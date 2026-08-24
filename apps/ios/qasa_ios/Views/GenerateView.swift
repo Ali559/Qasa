@@ -1,41 +1,14 @@
 import SwiftUI
 
-/// Full-page Generator tab (brand chrome + save). For sheets, use `PasswordGeneratorModal`.
+/// Full-page Generator (brand chrome + save). For sheets, use `PasswordGeneratorModal`.
 struct GeneratorView: View {
+    var onOpenMenu: () -> Void = {}
+
     @StateObject private var model = PasswordGeneratorModel()
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                HStack(spacing: 12) {
-                    Image(systemName: "shield.fill")
-                        .foregroundColor(Theme.mint)
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("KASO")
-                            .font(.system(size: 20, weight: .black))
-                            .tracking(-1)
-                            .foregroundColor(Theme.mint)
-                        Text("Generator / دروستکەری تێپەڕەوشە")
-                            .font(.system(size: 12))
-                            .tracking(0.6)
-                            .foregroundColor(Theme.textSecondary)
-                    }
-                }
-                Spacer()
-                Image(systemName: "person")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Theme.mint)
-                    .frame(width: 32, height: 32)
-                    .background(Theme.cardBackground)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Theme.stroke, lineWidth: 1))
-            }
-            .padding(.horizontal, 16)
-            .frame(height: 64)
-            .background(Theme.chrome)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.stroke).frame(height: 1)
-            }
+            AppMenuHeader(title: "Generator", onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -74,5 +47,5 @@ struct GeneratorView: View {
 }
 
 #Preview {
-    GeneratorView()
+    GeneratorView(onOpenMenu: {})
 }

@@ -22,6 +22,7 @@ final class VaultItemRecord {
     var sortKey: String
     var updatedAt: Date
     var createdAt: Date
+    var lastUsedAt: Date?
     var collectionId: UUID?
     var payloadData: Data
 
@@ -33,8 +34,13 @@ final class VaultItemRecord {
         self.sortKey = name
         self.updatedAt = Date()
         self.createdAt = Date()
+        self.lastUsedAt = nil
         self.collectionId = collectionId
         self.payloadData = (try? JSONEncoder().encode(payload)) ?? Data()
+    }
+
+    func markUsed() {
+        lastUsedAt = Date()
     }
 
     var kind: VaultItemKind {
@@ -86,11 +92,44 @@ final class AppNotification {
     }
 }
 
+@Model
+final class MonitoredEmail {
+    var id: UUID
+    var email: String
+    var statusRaw: String
+    var createdAt: Date
+
+    init(email: String, status: MonitorStatus = .secure) {
+        self.id = UUID()
+        self.email = email
+        self.statusRaw = status.rawValue
+        self.createdAt = Date()
+    }
+
+    var status: MonitorStatus {
+        get { MonitorStatus(rawValue: statusRaw) ?? .secure }
+        set { statusRaw = newValue.rawValue }
+    }
+}
+
+enum MonitorStatus: String, Codable, CaseIterable {
+    case secure
+    case atRisk
+
+    var title: String {
+        switch self {
+        case .secure: return "Secure"
+        case .atRisk: return "At Risk"
+        }
+    }
+}
+
 enum VaultSchema {
     static let models: [any PersistentModel.Type] = [
         VaultItemRecord.self,
         VaultCollection.self,
-        AppNotification.self
+        AppNotification.self,
+        MonitoredEmail.self
     ]
 }
 
@@ -137,6 +176,11 @@ enum VaultSeedData {
             let item = VaultItemRecord(payload: payload)
             // Stagger updatedAt so Most Recent ordering is visible
             item.updatedAt = Date().addingTimeInterval(TimeInterval(-index * 3600))
+            if index < 4 {
+                item.lastUsedAt = Date().addingTimeInterval(TimeInterval(-(index + 1) * 900))
+            } else if index < 8 {
+                item.lastUsedAt = Date().addingTimeInterval(TimeInterval(-(index + 1) * 86_400))
+            }
             context.insert(item)
         }
 

@@ -2,12 +2,12 @@ import SwiftUI
 import SwiftData
 
 struct VaultListView: View {
+    var onOpenMenu: () -> Void = {}
+
     @Query(sort: \VaultItemRecord.sortKey) private var items: [VaultItemRecord]
-    @Query(filter: #Predicate<AppNotification> { !$0.isRead }) private var unreadNotifications: [AppNotification]
 
     @State private var selectedTab: VaultFilterTab = .all
     @State private var searchText = ""
-    @State private var showNotifications = false
     @State private var showAddMenu = false
     @State private var editorMode: EditorPresentation?
     @State private var suggestedProvider = MockSuggestedContextProvider()
@@ -52,7 +52,8 @@ struct VaultListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
-                header
+                BrandMenuHeader(onMenu: onOpenMenu, titleSize: 20)
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         searchField
@@ -102,9 +103,7 @@ struct VaultListView: View {
             .padding(.bottom, 24)
         }
         .background(Theme.background.ignoresSafeArea())
-        .sheet(isPresented: $showNotifications) {
-            NotificationsView()
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAddMenu) {
             AddItemMenuView(tab: selectedTab) { payload in
                 showAddMenu = false
@@ -121,36 +120,6 @@ struct VaultListView: View {
                 editorMode = nil
             }
         }
-    }
-
-    private var header: some View {
-        KasoBrandHeader(
-            titleSize: 14,
-            trailing: AnyView(
-                Button {
-                    showNotifications = true
-                } label: {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "bell.fill")
-                            .foregroundColor(Theme.textPrimary)
-                            .frame(width: 40, height: 40)
-                            .background(Theme.cardBackground)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
-
-                        if !unreadNotifications.isEmpty {
-                            Text("\(min(unreadNotifications.count, 9))")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(Theme.mintOnChip)
-                                .padding(4)
-                                .background(Theme.mint)
-                                .clipShape(Circle())
-                                .offset(x: 4, y: -4)
-                        }
-                    }
-                }
-            )
-        )
     }
 
     private var searchField: some View {
@@ -191,9 +160,16 @@ struct VaultListView: View {
     }
 
     private func row(for item: VaultItemRecord) -> some View {
-        VaultItemRow(item: item) {
-            editorMode = EditorPresentation(mode: .edit(item))
-        } onDeleted: {}
+        NavigationLink {
+            VaultItemDetailView(item: item) {
+                editorMode = EditorPresentation(mode: .edit(item))
+            } onDeleted: {}
+        } label: {
+            VaultItemRow(item: item) {
+                editorMode = EditorPresentation(mode: .edit(item))
+            } onDeleted: {}
+        }
+        .buttonStyle(.plain)
     }
 
     private func handleAddTapped() {
@@ -209,6 +185,8 @@ struct VaultListView: View {
 }
 
 #Preview {
-    VaultListView()
-        .modelContainer(for: VaultSchema.models, inMemory: true)
+    NavigationStack {
+        VaultListView(onOpenMenu: {})
+    }
+    .modelContainer(for: VaultSchema.models, inMemory: true)
 }

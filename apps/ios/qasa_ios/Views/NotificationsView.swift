@@ -2,12 +2,24 @@ import SwiftUI
 import SwiftData
 
 struct NotificationsView: View {
+    var onOpenMenu: (() -> Void)? = nil
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \AppNotification.createdAt, order: .reverse) private var notifications: [AppNotification]
 
+    private var isEmbedded: Bool { onOpenMenu != nil }
+
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            if let onOpenMenu {
+                AppMenuHeader(
+                    title: "Notifications",
+                    onMenu: onOpenMenu,
+                    trailing: AnyView(markAllButton)
+                )
+            }
+
             Group {
                 if notifications.isEmpty {
                     ContentUnavailableView(
@@ -52,27 +64,36 @@ struct NotificationsView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Notifications")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .navigationTitle(isEmbedded ? "" : "Notifications")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    if notifications.contains(where: { !$0.isRead }) {
-                        Button("Mark All Read") {
-                            for n in notifications where !n.isRead {
-                                n.isRead = true
-                            }
-                            try? modelContext.save()
-                        }
-                        .font(.caption)
-                    }
+                    markAllButton
                 }
             }
         }
         .preferredColorScheme(.dark)
         .tint(Theme.mint)
+    }
+
+    @ViewBuilder
+    private var markAllButton: some View {
+        if notifications.contains(where: { !$0.isRead }) {
+            Button("Mark All Read") {
+                for n in notifications where !n.isRead {
+                    n.isRead = true
+                }
+                try? modelContext.save()
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundColor(Theme.mint)
+        }
     }
 }

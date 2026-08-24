@@ -1,89 +1,111 @@
 import SwiftUI
+import SwiftData
 
 struct BreachMonitorView: View {
+    var onOpenMenu: () -> Void = {}
+
+    @Environment(AppSession.self) private var session
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \MonitoredEmail.createdAt) private var monitored: [MonitoredEmail]
+
     @State private var monitorEmail = ""
+    @State private var selectedTab: BreachStatus = .unresolved
+    @State private var pendingRemoval: MonitoredEmail?
+    @State private var showLimitAlert = false
 
-    let monitored: [(email: String, ok: Bool)] = [
-        ("admin@kaso.io", true),
-        ("operations@kaso.io", false)
-    ]
+    private let maxSlots = 4
 
-    let breaches: [Breach] = [
+    private let breaches: [Breach] = [
         Breach(title: "Collection #1 Dump", breachDate: "Jan 17, 2019", discoveredDate: "Jan 18, 2019", compromisedFields: ["Passwords", "Emails"], status: .unresolved),
-        Breach(title: "LinkedIn Data Scraping", breachDate: "Jun 22, 2021", discoveredDate: "Jun 29, 2021", compromisedFields: ["Names", "Job Titles"], status: .resolved)
+        Breach(title: "LinkedIn Data Scraping", breachDate: "Jun 22, 2021", discoveredDate: "Jun 29, 2021", compromisedFields: ["Names", "Job Titles"], status: .resolved),
+        Breach(title: "Adobe Credential Leak", breachDate: "Oct 3, 2013", discoveredDate: "Nov 7, 2013", compromisedFields: ["Emails", "Passwords"], status: .resolved)
     ]
+
+    private var filteredBreaches: [Breach] {
+        breaches.filter { $0.status == selectedTab }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            KasoBrandHeader(
-                trailing: AnyView(
-                    StatusPill(
-                        text: "Secure",
-                        dotColor: Theme.success,
-                        textColor: Theme.success,
-                        background: Theme.cardBackground
-                    )
-                )
-            )
+            AppMenuHeader(title: "Breach Monitoring", onMenu: onOpenMenu)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
-                    pageHeader
-                    monitorCard
-                    actionBanner
-                    leakHistory
+                VStack(alignment: .leading, spacing: 24) {
+                    slotsHeader
+                    addEmailCard
+                    monitoredList
+                    breachTabs
+                    breachList
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 32)
+                .padding(.top, 24)
                 .padding(.bottom, 40)
             }
         }
-        .background(Theme.chrome.ignoresSafeArea())
+        .background(Theme.background.ignoresSafeArea())
+        .alert("Remove Email?", isPresented: Binding(
+            get: { pendingRemoval != nil },
+            set: { if !$0 { pendingRemoval = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { pendingRemoval = nil }
+            Button("Remove", role: .destructive) {
+                if let pendingRemoval {
+                    modelContext.delete(pendingRemoval)
+                    try? modelContext.save()
+                }
+                pendingRemoval = nil
+            }
+        } message: {
+            if let pendingRemoval {
+                Text("Stop monitoring \(pendingRemoval.email)?")
+            }
+        }
+        .alert("Slot Limit Reached", isPresented: $showLimitAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("You can monitor up to \(maxSlots) emails on your plan.")
+        }
+        .onAppear {
+            seedMonitoredIfNeeded()
+        }
     }
 
-    private var pageHeader: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "exclamationmark.shield.fill")
-                .font(.system(size: 22))
-                .foregroundColor(Theme.mint)
-                .frame(width: 44, height: 44)
-                .background(Theme.cardBackground)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Theme.stroke, lineWidth: 1)
-                )
-
+    private var slotsHeader: some View {
+        HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Breach Monitor")
-                    .font(.system(size: 28, weight: .heavy))
+                Text("Email Monitoring")
+                    .font(.system(size: 22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
-                Text("k-Anonymity privacy-preserving leak detection.")
+                Text("\(monitored.count) of \(maxSlots) slots used")
                     .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
             }
-        }
-        .padding(.bottom, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.stroke).frame(height: 1)
+            Spacer()
+            StatusPill(
+                text: session.isPremium ? "Premium" : "Locked",
+                dotColor: session.isPremium ? Theme.success : Theme.gold,
+                textColor: session.isPremium ? Theme.success : Theme.gold,
+                background: Theme.cardBackground
+            )
         }
     }
 
-    private var monitorCard: some View {
-        CardContainer(padding: 25) {
-            VStack(alignment: .leading, spacing: 16) {
-                SectionLabel(text: "Add Target to Monitor")
-
+    private var addEmailCard: some View {
+        CardContainer(padding: 20) {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionLabel(text: "Add Email")
                 HStack(spacing: 12) {
                     Image(systemName: "at")
                         .foregroundColor(Theme.textSecondary)
                     TextField("Enter email address...", text: $monitorEmail)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
                         .foregroundColor(Theme.textPrimary)
                         .tint(Theme.mint)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 18)
+                .padding(.vertical, 16)
                 .background(Theme.cardBackgroundLight)
                 .cornerRadius(8)
                 .overlay(
@@ -91,77 +113,121 @@ struct BreachMonitorView: View {
                         .stroke(Theme.stroke, lineWidth: 1)
                 )
 
-                PrimaryButton(title: "Check Leaks", icon: "magnifyingglass", cornerRadius: 8) {}
+                PrimaryButton(title: "Add to Monitoring", icon: "plus", cornerRadius: 8) {
+                    addEmail()
+                }
+                .opacity(monitored.count >= maxSlots ? 0.5 : 1)
+            }
+        }
+    }
 
-                FlowLayout(spacing: 8) {
-                    Text("Monitored:")
-                        .font(.kasoMono(12))
-                        .tracking(0.6)
-                        .foregroundColor(Theme.textTertiary)
-                        .padding(.trailing, 4)
-
-                    ForEach(monitored, id: \.email) { item in
-                        HStack(spacing: 8) {
+    private var monitoredList: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionLabel(text: "Monitored Emails")
+            if monitored.isEmpty {
+                Text("No emails monitored yet.")
+                    .font(.system(size: 14))
+                    .foregroundColor(Theme.textSecondary)
+                    .padding(.vertical, 8)
+            } else {
+                ForEach(monitored, id: \.id) { item in
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(item.email)
-                                .font(.system(size: 14))
+                                .font(.system(size: 15, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
-                            Image(systemName: item.ok ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(item.ok ? Theme.success : Theme.danger)
+                            Text(item.status.title)
+                                .font(.system(size: 13))
+                                .foregroundColor(item.status == .secure ? Theme.success : Theme.danger)
                         }
-                        .padding(.horizontal, 13)
-                        .padding(.vertical, 7)
-                        .background(Theme.cardBackgroundLight)
-                        .cornerRadius(4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Theme.stroke, lineWidth: 1)
-                        )
+                        Spacer()
+                        Button {
+                            pendingRemoval = item
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Theme.textSecondary)
+                                .frame(width: 32, height: 32)
+                                .background(Theme.chrome)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
                     }
+                    .padding(14)
+                    .background(Theme.cardBackground)
+                    .cornerRadius(Theme.cornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                            .stroke(Theme.stroke, lineWidth: 1)
+                    )
                 }
             }
         }
     }
 
-    private var actionBanner: some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .foregroundColor(Theme.dangerText)
-                .font(.system(size: 20))
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Action Required")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Theme.dangerText)
-                Text("1 active breach detected for monitored addresses. Immediate password rotation recommended.")
-                    .font(.system(size: 14))
-                    .foregroundColor(Theme.dangerTextMuted)
-                    .fixedSize(horizontal: false, vertical: true)
+    private var breachTabs: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionLabel(text: "Breaches")
+            HStack(spacing: 8) {
+                tabChip(.unresolved, title: "Unresolved")
+                tabChip(.resolved, title: "Resolved")
             }
         }
-        .padding(17)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.dangerBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(Theme.danger.opacity(0.3), lineWidth: 1)
-        )
-        .shadow(color: Theme.dangerBackground.opacity(0.4), radius: 10)
     }
 
-    private var leakHistory: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 8) {
-                Image(systemName: "clock.arrow.circlepath")
+    private func tabChip(_ status: BreachStatus, title: String) -> some View {
+        let selected = selectedTab == status
+        return Button {
+            selectedTab = status
+        } label: {
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(selected ? Theme.mintOnPrimary : Theme.textSecondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(selected ? Theme.mint : Theme.cardBackground)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(selected ? Theme.mint : Theme.stroke, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var breachList: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if filteredBreaches.isEmpty {
+                Text("No \(selectedTab == .unresolved ? "unresolved" : "resolved") breaches.")
+                    .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
-                Text("Leak History")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-            }
-            ForEach(breaches) { breach in
-                BreachCard(breach: breach)
+            } else {
+                ForEach(filteredBreaches) { breach in
+                    BreachCard(breach: breach)
+                }
             }
         }
+    }
+
+    private func addEmail() {
+        guard monitored.count < maxSlots else {
+            showLimitAlert = true
+            return
+        }
+        let trimmed = monitorEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard trimmed.contains("@"), trimmed.contains(".") else { return }
+        guard !monitored.contains(where: { $0.email.lowercased() == trimmed }) else {
+            monitorEmail = ""
+            return
+        }
+        modelContext.insert(MonitoredEmail(email: trimmed, status: .secure))
+        try? modelContext.save()
+        monitorEmail = ""
+    }
+
+    private func seedMonitoredIfNeeded() {
+        guard monitored.isEmpty else { return }
+        modelContext.insert(MonitoredEmail(email: "admin@kaso.io", status: .atRisk))
+        modelContext.insert(MonitoredEmail(email: "operations@kaso.io", status: .secure))
+        try? modelContext.save()
     }
 }
 
@@ -176,7 +242,7 @@ struct BreachCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
                 Text(breach.title)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 PillBadge(
                     text: breach.status.rawValue,
@@ -290,8 +356,7 @@ struct FlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = arrange(proposal: proposal, subviews: subviews)
-        return result.size
+        arrange(proposal: proposal, subviews: subviews).size
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
@@ -330,5 +395,7 @@ struct FlowLayout: Layout {
 }
 
 #Preview {
-    BreachMonitorView()
+    BreachMonitorView(onOpenMenu: {})
+        .environment(AppSession(isPremium: true))
+        .modelContainer(for: VaultSchema.models, inMemory: true)
 }

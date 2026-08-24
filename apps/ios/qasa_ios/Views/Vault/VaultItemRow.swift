@@ -123,10 +123,14 @@ struct VaultItemRow: View {
             unlockIfNeeded(protected: true) { ok in
                 guard ok else { return }
                 VaultClipboard.copy(primary.value)
+                item.markUsed()
+                try? modelContext.save()
                 flash("Copied \(primary.label)")
             }
         } else {
             VaultClipboard.copy(primary.value)
+            item.markUsed()
+            try? modelContext.save()
             flash("Copied \(primary.label)")
         }
     }
@@ -136,10 +140,14 @@ struct VaultItemRow: View {
             unlockIfNeeded(protected: true) { ok in
                 guard ok else { return }
                 VaultClipboard.copy(value)
+                item.markUsed()
+                try? modelContext.save()
                 flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
             }
         } else {
             VaultClipboard.copy(value)
+            item.markUsed()
+            try? modelContext.save()
             flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
         }
     }

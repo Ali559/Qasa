@@ -180,6 +180,10 @@ enum PhoneKind: String, Codable, CaseIterable {
 enum NoteColor: String, Codable, CaseIterable {
     case mint, gold, blue, purple, red, gray
 
+    var displayName: String {
+        rawValue.capitalized
+    }
+
     var color: Color {
         switch self {
         case .mint: return Theme.mint
@@ -190,6 +194,15 @@ enum NoteColor: String, Codable, CaseIterable {
         case .gray: return Theme.textSecondary
         }
     }
+}
+
+struct DetailField: Identifiable {
+    let label: String
+    let value: String
+    var isSecret: Bool = false
+    var isMultiline: Bool = false
+
+    var id: String { label }
 }
 
 // MARK: - Field payloads
@@ -473,5 +486,119 @@ extension VaultPayload {
     var isProtectedNote: Bool {
         if case .secureNote(let f) = self { return f.protectItem }
         return false
+    }
+
+    /// Color used in Organization (notes & cards).
+    var organizationColor: NoteColor? {
+        switch self {
+        case .secureNote(let f): return f.color
+        case .card(let f): return f.color
+        default: return nil
+        }
+    }
+
+    /// Collection id from payloads that support it.
+    var organizationCollectionId: UUID? {
+        switch self {
+        case .login(let f): return f.collectionId
+        case .secureNote(let f): return f.collectionId
+        default: return nil
+        }
+    }
+
+    var detailFields: [DetailField] {
+        switch self {
+        case .login(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Email", value: f.email),
+                DetailField(label: "Username", value: f.username),
+                DetailField(label: "Password", value: f.password, isSecret: true),
+                DetailField(label: "Website", value: f.website),
+                DetailField(label: "Note", value: f.note, isMultiline: true)
+            ].filter { !$0.value.isEmpty }
+        case .secureNote(let f):
+            return [
+                DetailField(label: "Title", value: f.title),
+                DetailField(label: "Content", value: f.content, isSecret: f.protectItem, isMultiline: true),
+                DetailField(label: "Protected", value: f.protectItem ? "Yes" : "No")
+            ].filter { !$0.value.isEmpty }
+        case .card(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Account Holder", value: f.accountHolder),
+                DetailField(label: "Number", value: f.number, isSecret: true),
+                DetailField(label: "Security Code", value: f.securityCode, isSecret: true),
+                DetailField(label: "Expiry Date", value: f.expiryDate),
+                DetailField(label: "Note", value: f.note, isMultiline: true)
+            ].filter { !$0.value.isEmpty }
+        case .bankAccount(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Account Holder", value: f.accountHolder),
+                DetailField(label: "Account Number", value: f.accountNumber, isSecret: true),
+                DetailField(label: "Routing Number", value: f.routingNumber),
+                DetailField(label: "Bank Name", value: f.bankName),
+                DetailField(label: "Country", value: Country.name(for: f.countryCode))
+            ].filter { !$0.value.isEmpty }
+        case .name(let f):
+            return [
+                DetailField(label: "Type", value: f.type == .none ? "" : f.type.rawValue),
+                DetailField(label: "First Name", value: f.firstName),
+                DetailField(label: "Middle Name", value: f.middleName),
+                DetailField(label: "Last Name", value: f.lastName),
+                DetailField(label: "Default Username", value: f.defaultUsername),
+                DetailField(label: "Birth Date", value: f.birthDate),
+                DetailField(label: "Birth Place", value: f.birthPlace)
+            ].filter { !$0.value.isEmpty }
+        case .personalEmail(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Type", value: f.type.rawValue),
+                DetailField(label: "Email", value: f.email)
+            ].filter { !$0.value.isEmpty }
+        case .phone(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Type", value: f.type.rawValue),
+                DetailField(label: "Country", value: Country.name(for: f.countryCode)),
+                DetailField(label: "Phone Number", value: "\(Country.dialCode(for: f.countryCode)) \(f.number)")
+            ].filter { !$0.value.isEmpty }
+        case .address(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Recipient", value: f.recipient),
+                DetailField(label: "Address", value: f.address, isMultiline: true),
+                DetailField(label: "Building", value: f.building),
+                DetailField(label: "Floor", value: f.floor),
+                DetailField(label: "Apartment", value: f.apartment),
+                DetailField(label: "Door Code", value: f.doorCode),
+                DetailField(label: "City", value: f.city),
+                DetailField(label: "Zip Code", value: f.zipCode),
+                DetailField(label: "Country", value: Country.name(for: f.countryCode))
+            ].filter { !$0.value.isEmpty }
+        case .company(let f):
+            return [
+                DetailField(label: "Company", value: f.companyName),
+                DetailField(label: "Job Title", value: f.jobTitle)
+            ].filter { !$0.value.isEmpty }
+        case .website(let f):
+            return [
+                DetailField(label: "Item Name", value: f.itemName),
+                DetailField(label: "Website", value: f.websiteURL)
+            ].filter { !$0.value.isEmpty }
+        case .idCard(let f), .passport(let f), .driverLicense(let f):
+            var fields = [
+                DetailField(label: "Name", value: f.name),
+                DetailField(label: "Country", value: Country.name(for: f.countryCode)),
+                DetailField(label: "Number", value: f.number),
+                DetailField(label: "Issue Date", value: f.issueDate),
+                DetailField(label: "Expiry Date", value: f.expiryDate)
+            ]
+            if case .passport = self, !f.issuePlace.isEmpty {
+                fields.append(DetailField(label: "Issue Place", value: f.issuePlace))
+            }
+            return fields.filter { !$0.value.isEmpty }
+        }
     }
 }

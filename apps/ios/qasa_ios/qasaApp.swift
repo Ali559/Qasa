@@ -11,7 +11,14 @@ struct qasaApp: App {
         do {
             container = try ModelContainer(for: schema, configurations: [config])
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            // Schema evolved (e.g. MonitoredEmail) — reset local store for development.
+            let url = config.url
+            try? FileManager.default.removeItem(at: url)
+            do {
+                container = try ModelContainer(for: schema, configurations: [config])
+            } catch {
+                fatalError("Failed to create ModelContainer: \(error)")
+            }
         }
     }
 
@@ -27,13 +34,34 @@ struct qasaApp: App {
     }
 
     struct RootView: View {
-        @State private var vaultCreated = false
+        @State private var unlocked = false
+        @State private var forceCreate = false
+
+        private var showLogin: Bool {
+            VaultAuthStore.vaultExists && !forceCreate
+        }
 
         var body: some View {
-            if vaultCreated {
-                MainTabView()
-            } else {
-                CreateVaultView(onVaultCreated: { vaultCreated = true })
+            Group {
+                if unlocked {
+                    AppShellView(onLogout: {
+                        unlocked = false
+                        forceCreate = false
+                    })
+                } else if showLogin {
+                    LoginView(
+                        onUnlocked: { unlocked = true },
+                        onCreateVault: { forceCreate = true }
+                    )
+                } else {
+                    CreateVaultView(
+                        onVaultCreated: {
+                            unlocked = true
+                            forceCreate = false
+                        },
+                        onLogin: VaultAuthStore.vaultExists ? { forceCreate = false } : nil
+                    )
+                }
             }
         }
     }

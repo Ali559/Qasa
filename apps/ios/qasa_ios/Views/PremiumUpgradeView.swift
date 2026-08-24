@@ -1,7 +1,11 @@
 import SwiftUI
 
 struct PremiumUpgradeView: View {
+    var onOpenMenu: (() -> Void)? = nil
+    var embedded: Bool = false
+
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppSession.self) private var session
     @State private var selectedMethodID: UUID?
 
     let methods: [PaymentMethod] = [
@@ -16,25 +20,29 @@ struct PremiumUpgradeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Theme.textPrimary)
-                        .frame(width: 32, height: 32)
+            if embedded, let onOpenMenu {
+                AppMenuHeader(title: "Upgrade", onMenu: onOpenMenu)
+            } else {
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Theme.textPrimary)
+                            .frame(width: 32, height: 32)
+                    }
+                    Spacer()
+                    Text("Kaso Premium")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(Theme.textOnChrome)
+                    Spacer()
+                    Color.clear.frame(width: 32, height: 32)
                 }
-                Spacer()
-                Text("Kaso Premium")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(Theme.textOnChrome)
-                Spacer()
-                Color.clear.frame(width: 32, height: 32)
-            }
-            .padding(.horizontal, 16)
-            .frame(height: 64)
-            .background(Theme.chrome)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.strokeChrome).frame(height: 1)
+                .padding(.horizontal, 16)
+                .frame(height: 64)
+                .background(Theme.chrome)
+                .overlay(alignment: .bottom) {
+                    Rectangle().fill(Theme.strokeChrome).frame(height: 1)
+                }
             }
 
             ScrollView {
@@ -54,7 +62,12 @@ struct PremiumUpgradeView: View {
                     icon: "lock.fill",
                     cornerRadius: 8
                 ) {
-                    dismiss()
+                    session.setPremium(true)
+                    if embedded {
+                        // Stay on page; menu will now hide Upgrade.
+                    } else {
+                        dismiss()
+                    }
                 }
                 Text("Local instant payment. Cancel anytime\nfrom device settings.")
                     .font(.kasoMono(12))
@@ -195,4 +208,5 @@ struct FeatureRow: View {
 
 #Preview {
     PremiumUpgradeView()
+        .environment(AppSession())
 }

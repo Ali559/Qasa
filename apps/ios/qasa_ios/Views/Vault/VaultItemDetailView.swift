@@ -1,0 +1,310 @@
+import SwiftUI
+import SwiftData
+
+struct VaultItemDetailView: View {
+    @Bindable var item: VaultItemRecord
+    var onEdit: () -> Void
+    var onDeleted: () -> Void
+
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
+
+    @State private var showDeleteConfirm = false
+    @State private var revealedSecrets: Set<String> = []
+    @State private var unlockedProtected = false
+
+    private var payload: VaultPayload { item.payload }
+
+    private var collectionName: String? {
+        let id = payload.organizationCollectionId ?? item.collectionId
+        guard let id else { return nil }
+        return collections.first { $0.id == id }?.name
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                heroIcon
+
+                Text(item.displayName)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(Theme.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, Theme.screenPadding)
+
+                detailsSection
+                organizationSection
+                historySection
+            }
+            .padding(.top, 8)
+            .padding(.bottom, 40)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 16) {
+                    Button {
+                        onEdit()
+                    } label: {
+                        Image(systemName: "pencil")
+                            .foregroundColor(Theme.mint)
+                    }
+                    .accessibilityLabel("Edit")
+
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(Theme.danger)
+                    }
+                    .accessibilityLabel("Delete")
+                }
+            }
+        }
+        .alert("Delete Item?", isPresented: $showDeleteConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                modelContext.delete(item)
+                try? modelContext.save()
+                onDeleted()
+                dismiss()
+            }
+        } message: {
+            Text("This permanently removes “\(item.displayName)” from your vault.")
+        }
+        .onAppear {
+            item.markUsed()
+            try? modelContext.save()
+            if payload.isProtectedNote {
+                unlockIfNeeded(protected: true) { ok in
+                    unlockedProtected = ok
+                }
+            } else {
+                unlockedProtected = true
+            }
+        }
+    }
+
+    private var heroIcon: some View {
+        Image(systemName: payload.systemImage)
+            .font(.system(size: 36, weight: .medium))
+            .foregroundColor(Theme.textPrimary)
+            .frame(width: 88, height: 88)
+            .background(Theme.chrome)
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Theme.strokeChrome, lineWidth: 1)
+            )
+            .padding(.top, 12)
+    }
+
+    private var detailsSection: some View {
+        detailCard(title: "Details") {
+            let fields = payload.detailFields
+            if fields.isEmpty {
+                Text("No details")
+                    .foregroundColor(Theme.textSecondary)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(fields.enumerated()), id: \.element.id) { index, field in
+                        detailRow(field)
+                        if index < fields.count - 1 {
+                            Divider().background(Theme.stroke)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var organizationSection: some View {
+        detailCard(title: "Organization") {
+            VStack(spacing: 0) {
+                organizationColorRow
+                Divider().background(Theme.stroke)
+                organizationCollectionRow
+            }
+        }
+    }
+
+    private var organizationColorRow: some View {
+        HStack {
+            Text("Color")
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+            Spacer()
+            if let noteColor = payload.organizationColor {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(noteColor.color)
+                        .frame(width: 14, height: 14)
+                    Text(noteColor.displayName)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(Theme.textPrimary)
+                }
+            } else {
+                Text("None")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(Theme.textSecondary)
+            }
+        }
+        .padding(.vertical, 12)
+    }
+
+    private var organizationCollectionRow: some View {
+        HStack {
+            Text("Collection")
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+            Spacer()
+            Text(collectionName ?? "None")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(collectionName == nil ? Theme.textSecondary : Theme.textPrimary)
+        }
+        .padding(.vertical, 12)
+    }
+
+    private var historySection: some View {
+        detailCard(title: "History") {
+            VStack(spacing: 0) {
+                historyRow(label: "Created", date: item.createdAt)
+                Divider().background(Theme.stroke)
+                historyRow(label: "Last Updated", date: item.updatedAt)
+                Divider().background(Theme.stroke)
+                historyRow(label: "Last Used", date: item.lastUsedAt)
+            }
+        }
+    }
+
+    private func historyRow(label: String, date: Date?) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+            Spacer()
+            Text(date.map { VaultDateFormat.display($0) } ?? "Never")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(Theme.textPrimary)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 12)
+    }
+
+    private func detailCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Theme.textSecondary)
+                .textCase(.uppercase)
+                .tracking(0.6)
+
+            content()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.cardBackground)
+                .cornerRadius(Theme.cornerRadius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                        .stroke(Theme.stroke, lineWidth: 1)
+                )
+        }
+        .padding(.horizontal, Theme.screenPadding)
+    }
+
+    @ViewBuilder
+    private func detailRow(_ field: DetailField) -> some View {
+        let locked = field.isSecret && payload.isProtectedNote && !unlockedProtected
+        let hidden = field.isSecret && !revealedSecrets.contains(field.id) && !locked
+
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(field.label)
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.textSecondary)
+                Spacer()
+                if field.isSecret && !locked {
+                    Button {
+                        if revealedSecrets.contains(field.id) {
+                            revealedSecrets.remove(field.id)
+                        } else {
+                            revealedSecrets.insert(field.id)
+                        }
+                    } label: {
+                        Image(systemName: hidden ? "eye" : "eye.slash")
+                            .font(.system(size: 14))
+                            .foregroundColor(Theme.mint)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            if locked {
+                Text("Locked — authenticate to view")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(Theme.textSecondary)
+            } else if hidden {
+                Text(String(repeating: "•", count: min(max(field.value.count, 8), 16)))
+                    .font(.kasoMono(15))
+                    .foregroundColor(Theme.textPrimary)
+            } else {
+                Text(field.value)
+                    .font(field.isSecret ? .kasoMono(15) : .system(size: 15, weight: .medium))
+                    .foregroundColor(Theme.textPrimary)
+                    .textSelection(.enabled)
+            }
+        }
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard !locked, !field.value.isEmpty else { return }
+            let value = field.value
+            if field.isSecret && payload.isProtectedNote {
+                unlockIfNeeded(protected: true) { ok in
+                    guard ok else { return }
+                    VaultClipboard.copy(value)
+                    item.markUsed()
+                    try? modelContext.save()
+                }
+            } else {
+                VaultClipboard.copy(value)
+                item.markUsed()
+                try? modelContext.save()
+            }
+        }
+    }
+}
+
+enum VaultDateFormat {
+    /// Recent: minutes / hours. Otherwise absolute like `Mar 4, 2025, 6:03PM`.
+    static func display(_ date: Date, now: Date = Date()) -> String {
+        let seconds = now.timeIntervalSince(date)
+        guard seconds >= 0 else { return absolute(date) }
+
+        if seconds < 60 {
+            return "Just now"
+        }
+        if seconds < 3600 {
+            let minutes = Int(seconds / 60)
+            return minutes == 1 ? "1 minute ago" : "\(minutes) minutes ago"
+        }
+        if seconds < 24 * 3600 {
+            let hours = Int(seconds / 3600)
+            return hours == 1 ? "1 hour ago" : "\(hours) hours ago"
+        }
+        return absolute(date)
+    }
+
+    private static func absolute(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MMM d, yyyy, h:mma"
+        formatter.amSymbol = "AM"
+        formatter.pmSymbol = "PM"
+        return formatter.string(from: date)
+    }
+}

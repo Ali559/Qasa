@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct VPNView: View {
+    var onOpenMenu: () -> Void = {}
+
     @State private var connected = true
     @State private var killSwitch = true
     @State private var autoConnect = false
@@ -8,16 +10,7 @@ struct VPNView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            KasoBrandHeader(
-                trailing: AnyView(
-                    Button {} label: {
-                        Image(systemName: "line.3.horizontal")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Theme.textSecondary)
-                            .padding(8)
-                    }
-                )
-            )
+            AppMenuHeader(title: "VPN", onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(spacing: 32) {
@@ -154,5 +147,5 @@ struct VPNView: View {
 }
 
 #Preview {
-    VPNView()
+    VPNView(onOpenMenu: {})
 }

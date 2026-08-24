@@ -1,32 +1,19 @@
 import SwiftUI
 
 struct SettingsView: View {
+    var onOpenMenu: () -> Void = {}
+    var onLogout: (() -> Void)? = nil
+
+    @Environment(AppSession.self) private var session
     @State private var biometricUnlock = true
     @State private var showClearDataAlert = false
     @State private var showLinkedDevices = false
     @State private var showPremium = false
-    @State private var showGenerator = false
+    @State private var showLogoutConfirm = false
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Kaso")
-                    .font(.system(size: 20, weight: .heavy))
-                    .foregroundColor(Theme.mint)
-                Text("Settings")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                Spacer()
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 28))
-                    .foregroundColor(Theme.textSecondary)
-            }
-            .padding(.horizontal, 16)
-            .frame(height: 64)
-            .background(Theme.chrome)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.strokeChrome).frame(height: 1)
-            }
+            AppMenuHeader(title: "Settings", onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -77,19 +64,6 @@ struct SettingsView: View {
                         NavChevronRow(icon: "moon.fill", title: "Theme", trailingText: "Dark")
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: "Tools")
-                        CardContainer {
-                            BilingualNavChevronRow(
-                                icon: "wand.and.stars",
-                                titleEN: "Password Generator",
-                                titleCKB: "دروستکەری تێپەڕەوشە"
-                            ) {
-                                showGenerator = true
-                            }
-                        }
-                    }
-
                     settingsSection(title: "Data & Account") {
                         NavChevronRow(icon: "square.and.arrow.down", title: "Import Data")
                         Divider().background(Theme.stroke)
@@ -100,7 +74,10 @@ struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
-                        NavChevronRow(icon: "rectangle.portrait.and.arrow.right", title: "Logout")
+                        Button { showLogoutConfirm = true } label: {
+                            NavChevronRow(icon: "rectangle.portrait.and.arrow.right", title: "Logout")
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(Theme.screenPadding)
@@ -114,17 +91,18 @@ struct SettingsView: View {
         } message: {
             Text("This permanently deletes your local vault. This cannot be undone.")
         }
-        .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView() }
-        .sheet(isPresented: $showPremium) { PremiumUpgradeView() }
-        .sheet(isPresented: $showGenerator) {
-            NavigationStack {
-                GeneratorView()
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { showGenerator = false }
-                        }
-                    }
+        .alert("Lock Vault?", isPresented: $showLogoutConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Logout", role: .destructive) {
+                onLogout?()
             }
+        } message: {
+            Text("You’ll need your master password to unlock again.")
+        }
+        .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView() }
+        .sheet(isPresented: $showPremium) {
+            PremiumUpgradeView(embedded: false)
+                .environment(session)
         }
     }
 
@@ -140,28 +118,28 @@ struct SettingsView: View {
                             .foregroundColor(Theme.textSecondary)
                     )
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Jane Doe")
+                    Text(session.username)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Theme.textPrimary)
-                    Text("jane.doe@example.com")
+                    Text(session.email)
                         .font(.system(size: 14))
                         .foregroundColor(Theme.textSecondary)
                     HStack(spacing: 4) {
-                        Image(systemName: "trophy.fill")
+                        Image(systemName: session.isPremium ? "trophy.fill" : "person")
                             .font(.system(size: 10))
-                        Text("Premium Account")
+                        Text(session.isPremium ? "Premium Account" : "Free Account")
                             .font(.kasoMono(12))
                     }
-                    .foregroundColor(Theme.mint)
+                    .foregroundColor(session.isPremium ? Theme.mint : Theme.textSecondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .overlay(Capsule().stroke(Theme.mint, lineWidth: 1))
+                    .overlay(Capsule().stroke(session.isPremium ? Theme.mint : Theme.stroke, lineWidth: 1))
                 }
                 Spacer()
             }
 
             Button { showPremium = true } label: {
-                Text("Manage Subscription")
+                Text(session.isPremium ? "Manage Subscription" : "Upgrade to Premium")
                     .font(.system(size: 14, weight: .medium))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
@@ -182,5 +160,6 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    SettingsView(onOpenMenu: {})
+        .environment(AppSession())
 }

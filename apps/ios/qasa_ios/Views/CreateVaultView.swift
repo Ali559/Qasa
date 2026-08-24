@@ -5,7 +5,9 @@ struct CreateVaultView: View {
     @State private var confirmPassword: String = ""
     @State private var biometricsEnabled = true
     @State private var passwordVisible = false
+    @State private var errorMessage: String?
     var onVaultCreated: () -> Void
+    var onLogin: (() -> Void)? = nil
 
     private var strength: (label: String, filled: Int, color: Color) {
         switch password.count {
@@ -14,6 +16,10 @@ struct CreateVaultView: View {
         case 4..<8: return ("Fair", 2, Theme.goldMuted)
         default: return ("Strong", 3, Theme.success)
         }
+    }
+
+    private var canCreate: Bool {
+        !password.isEmpty && password == confirmPassword
     }
 
     var body: some View {
@@ -82,6 +88,12 @@ struct CreateVaultView: View {
                     }
                     .padding(.top, 4)
 
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Theme.danger)
+                    }
+
                     CardContainer {
                         HStack {
                             ZStack {
@@ -131,7 +143,18 @@ struct CreateVaultView: View {
                         }
                     }
                     .padding(.top, 12)
-                    .padding(.bottom, 100)
+
+                    if let onLogin {
+                        Button(action: onLogin) {
+                            Text("Already have a vault? Unlock")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Theme.mint)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .padding(.top, 8)
+                    }
+
+                    Color.clear.frame(height: 100)
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 24)
@@ -140,8 +163,10 @@ struct CreateVaultView: View {
             VStack(spacing: 0) {
                 Divider().background(Theme.stroke)
                 PrimaryButton(title: "Create Local Vault", icon: "key.fill") {
-                    onVaultCreated()
+                    createVault()
                 }
+                .opacity(canCreate ? 1 : 0.5)
+                .disabled(!canCreate)
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 17)
                 .padding(.bottom, 32)
@@ -151,8 +176,18 @@ struct CreateVaultView: View {
         .background(Theme.background.ignoresSafeArea())
         .preferredColorScheme(.dark)
     }
+
+    private func createVault() {
+        guard canCreate else {
+            errorMessage = password != confirmPassword ? "Passwords do not match." : "Enter a master password."
+            return
+        }
+        errorMessage = nil
+        VaultAuthStore.createVault(masterPassword: password)
+        onVaultCreated()
+    }
 }
 
 #Preview {
-    CreateVaultView(onVaultCreated: {})
+    CreateVaultView(onVaultCreated: {}, onLogin: {})
 }
