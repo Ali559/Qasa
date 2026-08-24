@@ -1,125 +1,214 @@
 import SwiftUI
+import SwiftData
 
 struct VaultListView: View {
-    @State private var selectedType: VaultItemType? = nil
+    @Query(sort: \VaultItemRecord.sortKey) private var items: [VaultItemRecord]
+    @Query(filter: #Predicate<AppNotification> { !$0.isRead }) private var unreadNotifications: [AppNotification]
+
+    @State private var selectedTab: VaultFilterTab = .all
     @State private var searchText = ""
-    @State private var showLinkedDevices = false
+    @State private var showNotifications = false
+    @State private var showAddMenu = false
+    @State private var editorMode: EditorPresentation?
+    @State private var suggestedProvider = MockSuggestedContextProvider()
 
-    let items: [VaultItem] = [
-        VaultItem(title: "GitHub", subtitle: "dev@kaso.io", type: .login, iconName: "chevron.left.forwardslash.chevron.right"),
-        VaultItem(title: "FIB Corporate Card", subtitle: "**** 4921", type: .card, iconName: "creditcard.fill"),
-        VaultItem(title: "ProtonMail Main", subtitle: "admin@kaso.io", type: .login, iconName: "envelope.fill"),
-        VaultItem(title: "AWS Root Account", subtitle: "ops@kaso.io", type: .login, iconName: "cloud.fill", flagged: true)
-    ]
+    private struct EditorPresentation: Identifiable {
+        let id = UUID()
+        let mode: VaultItemEditor.Mode
+    }
 
-    var filteredItems: [VaultItem] {
-        items.filter { selectedType == nil || $0.type == selectedType }
+    private var filteredItems: [VaultItemRecord] {
+        items.filter { item in
+            let kindMatch = selectedTab.kind.map { item.kind == $0 } ?? true
+            let searchMatch = searchText.isEmpty
+                || item.displayName.localizedCaseInsensitiveContains(searchText)
+                || item.payload.subtitle.localizedCaseInsensitiveContains(searchText)
+            return kindMatch && searchMatch
+        }
+    }
+
+    private var suggestedItems: [VaultItemRecord] {
+        guard selectedTab == .all else { return [] }
+        return VaultSuggestionEngine.suggest(items: filteredItems, context: suggestedProvider.context)
+    }
+
+    private var recentItems: [VaultItemRecord] {
+        guard selectedTab != .all, filteredItems.count > 10 else { return [] }
+        return Array(
+            filteredItems.sorted { $0.updatedAt > $1.updatedAt }.prefix(8)
+        )
+    }
+
+    private var letterSections: [(letter: String, items: [VaultItemRecord])] {
+        let grouped = Dictionary(grouping: filteredItems) { $0.letterSection }
+        let keys = grouped.keys.sorted { a, b in
+            if a == "#" { return false }
+            if b == "#" { return true }
+            return a < b
+        }
+        return keys.map { ($0, grouped[$0]!.sorted { $0.sortKey.localizedCaseInsensitiveCompare($1.sortKey) == .orderedAscending }) }
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(Theme.textSecondary)
-                    TextField("Search items...", text: $searchText)
-                        .foregroundColor(Theme.textPrimary)
-                }
-                .padding()
-                .background(Theme.cardBackground)
-                .cornerRadius(Theme.cornerRadius)
+        ZStack(alignment: .bottomTrailing) {
+            VStack(spacing: 0) {
+                header
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        searchField
+                        tabChips
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        FilterChip(title: "All", isSelected: selectedType == nil) { selectedType = nil }
-                        ForEach(VaultItemType.allCases, id: \.self) { type in
-                            FilterChip(title: type.rawValue, isSelected: selectedType == type) {
-                                selectedType = type
+                        if selectedTab == .all, !suggestedItems.isEmpty {
+                            sectionHeader(suggestedProvider.context.title)
+                            ForEach(suggestedItems, id: \.id) { item in
+                                row(for: item)
                             }
                         }
-                    }
-                }
 
-                ScrollView {
-                    VStack(spacing: 10) {
-                        ForEach(filteredItems) { item in
-                            VaultItemRow(item: item)
+                        if !recentItems.isEmpty {
+                            sectionHeader("Most Recent")
+                            ForEach(recentItems, id: \.id) { item in
+                                row(for: item)
+                            }
+                        }
+
+                        ForEach(letterSections, id: \.letter) { section in
+                            sectionHeader(section.letter)
+                            ForEach(section.items, id: \.id) { item in
+                                row(for: item)
+                            }
+                        }
+
+                        if filteredItems.isEmpty {
+                            ContentUnavailableView(
+                                "No Items",
+                                systemImage: "tray",
+                                description: Text("Tap + to add your first vault item.")
+                            )
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 40)
+                        }
+                    }
+                    .padding(.horizontal, Theme.screenPadding)
+                    .padding(.top, 24)
+                    .padding(.bottom, 100)
+                }
+            }
+
+            MintFAB(systemImage: "plus") {
+                handleAddTapped()
+            }
+            .padding(.trailing, Theme.screenPadding)
+            .padding(.bottom, 24)
+        }
+        .background(Theme.background.ignoresSafeArea())
+        .sheet(isPresented: $showNotifications) {
+            NotificationsView()
+        }
+        .sheet(isPresented: $showAddMenu) {
+            AddItemMenuView(tab: selectedTab) { payload in
+                showAddMenu = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    editorMode = EditorPresentation(mode: .create(payload))
+                }
+            } onCancel: {
+                showAddMenu = false
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $editorMode) { presentation in
+            VaultItemEditor(mode: presentation.mode) {
+                editorMode = nil
+            }
+        }
+    }
+
+    private var header: some View {
+        KasoBrandHeader(
+            titleSize: 14,
+            trailing: AnyView(
+                Button {
+                    showNotifications = true
+                } label: {
+                    ZStack(alignment: .topTrailing) {
+                        Image(systemName: "bell.fill")
+                            .foregroundColor(Theme.textPrimary)
+                            .frame(width: 40, height: 40)
+                            .background(Theme.cardBackground)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
+
+                        if !unreadNotifications.isEmpty {
+                            Text("\(min(unreadNotifications.count, 9))")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(Theme.mintOnChip)
+                                .padding(4)
+                                .background(Theme.mint)
+                                .clipShape(Circle())
+                                .offset(x: 4, y: -4)
                         }
                     }
                 }
-            }
-            .padding(16)
-            .background(Theme.background.ignoresSafeArea())
-            .navigationTitle("Kaso")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showLinkedDevices = true
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(Theme.mint)
-                    }
-                }
-            }
-            .sheet(isPresented: $showLinkedDevices) {
-                LinkedDevicesView()
-            }
-        }
+            )
+        )
     }
-}
 
-struct FilterChip: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.medium))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(isSelected ? Theme.mint : Theme.cardBackground)
-                .foregroundColor(isSelected ? .black : Theme.textPrimary)
-                .cornerRadius(20)
-        }
-    }
-}
-
-struct VaultItemRow: View {
-    let item: VaultItem
-
-    var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: item.iconName)
-                .foregroundColor(Theme.textPrimary)
-                .frame(width: 36, height: 36)
-                .background(Theme.cardBackgroundLight)
-                .cornerRadius(8)
-
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(item.title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Theme.textPrimary)
-                    if item.flagged {
-                        Circle().fill(Theme.gold).frame(width: 6, height: 6)
-                    }
-                }
-                Text(item.subtitle)
-                    .font(.caption)
-                    .foregroundColor(Theme.textSecondary)
-            }
-            Spacer()
-            Image(systemName: "ellipsis")
+    private var searchField: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
                 .foregroundColor(Theme.textSecondary)
+            TextField("Search items...", text: $searchText)
+                .foregroundColor(Theme.textPrimary)
+                .tint(Theme.mint)
         }
-        .padding(12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .background(Theme.cardBackground)
         .cornerRadius(Theme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.stroke, lineWidth: 1)
+        )
+    }
+
+    private var tabChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(VaultFilterTab.allCases) { tab in
+                    FilterChip(title: tab.title, isSelected: selectedTab == tab) {
+                        selectedTab = tab
+                    }
+                }
+            }
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundColor(Theme.textSecondary)
+            .padding(.top, 8)
+    }
+
+    private func row(for item: VaultItemRecord) -> some View {
+        VaultItemRow(item: item) {
+            editorMode = EditorPresentation(mode: .edit(item))
+        } onDeleted: {}
+    }
+
+    private func handleAddTapped() {
+        switch selectedTab {
+        case .login:
+            editorMode = EditorPresentation(mode: .create(.login(LoginFields())))
+        case .secureNote:
+            editorMode = EditorPresentation(mode: .create(.secureNote(SecureNoteFields())))
+        default:
+            showAddMenu = true
+        }
     }
 }
 
 #Preview {
     VaultListView()
+        .modelContainer(for: VaultSchema.models, inMemory: true)
 }

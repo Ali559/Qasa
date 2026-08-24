@@ -1,22 +1,42 @@
 import SwiftUI
 
 enum Theme {
-    static let background = Color(hex: "0A0E1A")
-    static let cardBackground = Color(hex: "121A2C")
-    static let cardBackgroundLight = Color(hex: "182238")
-    static let stroke = Color.white.opacity(0.08)
+    // Surfaces — Figma Kaso mobile
+    static let background = Color(hex: "0F172A")
+    static let chrome = Color(hex: "131315")
+    static let cardBackground = Color(hex: "1E293B")
+    static let cardBackgroundLight = Color(hex: "1F1F21")
+    static let cardMuted = Color(hex: "1B1B1D")
+    static let stroke = Color(hex: "334155")
+    static let strokeChrome = Color(hex: "45464D")
 
-    static let mint = Color(hex: "2FE6A3")
-    static let mintDark = Color(hex: "1CA97A")
-    static let gold = Color(hex: "F5B429")
+    // Brand
+    static let mint = Color(hex: "4EDEA3")
+    static let mintDark = Color(hex: "00A572")
+    static let mintOnPrimary = Color(hex: "003824")
+    static let mintOnChip = Color(hex: "00311F")
+    static let gold = Color(hex: "FBBF24")
+    static let goldMuted = Color(hex: "F59E0B")
+    static let cyan = Color(hex: "4CD7F6")
+    static let info = Color(hex: "60A5FA")
+
+    // Status
+    static let success = Color(hex: "10B981")
     static let danger = Color(hex: "EF4444")
-    static let dangerBackground = Color(hex: "3A1418")
+    static let dangerBackground = Color(hex: "93000A")
+    static let dangerText = Color(hex: "FFB4AB")
+    static let dangerTextMuted = Color(hex: "FFDAD6")
 
-    static let textPrimary = Color.white
-    static let textSecondary = Color.white.opacity(0.55)
-    static let textTertiary = Color.white.opacity(0.35)
+    // Text
+    static let textPrimary = Color(hex: "E4E2E4")
+    static let textSecondary = Color(hex: "C6C6CD")
+    static let textTertiary = Color(hex: "45464D")
+    static let textPlaceholder = Color(hex: "6B7280")
+    static let textOnChrome = Color(hex: "BEC6E0")
 
-    static let cornerRadius: CGFloat = 14
+    static let cornerRadius: CGFloat = 12
+    static let cornerRadiusLarge: CGFloat = 16
+    static let screenPadding: CGFloat = 20
 }
 
 extension Color {
@@ -28,5 +48,11 @@ extension Color {
         let g = Double((rgb & 0x00FF00) >> 8) / 255
         let b = Double(rgb & 0x0000FF) / 255
         self.init(red: r, green: g, blue: b)
+    }
+}
+
+extension Font {
+    static func kasoMono(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
+        .system(size: size, weight: weight, design: .monospaced)
     }
 }

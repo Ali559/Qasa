@@ -7,138 +7,149 @@ struct CreateVaultView: View {
     @State private var passwordVisible = false
     var onVaultCreated: () -> Void
 
-    var strength: (label: String, progress: CGFloat, color: Color) {
+    private var strength: (label: String, filled: Int, color: Color) {
         switch password.count {
-        case 0..<4: return ("Weak", 0.25, Theme.danger)
-        case 4..<8: return ("Fair", 0.6, Theme.gold)
-        default: return ("Strong", 1.0, Theme.mint)
+        case 0: return ("", 0, Theme.stroke)
+        case 1..<4: return ("Weak", 1, Theme.danger)
+        case 4..<8: return ("Fair", 2, Theme.goldMuted)
+        default: return ("Strong", 3, Theme.success)
         }
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                HStack {
-                    Label("Kaso", systemImage: "shield.fill")
-                        .font(.headline)
-                        .foregroundColor(Theme.mint)
-                    Spacer()
-                    PillBadge(text: "100% Local & Offline", color: Theme.mint)
-                }
-                .padding(.top, 8)
+        VStack(spacing: 0) {
+            KasoBrandHeader(
+                trailing: AnyView(StatusPill(text: "100% Local & Offline"))
+            )
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Create Vault")
-                        .font(.largeTitle.bold())
-                        .foregroundColor(Theme.textPrimary)
-                    Text("Set a master password to secure your local vault. This is the only key.")
-                        .font(.subheadline)
-                        .foregroundColor(Theme.textSecondary)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    SectionLabel(text: "Master Password")
-                    HStack {
-                        Image(systemName: "lock.fill")
-                            .foregroundColor(Theme.textSecondary)
-                        if passwordVisible {
-                            TextField("Enter password", text: $password)
-                                .foregroundColor(Theme.textPrimary)
-                        } else {
-                            SecureField("Enter password", text: $password)
-                                .foregroundColor(Theme.textPrimary)
-                        }
-                        Button {
-                            passwordVisible.toggle()
-                        } label: {
-                            Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                                .foregroundColor(Theme.textSecondary)
-                        }
-                    }
-                    .padding()
-                    .background(Theme.cardBackground)
-                    .cornerRadius(Theme.cornerRadius)
-
-                    HStack {
-                        Text("Strength")
-                            .font(.caption2)
-                            .foregroundColor(Theme.textSecondary)
-                        Spacer()
-                        Text(strength.label)
-                            .font(.caption2.weight(.semibold))
-                            .foregroundColor(strength.color)
-                    }
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(Theme.cardBackgroundLight)
-                            Capsule().fill(strength.color)
-                                .frame(width: geo.size.width * strength.progress)
-                        }
-                    }
-                    .frame(height: 4)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    SectionLabel(text: "Confirm Password")
-                    HStack {
-                        Image(systemName: "lock.rotation")
-                            .foregroundColor(Theme.textSecondary)
-                        SecureField("Re-enter password", text: $confirmPassword)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Create Vault")
+                            .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
-                    }
-                    .padding()
-                    .background(Theme.cardBackground)
-                    .cornerRadius(Theme.cornerRadius)
-                }
-
-                CardContainer {
-                    HStack {
-                        Image(systemName: "faceid")
-                            .foregroundColor(Theme.mint)
-                            .frame(width: 28)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Enable Biometrics")
-                                .foregroundColor(Theme.textPrimary)
-                                .font(.subheadline.weight(.medium))
-                            Text("Use Face ID or Fingerprint")
-                                .foregroundColor(Theme.textSecondary)
-                                .font(.caption)
-                        }
-                        Spacer()
-                        Toggle("", isOn: $biometricsEnabled)
-                            .labelsHidden()
-                            .tint(Theme.mint)
-                    }
-                }
-
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(Theme.gold)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Zero-Knowledge")
-                            .foregroundColor(Theme.gold)
-                            .font(.subheadline.weight(.semibold))
-                        Text("Your master password cannot be recovered by anyone—not even Kaso. If you lose it, your vault data is permanently inaccessible.")
-                            .font(.caption)
+                        Text("Set a master password to secure your local vault. This is the only key.")
+                            .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                }
-                .padding()
-                .background(Theme.gold.opacity(0.08))
-                .cornerRadius(Theme.cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                        .stroke(Theme.gold.opacity(0.3), lineWidth: 1)
-                )
+                    .padding(.bottom, 4)
 
-                PrimaryButton(title: "Create Local Vault", icon: "lock.shield.fill") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        SectionLabel(text: "Master Password")
+                        ThemedTextField(
+                            icon: "lock.fill",
+                            placeholder: "Enter password",
+                            text: $password,
+                            isSecure: !passwordVisible,
+                            trailing: AnyView(
+                                Button {
+                                    passwordVisible.toggle()
+                                } label: {
+                                    Image(systemName: passwordVisible ? "eye.slash" : "eye")
+                                        .foregroundColor(Theme.textSecondary)
+                                }
+                            )
+                        )
+
+                        if !password.isEmpty {
+                            VStack(spacing: 4) {
+                                HStack {
+                                    Text("Strength")
+                                        .font(.kasoMono(12))
+                                        .tracking(0.6)
+                                        .foregroundColor(Theme.textSecondary)
+                                    Spacer()
+                                    Text(strength.label)
+                                        .font(.kasoMono(12))
+                                        .tracking(0.6)
+                                        .foregroundColor(Theme.mint)
+                                }
+                                StrengthBar(segments: 3, filled: strength.filled, color: strength.color)
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        SectionLabel(text: "Confirm Password")
+                        ThemedTextField(
+                            icon: "lock.rotation",
+                            placeholder: "Re-enter password",
+                            text: $confirmPassword,
+                            isSecure: true
+                        )
+                    }
+                    .padding(.top, 4)
+
+                    CardContainer {
+                        HStack {
+                            ZStack {
+                                Circle()
+                                    .fill(Theme.cardBackgroundLight)
+                                    .frame(width: 40, height: 40)
+                                Image(systemName: "touchid")
+                                    .foregroundColor(Theme.mint)
+                            }
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text("Enable Biometrics")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(Theme.textPrimary)
+                                Text("Use Face ID or Fingerprint")
+                                    .font(.kasoMono(12))
+                                    .tracking(0.6)
+                                    .foregroundColor(Theme.textSecondary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: $biometricsEnabled)
+                                .labelsHidden()
+                                .tint(Theme.mint)
+                        }
+                    }
+                    .padding(.top, 12)
+
+                    CardContainer(background: Theme.cardBackgroundLight) {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "shield.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(Theme.stroke.opacity(0.5))
+                                .offset(x: 24, y: -24)
+
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(Theme.goldMuted)
+                                    Text("Zero-Knowledge")
+                                        .font(.system(size: 20, weight: .semibold))
+                                        .foregroundColor(Theme.goldMuted)
+                                }
+                                Text("Your master password cannot be recovered by anyone—not even Kaso. If you lose it, your vault data is permanently inaccessible.")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Theme.textSecondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    .padding(.top, 12)
+                    .padding(.bottom, 100)
+                }
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, 24)
+            }
+
+            VStack(spacing: 0) {
+                Divider().background(Theme.stroke)
+                PrimaryButton(title: "Create Local Vault", icon: "key.fill") {
                     onVaultCreated()
                 }
-                .padding(.top, 4)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, 17)
+                .padding(.bottom, 32)
             }
-            .padding(20)
+            .background(Theme.chrome.opacity(0.92))
         }
         .background(Theme.background.ignoresSafeArea())
+        .preferredColorScheme(.dark)
     }
 }
 

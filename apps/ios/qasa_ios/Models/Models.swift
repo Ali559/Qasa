@@ -1,20 +1,5 @@
 import Foundation
 
-enum VaultItemType: String, CaseIterable {
-    case login = "Logins"
-    case card = "Cards"
-    case note = "Secure Notes"
-}
-
-struct VaultItem: Identifiable {
-    let id = UUID()
-    let title: String
-    let subtitle: String
-    let type: VaultItemType
-    let iconName: String
-    var flagged: Bool = false
-}
-
 struct LinkedDevice: Identifiable {
     let id = UUID()
     let name: String
