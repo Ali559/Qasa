@@ -1,0 +1,16 @@
+[package]
+name = "qasa-db"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+chrono.workspace = true
+qasa-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+hex = "0.4"
+sha2 = "0.10"

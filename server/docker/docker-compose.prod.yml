@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: qasa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qasa}
+      POSTGRES_DB: qasa
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qasa -d qasa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: qasa-api
+    environment:
+      QASA_ENV: prod
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      BIND_ADDR: 0.0.0.0:8080
+      QASA_ADMIN_JWT_SECRET: ${QASA_ADMIN_JWT_SECRET:?set QASA_ADMIN_JWT_SECRET}
+      QASA_LICENSE_PRIVATE_KEY: ${QASA_LICENSE_PRIVATE_KEY:?set QASA_LICENSE_PRIVATE_KEY}
+      QASA_ADMIN_CORS_ORIGIN: ${QASA_ADMIN_CORS_ORIGIN:-https://admin.qasa.app}
+      RUST_LOG: qasa_api=info,tower_http=info,sqlx=warn
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: qasa-worker
+    environment:
+      QASA_ENV: prod
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      RUST_LOG: qasa_worker=info,sqlx=warn
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,18 @@
+[package]
+name = "qasa-worker"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "qasa-worker"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+qasa-core.workspace = true
+qasa-db.workspace = true
+qasa-payments.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

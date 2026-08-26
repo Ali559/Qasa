@@ -1,0 +1,20 @@
+[package]
+name = "qasa-breach"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "qasa-breach"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap = { version = "4", features = ["derive", "env"] }
+qasa-core.workspace = true
+qasa-db.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "fs"] }
+
+[lib]
+path = "src/lib.rs"
