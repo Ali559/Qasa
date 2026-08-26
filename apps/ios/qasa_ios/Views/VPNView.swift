@@ -1,34 +1,36 @@
 import SwiftUI
 
 struct VPNView: View {
-    var onOpenMenu: () -> Void = {}
+    var onOpenMenu: () -> Void
 
-    @State private var connected = true
+    init(onOpenMenu: @escaping () -> Void = {}) {
+        self.onOpenMenu = onOpenMenu
+    }
+
+    private var vpn = VPNService.shared
+
     @State private var killSwitch = true
     @State private var autoConnect = false
-    @State private var selectedServer = "Kurdistan / Iraq Server - Auto"
 
     var body: some View {
+        @Bindable var vpn = vpn
         VStack(spacing: 0) {
             AppMenuHeader(title: "VPN", onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(spacing: 32) {
                     VStack(spacing: 16) {
-                        Text("Kaso VPN")
+                        Text("Qasa VPN")
                             .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
 
                         HStack(spacing: 12) {
                             Image(systemName: "globe")
                                 .foregroundColor(Theme.cyan)
-                            Text(selectedServer)
+                            Text(serverLabel)
                                 .font(.system(size: 16))
                                 .foregroundColor(Theme.textPrimary)
                                 .lineLimit(1)
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(Theme.textSecondary)
                         }
                         .padding(.horizontal, 25)
                         .padding(.vertical, 9)
@@ -39,8 +41,12 @@ struct VPNView: View {
 
                     VStack(spacing: 0) {
                         Button {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-                                connected.toggle()
+                            Task {
+                                if vpn.connected {
+                                    await vpn.disconnect()
+                                } else {
+                                    await vpn.connect()
+                                }
                             }
                         } label: {
                             ZStack {
@@ -48,40 +54,48 @@ struct VPNView: View {
                                     .stroke(Theme.cyan.opacity(0.3), lineWidth: 1)
                                     .frame(width: 160, height: 160)
                                 Circle()
-                                    .stroke((connected ? Theme.mint : Theme.stroke).opacity(0.5), lineWidth: 1)
+                                    .stroke((vpn.connected ? Theme.mint : Theme.stroke).opacity(0.5), lineWidth: 1)
                                     .frame(width: 140, height: 140)
                                 Circle()
                                     .fill(Theme.cardBackground)
                                     .frame(width: 128, height: 128)
                                     .overlay(
-                                        Circle().stroke(connected ? Theme.mint : Theme.stroke, lineWidth: 2)
+                                        Circle().stroke(vpn.connected ? Theme.mint : Theme.stroke, lineWidth: 2)
                                     )
-                                    .shadow(color: connected ? Theme.mint.opacity(0.4) : .clear, radius: 20)
-                                Image(systemName: "power")
-                                    .font(.system(size: 36, weight: .medium))
-                                    .foregroundColor(connected ? Theme.mint : Theme.textSecondary)
+                                    .shadow(color: vpn.connected ? Theme.mint.opacity(0.4) : .clear, radius: 20)
+                                if vpn.isBusy {
+                                    ProgressView()
+                                } else {
+                                    Image(systemName: "power")
+                                        .font(.system(size: 36, weight: .medium))
+                                        .foregroundColor(vpn.connected ? Theme.mint : Theme.textSecondary)
+                                }
                             }
                         }
+                        .disabled(vpn.isBusy)
 
                         VStack(spacing: 8) {
-                            Text(connected ? "Connected" : "Disconnected")
+                            Text(vpn.connected ? "Connected" : "Disconnected")
                                 .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(connected ? Theme.success : Theme.textSecondary)
-                            Text("Protected by WireGuard®")
+                                .foregroundColor(vpn.connected ? Theme.success : Theme.textSecondary)
+                            Text("API session only — WireGuard tunnel coming soon")
                                 .font(.kasoMono(12))
                                 .tracking(0.6)
                                 .foregroundColor(Theme.textSecondary)
+                                .multilineTextAlignment(.center)
                         }
                         .padding(.top, 32)
                     }
                     .padding(.vertical, 12)
 
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        StatBox(label: "Download", value: "45.2", unit: "Mbps", icon: "arrow.down.to.line", iconColor: Theme.mint)
-                        StatBox(label: "Upload", value: "18.7", unit: "Mbps", icon: "arrow.up.to.line", iconColor: Theme.mint)
+                    if let error = vpn.lastError {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.danger)
+                            .multilineTextAlignment(.center)
                     }
 
-                    metricCard(icon: "key.fill", label: "VIRTUAL IP", value: "10.0.0.42", highlighted: false)
+                    metricCard(icon: "key.fill", label: "VIRTUAL IP", value: vpn.assignedIP ?? "—", highlighted: false)
                     metricCard(icon: "lock.shield.fill", label: "ENCRYPTION", value: "WireGuard", highlighted: true)
 
                     CardContainer(background: Theme.cardMuted) {
@@ -121,6 +135,14 @@ struct VPNView: View {
             }
         }
         .background(Theme.chrome.ignoresSafeArea())
+        .task { await vpn.refreshStatus() }
+    }
+
+    private var serverLabel: String {
+        if let city = vpn.city, let node = vpn.nodeName {
+            return "\(city) — \(node)"
+        }
+        return "Auto-select server"
     }
 
     private func metricCard(icon: String, label: String, value: String, highlighted: Bool) -> some View {
@@ -147,5 +169,5 @@ struct VPNView: View {
 }
 
 #Preview {
-    VPNView(onOpenMenu: {})
+    VPNView()
 }

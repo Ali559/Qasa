@@ -6,16 +6,25 @@ struct PremiumUpgradeView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppSession.self) private var session
+    @State private var selectedPlan: SubscriptionPlan = .monthly
+    @State private var autoRenew = true
     @State private var selectedMethodID: UUID?
+    @State private var isPaying = false
+    @State private var statusMessage: String?
+    @State private var errorMessage: String?
 
     let methods: [PaymentMethod] = [
-        PaymentMethod(name: "First Iraqi Bank (FIB)", subtitle: "Instant Transfer", badgeText: "FIB", badgeColorHex: "FFFFFF"),
-        PaymentMethod(name: "FastPay", subtitle: "Mobile Wallet", badgeText: "FastPay", badgeColorHex: "E31837"),
-        PaymentMethod(name: "SuperQi", subtitle: "Qi Card integration", badgeText: "SuperQi", badgeColorHex: "2563EB")
+        PaymentMethod(name: "First Iraqi Bank (FIB)", subtitle: "Instant Transfer", badgeText: "FIB", badgeColorHex: "FFFFFF", gateway: "fib"),
+        PaymentMethod(name: "FastPay", subtitle: "Mobile Wallet", badgeText: "FastPay", badgeColorHex: "E31837", gateway: "fastpay"),
+        PaymentMethod(name: "SuperQi", subtitle: "Qi Card integration", badgeText: "SuperQi", badgeColorHex: "2563EB", gateway: "superqi")
     ]
 
     private var selectedMethod: PaymentMethod? {
         methods.first { $0.id == selectedMethodID } ?? methods.first
+    }
+
+    private var formattedAmount: String {
+        selectedPlan.amountIQD.formatted(.number.grouping(.automatic))
     }
 
     var body: some View {
@@ -23,33 +32,25 @@ struct PremiumUpgradeView: View {
             if embedded, let onOpenMenu {
                 AppMenuHeader(title: "Upgrade", onMenu: onOpenMenu)
             } else {
-                HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Theme.textPrimary)
-                            .frame(width: 32, height: 32)
-                    }
-                    Spacer()
-                    Text("Kaso Premium")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Theme.textOnChrome)
-                    Spacer()
-                    Color.clear.frame(width: 32, height: 32)
-                }
-                .padding(.horizontal, 16)
-                .frame(height: 64)
-                .background(Theme.chrome)
-                .overlay(alignment: .bottom) {
-                    Rectangle().fill(Theme.strokeChrome).frame(height: 1)
-                }
+                sheetChrome(title: "Qasa Premium")
             }
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    heroCard
+                VStack(alignment: .leading, spacing: 16) {
+                    planCarousel
+                    autoRenewRow
                     paymentSection
-                        .padding(.top, 4)
+
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.mint)
+                    }
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.danger)
+                    }
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 20)
@@ -58,23 +59,32 @@ struct PremiumUpgradeView: View {
 
             VStack(spacing: 12) {
                 PrimaryButton(
-                    title: "Pay 10,000 IQD via \(selectedMethod?.badgeText ?? "FIB")",
+                    title: isPaying
+                        ? "Processing…"
+                        : "Pay \(formattedAmount) IQD via \(selectedMethod?.badgeText ?? "FIB")",
                     icon: "lock.fill",
                     cornerRadius: 8
                 ) {
-                    session.setPremium(true)
-                    if embedded {
-                        // Stay on page; menu will now hide Upgrade.
-                    } else {
-                        dismiss()
-                    }
+                    Task { await startPayment() }
                 }
-                Text("Local instant payment. Cancel anytime\nfrom device settings.")
-                    .font(.kasoMono(12))
-                    .tracking(0.6)
-                    .foregroundColor(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
+                .opacity(isPaying ? 0.6 : 1)
+                .disabled(isPaying || session.isPremium)
+
+                if session.isPremium {
+                    Text("You're on Premium. Manage it from Settings.")
+                        .font(.kasoMono(12))
+                        .tracking(0.6)
+                        .foregroundColor(Theme.success)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text("Opens your wallet app. We'll refresh your license when payment completes.")
+                        .font(.kasoMono(12))
+                        .tracking(0.6)
+                        .foregroundColor(Theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                }
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 21)
@@ -88,7 +98,54 @@ struct PremiumUpgradeView: View {
         .onAppear { selectedMethodID = methods.first?.id }
     }
 
-    private var heroCard: some View {
+    private func sheetChrome(title: String) -> some View {
+        HStack {
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+                    .frame(width: 32, height: 32)
+            }
+            Spacer()
+            Text(title)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(Theme.textOnChrome)
+            Spacer()
+            Color.clear.frame(width: 32, height: 32)
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 64)
+        .background(Theme.chrome)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Theme.strokeChrome).frame(height: 1)
+        }
+    }
+
+    private var planCarousel: some View {
+        VStack(spacing: 12) {
+            TabView(selection: $selectedPlan) {
+                ForEach(SubscriptionPlan.allCases) { plan in
+                    planCard(plan)
+                        .tag(plan)
+                        .padding(.horizontal, 2)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 240)
+
+            HStack(spacing: 8) {
+                ForEach(SubscriptionPlan.allCases) { plan in
+                    Circle()
+                        .fill(plan == selectedPlan ? Theme.mint : Theme.stroke)
+                        .frame(width: 7, height: 7)
+                        .animation(.easeInOut(duration: 0.2), value: selectedPlan)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func planCard(_ plan: SubscriptionPlan) -> some View {
         ZStack(alignment: .topTrailing) {
             Circle()
                 .fill(Theme.gold.opacity(0.1))
@@ -96,20 +153,26 @@ struct PremiumUpgradeView: View {
                 .blur(radius: 20)
                 .offset(x: 40, y: -40)
 
-            VStack(spacing: 24) {
+            VStack(spacing: 20) {
                 VStack(spacing: 8) {
-                    Text("UPGRADE TO PRO")
+                    Text(plan == .yearly ? "BEST VALUE" : "UPGRADE TO PRO")
                         .font(.kasoMono(12))
                         .tracking(1.2)
                         .foregroundColor(Theme.gold)
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        Text("10,000")
+                        Text(plan.amountIQD.formatted(.number.grouping(.automatic)))
                             .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
-                        Text("IQD / mo")
+                        Text(plan.periodLabel)
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                             .padding(.bottom, 4)
+                    }
+                    if let hint = plan.savingsHint {
+                        Text(hint)
+                            .font(.kasoMono(11))
+                            .tracking(0.4)
+                            .foregroundColor(Theme.mint)
                     }
                 }
 
@@ -122,13 +185,41 @@ struct PremiumUpgradeView: View {
             }
             .padding(25)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Theme.cardBackgroundLight)
         .cornerRadius(Theme.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(Theme.stroke, lineWidth: 1)
+                .stroke(plan == selectedPlan ? Theme.mint : Theme.stroke, lineWidth: 1)
         )
         .clipped()
+    }
+
+    private var autoRenewRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .foregroundColor(Theme.mint)
+                .font(.system(size: 18))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Auto-renew")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+                Text("Renews automatically at the end of each period.")
+                    .font(.system(size: 12))
+                    .foregroundColor(Theme.textSecondary)
+            }
+            Spacer()
+            Toggle("", isOn: $autoRenew)
+                .labelsHidden()
+                .tint(Theme.mint)
+        }
+        .padding(16)
+        .background(Theme.chrome)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Theme.stroke, lineWidth: 1)
+        )
     }
 
     private var paymentSection: some View {
@@ -143,7 +234,6 @@ struct PremiumUpgradeView: View {
                 }
             }
         }
-        .padding(.top, 16)
     }
 
     private func paymentRow(_ method: PaymentMethod) -> some View {
@@ -189,6 +279,66 @@ struct PremiumUpgradeView: View {
             .frame(width: 48, height: 32)
             .background(isFIB ? Color.white : Color(hex: method.badgeColorHex))
             .cornerRadius(4)
+    }
+
+    private func startPayment() async {
+        guard let method = selectedMethod else { return }
+        let gateway = method.gateway
+        let plan = selectedPlan
+        let renew = autoRenew
+        isPaying = true
+        errorMessage = nil
+        statusMessage = nil
+        defer { isPaying = false }
+
+        do {
+            let intent = try await PaymentService.shared.createIntent(
+                gateway: gateway,
+                plan: plan,
+                autoRenew: renew
+            )
+            let opened = await PaymentService.shared.openDeepLink(intent.deep_link)
+
+            if opened {
+                statusMessage = "Complete payment in \(method.badgeText)…"
+            } else {
+                #if DEBUG
+                statusMessage = "\(method.badgeText) app not available — simulating payment…"
+                try await PaymentService.shared.simulateStubPayment(
+                    gateway: gateway,
+                    gatewayOrderId: intent.gateway_order_id
+                )
+                #else
+                errorMessage = "Install the \(method.badgeText) app to complete payment, then try again."
+                return
+                #endif
+            }
+
+            let success = await PaymentService.shared.pollUntilComplete(
+                paymentId: intent.payment_id,
+                maxAttempts: opened ? 30 : 10,
+                intervalSeconds: opened ? 2 : 1
+            )
+            if success {
+                if !LicenseManager.shared.isPremium {
+                    _ = await LicenseManager.shared.refresh()
+                }
+                await MainActor.run {
+                    session.syncFromLicense()
+                }
+                if session.isPremium {
+                    statusMessage = "Premium activated."
+                    if !embedded { dismiss() }
+                } else {
+                    errorMessage = LicenseManager.shared.lastError
+                        ?? "Payment succeeded but license refresh failed. Lock and unlock the vault."
+                }
+            } else {
+                errorMessage = PaymentService.shared.lastError
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 }
 

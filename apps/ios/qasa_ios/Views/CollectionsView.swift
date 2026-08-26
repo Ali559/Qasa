@@ -6,7 +6,8 @@ struct CollectionsView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
-    @Query private var items: [VaultItemRecord]
+
+    @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var showCreate = false
     @State private var newName = ""
@@ -78,7 +79,7 @@ struct CollectionsView: View {
     }
 
     private func collectionCard(_ collection: VaultCollection) -> some View {
-        let count = items.filter { ($0.collectionId ?? $0.payload.organizationCollectionId) == collection.id }.count
+        let count = cache.rows.filter { $0.collectionId == collection.id }.count
         return HStack(spacing: 14) {
             Image(systemName: "folder.fill")
                 .font(.system(size: 18))
@@ -149,20 +150,20 @@ struct CollectionsView: View {
 
     private func confirmDelete() {
         guard let deleting else { return }
-        for item in items where (item.collectionId ?? item.payload.organizationCollectionId) == deleting.id {
-            item.collectionId = nil
-            var payload = item.payload
-            switch payload {
-            case .login(var f):
-                f.collectionId = nil
-                payload = .login(f)
-            case .secureNote(var f):
-                f.collectionId = nil
-                payload = .secureNote(f)
-            default:
-                break
+        for row in cache.rows where row.collectionId == deleting.id {
+            if var payload = try? VaultRepository.shared.payload(for: row.id) {
+                switch payload {
+                case .login(var f):
+                    f.collectionId = nil
+                    payload = .login(f)
+                case .secureNote(var f):
+                    f.collectionId = nil
+                    payload = .secureNote(f)
+                default:
+                    break
+                }
+                _ = try? VaultRepository.shared.save(payload: payload, id: row.id)
             }
-            item.payload = payload
         }
         modelContext.delete(deleting)
         try? modelContext.save()
@@ -173,7 +174,7 @@ struct CollectionsView: View {
 struct CollectionDetailView: View {
     let collection: VaultCollection
 
-    @Query private var items: [VaultItemRecord]
+    @Bindable private var cache = VaultRepository.shared.cache
     @State private var editorMode: EditorPresentation?
 
     private struct EditorPresentation: Identifiable {
@@ -181,9 +182,10 @@ struct CollectionDetailView: View {
         let mode: VaultItemEditor.Mode
     }
 
-    private var collectionItems: [VaultItemRecord] {
-        items.filter { ($0.collectionId ?? $0.payload.organizationCollectionId) == collection.id }
-            .sorted { $0.sortKey.localizedCaseInsensitiveCompare($1.sortKey) == .orderedAscending }
+    private var collectionItems: [VaultListRow] {
+        cache.rows
+            .filter { $0.collectionId == collection.id }
+            .sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
     }
 
     var body: some View {
@@ -197,14 +199,14 @@ struct CollectionDetailView: View {
                     )
                     .padding(.top, 40)
                 } else {
-                    ForEach(collectionItems, id: \.id) { item in
+                    ForEach(collectionItems) { row in
                         NavigationLink {
-                            VaultItemDetailView(item: item) {
-                                editorMode = EditorPresentation(mode: .edit(item))
+                            VaultItemDetailView(itemId: row.id) {
+                                editorMode = EditorPresentation(mode: .edit(row.id))
                             } onDeleted: {}
                         } label: {
-                            VaultItemRow(item: item) {
-                                editorMode = EditorPresentation(mode: .edit(item))
+                            VaultItemRow(row: row) {
+                                editorMode = EditorPresentation(mode: .edit(row.id))
                             } onDeleted: {}
                         }
                         .buttonStyle(.plain)

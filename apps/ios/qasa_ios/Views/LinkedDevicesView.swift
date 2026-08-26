@@ -1,7 +1,23 @@
 import SwiftUI
+import UIKit
 
 struct LinkedDevicesView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppSession.self) private var session
+
+    @State private var devices: [RemoteDevice] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var pendingUnlink: RemoteDevice?
+
+    private var registration = DeviceRegistrationService.shared
+    private var currentDeviceId = LicenseManager.shared.parsed?.deviceId
+
+    private var tierLabel: String {
+        let used = max(devices.count, registration.devicesUsed)
+        let limit = session.deviceLimit
+        return "\(session.tierLabel): \(used)/\(limit) Used"
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -17,8 +33,8 @@ struct LinkedDevicesView: View {
                     .foregroundColor(Theme.textOnChrome)
                 Spacer()
                 StatusPill(
-                    text: "Free Tier: 1/1 Used",
-                    dotColor: Theme.goldMuted,
+                    text: tierLabel,
+                    dotColor: session.isPremium ? Theme.success : Theme.goldMuted,
                     textColor: Theme.textSecondary,
                     background: Color(hex: "2A2A2B")
                 )
@@ -32,15 +48,40 @@ struct LinkedDevicesView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    upgradeHintBanner
+                    if !session.isPremium {
+                        upgradeHintBanner
+                    }
+
+                    if let limitError = registration.lastLimitError {
+                        limitExceededBanner(limitError)
+                    }
 
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Active Devices")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(Theme.textPrimary)
+                        HStack {
+                            Text("Active Devices")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(Theme.textPrimary)
+                            Spacer()
+                            if isLoading {
+                                ProgressView()
+                            }
+                        }
 
-                        currentDeviceCard
-                        limitReachedCard
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .font(.system(size: 14))
+                                .foregroundColor(Theme.danger)
+                        }
+
+                        if devices.isEmpty, !isLoading {
+                            Text("No devices linked yet.")
+                                .font(.system(size: 14))
+                                .foregroundColor(Theme.textSecondary)
+                        }
+
+                        ForEach(devices) { device in
+                            deviceCard(device)
+                        }
                     }
 
                     infoNote
@@ -50,6 +91,129 @@ struct LinkedDevicesView: View {
             }
         }
         .background(Theme.chrome.ignoresSafeArea())
+        .task { await loadDevices() }
+        .alert("Unlink Device?", isPresented: Binding(
+            get: { pendingUnlink != nil },
+            set: { if !$0 { pendingUnlink = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { pendingUnlink = nil }
+            Button("Unlink", role: .destructive) {
+                if let pendingUnlink {
+                    Task { await unlink(pendingUnlink) }
+                }
+            }
+        } message: {
+            if let pendingUnlink {
+                Text("Unlink \(pendingUnlink.device_name)? It will be signed out immediately.")
+            }
+        }
+    }
+
+    private func loadDevices() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            devices = try await registration.fetchDevices()
+            errorMessage = nil
+        } catch {
+            if let limit = registration.lastLimitError?.devices {
+                devices = limit
+            }
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func unlink(_ device: RemoteDevice) async {
+        do {
+            try await registration.unlinkDevice(id: device.id)
+            pendingUnlink = nil
+            await loadDevices()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func deviceCard(_ device: RemoteDevice) -> some View {
+        let isCurrent = device.id == currentDeviceId
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 16) {
+                Image(systemName: device.platform.lowercased().contains("ios") ? "iphone" : "desktopcomputer")
+                    .font(.system(size: 28))
+                    .foregroundColor(Theme.mint)
+                    .frame(width: 40)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(device.device_name)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Theme.textPrimary)
+                        if isCurrent {
+                            PillBadge(text: "THIS DEVICE", color: Theme.mintDark, solid: true)
+                        }
+                    }
+                    Text(device.platform.uppercased())
+                        .font(.system(size: 14))
+                        .foregroundColor(Theme.textSecondary)
+                }
+            }
+            .padding(.leading, 8)
+
+            Button {
+                pendingUnlink = device
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "link")
+                    Text("Unlink")
+                }
+                .font(.system(size: 14))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .foregroundColor(isCurrent ? Theme.textTertiary : Theme.textSecondary)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Theme.strokeChrome, lineWidth: 1)
+                )
+            }
+            .disabled(isCurrent)
+        }
+        .padding(21)
+        .background(Theme.cardBackground)
+        .cornerRadius(Theme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.stroke, lineWidth: 1)
+        )
+        .overlay(alignment: .leading) {
+            if isCurrent {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: Theme.cornerRadius,
+                    bottomLeadingRadius: Theme.cornerRadius,
+                    bottomTrailingRadius: 0,
+                    topTrailingRadius: 0
+                )
+                .fill(Theme.mint)
+                .frame(width: 4)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+    }
+
+    private func limitExceededBanner(_ error: DeviceLimitErrorBody) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Device limit reached")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(Theme.danger)
+            Text(error.message)
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+        }
+        .padding(17)
+        .background(Theme.dangerBackground.opacity(0.2))
+        .cornerRadius(Theme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.danger.opacity(0.4), lineWidth: 1)
+        )
     }
 
     private var upgradeHintBanner: some View {
@@ -66,7 +230,7 @@ struct LinkedDevicesView: View {
                     Text("Need more devices?")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Theme.gold)
-                    Text("Unlock up to 5 simultaneous devices across Web, iOS, and Android. Upgrade in Settings.")
+                    Text("Upgrade to Premium for up to 5 simultaneous devices.")
                         .font(.system(size: 14))
                         .foregroundColor(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -88,100 +252,12 @@ struct LinkedDevicesView: View {
         )
     }
 
-    private var currentDeviceCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 16) {
-                Image(systemName: "iphone")
-                    .font(.system(size: 28))
-                    .foregroundColor(Theme.mint)
-                    .frame(width: 40)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        Text("iPhone 15")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Theme.textPrimary)
-                        PillBadge(text: "THIS DEVICE", color: Theme.mintDark, solid: true)
-                    }
-                    HStack(spacing: 4) {
-                        Image(systemName: "mappin")
-                            .font(.system(size: 11))
-                        Text("Baghdad, IQ • Active Now")
-                            .font(.system(size: 14))
-                    }
-                    .foregroundColor(Theme.textSecondary)
-                }
-            }
-            .padding(.leading, 8)
-
-            Button {} label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "link.badge.minus")
-                    Text("Unlink")
-                }
-                .font(.system(size: 14))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 9)
-                .foregroundColor(Theme.textSecondary)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Theme.strokeChrome, lineWidth: 1)
-                )
-                .opacity(0.5)
-            }
-            .disabled(true)
-        }
-        .padding(21)
-        .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(Theme.stroke, lineWidth: 1)
-        )
-        .overlay(alignment: .leading) {
-            UnevenRoundedRectangle(
-                topLeadingRadius: Theme.cornerRadius,
-                bottomLeadingRadius: Theme.cornerRadius,
-                bottomTrailingRadius: 0,
-                topTrailingRadius: 0
-            )
-            .fill(Theme.mint)
-            .frame(width: 4)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
-    }
-
-    private var limitReachedCard: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "desktopcomputer")
-                .font(.system(size: 36))
-                .foregroundColor(Theme.textSecondary)
-            Text("Device Limit Reached")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Theme.textPrimary)
-            Text("You are currently on the Free Tier which allows 1 device. Upgrade in Settings to link your Mac or Windows PC.")
-                .font(.system(size: 14))
-                .foregroundColor(Theme.textSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(25)
-        .background(Theme.cardMuted.opacity(0.5))
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
-                .foregroundColor(Theme.stroke)
-        )
-        .opacity(0.9)
-    }
-
     private var infoNote: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "info.circle.fill")
                 .foregroundColor(Theme.info)
                 .font(.system(size: 18))
-            Text("Unlinking a device will immediately sign it out and permanently purge local vault data from that hardware. Ensure your Master Password is safely stored.")
+            Text("Unlinking a device signs it out immediately. Local vault data on that device is not deleted from here.")
                 .font(.system(size: 14))
                 .foregroundColor(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -199,4 +275,5 @@ struct LinkedDevicesView: View {
 
 #Preview {
     LinkedDevicesView()
+        .environment(AppSession())
 }

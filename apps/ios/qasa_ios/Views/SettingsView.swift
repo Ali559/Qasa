@@ -1,15 +1,17 @@
 import SwiftUI
+import UIKit
 
 struct SettingsView: View {
     var onOpenMenu: () -> Void = {}
     var onLogout: (() -> Void)? = nil
 
     @Environment(AppSession.self) private var session
-    @State private var biometricUnlock = true
+    @State private var biometricUnlock = VaultKeychainStore.biometricsEnabled
     @State private var showClearDataAlert = false
     @State private var showLinkedDevices = false
     @State private var showPremium = false
     @State private var showLogoutConfirm = false
+    @State private var linkedDeviceCount = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,6 +31,9 @@ struct SettingsView: View {
                             subtitle: "",
                             isOn: $biometricUnlock
                         )
+                        .onChange(of: biometricUnlock) { _, newValue in
+                            VaultKeychainStore.biometricsEnabled = newValue
+                        }
                         Divider().background(Theme.stroke)
                         NavChevronRow(icon: "clock", title: "Auto-lock", trailingText: "5 mins")
                     }
@@ -37,7 +42,7 @@ struct SettingsView: View {
                         HStack {
                             SectionLabel(text: "Linked Devices")
                             Spacer()
-                            Text("3 Active")
+                            Text("\(linkedDeviceCount) Active")
                                 .font(.kasoMono(12))
                                 .foregroundColor(Theme.mint)
                         }
@@ -45,16 +50,12 @@ struct SettingsView: View {
                             Button { showLinkedDevices = true } label: {
                                 NavChevronRow(
                                     icon: "iphone",
-                                    title: "iPhone 15",
+                                    title: UIDevice.current.name,
                                     subtitle: "(This Device)",
                                     iconColor: Theme.mint
                                 )
                             }
                             .buttonStyle(.plain)
-                            Divider().background(Theme.stroke)
-                            NavChevronRow(icon: "laptopcomputer", title: "MacBook Pro", subtitle: "Last active: 2h ago")
-                            Divider().background(Theme.stroke)
-                            NavChevronRow(icon: "puzzlepiece.extension", title: "Chrome Extension", subtitle: "Last active: 1d ago")
                         }
                     }
 
@@ -87,7 +88,9 @@ struct SettingsView: View {
         .background(Theme.background.ignoresSafeArea())
         .alert("Clear Local Data?", isPresented: $showClearDataAlert) {
             Button("Cancel", role: .cancel) {}
-            Button("Clear", role: .destructive) {}
+            Button("Clear", role: .destructive) {
+                VaultAuthStore.resetVaultAuth()
+            }
         } message: {
             Text("This permanently deletes your local vault. This cannot be undone.")
         }
@@ -101,8 +104,19 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView() }
         .sheet(isPresented: $showPremium) {
-            PremiumUpgradeView(embedded: false)
-                .environment(session)
+            Group {
+                if session.isPremium {
+                    ManageSubscriptionView(embedded: false)
+                } else {
+                    PremiumUpgradeView(embedded: false)
+                }
+            }
+            .environment(session)
+        }
+        .task {
+            if let devices = try? await DeviceRegistrationService.shared.fetchDevices() {
+                linkedDeviceCount = devices.count
+            }
         }
     }
 
@@ -147,6 +161,7 @@ struct SettingsView: View {
                     .foregroundColor(Theme.textPrimary)
                     .cornerRadius(8)
             }
+            .buttonStyle(.plain)
             .padding(.top, 12)
         }
     }

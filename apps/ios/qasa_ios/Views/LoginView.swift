@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LoginView: View {
-    var onUnlocked: () -> Void
+    var onUnlocked: (String) -> Void
     var onCreateVault: () -> Void
 
     @State private var password = ""
@@ -102,7 +102,7 @@ struct LoginView: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(Theme.textPrimary)
                             }
-                            Text("Your vault never leaves this device. Kaso cannot reset or recover your master password.")
+                            Text("Your vault never leaves this device. Qasa cannot reset or recover your master password.")
                                 .font(.system(size: 14))
                                 .foregroundColor(Theme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -146,24 +146,26 @@ struct LoginView: View {
 
         if VaultAuthStore.verifyMasterPassword(trimmed) {
             errorMessage = nil
-            onUnlocked()
+            onUnlocked(trimmed)
         } else {
             errorMessage = "Incorrect master password."
         }
     }
 
     private func unlockWithBiometrics() {
-        unlockIfNeeded(protected: true) { success in
-            if success {
-                errorMessage = nil
-                onUnlocked()
-            } else {
-                errorMessage = "Biometric unlock failed. Enter your master password."
-            }
+        guard VaultKeychainStore.biometricsEnabled else {
+            errorMessage = "Enable biometrics when creating your vault."
+            return
+        }
+        if let unlockedPassword = VaultSession.shared.unlockWithBiometrics() {
+            errorMessage = nil
+            onUnlocked(unlockedPassword)
+        } else {
+            errorMessage = "Biometric unlock failed. Enter your master password."
         }
     }
 }
 
 #Preview {
-    LoginView(onUnlocked: {}, onCreateVault: {})
+    LoginView(onUnlocked: { _ in }, onCreateVault: {})
 }

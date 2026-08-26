@@ -7,24 +7,31 @@ final class AppSession {
     var username: String
     var email: String
     var isPremium: Bool
+    var tierLabel: String
+    var deviceLimit: Int
 
     init(
-        username: String = "Jane Doe",
-        email: String = "jane.doe@example.com",
+        username: String = "Qasa User",
+        email: String = "",
         isPremium: Bool = false
     ) {
         self.username = username
         self.email = email
-        self.isPremium = UserDefaults.standard.object(forKey: "kaso.isPremium") as? Bool ?? isPremium
+        self.isPremium = isPremium
+        self.tierLabel = LicenseManager.shared.tierLabel
+        self.deviceLimit = LicenseManager.shared.deviceLimit
+        syncFromLicense()
     }
 
     var planSubtitle: String {
-        isPremium ? "Premium Plan" : "Free Plan"
+        isPremium ? "Premium Plan" : "\(tierLabel) Plan"
     }
 
-    func setPremium(_ value: Bool) {
-        isPremium = value
-        UserDefaults.standard.set(value, forKey: "kaso.isPremium")
+    func syncFromLicense() {
+        let license = LicenseManager.shared
+        isPremium = license.isPremium
+        tierLabel = license.tierLabel
+        deviceLimit = license.deviceLimit
     }
 }
 

@@ -4,7 +4,7 @@ import SwiftData
 struct AppShellView: View {
     var onLogout: (() -> Void)? = nil
 
-    @State private var session = AppSession()
+    @Environment(AppSession.self) private var session
     @State private var showMenu = false
     @State private var page: AppPage = .vault
 
@@ -39,7 +39,7 @@ struct AppShellView: View {
                         title: "Terms of Use",
                         onOpenMenu: openMenu,
                         bodyText: """
-                        These Terms of Use are a placeholder for Kaso’s legal agreement with you.
+                        These Terms of Use are a placeholder for Qasa’s legal agreement with you.
 
                         By using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.
                         """
@@ -49,7 +49,7 @@ struct AppShellView: View {
                         title: "Privacy Policy",
                         onOpenMenu: openMenu,
                         bodyText: """
-                        This Privacy Policy is a placeholder describing how Kaso will handle your data.
+                        This Privacy Policy is a placeholder describing how Qasa will handle your data.
 
                         Vault contents are designed to stay encrypted and under your control. Full policy details will be published here before public release.
                         """
@@ -97,5 +97,6 @@ struct AppShellView: View {
 
 #Preview {
     AppShellView()
+        .environment(AppSession())
         .modelContainer(for: VaultSchema.models, inMemory: true)
 }

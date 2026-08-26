@@ -11,7 +11,6 @@ struct qasaApp: App {
         do {
             container = try ModelContainer(for: schema, configurations: [config])
         } catch {
-            // Schema evolved (e.g. MonitoredEmail) — reset local store for development.
             let url = config.url
             try? FileManager.default.removeItem(at: url)
             do {
@@ -27,15 +26,15 @@ struct qasaApp: App {
             RootView()
                 .preferredColorScheme(.dark)
                 .modelContainer(container)
-                .onAppear {
-                    VaultSeedData.seedIfNeeded(context: container.mainContext)
-                }
         }
     }
 
     struct RootView: View {
+        @Environment(\.modelContext) private var modelContext
         @State private var unlocked = false
         @State private var forceCreate = false
+        @State private var session = AppSession()
+        @State private var isBootstrapping = false
 
         private var showLogin: Bool {
             VaultAuthStore.vaultExists && !forceCreate
@@ -44,25 +43,63 @@ struct qasaApp: App {
         var body: some View {
             Group {
                 if unlocked {
-                    AppShellView(onLogout: {
-                        unlocked = false
-                        forceCreate = false
-                    })
+                    AppShellView(onLogout: handleLogout)
+                        .environment(session)
                 } else if showLogin {
                     LoginView(
-                        onUnlocked: { unlocked = true },
+                        onUnlocked: { password in
+                            Task { await handleUnlock(password: password) }
+                        },
                         onCreateVault: { forceCreate = true }
                     )
                 } else {
                     CreateVaultView(
-                        onVaultCreated: {
-                            unlocked = true
-                            forceCreate = false
+                        onVaultCreated: { password, biometrics in
+                            Task { await handleCreate(password: password, biometrics: biometrics) }
                         },
                         onLogin: VaultAuthStore.vaultExists ? { forceCreate = false } : nil
                     )
                 }
             }
+            .overlay {
+                if isBootstrapping {
+                    ProgressView("Securing vault…")
+                        .padding(24)
+                        .background(Theme.cardBackground)
+                        .cornerRadius(12)
+                }
+            }
+        }
+
+        @MainActor
+        private func handleCreate(password: String, biometrics: Bool) async {
+            isBootstrapping = true
+            defer { isBootstrapping = false }
+            do {
+                try VaultAuthStore.createVault(masterPassword: password, biometricsEnabled: biometrics)
+                await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
+                unlocked = true
+                forceCreate = false
+            } catch {
+                // createVault currently does not throw; keep hook for future validation.
+            }
+        }
+
+        @MainActor
+        private func handleUnlock(password: String) async {
+            guard VaultAuthStore.verifyMasterPassword(password) else { return }
+            isBootstrapping = true
+            defer { isBootstrapping = false }
+            await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
+            unlocked = true
+        }
+
+        @MainActor
+        private func handleLogout() {
+            AppBootstrap.onLogout()
+            session.syncFromLicense()
+            unlocked = false
+            forceCreate = false
         }
     }
 }

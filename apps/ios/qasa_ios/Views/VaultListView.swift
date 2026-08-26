@@ -2,9 +2,13 @@ import SwiftUI
 import SwiftData
 
 struct VaultListView: View {
-    var onOpenMenu: () -> Void = {}
+    var onOpenMenu: () -> Void
 
-    @Query(sort: \VaultItemRecord.sortKey) private var items: [VaultItemRecord]
+    init(onOpenMenu: @escaping () -> Void = {}) {
+        self.onOpenMenu = onOpenMenu
+    }
+
+    @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var selectedTab: VaultFilterTab = .all
     @State private var searchText = ""
@@ -17,36 +21,28 @@ struct VaultListView: View {
         let mode: VaultItemEditor.Mode
     }
 
-    private var filteredItems: [VaultItemRecord] {
-        items.filter { item in
-            let kindMatch = selectedTab.kind.map { item.kind == $0 } ?? true
-            let searchMatch = searchText.isEmpty
-                || item.displayName.localizedCaseInsensitiveContains(searchText)
-                || item.payload.subtitle.localizedCaseInsensitiveContains(searchText)
-            return kindMatch && searchMatch
-        }
+    private var filteredRows: [VaultListRow] {
+        cache.filter(kind: selectedTab.kind, query: searchText)
     }
 
-    private var suggestedItems: [VaultItemRecord] {
+    private var suggestedRows: [VaultListRow] {
         guard selectedTab == .all else { return [] }
-        return VaultSuggestionEngine.suggest(items: filteredItems, context: suggestedProvider.context)
+        return VaultSuggestionEngine.suggest(rows: filteredRows, context: suggestedProvider.context)
     }
 
-    private var recentItems: [VaultItemRecord] {
-        guard selectedTab != .all, filteredItems.count > 10 else { return [] }
-        return Array(
-            filteredItems.sorted { $0.updatedAt > $1.updatedAt }.prefix(8)
-        )
+    private var recentRows: [VaultListRow] {
+        guard selectedTab != .all, filteredRows.count > 10 else { return [] }
+        return Array(filteredRows.sorted { $0.updatedAt > $1.updatedAt }.prefix(8))
     }
 
-    private var letterSections: [(letter: String, items: [VaultItemRecord])] {
-        let grouped = Dictionary(grouping: filteredItems) { $0.letterSection }
+    private var letterSections: [(letter: String, items: [VaultListRow])] {
+        let grouped = Dictionary(grouping: filteredRows) { $0.letterSection }
         let keys = grouped.keys.sorted { a, b in
             if a == "#" { return false }
             if b == "#" { return true }
             return a < b
         }
-        return keys.map { ($0, grouped[$0]!.sorted { $0.sortKey.localizedCaseInsensitiveCompare($1.sortKey) == .orderedAscending }) }
+        return keys.map { ($0, grouped[$0]!.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }) }
     }
 
     var body: some View {
@@ -59,28 +55,28 @@ struct VaultListView: View {
                         searchField
                         tabChips
 
-                        if selectedTab == .all, !suggestedItems.isEmpty {
+                        if selectedTab == .all, !suggestedRows.isEmpty {
                             sectionHeader(suggestedProvider.context.title)
-                            ForEach(suggestedItems, id: \.id) { item in
-                                row(for: item)
+                            ForEach(suggestedRows) { row in
+                                rowLink(for: row)
                             }
                         }
 
-                        if !recentItems.isEmpty {
+                        if !recentRows.isEmpty {
                             sectionHeader("Most Recent")
-                            ForEach(recentItems, id: \.id) { item in
-                                row(for: item)
+                            ForEach(recentRows) { row in
+                                rowLink(for: row)
                             }
                         }
 
                         ForEach(letterSections, id: \.letter) { section in
                             sectionHeader(section.letter)
-                            ForEach(section.items, id: \.id) { item in
-                                row(for: item)
+                            ForEach(section.items) { row in
+                                rowLink(for: row)
                             }
                         }
 
-                        if filteredItems.isEmpty {
+                        if filteredRows.isEmpty {
                             ContentUnavailableView(
                                 "No Items",
                                 systemImage: "tray",
@@ -159,14 +155,14 @@ struct VaultListView: View {
             .padding(.top, 8)
     }
 
-    private func row(for item: VaultItemRecord) -> some View {
+    private func rowLink(for row: VaultListRow) -> some View {
         NavigationLink {
-            VaultItemDetailView(item: item) {
-                editorMode = EditorPresentation(mode: .edit(item))
+            VaultItemDetailView(itemId: row.id) {
+                editorMode = EditorPresentation(mode: .edit(row.id))
             } onDeleted: {}
         } label: {
-            VaultItemRow(item: item) {
-                editorMode = EditorPresentation(mode: .edit(item))
+            VaultItemRow(row: row) {
+                editorMode = EditorPresentation(mode: .edit(row.id))
             } onDeleted: {}
         }
         .buttonStyle(.plain)
@@ -186,7 +182,7 @@ struct VaultListView: View {
 
 #Preview {
     NavigationStack {
-        VaultListView(onOpenMenu: {})
+        VaultListView()
     }
     .modelContainer(for: VaultSchema.models, inMemory: true)
 }

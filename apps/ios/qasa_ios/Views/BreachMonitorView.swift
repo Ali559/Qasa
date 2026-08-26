@@ -12,18 +12,11 @@ struct BreachMonitorView: View {
     @State private var selectedTab: BreachStatus = .unresolved
     @State private var pendingRemoval: MonitoredEmail?
     @State private var showLimitAlert = false
+    @State private var isChecking = false
+    @State private var scanResults: [BreachCheckResult] = []
+    @State private var errorMessage: String?
 
     private let maxSlots = 4
-
-    private let breaches: [Breach] = [
-        Breach(title: "Collection #1 Dump", breachDate: "Jan 17, 2019", discoveredDate: "Jan 18, 2019", compromisedFields: ["Passwords", "Emails"], status: .unresolved),
-        Breach(title: "LinkedIn Data Scraping", breachDate: "Jun 22, 2021", discoveredDate: "Jun 29, 2021", compromisedFields: ["Names", "Job Titles"], status: .resolved),
-        Breach(title: "Adobe Credential Leak", breachDate: "Oct 3, 2013", discoveredDate: "Nov 7, 2013", compromisedFields: ["Emails", "Passwords"], status: .resolved)
-    ]
-
-    private var filteredBreaches: [Breach] {
-        breaches.filter { $0.status == selectedTab }
-    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,8 +27,20 @@ struct BreachMonitorView: View {
                     slotsHeader
                     addEmailCard
                     monitoredList
-                    breachTabs
-                    breachList
+                    if session.isPremium {
+                        breachTabs
+                        breachList
+                    } else {
+                        Text("Upgrade to Premium to run dark-web breach scans.")
+                            .font(.system(size: 14))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.system(size: 13))
+                            .foregroundColor(Theme.danger)
+                    }
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 24)
@@ -66,7 +71,13 @@ struct BreachMonitorView: View {
             Text("You can monitor up to \(maxSlots) emails on your plan.")
         }
         .onAppear {
-            seedMonitoredIfNeeded()
+            Task { await rescanAll() }
+        }
+    }
+
+    private var filteredResults: [BreachCheckResult] {
+        scanResults.filter { result in
+            selectedTab == .unresolved ? result.breached : !result.breached
         }
     }
 
@@ -113,10 +124,11 @@ struct BreachMonitorView: View {
                         .stroke(Theme.stroke, lineWidth: 1)
                 )
 
-                PrimaryButton(title: "Add to Monitoring", icon: "plus", cornerRadius: 8) {
-                    addEmail()
+                PrimaryButton(title: isChecking ? "Checking…" : "Add to Monitoring", icon: "plus", cornerRadius: 8) {
+                    Task { await addEmail() }
                 }
-                .opacity(monitored.count >= maxSlots ? 0.5 : 1)
+                .opacity(monitored.count >= maxSlots || !session.isPremium ? 0.5 : 1)
+                .disabled(!session.isPremium || isChecking)
             }
         }
     }
@@ -195,19 +207,26 @@ struct BreachMonitorView: View {
 
     private var breachList: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if filteredBreaches.isEmpty {
+            if filteredResults.isEmpty {
                 Text("No \(selectedTab == .unresolved ? "unresolved" : "resolved") breaches.")
                     .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
             } else {
-                ForEach(filteredBreaches) { breach in
-                    BreachCard(breach: breach)
+                ForEach(filteredResults, id: \.email) { result in
+                    BreachCard(breach: Breach(
+                        title: result.sources.first ?? "Breach detected",
+                        breachDate: "—",
+                        discoveredDate: "Recent scan",
+                        compromisedFields: ["Emails"],
+                        status: result.breached ? .unresolved : .resolved
+                    ))
                 }
             }
         }
     }
 
-    private func addEmail() {
+    private func addEmail() async {
+        guard session.isPremium else { return }
         guard monitored.count < maxSlots else {
             showLimitAlert = true
             return
@@ -218,15 +237,33 @@ struct BreachMonitorView: View {
             monitorEmail = ""
             return
         }
-        modelContext.insert(MonitoredEmail(email: trimmed, status: .secure))
-        try? modelContext.save()
-        monitorEmail = ""
+
+        isChecking = true
+        defer { isChecking = false }
+
+        do {
+            let result = try await BreachMonitorService.checkEmail(trimmed)
+            let item = MonitoredEmail(email: trimmed, status: result.breached ? .atRisk : .secure)
+            modelContext.insert(item)
+            try? modelContext.save()
+            scanResults.append(result)
+            monitorEmail = ""
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
-    private func seedMonitoredIfNeeded() {
-        guard monitored.isEmpty else { return }
-        modelContext.insert(MonitoredEmail(email: "admin@kaso.io", status: .atRisk))
-        modelContext.insert(MonitoredEmail(email: "operations@kaso.io", status: .secure))
+    private func rescanAll() async {
+        guard session.isPremium, !monitored.isEmpty else { return }
+        isChecking = true
+        defer { isChecking = false }
+        scanResults = await BreachMonitorService.checkEmails(monitored.map(\.email))
+        for result in scanResults {
+            if let item = monitored.first(where: { $0.email.lowercased() == result.email.lowercased() }) {
+                item.status = result.breached ? .atRisk : .secure
+            }
+        }
         try? modelContext.save()
     }
 }

@@ -14,6 +14,7 @@ struct PaymentMethod: Identifiable {
     let subtitle: String
     let badgeText: String
     let badgeColorHex: String
+    let gateway: String
 }
 
 enum BreachStatus: String {

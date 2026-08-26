@@ -5,8 +5,8 @@ struct PasswordHealthReport {
     let reusedCount: Int
     let weakCount: Int
     let score: Int
-    let reusedItems: [VaultItemRecord]
-    let weakItems: [VaultItemRecord]
+    let reusedItems: [VaultListRow]
+    let weakItems: [VaultListRow]
 
     static let empty = PasswordHealthReport(
         totalPasswords: 0,
@@ -24,14 +24,7 @@ enum PasswordHealthAnalyzer {
         "letmein", "admin", "welcome", "iloveyou", "monkey", "dragon"
     ]
 
-    static func analyze(items: [VaultItemRecord]) -> PasswordHealthReport {
-        let logins: [(item: VaultItemRecord, password: String)] = items.compactMap { item in
-            guard case .login(let fields) = item.payload else { return nil }
-            let trimmed = fields.password.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return nil }
-            return (item, trimmed)
-        }
-
+    static func analyze(logins: [(row: VaultListRow, password: String)]) -> PasswordHealthReport {
         guard !logins.isEmpty else { return .empty }
 
         var frequency: [String: Int] = [:]
@@ -41,16 +34,16 @@ enum PasswordHealthAnalyzer {
 
         let reusedItems = logins
             .filter { frequency[$0.password, default: 0] > 1 }
-            .map(\.item)
-            .sorted { $0.sortKey.localizedCaseInsensitiveCompare($1.sortKey) == .orderedAscending }
+            .map(\.row)
+            .sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
 
         let weakItems = logins
             .filter { isWeak($0.password) }
-            .map(\.item)
-            .sorted { $0.sortKey.localizedCaseInsensitiveCompare($1.sortKey) == .orderedAscending }
+            .map(\.row)
+            .sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
 
-        let reusedCount = reusedItems.count
-        let weakCount = weakItems.count
+        let reusedCount = Set(reusedItems.map(\.id)).count
+        let weakCount = Set(weakItems.map(\.id)).count
         let passwords = logins.map(\.password)
 
         var score = 100

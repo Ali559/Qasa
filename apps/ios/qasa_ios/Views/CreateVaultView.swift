@@ -6,7 +6,7 @@ struct CreateVaultView: View {
     @State private var biometricsEnabled = true
     @State private var passwordVisible = false
     @State private var errorMessage: String?
-    var onVaultCreated: () -> Void
+    var onVaultCreated: (String, Bool) -> Void
     var onLogin: (() -> Void)? = nil
 
     private var strength: (label: String, filled: Int, color: Color) {
@@ -135,7 +135,7 @@ struct CreateVaultView: View {
                                         .font(.system(size: 20, weight: .semibold))
                                         .foregroundColor(Theme.goldMuted)
                                 }
-                                Text("Your master password cannot be recovered by anyone—not even Kaso. If you lose it, your vault data is permanently inaccessible.")
+                                Text("Your master password cannot be recovered by anyone—not even Qasa. If you lose it, your vault data is permanently inaccessible.")
                                     .font(.system(size: 14))
                                     .foregroundColor(Theme.textSecondary)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -183,11 +183,10 @@ struct CreateVaultView: View {
             return
         }
         errorMessage = nil
-        VaultAuthStore.createVault(masterPassword: password)
-        onVaultCreated()
+        onVaultCreated(password, biometricsEnabled)
     }
 }
 
 #Preview {
-    CreateVaultView(onVaultCreated: {}, onLogin: {})
+    CreateVaultView(onVaultCreated: { _, _ in }, onLogin: {})
 }

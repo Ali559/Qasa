@@ -1,30 +1,21 @@
 import Foundation
 
-/// Lightweight local auth stub for vault unlock / create flows.
+/// Legacy compatibility shim — delegates to encrypted vault session.
 enum VaultAuthStore {
-    private static let existsKey = "kaso.vaultExists"
-    private static let passwordKey = "kaso.masterPassword"
-
     static var vaultExists: Bool {
-        get { UserDefaults.standard.bool(forKey: existsKey) }
-        set { UserDefaults.standard.set(newValue, forKey: existsKey) }
+        VaultSession.shared.vaultExists
     }
 
-    static func createVault(masterPassword: String) {
-        UserDefaults.standard.set(masterPassword, forKey: passwordKey)
-        vaultExists = true
+    static func createVault(masterPassword: String, biometricsEnabled: Bool = true) throws {
+        try VaultSession.shared.createVault(password: masterPassword, biometricsEnabled: biometricsEnabled)
     }
 
     static func verifyMasterPassword(_ password: String) -> Bool {
-        guard vaultExists else { return false }
-        let stored = UserDefaults.standard.string(forKey: passwordKey)
-        // Demo fallback: if no stored password (legacy installs), accept any non-empty unlock.
-        guard let stored, !stored.isEmpty else { return !password.isEmpty }
-        return stored == password
+        VaultSession.shared.unlock(password: password)
     }
 
     static func resetVaultAuth() {
-        UserDefaults.standard.removeObject(forKey: passwordKey)
-        vaultExists = false
+        VaultSession.shared.wipeVault()
+        LicenseManager.shared.clear()
     }
 }

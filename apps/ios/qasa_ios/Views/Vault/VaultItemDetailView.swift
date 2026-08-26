@@ -2,22 +2,25 @@ import SwiftUI
 import SwiftData
 
 struct VaultItemDetailView: View {
-    @Bindable var item: VaultItemRecord
+    let itemId: UUID
     var onEdit: () -> Void
     var onDeleted: () -> Void
 
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Bindable private var cache = VaultRepository.shared.cache
 
+    @State private var payload: VaultPayload = .login(LoginFields())
     @State private var showDeleteConfirm = false
     @State private var revealedSecrets: Set<String> = []
     @State private var unlockedProtected = false
 
-    private var payload: VaultPayload { item.payload }
+    private var row: VaultListRow? {
+        cache.row(for: itemId)
+    }
 
     private var collectionName: String? {
-        let id = payload.organizationCollectionId ?? item.collectionId
+        let id = payload.organizationCollectionId ?? row?.collectionId
         guard let id else { return nil }
         return collections.first { $0.id == id }?.name
     }
@@ -27,7 +30,7 @@ struct VaultItemDetailView: View {
             VStack(spacing: 24) {
                 heroIcon
 
-                Text(item.displayName)
+                Text(row?.displayName ?? "Untitled")
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                     .multilineTextAlignment(.center)
@@ -67,24 +70,37 @@ struct VaultItemDetailView: View {
         .alert("Delete Item?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                modelContext.delete(item)
-                try? modelContext.save()
+                try? VaultRepository.shared.delete(id: itemId)
                 onDeleted()
                 dismiss()
             }
         } message: {
-            Text("This permanently removes “\(item.displayName)” from your vault.")
+            Text("This permanently removes “\(row?.displayName ?? "this item")” from your vault.")
         }
         .onAppear {
-            item.markUsed()
-            try? modelContext.save()
-            if payload.isProtectedNote {
-                unlockIfNeeded(protected: true) { ok in
-                    unlockedProtected = ok
-                }
-            } else {
-                unlockedProtected = true
+            loadItem()
+            try? VaultRepository.shared.markUsed(id: itemId)
+            unlockProtectedIfNeeded()
+        }
+        .onChange(of: row?.updatedAt) { _, _ in
+            loadItem()
+            unlockProtectedIfNeeded()
+        }
+    }
+
+    private func loadItem() {
+        if let loaded = try? VaultRepository.shared.payload(for: itemId) {
+            payload = loaded
+        }
+    }
+
+    private func unlockProtectedIfNeeded() {
+        if payload.isProtectedNote {
+            unlockIfNeeded(protected: true) { ok in
+                unlockedProtected = ok
             }
+        } else {
+            unlockedProtected = true
         }
     }
 
@@ -171,11 +187,11 @@ struct VaultItemDetailView: View {
     private var historySection: some View {
         detailCard(title: "History") {
             VStack(spacing: 0) {
-                historyRow(label: "Created", date: item.createdAt)
+                historyRow(label: "Created", date: row?.createdAt)
                 Divider().background(Theme.stroke)
-                historyRow(label: "Last Updated", date: item.updatedAt)
+                historyRow(label: "Last Updated", date: row?.updatedAt)
                 Divider().background(Theme.stroke)
-                historyRow(label: "Last Used", date: item.lastUsedAt)
+                historyRow(label: "Last Used", date: row?.lastUsedAt)
             }
         }
     }
@@ -267,13 +283,11 @@ struct VaultItemDetailView: View {
                 unlockIfNeeded(protected: true) { ok in
                     guard ok else { return }
                     VaultClipboard.copy(value)
-                    item.markUsed()
-                    try? modelContext.save()
+                    try? VaultRepository.shared.markUsed(id: itemId)
                 }
             } else {
                 VaultClipboard.copy(value)
-                item.markUsed()
-                try? modelContext.save()
+                try? VaultRepository.shared.markUsed(id: itemId)
             }
         }
     }

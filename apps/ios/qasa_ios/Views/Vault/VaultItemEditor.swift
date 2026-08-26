@@ -4,23 +4,28 @@ import SwiftData
 struct VaultItemEditor: View {
     enum Mode {
         case create(VaultPayload)
-        case edit(VaultItemRecord)
+        case edit(UUID)
     }
 
     let mode: Mode
     var onDone: () -> Void
 
     @Environment(\.modelContext) private var modelContext
+
     @State private var payload: VaultPayload
     @State private var passwordVisible = false
     @State private var showPasswordGenerator = false
+    @State private var loadError: String?
+    @State private var saveError: String?
 
     init(mode: Mode, onDone: @escaping () -> Void) {
         self.mode = mode
         self.onDone = onDone
         switch mode {
-        case .create(let p): _payload = State(initialValue: p)
-        case .edit(let item): _payload = State(initialValue: item.payload)
+        case .create(let p):
+            _payload = State(initialValue: p)
+        case .edit:
+            _payload = State(initialValue: .login(LoginFields()))
         }
     }
 
@@ -58,6 +63,15 @@ struct VaultItemEditor: View {
             onSave: save
         ) {
             formFields
+        }
+        .onAppear(perform: loadExistingIfNeeded)
+        .alert("Could Not Save", isPresented: Binding(
+            get: { saveError != nil },
+            set: { if !$0 { saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
         }
         .sheet(isPresented: $showPasswordGenerator) {
             PasswordGeneratorModal { generated in
@@ -682,26 +696,38 @@ struct VaultItemEditor: View {
         )
     }
 
-    private func save() {
-        switch mode {
-        case .create:
-            modelContext.insert(VaultItemRecord(payload: payload))
-        case .edit(let item):
-            item.payload = payload
+    private func loadExistingIfNeeded() {
+        guard case .edit(let id) = mode else { return }
+        do {
+            payload = try VaultRepository.shared.payload(for: id)
+        } catch {
+            loadError = error.localizedDescription
         }
-        try? modelContext.save()
-        onDone()
+    }
+
+    private func save() {
+        VaultRepository.shared.ensureConfigured(context: modelContext)
+        do {
+            switch mode {
+            case .create:
+                _ = try VaultRepository.shared.save(payload: payload)
+            case .edit(let id):
+                _ = try VaultRepository.shared.save(payload: payload, id: id)
+            }
+            onDone()
+        } catch {
+            saveError = error.localizedDescription
+        }
     }
 }
 
 struct AddressPhonePicker: View {
-    @Query private var items: [VaultItemRecord]
     @Binding var phoneItemId: UUID?
 
-    private var phones: [VaultItemRecord] {
-        items.filter {
-            if case .phone = $0.payload { return true }
-            return false
+    private var phones: [VaultListRow] {
+        VaultRepository.shared.cache.rows.filter { row in
+            guard case .phone = try? VaultRepository.shared.payload(for: row.id) else { return false }
+            return true
         }
     }
 
@@ -709,9 +735,9 @@ struct AddressPhonePicker: View {
         VStack(alignment: .leading, spacing: 8) {
             FormFieldLabel(text: "Phone Number")
             Picker("Phone", selection: $phoneItemId) {
-                Text("None").tag(UUID?.none)
-                ForEach(phones, id: \.id) { item in
-                    Text(item.displayName).tag(Optional(item.id))
+                Text("None").tag(Optional<UUID>.none)
+                ForEach(phones) { row in
+                    Text(row.displayName).tag(Optional(row.id))
                 }
             }
             .tint(Theme.mint)
@@ -719,6 +745,11 @@ struct AddressPhonePicker: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.cardBackground)
             .cornerRadius(Theme.cornerRadius)
+        }
+        .onAppear {
+            if let id = phoneItemId, !phones.contains(where: { $0.id == id }) {
+                phoneItemId = nil
+            }
         }
     }
 }

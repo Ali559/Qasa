@@ -1,21 +1,18 @@
 import SwiftUI
-import SwiftData
 
 struct VaultItemRow: View {
-    let item: VaultItemRecord
+    let row: VaultListRow
     var onEdit: () -> Void
     var onDeleted: () -> Void
 
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL
     @State private var showDeleteConfirm = false
     @State private var toast: String?
-
-    private var payload: VaultPayload { item.payload }
+    @State private var payload: VaultPayload?
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: payload.systemImage)
+            Image(systemName: (payload ?? fallbackPayload).systemImage)
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(Theme.textPrimary)
                 .frame(width: 48, height: 48)
@@ -27,11 +24,11 @@ struct VaultItemRow: View {
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
+                Text(row.displayName)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .lineLimit(1)
-                Text(payload.subtitle)
+                Text(row.subtitle)
                     .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
                     .lineLimit(1)
@@ -39,7 +36,7 @@ struct VaultItemRow: View {
 
             Spacer(minLength: 8)
 
-            if payload.primaryCopy != nil {
+            if (payload ?? fallbackPayload).primaryCopy != nil {
                 Button {
                     copyPrimary()
                 } label: {
@@ -50,7 +47,7 @@ struct VaultItemRow: View {
             }
 
             Menu {
-                ForEach(payload.copyActions) { action in
+                ForEach((payload ?? fallbackPayload).copyActions) { action in
                     Button {
                         copyValue(action.value, label: action.label)
                     } label: {
@@ -58,7 +55,7 @@ struct VaultItemRow: View {
                     }
                 }
 
-                if let urlString = payload.websiteURL,
+                if let urlString = (payload ?? fallbackPayload).websiteURL,
                    let url = normalizedURL(urlString) {
                     Button {
                         openURL(url)
@@ -92,15 +89,18 @@ struct VaultItemRow: View {
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
+        .onAppear(perform: loadPayload)
+        .onChange(of: row.updatedAt) { _, _ in
+            loadPayload()
+        }
         .alert("Delete Item?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                modelContext.delete(item)
-                try? modelContext.save()
+                try? VaultRepository.shared.delete(id: row.id)
                 onDeleted()
             }
         } message: {
-            Text("This permanently removes “\(item.displayName)” from your vault.")
+            Text("This permanently removes “\(row.displayName)” from your vault.")
         }
         .overlay(alignment: .bottom) {
             if let toast {
@@ -117,37 +117,43 @@ struct VaultItemRow: View {
         }
     }
 
+    private var fallbackPayload: VaultPayload {
+        .login(LoginFields(itemName: row.displayName))
+    }
+
+    private func loadPayload() {
+        payload = try? VaultRepository.shared.payload(for: row.id)
+    }
+
     private func copyPrimary() {
-        guard let primary = payload.primaryCopy else { return }
+        guard let payload = payload ?? Optional(fallbackPayload).flatMap({ _ in try? VaultRepository.shared.payload(for: row.id) }),
+              let primary = payload.primaryCopy else { return }
         if payload.isProtectedNote {
             unlockIfNeeded(protected: true) { ok in
                 guard ok else { return }
                 VaultClipboard.copy(primary.value)
-                item.markUsed()
-                try? modelContext.save()
+                try? VaultRepository.shared.markUsed(id: row.id)
                 flash("Copied \(primary.label)")
             }
         } else {
             VaultClipboard.copy(primary.value)
-            item.markUsed()
-            try? modelContext.save()
+            try? VaultRepository.shared.markUsed(id: row.id)
             flash("Copied \(primary.label)")
         }
     }
 
     private func copyValue(_ value: String, label: String) {
+        let payload = payload ?? fallbackPayload
         if payload.isProtectedNote && label.contains("Content") {
             unlockIfNeeded(protected: true) { ok in
                 guard ok else { return }
                 VaultClipboard.copy(value)
-                item.markUsed()
-                try? modelContext.save()
+                try? VaultRepository.shared.markUsed(id: row.id)
                 flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
             }
         } else {
             VaultClipboard.copy(value)
-            item.markUsed()
-            try? modelContext.save()
+            try? VaultRepository.shared.markUsed(id: row.id)
             flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
         }
     }

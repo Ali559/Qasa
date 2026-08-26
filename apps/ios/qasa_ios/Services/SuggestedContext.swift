@@ -20,22 +20,21 @@ protocol SuggestedContextProviding {
     var context: SuggestedContext { get }
 }
 
-/// Demo provider — swap for AutoFill / extension later.
 final class MockSuggestedContextProvider: SuggestedContextProviding {
     var context: SuggestedContext = .checkout
 }
 
 enum VaultSuggestionEngine {
-    static func suggest(items: [VaultItemRecord], context: SuggestedContext) -> [VaultItemRecord] {
+    static func suggest(rows: [VaultListRow], context: SuggestedContext) -> [VaultListRow] {
         switch context {
         case .none:
             return []
         case .checkout:
-            return items.filter { $0.kind == .payment }
+            return rows.filter { $0.kind == .payment }
         case .googleSignIn:
-            return items.filter { item in
-                guard case .login(let f) = item.payload else { return false }
-                let hay = (f.website + f.itemName + f.email).lowercased()
+            return rows.filter { row in
+                guard row.kind == .login else { return false }
+                let hay = (row.subtitle + row.displayName).lowercased()
                 return hay.contains("google") || hay.contains("gmail") || hay.contains("accounts.google")
             }
         }

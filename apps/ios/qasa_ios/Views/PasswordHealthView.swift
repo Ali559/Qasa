@@ -18,13 +18,9 @@ enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
 struct PasswordHealthView: View {
     var onOpenMenu: () -> Void
 
-    @Query(sort: \VaultItemRecord.sortKey) private var items: [VaultItemRecord]
     @State private var animatedProgress: Double = 0
     @State private var animatedScore: Int = 0
-
-    private var report: PasswordHealthReport {
-        PasswordHealthAnalyzer.analyze(items: items)
-    }
+    @State private var report: PasswordHealthReport = .empty
 
     var body: some View {
         VStack(spacing: 0) {
@@ -75,8 +71,22 @@ struct PasswordHealthView: View {
                 weakItems: report.weakItems
             )
         }
-        .onAppear { animateScore() }
+        .onAppear {
+            refreshReport()
+            animateScore()
+        }
         .onChange(of: report.score) { _, _ in animateScore() }
+    }
+
+    private func refreshReport() {
+        let logins: [(row: VaultListRow, password: String)] = (try? VaultRepository.shared.allLoginPayloads())?
+            .compactMap { id, fields in
+                guard let row = VaultRepository.shared.cache.row(for: id) else { return nil }
+                let trimmed = fields.password.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty else { return nil }
+                return (row, trimmed)
+            } ?? []
+        report = PasswordHealthAnalyzer.analyze(logins: logins)
     }
 
     private var scoreGauge: some View {
@@ -155,8 +165,8 @@ struct PasswordHealthView: View {
 
 struct PasswordHealthIssuesView: View {
     let initialTab: PasswordIssueTab
-    let reusedItems: [VaultItemRecord]
-    let weakItems: [VaultItemRecord]
+    let reusedItems: [VaultListRow]
+    let weakItems: [VaultListRow]
 
     @State private var selectedTab: PasswordIssueTab
     @State private var editorMode: EditorPresentation?
@@ -166,14 +176,14 @@ struct PasswordHealthIssuesView: View {
         let mode: VaultItemEditor.Mode
     }
 
-    init(initialTab: PasswordIssueTab, reusedItems: [VaultItemRecord], weakItems: [VaultItemRecord]) {
+    init(initialTab: PasswordIssueTab, reusedItems: [VaultListRow], weakItems: [VaultListRow]) {
         self.initialTab = initialTab
         self.reusedItems = reusedItems
         self.weakItems = weakItems
         _selectedTab = State(initialValue: initialTab)
     }
 
-    private var currentItems: [VaultItemRecord] {
+    private var currentItems: [VaultListRow] {
         switch selectedTab {
         case .reused: return reusedItems
         case .weak: return weakItems
@@ -221,14 +231,14 @@ struct PasswordHealthIssuesView: View {
                         )
                         .padding(.top, 48)
                     } else {
-                        ForEach(currentItems, id: \.id) { item in
+                        ForEach(currentItems) { row in
                             NavigationLink {
-                                VaultItemDetailView(item: item) {
-                                    editorMode = EditorPresentation(mode: .edit(item))
+                                VaultItemDetailView(itemId: row.id) {
+                                    editorMode = EditorPresentation(mode: .edit(row.id))
                                 } onDeleted: {}
                             } label: {
-                                VaultItemRow(item: item) {
-                                    editorMode = EditorPresentation(mode: .edit(item))
+                                VaultItemRow(row: row) {
+                                    editorMode = EditorPresentation(mode: .edit(row.id))
                                 } onDeleted: {}
                             }
                             .buttonStyle(.plain)
