@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Braces, CheckCircle2, Copy, Download, Filter } from '@lucide/vue'
-import FadeIn from '@/components/FadeIn.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -21,17 +20,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { payments, type PaymentRow, type PayStatus } from '@/data/mock'
+import { payments as mockPayments, type PaymentRow, type PayStatus } from '@/data/mock'
+import { fetchPayments } from '@/api/admin'
+import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
 
-const selected = ref<PaymentRow | null>(payments[0] ?? null)
+const payments = ref<PaymentRow[]>([...mockPayments])
+
+onMounted(async () => {
+  if (!isLiveApiEnabled()) return
+  try {
+    const data = await fetchPayments()
+    payments.value = data.payments
+    selected.value = data.payments[0] ?? null
+  } catch {
+    toast.error('Failed to load payments')
+  }
+})
+
+const selected = ref<PaymentRow | null>(mockPayments[0] ?? null)
 const open = ref(true)
 const statusFilter = ref<'all' | PayStatus>('all')
 
 const rows = computed(() =>
   statusFilter.value === 'all'
-    ? payments
-    : payments.filter((p) => p.status === statusFilter.value),
+    ? payments.value
+    : payments.value.filter((p) => p.status === statusFilter.value),
 )
 
 const payload = computed(() =>
@@ -77,8 +91,7 @@ function exportLogs() {
 </script>
 
 <template>
-  <FadeIn>
-    <div class="space-y-4">
+  <div class="space-y-4">
       <div class="flex flex-wrap items-center justify-end gap-2">
         <Button variant="outline" size="sm" @click="cycleFilter">
           <Filter />
@@ -145,7 +158,6 @@ function exportLogs() {
           </Table>
         </CardContent>
       </Card>
-    </div>
 
     <Sheet v-model:open="open">
       <SheetContent class="sm:max-w-md">
@@ -187,5 +199,5 @@ function exportLogs() {
         </div>
       </SheetContent>
     </Sheet>
-  </FadeIn>
+  </div>
 </template>

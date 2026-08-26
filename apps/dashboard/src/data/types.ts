@@ -1,1 +1,1 @@
-export type NavKey = 'overview' | 'users' | 'payments' | 'vpn' | 'telemetry'
+export type NavKey = 'overview' | 'users' | 'payments' | 'cancellations' | 'vpn' | 'telemetry'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Download, Filter } from '@lucide/vue'
 import FadeIn from '@/components/FadeIn.vue'
 import { Badge } from '@/components/ui/badge'
@@ -10,8 +10,22 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { events, resources, telemetryMetrics } from '@/data/mock'
+import { events, resources, telemetryMetrics as mockTelemetry } from '@/data/mock'
+import { fetchTelemetry, type TelemetryMetric } from '@/api/admin'
+import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
+
+const telemetryMetrics = ref<TelemetryMetric[]>([...mockTelemetry])
+
+onMounted(async () => {
+  if (!isLiveApiEnabled()) return
+  try {
+    const data = await fetchTelemetry()
+    telemetryMetrics.value = data.metrics
+  } catch {
+    toast.error('Failed to load telemetry')
+  }
+})
 
 const menaOnly = ref(true)
 const hideDebug = ref(false)

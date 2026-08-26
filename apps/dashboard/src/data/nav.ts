@@ -3,6 +3,7 @@ import {
   Activity,
   CreditCard,
   LayoutDashboard,
+  MessageSquareWarning,
   Network,
   Users,
 } from '@lucide/vue'
@@ -19,6 +20,7 @@ export const navItems: {
   { key: 'overview', label: 'Overview', to: '/', icon: LayoutDashboard },
   { key: 'users', label: 'Users & Devices', to: '/users', icon: Users },
   { key: 'payments', label: 'Payments', to: '/payments', icon: CreditCard },
+  { key: 'cancellations', label: 'Cancellations', to: '/cancellations', icon: MessageSquareWarning },
   { key: 'vpn', label: 'VPN Nodes', to: '/vpn', icon: Network },
   { key: 'telemetry', label: 'Telemetry', to: '/telemetry', icon: Activity },
 ]

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { CurveType } from '@unovis/ts'
 import { VisArea, VisAxis, VisLine, VisXYContainer } from '@unovis/vue'
 import { Download, TrendingUp } from '@lucide/vue'
@@ -9,8 +10,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChartContainer, type ChartConfig } from '@/components/ui/chart'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { gateways, growthData, overviewKpis } from '@/data/mock'
+import { gateways, growthData, overviewKpis as mockKpis } from '@/data/mock'
+import { fetchOverview, type OverviewKpi } from '@/api/admin'
+import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
+
+const overviewKpis = ref<OverviewKpi[]>([...mockKpis])
+
+onMounted(async () => {
+  if (!isLiveApiEnabled()) return
+  try {
+    const data = await fetchOverview()
+    overviewKpis.value = data.kpis
+  } catch {
+    toast.error('Failed to load overview KPIs')
+  }
+})
 
 const chartConfig = {
   subscribers: { label: 'Subscribers', color: 'var(--chart-1)' },

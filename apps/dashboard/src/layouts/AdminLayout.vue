@@ -40,7 +40,13 @@ const router = useRouter()
 
 const activeKey = computed<NavKey>(() => {
   const name = String(route.name ?? 'overview')
-  if (name === 'users' || name === 'payments' || name === 'vpn' || name === 'telemetry') {
+  if (
+    name === 'users' ||
+    name === 'payments' ||
+    name === 'cancellations' ||
+    name === 'vpn' ||
+    name === 'telemetry'
+  ) {
     return name
   }
   return 'overview'
@@ -58,6 +64,10 @@ const titles: Record<NavKey, { title: string; description: string }> = {
   payments: {
     title: 'Webhook Audit Logs',
     description: 'Monitor payment gateway payloads in real time.',
+  },
+  cancellations: {
+    title: 'Cancellation Feedback',
+    description: 'Reasons users give when they cancel Premium.',
   },
   vpn: {
     title: 'Infrastructure Health',
@@ -184,8 +194,14 @@ function signOut() {
 
       <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
         <RouterView v-slot="{ Component, route: childRoute }">
-          <Transition name="page" mode="out-in">
-            <component :is="Component" :key="String(childRoute.name ?? childRoute.path)" />
+          <Transition name="page">
+            <div
+              v-if="Component"
+              :key="String(childRoute.name ?? childRoute.path)"
+              class="min-h-0 w-full"
+            >
+              <component :is="Component" />
+            </div>
           </Transition>
         </RouterView>
       </div>

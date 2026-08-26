@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Plus } from '@lucide/vue'
 import FadeIn from '@/components/FadeIn.vue'
 import { Badge } from '@/components/ui/badge'
@@ -17,8 +17,24 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { vpnKpis, vpnNodes } from '@/data/mock'
+import { vpnKpis as mockVpnKpis, vpnNodes as mockVpnNodes } from '@/data/mock'
+import { fetchVpnNodes, type VpnNodeRow } from '@/api/admin'
+import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
+
+const vpnKpis = ref([...mockVpnKpis])
+const vpnNodes = ref<VpnNodeRow[]>([...mockVpnNodes])
+
+onMounted(async () => {
+  if (!isLiveApiEnabled()) return
+  try {
+    const data = await fetchVpnNodes()
+    vpnKpis.value = data.kpis
+    vpnNodes.value = data.nodes
+  } catch {
+    toast.error('Failed to load VPN nodes')
+  }
+})
 
 const open = ref(false)
 const city = ref('')

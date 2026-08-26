@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Ban, MonitorSmartphone, RefreshCw, Search } from '@lucide/vue'
-import FadeIn from '@/components/FadeIn.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -29,9 +28,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { users, type UserRow } from '@/data/mock'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { users as mockUsers, type UserRow } from '@/data/mock'
+import { fetchUsers } from '@/api/admin'
+import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
+
+const users = ref<UserRow[]>([...mockUsers])
+
+onMounted(async () => {
+  if (!isLiveApiEnabled()) return
+  try {
+    users.value = await fetchUsers()
+  } catch {
+    toast.error('Failed to load users')
+  }
+})
 
 const query = ref('')
 const tier = ref('all')
@@ -40,7 +52,7 @@ const pageSize = 5
 const blockTarget = ref<UserRow | null>(null)
 
 const filtered = computed(() =>
-  users.filter((u) => {
+  users.value.filter((u) => {
     const q = query.value.trim().toLowerCase()
     const matchQuery = !q || u.id.toLowerCase().includes(q)
     const matchTier = tier.value === 'all' || u.tier === tier.value
@@ -74,9 +86,8 @@ function prevPage() {
 </script>
 
 <template>
-  <TooltipProvider>
-    <FadeIn>
-      <Card>
+  <div class="space-y-4">
+    <Card>
         <CardHeader class="gap-4">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div class="relative w-full max-w-sm">
@@ -191,7 +202,6 @@ function prevPage() {
           </div>
         </CardFooter>
       </Card>
-    </FadeIn>
 
     <Dialog :open="!!blockTarget" @update:open="(open) => !open && (blockTarget = null)">
       <DialogContent>
@@ -207,5 +217,5 @@ function prevPage() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  </TooltipProvider>
+  </div>
 </template>

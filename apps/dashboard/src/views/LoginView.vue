@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { Eye, EyeOff, KeyRound, Mail, ShieldCheck } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,10 +10,13 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import FadeIn from '@/components/FadeIn.vue'
 import { toast } from 'vue-sonner'
+import { adminLogin } from '@/api/admin'
+import { isLiveApiEnabled, setAuthToken } from '@/api/client'
 
 const router = useRouter()
-const email = ref('admin@kaso.vault')
-const password = ref('kaso-secure-key')
+const route = useRoute()
+const email = ref('admin@qasa.io')
+const password = ref('admin123')
 const showPassword = ref(false)
 const remember = ref(true)
 const loading = ref(false)
@@ -26,10 +29,23 @@ async function authenticate() {
     return
   }
   loading.value = true
-  await new Promise((r) => setTimeout(r, 650))
-  loading.value = false
-  toast.success('Authenticated', { description: 'Welcome back, System Admin.' })
-  router.push('/')
+  try {
+    if (isLiveApiEnabled()) {
+      const res = await adminLogin(email.value.trim(), password.value)
+      setAuthToken(res.token)
+    } else {
+      await new Promise((r) => setTimeout(r, 650))
+    }
+    loading.value = false
+    toast.success('Authenticated', { description: 'Welcome back, System Admin.' })
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    router.push(redirect)
+  } catch (err) {
+    loading.value = false
+    toast.error('Authentication failed', {
+      description: err instanceof Error ? err.message : 'Invalid credentials',
+    })
+  }
 }
 </script>
 
@@ -44,7 +60,7 @@ async function authenticate() {
           <div class="bg-primary/15 text-primary mb-2 flex size-12 items-center justify-center rounded-xl border border-primary/20">
             <ShieldCheck class="size-6" />
           </div>
-          <CardTitle class="text-2xl tracking-tight">KASO ADMIN</CardTitle>
+          <CardTitle class="text-2xl tracking-tight">QASA ADMIN</CardTitle>
           <CardDescription>Secure console access for authorized personnel.</CardDescription>
           <Badge variant="outline" class="mt-2 gap-1.5">
             <span class="bg-primary size-1.5 animate-pulse rounded-full" />
@@ -59,7 +75,13 @@ async function authenticate() {
                 <Mail class="text-muted-foreground size-3.5" />
                 Admin Identity
               </Label>
-              <Input id="email" v-model="email" type="email" autocomplete="username" placeholder="admin@kaso.vault" />
+              <Input
+                id="email"
+                v-model="email"
+                type="email"
+                autocomplete="username"
+                placeholder="admin@qasa.io"
+              />
             </div>
 
             <div class="grid gap-2">
