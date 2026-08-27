@@ -1,6 +1,6 @@
 import Foundation
 
-struct RemoteDevice: Codable, Identifiable, Hashable {
+nonisolated struct RemoteDevice: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let device_name: String
     let platform: String

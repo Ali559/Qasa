@@ -1,6 +1,6 @@
 import Foundation
 
-enum QasaAPIError: LocalizedError {
+enum QasaAPIError: LocalizedError, Sendable {
     case invalidURL
     case httpStatus(Int, Data?)
     case decoding(Error)
@@ -22,7 +22,7 @@ enum QasaAPIError: LocalizedError {
     }
 }
 
-struct DeviceLimitErrorBody: Decodable {
+nonisolated struct DeviceLimitErrorBody: Decodable, Sendable {
     let error: String
     let message: String
     let devices_used: Int?
@@ -47,7 +47,7 @@ actor QasaAPIClient {
     ) async throws -> T {
         let data = try await rawRequest(url, method: method, body: body, authorized: authorized)
         do {
-            return try JSONDecoder.api.decode(T.self, from: data)
+            return try QasaCodec.decode(T.self, from: data)
         } catch {
             throw QasaAPIError.decoding(error)
         }
@@ -64,7 +64,7 @@ actor QasaAPIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try JSONEncoder.api.encode(AnyEncodable(body))
+            request.httpBody = try QasaCodec.encodeBody(body)
         }
         if authorized, let token = VaultKeychainStore.licenseToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -88,7 +88,7 @@ actor QasaAPIClient {
         case 401:
             throw QasaAPIError.unauthorized
         case 403:
-            if let limit = try? JSONDecoder.api.decode(DeviceLimitErrorBody.self, from: data),
+            if let limit = try? QasaCodec.decode(DeviceLimitErrorBody.self, from: data),
                limit.error == "device_limit_exceeded" {
                 throw QasaAPIError.deviceLimitExceeded(limit)
             }
@@ -107,7 +107,29 @@ actor QasaAPIClient {
     }
 }
 
-private struct AnyEncodable: Encodable {
+nonisolated enum QasaCodec {
+    private static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .useDefaultKeys
+        return encoder
+    }()
+
+    private static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .useDefaultKeys
+        return decoder
+    }()
+
+    static func encodeBody(_ body: any Encodable) throws -> Data {
+        try encoder.encode(AnyEncodable(body))
+    }
+
+    static func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+        try decoder.decode(type, from: data)
+    }
+}
+
+nonisolated private struct AnyEncodable: Encodable {
     let value: any Encodable
 
     init(_ value: any Encodable) { self.value = value }
@@ -115,20 +137,4 @@ private struct AnyEncodable: Encodable {
     func encode(to encoder: Encoder) throws {
         try value.encode(to: encoder)
     }
-}
-
-extension JSONEncoder {
-    static let api: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .useDefaultKeys
-        return encoder
-    }()
-}
-
-extension JSONDecoder {
-    static let api: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .useDefaultKeys
-        return decoder
-    }()
 }

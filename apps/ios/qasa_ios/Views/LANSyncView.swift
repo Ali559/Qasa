@@ -7,6 +7,7 @@ struct LANSyncView: View {
     @State private var pairCode = ""
     @State private var mode: Mode = .host
     @State private var exportedURL: URL?
+    @State private var validationMessage: String?
 
     enum Mode { case host, join }
 
@@ -38,7 +39,7 @@ struct LANSyncView: View {
 
                         ThemedTextField(icon: "number", placeholder: "6-digit code", text: $pairCode)
 
-                        Text(sync.statusMessage)
+                        Text(validationMessage ?? sync.statusMessage)
                             .font(.kasoMono(12))
                             .foregroundColor(Theme.mint)
 
@@ -70,9 +71,10 @@ struct LANSyncView: View {
     private func runSync() {
         let code = pairCode.trimmingCharacters(in: .whitespacesAndNewlines)
         guard code.count >= 4 else {
-            sync.statusMessage = "Enter a shared code first."
+            validationMessage = "Enter a shared code first."
             return
         }
+        validationMessage = nil
         if mode == .host {
             // Export encrypted marker blob — full vault dump uses local file exchange for v1.
             let blob = Data("qasa-vault-placeholder:\(VaultKeychainStore.accountId ?? "")".utf8)

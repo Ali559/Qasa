@@ -17,7 +17,7 @@ struct AddItemMenuView: View {
                 switch tab {
                 case .all:
                     ForEach(VaultItemKind.allCases) { kind in
-                        if let subtypes = kind.subtypes {
+                        if kind.subtypes != nil {
                             Button {
                                 path.append(.subtypes(kind))
                             } label: {

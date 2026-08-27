@@ -44,7 +44,7 @@ struct NotificationsView: View {
                                         notificationRow(
                                             title: note.title(locale: locale),
                                             body: note.body(locale: locale),
-                                            date: note.created_at,
+                                            date: formatNotificationDate(note.created_at),
                                             unread: note.read_at == nil
                                         )
                                     }
@@ -110,17 +110,27 @@ struct NotificationsView: View {
         }
         .sheet(item: $selected) { note in
             NavigationStack {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(note.title(locale: locale))
-                        .font(.title2.bold())
-                        .foregroundColor(Theme.textPrimary)
-                    Text(note.body(locale: locale))
-                        .foregroundColor(Theme.textSecondary)
-                    Spacer()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(note.title(locale: locale))
+                            .font(.title2.bold())
+                            .foregroundColor(Theme.textPrimary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text(formatNotificationDate(note.created_at))
+                            .font(.caption)
+                            .foregroundColor(Theme.textTertiary)
+                        Text(note.body(locale: locale))
+                            .font(.body)
+                            .foregroundColor(Theme.textSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(Theme.screenPadding)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Theme.background.ignoresSafeArea())
                 .navigationTitle("Notification")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Close") { selected = nil }
@@ -128,6 +138,7 @@ struct NotificationsView: View {
                 }
             }
             .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .tint(Theme.mint)
     }
@@ -172,4 +183,27 @@ struct NotificationsView: View {
             errorMessage = error.localizedDescription
         }
     }
+
+    private func formatNotificationDate(_ iso: String) -> String {
+        guard let date = ISO8601DateFormatter.qasa.date(from: iso)
+            ?? ISO8601DateFormatter.qasaFractional.date(from: iso)
+        else {
+            return iso
+        }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+}
+
+private extension ISO8601DateFormatter {
+    static let qasa: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    static let qasaFractional: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
 }

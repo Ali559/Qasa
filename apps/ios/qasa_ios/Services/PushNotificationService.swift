@@ -6,7 +6,7 @@ import UserNotifications
 
 extension Notification.Name {
     /// Posted when the user taps a remote/local push — open Notifications in the shell.
-    static let qasaOpenNotifications = Notification.Name("qasa.openNotifications")
+    nonisolated static let qasaOpenNotifications = Notification.Name("qasa.openNotifications")
 }
 
 /// Requests permission, registers with APNs → FCM, uploads the **FCM** token via device prefs.
@@ -72,11 +72,14 @@ final class PushNotificationService: NSObject, UNUserNotificationCenterDelegate,
 
     private func refreshAndUploadFcmToken(enabled: Bool) async {
         guard FirebaseApp.app() != nil else { return }
-        do {
-            let token = try await Messaging.messaging().token()
-            storeAndUpload(token: token, enabled: enabled)
-        } catch {
-            // Token not ready yet; MessagingDelegate will deliver it.
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            Messaging.messaging().register { _ in
+                continuation.resume()
+            }
+        }
+        // Token arrives via messaging(_:didReceiveRegistrationToken:); upload cached copy if present.
+        if let token = fcmToken {
+            await uploadPrefs(token: token, enabled: enabled)
         }
     }
 

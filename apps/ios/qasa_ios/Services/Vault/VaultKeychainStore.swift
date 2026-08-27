@@ -1,7 +1,8 @@
 import Foundation
+import LocalAuthentication
 import Security
 
-enum VaultKeychainStore {
+nonisolated enum VaultKeychainStore {
     private static let service = "io.kaso.qasa.vault"
 
     enum Key: String {
@@ -76,13 +77,15 @@ enum VaultKeychainStore {
 
     static func loadBiometricPassword() -> String? {
         guard biometricsEnabled else { return nil }
+        let context = LAContext()
+        context.localizedReason = "Unlock Qasa vault"
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: Key.biometricPassword.rawValue,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
-            kSecUseOperationPrompt as String: "Unlock Qasa vault"
+            kSecUseAuthenticationContext as String: context
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
