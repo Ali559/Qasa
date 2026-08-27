@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue'
 import { Primitive } from 'reka-ui'
 import { computed } from 'vue'
-import { THEMES, useChart } from '.'
+import { THEMES, useChart } from './context'
 
 defineProps<{
   id?: HTMLAttributes['id']

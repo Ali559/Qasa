@@ -79,7 +79,7 @@ function exportGrowth() {
             </Button>
           </CardHeader>
           <CardContent>
-            <ChartContainer :config="chartConfig" class="aspect-[16/9] w-full" cursor>
+            <ChartContainer :config="chartConfig" class="aspect-video w-full" cursor>
               <VisXYContainer :data="growthData" :margin="{ top: 8, right: 8, bottom: 24, left: 28 }">
                 <VisArea
                   :x="x"

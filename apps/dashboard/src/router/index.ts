@@ -1,5 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '../layouts/AdminLayout.vue'
+import LoginView from '../views/LoginView.vue'
+import OverviewView from '../views/OverviewView.vue'
+import UsersView from '../views/UsersView.vue'
+import PaymentsView from '../views/PaymentsView.vue'
+import CancellationsView from '../views/CancellationsView.vue'
+import VpnNodesView from '../views/VpnNodesView.vue'
+import TelemetryView from '../views/TelemetryView.vue'
 import { getAuthToken, isLiveApiEnabled } from '../api/client'
 
 export const router = createRouter({
@@ -8,7 +15,7 @@ export const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue'),
+      component: LoginView,
     },
     {
       path: '/',
@@ -17,32 +24,32 @@ export const router = createRouter({
         {
           path: '',
           name: 'overview',
-          component: () => import('../views/OverviewView.vue'),
+          component: OverviewView,
         },
         {
           path: 'users',
           name: 'users',
-          component: () => import('../views/UsersView.vue'),
+          component: UsersView,
         },
         {
           path: 'payments',
           name: 'payments',
-          component: () => import('../views/PaymentsView.vue'),
+          component: PaymentsView,
         },
         {
           path: 'cancellations',
           name: 'cancellations',
-          component: () => import('../views/CancellationsView.vue'),
+          component: CancellationsView,
         },
         {
           path: 'vpn',
           name: 'vpn',
-          component: () => import('../views/VpnNodesView.vue'),
+          component: VpnNodesView,
         },
         {
           path: 'telemetry',
           name: 'telemetry',
-          component: () => import('../views/TelemetryView.vue'),
+          component: TelemetryView,
         },
       ],
     },

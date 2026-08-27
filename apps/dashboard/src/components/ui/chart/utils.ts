@@ -1,4 +1,4 @@
-import type { ChartConfig } from '.'
+import type { ChartConfig } from './context'
 import { isClient } from '@vueuse/core'
 import { useId } from 'reka-ui'
 import { h, render } from 'vue'

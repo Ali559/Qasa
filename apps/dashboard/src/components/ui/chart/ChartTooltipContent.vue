@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue'
-import type { ChartConfig } from '.'
+import type { ChartConfig } from './context'
 import { computed } from 'vue'
 import { cn } from '@/lib/utils'
 
