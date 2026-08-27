@@ -22,6 +22,13 @@ enum QasaConfig {
     static var subscriptionURL: URL { apiBaseURL.appending(path: "/v1/subscription") }
     static var subscriptionAutoRenewURL: URL { apiBaseURL.appending(path: "/v1/subscription/auto-renew") }
     static var subscriptionCancelURL: URL { apiBaseURL.appending(path: "/v1/subscription/cancel") }
+    static var pricingURL: URL { apiBaseURL.appending(path: "/v1/pricing") }
+    static var notificationsURL: URL { apiBaseURL.appending(path: "/v1/notifications") }
+    static func notificationURL(id: String) -> URL {
+        apiBaseURL.appending(path: "/v1/notifications/\(id)")
+    }
+    static var devicePrefsURL: URL { apiBaseURL.appending(path: "/v1/devices/prefs") }
+    static var breachMonitorURL: URL { apiBaseURL.appending(path: "/v1/breach/monitor") }
     static func breachPrefixURL(_ prefix: String) -> URL {
         apiBaseURL.appending(path: "/v1/breach/prefix/\(prefix)")
     }

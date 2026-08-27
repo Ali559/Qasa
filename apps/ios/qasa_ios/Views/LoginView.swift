@@ -109,14 +109,6 @@ struct LoginView: View {
                         }
                     }
                     .padding(.top, 8)
-                    .padding(.bottom, 24)
-
-                    Button(action: onCreateVault) {
-                        Text("New here? Create a vault")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Theme.mint)
-                            .frame(maxWidth: .infinity)
-                    }
                     .padding(.bottom, 100)
                 }
                 .padding(.horizontal, Theme.screenPadding)

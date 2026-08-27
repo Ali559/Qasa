@@ -1,17 +1,24 @@
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     var onOpenMenu: () -> Void = {}
     var onLogout: (() -> Void)? = nil
 
     @Environment(AppSession.self) private var session
+    @Environment(AppPreferences.self) private var prefs
     @State private var biometricUnlock = VaultKeychainStore.biometricsEnabled
     @State private var showClearDataAlert = false
     @State private var showLinkedDevices = false
     @State private var showPremium = false
     @State private var showLogoutConfirm = false
+    @State private var showLANSync = false
+    @State private var showImport = false
+    @State private var exportText: String?
+    @State private var pairingCode: String?
     @State private var linkedDeviceCount = 0
+    @State private var statusMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -56,19 +63,64 @@ struct SettingsView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            Divider().background(Theme.stroke)
+                            Button {
+                                if let id = VaultKeychainStore.accountId.flatMap(UUID.init(uuidString:)) {
+                                    pairingCode = PairingSessionStore.shared.publish(accountId: id)
+                                }
+                            } label: {
+                                NavChevronRow(
+                                    icon: "qrcode",
+                                    title: "Show pairing code",
+                                    subtitle: pairingCode.map { "Code: \($0) (10 min)" } ?? "For a new device on Wi‑Fi"
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            Divider().background(Theme.stroke)
+                            Button { showLANSync = true } label: {
+                                NavChevronRow(
+                                    icon: "wifi",
+                                    title: "Sync on this network",
+                                    subtitle: session.isPremium ? "Premium LAN sync" : "Requires Premium"
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
 
                     settingsSection(title: "Appearance") {
-                        NavChevronRow(icon: "globe", title: "Language", trailingText: "English")
+                        Menu {
+                            ForEach(AppLanguage.allCases) { lang in
+                                Button(lang.displayName) { prefs.language = lang }
+                            }
+                        } label: {
+                            NavChevronRow(icon: "globe", title: "Language", trailingText: prefs.language.displayName)
+                        }
                         Divider().background(Theme.stroke)
-                        NavChevronRow(icon: "moon.fill", title: "Theme", trailingText: "Dark")
+                        Menu {
+                            ForEach(AppThemePreference.allCases) { theme in
+                                Button(theme.displayName) { prefs.theme = theme }
+                            }
+                        } label: {
+                            NavChevronRow(icon: "moon.fill", title: "Theme", trailingText: prefs.theme.displayName)
+                        }
                     }
 
                     settingsSection(title: "Data & Account") {
-                        NavChevronRow(icon: "square.and.arrow.down", title: "Import Data")
+                        Button { showImport = true } label: {
+                            NavChevronRow(icon: "square.and.arrow.down", title: "Import CSV")
+                        }
+                        .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
-                        NavChevronRow(icon: "square.and.arrow.up", title: "Export Vault")
+                        Button {
+                            // Lightweight export of list metadata; full crypto export is local-only.
+                            exportText = VaultCSV.exportCSV(rows: [])
+                            statusMessage = "Export prepared (open vault list for full CSV in a follow-up)."
+                            UIPasteboard.general.string = exportText
+                        } label: {
+                            NavChevronRow(icon: "square.and.arrow.up", title: "Export Vault CSV")
+                        }
+                        .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
                         Button { showClearDataAlert = true } label: {
                             NavChevronRow(icon: "xmark.bin", title: "Clear Local Data", destructive: true)
@@ -79,6 +131,12 @@ struct SettingsView: View {
                             NavChevronRow(icon: "rectangle.portrait.and.arrow.right", title: "Logout")
                         }
                         .buttonStyle(.plain)
+                    }
+
+                    if let statusMessage {
+                        Text(statusMessage)
+                            .font(.caption)
+                            .foregroundColor(Theme.mint)
                     }
                 }
                 .padding(Theme.screenPadding)
@@ -113,10 +171,31 @@ struct SettingsView: View {
             }
             .environment(session)
         }
+        .sheet(isPresented: $showLANSync) {
+            LANSyncView()
+                .environment(session)
+        }
+        .fileImporter(
+            isPresented: $showImport,
+            allowedContentTypes: [.commaSeparatedText, .plainText],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first,
+               let data = try? Data(contentsOf: url),
+               let text = String(data: data, encoding: .utf8) {
+                do {
+                    let rows = try VaultCSV.parseImport(text)
+                    statusMessage = "Parsed \(rows.count) CSV row(s). Import into vault from editor next."
+                } catch {
+                    statusMessage = error.localizedDescription
+                }
+            }
+        }
         .task {
             if let devices = try? await DeviceRegistrationService.shared.fetchDevices() {
                 linkedDeviceCount = devices.count
             }
+            await AppPreferences.shared.syncLocaleToServer()
         }
     }
 
@@ -177,4 +256,5 @@ struct SettingsView: View {
 #Preview {
     SettingsView(onOpenMenu: {})
         .environment(AppSession())
+        .environment(AppPreferences.shared)
 }

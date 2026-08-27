@@ -75,6 +75,9 @@ struct AppShellView: View {
         }
         .preferredColorScheme(.dark)
         .tint(Theme.mint)
+        .onReceive(NotificationCenter.default.publisher(for: .qasaOpenNotifications)) { _ in
+            selectPage(.notifications)
+        }
     }
 
     private func openMenu() {

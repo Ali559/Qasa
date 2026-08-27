@@ -13,16 +13,17 @@ final class PaymentService {
 
     func createIntent(
         gateway: String,
-        plan: SubscriptionPlan,
+        planId: String,
+        amountIQD: Int,
         autoRenew: Bool
     ) async throws -> PaymentIntentResponse {
         isProcessing = true
         defer { isProcessing = false }
         let body = PaymentIntentRequest(
             gateway: gateway,
-            plan_id: plan.rawValue,
+            plan_id: planId,
             auto_renew: autoRenew,
-            amount_iqd: plan.amountIQD,
+            amount_iqd: amountIQD,
             idempotency_key: UUID().uuidString.lowercased()
         )
         let response: PaymentIntentResponse = try await QasaAPIClient.shared.request(

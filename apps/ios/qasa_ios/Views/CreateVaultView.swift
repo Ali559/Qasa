@@ -7,6 +7,7 @@ struct CreateVaultView: View {
     @State private var passwordVisible = false
     @State private var errorMessage: String?
     var onVaultCreated: (String, Bool) -> Void
+    var onPairExisting: (() -> Void)? = nil
     var onLogin: (() -> Void)? = nil
 
     private var strength: (label: String, filled: Int, color: Color) {
@@ -38,6 +39,16 @@ struct CreateVaultView: View {
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
+                        if onPairExisting != nil {
+                            Button {
+                                onPairExisting?()
+                            } label: {
+                                Text("I already have Qasa on another device")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(Theme.mint)
+                            }
+                            .padding(.top, 4)
+                        }
                     }
                     .padding(.bottom, 4)
 

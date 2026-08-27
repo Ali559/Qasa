@@ -3,12 +3,18 @@ import SwiftData
 
 struct NotificationsView: View {
     var onOpenMenu: (() -> Void)? = nil
+    var deepLinkId: String? = nil
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \AppNotification.createdAt, order: .reverse) private var notifications: [AppNotification]
+    @Query(sort: \AppNotification.createdAt, order: .reverse) private var localNotes: [AppNotification]
+
+    @State private var remote: [AppNotificationDTO] = []
+    @State private var selected: AppNotificationDTO?
+    @State private var errorMessage: String?
 
     private var isEmbedded: Bool { onOpenMenu != nil }
+    private var locale: String { AppPreferences.shared.language.rawValue }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -21,7 +27,7 @@ struct NotificationsView: View {
             }
 
             Group {
-                if notifications.isEmpty {
+                if remote.isEmpty && localNotes.isEmpty {
                     ContentUnavailableView(
                         "No Notifications",
                         systemImage: "bell.slash",
@@ -29,42 +35,59 @@ struct NotificationsView: View {
                     )
                 } else {
                     List {
-                        ForEach(notifications, id: \.id) { note in
-                            Button {
-                                note.isRead = true
-                                try? modelContext.save()
-                            } label: {
-                                HStack(alignment: .top, spacing: 12) {
-                                    Circle()
-                                        .fill(note.isRead ? Theme.stroke : Theme.mint)
-                                        .frame(width: 8, height: 8)
-                                        .padding(.top, 6)
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(note.title)
-                                            .font(.subheadline.weight(.semibold))
-                                            .foregroundColor(Theme.textPrimary)
-                                        Text(note.body)
-                                            .font(.caption)
-                                            .foregroundColor(Theme.textSecondary)
-                                        Text(note.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                            .font(.caption2)
-                                            .foregroundColor(Theme.textTertiary)
+                        if !remote.isEmpty {
+                            Section("From Qasa") {
+                                ForEach(remote) { note in
+                                    Button {
+                                        Task { await openRemote(note) }
+                                    } label: {
+                                        notificationRow(
+                                            title: note.title(locale: locale),
+                                            body: note.body(locale: locale),
+                                            date: note.created_at,
+                                            unread: note.read_at == nil
+                                        )
                                     }
+                                    .listRowBackground(Theme.cardBackground)
                                 }
                             }
-                            .listRowBackground(Theme.cardBackground)
                         }
-                        .onDelete { indexSet in
-                            for index in indexSet {
-                                modelContext.delete(notifications[index])
+                        if !localNotes.isEmpty {
+                            Section("On this device") {
+                                ForEach(localNotes, id: \.id) { note in
+                                    Button {
+                                        note.isRead = true
+                                        try? modelContext.save()
+                                    } label: {
+                                        notificationRow(
+                                            title: note.title,
+                                            body: note.body,
+                                            date: note.createdAt.formatted(date: .abbreviated, time: .shortened),
+                                            unread: !note.isRead
+                                        )
+                                    }
+                                    .listRowBackground(Theme.cardBackground)
+                                }
+                                .onDelete { indexSet in
+                                    for index in indexSet {
+                                        modelContext.delete(localNotes[index])
+                                    }
+                                    try? modelContext.save()
+                                }
                             }
-                            try? modelContext.save()
                         }
                     }
                     .scrollContentBackground(.hidden)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(Theme.danger)
+                    .padding(.bottom, 8)
+            }
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle(isEmbedded ? "" : "Notifications")
@@ -74,26 +97,79 @@ struct NotificationsView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    markAllButton
+                ToolbarItem(placement: .topBarTrailing) { markAllButton }
+            }
+        }
+        .task {
+            remote = await NotificationService.shared.fetchList()
+            if let deepLinkId {
+                if let detail = try? await NotificationService.shared.fetchDetail(id: deepLinkId) {
+                    selected = detail
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .sheet(item: $selected) { note in
+            NavigationStack {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(note.title(locale: locale))
+                        .font(.title2.bold())
+                        .foregroundColor(Theme.textPrimary)
+                    Text(note.body(locale: locale))
+                        .foregroundColor(Theme.textSecondary)
+                    Spacer()
+                }
+                .padding()
+                .background(Theme.background.ignoresSafeArea())
+                .navigationTitle("Notification")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") { selected = nil }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
         .tint(Theme.mint)
+    }
+
+    private func notificationRow(title: String, body: String, date: String, unread: Bool) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Circle()
+                .fill(unread ? Theme.mint : Theme.stroke)
+                .frame(width: 8, height: 8)
+                .padding(.top, 6)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(body)
+                    .font(.caption)
+                    .foregroundColor(Theme.textSecondary)
+                Text(date)
+                    .font(.caption2)
+                    .foregroundColor(Theme.textTertiary)
+            }
+        }
     }
 
     @ViewBuilder
     private var markAllButton: some View {
-        if notifications.contains(where: { !$0.isRead }) {
+        if localNotes.contains(where: { !$0.isRead }) {
             Button("Mark All Read") {
-                for n in notifications where !n.isRead {
-                    n.isRead = true
-                }
+                for n in localNotes where !n.isRead { n.isRead = true }
                 try? modelContext.save()
             }
             .font(.caption.weight(.semibold))
             .foregroundColor(Theme.mint)
+        }
+    }
+
+    private func openRemote(_ note: AppNotificationDTO) async {
+        do {
+            selected = try await NotificationService.shared.fetchDetail(id: note.id)
+            remote = NotificationService.shared.items
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }

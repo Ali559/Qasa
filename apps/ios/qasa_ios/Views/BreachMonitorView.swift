@@ -16,7 +16,7 @@ struct BreachMonitorView: View {
     @State private var scanResults: [BreachCheckResult] = []
     @State private var errorMessage: String?
 
-    private let maxSlots = 4
+    private var maxSlots: Int { session.isPremium ? 10 : 2 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,7 +31,7 @@ struct BreachMonitorView: View {
                         breachTabs
                         breachList
                     } else {
-                        Text("Upgrade to Premium to run dark-web breach scans.")
+                        Text("We'll send a push alert if a watched email appears in a breach. Upgrade for full scan details.")
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                     }
@@ -55,8 +55,10 @@ struct BreachMonitorView: View {
             Button("Cancel", role: .cancel) { pendingRemoval = nil }
             Button("Remove", role: .destructive) {
                 if let pendingRemoval {
+                    let email = pendingRemoval.email
                     modelContext.delete(pendingRemoval)
                     try? modelContext.save()
+                    Task { await BreachMonitorService.unregisterMonitor(email: email) }
                 }
                 pendingRemoval = nil
             }
@@ -93,9 +95,9 @@ struct BreachMonitorView: View {
             }
             Spacer()
             StatusPill(
-                text: session.isPremium ? "Premium" : "Locked",
-                dotColor: session.isPremium ? Theme.success : Theme.gold,
-                textColor: session.isPremium ? Theme.success : Theme.gold,
+                text: session.isPremium ? "Premium" : "Free",
+                dotColor: session.isPremium ? Theme.success : Theme.mint,
+                textColor: session.isPremium ? Theme.success : Theme.mint,
                 background: Theme.cardBackground
             )
         }
@@ -124,11 +126,11 @@ struct BreachMonitorView: View {
                         .stroke(Theme.stroke, lineWidth: 1)
                 )
 
-                PrimaryButton(title: isChecking ? "Checking…" : "Add to Monitoring", icon: "plus", cornerRadius: 8) {
+                PrimaryButton(title: isChecking ? "Saving…" : "Add to Monitoring", icon: "plus", cornerRadius: 8) {
                     Task { await addEmail() }
                 }
-                .opacity(monitored.count >= maxSlots || !session.isPremium ? 0.5 : 1)
-                .disabled(!session.isPremium || isChecking)
+                .opacity(monitored.count >= maxSlots ? 0.5 : 1)
+                .disabled(monitored.count >= maxSlots || isChecking)
             }
         }
     }
@@ -226,7 +228,6 @@ struct BreachMonitorView: View {
     }
 
     private func addEmail() async {
-        guard session.isPremium else { return }
         guard monitored.count < maxSlots else {
             showLimitAlert = true
             return
@@ -242,11 +243,19 @@ struct BreachMonitorView: View {
         defer { isChecking = false }
 
         do {
-            let result = try await BreachMonitorService.checkEmail(trimmed)
-            let item = MonitoredEmail(email: trimmed, status: result.breached ? .atRisk : .secure)
+            // Free + premium: hash uploaded for server monitoring → device push on match.
+            let registered = try await BreachMonitorService.registerMonitor(email: trimmed)
+            var status: MonitorStatus = .secure
+            if session.isPremium {
+                let result = try await BreachMonitorService.checkEmail(trimmed)
+                status = result.breached ? .atRisk : .secure
+                scanResults.append(result)
+            } else if registered.matched == true {
+                status = .atRisk
+            }
+            let item = MonitoredEmail(email: trimmed, status: status)
             modelContext.insert(item)
             try? modelContext.save()
-            scanResults.append(result)
             monitorEmail = ""
             errorMessage = nil
         } catch {

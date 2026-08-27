@@ -58,7 +58,7 @@ struct BrandMenuHeader: View {
                 Image(systemName: "shield.fill")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.mint)
-                Text("Kaso")
+                Text("Qasa")
                     .font(.system(size: titleSize, weight: .heavy))
                     .foregroundColor(Theme.mint)
             }

@@ -85,6 +85,90 @@ struct CancelSubscriptionRequest: Encodable {
     let subscription_id: String?
 }
 
+struct PricingPlanDTO: Decodable, Identifiable, Hashable {
+    let id: String
+    let title: String
+    let interval: String
+    let amount_iqd: Int
+    let days: Int
+    let vpn_quota_gb: Int?
+    let active: Bool?
+    let sort_order: Int?
+    let features_json: FeaturesJSON?
+
+    var featureList: [String] {
+        features_json?.values ?? []
+    }
+}
+
+enum FeaturesJSON: Decodable, Hashable {
+    case strings([String])
+    case empty
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let arr = try? container.decode([String].self) {
+            self = .strings(arr)
+        } else {
+            self = .empty
+        }
+    }
+
+    var values: [String] {
+        switch self {
+        case .strings(let v): return v
+        case .empty: return []
+        }
+    }
+}
+
+struct PricingResponse: Decodable {
+    let plans: [PricingPlanDTO]
+}
+
+struct AppNotificationDTO: Decodable, Identifiable {
+    let id: String
+    let title_en: String
+    let title_ckb: String?
+    let title_ar: String?
+    let body_en: String
+    let body_ckb: String?
+    let body_ar: String?
+    let created_at: String
+    let read_at: String?
+
+    func title(locale: String) -> String {
+        switch locale {
+        case "ckb": return title_ckb ?? title_en
+        case "ar": return title_ar ?? title_en
+        default: return title_en
+        }
+    }
+
+    func body(locale: String) -> String {
+        switch locale {
+        case "ckb": return body_ckb ?? body_en
+        case "ar": return body_ar ?? body_en
+        default: return body_en
+        }
+    }
+}
+
+struct NotificationsListResponse: Decodable {
+    let notifications: [AppNotificationDTO]
+}
+
+struct NotificationDetailResponse: Decodable {
+    let notification: AppNotificationDTO
+}
+
+struct DevicePrefsRequest: Encodable {
+    let locale: String?
+    /// FCM registration token (iOS via Firebase Messaging; Android same field later).
+    let push_token: String?
+    let notifications_enabled: Bool?
+}
+
 struct BreachPrefixResponse: Decodable {
     let prefix: String
     let count: Int

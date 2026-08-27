@@ -1,7 +1,8 @@
 import SwiftUI
 
 enum Theme {
-    // Surfaces — Figma Kaso mobile
+    // Surfaces — adapt lightly for light mode via preferredColorScheme on the root;
+    // tokens remain dark-first for the vault chrome (product default).
     static let background = Color(hex: "0F172A")
     static let chrome = Color(hex: "131315")
     static let cardBackground = Color(hex: "1E293B")
@@ -33,6 +34,12 @@ enum Theme {
     static let textTertiary = Color(hex: "45464D")
     static let textPlaceholder = Color(hex: "6B7280")
     static let textOnChrome = Color(hex: "BEC6E0")
+
+    // Light-mode companions (used where views opt in)
+    static let lightBackground = Color(hex: "F4F6FA")
+    static let lightChrome = Color(hex: "FFFFFF")
+    static let lightTextPrimary = Color(hex: "0F172A")
+    static let lightTextSecondary = Color(hex: "475569")
 
     static let cornerRadius: CGFloat = 12
     static let cornerRadiusLarge: CGFloat = 16

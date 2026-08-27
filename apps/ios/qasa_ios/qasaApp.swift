@@ -3,7 +3,9 @@ import SwiftData
 
 @main
 struct qasaApp: App {
+    @UIApplicationDelegateAdaptor(QasaAppDelegate.self) private var appDelegate
     private let container: ModelContainer
+    @State private var prefs = AppPreferences.shared
 
     init() {
         let schema = Schema(VaultSchema.models)
@@ -24,20 +26,29 @@ struct qasaApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(colorScheme)
+                .environment(prefs)
                 .modelContainer(container)
+        }
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch prefs.theme {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 
     struct RootView: View {
         @Environment(\.modelContext) private var modelContext
         @State private var unlocked = false
-        @State private var forceCreate = false
+        @State private var showPairing = false
         @State private var session = AppSession()
         @State private var isBootstrapping = false
 
         private var showLogin: Bool {
-            VaultAuthStore.vaultExists && !forceCreate
+            VaultAuthStore.vaultExists
         }
 
         var body: some View {
@@ -50,16 +61,27 @@ struct qasaApp: App {
                         onUnlocked: { password in
                             Task { await handleUnlock(password: password) }
                         },
-                        onCreateVault: { forceCreate = true }
+                        onCreateVault: {}
                     )
                 } else {
                     CreateVaultView(
                         onVaultCreated: { password, biometrics in
                             Task { await handleCreate(password: password, biometrics: biometrics) }
                         },
-                        onLogin: VaultAuthStore.vaultExists ? { forceCreate = false } : nil
+                        onPairExisting: { showPairing = true },
+                        onLogin: nil
                     )
                 }
+            }
+            .sheet(isPresented: $showPairing) {
+                PairExistingVaultView(
+                    onPaired: { _ in
+                        showPairing = false
+                        // After adopting account_id, user still creates local vault keys
+                        // then registers as additional device under same account.
+                    },
+                    onCancel: { showPairing = false }
+                )
             }
             .overlay {
                 if isBootstrapping {
@@ -79,7 +101,6 @@ struct qasaApp: App {
                 try VaultAuthStore.createVault(masterPassword: password, biometricsEnabled: biometrics)
                 await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
                 unlocked = true
-                forceCreate = false
             } catch {
                 // createVault currently does not throw; keep hook for future validation.
             }
@@ -99,7 +120,6 @@ struct qasaApp: App {
             AppBootstrap.onLogout()
             session.syncFromLicense()
             unlocked = false
-            forceCreate = false
         }
     }
 }

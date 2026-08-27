@@ -11,6 +11,8 @@ enum AppBootstrap {
         }
         session.syncFromLicense()
         VaultSeedData.seedIfNeeded(context: context)
+        await PushNotificationService.shared.requestAuthorizationAndRegister()
+        await AppPreferences.shared.syncLocaleToServer()
     }
 
     @MainActor

@@ -6,7 +6,8 @@ struct PremiumUpgradeView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppSession.self) private var session
-    @State private var selectedPlan: SubscriptionPlan = .monthly
+    @State private var plans: [PricingPlanDTO] = PricingService.fallbackPlans
+    @State private var selectedPlanId: String = "premium_monthly"
     @State private var autoRenew = true
     @State private var selectedMethodID: UUID?
     @State private var isPaying = false
@@ -23,8 +24,12 @@ struct PremiumUpgradeView: View {
         methods.first { $0.id == selectedMethodID } ?? methods.first
     }
 
+    private var selectedPlan: PricingPlanDTO {
+        plans.first { $0.id == selectedPlanId } ?? plans[0]
+    }
+
     private var formattedAmount: String {
-        selectedPlan.amountIQD.formatted(.number.grouping(.automatic))
+        selectedPlan.displayAmount
     }
 
     var body: some View {
@@ -96,6 +101,15 @@ struct PremiumUpgradeView: View {
         }
         .background(Theme.chrome.ignoresSafeArea())
         .onAppear { selectedMethodID = methods.first?.id }
+        .task {
+            let fetched = await PricingService.shared.fetchPlans()
+            if !fetched.isEmpty {
+                plans = fetched
+                if plans.allSatisfy({ $0.id != selectedPlanId }) {
+                    selectedPlanId = plans[0].id
+                }
+            }
+        }
     }
 
     private func sheetChrome(title: String) -> some View {
@@ -123,10 +137,10 @@ struct PremiumUpgradeView: View {
 
     private var planCarousel: some View {
         VStack(spacing: 12) {
-            TabView(selection: $selectedPlan) {
-                ForEach(SubscriptionPlan.allCases) { plan in
+            TabView(selection: $selectedPlanId) {
+                ForEach(plans) { plan in
                     planCard(plan)
-                        .tag(plan)
+                        .tag(plan.id)
                         .padding(.horizontal, 2)
                 }
             }
@@ -134,18 +148,18 @@ struct PremiumUpgradeView: View {
             .frame(height: 240)
 
             HStack(spacing: 8) {
-                ForEach(SubscriptionPlan.allCases) { plan in
+                ForEach(plans) { plan in
                     Circle()
-                        .fill(plan == selectedPlan ? Theme.mint : Theme.stroke)
+                        .fill(plan.id == selectedPlanId ? Theme.mint : Theme.stroke)
                         .frame(width: 7, height: 7)
-                        .animation(.easeInOut(duration: 0.2), value: selectedPlan)
+                        .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
                 }
             }
             .frame(maxWidth: .infinity)
         }
     }
 
-    private func planCard(_ plan: SubscriptionPlan) -> some View {
+    private func planCard(_ plan: PricingPlanDTO) -> some View {
         ZStack(alignment: .topTrailing) {
             Circle()
                 .fill(Theme.gold.opacity(0.1))
@@ -155,12 +169,12 @@ struct PremiumUpgradeView: View {
 
             VStack(spacing: 20) {
                 VStack(spacing: 8) {
-                    Text(plan == .yearly ? "BEST VALUE" : "UPGRADE TO PRO")
+                    Text(plan.interval == "yearly" ? "BEST VALUE" : "UPGRADE TO PRO")
                         .font(.kasoMono(12))
                         .tracking(1.2)
                         .foregroundColor(Theme.gold)
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
-                        Text(plan.amountIQD.formatted(.number.grouping(.automatic)))
+                        Text(plan.displayAmount)
                             .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
                         Text(plan.periodLabel)
@@ -168,18 +182,15 @@ struct PremiumUpgradeView: View {
                             .foregroundColor(Theme.textSecondary)
                             .padding(.bottom, 4)
                     }
-                    if let hint = plan.savingsHint {
-                        Text(hint)
-                            .font(.kasoMono(11))
-                            .tracking(0.4)
-                            .foregroundColor(Theme.mint)
-                    }
+                    Text(plan.title)
+                        .font(.kasoMono(11))
+                        .foregroundColor(Theme.mint)
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
-                    FeatureRow(text: "Protect up to 5 Devices")
-                    FeatureRow(text: "24/7 Dark Web Breach Monitor")
-                    FeatureRow(text: "Unlimited High-Speed VPN")
+                    ForEach(plan.featureList.isEmpty ? ["Protect up to 5 Devices", "Breach Monitor", "VPN"] : plan.featureList, id: \.self) { feature in
+                        FeatureRow(text: feature)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -190,7 +201,7 @@ struct PremiumUpgradeView: View {
         .cornerRadius(Theme.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(plan == selectedPlan ? Theme.mint : Theme.stroke, lineWidth: 1)
+                .stroke(plan.id == selectedPlanId ? Theme.mint : Theme.stroke, lineWidth: 1)
         )
         .clipped()
     }
@@ -294,7 +305,8 @@ struct PremiumUpgradeView: View {
         do {
             let intent = try await PaymentService.shared.createIntent(
                 gateway: gateway,
-                plan: plan,
+                planId: plan.id,
+                amountIQD: plan.amount_iqd,
                 autoRenew: renew
             )
             let opened = await PaymentService.shared.openDeepLink(intent.deep_link)

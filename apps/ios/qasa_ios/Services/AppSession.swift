@@ -84,7 +84,7 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
 
     var requiresPremium: Bool {
         switch self {
-        case .breachMonitoring, .vpn: return true
+        case .vpn: return true
         default: return false
         }
     }

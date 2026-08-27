@@ -197,7 +197,7 @@ struct VaultItemEditor: View {
             FormTextField(title: "Account Holder", text: cardBinding(\.accountHolder))
             FormTextField(title: "Number", text: cardBinding(\.number))
             FormTextField(title: "Security Code", text: cardBinding(\.securityCode), isSecure: true)
-            FormTextField(title: "Expiry Date", text: cardBinding(\.expiryDate))
+            ValidatedDateField(title: "Expiry Date", text: cardBinding(\.expiryDate))
             FormTextField(title: "Note", text: cardBinding(\.note))
             NoteColorPicker(color: cardColorBinding)
             Button {
@@ -253,7 +253,7 @@ struct VaultItemEditor: View {
             FormTextField(title: "Middle Name", text: nameBinding(\.middleName))
             FormTextField(title: "Last Name", text: nameBinding(\.lastName))
             FormTextField(title: "Default Username", text: nameBinding(\.defaultUsername))
-            FormTextField(title: "Birth Date", text: nameBinding(\.birthDate))
+            ValidatedDateField(title: "Birth Date", text: nameBinding(\.birthDate))
             FormTextField(title: "Birth Place", text: nameBinding(\.birthPlace))
         }
     }
