@@ -1,4 +1,5 @@
 mod admin;
+mod analytics;
 mod auth;
 mod breach;
 mod devices;
@@ -9,7 +10,9 @@ mod license;
 mod metrics;
 mod metrics_handler;
 mod middleware;
+mod notifications;
 mod payments;
+mod pricing;
 mod state;
 mod subscriptions;
 mod vpn;
@@ -18,7 +21,7 @@ mod vpn_agent;
 use std::net::SocketAddr;
 
 use axum::http::{header, Method};
-use axum::middleware::from_fn;
+use axum::middleware::{from_fn, from_fn_with_state};
 use axum::routing::{delete, get, patch, post};
 use axum::Router;
 use qasa_core::{hash_password, AppConfig, LicenseKeyPair};
@@ -80,7 +83,11 @@ async fn main() -> anyhow::Result<()> {
     let addr: SocketAddr = config.bind_addr.parse()?;
     tracing::info!(%addr, env = %config.env, "qasa-api listening");
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
     Ok(())
 }
 
@@ -146,27 +153,43 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route("/v1/payments/webhook/fastpay", post(payments::webhook_fastpay))
         .route("/v1/payments/webhook/superqi", post(payments::webhook_superqi))
         .route("/v1/breach/prefix/{prefix}", get(breach::lookup_prefix))
+        .route("/v1/breach/monitor", post(breach::register_monitor).get(breach::list_monitors).delete(breach::unregister_monitor))
         .route("/v1/vpn/connect", post(vpn::connect))
         .route("/v1/vpn/disconnect", post(vpn::disconnect))
         .route("/v1/vpn/status", get(vpn::status))
+        .route("/v1/pricing", get(pricing::list_public))
+        .route("/v1/notifications", get(notifications::list_mine))
+        .route("/v1/notifications/{id}", get(notifications::get_one))
+        .route("/v1/devices/prefs", patch(notifications::update_device_prefs))
         .route(
             "/v1/internal/vpn/nodes/{node_id}/heartbeat",
             post(vpn_agent::heartbeat),
         )
         .route("/v1/admin/auth/login", post(admin::login))
         .route("/v1/admin/overview", get(admin::overview))
+        .route("/v1/admin/analytics", get(analytics::analytics))
         .route("/v1/admin/users", get(admin::list_users))
         .route("/v1/admin/payments", get(admin::list_payments))
         .route("/v1/admin/cancellations", get(admin::list_cancellations))
         .route("/v1/admin/webhooks", get(admin::list_webhooks))
         .route("/v1/admin/vpn/nodes", get(admin::list_vpn_nodes))
-        .route("/v1/admin/telemetry", get(admin::telemetry));
+        .route("/v1/admin/telemetry", get(admin::telemetry))
+        .route("/v1/admin/plans", get(pricing::list_admin).put(pricing::upsert_admin))
+        .route(
+            "/v1/admin/notifications",
+            get(notifications::admin_list).post(notifications::admin_create),
+        );
 
     if config.env.is_prod() {
         router = router
             .route("/metrics", get(metrics_handler::prometheus_metrics))
             .layer(from_fn(middleware::count_requests));
     }
+
+    router = router.layer(from_fn_with_state(
+        state.clone(),
+        middleware::admin_tailscale_guard,
+    ));
 
     router
         .layer(cors)

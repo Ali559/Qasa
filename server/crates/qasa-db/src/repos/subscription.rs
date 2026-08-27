@@ -29,13 +29,21 @@ pub struct CancellationFeedbackRow {
 }
 
 pub fn plan_days(plan_id: &str) -> i64 {
+    plan_days_fallback(plan_id)
+}
+
+pub fn plan_amount(plan_id: &str) -> i32 {
+    plan_amount_fallback(plan_id)
+}
+
+pub fn plan_days_fallback(plan_id: &str) -> i64 {
     match plan_id {
         "premium_yearly" => 365,
         _ => 30,
     }
 }
 
-pub fn plan_amount(plan_id: &str) -> i32 {
+pub fn plan_amount_fallback(plan_id: &str) -> i32 {
     match plan_id {
         "premium_yearly" => 100_000,
         _ => 10_000,
@@ -114,7 +122,7 @@ pub async fn activate_subscription(
     auto_renew: bool,
 ) -> anyhow::Result<SubscriptionRow> {
     let plan_id = normalize_plan_id(plan_id);
-    let days = plan_days(plan_id);
+    let days = crate::repos::plan::plan_days(pool, plan_id).await?;
     let id = new_id();
     let started_at = Utc::now();
     let expires_at = started_at + Duration::days(days);

@@ -19,6 +19,7 @@ qasa-db.workspace = true
 qasa-payments.workspace = true
 qasa-breach.workspace = true
 qasa-vpn.workspace = true
+qasa-push.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true

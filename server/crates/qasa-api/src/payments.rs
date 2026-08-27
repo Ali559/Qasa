@@ -2,6 +2,7 @@ use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
 use qasa_core::CoreError;
+use qasa_db::repos::push_copy::SUB_RENEW_FAILED;
 use qasa_payments::{GatewayKind, PaymentGateway, WebhookStatus};
 use serde::Deserialize;
 use serde_json::json;
@@ -37,9 +38,10 @@ pub async fn create_intent(
 ) -> ApiResult<Json<serde_json::Value>> {
     let account_id = claims.account_id()?;
     let plan_id = qasa_db::repos::subscription::normalize_plan_id(&body.plan_id);
-    let amount_iqd = body
-        .amount_iqd
-        .unwrap_or_else(|| qasa_db::repos::subscription::plan_amount(plan_id));
+    let amount_iqd = match body.amount_iqd {
+        Some(v) => v,
+        None => qasa_db::repos::plan::plan_amount(&state.pool, plan_id).await?,
+    };
 
     let kind = GatewayKind::parse(&body.gateway)
         .ok_or_else(|| CoreError::BadRequest(format!("unsupported gateway: {}", body.gateway)))?;
@@ -200,6 +202,21 @@ async fn handle_webhook(
         subscription_id,
     )
     .await?;
+
+    // Live webhook failure → device push for auto-renew subscribers (never email).
+    if matches!(event.status, WebhookStatus::Failed) {
+        if let Some(sub) =
+            qasa_db::repos::subscription::get_current(&state.pool, payment.account_id).await?
+        {
+            if sub.auto_renew {
+                let dedupe = format!("sub_renew_failed_pay:{}", payment.id);
+                let _ = state
+                    .push
+                    .notify_account(&state.pool, payment.account_id, &SUB_RENEW_FAILED, &dedupe)
+                    .await;
+            }
+        }
+    }
 
     Ok(StatusCode::OK)
 }

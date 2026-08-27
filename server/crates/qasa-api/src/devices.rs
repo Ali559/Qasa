@@ -94,6 +94,7 @@ pub async fn register(
         .license_issuer
         .issue(account.id, device.id, &entitlements)?;
     qasa_db::repos::device::set_license_jti(&state.pool, device.id, &jti).await?;
+    let _ = qasa_db::repos::account::set_vault_initialized(&state.pool, account.id).await;
 
     let devices_used = qasa_db::repos::device::count_active(&state.pool, account.id).await?;
 

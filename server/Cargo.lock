@@ -1585,6 +1585,7 @@ dependencies = [
  "qasa-core",
  "qasa-db",
  "qasa-payments",
+ "qasa-push",
  "qasa-vpn",
  "serde",
  "serde_json",
@@ -1657,6 +1658,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "qasa-push"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "jsonwebtoken",
+ "qasa-db",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "qasa-vpn"
 version = "0.1.0"
 dependencies = [
@@ -1678,13 +1695,16 @@ name = "qasa-worker"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "qasa-core",
  "qasa-db",
  "qasa-payments",
+ "qasa-push",
  "sqlx",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
@@ -1935,6 +1955,7 @@ dependencies = [
  "base64",
  "bytes",
  "futures-core",
+ "h2",
  "http",
  "http-body",
  "http-body-util",

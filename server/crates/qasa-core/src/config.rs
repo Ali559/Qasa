@@ -51,11 +51,23 @@ pub struct AppConfig {
     pub admin_seed_email: Option<String>,
     pub admin_seed_password: Option<String>,
     pub admin_cors_origin: Option<String>,
+    /// Comma-separated CIDRs (e.g. Tailscale `100.64.0.0/10`). When set in prod,
+    /// `/v1/admin/*` (except login optionally) is restricted to these peers.
+    pub admin_allow_cidrs: Vec<String>,
 }
 
 impl AppConfig {
     pub fn from_env() -> Self {
         let env = AppEnvironment::from_env();
+        let admin_allow_cidrs = env::var("QASA_ADMIN_ALLOW_CIDRS")
+            .ok()
+            .map(|s| {
+                s.split(',')
+                    .map(|p| p.trim().to_string())
+                    .filter(|p| !p.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default();
         Self {
             env,
             database_url: env::var("DATABASE_URL")
@@ -71,6 +83,7 @@ impl AppConfig {
             admin_seed_email: env::var("QASA_ADMIN_SEED_EMAIL").ok(),
             admin_seed_password: env::var("QASA_ADMIN_SEED_PASSWORD").ok(),
             admin_cors_origin: env::var("QASA_ADMIN_CORS_ORIGIN").ok(),
+            admin_allow_cidrs,
         }
     }
 }

@@ -8,6 +8,7 @@ members = [
     "crates/qasa-breach",
     "crates/qasa-vpn",
     "crates/qasa-worker",
+    "crates/qasa-push",
 ]
 
 [workspace.package]
@@ -42,5 +43,6 @@ qasa-payments = { path = "crates/qasa-payments" }
 qasa-breach = { path = "crates/qasa-breach" }
 qasa-vpn = { path = "crates/qasa-vpn" }
 qasa-worker = { path = "crates/qasa-worker" }
+qasa-push = { path = "crates/qasa-push" }
 metrics = "0.24"
 metrics-exporter-prometheus = "0.16"

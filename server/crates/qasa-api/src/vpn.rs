@@ -27,6 +27,23 @@ pub async fn connect(
         return Err(ApiError::Core(CoreError::Forbidden));
     }
 
+    let usage = qasa_db::repos::vpn_usage::get_or_create(&state.pool, account_id).await?;
+    let plan_id = qasa_db::repos::subscription::get_current(&state.pool, account_id)
+        .await?
+        .map(|s| s.plan_id)
+        .unwrap_or_else(|| "premium_monthly".into());
+    let quota_gb = qasa_db::repos::plan::vpn_quota_gb(&state.pool, &plan_id).await?;
+    let quota_bytes = qasa_db::repos::vpn_usage::gb_to_bytes(quota_gb);
+    let throttle_mbps = 5i32;
+
+    if usage.bytes_used >= quota_bytes {
+        let _ = qasa_db::repos::vpn_usage::set_throttled(&state.pool, account_id, true).await;
+    } else if usage.bytes_used * 100 / quota_bytes.max(1) >= 80 && !usage.warned_80 {
+        let _ = qasa_db::repos::vpn_usage::set_warned_80(&state.pool, account_id).await;
+    }
+
+    let throttled = usage.bytes_used >= quota_bytes || usage.throttled;
+
     qasa_db::repos::device::get_device_for_account(&state.pool, account_id, device_id)
         .await?
         .ok_or(CoreError::Forbidden)?;
@@ -43,7 +60,17 @@ pub async fn connect(
                 &existing.client_public_key,
                 &existing.assigned_ip,
             );
-            return Ok(Json(json!({ "config": config, "reused": true })));
+            return Ok(Json(json!({
+                "config": config,
+                "reused": true,
+                "usage": {
+                    "bytes_used": usage.bytes_used,
+                    "quota_bytes": quota_bytes,
+                    "quota_gb": quota_gb,
+                    "throttled": throttled,
+                    "throttle_mbps": if throttled { Some(throttle_mbps) } else { None::<i32> },
+                }
+            })));
         }
     }
 
@@ -85,7 +112,17 @@ pub async fn connect(
         &assigned_ip.to_string(),
     );
 
-    Ok(Json(json!({ "config": config, "reused": false })))
+    Ok(Json(json!({
+        "config": config,
+        "reused": false,
+        "usage": {
+            "bytes_used": usage.bytes_used,
+            "quota_bytes": quota_bytes,
+            "quota_gb": quota_gb,
+            "throttled": throttled,
+            "throttle_mbps": if throttled { Some(throttle_mbps) } else { None::<i32> },
+        }
+    })))
 }
 
 pub async fn disconnect(

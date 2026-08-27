@@ -1,4 +1,6 @@
+use chrono::{DateTime, Utc};
 use sqlx::PgPool;
+use uuid::Uuid;
 
 pub async fn expire_subscriptions(pool: &PgPool) -> anyhow::Result<u64> {
     let mut tx = pool.begin().await?;
@@ -194,4 +196,82 @@ pub struct TelemetrySnapshot {
     pub active_sessions: i64,
     pub accounts_total: i64,
     pub devices_active: i64,
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct ExpiringSubRow {
+    pub id: Uuid,
+    pub account_id: Uuid,
+    pub auto_renew: bool,
+    pub expires_at: DateTime<Utc>,
+}
+
+/// Premium ending in 2–3 days with auto_renew off (once).
+pub async fn subs_needing_expiry_warning(pool: &PgPool) -> anyhow::Result<Vec<ExpiringSubRow>> {
+    let rows = sqlx::query_as::<_, ExpiringSubRow>(
+        r#"
+        SELECT id, account_id, auto_renew, expires_at
+        FROM subscriptions
+        WHERE status IN ('active', 'cancelled')
+          AND auto_renew = false
+          AND expiry_warned_at IS NULL
+          AND expires_at > now()
+          AND expires_at <= now() + interval '3 days'
+        ORDER BY expires_at ASC
+        LIMIT 200
+        "#,
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn mark_expiry_warned(pool: &PgPool, subscription_id: Uuid) -> anyhow::Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE subscriptions SET expiry_warned_at = now() WHERE id = $1
+        "#,
+    )
+    .bind(subscription_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Auto-renew on, expires within 24h, no successful payment in last 2 days — renew likely failed.
+pub async fn subs_needing_renew_failed_notice(pool: &PgPool) -> anyhow::Result<Vec<ExpiringSubRow>> {
+    let rows = sqlx::query_as::<_, ExpiringSubRow>(
+        r#"
+        SELECT s.id, s.account_id, s.auto_renew, s.expires_at
+        FROM subscriptions s
+        WHERE s.status = 'active'
+          AND s.auto_renew = true
+          AND s.renew_failed_notified_at IS NULL
+          AND s.expires_at > now()
+          AND s.expires_at <= now() + interval '1 day'
+          AND NOT EXISTS (
+            SELECT 1 FROM payments p
+            WHERE p.account_id = s.account_id
+              AND p.status = 'success'
+              AND p.completed_at > now() - interval '2 days'
+          )
+        ORDER BY s.expires_at ASC
+        LIMIT 200
+        "#,
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn mark_renew_failed_notified(pool: &PgPool, subscription_id: Uuid) -> anyhow::Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE subscriptions SET renew_failed_notified_at = now() WHERE id = $1
+        "#,
+    )
+    .bind(subscription_id)
+    .execute(pool)
+    .await?;
+    Ok(())
 }

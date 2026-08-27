@@ -15,6 +15,7 @@ pub struct AppState {
     pub admin_issuer: Arc<AdminTokenIssuer>,
     pub gateways: Arc<HashMap<GatewayKind, StubGateway>>,
     pub breach_rate_limiter: Arc<RateLimiter>,
+    pub push: Arc<qasa_push::PushService>,
 }
 
 impl AppState {
@@ -31,6 +32,7 @@ impl AppState {
             admin_issuer: Arc::new(AdminTokenIssuer::new(config.admin_jwt_secret)),
             gateways: Arc::new(gateways),
             breach_rate_limiter: Arc::new(RateLimiter::new(60, Duration::from_secs(3600))),
+            push: Arc::new(qasa_push::PushService::from_env()),
         }
     }
 

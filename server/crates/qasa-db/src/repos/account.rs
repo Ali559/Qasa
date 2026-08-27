@@ -49,6 +49,32 @@ pub async fn set_account_tier(pool: &PgPool, account_id: Uuid, tier: &str) -> an
     Ok(())
 }
 
+pub async fn set_vault_initialized(pool: &PgPool, account_id: Uuid) -> anyhow::Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE accounts SET vault_initialized = true, updated_at = now()
+        WHERE id = $1 AND vault_initialized = false
+        "#,
+    )
+    .bind(account_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn is_vault_initialized(pool: &PgPool, account_id: Uuid) -> anyhow::Result<bool> {
+    let flag: bool = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(vault_initialized, false) FROM accounts WHERE id = $1
+        "#,
+    )
+    .bind(account_id)
+    .fetch_optional(pool)
+    .await?
+    .unwrap_or(false);
+    Ok(flag)
+}
+
 pub async fn list_accounts_for_admin(pool: &PgPool) -> anyhow::Result<Vec<AccountRow>> {
     let rows = sqlx::query_as::<_, AccountRow>(
         r#"

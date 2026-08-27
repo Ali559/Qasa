@@ -152,3 +152,29 @@ pub async fn get_device_for_account(
     .await?;
     Ok(row)
 }
+
+pub async fn update_locale_and_push(
+    pool: &PgPool,
+    device_id: Uuid,
+    locale: &str,
+    push_token: Option<&str>,
+    notifications_enabled: bool,
+) -> anyhow::Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE devices
+        SET locale = $2,
+            push_token = COALESCE($3, push_token),
+            notifications_enabled = $4,
+            last_seen_at = now()
+        WHERE id = $1 AND revoked_at IS NULL
+        "#,
+    )
+    .bind(device_id)
+    .bind(locale)
+    .bind(push_token)
+    .bind(notifications_enabled)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
