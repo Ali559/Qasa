@@ -44,10 +44,13 @@ const activeKey = computed<NavKey>(() => {
     name === 'users' ||
     name === 'payments' ||
     name === 'cancellations' ||
+    name === 'plans' ||
+    name === 'analytics' ||
+    name === 'notifications' ||
     name === 'vpn' ||
     name === 'telemetry'
   ) {
-    return name
+    return name as NavKey
   }
   return 'overview'
 })
@@ -57,6 +60,10 @@ const titles: Record<NavKey, { title: string; description: string }> = {
     title: 'Executive Overview',
     description: 'Platform health and revenue at a glance.',
   },
+  analytics: {
+    title: 'Analytics',
+    description: 'Funnels, VPN usage, and cancellation cohorts.',
+  },
   users: {
     title: 'User Directory',
     description: 'Manage network access, subscriptions, and devices.',
@@ -65,9 +72,17 @@ const titles: Record<NavKey, { title: string; description: string }> = {
     title: 'Webhook Audit Logs',
     description: 'Monitor payment gateway payloads in real time.',
   },
+  plans: {
+    title: 'Pricing Plans',
+    description: 'Edit IQD amounts, VPN quotas, and notify subscribers.',
+  },
   cancellations: {
     title: 'Cancellation Feedback',
     description: 'Reasons users give when they cancel Premium.',
+  },
+  notifications: {
+    title: 'Push & Inbox',
+    description: 'Compose multi-locale notifications for devices.',
   },
   vpn: {
     title: 'Infrastructure Health',
@@ -107,7 +122,7 @@ function signOut() {
                 <ShieldCheck class="size-4" />
               </div>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold tracking-wide">KASO ADMIN</span>
+                <span class="truncate font-semibold tracking-wide">Qasa ADMIN</span>
                 <span class="text-muted-foreground truncate text-xs">Local & Offline</span>
               </div>
             </SidebarMenuButton>
