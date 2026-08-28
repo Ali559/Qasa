@@ -14,11 +14,13 @@ struct PremiumUpgradeView: View {
     @State private var statusMessage: String?
     @State private var errorMessage: String?
 
-    let methods: [PaymentMethod] = [
-        PaymentMethod(name: "First Iraqi Bank (FIB)", subtitle: "Instant Transfer", badgeText: "FIB", badgeColorHex: "FFFFFF", gateway: "fib"),
-        PaymentMethod(name: "FastPay", subtitle: "Mobile Wallet", badgeText: "FastPay", badgeColorHex: "E31837", gateway: "fastpay"),
-        PaymentMethod(name: "SuperQi", subtitle: "Qi Card integration", badgeText: "SuperQi", badgeColorHex: "2563EB", gateway: "superqi")
-    ]
+    private var methods: [PaymentMethod] {
+        [
+            PaymentMethod(name: L10n.tr("premium.fib"), subtitle: L10n.tr("premium.fibSub"), badgeText: "FIB", badgeColorHex: "FFFFFF", gateway: "fib"),
+            PaymentMethod(name: L10n.tr("premium.fastpay"), subtitle: L10n.tr("premium.fastpaySub"), badgeText: "FastPay", badgeColorHex: "E31837", gateway: "fastpay"),
+            PaymentMethod(name: L10n.tr("premium.superqi"), subtitle: L10n.tr("premium.superqiSub"), badgeText: "SuperQi", badgeColorHex: "2563EB", gateway: "superqi")
+        ]
+    }
 
     private var selectedMethod: PaymentMethod? {
         methods.first { $0.id == selectedMethodID } ?? methods.first
@@ -35,9 +37,9 @@ struct PremiumUpgradeView: View {
     var body: some View {
         VStack(spacing: 0) {
             if embedded, let onOpenMenu {
-                AppMenuHeader(title: "Upgrade", onMenu: onOpenMenu)
+                AppMenuHeader(title: L10n.tr("nav.upgrade", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
             } else {
-                sheetChrome(title: "Qasa Premium")
+                sheetChrome(title: L10n.tr("premium.title"))
             }
 
             ScrollView {
@@ -65,8 +67,8 @@ struct PremiumUpgradeView: View {
             VStack(spacing: 12) {
                 PrimaryButton(
                     title: isPaying
-                        ? "Processing…"
-                        : "Pay \(formattedAmount) IQD via \(selectedMethod?.badgeText ?? "FIB")",
+                        ? L10n.tr("premium.processing")
+                        : String(format: L10n.tr("premium.payVia"), formattedAmount, selectedMethod?.badgeText ?? "FIB"),
                     icon: "lock.fill",
                     cornerRadius: 8
                 ) {
@@ -76,14 +78,14 @@ struct PremiumUpgradeView: View {
                 .disabled(isPaying || session.isPremium)
 
                 if session.isPremium {
-                    Text("You're on Premium. Manage it from Settings.")
+                    Text(L10n.tr("premium.alreadyPremium"))
                         .font(.kasoMono(12))
                         .tracking(0.6)
                         .foregroundColor(Theme.success)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                 } else {
-                    Text("Opens your wallet app. We'll refresh your license when payment completes.")
+                    Text(L10n.tr("premium.opensWallet"))
                         .font(.kasoMono(12))
                         .tracking(0.6)
                         .foregroundColor(Theme.textSecondary)
@@ -100,6 +102,7 @@ struct PremiumUpgradeView: View {
             }
         }
         .background(Theme.chrome.ignoresSafeArea())
+        .appLocalization()
         .onAppear { selectedMethodID = methods.first?.id }
         .task {
             let fetched = await PricingService.shared.fetchPlans()
@@ -116,13 +119,13 @@ struct PremiumUpgradeView: View {
         HStack {
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.qasa(14, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .frame(width: 32, height: 32)
             }
             Spacer()
             Text(title)
-                .font(.system(size: 20, weight: .bold))
+                .font(.qasa(20, weight: .bold))
                 .foregroundColor(Theme.textOnChrome)
             Spacer()
             Color.clear.frame(width: 32, height: 32)
@@ -169,7 +172,7 @@ struct PremiumUpgradeView: View {
 
             VStack(spacing: 20) {
                 VStack(spacing: 8) {
-                    Text(plan.interval == "yearly" ? "BEST VALUE" : "UPGRADE TO PRO")
+                    Text(plan.interval == "yearly" ? L10n.tr("premium.bestValue") : L10n.tr("premium.upgradeToPro"))
                         .font(.kasoMono(12))
                         .tracking(1.2)
                         .foregroundColor(Theme.gold)
@@ -182,13 +185,13 @@ struct PremiumUpgradeView: View {
                             .foregroundColor(Theme.textSecondary)
                             .padding(.bottom, 4)
                     }
-                    Text(plan.title)
-                        .font(.kasoMono(11))
+                    Text(plan.localizedTitle)
+                        .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .kasoMono(11))
                         .foregroundColor(Theme.mint)
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
-                    ForEach(plan.featureList.isEmpty ? ["Protect up to 5 Devices", "Breach Monitor", "VPN"] : plan.featureList, id: \.self) { feature in
+                    ForEach(plan.featureList.isEmpty ? [L10n.tr("premium.featureDevices"), L10n.tr("premium.featureBreach"), L10n.tr("premium.featureVPN")] : plan.featureList, id: \.self) { feature in
                         FeatureRow(text: feature)
                     }
                 }
@@ -212,11 +215,11 @@ struct PremiumUpgradeView: View {
                 .foregroundColor(Theme.mint)
                 .font(.system(size: 18))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Auto-renew")
-                    .font(.system(size: 15, weight: .semibold))
+                Text(L10n.tr("premium.autoRenew"))
+                    .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
-                Text("Renews automatically at the end of each period.")
-                    .font(.system(size: 12))
+                Text(L10n.tr("premium.autoRenewDetail"))
+                    .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
             }
             Spacer()
@@ -235,8 +238,8 @@ struct PremiumUpgradeView: View {
 
     private var paymentSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Select Payment Method")
-                .font(.system(size: 14))
+            Text(L10n.tr("premium.selectPayment"))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
 
             VStack(spacing: 12) {
@@ -258,7 +261,7 @@ struct PremiumUpgradeView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(method.name)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.qasa(14, weight: .semibold))
                         .foregroundColor(Theme.textPrimary)
                     Text(method.subtitle)
                         .font(.kasoMono(12))
@@ -339,11 +342,11 @@ struct PremiumUpgradeView: View {
                     session.syncFromLicense()
                 }
                 if session.isPremium {
-                    statusMessage = "Premium activated."
+                    statusMessage = L10n.tr("premium.activated")
                     if !embedded { dismiss() }
                 } else {
                     errorMessage = LicenseManager.shared.lastError
-                        ?? "Payment succeeded but license refresh failed. Lock and unlock the vault."
+                        ?? L10n.tr("premium.licenseRefreshFailed")
                 }
             } else {
                 errorMessage = PaymentService.shared.lastError

@@ -12,23 +12,25 @@ struct VPNView: View {
     @State private var killSwitch = true
     @State private var autoConnect = false
 
+    private var locale: Locale { AppLanguage.current.locale }
+
     var body: some View {
         @Bindable var vpn = vpn
         VStack(spacing: 0) {
-            AppMenuHeader(title: "VPN", onMenu: onOpenMenu)
+            AppMenuHeader(title: L10n.tr("nav.vpn", locale: locale), onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(spacing: 32) {
                     VStack(spacing: 16) {
-                        Text("Qasa VPN")
-                            .font(.system(size: 28, weight: .heavy))
+                        Text(L10n.tr("vpn.brand", locale: locale))
+                            .font(.qasa(28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
 
                         HStack(spacing: 12) {
                             Image(systemName: "globe")
                                 .foregroundColor(Theme.cyan)
                             Text(serverLabel)
-                                .font(.system(size: 16))
+                                .font(.qasa(16))
                                 .foregroundColor(Theme.textPrimary)
                                 .lineLimit(1)
                         }
@@ -75,12 +77,14 @@ struct VPNView: View {
                         .disabled(vpn.isBusy)
 
                         VStack(spacing: 8) {
-                            Text(vpn.connected ? "Connected" : "Disconnected")
-                                .font(.system(size: 20, weight: .semibold))
+                            Text(vpn.connected
+                                 ? L10n.tr("vpn.connected", locale: locale)
+                                 : L10n.tr("vpn.disconnected", locale: locale))
+                                .font(.qasa(20, weight: .semibold))
                                 .foregroundColor(vpn.connected ? Theme.success : Theme.textSecondary)
-                            Text("API session only — WireGuard tunnel coming soon")
-                                .font(.kasoMono(12))
-                                .tracking(0.6)
+                            Text(L10n.tr("vpn.sessionOnly", locale: locale))
+                                .font(AppTypography.usesRudaw ? .qasa(12) : .kasoMono(12))
+                                .tracking(AppTypography.usesRudaw ? 0 : 0.6)
                                 .foregroundColor(Theme.textSecondary)
                                 .multilineTextAlignment(.center)
                         }
@@ -90,18 +94,28 @@ struct VPNView: View {
 
                     if let error = vpn.lastError {
                         Text(error)
-                            .font(.system(size: 13))
+                            .font(.qasa(13))
                             .foregroundColor(Theme.danger)
                             .multilineTextAlignment(.center)
                     }
 
-                    metricCard(icon: "key.fill", label: "VIRTUAL IP", value: vpn.assignedIP ?? "—", highlighted: false)
-                    metricCard(icon: "lock.shield.fill", label: "ENCRYPTION", value: "WireGuard", highlighted: true)
+                    metricCard(
+                        icon: "key.fill",
+                        label: L10n.tr("vpn.virtualIP", locale: locale),
+                        value: vpn.assignedIP ?? "—",
+                        highlighted: false
+                    )
+                    metricCard(
+                        icon: "lock.shield.fill",
+                        label: L10n.tr("vpn.encryption", locale: locale),
+                        value: "WireGuard",
+                        highlighted: true
+                    )
 
                     CardContainer(background: Theme.cardMuted) {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Security Features")
-                                .font(.system(size: 20, weight: .semibold))
+                            Text(L10n.tr("vpn.securityFeatures", locale: locale))
+                                .font(.qasa(20, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
                                 .padding(.bottom, 8)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -112,8 +126,8 @@ struct VPNView: View {
                             ToggleRow(
                                 icon: "hand.raised.fill",
                                 iconColor: Theme.danger,
-                                title: "Kill Switch",
-                                subtitle: "Block internet if VPN disconnects",
+                                title: L10n.tr("vpn.killSwitch", locale: locale),
+                                subtitle: L10n.tr("vpn.killSwitchSub", locale: locale),
                                 isOn: $killSwitch,
                                 iconBackground: Theme.dangerBackground.opacity(0.35)
                             )
@@ -121,8 +135,8 @@ struct VPNView: View {
                             ToggleRow(
                                 icon: "arrow.triangle.2.circlepath",
                                 iconColor: Theme.cyan,
-                                title: "Auto-connect",
-                                subtitle: "On public or untrusted Wi-Fi",
+                                title: L10n.tr("vpn.autoConnect", locale: locale),
+                                subtitle: L10n.tr("vpn.autoConnectSub", locale: locale),
                                 isOn: $autoConnect,
                                 iconBackground: Color(hex: "001B21")
                             )
@@ -142,16 +156,16 @@ struct VPNView: View {
         if let city = vpn.city, let node = vpn.nodeName {
             return "\(city) — \(node)"
         }
-        return "Auto-select server"
+        return L10n.tr("vpn.autoSelect", locale: locale)
     }
 
     private func metricCard(icon: String, label: String, value: String, highlighted: Bool) -> some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .foregroundColor(Theme.mint)
-            Text(label)
-                .font(.kasoMono(12))
-                .tracking(0.6)
+            Text(AppTypography.usesRudaw ? label : label.uppercased())
+                .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .kasoMono(12))
+                .tracking(AppTypography.usesRudaw ? 0 : 0.6)
                 .foregroundColor(Theme.textSecondary)
             Text(value)
                 .font(.system(size: 16, design: .monospaced))

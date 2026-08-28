@@ -74,8 +74,8 @@ struct LinkedDevicesView: View {
                         }
 
                         if devices.isEmpty, !isLoading {
-                            Text("No devices linked yet.")
-                                .font(.system(size: 14))
+                            Text(L10n.tr("devices.noneLinked"))
+                                .font(.qasa(14))
                                 .foregroundColor(Theme.textSecondary)
                         }
 

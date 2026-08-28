@@ -20,21 +20,26 @@ struct SettingsView: View {
     @State private var linkedDeviceCount = 0
     @State private var statusMessage: String?
 
+    private var locale: Locale { prefs.locale }
+
     var body: some View {
         VStack(spacing: 0) {
-            AppMenuHeader(title: "Settings", onMenu: onOpenMenu)
+            AppMenuHeader(title: L10n.tr("settings.title", locale: locale), onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     profileCard
 
-                    settingsSection(title: "Security") {
-                        NavChevronRow(icon: "ellipsis", title: "Change Master Password")
+                    settingsSection(title: L10n.tr("settings.security", locale: locale)) {
+                        NavChevronRow(
+                            icon: "ellipsis",
+                            title: L10n.tr("settings.changeMasterPassword", locale: locale)
+                        )
                         Divider().background(Theme.stroke)
                         ToggleRow(
                             icon: "touchid",
                             iconColor: Theme.textPrimary,
-                            title: "Biometric Unlock",
+                            title: L10n.tr("settings.biometricUnlock", locale: locale),
                             subtitle: "",
                             isOn: $biometricUnlock
                         )
@@ -42,14 +47,18 @@ struct SettingsView: View {
                             VaultKeychainStore.biometricsEnabled = newValue
                         }
                         Divider().background(Theme.stroke)
-                        NavChevronRow(icon: "clock", title: "Auto-lock", trailingText: "5 mins")
+                        NavChevronRow(
+                            icon: "clock",
+                            title: L10n.tr("settings.autoLock", locale: locale),
+                            trailingText: L10n.tr("settings.autoLockValue", locale: locale)
+                        )
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            SectionLabel(text: "Linked Devices")
+                            SectionLabel(text: L10n.tr("settings.linkedDevices", locale: locale))
                             Spacer()
-                            Text("\(linkedDeviceCount) Active")
+                            Text(String(format: L10n.tr("settings.activeCount", locale: locale), linkedDeviceCount))
                                 .font(.kasoMono(12))
                                 .foregroundColor(Theme.mint)
                         }
@@ -58,7 +67,7 @@ struct SettingsView: View {
                                 NavChevronRow(
                                     icon: "iphone",
                                     title: UIDevice.current.name,
-                                    subtitle: "(This Device)",
+                                    subtitle: L10n.tr("settings.thisDevice", locale: locale),
                                     iconColor: Theme.mint
                                 )
                             }
@@ -71,8 +80,10 @@ struct SettingsView: View {
                             } label: {
                                 NavChevronRow(
                                     icon: "qrcode",
-                                    title: "Show pairing code",
-                                    subtitle: pairingCode.map { "Code: \($0) (10 min)" } ?? "For a new device on Wi‑Fi"
+                                    title: L10n.tr("settings.showPairingCode", locale: locale),
+                                    subtitle: pairingCode.map {
+                                        String(format: L10n.tr("settings.pairingCodeFmt", locale: locale), $0)
+                                    } ?? L10n.tr("settings.pairingSubtitle", locale: locale)
                                 )
                             }
                             .buttonStyle(.plain)
@@ -80,55 +91,79 @@ struct SettingsView: View {
                             Button { showLANSync = true } label: {
                                 NavChevronRow(
                                     icon: "wifi",
-                                    title: "Sync on this network",
-                                    subtitle: session.isPremium ? "Premium LAN sync" : "Requires Premium"
+                                    title: L10n.tr("settings.syncNetwork", locale: locale),
+                                    subtitle: session.isPremium
+                                        ? L10n.tr("settings.premiumLanSync", locale: locale)
+                                        : L10n.tr("settings.requiresPremium", locale: locale)
                                 )
                             }
                             .buttonStyle(.plain)
                         }
                     }
 
-                    settingsSection(title: "Appearance") {
+                    settingsSection(title: L10n.tr("settings.appearance", locale: locale)) {
                         Menu {
                             ForEach(AppLanguage.allCases) { lang in
                                 Button(lang.displayName) { prefs.language = lang }
                             }
                         } label: {
-                            NavChevronRow(icon: "globe", title: "Language", trailingText: prefs.language.displayName)
+                            NavChevronRow(
+                                icon: "globe",
+                                title: L10n.tr("settings.language", locale: locale),
+                                trailingText: prefs.language.displayName
+                            )
                         }
                         Divider().background(Theme.stroke)
                         Menu {
                             ForEach(AppThemePreference.allCases) { theme in
-                                Button(theme.displayName) { prefs.theme = theme }
+                                Button(L10n.tr(theme.displayNameKey, locale: locale)) {
+                                    prefs.theme = theme
+                                }
                             }
                         } label: {
-                            NavChevronRow(icon: "moon.fill", title: "Theme", trailingText: prefs.theme.displayName)
+                            NavChevronRow(
+                                icon: "moon.fill",
+                                title: L10n.tr("settings.theme", locale: locale),
+                                trailingText: L10n.tr(prefs.theme.displayNameKey, locale: locale)
+                            )
                         }
                     }
 
-                    settingsSection(title: "Data & Account") {
+                    settingsSection(title: L10n.tr("settings.dataAccount", locale: locale)) {
                         Button { showImport = true } label: {
-                            NavChevronRow(icon: "square.and.arrow.down", title: "Import CSV")
+                            NavChevronRow(
+                                icon: "square.and.arrow.down",
+                                title: L10n.tr("settings.importCsv", locale: locale)
+                            )
                         }
                         .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
                         Button {
-                            // Lightweight export of list metadata; full crypto export is local-only.
                             exportText = VaultCSV.exportCSV(rows: [])
-                            statusMessage = "Export prepared (open vault list for full CSV in a follow-up)."
+                            statusMessage = L10n.tr("settings.exportPrepared", locale: locale)
                             UIPasteboard.general.string = exportText
                         } label: {
-                            NavChevronRow(icon: "square.and.arrow.up", title: "Export Vault CSV")
+                            NavChevronRow(
+                                icon: "square.and.arrow.up",
+                                title: L10n.tr("settings.exportCsv", locale: locale)
+                            )
                         }
                         .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
                         Button { showClearDataAlert = true } label: {
-                            NavChevronRow(icon: "xmark.bin", title: "Clear Local Data", destructive: true)
+                            NavChevronRow(
+                                icon: "xmark.bin",
+                                title: L10n.tr("settings.clearLocalData", locale: locale),
+                                destructive: true
+                            )
                         }
                         .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
                         Button { showLogoutConfirm = true } label: {
-                            NavChevronRow(icon: "rectangle.portrait.and.arrow.right", title: "Logout")
+                            NavChevronRow(
+                                icon: "rectangle.portrait.and.arrow.right",
+                                title: L10n.tr("settings.logout", locale: locale)
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -144,23 +179,23 @@ struct SettingsView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .alert("Clear Local Data?", isPresented: $showClearDataAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Clear", role: .destructive) {
+        .alert(L10n.tr("settings.clearAlertTitle", locale: locale), isPresented: $showClearDataAlert) {
+            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) {}
+            Button(L10n.tr("settings.clear", locale: locale), role: .destructive) {
                 VaultAuthStore.resetVaultAuth()
             }
         } message: {
-            Text("This permanently deletes your local vault. This cannot be undone.")
+            Text(L10n.tr("settings.clearAlertMessage", locale: locale))
         }
-        .alert("Lock Vault?", isPresented: $showLogoutConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Logout", role: .destructive) {
+        .alert(L10n.tr("settings.lockAlertTitle", locale: locale), isPresented: $showLogoutConfirm) {
+            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) {}
+            Button(L10n.tr("settings.logout", locale: locale), role: .destructive) {
                 onLogout?()
             }
         } message: {
-            Text("You’ll need your master password to unlock again.")
+            Text(L10n.tr("settings.lockAlertMessage", locale: locale))
         }
-        .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView() }
+        .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView().appLocalization() }
         .sheet(isPresented: $showPremium) {
             Group {
                 if session.isPremium {
@@ -170,10 +205,12 @@ struct SettingsView: View {
                 }
             }
             .environment(session)
+            .appLocalization()
         }
         .sheet(isPresented: $showLANSync) {
             LANSyncView()
                 .environment(session)
+                .appLocalization()
         }
         .fileImporter(
             isPresented: $showImport,
@@ -185,7 +222,10 @@ struct SettingsView: View {
                let text = String(data: data, encoding: .utf8) {
                 do {
                     let rows = try VaultCSV.parseImport(text)
-                    statusMessage = "Parsed \(rows.count) CSV row(s). Import into vault from editor next."
+                    statusMessage = String(
+                        format: L10n.tr("settings.parsedCsv", locale: locale),
+                        rows.count
+                    )
                 } catch {
                     statusMessage = error.localizedDescription
                 }
@@ -211,7 +251,7 @@ struct SettingsView: View {
                             .foregroundColor(Theme.textSecondary)
                     )
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(session.username)
+                    Text(session.displayName)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Theme.textPrimary)
                     Text(session.email)
@@ -220,8 +260,12 @@ struct SettingsView: View {
                     HStack(spacing: 4) {
                         Image(systemName: session.isPremium ? "trophy.fill" : "person")
                             .font(.system(size: 10))
-                        Text(session.isPremium ? "Premium Account" : "Free Account")
-                            .font(.kasoMono(12))
+                        Text(
+                            session.isPremium
+                                ? L10n.tr("settings.premiumAccount", locale: locale)
+                                : L10n.tr("settings.freeAccount", locale: locale)
+                        )
+                        .font(.kasoMono(12))
                     }
                     .foregroundColor(session.isPremium ? Theme.mint : Theme.textSecondary)
                     .padding(.horizontal, 8)
@@ -232,13 +276,17 @@ struct SettingsView: View {
             }
 
             Button { showPremium = true } label: {
-                Text(session.isPremium ? "Manage Subscription" : "Upgrade to Premium")
-                    .font(.system(size: 14, weight: .medium))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(Theme.cardBackgroundLight)
-                    .foregroundColor(Theme.textPrimary)
-                    .cornerRadius(8)
+                Text(
+                    session.isPremium
+                        ? L10n.tr("settings.manageSubscription", locale: locale)
+                        : L10n.tr("settings.upgradePremium", locale: locale)
+                )
+                .font(.system(size: 14, weight: .medium))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(Theme.cardBackgroundLight)
+                .foregroundColor(Theme.textPrimary)
+                .cornerRadius(8)
             }
             .buttonStyle(.plain)
             .padding(.top, 12)

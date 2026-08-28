@@ -4,10 +4,13 @@ struct LoginView: View {
     var onUnlocked: (String) -> Void
     var onCreateVault: () -> Void
 
+    @Environment(AppPreferences.self) private var prefs
     @State private var password = ""
     @State private var passwordVisible = false
     @State private var errorMessage: String?
     @State private var biometricsAvailable = true
+
+    private var locale: Locale { prefs.locale }
 
     private var canUnlock: Bool {
         !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -16,26 +19,26 @@ struct LoginView: View {
     var body: some View {
         VStack(spacing: 0) {
             KasoBrandHeader(
-                trailing: AnyView(StatusPill(text: "100% Local & Offline"))
+                trailing: AnyView(StatusPill(text: L10n.tr("brand.localOffline", locale: locale)))
             )
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Unlock Vault")
+                        Text(L10n.tr("auth.unlock.title", locale: locale))
                             .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
-                        Text("Enter your master password to access your local vault.")
+                        Text(L10n.tr("auth.unlock.subtitle", locale: locale))
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: "Master Password")
+                        SectionLabel(text: L10n.tr("auth.unlock.masterPassword", locale: locale))
                         ThemedTextField(
                             icon: "lock.fill",
-                            placeholder: "Enter password",
+                            placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
                             text: $password,
                             isSecure: !passwordVisible,
                             trailing: AnyView(
@@ -68,16 +71,16 @@ struct LoginView: View {
                                     .clipShape(Circle())
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("Unlock with Biometrics")
+                                    Text(L10n.tr("auth.unlock.biometrics", locale: locale))
                                         .font(.system(size: 16, weight: .semibold))
                                         .foregroundColor(Theme.textPrimary)
-                                    Text("Face ID or Fingerprint")
+                                    Text(L10n.tr("auth.unlock.biometricsHint", locale: locale))
                                         .font(.kasoMono(12))
                                         .tracking(0.6)
                                         .foregroundColor(Theme.textSecondary)
                                 }
                                 Spacer()
-                                Image(systemName: "chevron.right")
+                                Image(systemName: "chevron.forward")
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundColor(Theme.textTertiary)
                             }
@@ -98,11 +101,11 @@ struct LoginView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "shield.fill")
                                     .foregroundColor(Theme.mint)
-                                Text("Local unlock only")
+                                Text(L10n.tr("auth.unlock.localOnly", locale: locale))
                                     .font(.system(size: 16, weight: .semibold))
                                     .foregroundColor(Theme.textPrimary)
                             }
-                            Text("Your vault never leaves this device. Qasa cannot reset or recover your master password.")
+                            Text(L10n.tr("auth.unlock.localOnlyBody", locale: locale))
                                 .font(.system(size: 14))
                                 .foregroundColor(Theme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -117,7 +120,7 @@ struct LoginView: View {
 
             VStack(spacing: 0) {
                 Divider().background(Theme.stroke)
-                PrimaryButton(title: "Unlock Vault", icon: "lock.open.fill") {
+                PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: "lock.open.fill") {
                     attemptUnlock()
                 }
                 .opacity(canUnlock ? 1 : 0.5)
@@ -129,7 +132,7 @@ struct LoginView: View {
             .background(Theme.chrome.opacity(0.92))
         }
         .background(Theme.background.ignoresSafeArea())
-        .preferredColorScheme(.dark)
+        .environment(prefs)
     }
 
     private func attemptUnlock() {
@@ -140,24 +143,25 @@ struct LoginView: View {
             errorMessage = nil
             onUnlocked(trimmed)
         } else {
-            errorMessage = "Incorrect master password."
+            errorMessage = L10n.tr("auth.unlock.wrongPassword", locale: locale)
         }
     }
 
     private func unlockWithBiometrics() {
         guard VaultKeychainStore.biometricsEnabled else {
-            errorMessage = "Enable biometrics when creating your vault."
+            errorMessage = L10n.tr("auth.unlock.enableBiometricsHint", locale: locale)
             return
         }
         if let unlockedPassword = VaultSession.shared.unlockWithBiometrics() {
             errorMessage = nil
             onUnlocked(unlockedPassword)
         } else {
-            errorMessage = "Biometric unlock failed. Enter your master password."
+            errorMessage = L10n.tr("auth.unlock.biometricsFailed", locale: locale)
         }
     }
 }
 
 #Preview {
     LoginView(onUnlocked: { _ in }, onCreateVault: {})
+        .environment(AppPreferences.shared)
 }

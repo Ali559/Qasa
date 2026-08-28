@@ -53,11 +53,11 @@ struct AddItemMenuView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Theme.background)
-            .navigationTitle("Add New")
+            .navigationTitle(L10n.tr("vault.addNew", locale: AppPreferences.shared.locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", action: onCancel)
+                    Button("common.cancel", action: onCancel)
                 }
             }
             .navigationDestination(for: AddRoute.self) { route in
@@ -72,7 +72,6 @@ struct AddItemMenuView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
         .tint(Theme.mint)
     }
 

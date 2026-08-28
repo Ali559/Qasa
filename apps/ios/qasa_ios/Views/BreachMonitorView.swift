@@ -20,7 +20,7 @@ struct BreachMonitorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppMenuHeader(title: "Breach Monitoring", onMenu: onOpenMenu)
+            AppMenuHeader(title: L10n.tr("nav.breachMonitoring", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -31,7 +31,7 @@ struct BreachMonitorView: View {
                         breachTabs
                         breachList
                     } else {
-                        Text("We'll send a push alert if a watched email appears in a breach. Upgrade for full scan details.")
+                        Text(L10n.tr("breach.upgradeHint"))
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                     }
@@ -48,12 +48,12 @@ struct BreachMonitorView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .alert("Remove Email?", isPresented: Binding(
+        .alert(L10n.tr("breach.removeEmailTitle"), isPresented: Binding(
             get: { pendingRemoval != nil },
             set: { if !$0 { pendingRemoval = nil } }
         )) {
-            Button("Cancel", role: .cancel) { pendingRemoval = nil }
-            Button("Remove", role: .destructive) {
+            Button(L10n.tr("common.cancel"), role: .cancel) { pendingRemoval = nil }
+            Button(L10n.tr("common.remove"), role: .destructive) {
                 if let pendingRemoval {
                     let email = pendingRemoval.email
                     modelContext.delete(pendingRemoval)
@@ -64,13 +64,13 @@ struct BreachMonitorView: View {
             }
         } message: {
             if let pendingRemoval {
-                Text("Stop monitoring \(pendingRemoval.email)?")
+                Text(String(format: L10n.tr("breach.removeEmailMessage"), pendingRemoval.email))
             }
         }
-        .alert("Slot Limit Reached", isPresented: $showLimitAlert) {
-            Button("OK", role: .cancel) {}
+        .alert(L10n.tr("breach.slotLimitTitle"), isPresented: $showLimitAlert) {
+            Button(L10n.tr("common.ok"), role: .cancel) {}
         } message: {
-            Text("You can monitor up to \(maxSlots) emails on your plan.")
+            Text(String(format: L10n.tr("breach.slotLimitMessage", locale: AppLanguage.current.locale), maxSlots))
         }
         .onAppear {
             Task { await rescanAll() }
@@ -86,16 +86,16 @@ struct BreachMonitorView: View {
     private var slotsHeader: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Email Monitoring")
-                    .font(.system(size: 22, weight: .bold))
+                Text(L10n.tr("breach.emailMonitoring"))
+                    .font(.qasa(22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
-                Text("\(monitored.count) of \(maxSlots) slots used")
-                    .font(.system(size: 14))
+                Text(String(format: L10n.tr("breach.slotsUsed"), locale: AppLanguage.current.locale, arguments: [monitored.count, maxSlots]))
+                    .font(.qasa(14))
                     .foregroundColor(Theme.textSecondary)
             }
             Spacer()
             StatusPill(
-                text: session.isPremium ? "Premium" : "Free",
+                text: session.isPremium ? L10n.tr("breach.premium") : L10n.tr("breach.free"),
                 dotColor: session.isPremium ? Theme.success : Theme.mint,
                 textColor: session.isPremium ? Theme.success : Theme.mint,
                 background: Theme.cardBackground
@@ -106,11 +106,11 @@ struct BreachMonitorView: View {
     private var addEmailCard: some View {
         CardContainer(padding: 20) {
             VStack(alignment: .leading, spacing: 14) {
-                SectionLabel(text: "Add Email")
+                SectionLabel(text: L10n.tr("breach.addEmail"))
                 HStack(spacing: 12) {
                     Image(systemName: "at")
                         .foregroundColor(Theme.textSecondary)
-                    TextField("Enter email address...", text: $monitorEmail)
+                    TextField(L10n.tr("breach.emailPlaceholder"), text: $monitorEmail)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
@@ -126,7 +126,7 @@ struct BreachMonitorView: View {
                         .stroke(Theme.stroke, lineWidth: 1)
                 )
 
-                PrimaryButton(title: isChecking ? "Saving…" : "Add to Monitoring", icon: "plus", cornerRadius: 8) {
+                PrimaryButton(title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"), icon: "plus", cornerRadius: 8) {
                     Task { await addEmail() }
                 }
                 .opacity(monitored.count >= maxSlots ? 0.5 : 1)
@@ -137,9 +137,9 @@ struct BreachMonitorView: View {
 
     private var monitoredList: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(text: "Monitored Emails")
+            SectionLabel(text: L10n.tr("breach.monitoredEmails"))
             if monitored.isEmpty {
-                Text("No emails monitored yet.")
+                Text(L10n.tr("breach.noneMonitored"))
                     .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
                     .padding(.vertical, 8)
@@ -182,10 +182,10 @@ struct BreachMonitorView: View {
 
     private var breachTabs: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(text: "Breaches")
+            SectionLabel(text: L10n.tr("breach.breaches"))
             HStack(spacing: 8) {
-                tabChip(.unresolved, title: "Unresolved")
-                tabChip(.resolved, title: "Resolved")
+                tabChip(.unresolved, title: L10n.tr("breach.unresolved"))
+                tabChip(.resolved, title: L10n.tr("breach.resolved"))
             }
         }
     }
@@ -210,16 +210,16 @@ struct BreachMonitorView: View {
     private var breachList: some View {
         VStack(alignment: .leading, spacing: 12) {
             if filteredResults.isEmpty {
-                Text("No \(selectedTab == .unresolved ? "unresolved" : "resolved") breaches.")
+                Text(selectedTab == .unresolved ? L10n.tr("breach.noUnresolved") : L10n.tr("breach.noResolved"))
                     .font(.system(size: 14))
                     .foregroundColor(Theme.textSecondary)
             } else {
                 ForEach(filteredResults, id: \.email) { result in
                     BreachCard(breach: Breach(
-                        title: result.sources.first ?? "Breach detected",
+                        title: result.sources.first ?? L10n.tr("breach.detected"),
                         breachDate: "—",
-                        discoveredDate: "Recent scan",
-                        compromisedFields: ["Emails"],
+                        discoveredDate: L10n.tr("breach.recentScan"),
+                        compromisedFields: [L10n.tr("breach.emailsField")],
                         status: result.breached ? .unresolved : .resolved
                     ))
                 }
@@ -291,18 +291,18 @@ struct BreachCard: View {
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 PillBadge(
-                    text: breach.status.rawValue,
+                    text: breach.status == .unresolved ? L10n.tr("breach.unresolved") : L10n.tr("breach.resolved"),
                     color: breach.status == .unresolved ? Theme.dangerText : Theme.success
                 )
                 Spacer(minLength: 0)
             }
 
-            Text("Breach Date: \(breach.breachDate) • Discovered: \(breach.discoveredDate)")
+            Text(String(format: L10n.tr("breach.breachDate"), breach.breachDate, breach.discoveredDate))
                 .font(.system(size: 14))
                 .foregroundColor(Theme.textSecondary)
 
             FlowLayout(spacing: 8) {
-                Text("Compromised:")
+                Text(L10n.tr("breach.compromised"))
                     .font(.kasoMono(12))
                     .tracking(0.6)
                     .foregroundColor(Theme.textTertiary)

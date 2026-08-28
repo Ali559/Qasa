@@ -36,23 +36,15 @@ struct AppShellView: View {
                     SettingsView(onOpenMenu: openMenu, onLogout: onLogout)
                 case .terms:
                     LegalPlaceholderView(
-                        title: "Terms of Use",
+                        title: L10n.tr("nav.terms", locale: AppPreferences.shared.locale),
                         onOpenMenu: openMenu,
-                        bodyText: """
-                        These Terms of Use are a placeholder for Qasa’s legal agreement with you.
-
-                        By using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.
-                        """
+                        bodyText: L10n.tr("legal.termsBody", locale: AppPreferences.shared.locale)
                     )
                 case .privacy:
                     LegalPlaceholderView(
-                        title: "Privacy Policy",
+                        title: L10n.tr("nav.privacy", locale: AppPreferences.shared.locale),
                         onOpenMenu: openMenu,
-                        bodyText: """
-                        This Privacy Policy is a placeholder describing how Qasa will handle your data.
-
-                        Vault contents are designed to stay encrypted and under your control. Full policy details will be published here before public release.
-                        """
+                        bodyText: L10n.tr("legal.privacyBody", locale: AppPreferences.shared.locale)
                     )
                 case .premiumUpgrade:
                     PremiumUpgradeView(onOpenMenu: openMenu, embedded: true)
@@ -73,7 +65,6 @@ struct AppShellView: View {
                 .zIndex(10)
             }
         }
-        .preferredColorScheme(.dark)
         .tint(Theme.mint)
         .onReceive(NotificationCenter.default.publisher(for: .qasaOpenNotifications)) { _ in
             selectPage(.notifications)

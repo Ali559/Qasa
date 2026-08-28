@@ -13,22 +13,24 @@ enum VaultItemKind: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     var tabTitle: String {
+        let locale = AppLanguage.current.locale
         switch self {
-        case .login: return "Logins"
-        case .secureNote: return "Secure Notes"
-        case .payment: return "Payments"
-        case .personalInfo: return "Personal Info"
-        case .idDocument: return "IDs"
+        case .login: return L10n.tr("vault.kind.login.tab", locale: locale)
+        case .secureNote: return L10n.tr("vault.kind.secureNote.tab", locale: locale)
+        case .payment: return L10n.tr("vault.kind.payment.tab", locale: locale)
+        case .personalInfo: return L10n.tr("vault.kind.personalInfo.tab", locale: locale)
+        case .idDocument: return L10n.tr("vault.kind.idDocument.tab", locale: locale)
         }
     }
 
     var addTitle: String {
+        let locale = AppLanguage.current.locale
         switch self {
-        case .login: return "Login"
-        case .secureNote: return "Secure Note"
-        case .payment: return "Payment"
-        case .personalInfo: return "Personal Information"
-        case .idDocument: return "ID"
+        case .login: return L10n.tr("vault.kind.login.add", locale: locale)
+        case .secureNote: return L10n.tr("vault.kind.secureNote.add", locale: locale)
+        case .payment: return L10n.tr("vault.kind.payment.add", locale: locale)
+        case .personalInfo: return L10n.tr("vault.kind.personalInfo.add", locale: locale)
+        case .idDocument: return L10n.tr("vault.kind.idDocument.add", locale: locale)
         }
     }
 
@@ -62,15 +64,19 @@ enum VaultFilterTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var localizationKey: String {
         switch self {
-        case .all: return "All"
-        case .login: return VaultItemKind.login.tabTitle
-        case .secureNote: return VaultItemKind.secureNote.tabTitle
-        case .payment: return VaultItemKind.payment.tabTitle
-        case .personalInfo: return VaultItemKind.personalInfo.tabTitle
-        case .idDocument: return VaultItemKind.idDocument.tabTitle
+        case .all: return "vault.tab.all"
+        case .login: return "vault.kind.login.tab"
+        case .secureNote: return "vault.kind.secureNote.tab"
+        case .payment: return "vault.kind.payment.tab"
+        case .personalInfo: return "vault.kind.personalInfo.tab"
+        case .idDocument: return "vault.kind.idDocument.tab"
         }
+    }
+
+    var title: String {
+        L10n.tr(localizationKey, locale: AppLanguage.current.locale)
     }
 
     var kind: VaultItemKind? {
@@ -112,9 +118,10 @@ enum PaymentSubtype: String, Codable, CaseIterable {
     case bankAccount
 
     var title: String {
+        let locale = AppLanguage.current.locale
         switch self {
-        case .creditDebitCard: return "Credit / Debit Card"
-        case .bankAccount: return "Bank Account"
+        case .creditDebitCard: return L10n.tr("vault.subtype.card", locale: locale)
+        case .bankAccount: return L10n.tr("vault.subtype.bank", locale: locale)
         }
     }
 }
@@ -128,13 +135,14 @@ enum PersonalInfoSubtype: String, Codable, CaseIterable {
     case website
 
     var title: String {
+        let locale = AppLanguage.current.locale
         switch self {
-        case .name: return "Name"
-        case .email: return "Email"
-        case .phone: return "Phone Number"
-        case .address: return "Address"
-        case .company: return "Company"
-        case .website: return "Website"
+        case .name: return L10n.tr("vault.subtype.name", locale: locale)
+        case .email: return L10n.tr("vault.subtype.email", locale: locale)
+        case .phone: return L10n.tr("vault.subtype.phone", locale: locale)
+        case .address: return L10n.tr("vault.subtype.address", locale: locale)
+        case .company: return L10n.tr("vault.subtype.company", locale: locale)
+        case .website: return L10n.tr("vault.subtype.website", locale: locale)
         }
     }
 }
@@ -145,10 +153,11 @@ enum IDSubtype: String, Codable, CaseIterable {
     case driverLicense
 
     var title: String {
+        let locale = AppLanguage.current.locale
         switch self {
-        case .idCard: return "ID Card"
-        case .passport: return "Passport"
-        case .driverLicense: return "Driver License"
+        case .idCard: return L10n.tr("vault.subtype.idCard", locale: locale)
+        case .passport: return L10n.tr("vault.subtype.passport", locale: locale)
+        case .driverLicense: return L10n.tr("vault.subtype.driverLicense", locale: locale)
         }
     }
 }
@@ -181,7 +190,7 @@ enum NoteColor: String, Codable, CaseIterable {
     case mint, gold, blue, purple, red, gray
 
     var displayName: String {
-        rawValue.capitalized
+        L10n.tr("color.\(rawValue)")
     }
 
     var color: Color {
@@ -429,56 +438,56 @@ extension VaultPayload {
         switch self {
         case .login(let f):
             return [
-                CopyAction(label: "Copy Email", value: f.email, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Username", value: f.username, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Password", value: f.password, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Website", value: f.website, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.email"), value: f.email, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.username"), value: f.username, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.password"), value: f.password, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.website"), value: f.website, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .secureNote(let f):
             guard !f.content.isEmpty else { return [] }
-            return [CopyAction(label: "Copy Content", value: f.content, systemImage: "doc.on.doc")]
+            return [CopyAction(label: L10n.tr("copy.content"), value: f.content, systemImage: "doc.on.doc")]
         case .card(let f):
             return [
-                CopyAction(label: "Copy Number", value: f.number, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Account Holder", value: f.accountHolder, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Expiry", value: f.expiryDate, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Security Code", value: f.securityCode, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.number"), value: f.number, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.expiry"), value: f.expiryDate, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.securityCode"), value: f.securityCode, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .bankAccount(let f):
             return [
-                CopyAction(label: "Copy Account Number", value: f.accountNumber, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Routing Number", value: f.routingNumber, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Account Holder", value: f.accountHolder, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.accountNumber"), value: f.accountNumber, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.routingNumber"), value: f.routingNumber, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .name(let f):
             let full = [f.firstName, f.middleName, f.lastName].filter { !$0.isEmpty }.joined(separator: " ")
             return [
-                CopyAction(label: "Copy Name", value: full, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Username", value: f.defaultUsername, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.name"), value: full, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.username"), value: f.defaultUsername, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .personalEmail(let f):
-            return [CopyAction(label: "Copy Email", value: f.email, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
+            return [CopyAction(label: L10n.tr("copy.email"), value: f.email, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
         case .phone(let f):
             guard !f.number.isEmpty else { return [] }
             let full = "\(Country.dialCode(for: f.countryCode))\(f.number)"
-            return [CopyAction(label: "Copy Phone Number", value: full, systemImage: "doc.on.doc")]
+            return [CopyAction(label: L10n.tr("copy.phone"), value: full, systemImage: "doc.on.doc")]
         case .address(let f):
             return [
-                CopyAction(label: "Copy Address", value: f.address, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy City", value: f.city, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Zip Code", value: f.zipCode, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.address"), value: f.address, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.city"), value: f.city, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.zip"), value: f.zipCode, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .company(let f):
             return [
-                CopyAction(label: "Copy Company", value: f.companyName, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Job Title", value: f.jobTitle, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.company"), value: f.companyName, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.jobTitle"), value: f.jobTitle, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         case .website(let f):
-            return [CopyAction(label: "Copy Website", value: f.websiteURL, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
+            return [CopyAction(label: L10n.tr("copy.website"), value: f.websiteURL, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
         case .idCard(let f), .passport(let f), .driverLicense(let f):
             return [
-                CopyAction(label: "Copy Name", value: f.name, systemImage: "doc.on.doc"),
-                CopyAction(label: "Copy Number", value: f.number, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.name"), value: f.name, systemImage: "doc.on.doc"),
+                CopyAction(label: L10n.tr("copy.number"), value: f.number, systemImage: "doc.on.doc")
             ].filter { !$0.value.isEmpty }
         }
     }
@@ -510,93 +519,93 @@ extension VaultPayload {
         switch self {
         case .login(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Email", value: f.email),
-                DetailField(label: "Username", value: f.username),
-                DetailField(label: "Password", value: f.password, isSecret: true),
-                DetailField(label: "Website", value: f.website),
-                DetailField(label: "Note", value: f.note, isMultiline: true)
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.email"), value: f.email),
+                DetailField(label: L10n.tr("field.username"), value: f.username),
+                DetailField(label: L10n.tr("field.password"), value: f.password, isSecret: true),
+                DetailField(label: L10n.tr("field.website"), value: f.website),
+                DetailField(label: L10n.tr("field.note"), value: f.note, isMultiline: true)
             ].filter { !$0.value.isEmpty }
         case .secureNote(let f):
             return [
-                DetailField(label: "Title", value: f.title),
-                DetailField(label: "Content", value: f.content, isSecret: f.protectItem, isMultiline: true),
-                DetailField(label: "Protected", value: f.protectItem ? "Yes" : "No")
+                DetailField(label: L10n.tr("field.title"), value: f.title),
+                DetailField(label: L10n.tr("field.content"), value: f.content, isSecret: f.protectItem, isMultiline: true),
+                DetailField(label: L10n.tr("field.protected"), value: f.protectItem ? L10n.tr("common.yes") : L10n.tr("common.no"))
             ].filter { !$0.value.isEmpty }
         case .card(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Account Holder", value: f.accountHolder),
-                DetailField(label: "Number", value: f.number, isSecret: true),
-                DetailField(label: "Security Code", value: f.securityCode, isSecret: true),
-                DetailField(label: "Expiry Date", value: f.expiryDate),
-                DetailField(label: "Note", value: f.note, isMultiline: true)
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.accountHolder"), value: f.accountHolder),
+                DetailField(label: L10n.tr("field.number"), value: f.number, isSecret: true),
+                DetailField(label: L10n.tr("field.securityCode"), value: f.securityCode, isSecret: true),
+                DetailField(label: L10n.tr("field.expiryDate"), value: f.expiryDate),
+                DetailField(label: L10n.tr("field.note"), value: f.note, isMultiline: true)
             ].filter { !$0.value.isEmpty }
         case .bankAccount(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Account Holder", value: f.accountHolder),
-                DetailField(label: "Account Number", value: f.accountNumber, isSecret: true),
-                DetailField(label: "Routing Number", value: f.routingNumber),
-                DetailField(label: "Bank Name", value: f.bankName),
-                DetailField(label: "Country", value: Country.name(for: f.countryCode))
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.accountHolder"), value: f.accountHolder),
+                DetailField(label: L10n.tr("field.accountNumber"), value: f.accountNumber, isSecret: true),
+                DetailField(label: L10n.tr("field.routingNumber"), value: f.routingNumber),
+                DetailField(label: L10n.tr("field.bankName"), value: f.bankName),
+                DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode))
             ].filter { !$0.value.isEmpty }
         case .name(let f):
             return [
-                DetailField(label: "Type", value: f.type == .none ? "" : f.type.rawValue),
-                DetailField(label: "First Name", value: f.firstName),
-                DetailField(label: "Middle Name", value: f.middleName),
-                DetailField(label: "Last Name", value: f.lastName),
-                DetailField(label: "Default Username", value: f.defaultUsername),
-                DetailField(label: "Birth Date", value: f.birthDate),
-                DetailField(label: "Birth Place", value: f.birthPlace)
+                DetailField(label: L10n.tr("field.type"), value: f.type == .none ? "" : f.type.rawValue),
+                DetailField(label: L10n.tr("field.firstName"), value: f.firstName),
+                DetailField(label: L10n.tr("field.middleName"), value: f.middleName),
+                DetailField(label: L10n.tr("field.lastName"), value: f.lastName),
+                DetailField(label: L10n.tr("field.defaultUsername"), value: f.defaultUsername),
+                DetailField(label: L10n.tr("field.birthDate"), value: f.birthDate),
+                DetailField(label: L10n.tr("field.birthPlace"), value: f.birthPlace)
             ].filter { !$0.value.isEmpty }
         case .personalEmail(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Type", value: f.type.rawValue),
-                DetailField(label: "Email", value: f.email)
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.type"), value: f.type.rawValue),
+                DetailField(label: L10n.tr("field.email"), value: f.email)
             ].filter { !$0.value.isEmpty }
         case .phone(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Type", value: f.type.rawValue),
-                DetailField(label: "Country", value: Country.name(for: f.countryCode)),
-                DetailField(label: "Phone Number", value: "\(Country.dialCode(for: f.countryCode)) \(f.number)")
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.type"), value: f.type.rawValue),
+                DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode)),
+                DetailField(label: L10n.tr("field.phoneNumber"), value: "\(Country.dialCode(for: f.countryCode)) \(f.number)")
             ].filter { !$0.value.isEmpty }
         case .address(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Recipient", value: f.recipient),
-                DetailField(label: "Address", value: f.address, isMultiline: true),
-                DetailField(label: "Building", value: f.building),
-                DetailField(label: "Floor", value: f.floor),
-                DetailField(label: "Apartment", value: f.apartment),
-                DetailField(label: "Door Code", value: f.doorCode),
-                DetailField(label: "City", value: f.city),
-                DetailField(label: "Zip Code", value: f.zipCode),
-                DetailField(label: "Country", value: Country.name(for: f.countryCode))
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.recipient"), value: f.recipient),
+                DetailField(label: L10n.tr("field.address"), value: f.address, isMultiline: true),
+                DetailField(label: L10n.tr("field.building"), value: f.building),
+                DetailField(label: L10n.tr("field.floor"), value: f.floor),
+                DetailField(label: L10n.tr("field.apartment"), value: f.apartment),
+                DetailField(label: L10n.tr("field.doorCode"), value: f.doorCode),
+                DetailField(label: L10n.tr("field.city"), value: f.city),
+                DetailField(label: L10n.tr("field.zipCode"), value: f.zipCode),
+                DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode))
             ].filter { !$0.value.isEmpty }
         case .company(let f):
             return [
-                DetailField(label: "Company", value: f.companyName),
-                DetailField(label: "Job Title", value: f.jobTitle)
+                DetailField(label: L10n.tr("field.company"), value: f.companyName),
+                DetailField(label: L10n.tr("field.jobTitle"), value: f.jobTitle)
             ].filter { !$0.value.isEmpty }
         case .website(let f):
             return [
-                DetailField(label: "Item Name", value: f.itemName),
-                DetailField(label: "Website", value: f.websiteURL)
+                DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
+                DetailField(label: L10n.tr("field.website"), value: f.websiteURL)
             ].filter { !$0.value.isEmpty }
         case .idCard(let f), .passport(let f), .driverLicense(let f):
             var fields = [
-                DetailField(label: "Name", value: f.name),
-                DetailField(label: "Country", value: Country.name(for: f.countryCode)),
-                DetailField(label: "Number", value: f.number),
-                DetailField(label: "Issue Date", value: f.issueDate),
-                DetailField(label: "Expiry Date", value: f.expiryDate)
+                DetailField(label: L10n.tr("field.name"), value: f.name),
+                DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode)),
+                DetailField(label: L10n.tr("field.number"), value: f.number),
+                DetailField(label: L10n.tr("field.issueDate"), value: f.issueDate),
+                DetailField(label: L10n.tr("field.expiryDate"), value: f.expiryDate)
             ]
             if case .passport = self, !f.issuePlace.isEmpty {
-                fields.append(DetailField(label: "Issue Place", value: f.issuePlace))
+                fields.append(DetailField(label: L10n.tr("field.issuePlace"), value: f.issuePlace))
             }
             return fields.filter { !$0.value.isEmpty }
         }

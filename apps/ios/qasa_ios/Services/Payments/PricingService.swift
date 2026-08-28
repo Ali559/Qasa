@@ -61,10 +61,17 @@ final class PricingService {
 
 extension PricingPlanDTO {
     var periodLabel: String {
-        interval == "yearly" ? "IQD / year" : "IQD / mo"
+        interval == "yearly" ? L10n.tr("premium.periodYear") : L10n.tr("premium.periodMonth")
     }
 
     var displayAmount: String {
-        amount_iqd.formatted(.number.grouping(.automatic))
+        amount_iqd.formatted(.number.grouping(.automatic).locale(AppLanguage.current.locale))
+    }
+
+    var localizedTitle: String {
+        switch id {
+        case "premium_yearly": return L10n.tr("sub.planYearly")
+        default: return L10n.tr("sub.planMonthly")
+        }
     }
 }

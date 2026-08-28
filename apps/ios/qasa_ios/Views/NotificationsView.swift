@@ -7,6 +7,7 @@ struct NotificationsView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(AppPreferences.self) private var prefs
     @Query(sort: \AppNotification.createdAt, order: .reverse) private var localNotes: [AppNotification]
 
     @State private var remote: [AppNotificationDTO] = []
@@ -14,13 +15,14 @@ struct NotificationsView: View {
     @State private var errorMessage: String?
 
     private var isEmbedded: Bool { onOpenMenu != nil }
-    private var locale: String { AppPreferences.shared.language.rawValue }
+    private var localeCode: String { prefs.language.rawValue }
+    private var locale: Locale { prefs.locale }
 
     var body: some View {
         VStack(spacing: 0) {
             if let onOpenMenu {
                 AppMenuHeader(
-                    title: "Notifications",
+                    title: L10n.tr("notifications.title", locale: locale),
                     onMenu: onOpenMenu,
                     trailing: AnyView(markAllButton)
                 )
@@ -29,21 +31,21 @@ struct NotificationsView: View {
             Group {
                 if remote.isEmpty && localNotes.isEmpty {
                     ContentUnavailableView(
-                        "No Notifications",
+                        L10n.tr("notifications.empty", locale: locale),
                         systemImage: "bell.slash",
-                        description: Text("You’re all caught up.")
+                        description: Text(L10n.tr("notifications.emptyDesc", locale: locale))
                     )
                 } else {
                     List {
                         if !remote.isEmpty {
-                            Section("From Qasa") {
+                            Section(L10n.tr("notifications.fromQasa", locale: locale)) {
                                 ForEach(remote) { note in
                                     Button {
                                         Task { await openRemote(note) }
                                     } label: {
                                         notificationRow(
-                                            title: note.title(locale: locale),
-                                            body: note.body(locale: locale),
+                                            title: note.title(locale: localeCode),
+                                            body: note.body(locale: localeCode),
                                             date: formatNotificationDate(note.created_at),
                                             unread: note.read_at == nil
                                         )
@@ -53,7 +55,7 @@ struct NotificationsView: View {
                             }
                         }
                         if !localNotes.isEmpty {
-                            Section("On this device") {
+                            Section(L10n.tr("notifications.onDevice", locale: locale)) {
                                 ForEach(localNotes, id: \.id) { note in
                                     Button {
                                         note.isRead = true
@@ -90,12 +92,12 @@ struct NotificationsView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle(isEmbedded ? "" : "Notifications")
+        .navigationTitle(isEmbedded ? "" : L10n.tr("notifications.title", locale: locale))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button(L10n.tr("common.done", locale: locale)) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) { markAllButton }
             }
@@ -112,14 +114,14 @@ struct NotificationsView: View {
             NavigationStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(note.title(locale: locale))
+                        Text(note.title(locale: localeCode))
                             .font(.title2.bold())
                             .foregroundColor(Theme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Text(formatNotificationDate(note.created_at))
                             .font(.caption)
                             .foregroundColor(Theme.textTertiary)
-                        Text(note.body(locale: locale))
+                        Text(note.body(locale: localeCode))
                             .font(.body)
                             .foregroundColor(Theme.textSecondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -129,11 +131,11 @@ struct NotificationsView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Theme.background.ignoresSafeArea())
-                .navigationTitle("Notification")
+                .navigationTitle(L10n.tr("notifications.detailTitle", locale: locale))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Close") { selected = nil }
+                        Button(L10n.tr("common.close", locale: locale)) { selected = nil }
                     }
                 }
             }
@@ -166,7 +168,7 @@ struct NotificationsView: View {
     @ViewBuilder
     private var markAllButton: some View {
         if localNotes.contains(where: { !$0.isRead }) {
-            Button("Mark All Read") {
+            Button(L10n.tr("notifications.markAllRead", locale: AppPreferences.shared.locale)) {
                 for n in localNotes where !n.isRead { n.isRead = true }
                 try? modelContext.save()
             }

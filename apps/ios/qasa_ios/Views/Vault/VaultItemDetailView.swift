@@ -30,7 +30,7 @@ struct VaultItemDetailView: View {
             VStack(spacing: 24) {
                 heroIcon
 
-                Text(row?.displayName ?? "Untitled")
+                Text(row?.displayName ?? L10n.tr("vault.untitled"))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                     .multilineTextAlignment(.center)
@@ -55,7 +55,7 @@ struct VaultItemDetailView: View {
                         Image(systemName: "pencil")
                             .foregroundColor(Theme.mint)
                     }
-                    .accessibilityLabel("Edit")
+                    .accessibilityLabel(L10n.tr("common.edit"))
 
                     Button(role: .destructive) {
                         showDeleteConfirm = true
@@ -63,19 +63,22 @@ struct VaultItemDetailView: View {
                         Image(systemName: "trash")
                             .foregroundColor(Theme.danger)
                     }
-                    .accessibilityLabel("Delete")
+                    .accessibilityLabel(L10n.tr("common.delete"))
                 }
             }
         }
-        .alert("Delete Item?", isPresented: $showDeleteConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(L10n.tr("vault.deleteItemTitle"), isPresented: $showDeleteConfirm) {
+            Button(L10n.tr("common.cancel"), role: .cancel) {}
+            Button(L10n.tr("common.delete"), role: .destructive) {
                 try? VaultRepository.shared.delete(id: itemId)
                 onDeleted()
                 dismiss()
             }
         } message: {
-            Text("This permanently removes “\(row?.displayName ?? "this item")” from your vault.")
+            Text(String(
+                format: L10n.tr("vault.deleteItemMessage"),
+                row?.displayName ?? L10n.tr("vault.thisItem")
+            ))
         }
         .onAppear {
             loadItem()
@@ -119,10 +122,10 @@ struct VaultItemDetailView: View {
     }
 
     private var detailsSection: some View {
-        detailCard(title: "Details") {
+        detailCard(title: L10n.tr("vault.details")) {
             let fields = payload.detailFields
             if fields.isEmpty {
-                Text("No details")
+                Text(L10n.tr("vault.noDetails"))
                     .foregroundColor(Theme.textSecondary)
             } else {
                 VStack(spacing: 0) {
@@ -138,7 +141,7 @@ struct VaultItemDetailView: View {
     }
 
     private var organizationSection: some View {
-        detailCard(title: "Organization") {
+        detailCard(title: L10n.tr("vault.organization")) {
             VStack(spacing: 0) {
                 organizationColorRow
                 Divider().background(Theme.stroke)
@@ -149,7 +152,7 @@ struct VaultItemDetailView: View {
 
     private var organizationColorRow: some View {
         HStack {
-            Text("Color")
+            Text(L10n.tr("vault.color"))
                 .font(.system(size: 14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
@@ -163,7 +166,7 @@ struct VaultItemDetailView: View {
                         .foregroundColor(Theme.textPrimary)
                 }
             } else {
-                Text("None")
+                Text(L10n.tr("common.none"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(Theme.textSecondary)
             }
@@ -173,11 +176,11 @@ struct VaultItemDetailView: View {
 
     private var organizationCollectionRow: some View {
         HStack {
-            Text("Collection")
+            Text(L10n.tr("vault.collection"))
                 .font(.system(size: 14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
-            Text(collectionName ?? "None")
+            Text(collectionName ?? L10n.tr("common.none"))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(collectionName == nil ? Theme.textSecondary : Theme.textPrimary)
         }
@@ -185,13 +188,13 @@ struct VaultItemDetailView: View {
     }
 
     private var historySection: some View {
-        detailCard(title: "History") {
+        detailCard(title: L10n.tr("vault.history")) {
             VStack(spacing: 0) {
-                historyRow(label: "Created", date: row?.createdAt)
+                historyRow(label: L10n.tr("vault.created"), date: row?.createdAt)
                 Divider().background(Theme.stroke)
-                historyRow(label: "Last Updated", date: row?.updatedAt)
+                historyRow(label: L10n.tr("vault.lastUpdated"), date: row?.updatedAt)
                 Divider().background(Theme.stroke)
-                historyRow(label: "Last Used", date: row?.lastUsedAt)
+                historyRow(label: L10n.tr("vault.lastUsed"), date: row?.lastUsedAt)
             }
         }
     }
@@ -202,7 +205,7 @@ struct VaultItemDetailView: View {
                 .font(.system(size: 14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
-            Text(date.map { VaultDateFormat.display($0) } ?? "Never")
+            Text(date.map { VaultDateFormat.display($0) } ?? L10n.tr("vault.never"))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(Theme.textPrimary)
                 .multilineTextAlignment(.trailing)
@@ -260,7 +263,7 @@ struct VaultItemDetailView: View {
             }
 
             if locked {
-                Text("Locked — authenticate to view")
+                Text(L10n.tr("vault.lockedAuthenticate"))
                     .font(.system(size: 15, weight: .medium))
                     .foregroundColor(Theme.textSecondary)
             } else if hidden {
@@ -296,29 +299,42 @@ struct VaultItemDetailView: View {
 enum VaultDateFormat {
     /// Recent: minutes / hours. Otherwise absolute like `Mar 4, 2025, 6:03PM`.
     static func display(_ date: Date, now: Date = Date()) -> String {
+        let locale = AppLanguage.current.locale
         let seconds = now.timeIntervalSince(date)
-        guard seconds >= 0 else { return absolute(date) }
+        guard seconds >= 0 else { return absolute(date, locale: locale) }
 
         if seconds < 60 {
-            return "Just now"
+            return L10n.tr("date.justNow", locale: locale)
         }
         if seconds < 3600 {
             let minutes = Int(seconds / 60)
-            return minutes == 1 ? "1 minute ago" : "\(minutes) minutes ago"
+            if minutes == 1 {
+                return L10n.tr("date.minuteAgo", locale: locale)
+            }
+            return String(
+                format: L10n.tr("date.minutesAgo", locale: locale),
+                locale: locale,
+                arguments: [minutes]
+            )
         }
         if seconds < 24 * 3600 {
             let hours = Int(seconds / 3600)
-            return hours == 1 ? "1 hour ago" : "\(hours) hours ago"
+            if hours == 1 {
+                return L10n.tr("date.hourAgo", locale: locale)
+            }
+            return String(
+                format: L10n.tr("date.hoursAgo", locale: locale),
+                locale: locale,
+                arguments: [hours]
+            )
         }
-        return absolute(date)
+        return absolute(date, locale: locale)
     }
 
-    private static func absolute(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "MMM d, yyyy, h:mma"
-        formatter.amSymbol = "AM"
-        formatter.pmSymbol = "PM"
-        return formatter.string(from: date)
+    private static func absolute(_ date: Date, locale: Locale) -> String {
+        date.formatted(
+            Date.FormatStyle(date: .abbreviated, time: .shortened)
+                .locale(locale)
+        )
     }
 }

@@ -8,6 +8,7 @@ struct VaultListView: View {
         self.onOpenMenu = onOpenMenu
     }
 
+    @Environment(AppPreferences.self) private var prefs
     @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var selectedTab: VaultFilterTab = .all
@@ -63,7 +64,7 @@ struct VaultListView: View {
                         }
 
                         if !recentRows.isEmpty {
-                            sectionHeader("Most Recent")
+                            sectionHeader(L10n.tr("vault.mostRecent", locale: prefs.locale))
                             ForEach(recentRows) { row in
                                 rowLink(for: row)
                             }
@@ -78,9 +79,9 @@ struct VaultListView: View {
 
                         if filteredRows.isEmpty {
                             ContentUnavailableView(
-                                "No Items",
+                                L10n.tr("vault.emptyTitle", locale: prefs.locale),
                                 systemImage: "tray",
-                                description: Text("Tap + to add your first vault item.")
+                                description: Text(L10n.tr("vault.emptyHint", locale: prefs.locale))
                             )
                             .frame(maxWidth: .infinity)
                             .padding(.top, 40)
@@ -109,12 +110,14 @@ struct VaultListView: View {
             } onCancel: {
                 showAddMenu = false
             }
+            .appLocalization()
             .presentationDetents([.medium, .large])
         }
         .sheet(item: $editorMode) { presentation in
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
             }
+            .appLocalization()
         }
     }
 
@@ -122,7 +125,9 @@ struct VaultListView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Theme.textSecondary)
-            TextField("Search items...", text: $searchText)
+            TextField(L10n.tr("vault.searchPlaceholder", locale: prefs.locale), text: $searchText)
+                .font(.qasa(16))
+                .multilineTextAlignment(.leading)
                 .foregroundColor(Theme.textPrimary)
                 .tint(Theme.mint)
         }
@@ -140,7 +145,10 @@ struct VaultListView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(VaultFilterTab.allCases) { tab in
-                    FilterChip(title: tab.title, isSelected: selectedTab == tab) {
+                    FilterChip(
+                        title: L10n.tr(tab.localizationKey, locale: prefs.locale),
+                        isSelected: selectedTab == tab
+                    ) {
                         selectedTab = tab
                     }
                 }
@@ -150,9 +158,10 @@ struct VaultListView: View {
 
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 14, weight: .semibold))
+            .font(.qasa(14, weight: .semibold))
             .foregroundColor(Theme.textSecondary)
             .padding(.top, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func rowLink(for row: VaultListRow) -> some View {

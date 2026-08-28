@@ -10,14 +10,22 @@ enum QasaAPIError: LocalizedError, Sendable {
     case network(Error)
 
     var errorDescription: String? {
+        let locale = L10n.preferredLocale
         switch self {
-        case .invalidURL: return "Invalid API URL."
-        case .httpStatus(let code, _): return "Server error (\(code))."
-        case .decoding: return "Unexpected server response."
-        case .unauthorized: return "Session expired. Unlock your vault again."
-        case .deviceLimitExceeded(let body): return body.message
-        case .forbidden: return "This feature requires a Premium subscription."
-        case .network(let error): return error.localizedDescription
+        case .invalidURL:
+            return L10n.tr("error.invalidURL", locale: locale)
+        case .httpStatus(let code, _):
+            return String(format: L10n.tr("error.server", locale: locale), code)
+        case .decoding:
+            return L10n.tr("error.decoding", locale: locale)
+        case .unauthorized:
+            return L10n.tr("error.unauthorized", locale: locale)
+        case .deviceLimitExceeded(let body):
+            return body.message
+        case .forbidden:
+            return L10n.tr("error.forbidden", locale: locale)
+        case .network(let error):
+            return error.localizedDescription
         }
     }
 }

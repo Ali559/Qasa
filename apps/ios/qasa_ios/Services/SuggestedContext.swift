@@ -8,8 +8,8 @@ enum SuggestedContext: Equatable {
     var title: String {
         switch self {
         case .none: return ""
-        case .checkout: return "Suggested for Checkout"
-        case .googleSignIn: return "Suggested for Google Sign-In"
+        case .checkout: return L10n.tr("vault.suggestedCheckout")
+        case .googleSignIn: return L10n.tr("vault.suggestedGoogle")
         }
     }
 

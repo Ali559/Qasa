@@ -19,6 +19,8 @@ struct ManageSubscriptionView: View {
     @State private var cancelReason = ""
     @State private var isCancelling = false
 
+    private var locale: Locale { AppLanguage.current.locale }
+
     private var plan: SubscriptionPlan {
         SubscriptionPlan.from(planId: subscription?.plan_id ?? "")
     }
@@ -30,7 +32,7 @@ struct ManageSubscriptionView: View {
     var body: some View {
         VStack(spacing: 0) {
             if embedded, let onOpenMenu {
-                AppMenuHeader(title: "Subscription", onMenu: onOpenMenu)
+                AppMenuHeader(title: L10n.tr("settings.subscription", locale: locale), onMenu: onOpenMenu)
             } else {
                 HStack {
                     Button { dismiss() } label: {
@@ -40,8 +42,8 @@ struct ManageSubscriptionView: View {
                             .frame(width: 32, height: 32)
                     }
                     Spacer()
-                    Text("Manage Subscription")
-                        .font(.system(size: 18, weight: .bold))
+                    Text(L10n.tr("sub.manageTitle", locale: locale))
+                        .font(.qasa(18, weight: .bold))
                         .foregroundColor(Theme.textOnChrome)
                     Spacer()
                     Color.clear.frame(width: 32, height: 32)
@@ -68,8 +70,8 @@ struct ManageSubscriptionView: View {
                             cancelButton
                         }
                     } else {
-                        Text("No active subscription found.")
-                            .font(.system(size: 14))
+                        Text(L10n.tr("sub.noneActive", locale: locale))
+                            .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 40)
@@ -77,12 +79,12 @@ struct ManageSubscriptionView: View {
 
                     if let statusMessage {
                         Text(statusMessage)
-                            .font(.system(size: 13))
+                            .font(.qasa(13))
                             .foregroundColor(Theme.mint)
                     }
                     if let errorMessage {
                         Text(errorMessage)
-                            .font(.system(size: 13))
+                            .font(.qasa(13))
                             .foregroundColor(Theme.danger)
                     }
                 }
@@ -92,18 +94,23 @@ struct ManageSubscriptionView: View {
             }
         }
         .background(Theme.chrome.ignoresSafeArea())
+        .appLocalization()
         .task { await load() }
-        .alert("Cancel subscription?", isPresented: $showCancelConfirm) {
-            Button("Keep Premium", role: .cancel) {}
-            Button("Continue", role: .destructive) {
+        .alert(L10n.tr("sub.cancelConfirmTitle", locale: locale), isPresented: $showCancelConfirm) {
+            Button(L10n.tr("sub.keepPremium", locale: locale), role: .cancel) {}
+            Button(L10n.tr("sub.continue", locale: locale), role: .destructive) {
                 cancelReason = ""
                 showCancelReason = true
             }
         } message: {
-            Text("You'll keep Premium until \(formattedDate(subscription?.expires_at)). Auto-renew will be turned off.")
+            Text(String(
+                format: L10n.tr("sub.cancelConfirmMessage", locale: locale),
+                formattedDate(subscription?.expires_at)
+            ))
         }
         .sheet(isPresented: $showCancelReason) {
             cancelReasonSheet
+                .appLocalization()
         }
     }
 
@@ -111,12 +118,12 @@ struct ManageSubscriptionView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text(plan.displayName)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.qasa(18, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                 Spacer()
-                Text(isCancelled ? "Cancelling" : "Active")
-                    .font(.kasoMono(11))
-                    .tracking(0.6)
+                Text(isCancelled ? L10n.tr("sub.cancelling", locale: locale) : L10n.tr("sub.active", locale: locale))
+                    .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .kasoMono(11))
+                    .tracking(AppTypography.usesRudaw ? 0 : 0.6)
                     .foregroundColor(isCancelled ? Theme.gold : Theme.mint)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -125,17 +132,20 @@ struct ManageSubscriptionView: View {
                     )
             }
 
-            detailRow(label: "Amount", value: "\(sub.amount_iqd.formatted(.number.grouping(.automatic))) IQD")
-            detailRow(label: "Started", value: formattedDate(sub.started_at))
-            detailRow(label: "Renews / expires", value: formattedDate(sub.expires_at))
+            detailRow(
+                label: L10n.tr("sub.amount", locale: locale),
+                value: "\(sub.amount_iqd.formatted(.number.grouping(.automatic).locale(locale))) \(L10n.tr("sub.iqd", locale: locale))"
+            )
+            detailRow(label: L10n.tr("sub.started", locale: locale), value: formattedDate(sub.started_at))
+            detailRow(label: L10n.tr("sub.renewsExpires", locale: locale), value: formattedDate(sub.expires_at))
             if isCancelled, let cancelledAt = sub.cancelled_at {
-                detailRow(label: "Cancelled", value: formattedDate(cancelledAt))
+                detailRow(label: L10n.tr("sub.cancelled", locale: locale), value: formattedDate(cancelledAt))
             }
 
             Text(isCancelled
-                 ? "Access continues until the end of the current period."
-                 : "Premium includes 5 devices, breach monitoring, and VPN.")
-                .font(.system(size: 13))
+                 ? L10n.tr("sub.accessContinues", locale: locale)
+                 : L10n.tr("sub.premiumIncludes", locale: locale))
+                .font(.qasa(13))
                 .foregroundColor(Theme.textSecondary)
         }
         .padding(20)
@@ -150,11 +160,11 @@ struct ManageSubscriptionView: View {
     private func detailRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 13))
+                .font(.qasa(13))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
             Text(value)
-                .font(.system(size: 13, weight: .medium))
+                .font(.qasa(13, weight: .medium))
                 .foregroundColor(Theme.textPrimary)
         }
     }
@@ -165,13 +175,13 @@ struct ManageSubscriptionView: View {
                 .foregroundColor(Theme.mint)
                 .font(.system(size: 18))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Auto-renew")
-                    .font(.system(size: 15, weight: .semibold))
+                Text(L10n.tr("sub.autoRenew", locale: locale))
+                    .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(isCancelled
-                      ? "Turned off after cancellation."
-                      : "Renews automatically at period end.")
-                    .font(.system(size: 12))
+                      ? L10n.tr("sub.autoRenewOffCancelled", locale: locale)
+                      : L10n.tr("sub.autoRenewOn", locale: locale))
+                    .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
             }
             Spacer()
@@ -200,8 +210,8 @@ struct ManageSubscriptionView: View {
         Button {
             showCancelConfirm = true
         } label: {
-            Text("Cancel Subscription")
-                .font(.system(size: 15, weight: .semibold))
+            Text(L10n.tr("sub.cancelSubscription", locale: locale))
+                .font(.qasa(15, weight: .semibold))
                 .foregroundColor(Theme.danger)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
@@ -219,8 +229,8 @@ struct ManageSubscriptionView: View {
     private var cancelReasonSheet: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Help us improve — why are you cancelling?")
-                    .font(.system(size: 15))
+                Text(L10n.tr("sub.cancelReasonPrompt", locale: locale))
+                    .font(.qasa(15))
                     .foregroundColor(Theme.textSecondary)
 
                 TextEditor(text: $cancelReason)
@@ -234,15 +244,18 @@ struct ManageSubscriptionView: View {
                             .stroke(Theme.stroke, lineWidth: 1)
                     )
                     .foregroundColor(Theme.textPrimary)
+                    .font(.qasa(15))
 
-                Text("Optional. You can skip and still cancel.")
-                    .font(.kasoMono(11))
+                Text(L10n.tr("sub.cancelReasonOptional", locale: locale))
+                    .font(AppTypography.usesRudaw ? .qasa(11) : .kasoMono(11))
                     .foregroundColor(Theme.textSecondary)
 
                 Spacer()
 
                 PrimaryButton(
-                    title: isCancelling ? "Cancelling…" : "Confirm Cancel",
+                    title: isCancelling
+                        ? L10n.tr("sub.cancellingProgress", locale: locale)
+                        : L10n.tr("sub.confirmCancel", locale: locale),
                     icon: "xmark.circle",
                     cornerRadius: 8
                 ) {
@@ -253,11 +266,11 @@ struct ManageSubscriptionView: View {
             }
             .padding(Theme.screenPadding)
             .background(Theme.chrome.ignoresSafeArea())
-            .navigationTitle("Cancellation reason")
+            .navigationTitle(L10n.tr("sub.cancelReasonTitle", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Skip") {
+                    Button(L10n.tr("sub.skip", locale: locale)) {
                         Task { await confirmCancel() }
                     }
                     .disabled(isCancelling)
@@ -289,7 +302,9 @@ struct ManageSubscriptionView: View {
             let sub = try await SubscriptionService.shared.setAutoRenew(enabled)
             subscription = sub
             autoRenew = sub.auto_renew
-            statusMessage = enabled ? "Auto-renew enabled." : "Auto-renew disabled."
+            statusMessage = enabled
+                ? L10n.tr("sub.autoRenewEnabled", locale: locale)
+                : L10n.tr("sub.autoRenewDisabled", locale: locale)
         } catch {
             autoRenew = subscription?.auto_renew ?? true
             errorMessage = error.localizedDescription
@@ -306,7 +321,10 @@ struct ManageSubscriptionView: View {
             subscription = sub
             autoRenew = sub.auto_renew
             showCancelReason = false
-            statusMessage = "Subscription cancelled. Premium stays active until \(formattedDate(sub.expires_at))."
+            statusMessage = String(
+                format: L10n.tr("sub.cancelledUntil", locale: locale),
+                formattedDate(sub.expires_at)
+            )
             await MainActor.run {
                 session.syncFromLicense()
             }
@@ -320,7 +338,7 @@ struct ManageSubscriptionView: View {
                 ?? ISO8601DateFormatter.qasaFractional.date(from: iso) else {
             return iso ?? "—"
         }
-        return date.formatted(date: .abbreviated, time: .omitted)
+        return date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted).locale(locale))
     }
 }
 

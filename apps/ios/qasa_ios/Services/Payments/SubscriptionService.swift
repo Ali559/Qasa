@@ -46,8 +46,8 @@ enum SubscriptionPlan: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .monthly: return "Premium Monthly"
-        case .yearly: return "Premium Yearly"
+        case .monthly: return L10n.tr("sub.planMonthly")
+        case .yearly: return L10n.tr("sub.planYearly")
         }
     }
 

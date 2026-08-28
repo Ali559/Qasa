@@ -27,6 +27,8 @@ struct qasaApp: App {
         WindowGroup {
             RootView()
                 .preferredColorScheme(colorScheme)
+                .environment(\.locale, prefs.locale)
+                .environment(\.layoutDirection, prefs.layoutDirection)
                 .environment(prefs)
                 .modelContainer(container)
         }
@@ -42,6 +44,8 @@ struct qasaApp: App {
 
     struct RootView: View {
         @Environment(\.modelContext) private var modelContext
+        @Environment(\.colorScheme) private var systemScheme
+        @Environment(AppPreferences.self) private var prefs
         @State private var unlocked = false
         @State private var showPairing = false
         @State private var session = AppSession()
@@ -49,6 +53,14 @@ struct qasaApp: App {
 
         private var showLogin: Bool {
             VaultAuthStore.vaultExists
+        }
+
+        private var effectiveScheme: ColorScheme {
+            switch prefs.theme {
+            case .system: return systemScheme
+            case .light: return .light
+            case .dark: return .dark
+            }
         }
 
         var body: some View {
@@ -73,6 +85,12 @@ struct qasaApp: App {
                     )
                 }
             }
+            .environment(\.themePalette, ThemePalette.resolved(for: effectiveScheme))
+            .environment(\.locale, prefs.locale)
+            .environment(\.layoutDirection, prefs.layoutDirection)
+            .font(.qasa(16))
+            // Refresh localized strings without resetting unlock state (state lives on RootView).
+            .id(prefs.language.rawValue)
             .sheet(isPresented: $showPairing) {
                 PairExistingVaultView(
                     onPaired: { _ in
@@ -82,10 +100,11 @@ struct qasaApp: App {
                     },
                     onCancel: { showPairing = false }
                 )
+                .appLocalization()
             }
             .overlay {
                 if isBootstrapping {
-                    ProgressView("Securing vault…")
+                    ProgressView(L10n.tr("auth.securingVault", locale: prefs.locale))
                         .padding(24)
                         .background(Theme.cardBackground)
                         .cornerRadius(12)

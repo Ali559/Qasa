@@ -18,15 +18,15 @@ struct CollectionsView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
-                AppMenuHeader(title: "Collections", onMenu: onOpenMenu)
+                AppMenuHeader(title: L10n.tr("nav.collections", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
 
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         if collections.isEmpty {
                             ContentUnavailableView(
-                                "No Collections",
+                                L10n.tr("collections.noneTitle"),
                                 systemImage: "folder",
-                                description: Text("Tap + to create your first collection.")
+                                description: Text(L10n.tr("collections.empty"))
                             )
                             .padding(.top, 48)
                         } else {
@@ -54,27 +54,27 @@ struct CollectionsView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .alert("New Collection", isPresented: $showCreate) {
-            TextField("Name", text: $newName)
-            Button("Cancel", role: .cancel) {}
-            Button("Create") { createCollection() }
+        .alert(L10n.tr("collections.createTitle"), isPresented: $showCreate) {
+            TextField(L10n.tr("common.name"), text: $newName)
+            Button(L10n.tr("common.cancel"), role: .cancel) {}
+            Button(L10n.tr("common.create")) { createCollection() }
         }
-        .alert("Rename Collection", isPresented: Binding(
+        .alert(L10n.tr("collections.rename"), isPresented: Binding(
             get: { editing != nil },
             set: { if !$0 { editing = nil } }
         )) {
-            TextField("Name", text: $editName)
-            Button("Cancel", role: .cancel) { editing = nil }
-            Button("Save") { saveRename() }
+            TextField(L10n.tr("common.name"), text: $editName)
+            Button(L10n.tr("common.cancel"), role: .cancel) { editing = nil }
+            Button(L10n.tr("common.save")) { saveRename() }
         }
-        .alert("Delete Collection?", isPresented: Binding(
+        .alert(L10n.tr("collections.deleteTitle"), isPresented: Binding(
             get: { deleting != nil },
             set: { if !$0 { deleting = nil } }
         )) {
-            Button("Cancel", role: .cancel) { deleting = nil }
-            Button("Delete", role: .destructive) { confirmDelete() }
+            Button(L10n.tr("common.cancel"), role: .cancel) { deleting = nil }
+            Button(L10n.tr("common.delete"), role: .destructive) { confirmDelete() }
         } message: {
-            Text("Items stay in your vault but will no longer belong to this collection.")
+            Text(L10n.tr("collections.deleteMessage"))
         }
     }
 
@@ -96,7 +96,11 @@ struct CollectionsView: View {
                 Text(collection.name)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
-                Text("\(count) item\(count == 1 ? "" : "s")")
+                Text(String(
+                    format: L10n.tr(count == 1 ? "collections.itemCountOne" : "collections.itemCount"),
+                    locale: AppLanguage.current.locale,
+                    arguments: [count]
+                ))
                     .font(.system(size: 13))
                     .foregroundColor(Theme.textSecondary)
             }
@@ -108,12 +112,12 @@ struct CollectionsView: View {
                     editing = collection
                     editName = collection.name
                 } label: {
-                    Label("Edit", systemImage: "pencil")
+                    Label(L10n.tr("common.edit"), systemImage: "pencil")
                 }
                 Button(role: .destructive) {
                     deleting = collection
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label(L10n.tr("common.delete"), systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -193,9 +197,12 @@ struct CollectionDetailView: View {
             LazyVStack(spacing: 12) {
                 if collectionItems.isEmpty {
                     ContentUnavailableView(
-                        "Empty Collection",
+                        L10n.tr("collections.emptyCollectionTitle"),
                         systemImage: "tray",
-                        description: Text("Assign items to “\(collection.name)” from the item editor.")
+                        description: Text(String(
+                            format: L10n.tr("collections.assignHint"),
+                            collection.name
+                        ))
                     )
                     .padding(.top, 40)
                 } else {
@@ -224,6 +231,7 @@ struct CollectionDetailView: View {
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
             }
+            .appLocalization()
         }
     }
 }

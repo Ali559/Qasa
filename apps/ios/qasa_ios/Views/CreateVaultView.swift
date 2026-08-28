@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CreateVaultView: View {
+    @Environment(AppPreferences.self) private var prefs
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     @State private var biometricsEnabled = true
@@ -10,12 +11,14 @@ struct CreateVaultView: View {
     var onPairExisting: (() -> Void)? = nil
     var onLogin: (() -> Void)? = nil
 
+    private var locale: Locale { prefs.locale }
+
     private var strength: (label: String, filled: Int, color: Color) {
         switch password.count {
         case 0: return ("", 0, Theme.stroke)
-        case 1..<4: return ("Weak", 1, Theme.danger)
-        case 4..<8: return ("Fair", 2, Theme.goldMuted)
-        default: return ("Strong", 3, Theme.success)
+        case 1..<4: return (L10n.tr("auth.create.weak", locale: locale), 1, Theme.danger)
+        case 4..<8: return (L10n.tr("auth.create.fair", locale: locale), 2, Theme.goldMuted)
+        default: return (L10n.tr("auth.create.strong", locale: locale), 3, Theme.success)
         }
     }
 
@@ -26,16 +29,16 @@ struct CreateVaultView: View {
     var body: some View {
         VStack(spacing: 0) {
             KasoBrandHeader(
-                trailing: AnyView(StatusPill(text: "100% Local & Offline"))
+                trailing: AnyView(StatusPill(text: L10n.tr("brand.localOffline", locale: locale)))
             )
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Create Vault")
+                        Text(L10n.tr("auth.create.title", locale: locale))
                             .font(.system(size: 28, weight: .heavy))
                             .foregroundColor(Theme.textPrimary)
-                        Text("Set a master password to secure your local vault. This is the only key.")
+                        Text(L10n.tr("auth.create.subtitle", locale: locale))
                             .font(.system(size: 14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -43,7 +46,7 @@ struct CreateVaultView: View {
                             Button {
                                 onPairExisting?()
                             } label: {
-                                Text("I already have Qasa on another device")
+                                Text(L10n.tr("auth.create.pairExisting", locale: locale))
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(Theme.mint)
                             }
@@ -53,10 +56,10 @@ struct CreateVaultView: View {
                     .padding(.bottom, 4)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: "Master Password")
+                        SectionLabel(text: L10n.tr("auth.unlock.masterPassword", locale: locale))
                         ThemedTextField(
                             icon: "lock.fill",
-                            placeholder: "Enter password",
+                            placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
                             text: $password,
                             isSecure: !passwordVisible,
                             trailing: AnyView(
@@ -72,7 +75,7 @@ struct CreateVaultView: View {
                         if !password.isEmpty {
                             VStack(spacing: 4) {
                                 HStack {
-                                    Text("Strength")
+                                    Text(L10n.tr("auth.create.strength", locale: locale))
                                         .font(.kasoMono(12))
                                         .tracking(0.6)
                                         .foregroundColor(Theme.textSecondary)
@@ -89,10 +92,10 @@ struct CreateVaultView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: "Confirm Password")
+                        SectionLabel(text: L10n.tr("auth.create.confirmPassword", locale: locale))
                         ThemedTextField(
                             icon: "lock.rotation",
-                            placeholder: "Re-enter password",
+                            placeholder: L10n.tr("auth.create.reenter", locale: locale),
                             text: $confirmPassword,
                             isSecure: true
                         )
@@ -115,10 +118,10 @@ struct CreateVaultView: View {
                                     .foregroundColor(Theme.mint)
                             }
                             VStack(alignment: .leading, spacing: 0) {
-                                Text("Enable Biometrics")
+                                Text(L10n.tr("auth.create.enableBiometrics", locale: locale))
                                     .font(.system(size: 16))
                                     .foregroundColor(Theme.textPrimary)
-                                Text("Use Face ID or Fingerprint")
+                                Text(L10n.tr("auth.create.biometricsHint", locale: locale))
                                     .font(.kasoMono(12))
                                     .tracking(0.6)
                                     .foregroundColor(Theme.textSecondary)
@@ -142,11 +145,11 @@ struct CreateVaultView: View {
                                 HStack(spacing: 8) {
                                     Image(systemName: "exclamationmark.triangle.fill")
                                         .foregroundColor(Theme.goldMuted)
-                                    Text("Zero-Knowledge")
+                                    Text(L10n.tr("auth.create.zeroKnowledge", locale: locale))
                                         .font(.system(size: 20, weight: .semibold))
                                         .foregroundColor(Theme.goldMuted)
                                 }
-                                Text("Your master password cannot be recovered by anyone—not even Qasa. If you lose it, your vault data is permanently inaccessible.")
+                                Text(L10n.tr("auth.create.zeroKnowledgeBody", locale: locale))
                                     .font(.system(size: 14))
                                     .foregroundColor(Theme.textSecondary)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -157,7 +160,7 @@ struct CreateVaultView: View {
 
                     if let onLogin {
                         Button(action: onLogin) {
-                            Text("Already have a vault? Unlock")
+                            Text(L10n.tr("auth.create.alreadyHave", locale: locale))
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(Theme.mint)
                                 .frame(maxWidth: .infinity)
@@ -173,7 +176,7 @@ struct CreateVaultView: View {
 
             VStack(spacing: 0) {
                 Divider().background(Theme.stroke)
-                PrimaryButton(title: "Create Local Vault", icon: "key.fill") {
+                PrimaryButton(title: L10n.tr("auth.create.buttonLocal", locale: locale), icon: "key.fill") {
                     createVault()
                 }
                 .opacity(canCreate ? 1 : 0.5)
@@ -185,12 +188,14 @@ struct CreateVaultView: View {
             .background(Theme.chrome.opacity(0.92))
         }
         .background(Theme.background.ignoresSafeArea())
-        .preferredColorScheme(.dark)
+        .environment(prefs)
     }
 
     private func createVault() {
         guard canCreate else {
-            errorMessage = password != confirmPassword ? "Passwords do not match." : "Enter a master password."
+            errorMessage = password != confirmPassword
+                ? L10n.tr("auth.create.mismatch", locale: locale)
+                : L10n.tr("auth.create.enterPassword", locale: locale)
             return
         }
         errorMessage = nil
@@ -200,4 +205,5 @@ struct CreateVaultView: View {
 
 #Preview {
     CreateVaultView(onVaultCreated: { _, _ in }, onLogin: {})
+        .environment(AppPreferences.shared)
 }

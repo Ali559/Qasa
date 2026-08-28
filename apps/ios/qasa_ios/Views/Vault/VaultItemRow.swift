@@ -60,20 +60,20 @@ struct VaultItemRow: View {
                     Button {
                         openURL(url)
                     } label: {
-                        Label("Open Website", systemImage: "safari")
+                        Label(L10n.tr("vault.openWebsite"), systemImage: "safari")
                     }
                 }
 
                 Button {
                     onEdit()
                 } label: {
-                    Label("Edit Item", systemImage: "pencil")
+                    Label(L10n.tr("vault.editItem"), systemImage: "pencil")
                 }
 
                 Button(role: .destructive) {
                     showDeleteConfirm = true
                 } label: {
-                    Label("Delete Item", systemImage: "trash")
+                    Label(L10n.tr("vault.deleteItem"), systemImage: "trash")
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -93,14 +93,14 @@ struct VaultItemRow: View {
         .onChange(of: row.updatedAt) { _, _ in
             loadPayload()
         }
-        .alert("Delete Item?", isPresented: $showDeleteConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(L10n.tr("vault.deleteItemTitle"), isPresented: $showDeleteConfirm) {
+            Button(L10n.tr("common.cancel"), role: .cancel) {}
+            Button(L10n.tr("common.delete"), role: .destructive) {
                 try? VaultRepository.shared.delete(id: row.id)
                 onDeleted()
             }
         } message: {
-            Text("This permanently removes “\(row.displayName)” from your vault.")
+            Text(String(format: L10n.tr("vault.deleteItemMessage"), row.displayName))
         }
         .overlay(alignment: .bottom) {
             if let toast {

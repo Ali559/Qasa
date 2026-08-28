@@ -1,6 +1,7 @@
 import Foundation
+import SwiftUI
 
-enum AppLanguage: String, CaseIterable, Identifiable {
+enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     case en, ckb, ar
 
     var id: String { rawValue }
@@ -12,12 +13,35 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .ar: return "العربية"
         }
     }
+
+    var locale: Locale {
+        switch self {
+        case .en: return Locale(identifier: "en")
+        case .ckb: return Locale(identifier: "ckb")
+        case .ar: return Locale(identifier: "ar")
+        }
+    }
+
+    var layoutDirection: LayoutDirection {
+        switch self {
+        case .en: return .leftToRight
+        case .ckb, .ar: return .rightToLeft
+        }
+    }
 }
 
 enum AppThemePreference: String, CaseIterable, Identifiable {
     case system, light, dark
 
     var id: String { rawValue }
+
+    var displayNameKey: String.LocalizationValue {
+        switch self {
+        case .system: return "settings.theme.system"
+        case .light: return "settings.theme.light"
+        case .dark: return "settings.theme.dark"
+        }
+    }
 
     var displayName: String {
         switch self {
@@ -39,6 +63,9 @@ final class AppPreferences {
     var language: AppLanguage {
         didSet {
             defaults.set(language.rawValue, forKey: langKey)
+            // Helps Bundle / catalog lookups that still consult preferred languages.
+            defaults.set([language.rawValue], forKey: "AppleLanguages")
+            AppTypography.applyChromeFonts(for: language)
             Task { await syncLocaleToServer() }
         }
     }
@@ -47,11 +74,16 @@ final class AppPreferences {
         didSet { defaults.set(theme.rawValue, forKey: themeKey) }
     }
 
+    var locale: Locale { language.locale }
+    var layoutDirection: LayoutDirection { language.layoutDirection }
+
     private init() {
         let lang = defaults.string(forKey: langKey).flatMap(AppLanguage.init(rawValue:)) ?? .en
-        let themePref = defaults.string(forKey: themeKey).flatMap(AppThemePreference.init(rawValue:)) ?? .dark
+        let themePref = defaults.string(forKey: themeKey).flatMap(AppThemePreference.init(rawValue:)) ?? .system
         self.language = lang
         self.theme = themePref
+        defaults.set([lang.rawValue], forKey: "AppleLanguages")
+        AppTypography.applyChromeFonts(for: lang)
     }
 
     func syncLocaleToServer() async {

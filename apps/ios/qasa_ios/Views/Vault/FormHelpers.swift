@@ -31,6 +31,8 @@ struct FormTextField: View {
                     TextField(title, text: $text)
                 }
             }
+            .font(.qasa(16))
+            .multilineTextAlignment(.leading)
             .foregroundColor(Theme.textPrimary)
             .padding(14)
             .background(Theme.cardBackground)
@@ -40,6 +42,7 @@ struct FormTextField: View {
                     .stroke(Theme.stroke, lineWidth: 1)
             )
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -50,7 +53,7 @@ struct CountryPickerField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: "Country")
+            FormFieldLabel(text: L10n.tr("vault.country", locale: AppLanguage.current.locale))
             CountryMenuPicker(countryCode: $countryCode, showsDialCode: showsDialCode)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -70,7 +73,7 @@ struct CountryMenuPicker: View {
     var showsDialCode: Bool = false
 
     var body: some View {
-        Picker("Country", selection: $countryCode) {
+        Picker(L10n.tr("vault.country", locale: AppLanguage.current.locale), selection: $countryCode) {
             ForEach(Country.all) { country in
                 Text(country.pickerLabel(showsDialCode: showsDialCode)).tag(country.code)
             }
@@ -90,10 +93,10 @@ struct CollectionPickerField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: "Collection")
+            FormFieldLabel(text: L10n.tr("vault.collection", locale: AppLanguage.current.locale))
             HStack {
-                Picker("Collection", selection: $collectionId) {
-                    Text("None").tag(UUID?.none)
+                Picker(L10n.tr("vault.collection", locale: AppLanguage.current.locale), selection: $collectionId) {
+                    Text(L10n.tr("common.none", locale: AppLanguage.current.locale)).tag(UUID?.none)
                     ForEach(collections, id: \.id) { c in
                         Text(c.name).tag(Optional(c.id))
                     }
@@ -114,10 +117,10 @@ struct CollectionPickerField: View {
                     .stroke(Theme.stroke, lineWidth: 1)
             )
         }
-        .alert("New Collection", isPresented: $showNew) {
-            TextField("Name", text: $newName)
-            Button("Cancel", role: .cancel) { newName = "" }
-            Button("Create") {
+        .alert(L10n.tr("vault.newCollection", locale: AppLanguage.current.locale), isPresented: $showNew) {
+            TextField(L10n.tr("common.name", locale: AppLanguage.current.locale), text: $newName)
+            Button(L10n.tr("common.cancel", locale: AppLanguage.current.locale), role: .cancel) { newName = "" }
+            Button(L10n.tr("common.create", locale: AppLanguage.current.locale)) {
                 let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
                 let c = VaultCollection(name: trimmed)
@@ -134,7 +137,7 @@ struct NoteColorPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: "Color")
+            FormFieldLabel(text: L10n.tr("vault.color", locale: AppLanguage.current.locale))
             HStack(spacing: 12) {
                 ForEach(NoteColor.allCases, id: \.self) { c in
                     Circle()
@@ -158,6 +161,8 @@ struct VaultFormChrome<Content: View>: View {
     let onSave: () -> Void
     @ViewBuilder var content: Content
 
+    private var locale: Locale { AppLanguage.current.locale }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -171,15 +176,21 @@ struct VaultFormChrome<Content: View>: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel", action: onCancel)
+                    Button(L10n.tr("common.cancel", locale: locale), action: onCancel)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? "Update" : "Save", action: onSave)
-                        .disabled(!canSave)
-                        .tint(Theme.mint)
+                    Button(
+                        isEditing
+                            ? L10n.tr("common.update", locale: locale)
+                            : L10n.tr("common.save", locale: locale),
+                        action: onSave
+                    )
+                    .disabled(!canSave)
+                    .tint(Theme.mint)
                 }
             }
         }
+        .appLocalization()
     }
 }
 
@@ -191,7 +202,7 @@ func unlockIfNeeded(protected: Bool, completion: @escaping (Bool) -> Void) {
     let context = LAContext()
     var error: NSError?
     if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock protected note") { success, _ in
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: L10n.tr("vault.unlockProtectedNote")) { success, _ in
             DispatchQueue.main.async { completion(success) }
         }
     } else {

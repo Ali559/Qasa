@@ -23,8 +23,20 @@ final class AppSession {
         syncFromLicense()
     }
 
+    var displayName: String {
+        if username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || username == "Qasa User" {
+            return L10n.tr("session.qasaUser", locale: AppPreferences.shared.locale)
+        }
+        return username
+    }
+
     var planSubtitle: String {
-        isPremium ? "Premium Plan" : "\(tierLabel) Plan"
+        let locale = AppPreferences.shared.locale
+        if isPremium {
+            return L10n.tr("settings.premiumPlan", locale: locale)
+        }
+        return String(format: L10n.tr("settings.freePlan", locale: locale), tierLabel)
     }
 
     func syncFromLicense() {
@@ -50,20 +62,24 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var localizationKey: String {
         switch self {
-        case .vault: return "Vault"
-        case .notifications: return "Notifications"
-        case .generator: return "Generator"
-        case .passwordHealth: return "Password Health"
-        case .breachMonitoring: return "Breach Monitoring"
-        case .vpn: return "VPN"
-        case .collections: return "Collections"
-        case .settings: return "Settings"
-        case .terms: return "Terms of Use"
-        case .privacy: return "Privacy Policy"
-        case .premiumUpgrade: return "Upgrade"
+        case .vault: return "nav.vault"
+        case .notifications: return "nav.notifications"
+        case .generator: return "nav.generator"
+        case .passwordHealth: return "nav.passwordHealth"
+        case .breachMonitoring: return "nav.breachMonitoring"
+        case .vpn: return "nav.vpn"
+        case .collections: return "nav.collections"
+        case .settings: return "nav.settings"
+        case .terms: return "nav.terms"
+        case .privacy: return "nav.privacy"
+        case .premiumUpgrade: return "nav.upgrade"
         }
+    }
+
+    var title: String {
+        L10n.tr(localizationKey, locale: AppLanguage.current.locale)
     }
 
     var systemImage: String {

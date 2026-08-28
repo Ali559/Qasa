@@ -99,8 +99,8 @@ enum MonitorStatus: String, Codable, CaseIterable {
 
     var title: String {
         switch self {
-        case .secure: return "Secure"
-        case .atRisk: return "At Risk"
+        case .secure: return L10n.tr("breach.secure")
+        case .atRisk: return L10n.tr("breach.atRisk")
         }
     }
 }

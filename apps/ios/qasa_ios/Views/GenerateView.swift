@@ -4,11 +4,12 @@ import SwiftUI
 struct GeneratorView: View {
     var onOpenMenu: () -> Void = {}
 
+    @Environment(AppPreferences.self) private var prefs
     @StateObject private var model = PasswordGeneratorModel()
 
     var body: some View {
         VStack(spacing: 0) {
-            AppMenuHeader(title: "Generator", onMenu: onOpenMenu)
+            AppMenuHeader(title: L10n.tr("nav.generator", locale: prefs.locale), onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -26,21 +27,14 @@ struct GeneratorView: View {
 
     private var saveButton: some View {
         Button {} label: {
-            VStack(spacing: 4) {
-                Text("Save to Vault")
-                    .font(.system(size: 16))
-                Text("پاشەکەوتکردن لە خەزێنە")
-                    .font(.system(size: 12))
-                    .tracking(0.6)
-                    .opacity(0.8)
-                    .environment(\.layoutDirection, .rightToLeft)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Theme.mint)
-            .foregroundColor(Theme.mintOnChip)
-            .cornerRadius(Theme.cornerRadius)
-            .shadow(color: Theme.mint.opacity(0.3), radius: 8)
+            Text(L10n.tr("gen.saveToVault", locale: prefs.locale))
+                .font(.system(size: 16, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Theme.mint)
+                .foregroundColor(Theme.mintOnChip)
+                .cornerRadius(Theme.cornerRadius)
+                .shadow(color: Theme.mint.opacity(0.3), radius: 8)
         }
         .padding(.top, 16)
     }

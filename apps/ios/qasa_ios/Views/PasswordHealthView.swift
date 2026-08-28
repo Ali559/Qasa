@@ -9,8 +9,8 @@ enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .reused: return "Reused"
-        case .weak: return "Weak"
+        case .reused: return L10n.tr("health.reused")
+        case .weak: return L10n.tr("health.weak")
         }
     }
 }
@@ -24,7 +24,7 @@ struct PasswordHealthView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            AppMenuHeader(title: "Password Health", onMenu: onOpenMenu)
+            AppMenuHeader(title: L10n.tr("nav.passwordHealth", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
 
             ScrollView {
                 VStack(spacing: 28) {
@@ -32,27 +32,27 @@ struct PasswordHealthView: View {
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         NavigationLink(value: PasswordIssueTab.reused) {
-                            statCard(title: "Passwords", value: "\(report.totalPasswords)", accent: Theme.mint)
+                            statCard(title: L10n.tr("health.passwords"), value: "\(report.totalPasswords)", accent: Theme.mint)
                         }
                         .buttonStyle(.plain)
 
                         NavigationLink(value: PasswordIssueTab.reused) {
-                            statCard(title: "Reused", value: "\(report.reusedCount)", accent: Theme.gold)
+                            statCard(title: L10n.tr("health.reused"), value: "\(report.reusedCount)", accent: Theme.gold)
                         }
                         .buttonStyle(.plain)
 
                         NavigationLink(value: PasswordIssueTab.weak) {
-                            statCard(title: "Weak", value: "\(report.weakCount)", accent: Theme.danger)
+                            statCard(title: L10n.tr("health.weak"), value: "\(report.weakCount)", accent: Theme.danger)
                         }
                         .buttonStyle(.plain)
                     }
 
                     CardContainer {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("How scoring works")
+                            Text(L10n.tr("health.howScoring"))
                                 .font(.system(size: 16, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
-                            Text("Score starts at 100 and drops for weak or reused login passwords. Aim for unique, long passwords with mixed character types.")
+                            Text(L10n.tr("health.howScoringBody"))
                                 .font(.system(size: 14))
                                 .foregroundColor(Theme.textSecondary)
                         }
@@ -100,7 +100,7 @@ struct PasswordHealthView: View {
                         .font(.system(size: 44, weight: .bold))
                         .foregroundColor(scoreColor(for: animatedScore))
                         .contentTransition(.numericText())
-                    Text("out of 100")
+                    Text(L10n.tr("health.outOf100"))
                         .font(.kasoMono(12))
                         .foregroundColor(Theme.textSecondary)
                 }
@@ -126,10 +126,10 @@ struct PasswordHealthView: View {
 
     private func scoreLabel(for score: Int) -> String {
         switch score {
-        case 90...100: return "Excellent"
-        case 75..<90: return "Strong"
-        case 50..<75: return "Fair"
-        default: return "Needs Attention"
+        case 90...100: return L10n.tr("health.excellent")
+        case 75..<90: return L10n.tr("health.strong")
+        case 50..<75: return L10n.tr("health.fair")
+        default: return L10n.tr("health.needsAttention")
         }
     }
 
@@ -221,12 +221,14 @@ struct PasswordHealthIssuesView: View {
                 LazyVStack(spacing: 12) {
                     if currentItems.isEmpty {
                         ContentUnavailableView(
-                            "No \(selectedTab.title) Passwords",
+                            selectedTab == .reused
+                                ? L10n.tr("health.noReusedTitle")
+                                : L10n.tr("health.noWeakTitle"),
                             systemImage: selectedTab == .reused ? "arrow.triangle.2.circlepath" : "exclamationmark.triangle",
                             description: Text(
                                 selectedTab == .reused
-                                    ? "None of your login passwords are reused."
-                                    : "None of your login passwords are marked weak."
+                                    ? L10n.tr("health.noReusedBody")
+                                    : L10n.tr("health.noWeakBody")
                             )
                         )
                         .padding(.top, 48)
@@ -250,13 +252,14 @@ struct PasswordHealthIssuesView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle("Password Issues")
+        .navigationTitle(L10n.tr("health.issuesTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
         .sheet(item: $editorMode) { presentation in
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
             }
+            .appLocalization()
         }
     }
 }

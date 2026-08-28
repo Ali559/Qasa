@@ -2,6 +2,8 @@ import SwiftUI
 
 struct SideMenuView: View {
     @Environment(AppSession.self) private var session
+    @Environment(AppPreferences.self) private var prefs
+    @Environment(\.themePalette) private var theme
     @Binding var isPresented: Bool
     var currentPage: AppPage
     var onSelect: (AppPage) -> Void
@@ -15,7 +17,7 @@ struct SideMenuView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 header
-                Divider().background(Theme.strokeChrome)
+                Divider().background(theme.strokeChrome)
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -32,11 +34,12 @@ struct SideMenuView: View {
             }
             .frame(maxWidth: 320)
             .frame(maxHeight: .infinity)
-            .background(Theme.chrome)
+            .background(theme.chrome)
             .overlay(alignment: .trailing) {
-                Rectangle().fill(Theme.strokeChrome).frame(width: 1)
+                Rectangle().fill(theme.strokeChrome).frame(width: 1)
             }
         }
+        // `.leading` mirrors with layoutDirection (RTL → visual right).
         .transition(.move(edge: .leading).combined(with: .opacity))
     }
 
@@ -46,34 +49,34 @@ struct SideMenuView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "shield.fill")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Theme.mint)
-                    Text("Kaso")
+                        .foregroundColor(theme.mint)
+                    Text("brand.name")
                         .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(Theme.mint)
+                        .foregroundColor(theme.mint)
                 }
 
                 Spacer()
 
                 if !session.isPremium {
                     Button(action: onUpgrade) {
-                        Text("Upgrade")
+                        Text("nav.upgrade")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Theme.mintOnPrimary)
+                            .foregroundColor(theme.mintOnPrimary)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
-                            .background(Theme.mint)
+                            .background(theme.mint)
                             .clipShape(Capsule())
                     }
                 }
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(session.username)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
+                Text(session.displayName)
+                    .font(.qasa(17, weight: .semibold))
+                    .foregroundColor(theme.textPrimary)
                 Text(session.planSubtitle)
-                    .font(.system(size: 13))
-                    .foregroundColor(Theme.textSecondary)
+                    .font(.qasa(13))
+                    .foregroundColor(theme.textSecondary)
             }
         }
         .padding(.horizontal, 20)
@@ -93,7 +96,7 @@ struct SideMenuView: View {
 
     private var toolsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionLabel("Tools")
+            sectionLabel(L10n.tr("nav.tools", locale: prefs.locale))
             VStack(spacing: 2) {
                 menuRow(.passwordHealth)
                 menuRow(.breachMonitoring)
@@ -107,7 +110,7 @@ struct SideMenuView: View {
 
     private var accountSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            sectionLabel("My Account")
+            sectionLabel(L10n.tr("nav.myAccount", locale: prefs.locale))
             VStack(spacing: 2) {
                 menuRow(.settings)
                 menuRow(.terms)
@@ -121,7 +124,7 @@ struct SideMenuView: View {
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(Theme.textTertiary)
+            .foregroundColor(theme.textTertiary)
             .textCase(.uppercase)
             .tracking(0.8)
             .padding(.horizontal, 12)
@@ -130,7 +133,7 @@ struct SideMenuView: View {
 
     private var sectionDivider: some View {
         Rectangle()
-            .fill(Theme.strokeChrome)
+            .fill(theme.strokeChrome)
             .frame(height: 1)
             .padding(.vertical, 4)
     }
@@ -144,20 +147,20 @@ struct SideMenuView: View {
                 Image(systemName: page.systemImage)
                     .font(.system(size: 16, weight: .medium))
                     .frame(width: 22)
-                    .foregroundColor(selected ? Theme.mint : Theme.textSecondary)
-                Text(page.title)
-                    .font(.system(size: 16, weight: selected ? .semibold : .regular))
-                    .foregroundColor(selected ? Theme.textPrimary : Theme.textSecondary)
+                    .foregroundColor(selected ? theme.mint : theme.textSecondary)
+                Text(L10n.tr(page.localizationKey, locale: prefs.locale))
+                    .font(.qasa(16, weight: selected ? .semibold : .regular))
+                    .foregroundColor(selected ? theme.textPrimary : theme.textSecondary)
                 Spacer()
                 if page.requiresPremium && !session.isPremium {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 11))
-                        .foregroundColor(Theme.gold)
+                        .foregroundColor(theme.gold)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
-            .background(selected ? Theme.cardBackground : Color.clear)
+            .background(selected ? theme.cardBackground : Color.clear)
             .cornerRadius(10)
         }
         .buttonStyle(.plain)
