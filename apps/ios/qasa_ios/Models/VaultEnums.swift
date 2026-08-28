@@ -169,11 +169,29 @@ enum Honorific: String, Codable, CaseIterable {
     case mx = "Mx"
     case miss = "Miss"
     case none = "None of these"
+
+    var displayName: String {
+        switch self {
+        case .mr: return L10n.tr("honorific.mr")
+        case .mrs: return L10n.tr("honorific.mrs")
+        case .ms: return L10n.tr("honorific.ms")
+        case .mx: return L10n.tr("honorific.mx")
+        case .miss: return L10n.tr("honorific.miss")
+        case .none: return L10n.tr("honorific.none")
+        }
+    }
 }
 
 enum EmailKind: String, Codable, CaseIterable {
     case personal = "Personal"
     case work = "Work"
+
+    var displayName: String {
+        switch self {
+        case .personal: return L10n.tr("emailKind.personal")
+        case .work: return L10n.tr("emailKind.work")
+        }
+    }
 }
 
 enum PhoneKind: String, Codable, CaseIterable {
@@ -184,6 +202,18 @@ enum PhoneKind: String, Codable, CaseIterable {
     case fax = "Fax"
     case homePhone = "Home Phone"
     case other = "Other"
+
+    var displayName: String {
+        switch self {
+        case .cell: return L10n.tr("phoneKind.cell")
+        case .work: return L10n.tr("phoneKind.work")
+        case .workCell: return L10n.tr("phoneKind.workCell")
+        case .workFax: return L10n.tr("phoneKind.workFax")
+        case .fax: return L10n.tr("phoneKind.fax")
+        case .homePhone: return L10n.tr("phoneKind.homePhone")
+        case .other: return L10n.tr("phoneKind.other")
+        }
+    }
 }
 
 enum NoteColor: String, Codable, CaseIterable {
@@ -552,7 +582,7 @@ extension VaultPayload {
             ].filter { !$0.value.isEmpty }
         case .name(let f):
             return [
-                DetailField(label: L10n.tr("field.type"), value: f.type == .none ? "" : f.type.rawValue),
+                DetailField(label: L10n.tr("field.type"), value: f.type == .none ? "" : f.type.displayName),
                 DetailField(label: L10n.tr("field.firstName"), value: f.firstName),
                 DetailField(label: L10n.tr("field.middleName"), value: f.middleName),
                 DetailField(label: L10n.tr("field.lastName"), value: f.lastName),
@@ -563,13 +593,13 @@ extension VaultPayload {
         case .personalEmail(let f):
             return [
                 DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
-                DetailField(label: L10n.tr("field.type"), value: f.type.rawValue),
+                DetailField(label: L10n.tr("field.type"), value: f.type.displayName),
                 DetailField(label: L10n.tr("field.email"), value: f.email)
             ].filter { !$0.value.isEmpty }
         case .phone(let f):
             return [
                 DetailField(label: L10n.tr("field.itemName"), value: f.itemName),
-                DetailField(label: L10n.tr("field.type"), value: f.type.rawValue),
+                DetailField(label: L10n.tr("field.type"), value: f.type.displayName),
                 DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode)),
                 DetailField(label: L10n.tr("field.phoneNumber"), value: "\(Country.dialCode(for: f.countryCode)) \(f.number)")
             ].filter { !$0.value.isEmpty }

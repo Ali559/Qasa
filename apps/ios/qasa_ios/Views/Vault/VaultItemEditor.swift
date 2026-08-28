@@ -246,7 +246,7 @@ struct VaultItemEditor: View {
             VStack(alignment: .leading, spacing: 8) {
                 FormFieldLabel(text: L10n.tr("field.type"))
                 Picker(L10n.tr("field.type"), selection: nameHonorificBinding) {
-                    ForEach(Honorific.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(Honorific.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 .pickerStyle(.menu)
                 .tint(Theme.mint)
@@ -272,7 +272,7 @@ struct VaultItemEditor: View {
             VStack(alignment: .leading, spacing: 8) {
                 FormFieldLabel(text: L10n.tr("field.type"))
                 Picker(L10n.tr("field.type"), selection: emailKindBinding) {
-                    ForEach(EmailKind.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(EmailKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 .tint(Theme.mint)
                 .padding(12)
@@ -294,7 +294,7 @@ struct VaultItemEditor: View {
                 VStack(alignment: .leading, spacing: 8) {
                     FormFieldLabel(text: L10n.tr("field.type"))
                     Picker(L10n.tr("field.type"), selection: phoneKindBinding) {
-                        ForEach(PhoneKind.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                        ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                     }
                     .labelsHidden()
                     .tint(Theme.mint)

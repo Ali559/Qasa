@@ -9,12 +9,14 @@ struct ValidatedDateField: View {
     @State private var showPicker = false
     @State private var parseError: String?
 
-    private static let displayFormatter: DateFormatter = {
+    private var locale: Locale { AppLanguage.current.locale }
+
+    private var displayFormatter: DateFormatter {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "MMM d yyyy"
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate("MMMdyyyy")
         return f
-    }()
+    }
 
     private static let parsers: [DateFormatter] = {
         ["MMM d yyyy", "MMM d, yyyy", "yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy"].map { format in
@@ -38,15 +40,16 @@ struct ValidatedDateField: View {
                     if let d = Self.parse(text) { picked = d }
                     showPicker = true
                 } label: {
-                    Label("Pick date", systemImage: "calendar")
-                        .font(.system(size: 13, weight: .semibold))
+                    Label(L10n.tr("date.pick", locale: locale), systemImage: "calendar")
+                        .font(.qasa(13, weight: .semibold))
                         .foregroundColor(Theme.mint)
                 }
                 Spacer()
                 if let parseError {
                     Text(parseError)
-                        .font(.system(size: 11))
+                        .font(.qasa(11))
                         .foregroundColor(Theme.danger)
+                        .multilineTextAlignment(.trailing)
                 }
             }
 
@@ -57,13 +60,14 @@ struct ValidatedDateField: View {
                     displayedComponents: .date
                 )
                 .datePickerStyle(.graphical)
+                .environment(\.locale, locale)
                 .tint(Theme.mint)
                 .onChange(of: picked) { _, newValue in
-                    text = Self.displayFormatter.string(from: newValue)
+                    text = displayFormatter.string(from: newValue)
                     parseError = nil
                 }
-                Button("Done") { showPicker = false }
-                    .font(.system(size: 13, weight: .semibold))
+                Button(L10n.tr("date.done", locale: locale)) { showPicker = false }
+                    .font(.qasa(13, weight: .semibold))
                     .foregroundColor(Theme.mint)
             }
         }
@@ -78,7 +82,7 @@ struct ValidatedDateField: View {
         if Self.parse(trimmed) != nil {
             parseError = nil
         } else {
-            parseError = "Use e.g. Nov 6 2000"
+            parseError = L10n.tr("date.invalidFormat", locale: locale)
         }
     }
 
@@ -87,6 +91,12 @@ struct ValidatedDateField: View {
         for f in parsers {
             if let d = f.date(from: trimmed) { return d }
         }
+        // Locale-aware fallback for typed dates in ckb/ar.
+        let localized = DateFormatter()
+        localized.locale = AppLanguage.current.locale
+        localized.dateStyle = .medium
+        localized.timeStyle = .none
+        if let d = localized.date(from: trimmed) { return d }
         return nil
     }
 
