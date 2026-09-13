@@ -27,7 +27,8 @@ final class DeviceRegistrationService {
             account_id: accountId,
             device_fingerprint: fingerprint,
             device_name: UIDevice.current.name,
-            platform: "ios"
+            platform: "ios",
+            location: Self.approximateLocation()
         )
 
         do {
@@ -62,5 +63,42 @@ final class DeviceRegistrationService {
     func unlinkDevice(id: String) async throws {
         let url = QasaConfig.devicesURL.appending(path: "/\(id)")
         try await QasaAPIClient.shared.requestEmpty(url, method: "DELETE")
+    }
+
+    /// Whether `accountId` can accept another linked device (live Premium + under limit).
+    func checkLinkEligibility(accountId: UUID) async throws -> DeviceLinkCheckResponse {
+        try await QasaAPIClient.shared.request(
+            QasaConfig.devicesLinkCheckURL,
+            method: "POST",
+            body: DeviceLinkCheckRequest(account_id: accountId.uuidString.lowercased()),
+            authorized: false
+        )
+    }
+
+    /// Unlinks every device except the primary (first linked). Returns remaining devices.
+    @discardableResult
+    func unlinkOtherDevices() async throws -> [RemoteDevice] {
+        struct Response: Decodable {
+            let revoked: Int?
+            let devices: [RemoteDevice]?
+        }
+        let response: Response = try await QasaAPIClient.shared.request(
+            QasaConfig.devicesOthersURL,
+            method: "DELETE"
+        )
+        return response.devices ?? []
+    }
+
+    /// Region-based hint for linked-device list (not precise GPS).
+    static func approximateLocation() -> String {
+        let locale = Locale.current
+        if let region = locale.region?.identifier,
+           let name = locale.localizedString(forRegionCode: region) {
+            return name
+        }
+        if let region = locale.region?.identifier {
+            return region
+        }
+        return TimeZone.current.identifier
     }
 }

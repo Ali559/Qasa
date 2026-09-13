@@ -8,8 +8,9 @@ struct LinkedDevice: Identifiable {
     let iconName: String
 }
 
-struct PaymentMethod: Identifiable {
-    let id = UUID()
+struct PaymentMethod: Identifiable, Equatable {
+    /// Stable id so selection survives view recomputation (must not be a fresh UUID).
+    var id: String { gateway }
     let name: String
     let subtitle: String
     let badgeText: String

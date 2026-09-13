@@ -15,6 +15,8 @@ struct SettingsView: View {
     @State private var showLogoutConfirm = false
     @State private var showLANSync = false
     @State private var showImport = false
+    @State private var showChangeMasterPassword = false
+    @State private var showAutoLock = false
     @State private var exportText: String?
     @State private var pairingCode: String?
     @State private var linkedDeviceCount = 0
@@ -31,10 +33,13 @@ struct SettingsView: View {
                     profileCard
 
                     settingsSection(title: L10n.tr("settings.security", locale: locale)) {
-                        NavChevronRow(
-                            icon: "ellipsis",
-                            title: L10n.tr("settings.changeMasterPassword", locale: locale)
-                        )
+                        Button { showChangeMasterPassword = true } label: {
+                            NavChevronRow(
+                                icon: "ellipsis",
+                                title: L10n.tr("settings.changeMasterPassword", locale: locale)
+                            )
+                        }
+                        .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
                         ToggleRow(
                             icon: "touchid",
@@ -45,13 +50,31 @@ struct SettingsView: View {
                         )
                         .onChange(of: biometricUnlock) { _, newValue in
                             VaultKeychainStore.biometricsEnabled = newValue
+                            SharedVaultKeychain.biometricsEnabled = newValue
                         }
                         Divider().background(Theme.stroke)
-                        NavChevronRow(
-                            icon: "clock",
-                            title: L10n.tr("settings.autoLock", locale: locale),
-                            trailingText: L10n.tr("settings.autoLockValue", locale: locale)
-                        )
+                        Button {
+                            openAutofillSettings()
+                        } label: {
+                            NavChevronRow(
+                                icon: "text.cursor",
+                                title: L10n.tr("settings.autofill", locale: locale),
+                                subtitle: L10n.tr("settings.autofillSubtitle", locale: locale)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        Divider().background(Theme.stroke)
+                        Button { showAutoLock = true } label: {
+                            NavChevronRow(
+                                icon: "clock",
+                                title: L10n.tr("settings.autoLock", locale: locale),
+                                trailingText: String(
+                                    format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
+                                    prefs.autoLockMinutes
+                                )
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -196,6 +219,14 @@ struct SettingsView: View {
             Text(L10n.tr("settings.lockAlertMessage", locale: locale))
         }
         .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView().appLocalization() }
+        .sheet(isPresented: $showChangeMasterPassword) {
+            ChangeMasterPasswordView()
+                .appLocalization()
+        }
+        .sheet(isPresented: $showAutoLock) {
+            AutoLockSettingsView()
+                .appLocalization()
+        }
         .sheet(isPresented: $showPremium) {
             Group {
                 if session.isPremium {
@@ -208,7 +239,10 @@ struct SettingsView: View {
             .appLocalization()
         }
         .sheet(isPresented: $showLANSync) {
-            LANSyncView()
+            LANSyncView(onUpgrade: {
+                showLANSync = false
+                showPremium = true
+            })
                 .environment(session)
                 .appLocalization()
         }
@@ -297,6 +331,19 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 8) {
             SectionLabel(text: title)
             CardContainer { content() }
+        }
+    }
+
+    private func openAutofillSettings() {
+        let candidates = [
+            "App-prefs:PASSWORDS",
+            "App-prefs:root=PASSWORDS",
+            UIApplication.openSettingsURLString
+        ]
+        for raw in candidates {
+            guard let url = URL(string: raw), UIApplication.shared.canOpenURL(url) else { continue }
+            UIApplication.shared.open(url)
+            return
         }
     }
 }

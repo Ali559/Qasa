@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Brand header
 struct KasoBrandHeader: View {
     @Environment(\.themePalette) private var theme
+    @Environment(AppPreferences.self) private var prefs
     var titleSize: CGFloat = 24
     var trailing: AnyView? = nil
 
@@ -13,7 +14,7 @@ struct KasoBrandHeader: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(theme.mint)
                     .frame(width: 16, height: 20)
-                Text("brand.name")
+                Text(L10n.tr("brand.name", locale: prefs.locale))
                     .font(.system(size: titleSize, weight: .heavy))
                     .foregroundColor(theme.mint)
             }

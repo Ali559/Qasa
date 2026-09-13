@@ -128,33 +128,49 @@ struct VaultItemRow: View {
     private func copyPrimary() {
         guard let payload = payload ?? Optional(fallbackPayload).flatMap({ _ in try? VaultRepository.shared.payload(for: row.id) }),
               let primary = payload.primaryCopy else { return }
-        if payload.isProtectedNote {
-            unlockIfNeeded(protected: true) { ok in
-                guard ok else { return }
-                VaultClipboard.copy(primary.value)
+        let doCopy = {
+            if PaymentClipboard.copy(
+                payload: payload,
+                preferredFieldId: PaymentClipboard.preferredFieldId(forLabel: primary.label)
+            ) {
                 try? VaultRepository.shared.markUsed(id: row.id)
-                flash("Copied \(primary.label)")
+                return
             }
-        } else {
             VaultClipboard.copy(primary.value)
             try? VaultRepository.shared.markUsed(id: row.id)
             flash("Copied \(primary.label)")
         }
+        if payload.isProtectedNote {
+            unlockIfNeeded(protected: true) { ok in
+                guard ok else { return }
+                doCopy()
+            }
+        } else {
+            doCopy()
+        }
     }
 
     private func copyValue(_ value: String, label: String) {
-        let payload = payload ?? fallbackPayload
-        if payload.isProtectedNote && label.contains("Content") {
-            unlockIfNeeded(protected: true) { ok in
-                guard ok else { return }
-                VaultClipboard.copy(value)
+        let payload = self.payload ?? (try? VaultRepository.shared.payload(for: row.id)) ?? fallbackPayload
+        let doCopy = {
+            if PaymentClipboard.copy(
+                payload: payload,
+                preferredFieldId: PaymentClipboard.preferredFieldId(forLabel: label)
+            ) {
                 try? VaultRepository.shared.markUsed(id: row.id)
-                flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
+                return
             }
-        } else {
             VaultClipboard.copy(value)
             try? VaultRepository.shared.markUsed(id: row.id)
             flash(label.replacingOccurrences(of: "Copy ", with: "Copied "))
+        }
+        if payload.isProtectedNote && label.contains("Content") {
+            unlockIfNeeded(protected: true) { ok in
+                guard ok else { return }
+                doCopy()
+            }
+        } else {
+            doCopy()
         }
     }
 

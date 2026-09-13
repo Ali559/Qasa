@@ -86,4 +86,53 @@ final class VaultSession {
         lock()
         VaultKeychainStore.resetVaultSecrets()
     }
+
+    /// Verifies the current master password and derives new key material without committing yet.
+    func derivePasswordChange(current: String, newPassword: String) throws -> (
+        oldEnc: SymmetricKey,
+        newSalt: Data,
+        newVerifier: Data,
+        newPassword: String,
+        newEnc: SymmetricKey,
+        newSearch: SymmetricKey
+    ) {
+        guard isUnlocked,
+              let salt = VaultKeychainStore.kdfSalt,
+              let expected = VaultKeychainStore.passwordVerifier,
+              let oldEnc = encKey else {
+            throw VaultCryptoError.vaultLocked
+        }
+
+        let currentRoot = MasterKeyDeriver.deriveRootKey(password: current, salt: salt)
+        guard MasterKeyDeriver.passwordVerifier(rootKey: currentRoot) == expected else {
+            throw VaultCryptoError.wrongPassword
+        }
+
+        let trimmed = newPassword.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= 8 else {
+            throw VaultCryptoError.weakPassword
+        }
+
+        let newSalt = MasterKeyDeriver.generateSalt()
+        let newRoot = MasterKeyDeriver.deriveRootKey(password: trimmed, salt: newSalt)
+        let newVerifier = MasterKeyDeriver.passwordVerifier(rootKey: newRoot)
+        let newKeys = MasterKeyDeriver.deriveSubkeys(rootKey: newRoot)
+        return (oldEnc, newSalt, newVerifier, trimmed, newKeys.encKey, newKeys.searchKey)
+    }
+
+    func commitPasswordChange(
+        newSalt: Data,
+        newVerifier: Data,
+        newPassword: String,
+        newEnc: SymmetricKey,
+        newSearch: SymmetricKey
+    ) {
+        VaultKeychainStore.kdfSalt = newSalt
+        VaultKeychainStore.passwordVerifier = newVerifier
+        encKey = newEnc
+        searchKey = newSearch
+        if VaultKeychainStore.biometricsEnabled {
+            VaultKeychainStore.storeBiometricPassword(newPassword)
+        }
+    }
 }

@@ -24,9 +24,22 @@ enum VaultCrypto {
     }
 }
 
-enum VaultCryptoError: Error {
+enum VaultCryptoError: Error, LocalizedError {
     case encryptionFailed
     case invalidCiphertext
     case vaultLocked
     case itemNotFound
+    case wrongPassword
+    case weakPassword
+
+    var errorDescription: String? {
+        switch self {
+        case .encryptionFailed: return "Encryption failed"
+        case .invalidCiphertext: return "Invalid ciphertext"
+        case .vaultLocked: return "Vault is locked"
+        case .itemNotFound: return "Item not found"
+        case .wrongPassword: return "Wrong master password"
+        case .weakPassword: return "Password must be at least 8 characters"
+        }
+    }
 }

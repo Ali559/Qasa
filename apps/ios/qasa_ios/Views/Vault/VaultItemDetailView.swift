@@ -282,15 +282,24 @@ struct VaultItemDetailView: View {
         .onTapGesture {
             guard !locked, !field.value.isEmpty else { return }
             let value = field.value
+            let copyAction = {
+                if PaymentClipboard.copy(
+                    payload: payload,
+                    preferredFieldId: PaymentClipboard.preferredFieldId(forLabel: field.label)
+                ) {
+                    try? VaultRepository.shared.markUsed(id: itemId)
+                    return
+                }
+                VaultClipboard.copy(value)
+                try? VaultRepository.shared.markUsed(id: itemId)
+            }
             if field.isSecret && payload.isProtectedNote {
                 unlockIfNeeded(protected: true) { ok in
                     guard ok else { return }
-                    VaultClipboard.copy(value)
-                    try? VaultRepository.shared.markUsed(id: itemId)
+                    copyAction()
                 }
             } else {
-                VaultClipboard.copy(value)
-                try? VaultRepository.shared.markUsed(id: itemId)
+                copyAction()
             }
         }
     }

@@ -2,7 +2,7 @@ import FirebaseCore
 import FirebaseMessaging
 import Foundation
 import UIKit
-import UserNotifications
+@preconcurrency import UserNotifications
 
 extension Notification.Name {
     /// Posted when the user taps a remote/local push — open Notifications in the shell.
@@ -26,6 +26,7 @@ final class PushNotificationService: NSObject, UNUserNotificationCenterDelegate,
 
     func configure() {
         UNUserNotificationCenter.current().delegate = self
+        registerEphemeralPaymentCategory()
         guard Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil else {
             // Drop GoogleService-Info.plist from Firebase Console into qasa_ios/ to enable.
             return
@@ -34,6 +35,17 @@ final class PushNotificationService: NSObject, UNUserNotificationCenterDelegate,
             FirebaseApp.configure()
         }
         Messaging.messaging().delegate = self
+    }
+
+    private func registerEphemeralPaymentCategory() {
+        let identifier = EphemeralPaymentNotificationSupport.categoryId
+        let category = UNNotificationCategory(
+            identifier: identifier,
+            actions: [],
+            intentIdentifiers: [],
+            options: [.customDismissAction]
+        )
+        UNUserNotificationCenter.current().setNotificationCategories([category])
     }
 
     /// Call after vault unlock when a license token exists.
@@ -119,22 +131,42 @@ final class PushNotificationService: NSObject, UNUserNotificationCenterDelegate,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        let userInfo = notification.request.content.userInfo
+        if Self.isEphemeralPayment(userInfo) {
+            // Keep secrets in the OS banner / Notification Center — not an in-app overlay.
+            completionHandler([.banner, .list, .sound])
+            return
+        }
         completionHandler([.banner, .sound, .badge])
     }
 
-    // Tap → Notifications screen
+    // Tap → Notifications screen (except ephemeral payment secret panels)
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
+        if Self.isEphemeralPayment(userInfo) {
+            if response.actionIdentifier == UNNotificationDismissActionIdentifier {
+                Task { @MainActor in
+                    EphemeralPaymentNotificationSupport.clearOwnedPasteboardIfNeeded()
+                }
+            }
+            completionHandler()
+            return
+        }
         NotificationCenter.default.post(
             name: .qasaOpenNotifications,
             object: nil,
             userInfo: userInfo
         )
         completionHandler()
+    }
+
+    /// Thin nonisolated wrapper so delegate callbacks never touch MainActor-isolated APIs.
+    nonisolated private static func isEphemeralPayment(_ userInfo: [AnyHashable: Any]) -> Bool {
+        EphemeralPaymentNotificationSupport.isEphemeral(userInfo)
     }
 }
 

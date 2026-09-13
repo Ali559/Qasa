@@ -12,7 +12,9 @@ enum QasaConfig {
     }
 
     static var registerURL: URL { apiBaseURL.appending(path: "/v1/devices/register") }
+    static var devicesLinkCheckURL: URL { apiBaseURL.appending(path: "/v1/devices/link-check") }
     static var devicesURL: URL { apiBaseURL.appending(path: "/v1/devices") }
+    static var devicesOthersURL: URL { apiBaseURL.appending(path: "/v1/devices/others") }
     static var licenseRefreshURL: URL { apiBaseURL.appending(path: "/v1/license") }
     static var paymentsURL: URL { apiBaseURL.appending(path: "/v1/payments/intents") }
     static func paymentURL(id: String) -> URL { apiBaseURL.appending(path: "/v1/payments/\(id)") }

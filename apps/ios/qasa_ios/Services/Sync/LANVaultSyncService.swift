@@ -21,6 +21,10 @@ final class LANVaultSyncService {
     private init() {}
 
     func startHost(pairCode: String, vaultBlob: Data) {
+        guard LicenseManager.shared.isPremium else {
+            statusMessage = "Premium required"
+            return
+        }
         stop()
         isHosting = true
         statusMessage = "Waiting for peer on this Wi‑Fi…"
@@ -45,6 +49,10 @@ final class LANVaultSyncService {
     }
 
     func startBrowse(pairCode: String, onReceive: @escaping (Data) -> Void) {
+        guard LicenseManager.shared.isPremium else {
+            statusMessage = "Premium required"
+            return
+        }
         stop()
         isBrowsing = true
         statusMessage = "Looking for host…"

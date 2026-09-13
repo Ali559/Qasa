@@ -50,7 +50,7 @@ struct SideMenuView: View {
                     Image(systemName: "shield.fill")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(theme.mint)
-                    Text("brand.name")
+                    Text(L10n.tr("brand.name", locale: prefs.locale))
                         .font(.system(size: 22, weight: .heavy))
                         .foregroundColor(theme.mint)
                 }
@@ -59,7 +59,7 @@ struct SideMenuView: View {
 
                 if !session.isPremium {
                     Button(action: onUpgrade) {
-                        Text("nav.upgrade")
+                        Text(L10n.tr("nav.upgrade", locale: prefs.locale))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(theme.mintOnPrimary)
                             .padding(.horizontal, 12)

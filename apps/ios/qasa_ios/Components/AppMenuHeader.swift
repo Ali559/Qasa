@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AppMenuHeader: View {
     @Environment(\.themePalette) private var theme
+    @Environment(AppPreferences.self) private var prefs
     var title: String
     var onMenu: () -> Void
     var trailing: AnyView? = nil
@@ -17,7 +18,7 @@ struct AppMenuHeader: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(theme.strokeChrome, lineWidth: 1))
             }
-            .accessibilityLabel(Text("nav.openMenu"))
+            .accessibilityLabel(L10n.tr("nav.openMenu", locale: prefs.locale))
 
             Text(title)
                 .font(.qasa(20, weight: .bold))
@@ -39,6 +40,7 @@ struct AppMenuHeader: View {
 
 struct BrandMenuHeader: View {
     @Environment(\.themePalette) private var theme
+    @Environment(AppPreferences.self) private var prefs
     var onMenu: () -> Void
     var trailing: AnyView? = nil
     var titleSize: CGFloat = 20
@@ -54,13 +56,13 @@ struct BrandMenuHeader: View {
                     .clipShape(Circle())
                     .overlay(Circle().stroke(theme.strokeChrome, lineWidth: 1))
             }
-            .accessibilityLabel(Text("nav.openMenu"))
+            .accessibilityLabel(L10n.tr("nav.openMenu", locale: prefs.locale))
 
             HStack(spacing: 10) {
                 Image(systemName: "shield.fill")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(theme.mint)
-                Text("brand.name")
+                Text(L10n.tr("brand.name", locale: prefs.locale))
                     .font(.system(size: titleSize, weight: .heavy))
                     .foregroundColor(theme.mint)
             }

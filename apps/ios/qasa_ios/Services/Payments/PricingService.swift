@@ -74,4 +74,17 @@ extension PricingPlanDTO {
         default: return L10n.tr("sub.planMonthly")
         }
     }
+
+    /// Always resolve feature bullets from the string catalog (API English strings are ignored for UI).
+    var localizedFeatures: [String] {
+        var items = [
+            L10n.tr("premium.featureDevices"),
+            L10n.tr("premium.featureBreach"),
+            L10n.tr("premium.featureVPN")
+        ]
+        if interval == "yearly" {
+            items.append(L10n.tr("premium.featureSave"))
+        }
+        return items
+    }
 }

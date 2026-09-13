@@ -25,9 +25,15 @@ struct AppShellView: View {
                         PasswordHealthView(onOpenMenu: openMenu)
                     }
                 case .breachMonitoring:
-                    BreachMonitorView(onOpenMenu: openMenu)
+                    BreachMonitorView(
+                        onOpenMenu: openMenu,
+                        onUpgrade: { selectPage(.premiumUpgrade) }
+                    )
                 case .vpn:
-                    VPNView(onOpenMenu: openMenu)
+                    VPNView(
+                        onOpenMenu: openMenu,
+                        onUpgrade: { selectPage(.premiumUpgrade) }
+                    )
                 case .collections:
                     NavigationStack {
                         CollectionsView(onOpenMenu: openMenu)

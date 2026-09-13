@@ -6,24 +6,45 @@ struct PremiumUpgradeView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppSession.self) private var session
+    @Environment(AppPreferences.self) private var prefs
     @State private var plans: [PricingPlanDTO] = PricingService.fallbackPlans
     @State private var selectedPlanId: String = "premium_monthly"
     @State private var autoRenew = true
-    @State private var selectedMethodID: UUID?
+    @State private var selectedGateway: String = "fib"
     @State private var isPaying = false
     @State private var statusMessage: String?
     @State private var errorMessage: String?
 
+    private var locale: Locale { prefs.locale }
+
     private var methods: [PaymentMethod] {
         [
-            PaymentMethod(name: L10n.tr("premium.fib"), subtitle: L10n.tr("premium.fibSub"), badgeText: "FIB", badgeColorHex: "FFFFFF", gateway: "fib"),
-            PaymentMethod(name: L10n.tr("premium.fastpay"), subtitle: L10n.tr("premium.fastpaySub"), badgeText: "FastPay", badgeColorHex: "E31837", gateway: "fastpay"),
-            PaymentMethod(name: L10n.tr("premium.superqi"), subtitle: L10n.tr("premium.superqiSub"), badgeText: "SuperQi", badgeColorHex: "2563EB", gateway: "superqi")
+            PaymentMethod(
+                name: L10n.tr("premium.fib", locale: locale),
+                subtitle: L10n.tr("premium.fibSub", locale: locale),
+                badgeText: "FIB",
+                badgeColorHex: "FFFFFF",
+                gateway: "fib"
+            ),
+            PaymentMethod(
+                name: L10n.tr("premium.fastpay", locale: locale),
+                subtitle: L10n.tr("premium.fastpaySub", locale: locale),
+                badgeText: "FastPay",
+                badgeColorHex: "E31837",
+                gateway: "fastpay"
+            ),
+            PaymentMethod(
+                name: L10n.tr("premium.superqi", locale: locale),
+                subtitle: L10n.tr("premium.superqiSub", locale: locale),
+                badgeText: "SuperQi",
+                badgeColorHex: "2563EB",
+                gateway: "superqi"
+            )
         ]
     }
 
     private var selectedMethod: PaymentMethod? {
-        methods.first { $0.id == selectedMethodID } ?? methods.first
+        methods.first { $0.gateway == selectedGateway } ?? methods.first
     }
 
     private var selectedPlan: PricingPlanDTO {
@@ -37,9 +58,9 @@ struct PremiumUpgradeView: View {
     var body: some View {
         VStack(spacing: 0) {
             if embedded, let onOpenMenu {
-                AppMenuHeader(title: L10n.tr("nav.upgrade", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
+                AppMenuHeader(title: L10n.tr("nav.upgrade", locale: locale), onMenu: onOpenMenu)
             } else {
-                sheetChrome(title: L10n.tr("premium.title"))
+                sheetChrome(title: L10n.tr("premium.title", locale: locale))
             }
 
             ScrollView {
@@ -67,8 +88,12 @@ struct PremiumUpgradeView: View {
             VStack(spacing: 12) {
                 PrimaryButton(
                     title: isPaying
-                        ? L10n.tr("premium.processing")
-                        : String(format: L10n.tr("premium.payVia"), formattedAmount, selectedMethod?.badgeText ?? "FIB"),
+                        ? L10n.tr("premium.processing", locale: locale)
+                        : String(
+                            format: L10n.tr("premium.payVia", locale: locale),
+                            formattedAmount,
+                            selectedMethod?.badgeText ?? "FIB"
+                        ),
                     icon: "lock.fill",
                     cornerRadius: 8
                 ) {
@@ -78,14 +103,14 @@ struct PremiumUpgradeView: View {
                 .disabled(isPaying || session.isPremium)
 
                 if session.isPremium {
-                    Text(L10n.tr("premium.alreadyPremium"))
+                    Text(L10n.tr("premium.alreadyPremium", locale: locale))
                         .font(.kasoMono(12))
                         .tracking(0.6)
                         .foregroundColor(Theme.success)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                 } else {
-                    Text(L10n.tr("premium.opensWallet"))
+                    Text(L10n.tr("premium.opensWallet", locale: locale))
                         .font(.kasoMono(12))
                         .tracking(0.6)
                         .foregroundColor(Theme.textSecondary)
@@ -103,7 +128,6 @@ struct PremiumUpgradeView: View {
         }
         .background(Theme.chrome.ignoresSafeArea())
         .appLocalization()
-        .onAppear { selectedMethodID = methods.first?.id }
         .task {
             let fetched = await PricingService.shared.fetchPlans()
             if !fetched.isEmpty {
@@ -123,6 +147,7 @@ struct PremiumUpgradeView: View {
                     .foregroundColor(Theme.textPrimary)
                     .frame(width: 32, height: 32)
             }
+            .accessibilityLabel(L10n.tr("common.cancel", locale: locale))
             Spacer()
             Text(title)
                 .font(.qasa(20, weight: .bold))
@@ -172,7 +197,9 @@ struct PremiumUpgradeView: View {
 
             VStack(spacing: 20) {
                 VStack(spacing: 8) {
-                    Text(plan.interval == "yearly" ? L10n.tr("premium.bestValue") : L10n.tr("premium.upgradeToPro"))
+                    Text(plan.interval == "yearly"
+                          ? L10n.tr("premium.bestValue", locale: locale)
+                          : L10n.tr("premium.upgradeToPro", locale: locale))
                         .font(.kasoMono(12))
                         .tracking(1.2)
                         .foregroundColor(Theme.gold)
@@ -191,7 +218,7 @@ struct PremiumUpgradeView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
-                    ForEach(plan.featureList.isEmpty ? [L10n.tr("premium.featureDevices"), L10n.tr("premium.featureBreach"), L10n.tr("premium.featureVPN")] : plan.featureList, id: \.self) { feature in
+                    ForEach(plan.localizedFeatures, id: \.self) { feature in
                         FeatureRow(text: feature)
                     }
                 }
@@ -215,10 +242,10 @@ struct PremiumUpgradeView: View {
                 .foregroundColor(Theme.mint)
                 .font(.system(size: 18))
             VStack(alignment: .leading, spacing: 2) {
-                Text(L10n.tr("premium.autoRenew"))
+                Text(L10n.tr("premium.autoRenew", locale: locale))
                     .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
-                Text(L10n.tr("premium.autoRenewDetail"))
+                Text(L10n.tr("premium.autoRenewDetail", locale: locale))
                     .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
             }
@@ -238,7 +265,7 @@ struct PremiumUpgradeView: View {
 
     private var paymentSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(L10n.tr("premium.selectPayment"))
+            Text(L10n.tr("premium.selectPayment", locale: locale))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
 
@@ -251,9 +278,9 @@ struct PremiumUpgradeView: View {
     }
 
     private func paymentRow(_ method: PaymentMethod) -> some View {
-        let selected = selectedMethodID == method.id
+        let selected = selectedGateway == method.gateway
         return Button {
-            selectedMethodID = method.id
+            selectedGateway = method.gateway
         } label: {
             HStack(spacing: 0) {
                 paymentBadge(method)
@@ -280,6 +307,7 @@ struct PremiumUpgradeView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(selected ? Theme.mint : Theme.stroke, lineWidth: 1)
             )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -315,16 +343,25 @@ struct PremiumUpgradeView: View {
             let opened = await PaymentService.shared.openDeepLink(intent.deep_link)
 
             if opened {
-                statusMessage = "Complete payment in \(method.badgeText)…"
+                statusMessage = String(
+                    format: L10n.tr("premium.completeInWallet", locale: locale),
+                    method.badgeText
+                )
             } else {
                 #if DEBUG
-                statusMessage = "\(method.badgeText) app not available — simulating payment…"
+                statusMessage = String(
+                    format: L10n.tr("premium.simulatingPayment", locale: locale),
+                    method.badgeText
+                )
                 try await PaymentService.shared.simulateStubPayment(
                     gateway: gateway,
                     gatewayOrderId: intent.gateway_order_id
                 )
                 #else
-                errorMessage = "Install the \(method.badgeText) app to complete payment, then try again."
+                errorMessage = String(
+                    format: L10n.tr("premium.installWalletApp", locale: locale),
+                    method.badgeText
+                )
                 return
                 #endif
             }
@@ -342,14 +379,15 @@ struct PremiumUpgradeView: View {
                     session.syncFromLicense()
                 }
                 if session.isPremium {
-                    statusMessage = L10n.tr("premium.activated")
+                    statusMessage = L10n.tr("premium.activated", locale: locale)
                     if !embedded { dismiss() }
                 } else {
                     errorMessage = LicenseManager.shared.lastError
-                        ?? L10n.tr("premium.licenseRefreshFailed")
+                        ?? L10n.tr("premium.licenseRefreshFailed", locale: locale)
                 }
             } else {
                 errorMessage = PaymentService.shared.lastError
+                    ?? L10n.tr("premium.paymentFailed", locale: locale)
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -374,4 +412,5 @@ struct FeatureRow: View {
 #Preview {
     PremiumUpgradeView()
         .environment(AppSession())
+        .environment(AppPreferences.shared)
 }

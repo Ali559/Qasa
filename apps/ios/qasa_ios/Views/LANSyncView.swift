@@ -2,6 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct LANSyncView: View {
+    var onUpgrade: () -> Void = {}
+
     @Environment(AppSession.self) private var session
     @Environment(AppPreferences.self) private var prefs
     @Environment(\.dismiss) private var dismiss
@@ -27,40 +29,10 @@ struct LANSyncView: View {
                             icon: "crown.fill",
                             cornerRadius: 8
                         ) {
-                            dismiss()
+                            onUpgrade()
                         }
                     } else {
-                        Text(L10n.tr("lan.secureTitle", locale: locale))
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(Theme.textPrimary)
-                        Text(L10n.tr("lan.secureBody", locale: locale))
-                            .font(.system(size: 14))
-                            .foregroundColor(Theme.textSecondary)
-
-                        Picker("Mode", selection: $mode) {
-                            Text(L10n.tr("lan.hostMode", locale: locale)).tag(Mode.host)
-                            Text(L10n.tr("lan.joinMode", locale: locale)).tag(Mode.join)
-                        }
-                        .pickerStyle(.segmented)
-
-                        ThemedTextField(icon: "number", placeholder: "6-digit code", text: $pairCode)
-
-                        Text(validationMessage ?? sync.statusMessage)
-                            .font(.kasoMono(12))
-                            .foregroundColor(Theme.mint)
-
-                        PrimaryButton(
-                            title: mode == .host
-                                ? L10n.tr("lan.startHost", locale: locale)
-                                : L10n.tr("lan.findHost", locale: locale),
-                            icon: "wifi",
-                            cornerRadius: 8
-                        ) {
-                            runSync()
-                        }
-
-                        Button(L10n.tr("lan.stop", locale: locale)) { sync.stop() }
-                            .foregroundColor(Theme.danger)
+                        premiumBody
                     }
                 }
                 .padding(Theme.screenPadding)
@@ -76,7 +48,47 @@ struct LANSyncView: View {
         }
     }
 
+    private var premiumBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(L10n.tr("lan.secureTitle", locale: locale))
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(Theme.textPrimary)
+            Text(L10n.tr("lan.secureBody", locale: locale))
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+
+            Picker(L10n.tr("common.mode", locale: locale), selection: $mode) {
+                Text(L10n.tr("lan.hostMode", locale: locale)).tag(Mode.host)
+                Text(L10n.tr("lan.joinMode", locale: locale)).tag(Mode.join)
+            }
+            .pickerStyle(.segmented)
+
+            ThemedTextField(icon: "number", placeholder: "6-digit code", text: $pairCode)
+
+            Text(validationMessage ?? sync.statusMessage)
+                .font(.kasoMono(12))
+                .foregroundColor(Theme.mint)
+
+            PrimaryButton(
+                title: mode == .host
+                    ? L10n.tr("lan.startHost", locale: locale)
+                    : L10n.tr("lan.findHost", locale: locale),
+                icon: "wifi",
+                cornerRadius: 8
+            ) {
+                runSync()
+            }
+
+            Button(L10n.tr("lan.stop", locale: locale)) { sync.stop() }
+                .foregroundColor(Theme.danger)
+        }
+    }
+
     private func runSync() {
+        guard session.isPremium else {
+            validationMessage = L10n.tr("lan.requiresPremium", locale: locale)
+            return
+        }
         let code = pairCode.trimmingCharacters(in: .whitespacesAndNewlines)
         guard code.count >= 4 else {
             validationMessage = L10n.tr("lan.enterCode", locale: locale)

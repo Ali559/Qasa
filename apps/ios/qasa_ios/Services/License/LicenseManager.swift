@@ -9,9 +9,9 @@ struct ParsedLicense {
     let expiresAt: Date
     let entitlements: [String]
 
-    var isPremium: Bool { tier.lowercased() == "premium" }
-    var hasBreach: Bool { entitlements.contains("breach") || isPremium }
-    var hasVPN: Bool { entitlements.contains("vpn") || isPremium }
+    var isPremium: Bool {
+        tier.lowercased() == "premium" && expiresAt > Date()
+    }
 }
 
 @Observable

@@ -35,13 +35,19 @@ struct AddItemMenuView: View {
                     }
                 case .login:
                     Button { onSelect(.login(LoginFields())) } label: {
-                        Label("Login", systemImage: "person.badge.key.fill")
-                            .foregroundColor(Theme.textPrimary)
+                        Label(
+                            L10n.tr("vault.type.login", locale: AppPreferences.shared.locale),
+                            systemImage: "person.badge.key.fill"
+                        )
+                        .foregroundColor(Theme.textPrimary)
                     }
                 case .secureNote:
                     Button { onSelect(.secureNote(SecureNoteFields())) } label: {
-                        Label("Secure Note", systemImage: "note.text")
-                            .foregroundColor(Theme.textPrimary)
+                        Label(
+                            L10n.tr("vault.type.secureNote", locale: AppPreferences.shared.locale),
+                            systemImage: "note.text"
+                        )
+                        .foregroundColor(Theme.textPrimary)
                     }
                 case .payment:
                     subtypeButtons(for: .payment)

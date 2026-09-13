@@ -135,11 +135,15 @@ struct CreateVaultView: View {
                     .padding(.top, 12)
 
                     CardContainer(background: Theme.cardBackgroundLight) {
-                        ZStack(alignment: .topTrailing) {
-                            Image(systemName: "shield.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(Theme.stroke.opacity(0.5))
-                                .offset(x: 24, y: -24)
+                        ZStack {
+                            GeometryReader { geo in
+                                Image(systemName: "shield.fill")
+                                    .font(.system(size: 88, weight: .bold))
+                                    .foregroundStyle(Theme.mint.opacity(0.14))
+                                    // Pin to the physical trailing edge so RTL does not leave a hollow watermark on the leading side.
+                                    .position(x: geo.size.width - 8, y: 28)
+                                    .allowsHitTesting(false)
+                            }
 
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(spacing: 8) {
@@ -155,6 +159,7 @@ struct CreateVaultView: View {
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
+                        .clipped()
                     }
                     .padding(.top, 12)
 

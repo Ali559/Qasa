@@ -8,6 +8,10 @@ struct qasaApp: App {
     @State private var prefs = AppPreferences.shared
 
     init() {
+        if LocalVaultReset.shouldWipeOnLaunch {
+            LocalVaultReset.wipeStoreFiles()
+            LocalVaultReset.wipeSecretsAndWelcome()
+        }
         let schema = Schema(VaultSchema.models)
         let config = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
@@ -45,6 +49,7 @@ struct qasaApp: App {
     struct RootView: View {
         @Environment(\.modelContext) private var modelContext
         @Environment(\.colorScheme) private var systemScheme
+        @Environment(\.scenePhase) private var scenePhase
         @Environment(AppPreferences.self) private var prefs
         @State private var unlocked = false
         @State private var showPairing = false
@@ -53,6 +58,10 @@ struct qasaApp: App {
 
         private var showLogin: Bool {
             VaultAuthStore.vaultExists
+        }
+
+        private var showWelcome: Bool {
+            !VaultAuthStore.vaultExists && !prefs.hasCompletedWelcome
         }
 
         private var effectiveScheme: ColorScheme {
@@ -68,6 +77,10 @@ struct qasaApp: App {
                 if unlocked {
                     AppShellView(onLogout: handleLogout)
                         .environment(session)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in AutoLockMonitor.shared.noteActivity() }
+                        )
                 } else if showLogin {
                     LoginView(
                         onUnlocked: { password in
@@ -75,6 +88,8 @@ struct qasaApp: App {
                         },
                         onCreateVault: {}
                     )
+                } else if showWelcome {
+                    WelcomePreferencesView(onContinue: {})
                 } else {
                     CreateVaultView(
                         onVaultCreated: { password, biometrics in
@@ -91,7 +106,7 @@ struct qasaApp: App {
             .font(.qasa(16))
             // Refresh localized strings without resetting unlock state (state lives on RootView).
             .id(prefs.language.rawValue)
-            .sheet(isPresented: $showPairing) {
+            .fullScreenCover(isPresented: $showPairing) {
                 PairExistingVaultView(
                     onPaired: { _ in
                         showPairing = false
@@ -100,6 +115,7 @@ struct qasaApp: App {
                     },
                     onCancel: { showPairing = false }
                 )
+                .environment(prefs)
                 .appLocalization()
             }
             .overlay {
@@ -109,6 +125,12 @@ struct qasaApp: App {
                         .background(Theme.cardBackground)
                         .cornerRadius(12)
                 }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                AutoLockMonitor.shared.handleScenePhase(phase)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.forceLockNotification)) { _ in
+                handleLogout()
             }
         }
 
@@ -120,6 +142,7 @@ struct qasaApp: App {
                 try VaultAuthStore.createVault(masterPassword: password, biometricsEnabled: biometrics)
                 await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
                 unlocked = true
+                AutoLockMonitor.shared.start(onLock: handleLogout)
             } catch {
                 // createVault currently does not throw; keep hook for future validation.
             }
@@ -132,10 +155,12 @@ struct qasaApp: App {
             defer { isBootstrapping = false }
             await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
             unlocked = true
+            AutoLockMonitor.shared.start(onLock: handleLogout)
         }
 
         @MainActor
         private func handleLogout() {
+            AutoLockMonitor.shared.stop()
             AppBootstrap.onLogout()
             session.syncFromLicense()
             unlocked = false

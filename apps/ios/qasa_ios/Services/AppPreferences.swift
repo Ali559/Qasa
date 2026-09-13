@@ -59,12 +59,15 @@ final class AppPreferences {
     private let defaults = UserDefaults.standard
     private let langKey = "qasa.language"
     private let themeKey = "qasa.theme"
+    private let autoLockKey = "qasa.autoLockMinutes"
+    private let welcomeKey = "qasa.hasCompletedWelcome"
 
     var language: AppLanguage {
         didSet {
             defaults.set(language.rawValue, forKey: langKey)
             // Helps Bundle / catalog lookups that still consult preferred languages.
             defaults.set([language.rawValue], forKey: "AppleLanguages")
+            UserDefaults(suiteName: AppGroup.identifier)?.set(language.rawValue, forKey: langKey)
             AppTypography.applyChromeFonts(for: language)
             Task { await syncLocaleToServer() }
         }
@@ -74,16 +77,57 @@ final class AppPreferences {
         didSet { defaults.set(theme.rawValue, forKey: themeKey) }
     }
 
+    /// Minutes of inactivity before the vault locks (1…60).
+    var autoLockMinutes: Int {
+        didSet {
+            let clamped = min(60, max(1, autoLockMinutes))
+            if clamped != autoLockMinutes {
+                autoLockMinutes = clamped
+                return
+            }
+            defaults.set(clamped, forKey: autoLockKey)
+            AutoLockMonitor.shared.noteActivity()
+        }
+    }
+
+    var hasCompletedWelcome: Bool {
+        didSet { defaults.set(hasCompletedWelcome, forKey: welcomeKey) }
+    }
+
     var locale: Locale { language.locale }
     var layoutDirection: LayoutDirection { language.layoutDirection }
 
     private init() {
-        let lang = defaults.string(forKey: langKey).flatMap(AppLanguage.init(rawValue:)) ?? .en
+        let lang = defaults.string(forKey: langKey).flatMap(AppLanguage.init(rawValue:))
+            ?? Self.inferredLanguage()
         let themePref = defaults.string(forKey: themeKey).flatMap(AppThemePreference.init(rawValue:)) ?? .system
+        let storedLock = defaults.object(forKey: autoLockKey) as? Int ?? 5
         self.language = lang
         self.theme = themePref
+        self.autoLockMinutes = min(60, max(1, storedLock))
+        self.hasCompletedWelcome = defaults.bool(forKey: welcomeKey)
         defaults.set([lang.rawValue], forKey: "AppleLanguages")
+        UserDefaults(suiteName: AppGroup.identifier)?.set(lang.rawValue, forKey: langKey)
         AppTypography.applyChromeFonts(for: lang)
+    }
+
+    func markWelcomeCompleted() {
+        hasCompletedWelcome = true
+    }
+
+    func resetWelcome() {
+        hasCompletedWelcome = false
+    }
+
+    /// Best-effort first pick from the device language list (Kurdish / Arabic / English).
+    static func inferredLanguage() -> AppLanguage {
+        for id in Locale.preferredLanguages {
+            let lower = id.lowercased()
+            if lower.hasPrefix("ckb") || lower.hasPrefix("ku") { return .ckb }
+            if lower.hasPrefix("ar") { return .ar }
+            if lower.hasPrefix("en") { return .en }
+        }
+        return .en
     }
 
     func syncLocaleToServer() async {

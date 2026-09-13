@@ -4,6 +4,30 @@ nonisolated struct RemoteDevice: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let device_name: String
     let platform: String
+    let location: String?
+    let created_at: String?
+    let last_seen_at: String?
+    let is_primary: Bool?
+
+    var isPrimary: Bool { is_primary == true }
+
+    var activatedAt: Date? {
+        Self.parseDate(created_at)
+    }
+
+    var lastSeenAt: Date? {
+        Self.parseDate(last_seen_at)
+    }
+
+    private static func parseDate(_ raw: String?) -> Date? {
+        guard let raw, !raw.isEmpty else { return nil }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = fractional.date(from: raw) { return d }
+        let plain = ISO8601DateFormatter()
+        plain.formatOptions = [.withInternetDateTime]
+        return plain.date(from: raw)
+    }
 }
 
 struct RegisterDeviceRequest: Encodable {
@@ -11,6 +35,7 @@ struct RegisterDeviceRequest: Encodable {
     let device_fingerprint: String
     let device_name: String
     let platform: String
+    let location: String?
 }
 
 struct RegisterDeviceResponse: Decodable {
@@ -19,6 +44,18 @@ struct RegisterDeviceResponse: Decodable {
     let devices_used: Int
     let device_limit: Int
     let tier: String
+}
+
+struct DeviceLinkCheckRequest: Encodable {
+    let account_id: String
+}
+
+struct DeviceLinkCheckResponse: Decodable {
+    let eligible: Bool
+    let tier: String
+    let devices_used: Int
+    let device_limit: Int
+    let error: String?
 }
 
 struct DeviceListResponse: Decodable {

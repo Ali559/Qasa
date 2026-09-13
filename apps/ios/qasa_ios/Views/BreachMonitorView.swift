@@ -3,6 +3,7 @@ import SwiftData
 
 struct BreachMonitorView: View {
     var onOpenMenu: () -> Void = {}
+    var onUpgrade: () -> Void = {}
 
     @Environment(AppSession.self) private var session
     @Environment(\.modelContext) private var modelContext
@@ -16,35 +17,18 @@ struct BreachMonitorView: View {
     @State private var scanResults: [BreachCheckResult] = []
     @State private var errorMessage: String?
 
-    private var maxSlots: Int { session.isPremium ? 10 : 2 }
+    private let maxSlots = 10
 
     var body: some View {
         VStack(spacing: 0) {
-            AppMenuHeader(title: L10n.tr("nav.breachMonitoring", locale: AppPreferences.shared.locale), onMenu: onOpenMenu)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    slotsHeader
-                    addEmailCard
-                    monitoredList
-                    if session.isPremium {
-                        breachTabs
-                        breachList
-                    } else {
-                        Text(L10n.tr("breach.upgradeHint"))
-                            .font(.system(size: 14))
-                            .foregroundColor(Theme.textSecondary)
-                    }
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.system(size: 13))
-                            .foregroundColor(Theme.danger)
-                    }
-                }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 24)
-                .padding(.bottom, 40)
+            AppMenuHeader(
+                title: L10n.tr("nav.breachMonitoring", locale: AppPreferences.shared.locale),
+                onMenu: onOpenMenu
+            )
+            if !session.isPremium {
+                premiumGate
+            } else {
+                premiumContent
             }
         }
         .background(Theme.background.ignoresSafeArea())
@@ -77,6 +61,40 @@ struct BreachMonitorView: View {
         }
     }
 
+    private var premiumGate: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(L10n.tr("breach.upgradeHint"))
+                .font(.system(size: 14))
+                .foregroundColor(Theme.textSecondary)
+            PrimaryButton(title: L10n.tr("settings.upgradePremium"), icon: "star.fill") {
+                onUpgrade()
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.top, 24)
+    }
+
+    private var premiumContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                slotsHeader
+                addEmailCard
+                monitoredList
+                breachTabs
+                breachList
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 13))
+                        .foregroundColor(Theme.danger)
+                }
+            }
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, 24)
+            .padding(.bottom, 40)
+        }
+    }
+
     private var filteredResults: [BreachCheckResult] {
         scanResults.filter { result in
             selectedTab == .unresolved ? result.breached : !result.breached
@@ -89,15 +107,19 @@ struct BreachMonitorView: View {
                 Text(L10n.tr("breach.emailMonitoring"))
                     .font(.qasa(22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
-                Text(String(format: L10n.tr("breach.slotsUsed"), locale: AppLanguage.current.locale, arguments: [monitored.count, maxSlots]))
-                    .font(.qasa(14))
-                    .foregroundColor(Theme.textSecondary)
+                Text(String(
+                    format: L10n.tr("breach.slotsUsed"),
+                    locale: AppLanguage.current.locale,
+                    arguments: [monitored.count, maxSlots]
+                ))
+                .font(.qasa(14))
+                .foregroundColor(Theme.textSecondary)
             }
             Spacer()
             StatusPill(
-                text: session.isPremium ? L10n.tr("breach.premium") : L10n.tr("breach.free"),
-                dotColor: session.isPremium ? Theme.success : Theme.mint,
-                textColor: session.isPremium ? Theme.success : Theme.mint,
+                text: L10n.tr("breach.premium"),
+                dotColor: Theme.success,
+                textColor: Theme.success,
                 background: Theme.cardBackground
             )
         }
@@ -126,7 +148,11 @@ struct BreachMonitorView: View {
                         .stroke(Theme.stroke, lineWidth: 1)
                 )
 
-                PrimaryButton(title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"), icon: "plus", cornerRadius: 8) {
+                PrimaryButton(
+                    title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"),
+                    icon: "plus",
+                    cornerRadius: 8
+                ) {
                     Task { await addEmail() }
                 }
                 .opacity(monitored.count >= maxSlots ? 0.5 : 1)
@@ -145,39 +171,43 @@ struct BreachMonitorView: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(monitored, id: \.id) { item in
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(item.email)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(Theme.textPrimary)
-                            Text(item.status.title)
-                                .font(.system(size: 13))
-                                .foregroundColor(item.status == .secure ? Theme.success : Theme.danger)
-                        }
-                        Spacer()
-                        Button {
-                            pendingRemoval = item
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(Theme.textSecondary)
-                                .frame(width: 32, height: 32)
-                                .background(Theme.chrome)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(14)
-                    .background(Theme.cardBackground)
-                    .cornerRadius(Theme.cornerRadius)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                            .stroke(Theme.stroke, lineWidth: 1)
-                    )
+                    monitoredRow(item)
                 }
             }
         }
+    }
+
+    private func monitoredRow(_ item: MonitoredEmail) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(item.email)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(item.status.title)
+                    .font(.system(size: 13))
+                    .foregroundColor(item.status == .secure ? Theme.success : Theme.danger)
+            }
+            Spacer()
+            Button {
+                pendingRemoval = item
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Theme.textSecondary)
+                    .frame(width: 32, height: 32)
+                    .background(Theme.chrome)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .background(Theme.cardBackground)
+        .cornerRadius(Theme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.stroke, lineWidth: 1)
+        )
     }
 
     private var breachTabs: some View {
@@ -243,18 +273,11 @@ struct BreachMonitorView: View {
         defer { isChecking = false }
 
         do {
-            // Free + premium: hash uploaded for server monitoring → device push on match.
-            let registered = try await BreachMonitorService.registerMonitor(email: trimmed)
-            var status: MonitorStatus = .secure
-            if session.isPremium {
-                let result = try await BreachMonitorService.checkEmail(trimmed)
-                status = result.breached ? .atRisk : .secure
-                scanResults.append(result)
-            } else if registered.matched == true {
-                status = .atRisk
-            }
-            let item = MonitoredEmail(email: trimmed, status: status)
-            modelContext.insert(item)
+            _ = try await BreachMonitorService.registerMonitor(email: trimmed)
+            let result = try await BreachMonitorService.checkEmail(trimmed)
+            let status: MonitorStatus = result.breached ? .atRisk : .secure
+            scanResults.append(result)
+            modelContext.insert(MonitoredEmail(email: trimmed, status: status))
             try? modelContext.save()
             monitorEmail = ""
             errorMessage = nil
@@ -277,171 +300,8 @@ struct BreachMonitorView: View {
     }
 }
 
-struct BreachCard: View {
-    let breach: Breach
-
-    private var accent: Color {
-        breach.status == .unresolved ? Theme.danger : Theme.success
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top, spacing: 12) {
-                Text(breach.title)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                PillBadge(
-                    text: breach.status == .unresolved ? L10n.tr("breach.unresolved") : L10n.tr("breach.resolved"),
-                    color: breach.status == .unresolved ? Theme.dangerText : Theme.success
-                )
-                Spacer(minLength: 0)
-            }
-
-            Text(String(format: L10n.tr("breach.breachDate"), breach.breachDate, breach.discoveredDate))
-                .font(.system(size: 14))
-                .foregroundColor(Theme.textSecondary)
-
-            FlowLayout(spacing: 8) {
-                Text(L10n.tr("breach.compromised"))
-                    .font(.kasoMono(12))
-                    .tracking(0.6)
-                    .foregroundColor(Theme.textTertiary)
-                    .padding(.trailing, 4)
-
-                ForEach(breach.compromisedFields, id: \.self) { field in
-                    HStack(spacing: 4) {
-                        Image(systemName: fieldIcon(field))
-                            .font(.system(size: 10))
-                        Text(field)
-                            .font(.kasoMono(12))
-                            .tracking(0.6)
-                    }
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 5)
-                    .background(Theme.cardBackgroundLight)
-                    .foregroundColor(Theme.textPrimary)
-                    .cornerRadius(4)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(Theme.stroke, lineWidth: 1)
-                    )
-                }
-            }
-            .padding(.top, 4)
-
-            if breach.status == .unresolved {
-                Button {} label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "key.fill")
-                        Text("Rotate Password")
-                    }
-                    .font(.system(size: 14))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 11)
-                    .foregroundColor(Theme.danger)
-                    .background(Theme.chrome)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.danger, lineWidth: 1)
-                    )
-                }
-            } else {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark")
-                    Text("Action Taken")
-                }
-                .font(.system(size: 14))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 11)
-                .foregroundColor(Theme.textTertiary)
-                .background(Theme.cardBackgroundLight)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Theme.strokeChrome, lineWidth: 1)
-                )
-            }
-        }
-        .padding(21)
-        .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(accent, lineWidth: 1)
-        )
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(accent)
-                .frame(height: 2)
-                .clipShape(
-                    UnevenRoundedRectangle(
-                        topLeadingRadius: Theme.cornerRadius,
-                        bottomLeadingRadius: 0,
-                        bottomTrailingRadius: 0,
-                        topTrailingRadius: Theme.cornerRadius
-                    )
-                )
-        }
-        .opacity(breach.status == .resolved ? 0.8 : 1)
-    }
-
-    private func fieldIcon(_ field: String) -> String {
-        switch field {
-        case "Passwords": return "keyboard"
-        case "Emails": return "envelope"
-        case "Names": return "person"
-        case "Job Titles": return "briefcase"
-        default: return "tag"
-        }
-    }
-}
-
-/// Simple wrapping layout for monitored chips / compromised tags.
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        arrange(proposal: proposal, subviews: subviews).size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = arrange(proposal: proposal, subviews: subviews)
-        for (index, origin) in result.origins.enumerated() {
-            subviews[index].place(
-                at: CGPoint(x: bounds.minX + origin.x, y: bounds.minY + origin.y),
-                proposal: .unspecified
-            )
-        }
-    }
-
-    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, origins: [CGPoint]) {
-        let maxWidth = proposal.width ?? .infinity
-        var origins: [CGPoint] = []
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var maxX: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > maxWidth, x > 0 {
-                x = 0
-                y += rowHeight + spacing
-                rowHeight = 0
-            }
-            origins.append(CGPoint(x: x, y: y))
-            rowHeight = max(rowHeight, size.height)
-            x += size.width + spacing
-            maxX = max(maxX, x)
-        }
-
-        return (CGSize(width: maxX, height: y + rowHeight), origins)
-    }
-}
-
 #Preview {
-    BreachMonitorView(onOpenMenu: {})
+    BreachMonitorView(onOpenMenu: {}, onUpgrade: {})
         .environment(AppSession(isPremium: true))
         .modelContainer(for: VaultSchema.models, inMemory: true)
 }

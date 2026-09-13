@@ -12,7 +12,6 @@ struct BreachMonitorRegisterResponse: Decodable {
     let ok: Bool?
     let matched: Bool?
     let alerted: Bool?
-    let details_require_premium: Bool?
 }
 
 enum BreachMonitorService {
@@ -30,7 +29,7 @@ enum BreachMonitorService {
         return (prefix, suffix)
     }
 
-    /// Upload SHA-256 of normalized email for server-side monitoring (free + premium).
+    /// Upload SHA-256 of normalized email for server-side monitoring (Premium).
     /// On match the server sends a **device push**, not email.
     static func registerMonitor(email: String, labelHint: String? = nil) async throws -> BreachMonitorRegisterResponse {
         guard let hash = fullHash(for: email) else {

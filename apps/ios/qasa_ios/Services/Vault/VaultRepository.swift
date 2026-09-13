@@ -38,6 +38,7 @@ final class VaultRepository {
         await MainActor.run {
             cache.rebuild(from: pairs)
         }
+        await syncAutofillIndex()
     }
 
     func save(payload: VaultPayload, id: UUID? = nil) throws -> VaultListRow {
@@ -68,6 +69,7 @@ final class VaultRepository {
 
         let row = VaultListRow(record: record, envelope: envelope)
         cache.upsert(row)
+        Task { await syncAutofillIndex() }
         return row
     }
 
@@ -77,6 +79,7 @@ final class VaultRepository {
         context.delete(record)
         try context.save()
         cache.remove(id: id)
+        Task { await syncAutofillIndex() }
     }
 
     func payload(for id: UUID) throws -> VaultPayload {
@@ -121,6 +124,44 @@ final class VaultRepository {
 
     func resetContext() {
         context = nil
+    }
+
+    /// Decrypt every item with `oldEnc` / re-encrypt with `newEnc`, and rebuild search tokens.
+    func rekeyAllItems(oldEnc: SymmetricKey, newEnc: SymmetricKey, newSearch: SymmetricKey) throws {
+        guard let context else { throw VaultCryptoError.vaultLocked }
+        let descriptor = FetchDescriptor<VaultItemRecord>()
+        let records = try context.fetch(descriptor)
+
+        for record in records {
+            let payload: VaultPayload
+            let envelope: VaultEnvelope
+
+            if record.schemaVersion >= 1, !record.encryptedPayload.isEmpty {
+                let payloadData = try VaultCrypto.decrypt(record.encryptedPayload, key: oldEnc)
+                payload = try JSONDecoder().decode(VaultPayload.self, from: payloadData)
+                if !record.encryptedEnvelope.isEmpty {
+                    let envelopeData = try VaultCrypto.decrypt(record.encryptedEnvelope, key: oldEnc)
+                    envelope = try JSONDecoder().decode(VaultEnvelope.self, from: envelopeData)
+                } else {
+                    envelope = VaultEnvelope(from: payload)
+                }
+            } else if let legacy = record.legacyPayloadData {
+                payload = try JSONDecoder().decode(VaultPayload.self, from: legacy)
+                envelope = VaultEnvelope(from: payload)
+            } else {
+                continue
+            }
+
+            record.encryptedEnvelope = try VaultCrypto.encrypt(try JSONEncoder().encode(envelope), key: newEnc)
+            record.encryptedPayload = try VaultCrypto.encrypt(try JSONEncoder().encode(payload), key: newEnc)
+            record.schemaVersion = 1
+            record.legacyPayloadData = nil
+            record.updatedAt = Date()
+            replaceSearchTokens(for: record.id, envelope: envelope, payload: payload, searchKey: newSearch)
+        }
+
+        try context.save()
+        Task { await warmCache(); await syncAutofillIndex() }
     }
 
     // MARK: - Private
@@ -194,5 +235,22 @@ final class VaultRepository {
             _ = try? save(payload: payload, id: record.id)
         }
         try? context.save()
+    }
+
+    private func syncAutofillIndex() async {
+        guard VaultSession.shared.isUnlocked, let context else { return }
+        let descriptor = FetchDescriptor<VaultItemRecord>()
+        guard let records = try? context.fetch(descriptor) else { return }
+        var pairs: [(UUID, VaultPayload)] = []
+        for record in records {
+            guard let payload = try? decryptPayload(record) else { continue }
+            switch payload {
+            case .login, .card, .bankAccount:
+                pairs.append((record.id, payload))
+            default:
+                continue
+            }
+        }
+        AutofillVaultSync.rebuild(from: pairs)
     }
 }

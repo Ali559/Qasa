@@ -14,6 +14,21 @@ enum SuggestedContext: Equatable {
     }
 
     var isEmpty: Bool { self == .none }
+
+    var autofillHint: AutofillContextHint {
+        switch self {
+        case .none: return .unknown
+        case .checkout: return .paymentCard
+        case .googleSignIn: return .login
+        }
+    }
+
+    var serviceIdentifiers: [String] {
+        switch self {
+        case .none, .checkout: return []
+        case .googleSignIn: return ["accounts.google.com", "google.com"]
+        }
+    }
 }
 
 protocol SuggestedContextProviding {
@@ -26,6 +41,21 @@ final class MockSuggestedContextProvider: SuggestedContextProviding {
 
 enum VaultSuggestionEngine {
     static func suggest(rows: [VaultListRow], context: SuggestedContext) -> [VaultListRow] {
+        guard context != .none else { return [] }
+
+        // Prefer ranking via the shared Autofill matcher when an App Group index exists.
+        let index = AutofillIndexStore.load().entries
+        if !index.isEmpty {
+            let ranked = AutofillContextMatcher.candidates(
+                from: index,
+                serviceIdentifiers: context.serviceIdentifiers,
+                hint: context.autofillHint
+            )
+            let byId = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) })
+            let matched = ranked.compactMap { byId[$0.id] }
+            if !matched.isEmpty { return matched }
+        }
+
         switch context {
         case .none:
             return []

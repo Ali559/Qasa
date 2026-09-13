@@ -70,6 +70,7 @@ nonisolated enum VaultKeychainStore {
             kSecAttrService as String: service,
             kSecAttrAccount as String: Key.biometricPassword.rawValue,
             kSecAttrAccessControl as String: access,
+            kSecAttrAccessGroup as String: AppGroup.keychainAccessGroup,
             kSecValueData as String: Data(password.utf8)
         ]
         SecItemAdd(query as CFDictionary, nil)
@@ -79,16 +80,21 @@ nonisolated enum VaultKeychainStore {
         guard biometricsEnabled else { return nil }
         let context = LAContext()
         context.localizedReason = "Unlock Qasa vault"
-        let query: [String: Any] = [
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: Key.biometricPassword.rawValue,
+            kSecAttrAccessGroup as String: AppGroup.keychainAccessGroup,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
             kSecUseAuthenticationContext as String: context
         ]
         var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        var status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status != errSecSuccess {
+            query.removeValue(forKey: kSecAttrAccessGroup as String)
+            status = SecItemCopyMatching(query as CFDictionary, &result)
+        }
         guard status == errSecSuccess, let data = result as? Data else { return nil }
         return String(data: data, encoding: .utf8)
     }
@@ -105,16 +111,36 @@ nonisolated enum VaultKeychainStore {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
+            kSecAttrAccount as String: key.rawValue,
+            kSecAttrAccessGroup as String: AppGroup.keychainAccessGroup
+        ]
+    }
+
+    private static func legacyQuery(for key: Key) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
             kSecAttrAccount as String: key.rawValue
         ]
     }
 
     private static func data(for key: Key) -> Data? {
-        var query = self.query(for: key)
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        if let shared = copyMatching(query(for: key)) {
+            return shared
+        }
+        // Migrate pre–App Group keychain items into the shared access group.
+        guard let legacy = copyMatching(legacyQuery(for: key)) else { return nil }
+        setData(legacy, for: key)
+        SecItemDelete(legacyQuery(for: key) as CFDictionary)
+        return legacy
+    }
+
+    private static func copyMatching(_ query: [String: Any]) -> Data? {
+        var q = query
+        q[kSecReturnData as String] = true
+        q[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        let status = SecItemCopyMatching(q as CFDictionary, &result)
         guard status == errSecSuccess else { return nil }
         return result as? Data
     }
