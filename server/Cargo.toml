@@ -23,6 +23,7 @@ axum = { version = "0.8", features = ["macros", "ws"] }
 axum-extra = { version = "0.10", features = ["typed-header"] }
 base64 = "0.22"
 chrono = { version = "0.4", features = ["serde"] }
+ipnet = "2"
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 jsonwebtoken = "9"
 rand = "0.8"

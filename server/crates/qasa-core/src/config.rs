@@ -1,5 +1,7 @@
+use ipnet::IpNet;
 use std::env;
 use std::fmt;
+use std::net::IpAddr;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AppEnvironment {
@@ -54,20 +56,19 @@ pub struct AppConfig {
     /// Comma-separated CIDRs (e.g. Tailscale `100.64.0.0/10`). When set in prod,
     /// `/v1/admin/*` (except login optionally) is restricted to these peers.
     pub admin_allow_cidrs: Vec<String>,
+    /// Comma-separated CIDRs of reverse proxies whose `X-Forwarded-For` we believe.
+    ///
+    /// Empty (the default) means we trust no proxy and always use the TCP peer address.
+    /// Set this only to the load balancer / CDN that actually fronts the API — trusting it
+    /// unconditionally would let any client spoof its source address.
+    pub trusted_proxy_cidrs: Vec<String>,
 }
 
 impl AppConfig {
     pub fn from_env() -> Self {
         let env = AppEnvironment::from_env();
-        let admin_allow_cidrs = env::var("QASA_ADMIN_ALLOW_CIDRS")
-            .ok()
-            .map(|s| {
-                s.split(',')
-                    .map(|p| p.trim().to_string())
-                    .filter(|p| !p.is_empty())
-                    .collect()
-            })
-            .unwrap_or_default();
+        let admin_allow_cidrs = parse_cidr_list("QASA_ADMIN_ALLOW_CIDRS", env, true);
+        let trusted_proxy_cidrs = parse_cidr_list("QASA_TRUSTED_PROXY_CIDRS", env, false);
         Self {
             env,
             database_url: env::var("DATABASE_URL")
@@ -84,6 +85,36 @@ impl AppConfig {
             admin_seed_password: env::var("QASA_ADMIN_SEED_PASSWORD").ok(),
             admin_cors_origin: env::var("QASA_ADMIN_CORS_ORIGIN").ok(),
             admin_allow_cidrs,
+            trusted_proxy_cidrs,
         }
     }
+}
+
+/// Parse a comma-separated network allow list.
+///
+/// A typo here used to be silently swallowed, which for `QASA_ADMIN_ALLOW_CIDRS` meant an
+/// operator who wrote `10.0.0.0/8` got an admin panel that rejected every request with no
+/// hint as to why. In prod an unparseable entry is fatal.
+fn parse_cidr_list(key: &str, env: AppEnvironment, allow_alias: bool) -> Vec<String> {
+    let Some(raw) = env::var(key).ok() else {
+        return Vec::new();
+    };
+    raw.split(',')
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .map(|entry| {
+            let ok = if allow_alias && entry.eq_ignore_ascii_case("tailscale") {
+                true
+            } else {
+                entry.parse::<IpNet>().is_ok() || entry.parse::<IpAddr>().is_ok()
+            };
+            if !ok && env.is_prod() {
+                panic!("{key} contains an invalid entry {entry:?} (expected a CIDR or IP address)");
+            }
+            if !ok {
+                tracing::warn!("{key}: ignoring unparseable entry {entry:?}");
+            }
+            entry.to_string()
+        })
+        .collect()
 }

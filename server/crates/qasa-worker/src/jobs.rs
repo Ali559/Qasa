@@ -3,7 +3,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use qasa_db::DbPool;
 use qasa_db::repos::push_copy::{
-    BREACH_ALERT_FREE, BREACH_ALERT_PREMIUM, SUB_EXPIRING_3D, SUB_RENEW_FAILED,
+    BREACH_ALERT_PREMIUM, SUB_EXPIRING_3D, SUB_RENEW_FAILED,
 };
 use qasa_payments::GatewayKind;
 use qasa_push::PushService;
@@ -17,6 +17,7 @@ pub async fn expire_subscriptions(pool: DbPool, _push: Arc<PushService>) -> anyh
 }
 
 pub async fn refresh_views(pool: DbPool, _push: Arc<PushService>) -> anyhow::Result<()> {
+    // Propagate: a failed refresh must show up as a failed job, not a silent no-op.
     qasa_db::repos::worker::refresh_materialized_views(&pool).await?;
     tracing::debug!("refreshed materialized views");
     Ok(())
@@ -26,6 +27,12 @@ pub async fn stale_vpn_sessions(pool: DbPool, _push: Arc<PushService>) -> anyhow
     let n = qasa_db::repos::worker::disconnect_stale_vpn_sessions(&pool, 5).await?;
     if n > 0 {
         tracing::info!(count = n, "disconnected stale VPN sessions");
+    }
+    // The decrement above is best-effort; recompute from vpn_sessions so a missed
+    // decrement cannot leave a node permanently over-counted and starved of peers.
+    let fixed = qasa_db::repos::vpn::reconcile_active_peers(&pool).await?;
+    if fixed > 0 {
+        tracing::info!(nodes = fixed, "reconciled VPN active_peers drift");
     }
     Ok(())
 }
@@ -39,20 +46,16 @@ pub async fn purge_revocations(pool: DbPool, _push: Arc<PushService>) -> anyhow:
 }
 
 /// Scan monitored email hashes against breach dumps → multilingual device push.
+/// Only accounts with a live Premium subscription receive alerts.
 pub async fn breach_alert_scan(pool: DbPool, push: Arc<PushService>) -> anyhow::Result<()> {
     let matches = qasa_db::repos::monitored_email::find_unalerted_matches(&pool, 100).await?;
     let mut sent = 0u64;
     for m in matches {
-        let copy = if m.tier == "premium" {
-            &BREACH_ALERT_PREMIUM
-        } else {
-            &BREACH_ALERT_FREE
-        };
         let day = Utc::now().format("%Y-%m-%d");
         let prefix = &m.email_hash[..12.min(m.email_hash.len())];
         let dedupe = format!("breach:{}:{}:{}", m.account_id, prefix, day);
         if push
-            .notify_account(&pool, m.account_id, copy, &dedupe)
+            .notify_account(&pool, m.account_id, &BREACH_ALERT_PREMIUM, &dedupe)
             .await?
             .is_some()
         {

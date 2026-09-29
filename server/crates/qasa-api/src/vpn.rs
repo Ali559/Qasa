@@ -1,13 +1,13 @@
 use axum::extract::State;
 use axum::Json;
-use qasa_core::{AccountTier, CoreError};
+use qasa_core::CoreError;
 use qasa_vpn::{allocate_ip, ConnectRequest, WireGuardConfig};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::auth::LicenseAuth;
-use crate::entitlements::resolve_entitlements;
-use crate::error::{ApiError, ApiResult};
+use crate::entitlements::{require_active_premium, PremiumFeature};
+use crate::error::ApiResult;
 use crate::state::AppState;
 
 pub async fn connect(
@@ -22,16 +22,13 @@ pub async fn connect(
         .await?
         .ok_or(CoreError::NotFound)?;
 
-    let entitlements = resolve_entitlements(&state, account_id, &account.tier).await?;
-    if entitlements.tier != AccountTier::Premium || !entitlements.vpn {
-        return Err(ApiError::Core(CoreError::Forbidden));
-    }
+    require_active_premium(&state, account_id, &account.tier, PremiumFeature::Vpn).await?;
 
     let usage = qasa_db::repos::vpn_usage::get_or_create(&state.pool, account_id).await?;
     let plan_id = qasa_db::repos::subscription::get_current(&state.pool, account_id)
         .await?
         .map(|s| s.plan_id)
-        .unwrap_or_else(|| "premium_monthly".into());
+        .ok_or(crate::error::ApiError::SubscriptionRequired)?;
     let quota_gb = qasa_db::repos::plan::vpn_quota_gb(&state.pool, &plan_id).await?;
     let quota_bytes = qasa_db::repos::vpn_usage::gb_to_bytes(quota_gb);
     let throttle_mbps = 5i32;
@@ -125,6 +122,7 @@ pub async fn connect(
     })))
 }
 
+/// Disconnect is allowed without premium so expired users can tear down leftover sessions.
 pub async fn disconnect(
     State(state): State<AppState>,
     LicenseAuth(claims): LicenseAuth,
@@ -148,6 +146,24 @@ pub async fn status(
 ) -> ApiResult<Json<serde_json::Value>> {
     let account_id = claims.account_id()?;
     let device_id = claims.device_id()?;
+
+    let account = qasa_db::repos::account::get_account(&state.pool, account_id)
+        .await?
+        .ok_or(CoreError::NotFound)?;
+
+    // No live subscription → kill any leftover session and refuse connected status.
+    if require_active_premium(&state, account_id, &account.tier, PremiumFeature::Vpn)
+        .await
+        .is_err()
+    {
+        if let Some(session) =
+            qasa_db::repos::vpn::active_session_for_device(&state.pool, account_id, device_id)
+                .await?
+        {
+            let _ = qasa_db::repos::vpn::disconnect_session(&state.pool, session.id).await;
+        }
+        return Err(crate::error::ApiError::SubscriptionRequired);
+    }
 
     let session =
         qasa_db::repos::vpn::active_session_for_device(&state.pool, account_id, device_id).await?;

@@ -9,6 +9,8 @@ pub enum ApiError {
     Core(CoreError),
     Internal(anyhow::Error),
     RateLimited,
+    /// VPN / breach (and similar) require a live premium subscription.
+    SubscriptionRequired,
 }
 
 impl From<CoreError> for ApiError {
@@ -67,6 +69,14 @@ impl IntoResponse for ApiError {
                 Json(json!({
                     "error": "rate_limit_exceeded",
                     "message": "Maximum 60 prefix queries per hour."
+                })),
+            )
+                .into_response(),
+            ApiError::SubscriptionRequired => (
+                StatusCode::FORBIDDEN,
+                Json(json!({
+                    "error": "subscription_required",
+                    "message": "An active Premium subscription is required for this feature."
                 })),
             )
                 .into_response(),

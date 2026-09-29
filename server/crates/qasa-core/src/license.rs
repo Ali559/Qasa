@@ -119,6 +119,7 @@ impl LicenseTokenIssuer {
 }
 
 fn entitlement_names(entitlements: &Entitlements) -> Vec<String> {
+    // Always lists multi_device; enforce capacity via `device_limit`, not this name alone.
     let mut names = vec!["multi_device".into()];
     if entitlements.breach {
         names.push("breach".into());

@@ -297,6 +297,54 @@ pub async fn seed_dev_nodes(pool: &PgPool) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Recompute `vpn_nodes.active_peers` from `vpn_sessions`, the actual source of truth.
+///
+/// `active_peers` is a denormalized counter bumped in `create_session` and decremented in
+/// `disconnect_session` / `disconnect_stale_vpn_sessions`. Any path that misses a decrement
+/// — a crashed agent, a rolled-back transaction, a manual session edit — leaves the count
+/// permanently inflated. Because node selection orders by `active_peers ASC`, a drifted
+/// node silently stops receiving new peers while looking busy in the admin dashboard.
+///
+/// This makes the counter self-healing. Run it periodically from the worker.
+///
+/// Returns the number of nodes whose count was corrected.
+pub async fn reconcile_active_peers(pool: &PgPool) -> anyhow::Result<u64> {
+    let corrected = sqlx::query(
+        r#"
+        UPDATE vpn_nodes n
+        SET active_peers = COALESCE(live.count, 0)
+        FROM (
+            SELECT node_id, COUNT(*)::bigint AS count
+            FROM vpn_sessions
+            WHERE disconnected_at IS NULL
+            GROUP BY node_id
+        ) live
+        WHERE n.id = live.node_id AND n.active_peers <> live.count
+        "#,
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    // Nodes with zero live sessions are not in the subquery, so fix them separately.
+    let zeroed = sqlx::query(
+        r#"
+        UPDATE vpn_nodes n
+        SET active_peers = 0
+        WHERE n.active_peers <> 0
+          AND NOT EXISTS (
+              SELECT 1 FROM vpn_sessions s
+              WHERE s.node_id = n.id AND s.disconnected_at IS NULL
+          )
+        "#,
+    )
+    .execute(pool)
+    .await?
+    .rows_affected();
+
+    Ok(corrected + zeroed)
+}
+
 pub async fn vpn_admin_kpis(pool: &PgPool) -> anyhow::Result<VpnAdminKpis> {
     let total_peers: i64 = sqlx::query_scalar(
         r#"

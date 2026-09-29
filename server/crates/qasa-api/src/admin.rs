@@ -17,6 +17,60 @@ pub struct AdminLoginRequest {
     pub password: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct RevokeLicenseRequest {
+    /// The license token id to revoke.
+    pub jti: String,
+    /// Owner of the token. Admin tokens are staff-scoped and carry no account, and
+    /// `license_revocations.account_id` is `NOT NULL REFERENCES accounts(id)`.
+    pub account_id: uuid::Uuid,
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+/// Revoke a license token by `jti`, so every request presenting it is rejected.
+///
+/// The `license_revocations` table was already consulted on every authenticated call
+/// (`is_jti_revoked`) but nothing ever inserted into it, so this is the missing writer.
+pub async fn revoke_license(
+    State(state): State<AppState>,
+    _claims: AdminAuth,
+    Json(body): Json<RevokeLicenseRequest>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let created = qasa_db::repos::device::revoke_license_jti(
+        &state.pool,
+        &body.jti,
+        body.account_id,
+        body.reason.as_deref(),
+    )
+    .await?;
+    Ok(Json(json!({
+        "jti": body.jti,
+        "account_id": body.account_id,
+        "revoked": true,
+        // false means it was already revoked; the call still succeeds (idempotent).
+        "created": created,
+    })))
+}
+
+/// Lift a revocation previously created by [`revoke_license`].
+pub async fn unrevoke_license(
+    State(state): State<AppState>,
+    _claims: AdminAuth,
+    axum::extract::Path(jti): axum::extract::Path<String>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let removed = qasa_db::repos::device::unrevoke_license_jti(&state.pool, &jti).await?;
+    Ok(Json(json!({ "jti": jti, "revoked": false, "removed": removed })))
+}
+
+pub async fn list_license_revocations(
+    State(state): State<AppState>,
+    _claims: AdminAuth,
+) -> ApiResult<Json<serde_json::Value>> {
+    let rows = qasa_db::repos::device::list_license_revocations(&state.pool).await?;
+    Ok(Json(json!({ "revocations": rows })))
+}
+
 pub async fn login(
     State(state): State<AppState>,
     Json(body): Json<AdminLoginRequest>,

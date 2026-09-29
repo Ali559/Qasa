@@ -3,7 +3,7 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
 use qasa_core::CoreError;
 use qasa_db::repos::push_copy::SUB_RENEW_FAILED;
-use qasa_payments::{GatewayKind, PaymentGateway, WebhookStatus};
+use qasa_payments::{GatewayKind, PaymentError, PaymentGateway, WebhookStatus};
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
@@ -48,6 +48,16 @@ pub async fn create_intent(
     let gateway = state
         .gateway(kind)
         .ok_or_else(|| CoreError::BadRequest("gateway unavailable".into()))?;
+
+    // Outside dev, no gateway can actually move money, so refuse up front rather than
+    // handing back a deep link that opens nothing and leaving the user waiting on a
+    // payment that can never be confirmed.
+    if !gateway.settles_payments() {
+        return Err(CoreError::BadRequest(
+            "payments are not available for this gateway".into(),
+        )
+        .into());
+    }
 
     let order_ref = qasa_payments::new_order_ref();
     let intent = gateway.create_intent(amount_iqd, &order_ref).await;
@@ -177,6 +187,31 @@ async fn handle_webhook(
 
     if payment.status == "success" {
         return Ok(StatusCode::OK);
+    }
+
+    // Second gate, independent of the gateway implementation: a webhook may only settle
+    // an order for the amount we actually charged. A gateway that under-reports the
+    // amount must not be able to unlock a full-price subscription.
+    if event.status == WebhookStatus::Success {
+        if let Some(reported) = event.amount_iqd {
+            if reported != payment.amount_iqd {
+                let err = PaymentError::AmountMismatch {
+                    reported,
+                    expected: payment.amount_iqd,
+                };
+                qasa_db::repos::payment::insert_webhook_event(
+                    &state.pool,
+                    kind.as_str(),
+                    Some(&event.gateway_order_id),
+                    &event.raw_payload,
+                    signature_valid,
+                    false,
+                    Some(&err.to_string()),
+                )
+                .await?;
+                return Err(CoreError::BadRequest("payment amount mismatch".into()).into());
+            }
+        }
     }
 
     let (status, subscription_id) = match event.status {

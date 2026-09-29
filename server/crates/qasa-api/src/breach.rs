@@ -2,17 +2,17 @@ use axum::extract::{Path, State};
 use axum::Json;
 use chrono::Utc;
 use qasa_breach::normalize_prefix;
-use qasa_core::{AccountTier, CoreError};
-use qasa_db::repos::push_copy::{BREACH_ALERT_FREE, BREACH_ALERT_PREMIUM};
+use qasa_core::CoreError;
+use qasa_db::repos::push_copy::BREACH_ALERT_PREMIUM;
 use serde::Deserialize;
 use serde_json::json;
 
 use crate::auth::LicenseAuth;
-use crate::entitlements::resolve_entitlements;
+use crate::entitlements::{require_active_premium, PremiumFeature};
 use crate::error::{ApiError, ApiResult};
 use crate::state::AppState;
 
-/// Premium: full k-anonymity suffix list. Free: forbidden (use monitor + alerts).
+/// Premium only: full k-anonymity suffix list.
 pub async fn lookup_prefix(
     State(state): State<AppState>,
     LicenseAuth(claims): LicenseAuth,
@@ -29,11 +29,7 @@ pub async fn lookup_prefix(
         .await?
         .ok_or(CoreError::NotFound)?;
 
-    let entitlements = resolve_entitlements(&state, account_id, &account.tier).await?;
-
-    if entitlements.tier != AccountTier::Premium || !entitlements.breach {
-        return Err(ApiError::Core(CoreError::Forbidden));
-    }
+    require_active_premium(&state, account_id, &account.tier, PremiumFeature::Breach).await?;
 
     let normalized = normalize_prefix(&prefix).map_err(|e| CoreError::BadRequest(e.to_string()))?;
 
@@ -53,7 +49,7 @@ pub struct RegisterMonitorRequest {
     pub label_hint: Option<String>,
 }
 
-/// Free + Premium: register an email hash for server-side breach alerts (conversion hook).
+/// Premium only: register an email hash for server-side breach alerts.
 pub async fn register_monitor(
     State(state): State<AppState>,
     LicenseAuth(claims): LicenseAuth,
@@ -68,21 +64,14 @@ pub async fn register_monitor(
     let account = qasa_db::repos::account::get_account(&state.pool, account_id)
         .await?
         .ok_or(CoreError::NotFound)?;
-    let entitlements = resolve_entitlements(&state, account_id, &account.tier).await?;
+    require_active_premium(&state, account_id, &account.tier, PremiumFeature::Breach).await?;
 
-    let limit = if entitlements.tier == AccountTier::Premium {
-        10
-    } else {
-        2
-    };
+    const LIMIT: i64 = 10;
     let count = qasa_db::repos::monitored_email::count_for_account(&state.pool, account_id).await?;
     let existing = qasa_db::repos::monitored_email::list_for_account(&state.pool, account_id).await?;
     let already = existing.iter().any(|r| r.email_hash == hash);
-    if !already && count >= limit {
-        return Err(CoreError::BadRequest(format!(
-            "monitor limit is {limit} for your plan"
-        ))
-        .into());
+    if !already && count >= LIMIT {
+        return Err(CoreError::BadRequest(format!("monitor limit is {LIMIT} for your plan")).into());
     }
 
     let row = qasa_db::repos::monitored_email::upsert_hash(
@@ -93,20 +82,14 @@ pub async fn register_monitor(
     )
     .await?;
 
-    // Immediate check — if already in dump, notify (especially free conversion).
     let matched = qasa_db::repos::monitored_email::hash_is_breached(&state.pool, &hash).await?;
     let mut alerted = false;
     if matched {
-        let copy = if entitlements.tier == AccountTier::Premium {
-            &BREACH_ALERT_PREMIUM
-        } else {
-            &BREACH_ALERT_FREE
-        };
         let day = Utc::now().format("%Y-%m-%d");
         let dedupe = format!("breach:{}:{}:{}", account_id, &hash[..12], day);
         if state
             .push
-            .notify_account(&state.pool, account_id, copy, &dedupe)
+            .notify_account(&state.pool, account_id, &BREACH_ALERT_PREMIUM, &dedupe)
             .await?
             .is_some()
         {
@@ -120,7 +103,6 @@ pub async fn register_monitor(
         "email_hash_prefix": &hash[..5],
         "matched": matched,
         "alerted": alerted,
-        "details_require_premium": entitlements.tier != AccountTier::Premium,
     })))
 }
 
@@ -129,6 +111,11 @@ pub async fn list_monitors(
     LicenseAuth(claims): LicenseAuth,
 ) -> ApiResult<Json<serde_json::Value>> {
     let account_id = claims.account_id()?;
+    let account = qasa_db::repos::account::get_account(&state.pool, account_id)
+        .await?
+        .ok_or(CoreError::NotFound)?;
+    require_active_premium(&state, account_id, &account.tier, PremiumFeature::Breach).await?;
+
     let rows = qasa_db::repos::monitored_email::list_for_account(&state.pool, account_id).await?;
     let items: Vec<_> = rows
         .into_iter()
@@ -155,6 +142,11 @@ pub async fn unregister_monitor(
     Json(body): Json<UnregisterMonitorRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
     let account_id = claims.account_id()?;
+    let account = qasa_db::repos::account::get_account(&state.pool, account_id)
+        .await?
+        .ok_or(CoreError::NotFound)?;
+    require_active_premium(&state, account_id, &account.tier, PremiumFeature::Breach).await?;
+
     let ok = qasa_db::repos::monitored_email::delete_hash(
         &state.pool,
         account_id,

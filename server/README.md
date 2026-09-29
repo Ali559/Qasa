@@ -20,6 +20,35 @@ cargo run -p qasa-api
 
 API listens on `http://0.0.0.0:8080`.
 
+### Postgres port
+
+The dev compose maps Postgres to host port **5433**, not the default 5432. A Homebrew,
+APT, or Postgres.app install very often already owns 5432, and whichever process binds it
+first wins *silently* — so `localhost:5432` can resolve to a completely different server
+than the container you just started. Override with `QASA_POSTGRES_PORT` if you need a
+specific host port.
+
+## Tests
+
+```bash
+cargo test                    # unit tests only; database tests report as `ignored`
+./scripts/test-integration.sh # database tests against a disposable qasa_test
+```
+
+The integration tests under `crates/qasa-db/tests/` are `#[ignore]`d by default. This is
+deliberate: a test that quietly returns when no database is available is reported by
+libtest as `ok`, so a skipped run is indistinguishable from a passing one. As ignored they
+show up as `N ignored` in the summary, which cannot be mistaken for a pass.
+
+`./scripts/test-integration.sh` starts a throwaway Postgres, recreates `qasa_test`,
+applies migrations, and runs them. The tests **refuse to start** if
+`QASA_TEST_DATABASE_URL` is unset or does not name a database ending in `_test`, because
+they insert and delete rows and `reconcile_active_peers` rewrites `vpn_nodes.active_peers`
+for every node in the database. Set `QASA_TEST_ALLOW_ANY_DB=1` to override deliberately.
+
+The tests clean up after themselves, so the database is left as it was found.
+
+
 ## Smoke test (breach + VPN)
 
 With the API and Postgres running:
@@ -31,11 +60,13 @@ With the API and Postgres running:
 The script exercises:
 
 1. Device registration + license JWT
-2. Free-tier breach lookup (expects 403)
+2. Free-tier breach lookup + monitor register (expects 403)
 3. Premium upgrade via FIB payment webhook
-4. Breach hash ingest + prefix lookup
+4. Premium breach monitor + inbox alert, hash ingest + prefix lookup
 5. VPN connect → status → disconnect
 6. Admin VPN node list + agent heartbeat
+
+**Entitlements:** Breach monitoring, VPN, and multi-device (limit 5) require a live Premium subscription. Free accounts are limited to 1 device; they may unlink a remote device to free the slot. JWT claim `entitlements` may include `"multi_device"` for all tiers — the real cap is `device_limit` (1 free / 5 premium).
 
 Options:
 
@@ -53,7 +84,9 @@ Requires `curl` and `jq`.
 | GET | `/health` | Health check |
 | GET | `/.well-known/qasa-license-key` | Ed25519 public key |
 | POST | `/v1/devices/register` | Device handshake |
+| POST | `/v1/devices/link-check` | Can this account add another device? (pairing) |
 | GET | `/v1/devices` | List devices (Bearer license JWT) |
+| DELETE | `/v1/devices/others` | Unlink all except primary (first linked) |
 | DELETE | `/v1/devices/{id}` | Unlink device |
 | GET | `/v1/license` | Refresh license JWT |
 | POST | `/v1/payments/intents` | Create payment intent (Bearer license JWT) |
@@ -123,7 +156,7 @@ QASA_ENV=prod cargo run -p qasa-worker
 ```bash
 cd dashboard
 cp .env.example .env   # VITE_QASA_API_URL=http://localhost:8080
-npm run dev
+bun run dev
 ```
 
 ## Default admin (dev)

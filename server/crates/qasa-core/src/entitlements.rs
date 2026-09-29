@@ -35,10 +35,45 @@ pub fn device_limit_for_tier(tier: AccountTier) -> u32 {
 }
 
 pub fn effective_tier(stored_tier: &str, has_active_subscription: bool) -> AccountTier {
+    // Premium is granted only by a live subscription — never by a stale accounts.tier flag.
     if has_active_subscription {
         return AccountTier::Premium;
     }
-    AccountTier::parse(stored_tier)
+    match AccountTier::parse(stored_tier) {
+        AccountTier::Premium => AccountTier::Expired,
+        other => other,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn premium_requires_active_subscription() {
+        assert_eq!(
+            effective_tier("premium", true),
+            AccountTier::Premium
+        );
+        assert_eq!(
+            effective_tier("premium", false),
+            AccountTier::Expired
+        );
+        assert_eq!(effective_tier("free", false), AccountTier::Free);
+        assert_eq!(effective_tier("expired", false), AccountTier::Expired);
+    }
+
+    #[test]
+    fn entitlements_follow_tier() {
+        let premium = Entitlements::for_tier(AccountTier::Premium);
+        assert!(premium.breach && premium.vpn);
+
+        let free = Entitlements::for_tier(AccountTier::Free);
+        assert!(!free.breach && !free.vpn);
+
+        let expired = Entitlements::for_tier(AccountTier::Expired);
+        assert!(!expired.breach && !expired.vpn);
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]

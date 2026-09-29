@@ -107,6 +107,12 @@ pub async fn find_unalerted_matches(pool: &PgPool, limit: i64) -> anyhow::Result
           WHERE b.prefix = left(m.email_hash, 5)
             AND lower(b.suffix) = lower(substring(m.email_hash from 6))
         )
+        AND EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.account_id = m.account_id
+            AND s.status IN ('active', 'cancelled')
+            AND s.expires_at > now()
+        )
         AND (
           m.last_alerted_at IS NULL
           OR m.last_alerted_at < now() - interval '7 days'

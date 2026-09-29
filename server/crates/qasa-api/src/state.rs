@@ -20,7 +20,12 @@ pub struct AppState {
 
 impl AppState {
     pub fn new(pool: DbPool, config: AppConfig, license_keys: LicenseKeyPair) -> Self {
-        let gateways = qasa_payments::all_stub_gateways()
+        // No payment gateway has a real integration yet — all three are stubs whose
+        // webhook handler performs no signature check. In prod they must therefore be
+        // unable to mark an order paid, otherwise anyone who can reach the webhook URL
+        // gets a free subscription by POSTing `{"order_id": "...", "status": "success"}`.
+        let settles_payments = config.env.is_dev();
+        let gateways = qasa_payments::all_stub_gateways(settles_payments)
             .into_iter()
             .map(|(kind, gw)| (kind, gw))
             .collect();

@@ -41,6 +41,9 @@ pub struct PaymentIntent {
 pub struct WebhookEvent {
     pub gateway_order_id: String,
     pub status: WebhookStatus,
+    /// Amount the gateway says it settled, when it reports one. Compared against the
+    /// amount we asked for before any entitlement is granted.
+    pub amount_iqd: Option<i32>,
     pub raw_payload: serde_json::Value,
 }
 
@@ -60,6 +63,11 @@ pub enum PaymentError {
     InvalidSignature,
     #[error("bad payload: {0}")]
     BadPayload(String),
+    /// The gateway has no live integration behind it, so it cannot settle anything.
+    #[error("gateway {0:?} is not live in this environment")]
+    GatewayNotLive(GatewayKind),
+    #[error("webhook amount {reported} does not match the charged amount {expected}")]
+    AmountMismatch { reported: i32, expected: i32 },
 }
 
 #[async_trait]

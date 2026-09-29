@@ -33,29 +33,56 @@ pub async fn expire_subscriptions(pool: &PgPool) -> anyhow::Result<u64> {
     .await?
     .rows_affected();
 
+    // Tear down VPN for anyone without a live subscription.
+    let killed_vpn = sqlx::query(
+        r#"
+        UPDATE vpn_sessions vs
+        SET disconnected_at = now()
+        WHERE vs.disconnected_at IS NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM subscriptions s
+            WHERE s.account_id = vs.account_id
+              AND s.status IN ('active', 'cancelled')
+              AND s.expires_at > now()
+          )
+        "#,
+    )
+    .execute(&mut *tx)
+    .await?
+    .rows_affected();
+
     tx.commit().await?;
-    Ok(expired_subs + expired_accounts)
+    Ok(expired_subs + expired_accounts + killed_vpn)
 }
 
 pub async fn refresh_materialized_views(pool: &PgPool) -> anyhow::Result<()> {
-    sqlx::query("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_revenue_daily")
-        .execute(pool)
-        .await
-        .ok(); // may fail if no unique index on first run — non-concurrent fallback
-    sqlx::query("REFRESH MATERIALIZED VIEW mv_revenue_daily")
-        .execute(pool)
-        .await
-        .ok();
+    // Each view is retried CONCURRENTLY first and falls back to a blocking REFRESH.
+    // Previously every call ended in `.ok()`, so a broken view, a missing unique index,
+    // or a revoked permission all failed silently and the dashboard just showed stale
+    // numbers with nothing in the logs. Report the real error instead.
+    for view in ["mv_revenue_daily", "mv_active_subscribers"] {
+        refresh_one(pool, view).await?;
+    }
+    Ok(())
+}
 
-    sqlx::query("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_active_subscribers")
+async fn refresh_one(pool: &PgPool, view: &str) -> anyhow::Result<()> {
+    let concurrent = sqlx::query(&format!("REFRESH MATERIALIZED VIEW CONCURRENTLY {view}"))
         .execute(pool)
-        .await
-        .ok();
-    sqlx::query("REFRESH MATERIALIZED VIEW mv_active_subscribers")
-        .execute(pool)
-        .await
-        .ok();
-
+        .await;
+    match concurrent {
+        Ok(_) => return Ok(()),
+        Err(err) => {
+            // CONCURRENTLY needs a unique index; on the very first run it does not exist.
+            let blocking = sqlx::query(&format!("REFRESH MATERIALIZED VIEW {view}"))
+                .execute(pool)
+                .await;
+            if let Err(fallback_err) = blocking {
+                anyhow::bail!("failed to refresh {view}: {fallback_err} (concurrent attempt: {err})");
+            }
+            tracing::debug!(view, error = %err, "refreshed without CONCURRENTLY");
+        }
+    }
     Ok(())
 }
 

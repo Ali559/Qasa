@@ -141,7 +141,9 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route("/health", get(health::health))
         .route("/.well-known/qasa-license-key", get(license::public_key))
         .route("/v1/devices/register", post(devices::register))
+        .route("/v1/devices/link-check", post(devices::link_check))
         .route("/v1/devices", get(devices::list))
+        .route("/v1/devices/others", delete(devices::unlink_others))
         .route("/v1/devices/{device_id}", delete(devices::unlink))
         .route("/v1/license", get(license::refresh))
         .route("/v1/subscription", get(subscriptions::get_current))
@@ -178,6 +180,14 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route(
             "/v1/admin/notifications",
             get(notifications::admin_list).post(notifications::admin_create),
+        )
+        .route(
+            "/v1/admin/licenses/revocations",
+            get(admin::list_license_revocations).post(admin::revoke_license),
+        )
+        .route(
+            "/v1/admin/licenses/revocations/{jti}",
+            delete(admin::unrevoke_license),
         );
 
     if config.env.is_prod() {

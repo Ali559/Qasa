@@ -11,18 +11,7 @@ pub struct LocalizedNotice {
     pub body_ar: &'static str,
 }
 
-/// Free-tier conversion: email hash found in a leak dump.
-pub const BREACH_ALERT_FREE: LocalizedNotice = LocalizedNotice {
-    kind: "breach_alert_free",
-    title_en: "🚨 Security alert",
-    title_ckb: "🚨 ئاگاداری ئاسایش",
-    title_ar: "🚨 تنبيه أمني",
-    body_en: "Heads up — an email you monitor showed up in a new data leak. Open Qasa, upgrade to Premium, and lock it down for 10,000 IQD via FIB, FastPay, or SuperQi. You've got this 💪",
-    body_ckb: "سڵاو — ئیمەیڵێکت لە دزەکردنی نوێدا دۆزرایەوە. قاسە بکەرەوە، بۆ پرێمیۆم بەرزبکەرەوە و بیپارێزە بە ١٠٬٠٠٠ دینار لە ڕێگەی FIB / FastPay / SuperQi. تۆ دەتوانیت 💪",
-    body_ar: "تنبيه ودي — ظهر بريد تراقبه في تسريب جديد. افتح Qasa، ترقَّ إلى Premium، وأمِّنه بـ ١٠٬٠٠٠ دينار عبر FIB أو FastPay أو SuperQi. أنت قدّها 💪",
-};
-
-/// Premium users also get a friendlier alert (details available in-app).
+/// Premium users get a friendlier alert (details available in-app).
 pub const BREACH_ALERT_PREMIUM: LocalizedNotice = LocalizedNotice {
     kind: "breach_alert_premium",
     title_en: "🚨 Breach found",

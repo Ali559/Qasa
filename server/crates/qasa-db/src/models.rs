@@ -18,6 +18,7 @@ pub struct DeviceRow {
     pub fingerprint: String,
     pub device_name: String,
     pub platform: String,
+    pub location: Option<String>,
     pub license_jti: Option<String>,
     pub last_seen_at: Option<DateTime<Utc>>,
     pub revoked_at: Option<DateTime<Utc>>,

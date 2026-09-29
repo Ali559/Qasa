@@ -151,44 +151,25 @@ else
   step "Skipping breach ingest (--skip-ingest)"
 fi
 
-step "Free-tier breach monitor (hash match → inbox + FCM queue / deliver)"
-monitor_body="$(api_expect_status POST /v1/breach/monitor 200 \
+step "Free-tier breach monitor should be forbidden"
+free_mon_body="$(mktemp)"
+free_mon_status="$(curl -sS -o "$free_mon_body" -w '%{http_code}' \
+  -X POST \
   -H "Authorization: Bearer $LICENSE" \
   -H 'Content-Type: application/json' \
   -d "{
     \"email_hash\": \"$SAMPLE_HASH\",
     \"label_hint\": \"smoke-free\"
-  }")"
-echo "$monitor_body" | jq -e '.ok == true' >/dev/null || fail "Monitor register failed: $monitor_body"
-matched="$(echo "$monitor_body" | jq -r .matched)"
-alerted="$(echo "$monitor_body" | jq -r .alerted)"
-details_premium="$(echo "$monitor_body" | jq -r .details_require_premium)"
-if [[ "$SKIP_INGEST" -eq 0 ]]; then
-  [[ "$matched" == "true" ]] || fail "Expected matched=true after ingest, got: $monitor_body"
-  [[ "$alerted" == "true" ]] || fail "Expected alerted=true (inbox/push), got: $monitor_body"
-  [[ "$details_premium" == "true" ]] || fail "Free tier should require premium for details: $monitor_body"
-  pass "Free monitor matched + alerted (conversion push path)"
-else
-  pass "Free monitor registered (matched=$matched; ingest skipped)"
+  }" \
+  "${API_URL}/v1/breach/monitor")"
+if [[ "$free_mon_status" != "403" ]]; then
+  echo "Expected HTTP 403, got $free_mon_status:" >&2
+  cat "$free_mon_body" >&2
+  rm -f "$free_mon_body"
+  fail "Free-tier breach monitor should return 403"
 fi
-
-step "List breach monitors"
-monitors_body="$(api_expect_status GET /v1/breach/monitor 200 \
-  -H "Authorization: Bearer $LICENSE")"
-monitor_count="$(echo "$monitors_body" | jq '.monitors | length')"
-[[ "$monitor_count" -ge 1 ]] || fail "Expected ≥1 monitor, got: $monitors_body"
-pass "Listed $monitor_count monitor(s)"
-
-step "Inbox notifications after breach alert"
-notif_body="$(api_expect_status GET /v1/notifications 200 \
-  -H "Authorization: Bearer $LICENSE")"
-notif_count="$(echo "$notif_body" | jq '.notifications | length')"
-if [[ "$SKIP_INGEST" -eq 0 ]]; then
-  [[ "$notif_count" -ge 1 ]] || fail "Expected inbox row after breach alert, got: $notif_body"
-  pass "Inbox has $notif_count notification(s)"
-else
-  pass "Inbox list ok ($notif_count notification(s); ingest skipped)"
-fi
+rm -f "$free_mon_body"
+pass "Free tier monitor correctly blocked (403)"
 
 step "Upgrading to premium via payment webhook"
 intent_body="$(api_expect_status POST /v1/payments/intents 200 \
@@ -208,6 +189,43 @@ LICENSE="$(echo "$license_body" | jq -r .license_token)"
 TIER="$(echo "$license_body" | jq -r .tier)"
 [[ "$TIER" == "premium" ]] || fail "Expected premium tier after webhook, got $TIER"
 pass "Premium activated via FIB webhook"
+
+step "Premium breach monitor (hash match → inbox + FCM queue / deliver)"
+monitor_body="$(api_expect_status POST /v1/breach/monitor 200 \
+  -H "Authorization: Bearer $LICENSE" \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"email_hash\": \"$SAMPLE_HASH\",
+    \"label_hint\": \"smoke-premium\"
+  }")"
+echo "$monitor_body" | jq -e '.ok == true' >/dev/null || fail "Monitor register failed: $monitor_body"
+matched="$(echo "$monitor_body" | jq -r .matched)"
+alerted="$(echo "$monitor_body" | jq -r .alerted)"
+if [[ "$SKIP_INGEST" -eq 0 ]]; then
+  [[ "$matched" == "true" ]] || fail "Expected matched=true after ingest, got: $monitor_body"
+  [[ "$alerted" == "true" ]] || fail "Expected alerted=true (inbox/push), got: $monitor_body"
+  pass "Premium monitor matched + alerted"
+else
+  pass "Premium monitor registered (matched=$matched; ingest skipped)"
+fi
+
+step "List breach monitors"
+monitors_body="$(api_expect_status GET /v1/breach/monitor 200 \
+  -H "Authorization: Bearer $LICENSE")"
+monitor_count="$(echo "$monitors_body" | jq '.monitors | length')"
+[[ "$monitor_count" -ge 1 ]] || fail "Expected ≥1 monitor, got: $monitors_body"
+pass "Listed $monitor_count monitor(s)"
+
+step "Inbox notifications after breach alert"
+notif_body="$(api_expect_status GET /v1/notifications 200 \
+  -H "Authorization: Bearer $LICENSE")"
+notif_count="$(echo "$notif_body" | jq '.notifications | length')"
+if [[ "$SKIP_INGEST" -eq 0 ]]; then
+  [[ "$notif_count" -ge 1 ]] || fail "Expected inbox row after breach alert, got: $notif_body"
+  pass "Inbox has $notif_count notification(s)"
+else
+  pass "Inbox list ok ($notif_count notification(s); ingest skipped)"
+fi
 
 step "Breach prefix lookup"
 breach_body="$(api_expect_status GET "/v1/breach/prefix/${SAMPLE_PREFIX}" 200 \
