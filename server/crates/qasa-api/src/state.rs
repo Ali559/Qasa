@@ -27,7 +27,6 @@ impl AppState {
         let settles_payments = config.env.is_dev();
         let gateways = qasa_payments::all_stub_gateways(settles_payments)
             .into_iter()
-            .map(|(kind, gw)| (kind, gw))
             .collect();
 
         Self {
