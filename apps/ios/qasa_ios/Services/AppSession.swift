@@ -10,6 +10,10 @@ final class AppSession {
     var tierLabel: String
     var deviceLimit: Int
 
+    /// Set when the build cannot reach a valid API host, so every network-backed screen
+    /// fails the same way with an explanation instead of silently timing out.
+    var configurationError: String?
+
     init(
         username: String = "Qasa User",
         email: String = "",
@@ -20,6 +24,7 @@ final class AppSession {
         self.isPremium = isPremium
         self.tierLabel = LicenseManager.shared.tierLabel
         self.deviceLimit = LicenseManager.shared.deviceLimit
+        self.configurationError = QasaConfig.isBaseURLValid ? nil : QasaConfig.apiBaseURL.absoluteString
         syncFromLicense()
     }
 

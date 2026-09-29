@@ -194,6 +194,12 @@ struct VaultFormChrome<Content: View>: View {
     }
 }
 
+/// Gates a `protectItem` note behind device-owner authentication.
+///
+/// Fails **closed**: previously this called `completion(true)` whenever
+/// `canEvaluatePolicy` failed (no enrolled biometrics, simulator, `errSecNotAvailable`),
+/// which opened protected notes with no authentication at all. A protected note must
+/// never be more accessible because the hardware cannot do face ID.
 func unlockIfNeeded(protected: Bool, completion: @escaping (Bool) -> Void) {
     guard protected else {
         completion(true)
@@ -201,11 +207,14 @@ func unlockIfNeeded(protected: Bool, completion: @escaping (Bool) -> Void) {
     }
     let context = LAContext()
     var error: NSError?
-    if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: L10n.tr("vault.unlockProtectedNote")) { success, _ in
-            DispatchQueue.main.async { completion(success) }
-        }
-    } else {
-        completion(true) // stub fallback when biometrics unavailable
+    guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
+        completion(false)
+        return
+    }
+    context.evaluatePolicy(
+        .deviceOwnerAuthentication,
+        localizedReason: L10n.tr("vault.unlockProtectedNote")
+    ) { success, _ in
+        DispatchQueue.main.async { completion(success) }
     }
 }

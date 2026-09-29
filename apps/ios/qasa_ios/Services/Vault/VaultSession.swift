@@ -16,7 +16,7 @@ final class VaultSession {
 
     func createVault(password: String, biometricsEnabled: Bool) throws {
         let salt = MasterKeyDeriver.generateSalt()
-        let root = MasterKeyDeriver.deriveRootKey(password: password, salt: salt)
+        let root = try MasterKeyDeriver.deriveRootKey(password: password, salt: salt)
         let verifier = MasterKeyDeriver.passwordVerifier(rootKey: root)
         let subkeys = MasterKeyDeriver.deriveSubkeys(rootKey: root)
 
@@ -29,6 +29,7 @@ final class VaultSession {
 
         VaultKeychainStore.kdfSalt = salt
         VaultKeychainStore.passwordVerifier = verifier
+        VaultKeychainStore.kdfVersion = VaultCrypto.kdfVersion
         VaultKeychainStore.vaultExists = true
         VaultKeychainStore.biometricsEnabled = biometricsEnabled
 
@@ -47,8 +48,14 @@ final class VaultSession {
               let expected = VaultKeychainStore.passwordVerifier else {
             return false
         }
-        let root = MasterKeyDeriver.deriveRootKey(password: password, salt: salt)
-        guard MasterKeyDeriver.passwordVerifier(rootKey: root) == expected else {
+        // A vault written by a newer build is rejected as an unsupported-version failure
+        // rather than silently failing the verifier check, which would look like a wrong
+        // password and send the user into a reset loop.
+        guard isKdfVersionSupported else { return false }
+
+        guard let root = try? MasterKeyDeriver.deriveRootKey(password: password, salt: salt),
+              VaultCrypto.constantTimeEquals(MasterKeyDeriver.passwordVerifier(rootKey: root), expected)
+        else {
             return false
         }
         let subkeys = MasterKeyDeriver.deriveSubkeys(rootKey: root)
@@ -59,6 +66,20 @@ final class VaultSession {
             VaultKeychainStore.storeBiometricPassword(password)
         }
         return true
+    }
+
+    /// `nil` means a legacy vault written before versioning, which is still v1.
+    var isKdfVersionSupported: Bool {
+        guard let version = VaultKeychainStore.kdfVersion else { return true }
+        return version <= VaultCrypto.kdfVersion
+    }
+
+    /// Lets the UI distinguish "wrong password" from "this vault needs a newer build".
+    var unsupportedKdfVersion: Int? {
+        guard let version = VaultKeychainStore.kdfVersion, version > VaultCrypto.kdfVersion else {
+            return nil
+        }
+        return version
     }
 
     func unlockWithBiometrics() -> String? {
@@ -102,9 +123,15 @@ final class VaultSession {
               let oldEnc = encKey else {
             throw VaultCryptoError.vaultLocked
         }
+        guard isKdfVersionSupported else {
+            throw VaultCryptoError.unsupportedKdfVersion(VaultKeychainStore.kdfVersion ?? 0)
+        }
 
-        let currentRoot = MasterKeyDeriver.deriveRootKey(password: current, salt: salt)
-        guard MasterKeyDeriver.passwordVerifier(rootKey: currentRoot) == expected else {
+        let currentRoot = try MasterKeyDeriver.deriveRootKey(password: current, salt: salt)
+        guard VaultCrypto.constantTimeEquals(
+            MasterKeyDeriver.passwordVerifier(rootKey: currentRoot),
+            expected
+        ) else {
             throw VaultCryptoError.wrongPassword
         }
 
@@ -114,7 +141,7 @@ final class VaultSession {
         }
 
         let newSalt = MasterKeyDeriver.generateSalt()
-        let newRoot = MasterKeyDeriver.deriveRootKey(password: trimmed, salt: newSalt)
+        let newRoot = try MasterKeyDeriver.deriveRootKey(password: trimmed, salt: newSalt)
         let newVerifier = MasterKeyDeriver.passwordVerifier(rootKey: newRoot)
         let newKeys = MasterKeyDeriver.deriveSubkeys(rootKey: newRoot)
         return (oldEnc, newSalt, newVerifier, trimmed, newKeys.encKey, newKeys.searchKey)
@@ -129,6 +156,7 @@ final class VaultSession {
     ) {
         VaultKeychainStore.kdfSalt = newSalt
         VaultKeychainStore.passwordVerifier = newVerifier
+        VaultKeychainStore.kdfVersion = VaultCrypto.kdfVersion
         encKey = newEnc
         searchKey = newSearch
         if VaultKeychainStore.biometricsEnabled {

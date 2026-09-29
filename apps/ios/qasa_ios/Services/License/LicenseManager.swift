@@ -27,14 +27,26 @@ final class LicenseManager {
 
     private init() {
         if let token = VaultKeychainStore.licenseToken {
-            parsed = Self.parseJWT(token)
+            // Signature-verified. An unverified token is treated as absent, so a forged
+            // or expired one cannot grant premium.
+            parsed = LicenseTokenVerifier.parse(token)
         }
     }
 
-    func applyToken(_ token: String) {
+    /// Returns false when the token could not be verified, in which case nothing is
+    /// stored and the previously verified license (if any) stays in effect.
+    @discardableResult
+    func applyToken(_ token: String) -> Bool {
+        guard let verified = LicenseTokenVerifier.parse(token) else {
+            // Do not store a token we cannot verify — a bad token must not replace a
+            // good one, and must not become the persisted source of truth.
+            lastError = "license_token_rejected"
+            return false
+        }
         VaultKeychainStore.licenseToken = token
-        parsed = Self.parseJWT(token)
+        parsed = verified
         lastError = nil
+        return true
     }
 
     func clear() {
@@ -43,57 +55,44 @@ final class LicenseManager {
         lastError = nil
     }
 
+    /// Ensures a verifying key is available, then re-parses any stored token.
+    ///
+    /// Must run before `applyToken` is trusted, and before the UI reads `isPremium`,
+    /// because verification fails closed without a key.
+    @discardableResult
+    func bootstrapVerifyingKey() async -> Bool {
+        let hadKey = LicenseTokenVerifier.cachedVerifyingKey != nil
+        let ok = await LicenseTokenVerifier.refreshVerifyingKey()
+        if let token = VaultKeychainStore.licenseToken {
+            parsed = LicenseTokenVerifier.parse(token)
+        }
+        return ok || hadKey
+    }
+
     @discardableResult
     func refresh() async -> Bool {
         guard VaultKeychainStore.licenseToken != nil else { return false }
+
+        // A refresh that ran while the verifying key was unavailable would decode a
+        // perfectly valid new token, reject it as unverifiable, and leave the user
+        // paying for premium that never unlocks. Make sure the key exists first.
+        if LicenseTokenVerifier.cachedVerifyingKey == nil {
+            _ = await LicenseTokenVerifier.refreshVerifyingKey()
+        }
+
         do {
             let response: LicenseRefreshResponse = try await QasaAPIClient.shared.request(
                 QasaConfig.licenseRefreshURL,
                 method: "GET",
                 authorized: true
             )
-            applyToken(response.license_token)
-            return true
+            if applyToken(response.license_token) { return true }
+            // A second key attempt covers a key rotated between bootstrap and now.
+            _ = await LicenseTokenVerifier.refreshVerifyingKey()
+            return applyToken(response.license_token)
         } catch {
             lastError = error.localizedDescription
             return false
         }
-    }
-
-    static func parseJWT(_ token: String) -> ParsedLicense? {
-        let parts = token.split(separator: ".")
-        guard parts.count >= 2 else { return nil }
-        var payload = String(parts[1])
-        payload = payload.replacingOccurrences(of: "-", with: "+")
-            .replacingOccurrences(of: "_", with: "/")
-        let padding = (4 - payload.count % 4) % 4
-        payload += String(repeating: "=", count: padding)
-        guard let data = Data(base64Encoded: payload),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let sub = json["sub"] as? String,
-              let did = json["did"] as? String,
-              let tier = json["tier"] as? String,
-              let exp = jsonNumber(json["exp"]) else {
-            return nil
-        }
-        let limit = Int(jsonNumber(json["device_limit"]) ?? 1)
-        let entitlements = json["entitlements"] as? [String] ?? []
-        return ParsedLicense(
-            accountId: sub,
-            deviceId: did,
-            tier: tier,
-            deviceLimit: max(limit, 1),
-            expiresAt: Date(timeIntervalSince1970: exp),
-            entitlements: entitlements
-        )
-    }
-
-    private static func jsonNumber(_ value: Any?) -> TimeInterval? {
-        if let d = value as? Double { return d }
-        if let i = value as? Int { return TimeInterval(i) }
-        if let i = value as? Int64 { return TimeInterval(i) }
-        if let u = value as? UInt64 { return TimeInterval(u) }
-        if let n = value as? NSNumber { return n.doubleValue }
-        return nil
     }
 }

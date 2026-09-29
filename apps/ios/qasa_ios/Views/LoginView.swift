@@ -139,6 +139,16 @@ struct LoginView: View {
         let trimmed = password.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
+        // A vault written by a newer KDF version must not be reported as a wrong
+        // password — that pushes the user toward "reset my vault", i.e. data loss.
+        if let version = VaultSession.shared.unsupportedKdfVersion {
+            errorMessage = String(
+                format: L10n.tr("error.vaultNewerKdf", locale: locale),
+                version
+            )
+            return
+        }
+
         if VaultAuthStore.verifyMasterPassword(trimmed) {
             errorMessage = nil
             onUnlocked(trimmed)

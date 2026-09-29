@@ -10,6 +10,7 @@ nonisolated enum SharedVaultKeychain {
         case vaultExists
         case kdfSalt
         case passwordVerifier
+        case kdfVersion
         case biometricsEnabled
         case biometricPassword
     }
@@ -27,6 +28,19 @@ nonisolated enum SharedVaultKeychain {
     static var passwordVerifier: Data? {
         get { data(for: .passwordVerifier) }
         set { setData(newValue, for: .passwordVerifier) }
+    }
+
+    /// KDF parameters used for the stored salt. `nil` means a legacy vault written
+    /// before versioning, which is still the current v1 scheme.
+    static var kdfVersion: Int? {
+        get {
+            guard let data = data(for: .kdfVersion), data.count == 4 else { return nil }
+            return Int(data[0])
+                | (Int(data[1]) << 8)
+                | (Int(data[2]) << 16)
+                | (Int(data[3]) << 24)
+        }
+        set { setData(newValue.map { v in withUnsafeBytes(of: Int32(v).bigEndian) { Data($0) } }, for: .kdfVersion) }
     }
 
     static var biometricsEnabled: Bool {

@@ -2,12 +2,19 @@ import CommonCrypto
 import CryptoKit
 import Foundation
 
+/// Must stay byte-for-byte equivalent to the app's `MasterKeyDeriver` (iOS
+/// `Services/Vault/MasterKeyDeriver.swift`). A divergence in the KDF parameters makes
+/// the credential provider derive a different root key than the app, which breaks
+/// autofill for every user while the main app keeps working — silently.
 enum SharedMasterKeyDeriver {
-    private static let saltLength = 32
-    private static let rootKeyLength = 32
-    private static let pbkdf2Iterations: UInt32 = 310_000
+    private static let saltLength = SharedVaultCrypto.saltLength
+    private static let rootKeyLength = SharedVaultCrypto.rootKeyLength
+    private static let pbkdf2Iterations = SharedVaultCrypto.pbkdf2Iterations
 
-    static func deriveRootKey(password: String, salt: Data) -> Data {
+    /// Throws instead of trapping. `fatalError` in the KDF is reachable on a
+    /// low-memory device and inside the extension, where it kills the autofill host.
+    static func deriveRootKey(password: String, salt: Data) throws -> Data {
+        guard salt.count >= 16 else { throw SharedVaultCryptoError.invalidSalt }
         let passwordData = Data(password.utf8)
         var derived = [UInt8](repeating: 0, count: rootKeyLength)
         let status = passwordData.withUnsafeBytes { passwordBytes in
@@ -26,7 +33,7 @@ enum SharedMasterKeyDeriver {
             }
         }
         guard status == kCCSuccess else {
-            fatalError("PBKDF2 key derivation failed with status \(status)")
+            throw SharedVaultCryptoError.keyDerivationFailed(status)
         }
         return Data(derived)
     }

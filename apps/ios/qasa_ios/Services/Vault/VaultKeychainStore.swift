@@ -9,6 +9,7 @@ nonisolated enum VaultKeychainStore {
         case vaultExists
         case kdfSalt
         case passwordVerifier
+        case kdfVersion
         case accountId
         case deviceFingerprint
         case licenseToken
@@ -29,6 +30,22 @@ nonisolated enum VaultKeychainStore {
     static var passwordVerifier: Data? {
         get { data(for: .passwordVerifier) }
         set { setData(newValue, for: .passwordVerifier) }
+    }
+
+    /// KDF parameters used for the stored salt. `nil` means a legacy vault written
+    /// before versioning, which is still the current v1 scheme.
+    static var kdfVersion: Int? {
+        get {
+            guard let data = data(for: .kdfVersion), data.count == 4 else { return nil }
+            return Int(data[0])
+                | (Int(data[1]) << 8)
+                | (Int(data[2]) << 16)
+                | (Int(data[3]) << 24)
+        }
+        set {
+            setData(newValue.map { v in withUnsafeBytes(of: Int32(v).bigEndian) { Data($0) } },
+                   for: .kdfVersion)
+        }
     }
 
     static var accountId: String? {
@@ -102,6 +119,9 @@ nonisolated enum VaultKeychainStore {
     static func resetVaultSecrets() {
         for key in Key.allCases {
             delete(key)
+            // Also clear the pre–App Group location, otherwise "clear local data" leaves
+            // the old salt, verifier, and plaintext-biometric password behind on disk.
+            SecItemDelete(legacyQuery(for: key) as CFDictionary)
         }
     }
 
@@ -158,10 +178,29 @@ nonisolated enum VaultKeychainStore {
     private static func setData(_ value: Data?, for key: Key) {
         delete(key)
         guard let value else { return }
+
+        // Prefer the shared access group so the credential provider can read the salt
+        // and verifier, then fall back to the app-private item. The read path does the
+        // same, and a signed build without the App Group entitlement would otherwise
+        // store the key material somewhere nothing can find it again.
         var query = self.query(for: key)
         query[kSecValueData as String] = value
         query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
-        SecItemAdd(query as CFDictionary, nil)
+        let status = SecItemAdd(query as CFDictionary, nil)
+        if status == errSecSuccess { return }
+
+        SecItemDelete(legacyQuery(for: key) as CFDictionary)
+        var fallback = legacyQuery(for: key)
+        fallback[kSecValueData as String] = value
+        fallback[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        let fallbackStatus = SecItemAdd(fallback as CFDictionary, nil)
+        if fallbackStatus != errSecSuccess {
+            // A silently-failed write looks like a missing vault: the next unlock
+            // reports "wrong password" and the user's data appears gone.
+            assertionFailure(
+                "Keychain write failed for \(key.rawValue) (shared: \(status), legacy: \(fallbackStatus))"
+            )
+        }
     }
 
     private static func setString(_ value: String?, for key: Key) {

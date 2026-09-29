@@ -12,8 +12,15 @@ enum AutofillUnlock {
               let expected = SharedVaultKeychain.passwordVerifier else {
             return nil
         }
-        let root = SharedMasterKeyDeriver.deriveRootKey(password: password, salt: salt)
-        guard SharedMasterKeyDeriver.passwordVerifier(rootKey: root) == expected else {
+        // Refuse rather than silently reject a vault written by a newer KDF version.
+        if let version = SharedVaultKeychain.kdfVersion, version > SharedVaultCrypto.kdfVersion {
+            return nil
+        }
+        guard let root = try? SharedMasterKeyDeriver.deriveRootKey(password: password, salt: salt),
+              SharedVaultCrypto.constantTimeEquals(
+                  SharedMasterKeyDeriver.passwordVerifier(rootKey: root),
+                  expected
+              ) else {
             return nil
         }
         let subkeys = SharedMasterKeyDeriver.deriveSubkeys(rootKey: root)

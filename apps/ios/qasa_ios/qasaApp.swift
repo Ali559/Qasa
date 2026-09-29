@@ -5,6 +5,9 @@ import SwiftData
 struct qasaApp: App {
     @UIApplicationDelegateAdaptor(QasaAppDelegate.self) private var appDelegate
     private let container: ModelContainer
+    /// Non-nil when the on-disk vault store could not be opened. The store file is
+    /// left untouched so the data stays recoverable — see `VaultStoreErrorView`.
+    private let storeFailure: VaultStoreFailure?
     @State private var prefs = AppPreferences.shared
 
     init() {
@@ -16,25 +19,53 @@ struct qasaApp: App {
         let config = ModelConfiguration(isStoredInMemoryOnly: false)
         do {
             container = try ModelContainer(for: schema, configurations: [config])
+            storeFailure = nil
         } catch {
-            let url = config.url
-            try? FileManager.default.removeItem(at: url)
-            do {
-                container = try ModelContainer(for: schema, configurations: [config])
-            } catch {
-                fatalError("Failed to create ModelContainer: \(error)")
-            }
+            // Never delete the store to recover. Store creation can fail transiently
+            // (SQLite lock, out-of-space, WAL contention) and destroying the file on
+            // those turns a recoverable hiccup into permanent, unrecoverable data loss.
+            // Fall back to an in-memory container so the UI can explain the problem.
+            let failure = VaultStoreFailure(
+                underlying: String(describing: error),
+                storeURL: config.url
+            )
+            storeFailure = failure
+            container = (try? ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(isStoredInMemoryOnly: true)]
+            )) ?? Self.inMemoryContainer(for: schema)
+        }
+    }
+
+    /// Last-resort container so the process can still render the error screen.
+    private static func inMemoryContainer(for schema: Schema) -> ModelContainer {
+        // `ModelConfiguration(isStoredInMemoryOnly: true)` cannot realistically fail.
+        // If it somehow does, crashing is better than running against a real store we
+        // could not open.
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        do {
+            return try ModelContainer(for: schema, configurations: [config])
+        } catch {
+            fatalError("Failed to create in-memory ModelContainer: \(error)")
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .preferredColorScheme(colorScheme)
-                .environment(\.locale, prefs.locale)
-                .environment(\.layoutDirection, prefs.layoutDirection)
-                .environment(prefs)
-                .modelContainer(container)
+            if let storeFailure {
+                VaultStoreErrorView(failure: storeFailure)
+                    .preferredColorScheme(colorScheme)
+                    .environment(\.locale, prefs.locale)
+                    .environment(\.layoutDirection, prefs.layoutDirection)
+                    .environment(prefs)
+            } else {
+                RootView()
+                    .preferredColorScheme(colorScheme)
+                    .environment(\.locale, prefs.locale)
+                    .environment(\.layoutDirection, prefs.layoutDirection)
+                    .environment(prefs)
+                    .modelContainer(container)
+            }
         }
     }
 
@@ -55,6 +86,8 @@ struct qasaApp: App {
         @State private var showPairing = false
         @State private var session = AppSession()
         @State private var isBootstrapping = false
+        @State private var createError: String? = nil
+        @State private var isShielded = true
 
         private var showLogin: Bool {
             VaultAuthStore.vaultExists
@@ -104,6 +137,9 @@ struct qasaApp: App {
             .environment(\.locale, prefs.locale)
             .environment(\.layoutDirection, prefs.layoutDirection)
             .font(.qasa(16))
+            // Cover the vault before the system takes an app-switcher/Control Centre
+            // snapshot. Without this, whatever is on screen lands in that snapshot.
+            .privacyShield(!isShielded)
             // Refresh localized strings without resetting unlock state (state lives on RootView).
             .id(prefs.language.rawValue)
             .fullScreenCover(isPresented: $showPairing) {
@@ -126,8 +162,56 @@ struct qasaApp: App {
                         .cornerRadius(12)
                 }
             }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if let host = session.configurationError {
+                    // A Release build with no https QASA_API_URL reaches nothing at all.
+                    // Say so instead of letting every screen look broken.
+                    HStack(spacing: 8) {
+                        Image(systemName: "wifi.exclamationmark")
+                        Text(
+                            String(
+                                format: L10n.tr("error.apiHostMisconfigured", locale: prefs.locale),
+                                host
+                            )
+                        )
+                        .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .font(.qasa(12, weight: .medium))
+                    .foregroundColor(Theme.danger)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.cardBackground)
+                }
+            }
+            .alert(
+                L10n.tr("error.vaultCreateTitle", locale: prefs.locale),
+                isPresented: Binding(
+                    get: { createError != nil },
+                    set: { if !$0 { createError = nil } }
+                ),
+                presenting: createError
+            ) { _ in
+                Button(L10n.tr("common.ok", locale: prefs.locale), role: .cancel) { createError = nil }
+            } message: { detail in
+                Text(detail)
+            }
+            .task {
+                // `onChange` never fires for the initial value, so an app that launches
+                // straight into `.active` would keep the shield stuck on.
+                AutoLockMonitor.shared.handleScenePhase(scenePhase)
+                isShielded = AutoLockMonitor.shared.isObscured
+            }
             .onChange(of: scenePhase) { _, phase in
                 AutoLockMonitor.shared.handleScenePhase(phase)
+                isShielded = AutoLockMonitor.shared.isObscured
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.obscureNotification)) { _ in
+                isShielded = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.revealNotification)) { _ in
+                isShielded = false
             }
             .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.forceLockNotification)) { _ in
                 handleLogout()
@@ -144,7 +228,9 @@ struct qasaApp: App {
                 unlocked = true
                 AutoLockMonitor.shared.start(onLock: handleLogout)
             } catch {
-                // createVault currently does not throw; keep hook for future validation.
+                // Silently swallowing this left the spinner stopping with no message
+                // and no way to tell the user why creation failed.
+                createError = String(describing: error)
             }
         }
 

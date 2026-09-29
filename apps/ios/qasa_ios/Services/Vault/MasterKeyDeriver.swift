@@ -1,18 +1,31 @@
+import CommonCrypto
 import CryptoKit
 import Foundation
+import Security
 
+/// Must stay byte-for-byte equivalent to the extension's `SharedMasterKeyDeriver`
+/// (`qasa/SharedAutofill/SharedMasterKeyDeriver.swift`). A divergence in the KDF
+/// parameters makes the credential provider derive a different root key than the app,
+/// which breaks autofill for every user while the main app keeps working — silently.
 enum MasterKeyDeriver {
-    private static let saltLength = 32
-    private static let rootKeyLength = 32
-    private static let pbkdf2Iterations: UInt32 = 310_000
+    private static let saltLength = VaultCrypto.kdfSaltLength
+    private static let rootKeyLength = VaultCrypto.rootKeyLength
+    private static let pbkdf2Iterations = VaultCrypto.pbkdf2Iterations
 
     static func generateSalt() -> Data {
         var bytes = [UInt8](repeating: 0, count: saltLength)
-        _ = SecRandomCopyBytes(kSecRandomDefault, saltLength, &bytes)
+        guard SecRandomCopyBytes(kSecRandomDefault, saltLength, &bytes) == errSecSuccess else {
+            // A weak salt silently destroys the whole key hierarchy. Fail loudly at
+            // creation time rather than deriving keys from predictable bytes.
+            fatalError("Failed to generate vault salt: CSPRNG unavailable")
+        }
         return Data(bytes)
     }
 
-    static func deriveRootKey(password: String, salt: Data) -> Data {
+    /// Throws instead of trapping. `fatalError` in the KDF is reachable on a
+    /// low-memory device, and the extension runs this in a host process.
+    static func deriveRootKey(password: String, salt: Data) throws -> Data {
+        guard salt.count >= 16 else { throw VaultCryptoError.invalidSalt }
         let passwordData = Data(password.utf8)
         var derived = [UInt8](repeating: 0, count: rootKeyLength)
         let status = passwordData.withUnsafeBytes { passwordBytes in
@@ -31,7 +44,7 @@ enum MasterKeyDeriver {
             }
         }
         guard status == kCCSuccess else {
-            fatalError("PBKDF2 key derivation failed with status \(status)")
+            throw VaultCryptoError.keyDerivationFailed(status)
         }
         return Data(derived)
     }

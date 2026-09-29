@@ -116,7 +116,11 @@ enum VaultSchema {
 }
 
 enum VaultSeedData {
+    /// Sample credentials for local development. Gated to DEBUG so these can never be
+    /// written into a shipping vault — the trigger is "item count is zero", which is
+    /// exactly the state a user reaches after purging compromised logins.
     static func seedIfNeeded(context: ModelContext) {
+        #if DEBUG
         guard VaultSession.shared.isUnlocked else { return }
         let descriptor = FetchDescriptor<VaultItemRecord>()
         let count = (try? context.fetchCount(descriptor)) ?? 0
@@ -147,5 +151,6 @@ enum VaultSeedData {
             body: "Your encrypted vault is set up. Link devices in Settings to sync entitlements."
         ))
         try? context.save()
+        #endif
     }
 }

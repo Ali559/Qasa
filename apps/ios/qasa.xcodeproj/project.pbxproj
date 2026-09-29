@@ -500,6 +500,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = qasa_ios/AppInfo.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Scan payment cards and identity documents straight into your vault.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Unlock your vault and reveal protected notes with Face ID.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Attach a photo to a vault item.";
+				INFOPLIST_KEY_NSSiriUsageDescription = "Fill logins and cards in other apps using Qasa Autofill.";
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
 				INFOPLIST_KEY_QASA_API_URL = "http://localhost:8080";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -539,8 +543,12 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = qasa_ios/AppInfo.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Scan payment cards and identity documents straight into your vault.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Unlock your vault and reveal protected notes with Face ID.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Attach a photo to a vault item.";
+				INFOPLIST_KEY_NSSiriUsageDescription = "Fill logins and cards in other apps using Qasa Autofill.";
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_QASA_API_URL = "http://localhost:8080";
+				INFOPLIST_KEY_QASA_API_URL = "https://api.qasa.app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";

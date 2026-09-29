@@ -118,6 +118,28 @@ final class VaultRepository {
         }
     }
 
+    /// Every decryptable payload in the vault. Used by CSV export/backup.
+    ///
+    /// Records that fail to decrypt are skipped rather than aborting the export, so one
+    /// corrupted row cannot cost the user their whole backup. `decryptFailureCount`
+    /// reports how many were dropped so the UI can say so instead of implying a
+    /// complete backup.
+    func allPayloads() -> (payloads: [VaultPayload], decryptFailureCount: Int) {
+        guard let context else { return ([], 0) }
+        let descriptor = FetchDescriptor<VaultItemRecord>()
+        guard let records = try? context.fetch(descriptor) else { return ([], 0) }
+        var out: [VaultPayload] = []
+        var failures = 0
+        for record in records {
+            if let payload = try? decryptPayload(record) {
+                out.append(payload)
+            } else {
+                failures += 1
+            }
+        }
+        return (out, failures)
+    }
+
     func filteredRows(kind: VaultItemKind?, query: String) -> [VaultListRow] {
         cache.filter(kind: kind, query: query)
     }

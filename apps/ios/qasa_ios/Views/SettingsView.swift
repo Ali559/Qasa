@@ -17,7 +17,7 @@ struct SettingsView: View {
     @State private var showImport = false
     @State private var showChangeMasterPassword = false
     @State private var showAutoLock = false
-    @State private var exportText: String?
+    @State private var exportDocument: CSVDocument?
     @State private var pairingCode: String?
     @State private var linkedDeviceCount = 0
     @State private var statusMessage: String?
@@ -161,18 +161,33 @@ struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         Divider().background(Theme.stroke)
-                        Button {
-                            exportText = VaultCSV.exportCSV(rows: [])
-                            statusMessage = L10n.tr("settings.exportPrepared", locale: locale)
-                            UIPasteboard.general.string = exportText
-                        } label: {
-                            NavChevronRow(
-                                icon: "square.and.arrow.up",
-                                title: L10n.tr("settings.exportCsv", locale: locale)
-                            )
+                        if let exportDocument {
+                            // Save/share the file rather than the clipboard: a
+                            // plaintext vault backup on `UIPasteboard.general` is
+                            // readable by every app and survives in clipboard history.
+                            ShareLink(
+                                item: exportDocument,
+                                preview: SharePreview("qasa-vault-backup.csv")
+                            ) {
+                                NavChevronRow(
+                                    icon: "square.and.arrow.up",
+                                    title: L10n.tr("settings.exportCsv", locale: locale)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            Divider().background(Theme.stroke)
+                        } else {
+                            Button {
+                                performExport()
+                            } label: {
+                                NavChevronRow(
+                                    icon: "square.and.arrow.up",
+                                    title: L10n.tr("settings.exportCsv", locale: locale)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            Divider().background(Theme.stroke)
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
                         Button { showClearDataAlert = true } label: {
                             NavChevronRow(
                                 icon: "xmark.bin",
@@ -251,17 +266,26 @@ struct SettingsView: View {
             allowedContentTypes: [.commaSeparatedText, .plainText],
             allowsMultipleSelection: false
         ) { result in
-            if case .success(let urls) = result, let url = urls.first,
-               let data = try? Data(contentsOf: url),
-               let text = String(data: data, encoding: .utf8) {
+            if case .success(let urls) = result, let url = urls.first {
+                // The picker hands back a security-scoped URL; without this the read
+                // fails once we leave the callback.
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
                 do {
-                    let rows = try VaultCSV.parseImport(text)
-                    statusMessage = String(
-                        format: L10n.tr("settings.parsedCsv", locale: locale),
-                        rows.count
-                    )
+                    let data = try Data(contentsOf: url)
+                    guard let text = String(data: data, encoding: .utf8) else {
+                        statusMessage = String(
+                            format: L10n.tr("settings.importFailed", locale: locale),
+                            L10n.tr("error.decoding", locale: locale)
+                        )
+                        return
+                    }
+                    performImport(csv: text)
                 } catch {
-                    statusMessage = error.localizedDescription
+                    statusMessage = String(
+                        format: L10n.tr("settings.importFailed", locale: locale),
+                        error.localizedDescription
+                    )
                 }
             }
         }
@@ -344,6 +368,87 @@ struct SettingsView: View {
             guard let url = URL(string: raw), UIApplication.shared.canOpenURL(url) else { continue }
             UIApplication.shared.open(url)
             return
+        }
+    }
+
+    // MARK: - CSV backup
+
+    private func performExport() {
+        let (payloads, failures) = VaultRepository.shared.allPayloads()
+        guard !payloads.isEmpty else {
+            statusMessage = L10n.tr("settings.exportEmpty", locale: locale)
+            return
+        }
+        // Deliberately not written to `UIPasteboard.general`: that would expose every
+        // password in the vault to any app and to the system clipboard history.
+        exportDocument = CSVDocument(text: VaultCSV.exportCSV(payloads: payloads))
+        if failures > 0 {
+            // Do not imply a complete backup when some rows could not be decrypted.
+            statusMessage = String(
+                format: L10n.tr("settings.exportPartial", locale: locale),
+                payloads.count,
+                failures
+            )
+        } else {
+            statusMessage = String(
+                format: L10n.tr("settings.exportPrepared", locale: locale),
+                payloads.count
+            )
+        }
+    }
+
+    private func performImport(csv: String) {
+        do {
+            let result = try VaultCSV.parseImport(csv)
+            let candidates = result.imported
+            guard !candidates.isEmpty else {
+                statusMessage = L10n.tr("settings.importNothing", locale: locale)
+                return
+            }
+            // Skip anything already present so a repeated import is a no-op.
+            let (existing, _) = VaultRepository.shared.allPayloads()
+            let existingPrints = Set(existing.map(VaultCSV.fingerprint))
+
+            var added = 0
+            var skipped = 0
+            var firstError: Error?
+            for payload in candidates {
+                guard !existingPrints.contains(VaultCSV.fingerprint(payload)) else {
+                    skipped += 1
+                    continue
+                }
+                do {
+                    _ = try VaultRepository.shared.save(payload: payload)
+                    added += 1
+                } catch {
+                    firstError = firstError ?? error
+                }
+            }
+
+            Task { await VaultRepository.shared.warmCache() }
+
+            if let firstError, added == 0 {
+                statusMessage = String(
+                    format: L10n.tr("settings.importFailed", locale: locale),
+                    firstError.localizedDescription
+                )
+            } else if skipped > 0 {
+                statusMessage = String(
+                    format: L10n.tr("settings.importSkipped", locale: locale),
+                    added,
+                    skipped
+                )
+            } else {
+                statusMessage = String(
+                    format: L10n.tr("settings.parsedCsv", locale: locale),
+                    added
+                )
+            }
+        } catch {
+            statusMessage = String(
+                format: L10n.tr("settings.importFailed", locale: locale),
+                error.localizedDescription
+            )
         }
     }
 }
