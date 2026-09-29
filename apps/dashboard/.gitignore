@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local env — may contain machine-specific API URLs and tokens.
+.env
+.env.local
+.env.*.local

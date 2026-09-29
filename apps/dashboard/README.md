@@ -23,8 +23,8 @@ Vue 3 + TypeScript admin dashboard with **shadcn-vue** (Nova style), dark emeral
 
 ```bash
 cd dashboard
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Open the URL Vite prints (usually `http://localhost:5173`).
@@ -32,6 +32,6 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 ## Build
 
 ```bash
-npm run build
-npm run preview
+bun run build
+bun run preview
 ```
