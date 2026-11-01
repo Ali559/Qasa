@@ -8,7 +8,6 @@ struct LoginView: View {
     @State private var password = ""
     @State private var passwordVisible = false
     @State private var errorMessage: String?
-    @State private var biometricsAvailable = true
 
     private var locale: Locale { prefs.locale }
 
@@ -58,7 +57,9 @@ struct LoginView: View {
                         }
                     }
 
-                    if biometricsAvailable {
+                    // Only offered when biometrics were enabled for this vault (Android parity);
+                    // tapping a row that can only answer "enable biometrics first" was a dead end.
+                    if VaultKeychainStore.biometricsEnabled {
                         Button {
                             unlockWithBiometrics()
                         } label: {
@@ -149,12 +150,18 @@ struct LoginView: View {
             return
         }
 
-        if VaultAuthStore.verifyMasterPassword(trimmed) {
-            errorMessage = nil
-            onUnlocked(trimmed)
-        } else {
-            errorMessage = L10n.tr("auth.unlock.wrongPassword", locale: locale)
+        // Try the password exactly as typed first: vaults are created with the raw password,
+        // so trimming first locked out anyone whose password starts or ends with a space.
+        // The trimmed form still works for passwords set via Change Master Password (trimmed).
+        for candidate in [password, trimmed] where !candidate.isEmpty {
+            if VaultAuthStore.verifyMasterPassword(candidate) {
+                errorMessage = nil
+                onUnlocked(candidate)
+                return
+            }
+            if candidate == trimmed { break }
         }
+        errorMessage = L10n.tr("auth.unlock.wrongPassword", locale: locale)
     }
 
     private func unlockWithBiometrics() {

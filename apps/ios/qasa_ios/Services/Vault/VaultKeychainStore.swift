@@ -93,6 +93,28 @@ nonisolated enum VaultKeychainStore {
         SecItemAdd(query as CFDictionary, nil)
     }
 
+    /// Whether a biometric-sealed password exists, checked without showing Face ID / Touch ID:
+    /// with interaction disallowed, a present item reports `errSecInteractionNotAllowed`.
+    static var biometricPasswordStored: Bool {
+        guard biometricsEnabled else { return false }
+        let context = LAContext()
+        context.interactionNotAllowed = true
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: Key.biometricPassword.rawValue,
+            kSecAttrAccessGroup as String: AppGroup.keychainAccessGroup,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecUseAuthenticationContext as String: context
+        ]
+        func present(_ status: OSStatus) -> Bool {
+            status == errSecSuccess || status == errSecInteractionNotAllowed
+        }
+        if present(SecItemCopyMatching(query as CFDictionary, nil)) { return true }
+        query.removeValue(forKey: kSecAttrAccessGroup as String)
+        return present(SecItemCopyMatching(query as CFDictionary, nil))
+    }
+
     static func loadBiometricPassword() -> String? {
         guard biometricsEnabled else { return nil }
         let context = LAContext()

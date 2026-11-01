@@ -16,6 +16,8 @@ struct BreachMonitorView: View {
     @State private var isChecking = false
     @State private var scanResults: [BreachCheckResult] = []
     @State private var errorMessage: String?
+    @State private var statusMessage: String?
+    @State private var rotateTarget: RotateTarget?
 
     private let maxSlots = 10
 
@@ -56,6 +58,13 @@ struct BreachMonitorView: View {
         } message: {
             Text(String(format: L10n.tr("breach.slotLimitMessage", locale: AppLanguage.current.locale), maxSlots))
         }
+        .sheet(item: $rotateTarget) { target in
+            RotatePasswordSheet(email: target.email) { itemName in
+                errorMessage = nil
+                statusMessage = String(format: L10n.tr("breach.rotateSaved"), itemName)
+            }
+            .appLocalization()
+        }
         .onAppear {
             Task { await rescanAll() }
         }
@@ -83,6 +92,11 @@ struct BreachMonitorView: View {
                 monitoredList
                 breachTabs
                 breachList
+                if let statusMessage {
+                    Text(statusMessage)
+                        .font(.system(size: 13))
+                        .foregroundColor(Theme.success)
+                }
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.system(size: 13))
@@ -251,7 +265,10 @@ struct BreachMonitorView: View {
                         discoveredDate: L10n.tr("breach.recentScan"),
                         compromisedFields: [L10n.tr("breach.emailsField")],
                         status: result.breached ? .unresolved : .resolved
-                    ))
+                    ), onRotate: {
+                        statusMessage = nil
+                        rotateTarget = RotateTarget(email: result.email)
+                    })
                 }
             }
         }
@@ -298,6 +315,11 @@ struct BreachMonitorView: View {
         }
         try? modelContext.save()
     }
+}
+
+private struct RotateTarget: Identifiable {
+    let email: String
+    var id: String { email }
 }
 
 #Preview {

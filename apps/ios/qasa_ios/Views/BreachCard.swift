@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BreachCard: View {
     let breach: Breach
+    var onRotate: () -> Void = {}
 
     private var accent: Color {
         breach.status == .unresolved ? Theme.danger : Theme.success
@@ -86,7 +87,7 @@ struct BreachCard: View {
     }
 
     private var unresolvedAction: some View {
-        Button {} label: {
+        Button(action: onRotate) {
             HStack(spacing: 8) {
                 Image(systemName: "key.fill")
                 Text(L10n.tr("breach.rotatePassword"))

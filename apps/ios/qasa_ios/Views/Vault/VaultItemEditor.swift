@@ -397,11 +397,12 @@ struct VaultItemEditor: View {
             FormTextField(title: L10n.tr("field.name"), text: idBinding(\.name))
             CountryPickerField(countryCode: idCountryBinding)
             FormTextField(title: L10n.tr("field.number"), text: idBinding(\.number))
-            FormTextField(title: L10n.tr("field.issueDate"), text: idBinding(\.issueDate))
+            // Validated like card expiry and birth date (Android parity).
+            ValidatedDateField(title: L10n.tr("field.issueDate"), text: idBinding(\.issueDate))
             if case .passport = payload {
                 FormTextField(title: L10n.tr("field.issuePlace"), text: idBinding(\.issuePlace))
             }
-            FormTextField(title: L10n.tr("field.expiryDate"), text: idBinding(\.expiryDate))
+            ValidatedDateField(title: L10n.tr("field.expiryDate"), text: idBinding(\.expiryDate))
         }
     }
 

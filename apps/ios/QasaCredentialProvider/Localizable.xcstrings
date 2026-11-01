@@ -1,673 +1,644 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "auth.unlock.placeholder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أدخل كلمة المرور"
+  "sourceLanguage": "en",
+  "strings": {
+    "auth.unlock.placeholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter password"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "وشەی نهێنی بنووسە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل كلمة المرور"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter password"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشەی نهێنی بنووسە"
           }
         }
       }
     },
-    "autofill.bank" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بنك"
+    "autofill.bank": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bank"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بانک"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بنك"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bank"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بانک"
           }
         }
       }
     },
-    "autofill.biometricFailed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فشل الفتح البيومتري."
+    "autofill.biometricFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biometric unlock failed."
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کردنەوە بە بایۆمەتری سەرکەوتوو نەبوو."
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فشل الفتح البيومتري."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Biometric unlock failed."
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کردنەوە بە بایۆمەتری سەرکەوتوو نەبوو."
           }
         }
       }
     },
-    "autofill.card" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بطاقة"
+    "autofill.card": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کارت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بطاقة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Card"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارت"
           }
         }
       }
     },
-    "autofill.cardNumber" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رقم البطاقة"
+    "autofill.cardNumber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card number"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ژمارەی کارت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم البطاقة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Card number"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی کارت"
           }
         }
       }
     },
-    "autofill.copied" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم النسخ"
+    "autofill.copied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لەبەرگیرا"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم النسخ"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copied"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لەبەرگیرا"
           }
         }
       }
     },
-    "autofill.copy" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نسخ"
+    "autofill.copy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لەبەرگرتنەوە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لەبەرگرتنەوە"
           }
         }
       }
     },
-    "autofill.cvv" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+    "autofill.cvv": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         }
       }
     },
-    "autofill.decryptFailed" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّر فك تشفير العنصر."
+    "autofill.decryptFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not decrypt item."
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نەتوانرا ئایتمەکە دەکۆد بکرێت."
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر فك تشفير العنصر."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not decrypt item."
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا ئایتمەکە دەکۆد بکرێت."
           }
         }
       }
     },
-    "autofill.expiresIn" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ينتهي خلال %dث"
+    "autofill.expiresIn": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expires in %ds"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لە %d چرکەدا بەسەر دەچێت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ينتهي خلال %dث"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expires in %ds"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە %d چرکەدا بەسەر دەچێت"
           }
         }
       }
     },
-    "autofill.expiryDate" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تاريخ الانتهاء"
+    "autofill.expiryDate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expiry date"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بەرواری بەسەرچوون"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تاريخ الانتهاء"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expiry date"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەرواری بەسەرچوون"
           }
         }
       }
     },
-    "autofill.nameOnCard" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الاسم على البطاقة"
+    "autofill.nameOnCard": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name on card"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ناو لەسەر کارت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم على البطاقة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name on card"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناو لەسەر کارت"
           }
         }
       }
     },
-    "autofill.noMatches" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا توجد مطابقات"
+    "autofill.noMatches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "هیچ هاوتایەک نییە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد مطابقات"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No matches"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هیچ هاوتایەک نییە"
           }
         }
       }
     },
-    "autofill.noMatchesHint" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جرّب البحث في كل عناصر الخزنة."
+    "autofill.noMatchesHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try searching all vault items."
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "هەموو ئایتمەکانی قەڵا بگەڕێ."
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جرّب البحث في كل عناصر الخزنة."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try searching all vault items."
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەموو ئایتمەکانی قەڵا بگەڕێ."
           }
         }
       }
     },
-    "autofill.search" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بحث"
+    "autofill.search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "گەڕان"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بحث"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕان"
           }
         }
       }
     },
-    "autofill.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعبئة Qasa التلقائية"
+    "autofill.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa Autofill"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "پڕکردنەوەی خۆکاری Qasa"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعبئة Qasa التلقائية"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Qasa Autofill"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پڕکردنەوەی خۆکاری Qasa"
           }
         }
       }
     },
-    "autofill.unlock" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فتح"
+    "autofill.unlock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کردنەوە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فتح"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کردنەوە"
           }
         }
       }
     },
-    "autofill.unlocking" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جارٍ الفتح…"
+    "autofill.unlockTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock vault"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "دەکرێتەوە…"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فتح الخزنة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlocking…"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کردنەوەی قەڵا"
           }
         }
       }
     },
-    "autofill.unlockTitle" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فتح الخزنة"
+    "autofill.unlocking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlocking…"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کردنەوەی قەڵا"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الفتح…"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock vault"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەکرێتەوە…"
           }
         }
       }
     },
-    "autofill.useBiometrics" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استخدم Face ID / Touch ID"
+    "autofill.useBiometrics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use Face ID / Touch ID"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Face ID / Touch ID بەکاربهێنە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم Face ID / Touch ID"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Use Face ID / Touch ID"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID / Touch ID بەکاربهێنە"
           }
         }
       }
     },
-    "autofill.wrongPassword" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "كلمة المرور الرئيسية غير صحيحة."
+    "autofill.wrongPassword": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wrong master password."
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "وشەی نهێنی سەرەکی هەڵەیە."
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمة المرور الرئيسية غير صحيحة."
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wrong master password."
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشەی نهێنی سەرەکی هەڵەیە."
           }
         }
       }
     },
-    "common.cancel" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إلغاء"
+    "common.cancel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "هەڵوەشاندنەوە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إلغاء"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵوەشاندنەوە"
           }
         }
       }
     },
-    "field.accountHolder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "صاحب الحساب"
+    "field.accountHolder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account Holder"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خاوەنی هەژمار"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صاحب الحساب"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Account Holder"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خاوەنی هەژمار"
           }
         }
       }
     },
-    "field.accountNumber" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رقم الحساب"
+    "field.accountNumber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account Number"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ژمارەی هەژمار"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم الحساب"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Account Number"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی هەژمار"
           }
         }
       }
     },
-    "field.bankName" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اسم البنك"
+    "field.bankName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bank Name"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ناوی بانک"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسم البنك"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bank Name"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوی بانک"
           }
         }
       }
     },
-    "field.expiryDate" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تاريخ الانتهاء"
+    "field.expiryDate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expiry Date"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بەرواری بەسەرچوون"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تاريخ الانتهاء"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expiry Date"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەرواری بەسەرچوون"
           }
         }
       }
     },
-    "field.number" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الرقم"
+    "field.number": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ژمارە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الرقم"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Number"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارە"
           }
         }
       }
     },
-    "field.routingNumber" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رقم التوجيه"
+    "field.routingNumber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Routing Number"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ژمارەی ڕێڕەو"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم التوجيه"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Routing Number"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی ڕێڕەو"
           }
         }
       }
     },
-    "field.securityCode" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رمز الأمان"
+    "field.securityCode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Security Code"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "کۆدی ئاسایش"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رمز الأمان"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Security Code"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆدی ئاسایش"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

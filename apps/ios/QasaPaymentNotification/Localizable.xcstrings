@@ -1,167 +1,160 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "autofill.cardNumber" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رقم البطاقة"
+  "sourceLanguage": "en",
+  "strings": {
+    "autofill.cardNumber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card number"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ژمارەی کارت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم البطاقة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Card number"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی کارت"
           }
         }
       }
     },
-    "autofill.copied" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم النسخ"
+    "autofill.copied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لەبەرگیرا"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم النسخ"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copied"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لەبەرگیرا"
           }
         }
       }
     },
-    "autofill.copy" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نسخ"
+    "autofill.copy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لەبەرگرتنەوە"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لەبەرگرتنەوە"
           }
         }
       }
     },
-    "autofill.cvv" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+    "autofill.cvv": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CVV"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CVV"
           }
         }
       }
     },
-    "autofill.expiresIn" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ينتهي خلال %dث"
+    "autofill.expiresIn": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expires in %ds"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لە %d چرکەدا بەسەر دەچێت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ينتهي خلال %dث"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expires in %ds"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە %d چرکەدا بەسەر دەچێت"
           }
         }
       }
     },
-    "autofill.expiryDate" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تاريخ الانتهاء"
+    "autofill.expiryDate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expiry date"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بەرواری بەسەرچوون"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تاريخ الانتهاء"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expiry date"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەرواری بەسەرچوون"
           }
         }
       }
     },
-    "autofill.nameOnCard" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الاسم على البطاقة"
+    "autofill.nameOnCard": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name on card"
           }
         },
-        "ckb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ناو لەسەر کارت"
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم على البطاقة"
           }
         },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Name on card"
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناو لەسەر کارت"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

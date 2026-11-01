@@ -7,8 +7,10 @@ struct VPNView: View {
     @Environment(AppSession.self) private var session
     private var vpn = VPNService.shared
 
-    @State private var killSwitch = true
-    @State private var autoConnect = false
+    // Saved like Android (`qasa.vpn.*`); the page is premium-only, and nothing acts on these
+    // until a real tunnel exists (server follow-up plan).
+    @AppStorage("qasa.vpn.killSwitch") private var killSwitch = true
+    @AppStorage("qasa.vpn.autoConnect") private var autoConnect = false
 
     private var locale: Locale { AppLanguage.current.locale }
 

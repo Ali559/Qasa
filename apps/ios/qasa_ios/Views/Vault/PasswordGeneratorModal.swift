@@ -73,16 +73,24 @@ final class PasswordGeneratorModel: ObservableObject {
     }
 
     func regenerate() {
-        var pool = ""
-        if useUppercase { pool += uppercaseChars }
-        if useLowercase { pool += lowercaseChars }
-        if useNumbers { pool += numberChars }
-        if useSymbols { pool += symbolChars }
+        var classes: [String] = []
+        if useUppercase { classes.append(uppercaseChars) }
+        if useLowercase { classes.append(lowercaseChars) }
+        if useNumbers { classes.append(numberChars) }
+        if useSymbols { classes.append(symbolChars) }
+        let pool = classes.joined()
         guard !pool.isEmpty else {
             password = ""
             return
         }
-        password = String((0..<Int(length)).compactMap { _ in pool.randomElement() })
+        // One character from every enabled class first, so "Symbols on" always yields a
+        // symbol (Android `PasswordGenerator` parity), then fill and shuffle so the
+        // guaranteed characters don't sit in a predictable prefix.
+        var chars = classes.compactMap { $0.randomElement() }
+        while chars.count < Int(length) {
+            if let c = pool.randomElement() { chars.append(c) }
+        }
+        password = String(chars.prefix(max(Int(length), classes.count)).shuffled())
     }
 
     func copyPassword() {

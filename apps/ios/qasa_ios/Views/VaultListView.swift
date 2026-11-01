@@ -81,7 +81,12 @@ struct VaultListView: View {
                             ContentUnavailableView(
                                 L10n.tr("vault.emptyTitle", locale: prefs.locale),
                                 systemImage: "tray",
-                                description: Text(L10n.tr("vault.emptyHint", locale: prefs.locale))
+                                // A search with no hits says so instead of "add your first item".
+                                description: Text(L10n.tr(
+                                    searchText.trimmingCharacters(in: .whitespaces).isEmpty
+                                        ? "vault.emptyHint" : "vault.noSearchMatches",
+                                    locale: prefs.locale
+                                ))
                             )
                             .frame(maxWidth: .infinity)
                             .padding(.top, 40)

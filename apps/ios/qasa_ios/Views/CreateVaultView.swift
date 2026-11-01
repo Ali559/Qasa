@@ -22,8 +22,9 @@ struct CreateVaultView: View {
         }
     }
 
+    /// At least 8 characters, the same rule as Android and as Change Master Password.
     private var canCreate: Bool {
-        !password.isEmpty && password == confirmPassword
+        password.count >= 8 && password == confirmPassword
     }
 
     var body: some View {
@@ -198,9 +199,11 @@ struct CreateVaultView: View {
 
     private func createVault() {
         guard canCreate else {
-            errorMessage = password != confirmPassword
-                ? L10n.tr("auth.create.mismatch", locale: locale)
-                : L10n.tr("auth.create.enterPassword", locale: locale)
+            errorMessage = password.isEmpty
+                ? L10n.tr("auth.create.enterPassword", locale: locale)
+                : password.count < 8
+                    ? L10n.tr("settings.weakMasterPassword", locale: locale)
+                    : L10n.tr("auth.create.mismatch", locale: locale)
             return
         }
         errorMessage = nil

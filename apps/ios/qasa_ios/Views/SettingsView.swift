@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
+import LocalAuthentication
 
 struct SettingsView: View {
     var onOpenMenu: () -> Void = {}
@@ -24,6 +25,20 @@ struct SettingsView: View {
 
     private var locale: Locale { prefs.locale }
 
+    /// Seal state under the biometric toggle, the same three states Android shows: the
+    /// password is sealed, the device can't do biometrics, or it gets sealed on the next
+    /// master-password unlock (turning the toggle on does not seal anything by itself).
+    private var biometricSubtitle: String {
+        guard biometricUnlock else { return "" }
+        if VaultKeychainStore.biometricPasswordStored {
+            return L10n.tr("settings.biometricSealed", locale: locale)
+        }
+        if !LAContext().canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil) {
+            return L10n.tr("settings.biometricNoGate", locale: locale)
+        }
+        return L10n.tr("settings.biometricPending", locale: locale)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             AppMenuHeader(title: L10n.tr("settings.title", locale: locale), onMenu: onOpenMenu)
@@ -45,7 +60,7 @@ struct SettingsView: View {
                             icon: "touchid",
                             iconColor: Theme.textPrimary,
                             title: L10n.tr("settings.biometricUnlock", locale: locale),
-                            subtitle: "",
+                            subtitle: biometricSubtitle,
                             isOn: $biometricUnlock
                         )
                         .onChange(of: biometricUnlock) { _, newValue in
