@@ -1,0 +1,10 @@
+export type NavKey =
+  | 'overview'
+  | 'users'
+  | 'payments'
+  | 'cancellations'
+  | 'plans'
+  | 'analytics'
+  | 'notifications'
+  | 'vpn'
+  | 'telemetry'
