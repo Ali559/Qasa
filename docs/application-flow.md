@@ -1,6 +1,6 @@
 # Qasa — Application Flow
 
-End-to-end user and system journeys. Companion to `architecture.md`.
+End-to-end user and system journeys. Companion to [`ARCHITECTURE.md`](../ARCHITECTURE.md).
 
 Legend for auth column: **none** = unauthenticated, **Lic** = Ed25519 license JWT, **Adm** = HS256 admin JWT, **Agent** = `x-qasa-agent-token`, **Prem** = live subscription required.
 
@@ -221,7 +221,7 @@ sequenceDiagram
     S-->>A: activates premium
 ```
 
-Dev-only convenience. It is also the sharpest edge in the codebase — see Appendix item 3 in `architecture.md`. The webhook verifies nothing, so this must never be reachable in production.
+Dev-only convenience. The stub gateways accept unsigned webhooks, so they settle payments only when `QASA_ENV=dev`; in production they refuse, and `create_intent` refuses up front (see `ARCHITECTURE.md` §4.8).
 
 ---
 

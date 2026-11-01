@@ -1,7 +1,7 @@
 # Qasa — Design System & Platform Parity Spec
 
 Normative reference for the Qasa visual design system **and** the behavioural contract that
-`apps/android/` must satisfy. Companion to `architecture.md` (what exists) and
+`apps/android/` must satisfy. Companion to [`ARCHITECTURE.md`](../ARCHITECTURE.md) (what exists) and
 `application-flow.md` (what happens).
 
 **Source of truth: the iOS app.** `apps/ios/qasa_ios/` defines every token, every component
