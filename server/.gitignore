@@ -1,0 +1,38 @@
+# Build
+/target/
+**/*.rs.bk
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/
+credentials.json
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs & local runtime
+*.log
+logs/
+tmp/
+.cache/
+
+# Coverage / profiling
+coverage/
+lcov.info
+*.profraw
+*.profdata
+flamegraph.svg
+perf.data*
+
+# Docker local overrides
+docker-compose.override.yml

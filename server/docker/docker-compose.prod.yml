@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: qasa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qasa}
+      POSTGRES_DB: qasa
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qasa -d qasa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: qasa-api
+    environment:
+      QASA_ENV: prod
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      BIND_ADDR: 0.0.0.0:8080
+      QASA_ADMIN_JWT_SECRET: ${QASA_ADMIN_JWT_SECRET:?set QASA_ADMIN_JWT_SECRET}
+      QASA_LICENSE_PRIVATE_KEY: ${QASA_LICENSE_PRIVATE_KEY:?set QASA_LICENSE_PRIVATE_KEY}
+      QASA_ADMIN_CORS_ORIGIN: ${QASA_ADMIN_CORS_ORIGIN:-https://admin.qasa.app}
+      # Restrict /v1/admin/* to the VPN range. Strongly recommended: without it the
+      # admin surface is reachable by anyone who can reach this port.
+      QASA_ADMIN_ALLOW_CIDRS: ${QASA_ADMIN_ALLOW_CIDRS:-tailscale}
+      # Only set this to the proxy that actually fronts the API. Empty means the TCP
+      # peer address is always used, which is the safe default.
+      QASA_TRUSTED_PROXY_CIDRS: ${QASA_TRUSTED_PROXY_CIDRS:-}
+      # Device push. Without these, inbox rows still write and pushes are logged only.
+      QASA_FCM_PROJECT_ID: ${QASA_FCM_PROJECT_ID:-}
+      QASA_FCM_SERVICE_ACCOUNT_JSON: ${QASA_FCM_SERVICE_ACCOUNT_JSON:-}
+      QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE: ${QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE:-}
+      RUST_LOG: qasa_api=info,tower_http=info,sqlx=warn
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: qasa-worker
+    environment:
+      QASA_ENV: prod
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      # The worker builds AppConfig too, and AppConfig panics in prod without this.
+      QASA_ADMIN_JWT_SECRET: ${QASA_ADMIN_JWT_SECRET:?set QASA_ADMIN_JWT_SECRET}
+      QASA_LICENSE_PRIVATE_KEY: ${QASA_LICENSE_PRIVATE_KEY:?set QASA_LICENSE_PRIVATE_KEY}
+      # The worker is gated off outside prod; in prod it is the point of the service.
+      QASA_WORKER_ENABLE: ${QASA_WORKER_ENABLE:-1}
+      QASA_FCM_PROJECT_ID: ${QASA_FCM_PROJECT_ID:-}
+      QASA_FCM_SERVICE_ACCOUNT_JSON: ${QASA_FCM_SERVICE_ACCOUNT_JSON:-}
+      QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE: ${QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE:-}
+      RUST_LOG: qasa_worker=info,sqlx=warn
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

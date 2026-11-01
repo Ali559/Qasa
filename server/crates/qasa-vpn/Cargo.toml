@@ -1,0 +1,24 @@
+[package]
+name = "qasa-vpn"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "qasa-vpn-agent"
+path = "src/bin/agent.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap = { version = "4", features = ["derive", "env"] }
+hex = "0.4"
+qasa-core.workspace = true
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+thiserror.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
+uuid.workspace = true
+
+[lib]
+path = "src/lib.rs"

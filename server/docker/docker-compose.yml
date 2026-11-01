@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: qasa
+      POSTGRES_PASSWORD: qasa
+      POSTGRES_DB: qasa
+    ports:
+      # Host port is 5433, not the Postgres default of 5432. A Homebrew/apt/Postgres.app
+      # install very often already owns 5432, and whichever process binds it first wins --
+      # silently. That made `localhost:5432` resolve to an unrelated server, so the app and
+      # the integration tests ran against a different database than the one in this file.
+      # Override with QASA_POSTGRES_PORT if you genuinely need 5432.
+      - "${QASA_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qasa -d qasa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
