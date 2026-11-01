@@ -3,6 +3,7 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 import LoginView from '../views/LoginView.vue'
 import OverviewView from '../views/OverviewView.vue'
 import UsersView from '../views/UsersView.vue'
+import AccountView from '../views/AccountView.vue'
 import PaymentsView from '../views/PaymentsView.vue'
 import CancellationsView from '../views/CancellationsView.vue'
 import PlansView from '../views/PlansView.vue'
@@ -27,6 +28,7 @@ export const router = createRouter({
         { path: '', name: 'overview', component: OverviewView },
         { path: 'analytics', name: 'analytics', component: AnalyticsView },
         { path: 'users', name: 'users', component: UsersView },
+        { path: 'users/:accountId', name: 'account', component: AccountView },
         { path: 'payments', name: 'payments', component: PaymentsView },
         { path: 'plans', name: 'plans', component: PlansView },
         { path: 'cancellations', name: 'cancellations', component: CancellationsView },

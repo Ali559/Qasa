@@ -12,7 +12,7 @@ import {
   fetchAdminNotifications,
   type AdminNotificationRow,
 } from '@/api/admin'
-import { isLiveApiEnabled } from '@/api/client'
+import { canWrite, isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
 
 const rows = ref<AdminNotificationRow[]>([])
@@ -23,6 +23,20 @@ const title_ar = ref('')
 const body_ckb = ref('')
 const body_ar = ref('')
 const loading = ref(false)
+
+type Audience = 'all' | 'subscribers' | 'free'
+const audience = ref<Audience>('all')
+const audienceOptions = [
+  { value: 'all' as const, label: 'Everyone' },
+  { value: 'subscribers' as const, label: 'Premium' },
+  { value: 'free' as const, label: 'Free' },
+]
+const audienceLabel: Record<string, string> = {
+  all: 'everyone',
+  subscribers: 'Premium users',
+  free: 'Free users',
+}
+const sendLabel = computed(() => `Send to ${audienceLabel[audience.value]}`)
 
 async function load() {
   if (!isLiveApiEnabled()) {
@@ -50,16 +64,18 @@ async function send() {
     return
   }
   try {
-    await createAdminNotification({
+    const res = await createAdminNotification({
       title_en: title_en.value,
       body_en: body_en.value,
       title_ckb: title_ckb.value || undefined,
       title_ar: title_ar.value || undefined,
       body_ckb: body_ckb.value || undefined,
       body_ar: body_ar.value || undefined,
-      audience: 'all',
+      audience: audience.value,
     })
-    toast.success('Sent to all users', { description: 'Delivered to inboxes, and as a push where FCM is set up.' })
+    toast.success(`Sent to ${res.notified_accounts} ${audienceLabel[audience.value]}`, {
+      description: 'In their inboxes now; device pushes go out within a minute where FCM is set up.',
+    })
     title_en.value = ''
     body_en.value = ''
     await load()
@@ -127,8 +143,14 @@ function formatDate(value: string) {
           </fieldset>
         </div>
 
+        <div class="grid gap-2">
+          <Label>Who gets it</Label>
+          <FilterChips v-model="audience" :options="audienceOptions" label="Audience" />
+        </div>
+
         <div class="flex flex-wrap gap-2">
-          <Button size="lg" class="rounded-xl" @click="send"><Send /> Send to all users</Button>
+          <Button v-if="canWrite()" size="lg" class="rounded-xl" @click="send"><Send /> {{ sendLabel }}</Button>
+          <p v-else class="text-muted-foreground text-sm">Your role is read-only, so you can't send notifications.</p>
         </div>
       </CardContent>
     </Card>
@@ -163,7 +185,9 @@ function formatDate(value: string) {
           <div v-for="n in rows" :key="n.id" class="bg-muted/60 rounded-2xl px-4 py-3 text-sm">
             <p class="font-semibold">{{ n.title_en }}</p>
             <p class="text-muted-foreground">{{ n.body_en }}</p>
-            <p class="text-muted-foreground mt-1 text-xs">{{ formatDate(n.created_at) }}</p>
+            <p class="text-muted-foreground mt-1 text-xs">
+              {{ formatDate(n.created_at) }} · {{ audienceLabel[n.audience] ?? n.audience }}
+            </p>
           </div>
           <p v-if="!rows.length" class="text-muted-foreground text-sm">Nothing sent yet. Your first notification will show up here.</p>
         </CardContent>

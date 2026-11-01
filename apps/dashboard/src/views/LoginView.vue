@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'vue-sonner'
 import { adminLogin } from '@/api/admin'
 import { vpnNodes } from '@/data/mock'
-import { isLiveApiEnabled, setAuthToken } from '@/api/client'
+import { errorMessage, isLiveApiEnabled, setSession } from '@/api/client'
 
 const router = useRouter()
 const route = useRoute()
@@ -30,7 +30,7 @@ async function authenticate() {
   try {
     if (isLiveApiEnabled()) {
       const res = await adminLogin(email.value.trim(), password.value)
-      setAuthToken(res.token)
+      setSession(res)
     } else {
       await new Promise((r) => setTimeout(r, 650))
     }
@@ -41,7 +41,7 @@ async function authenticate() {
   } catch (err) {
     loading.value = false
     toast.error('Sign-in failed', {
-      description: err instanceof Error ? err.message : 'Check your email and password, then try again.',
+      description: errorMessage(err, 'Check your email and password, then try again.'),
     })
   }
 }

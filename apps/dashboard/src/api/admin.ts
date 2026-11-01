@@ -1,4 +1,4 @@
-import { apiFetch } from './client'
+import { apiFetch, apiFetchWithHeaders, qs } from './client'
 import type { PaymentRow, UserRow } from '@/data/mock'
 
 export async function adminLogin(email: string, password: string) {
@@ -6,6 +6,11 @@ export async function adminLogin(email: string, password: string) {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
+}
+
+/** Ends this admin session server-side (204). */
+export async function adminLogout() {
+  return apiFetch<void>('/v1/admin/auth/logout', { method: 'POST' })
 }
 
 export type OverviewKpi = {
@@ -21,12 +26,202 @@ export async function fetchOverview() {
   return apiFetch<{ kpis: OverviewKpi[] }>('/v1/admin/overview')
 }
 
-export async function fetchUsers() {
-  return apiFetch<UserRow[]>('/v1/admin/users')
+/** Bare array; the next-page cursor (RFC3339) is in the `X-Next-Before` header. */
+export async function fetchUsers(params: { q?: string; limit?: number; before?: string | null } = {}) {
+  const { data, headers } = await apiFetchWithHeaders<UserRow[]>(`/v1/admin/users${qs(params)}`)
+  return { users: data, nextBefore: headers.get('X-Next-Before') }
 }
 
-export async function fetchPayments() {
-  return apiFetch<{ payments: PaymentRow[] }>('/v1/admin/payments')
+export async function fetchPayments(
+  params: { q?: string; status?: string; gateway?: string; limit?: number; before?: string | null } = {},
+) {
+  return apiFetch<{ payments: PaymentRow[]; next_before: string | null }>(
+    `/v1/admin/payments${qs(params)}`,
+  )
+}
+
+export type PaymentDetail = {
+  payment: {
+    payment_id: string
+    account_id: string
+    status: string
+    gateway: string
+    gateway_order_id: string | null
+    amount_iqd: number
+    plan_id: string
+    auto_renew: boolean
+    subscription_id: string | null
+    created_at: string
+    completed_at: string | null
+  }
+  webhooks: WebhookEventRow[]
+}
+
+export async function fetchPaymentDetail(paymentId: string) {
+  return apiFetch<PaymentDetail>(`/v1/admin/payments/${encodeURIComponent(paymentId)}`)
+}
+
+// --- Accounts ---------------------------------------------------------------
+
+export type AccountDevice = {
+  id: string
+  device_name: string
+  platform: string
+  location: string | null
+  created_at: string
+  last_seen_at: string | null
+  revoked_at: string | null
+  notifications_enabled: boolean
+  is_primary: boolean
+}
+
+export type AccountSubscription = {
+  id: string
+  status: string
+  plan_id: string
+  amount_iqd: number
+  auto_renew: boolean
+  started_at: string
+  expires_at: string
+  cancelled_at: string | null
+  cancellation_reason: string | null
+  granted_by: string | null
+  grant_days: number | null
+  grant_reason: string | null
+  grant_revoked_at: string | null
+}
+
+export type AccountPayment = {
+  payment_id: string
+  status: string
+  gateway: string
+  gateway_order_id: string | null
+  amount_iqd: number
+  plan_id: string
+  created_at: string
+  completed_at: string | null
+}
+
+export type AuditEntry = {
+  id: string
+  admin_id: string
+  admin_email: string | null
+  action: string
+  target_type: string
+  target_id: string
+  payload: Record<string, unknown> | null
+  created_at: string
+}
+
+export type AccountDetail = {
+  account: {
+    id: string
+    public_id: string
+    created_at: string
+    blocked_at: string | null
+    blocked_reason: string | null
+    lapsed: boolean
+  }
+  entitlements: {
+    tier: string
+    device_limit: number
+    breach_monitor_limit: number
+    breach: boolean
+    vpn: boolean
+  }
+  devices: AccountDevice[]
+  subscriptions: AccountSubscription[]
+  payments: AccountPayment[]
+  breach_monitors: number
+  vpn_usage: {
+    account_id: string
+    period_start: string
+    bytes_used: number
+    throttled: boolean
+    warned_80: boolean
+    updated_at: string
+  }
+  audit: AuditEntry[]
+}
+
+export async function fetchAccountDetail(accountId: string) {
+  return apiFetch<AccountDetail>(`/v1/admin/accounts/${encodeURIComponent(accountId)}`)
+}
+
+export async function blockAccount(accountId: string, reason: string) {
+  return apiFetch<{ blocked: boolean; changed: boolean }>(
+    `/v1/admin/accounts/${encodeURIComponent(accountId)}/block`,
+    { method: 'POST', body: JSON.stringify({ reason }) },
+  )
+}
+
+export async function unblockAccount(accountId: string) {
+  return apiFetch<{ blocked: boolean; changed: boolean }>(
+    `/v1/admin/accounts/${encodeURIComponent(accountId)}/block`,
+    { method: 'DELETE' },
+  )
+}
+
+export async function unlinkAccountDevice(accountId: string, deviceId: string) {
+  return apiFetch<void>(
+    `/v1/admin/accounts/${encodeURIComponent(accountId)}/devices/${encodeURIComponent(deviceId)}`,
+    { method: 'DELETE' },
+  )
+}
+
+export async function grantPremium(
+  accountId: string,
+  body: { days: number; reason: string; plan_id?: string },
+) {
+  return apiFetch<{
+    subscription: { id: string; account_id: string; status: string; plan_id: string; started_at: string; expires_at: string }
+    granted_days: number
+  }>(`/v1/admin/accounts/${encodeURIComponent(accountId)}/grants`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function revokeGrant(subscriptionId: string) {
+  return apiFetch<{ subscription: { id: string; status: string; expires_at: string }; revoked: boolean }>(
+    `/v1/admin/grants/${encodeURIComponent(subscriptionId)}`,
+    { method: 'DELETE' },
+  )
+}
+
+export type GrantRow = {
+  subscription_id: string
+  account_id: string
+  plan_id: string
+  status: string
+  expires_at: string
+  grant_days: number | null
+  grant_reason: string | null
+  granted_by_email: string | null
+  granted_at: string
+  grant_revoked_at: string | null
+}
+
+export async function fetchGrants() {
+  return apiFetch<{ grants: GrantRow[] }>('/v1/admin/grants')
+}
+
+// --- Reports ----------------------------------------------------------------
+
+export type Timeseries = {
+  days: number
+  revenue_daily: { day: string; gateway: string; total_iqd: number; tx_count: number }[]
+  signups_daily: { day: string; count: number }[]
+  new_paid_daily: { day: string; count: number }[]
+  gateway_mix: { gateway: string; total_iqd: number; tx_count: number }[]
+}
+
+export async function fetchTimeseries(days = 90) {
+  return apiFetch<Timeseries>(`/v1/admin/timeseries${qs({ days })}`)
+}
+
+export async function fetchAudit(params: { target_id?: string; before?: string | null; limit?: number } = {}) {
+  return apiFetch<{ entries: AuditEntry[]; next_before: string | null }>(`/v1/admin/audit${qs(params)}`)
 }
 
 export type CancellationRow = {
@@ -119,6 +314,7 @@ export async function createAdminNotification(body: {
 }
 
 export type VpnNodeRow = {
+  id?: string
   name: string
   city: string
   status: string
@@ -129,11 +325,74 @@ export type VpnNodeRow = {
   memoryLabel: string
   bandwidth: string
   peers: string
+  maxPeers?: number
+  endpointPort?: number
+  lastHeartbeat?: string | null
 }
 
 export async function fetchVpnNodes() {
   return apiFetch<{ kpis: { label: string; value: string; meta: string }[]; nodes: VpnNodeRow[] }>(
     '/v1/admin/vpn/nodes',
+  )
+}
+
+/** Node as returned by create/update (snake_case, unlike the list rows). */
+export type VpnNodeRecord = {
+  id: string
+  name: string
+  city: string
+  status: string
+  public_ip: string
+  endpoint_port: number
+  wg_public_key: string
+  max_peers: number
+  active_peers: number
+  ip_pool_cidr: string
+  service_name: string
+  last_heartbeat: string | null
+}
+
+export async function createVpnNode(body: {
+  name: string
+  city: string
+  public_ip: string
+  wg_public_key: string
+  ip_pool_cidr: string
+  endpoint_port?: number
+  max_peers?: number
+  service_name?: string
+}) {
+  return apiFetch<{ node: VpnNodeRecord; agent_token: string }>('/v1/admin/vpn/nodes', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function updateVpnNode(
+  nodeId: string,
+  body: {
+    name?: string
+    city?: string
+    max_peers?: number
+    endpoint_port?: number
+    wg_public_key?: string
+    status?: 'online' | 'draining'
+  },
+) {
+  return apiFetch<{ node: VpnNodeRecord }>(`/v1/admin/vpn/nodes/${encodeURIComponent(nodeId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function retireVpnNode(nodeId: string) {
+  return apiFetch<void>(`/v1/admin/vpn/nodes/${encodeURIComponent(nodeId)}`, { method: 'DELETE' })
+}
+
+export async function rotateVpnAgentToken(nodeId: string) {
+  return apiFetch<{ node_id: string; agent_token: string }>(
+    `/v1/admin/vpn/nodes/${encodeURIComponent(nodeId)}/agent-token`,
+    { method: 'POST' },
   )
 }
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { ChevronsUpDown, LogOut } from '@lucide/vue'
 import { navGroups, navItems } from '@/data/nav'
@@ -27,7 +28,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import adminAvatar from '@/assets/images/admin-avatar.png'
 
-defineProps<{ activeKey: NavKey }>()
+const props = defineProps<{ activeKey: NavKey; email?: string | null; role?: string | null }>()
+
+const displayName = computed(() => (props.role === 'viewer' ? 'Viewer' : props.role ? 'Admin' : 'System Admin'))
+const displayEmail = computed(() => props.email ?? 'admin@kaso.vault')
+const initials = computed(() => (props.email ? props.email.slice(0, 2).toUpperCase() : 'SA'))
 const emit = defineEmits<{ signOut: [] }>()
 
 // Active item reads as a raised sunflower key sitting on the ink dock.
@@ -86,17 +91,17 @@ const itemsIn = (group: string) => navItems.filter((item) => item.group === grou
               <SidebarMenuButton size="lg" class="bg-sidebar-accent rounded-2xl data-[state=open]:bg-sidebar-accent">
                 <Avatar class="size-8 rounded-xl">
                   <AvatarImage :src="adminAvatar" alt="" />
-                  <AvatarFallback class="rounded-xl">SA</AvatarFallback>
+                  <AvatarFallback class="rounded-xl">{{ initials }}</AvatarFallback>
                 </Avatar>
                 <span class="grid flex-1 text-left text-sm leading-tight">
-                  <span class="truncate font-semibold">System Admin</span>
-                  <span class="text-sidebar-foreground/60 truncate text-xs">admin@kaso.vault</span>
+                  <span class="truncate font-semibold">{{ displayName }}</span>
+                  <span class="text-sidebar-foreground/60 truncate text-xs">{{ displayEmail }}</span>
                 </span>
                 <ChevronsUpDown class="text-sidebar-foreground/50" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent class="w-56 rounded-xl" side="top" align="start">
-              <DropdownMenuLabel>Signed in as System Admin</DropdownMenuLabel>
+              <DropdownMenuLabel>Signed in as {{ displayName }}<template v-if="role === 'viewer'"> (read-only)</template></DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem @click="emit('signOut')">
                 <LogOut />

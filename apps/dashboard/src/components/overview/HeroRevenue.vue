@@ -7,6 +7,7 @@ import type { OverviewKpi } from '@/api/admin'
 const props = defineProps<{
   kpi: OverviewKpi
   growth: { month: string; subscribers: number }[]
+  chartLabel?: string
 }>()
 const emit = defineEmits<{ export: [] }>()
 
@@ -37,7 +38,7 @@ const latest = computed(() => props.growth.at(-1))
 
     <div class="mt-auto">
       <div class="mb-3 flex items-center justify-between gap-3">
-        <p class="text-sm font-semibold">Paid subscribers by month</p>
+        <p class="text-sm font-semibold">{{ chartLabel ?? 'Paid subscribers by month' }}</p>
         <Button
           variant="secondary"
           size="sm"
@@ -48,7 +49,7 @@ const latest = computed(() => props.growth.at(-1))
           Export CSV
         </Button>
       </div>
-      <ol class="flex h-44 items-end gap-2 sm:gap-3" aria-label="Paid subscribers by month">
+      <ol class="flex h-44 items-end gap-2 sm:gap-3" :aria-label="chartLabel ?? 'Paid subscribers by month'">
         <li
           v-for="(d, i) in growth"
           :key="d.month"

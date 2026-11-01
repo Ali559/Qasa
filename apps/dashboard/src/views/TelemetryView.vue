@@ -9,19 +9,64 @@ import InkPanel from '@/components/kit/InkPanel.vue'
 import SegmentMeter from '@/components/kit/SegmentMeter.vue'
 import StatTile from '@/components/kit/StatTile.vue'
 import { events, resources, telemetryMetrics as mockTelemetry } from '@/data/mock'
-import { fetchTelemetry, type TelemetryMetric } from '@/api/admin'
-import { isLiveApiEnabled } from '@/api/client'
+import { fetchAudit, fetchTelemetry, type AuditEntry, type TelemetryMetric } from '@/api/admin'
+import { errorMessage, isLiveApiEnabled } from '@/api/client'
+import { downloadCsv } from '@/lib/reports'
 import { toast } from 'vue-sonner'
 
+const live = isLiveApiEnabled()
 const telemetryMetrics = ref<TelemetryMetric[]>([...mockTelemetry])
 
+type Level = 'INFO' | 'WARN' | 'DEBUG' | 'ERROR'
+type EventRow = { key: string; time: string; level: Level; message: string; who?: string }
+
+const mockEvents: EventRow[] = events.map((e) => ({ ...e, key: e.time + e.message }))
+const auditEvents = ref<EventRow[]>([])
+const auditNext = ref<string | null>(null)
+const auditLoading = ref(false)
+
+// Destructive staff actions read as warnings in the feed.
+const WARN_ACTIONS = /^(block|retire|revoke|unlink|rotate)/
+
+function toEvent(a: AuditEntry): EventRow {
+  const d = new Date(a.created_at)
+  const detail = a.payload
+    ? Object.entries(a.payload)
+        .filter(([, v]) => v !== null && v !== undefined && v !== '')
+        .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
+        .join(' ')
+    : ''
+  return {
+    key: a.id,
+    time: d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    level: WARN_ACTIONS.test(a.action) ? 'WARN' : 'INFO',
+    message: `${a.action.replace(/_/g, ' ')} ${a.target_type} ${a.target_id}${detail ? ` (${detail})` : ''}`,
+    who: a.admin_email ?? a.admin_id,
+  }
+}
+
+async function loadAudit(append = false) {
+  auditLoading.value = true
+  try {
+    const res = await fetchAudit({ limit: 50, before: append ? auditNext.value : undefined })
+    const rows = res.entries.map(toEvent)
+    auditEvents.value = append ? [...auditEvents.value, ...rows] : rows
+    auditNext.value = res.next_before
+  } catch (err) {
+    toast.error('Failed to load the audit log', { description: errorMessage(err) })
+  } finally {
+    auditLoading.value = false
+  }
+}
+
 onMounted(async () => {
-  if (!isLiveApiEnabled()) return
+  if (!live) return
+  loadAudit()
   try {
     const data = await fetchTelemetry()
     telemetryMetrics.value = data.metrics
-  } catch {
-    toast.error('Failed to load telemetry')
+  } catch (err) {
+    toast.error('Failed to load telemetry', { description: errorMessage(err) })
   }
 })
 
@@ -52,7 +97,7 @@ const regionStats = computed(() =>
       ],
 )
 
-const levelColor: Record<(typeof events)[number]['level'], string> = {
+const levelColor: Record<Level, string> = {
   INFO: 'var(--ink-info)',
   WARN: 'var(--ink-warn)',
   DEBUG: 'var(--ink-ok)',
@@ -60,14 +105,20 @@ const levelColor: Record<(typeof events)[number]['level'], string> = {
 }
 const hideDebug = ref(false)
 
-const visibleEvents = computed(() =>
-  hideDebug.value ? events.filter((e) => e.level !== 'DEBUG') : events,
-)
+const visibleEvents = computed(() => {
+  const list = live ? auditEvents.value : mockEvents
+  return hideDebug.value ? list.filter((e) => e.level !== 'DEBUG') : list
+})
 
 function exportEvents() {
-  toast.success('Export started', {
-    description: `${visibleEvents.value.length} events in this file.`,
-  })
+  if (visibleEvents.value.length === 0) {
+    toast.error('Nothing to export')
+    return
+  }
+  downloadCsv(
+    'qasa-events.csv',
+    visibleEvents.value.map((e) => ({ time: e.time, level: e.level, message: e.message, admin: e.who ?? '' })),
+  )
 }
 </script>
 
@@ -130,11 +181,13 @@ function exportEvents() {
     <InkPanel>
       <div class="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-4">
         <div>
-          <h2 class="font-heading text-xl font-bold">Live events</h2>
-          <p class="text-sidebar-foreground/60 text-sm">Newest first, from every service</p>
+          <h2 class="font-heading text-xl font-bold">{{ live ? 'Staff activity' : 'Live events' }}</h2>
+          <p class="text-sidebar-foreground/60 text-sm">
+            {{ live ? 'Admin audit log, newest first' : 'Newest first, from every service' }}
+          </p>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="secondary" size="sm" @click="hideDebug = !hideDebug">
+          <Button v-if="!live" variant="secondary" size="sm" @click="hideDebug = !hideDebug">
             <Filter />
             {{ hideDebug ? 'Show debug' : 'Hide debug' }}
           </Button>
@@ -148,7 +201,7 @@ function exportEvents() {
         <ul class="divide-sidebar-border divide-y border-t border-sidebar-border font-mono text-xs">
           <li
             v-for="event in visibleEvents"
-            :key="event.time + event.message"
+            :key="event.key"
             class="flex flex-col gap-1.5 px-6 py-3 sm:flex-row sm:items-center sm:gap-4"
           >
             <span class="text-sidebar-foreground/55 shrink-0 tabular-nums">{{ event.time }}</span>
@@ -156,7 +209,14 @@ function exportEvents() {
               class="w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-[0.7rem] font-semibold text-[#1c1b33]"
               :style="{ background: levelColor[event.level] }"
             >{{ event.level }}</span>
-            <span>{{ event.message }}</span>
+            <span class="min-w-0 break-words">{{ event.message }}</span>
+            <span v-if="event.who" class="text-sidebar-foreground/55 shrink-0 sm:ml-auto">{{ event.who }}</span>
+          </li>
+          <li v-if="live && !auditLoading && visibleEvents.length === 0" class="text-sidebar-foreground/60 px-6 py-6">
+            No staff actions recorded yet.
+          </li>
+          <li v-if="live && auditNext" class="px-6 py-3">
+            <Button variant="secondary" size="sm" :disabled="auditLoading" @click="loadAudit(true)">Load older</Button>
           </li>
         </ul>
       </ScrollArea>

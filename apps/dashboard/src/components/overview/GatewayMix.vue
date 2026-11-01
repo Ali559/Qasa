@@ -1,18 +1,25 @@
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-defineProps<{
-  gateways: { name: string; value: number; color: string }[]
-}>()
+withDefaults(
+  defineProps<{
+    gateways: { name: string; value: number; color: string }[]
+    description?: string
+  }>(),
+  { description: 'Share of revenue by source' },
+)
 </script>
 
 <template>
   <Card class="h-full gap-6 py-6">
     <CardHeader class="px-6">
       <CardTitle class="text-xl font-bold">Revenue by payment gateway</CardTitle>
-      <CardDescription>Share of revenue by source</CardDescription>
+      <CardDescription>{{ description }}</CardDescription>
     </CardHeader>
-    <CardContent class="space-y-6 px-6">
+    <CardContent v-if="gateways.length === 0" class="px-6">
+      <p class="text-muted-foreground text-sm">No successful payments in this period yet.</p>
+    </CardContent>
+    <CardContent v-else class="space-y-6 px-6">
       <div class="flex h-8 gap-1.5" role="img" :aria-label="gateways.map((g) => `${g.name} ${g.value}%`).join(', ')">
         <span
           v-for="g in gateways"

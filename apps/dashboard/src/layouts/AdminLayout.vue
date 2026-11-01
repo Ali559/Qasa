@@ -9,6 +9,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/composables/useTheme'
 import { toast } from 'vue-sonner'
+import { adminLogout } from '@/api/admin'
+import { adminEmail, adminRole, isLiveApiEnabled, setSession } from '@/api/client'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +18,7 @@ const { isDark, toggleTheme } = useTheme()
 
 const activeKey = computed<NavKey>(() => {
   const name = String(route.name ?? '')
+  if (name === 'account') return 'users'
   return navItems.find((item) => item.key === name)?.key ?? 'overview'
 })
 
@@ -58,9 +61,21 @@ const titles: Record<NavKey, { title: string; description: string }> = {
   },
 }
 
-const page = computed(() => titles[activeKey.value])
+const page = computed(() =>
+  route.name === 'account'
+    ? { title: 'Account', description: 'Devices, subscriptions, payments and staff actions for one user.' }
+    : titles[activeKey.value],
+)
 
-function signOut() {
+async function signOut() {
+  if (isLiveApiEnabled()) {
+    try {
+      await adminLogout()
+    } catch {
+      // The token may already be dead; clearing local state is what matters.
+    }
+    setSession(null)
+  }
   toast.message('Signed out')
   router.push({ name: 'login' })
 }
@@ -68,7 +83,12 @@ function signOut() {
 
 <template>
   <SidebarProvider>
-    <AppSidebar :active-key="activeKey" @sign-out="signOut" />
+    <AppSidebar
+      :active-key="activeKey"
+      :email="isLiveApiEnabled() ? adminEmail : null"
+      :role="isLiveApiEnabled() ? adminRole : null"
+      @sign-out="signOut"
+    />
 
     <SidebarInset class="bg-transparent">
       <header class="flex items-start gap-3 px-4 pt-5 pb-2 md:px-8 md:pt-7">
@@ -81,6 +101,11 @@ function signOut() {
             {{ page.description }}
           </p>
         </div>
+        <span
+          v-if="isLiveApiEnabled() && adminRole === 'viewer'"
+          class="bg-warn/16 text-warn mt-1 hidden rounded-full px-3 py-1.5 text-xs font-semibold sm:inline-flex"
+          title="Your account can view everything but not change anything."
+        >Read-only</span>
         <span class="bg-card text-foreground mt-1 hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-[0_3px_0_var(--lip)] sm:inline-flex">
           <span class="relative flex size-2">
             <span class="bg-ok absolute inset-0 animate-ping rounded-full opacity-60" />

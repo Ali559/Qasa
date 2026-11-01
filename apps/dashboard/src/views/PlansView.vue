@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import StatusPill from '@/components/kit/StatusPill.vue'
 import { Input } from '@/components/ui/input'
 import { fetchPlans, upsertPlan, type PlanRow } from '@/api/admin'
-import { isLiveApiEnabled } from '@/api/client'
+import { canWrite, isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
 
 const plans = ref<PlanRow[]>([])
@@ -121,7 +121,7 @@ const perLabel = (interval: string) => (interval === 'yearly' ? 'year' : interva
           <li v-for="f in p.features_json ?? []" :key="f" class="bg-muted rounded-lg px-2.5 py-1 font-medium">{{ f }}</li>
         </ul>
 
-        <Button variant="outline" class="mt-auto w-full" @click="startEdit(p)">
+        <Button v-if="canWrite()" variant="outline" class="mt-auto w-full" @click="startEdit(p)">
           <Pencil />
           Edit plan
         </Button>

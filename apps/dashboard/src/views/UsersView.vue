@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { Ban, MonitorSmartphone, RefreshCw, Search } from '@lucide/vue'
+import { RouterLink } from 'vue-router'
+import { Ban, LockOpen, Search, UserRoundSearch } from '@lucide/vue'
+import { useDebounceFn } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
@@ -12,6 +14,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Table,
   TableBody,
@@ -24,31 +28,58 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import FilterChips from '@/components/kit/FilterChips.vue'
 import StatusPill, { type PillTone } from '@/components/kit/StatusPill.vue'
 import { users as mockUsers, type UserRow, type UserTier } from '@/data/mock'
-import { fetchUsers } from '@/api/admin'
-import { isLiveApiEnabled } from '@/api/client'
+import { blockAccount, fetchUsers, unblockAccount } from '@/api/admin'
+import { canWrite, errorMessage, isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
 
-const users = ref<UserRow[]>([...mockUsers])
+const live = isLiveApiEnabled()
+const SERVER_PAGE = 100
 
-onMounted(async () => {
-  if (!isLiveApiEnabled()) return
+const users = ref<UserRow[]>([...mockUsers])
+const nextBefore = ref<string | null>(null)
+const loading = ref(false)
+
+// Live mode searches server-side (account-id prefix or masked id) and pages with the
+// X-Next-Before cursor; demo mode filters the mock rows locally.
+async function load(append = false) {
+  if (!live) return
+  loading.value = true
   try {
-    users.value = await fetchUsers()
-  } catch {
-    toast.error('Failed to load users')
+    const res = await fetchUsers({
+      q: query.value.trim() || undefined,
+      limit: SERVER_PAGE,
+      before: append ? nextBefore.value : undefined,
+    })
+    users.value = append ? [...users.value, ...res.users] : res.users
+    nextBefore.value = res.nextBefore
+  } catch (err) {
+    toast.error('Failed to load users', { description: errorMessage(err) })
+  } finally {
+    loading.value = false
   }
-})
+}
+
+onMounted(() => load())
 
 const query = ref('')
 const tier = ref<'all' | UserTier>('all')
 const page = ref(1)
 const pageSize = 5
 const blockTarget = ref<UserRow | null>(null)
+const blockReason = ref('')
+const busy = ref(false)
+
+const debouncedSearch = useDebounceFn(() => load(), 300)
+watch(query, () => {
+  page.value = 1
+  if (live) debouncedSearch()
+})
 
 const filtered = computed(() =>
   users.value.filter((u) => {
     const q = query.value.trim().toLowerCase()
-    const matchQuery = !q || u.id.toLowerCase().includes(q)
+    const matchQuery =
+      live || !q || u.id.toLowerCase().includes(q) || u.accountId.toLowerCase().startsWith(q)
     const matchTier = tier.value === 'all' || u.tier === tier.value
     return matchQuery && matchTier
   }),
@@ -64,8 +95,8 @@ const tierOptions = computed(() => {
   ]
 })
 
-const tierTone: Record<UserTier, PillTone> = { premium: 'info', free: 'neutral', expired: 'bad' }
-const statusTone: Record<UserRow['status'], PillTone> = { active: 'ok', idle: 'neutral', expired: 'bad' }
+const tierTone: Record<string, PillTone> = { premium: 'info', free: 'neutral', expired: 'bad' }
+const statusTone: Record<string, PillTone> = { active: 'ok', idle: 'neutral', expired: 'bad', blocked: 'bad' }
 
 // "3 / 5" → one pip per allowed device, filled for those in use.
 function devicePips(devices: string) {
@@ -81,14 +112,48 @@ const pageRows = computed(() => {
   return filtered.value.slice(start, start + pageSize)
 })
 
-function refreshUser(user: UserRow) {
-  toast.success('Session refreshed', { description: user.id })
+function openBlock(user: UserRow) {
+  blockTarget.value = user
+  blockReason.value = ''
 }
 
-function confirmBlock() {
-  if (!blockTarget.value) return
-  toast.error('User blocked', { description: blockTarget.value.id })
-  blockTarget.value = null
+function setStatus(user: UserRow, status: UserRow['status']) {
+  users.value = users.value.map((u) => (u.accountId === user.accountId ? { ...u, status } : u))
+}
+
+async function confirmBlock() {
+  const target = blockTarget.value
+  if (!target) return
+  const reason = blockReason.value.trim()
+  if (!reason) {
+    toast.error('Add a reason. It is kept in the audit log.')
+    return
+  }
+  busy.value = true
+  try {
+    if (live) await blockAccount(target.accountId, reason)
+    setStatus(target, 'blocked')
+    toast.success('User blocked', { description: target.id })
+    blockTarget.value = null
+  } catch (err) {
+    toast.error('User not blocked', { description: errorMessage(err) })
+  } finally {
+    busy.value = false
+  }
+}
+
+async function unblock(user: UserRow) {
+  try {
+    if (live) {
+      await unblockAccount(user.accountId)
+      await load()
+    } else {
+      setStatus(user, 'active')
+    }
+    toast.success('User unblocked', { description: user.id })
+  } catch (err) {
+    toast.error('User not unblocked', { description: errorMessage(err) })
+  }
 }
 
 function nextPage() {
@@ -109,9 +174,8 @@ function prevPage() {
         <Input
           v-model="query"
           class="bg-card h-10 pl-9"
-          placeholder="Search by user ID"
-          aria-label="Search by user ID"
-          @update:model-value="page = 1"
+          placeholder="Search by user or account ID"
+          aria-label="Search by user or account ID"
         />
       </div>
     </div>
@@ -130,10 +194,12 @@ function prevPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="user in pageRows" :key="user.id" class="group">
-              <TableCell class="py-3.5 pl-6 font-mono text-[0.8rem] font-medium">{{ user.id }}</TableCell>
-              <TableCell><StatusPill :tone="statusTone[user.status]">{{ user.status }}</StatusPill></TableCell>
-              <TableCell><StatusPill :tone="tierTone[user.tier]" :dot="false">{{ user.tier }}</StatusPill></TableCell>
+            <TableRow v-for="user in pageRows" :key="user.accountId" class="group">
+              <TableCell class="py-3.5 pl-6 font-mono text-[0.8rem] font-medium">
+                <RouterLink :to="{ name: 'account', params: { accountId: user.accountId } }" class="hover:underline">{{ user.id }}</RouterLink>
+              </TableCell>
+              <TableCell><StatusPill :tone="statusTone[user.status] ?? 'neutral'">{{ user.status }}</StatusPill></TableCell>
+              <TableCell><StatusPill :tone="tierTone[user.tier] ?? 'neutral'" :dot="false">{{ user.tier }}</StatusPill></TableCell>
               <TableCell>
                 <span class="flex items-center gap-2" :aria-label="`${user.devices} devices`">
                   <span class="flex gap-1" aria-hidden="true">
@@ -152,28 +218,32 @@ function prevPage() {
                 <div class="flex justify-end gap-1">
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <Button variant="ghost" size="icon-sm" aria-label="View devices">
-                        <MonitorSmartphone />
+                      <Button variant="ghost" size="icon-sm" as-child aria-label="Open account">
+                        <RouterLink :to="{ name: 'account', params: { accountId: user.accountId } }">
+                          <UserRoundSearch />
+                        </RouterLink>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>View devices</TooltipContent>
+                    <TooltipContent>Devices, payments and grants</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button variant="ghost" size="icon-sm" aria-label="Refresh session" @click="refreshUser(user)">
-                        <RefreshCw />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Refresh session</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger as-child>
-                      <Button variant="ghost" size="icon-sm" class="text-bad hover:text-bad" aria-label="Block user" @click="blockTarget = user">
-                        <Ban />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Block user</TooltipContent>
-                  </Tooltip>
+                  <template v-if="canWrite()">
+                    <Tooltip v-if="user.status === 'blocked'">
+                      <TooltipTrigger as-child>
+                        <Button variant="ghost" size="icon-sm" aria-label="Unblock user" @click="unblock(user)">
+                          <LockOpen />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Unblock user</TooltipContent>
+                    </Tooltip>
+                    <Tooltip v-else>
+                      <TooltipTrigger as-child>
+                        <Button variant="ghost" size="icon-sm" class="text-bad hover:text-bad" aria-label="Block user" @click="openBlock(user)">
+                          <Ban />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Block user</TooltipContent>
+                    </Tooltip>
+                  </template>
                 </div>
               </TableCell>
             </TableRow>
@@ -188,9 +258,10 @@ function prevPage() {
 
       <CardFooter class="justify-between border-t px-6 py-4">
         <p class="text-muted-foreground text-sm">
-          {{ filtered.length }} users, page {{ page }} of {{ totalPages }}
+          {{ filtered.length }} users<template v-if="nextBefore"> loaded</template>, page {{ page }} of {{ totalPages }}
         </p>
         <div class="flex gap-2">
+          <Button v-if="nextBefore" variant="outline" size="sm" :disabled="loading" @click="load(true)">Load more</Button>
           <Button variant="outline" size="sm" :disabled="page <= 1" @click="prevPage">Previous</Button>
           <Button variant="outline" size="sm" :disabled="page >= totalPages" @click="nextPage">Next</Button>
         </div>
@@ -202,12 +273,17 @@ function prevPage() {
         <DialogHeader>
           <DialogTitle class="font-heading text-xl">Block this user?</DialogTitle>
           <DialogDescription>
-            <span class="font-mono">{{ blockTarget?.id }}</span> loses VPN access on every device.
+            <span class="font-mono">{{ blockTarget?.id }}</span> is signed out on every device and loses VPN
+            access until unblocked.
           </DialogDescription>
         </DialogHeader>
+        <div class="grid gap-2">
+          <Label for="block-reason">Reason</Label>
+          <Textarea id="block-reason" v-model="blockReason" placeholder="Chargeback abuse, ticket #1234" />
+        </div>
         <DialogFooter>
           <Button variant="outline" @click="blockTarget = null">Cancel</Button>
-          <Button variant="destructive" @click="confirmBlock">Block user</Button>
+          <Button variant="destructive" :disabled="busy || !blockReason.trim()" @click="confirmBlock">Block user</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
