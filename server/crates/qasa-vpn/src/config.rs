@@ -37,8 +37,25 @@ impl WireGuardConfig {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ConnectRequest {
-    /// Client WireGuard public key (base64). Generated on-device if omitted.
+    /// The device's WireGuard public key (base64, 32 bytes). The device generates the
+    /// keypair and keeps the private key; the server never sees it. Required in prod.
     pub client_public_key: Option<String>,
+    /// A node from `GET /v1/vpn/nodes`; the least-loaded online node when omitted.
+    #[serde(default)]
+    pub node_id: Option<uuid::Uuid>,
+}
+
+/// Speed a peer is limited to once its account has used the month's VPN quota.
+pub const THROTTLE_MBPS: u32 = 5;
+
+/// Whether `key` is a WireGuard public key: base64 of exactly 32 bytes.
+pub fn is_wg_key(key: &str) -> bool {
+    use base64::Engine;
+    let key = key.trim();
+    key.len() == 44
+        && base64::engine::general_purpose::STANDARD
+            .decode(key)
+            .is_ok_and(|b| b.len() == 32)
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -47,7 +64,38 @@ pub struct AgentHeartbeat {
     pub memory_percent: i32,
     pub memory_label: Option<String>,
     pub bandwidth_label: Option<String>,
+    /// Ignored by the API, which counts live sessions itself; kept so older agents
+    /// still parse.
     pub active_peers: Option<i32>,
+    /// What the node's WireGuard interface reports per peer. Older agents send none.
+    #[serde(default)]
+    pub peers: Vec<PeerStat>,
+}
+
+/// One peer as `wg show <iface> dump` reports it.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct PeerStat {
+    pub public_key: String,
+    /// Unix seconds of the latest handshake; 0 means never.
+    pub last_handshake: u64,
+    /// Cumulative bytes since the peer was added to the interface.
+    pub rx_bytes: u64,
+    pub tx_bytes: u64,
+}
+
+/// A peer the node should have, from `GET /v1/internal/vpn/nodes/{id}/peers`.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+pub struct DesiredPeer {
+    pub public_key: String,
+    /// The single address the peer may use, e.g. `10.64.0.2/32`.
+    pub allowed_ip: String,
+    /// Set when the account is over its monthly quota.
+    pub throttle_mbps: Option<u32>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DesiredPeers {
+    pub peers: Vec<DesiredPeer>,
 }
 
 pub fn hash_agent_token(token: &str) -> String {

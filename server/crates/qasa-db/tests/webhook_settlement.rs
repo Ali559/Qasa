@@ -11,14 +11,15 @@
 
 mod support;
 
+use qasa_db::repos::settlement::{settle_payment, SettleOutcome, SettleStatus};
 use qasa_db::repos::{account, payment, subscription};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use support::{cleanup, test_pool};
 
-/// Mirrors `payments::handle_webhook`'s decision, so the ordering of the security checks
-/// is reproduced exactly. Returns Ok(settled) / Err(reason).
+/// The gateway gate lives in the API (a non-live gateway never reaches settlement); the
+/// rest is the shared `settle_payment` both the API and the retry job call.
 async fn settle(
     pool: &PgPool,
     gateway_settles: bool,
@@ -28,40 +29,19 @@ async fn settle(
     if !gateway_settles {
         return Err("gateway not live".into());
     }
-
-    let payment = payment::find_by_gateway_order_id(pool, gateway_order_id)
+    match settle_payment(pool, "fib", gateway_order_id, SettleStatus::Success, reported_amount)
         .await
         .map_err(|e| e.to_string())?
-        .ok_or_else(|| "not found".to_string())?;
-
-    if payment.status == "success" {
-        return Err("already settled".into());
+    {
+        SettleOutcome::Settled { .. } => Ok(()),
+        SettleOutcome::Unchanged => Err("already settled".into()),
+        SettleOutcome::NotFound => Err("not found".into()),
+        SettleOutcome::AmountMismatch { reported, expected } => Err(format!(
+            "amount mismatch: reported {reported}, charged {expected}"
+        )),
+        SettleOutcome::Failed { .. } => Err("failed".into()),
+        SettleOutcome::AccountDeleted { .. } => Err("account deleted".into()),
     }
-
-    if let Some(reported) = reported_amount {
-        if reported != payment.amount_iqd {
-            return Err(format!(
-                "amount mismatch: reported {reported}, charged {}",
-                payment.amount_iqd
-            ));
-        }
-    }
-
-    let sub = subscription::activate_subscription(
-        pool,
-        payment.account_id,
-        payment.amount_iqd,
-        &payment.plan_id,
-        payment.auto_renew,
-    )
-    .await
-    .map_err(|e| e.to_string())?;
-    let _ = sub;
-
-    payment::mark_status(pool, payment.id, "success", Some(sub.id))
-        .await
-        .map_err(|e| e.to_string())?;
-    Ok(())
 }
 
 struct Fixture {
@@ -108,7 +88,8 @@ async fn fixture(amount_iqd: i32) -> Fixture {
         None,
     )
     .await
-    .unwrap();
+    .unwrap()
+    .expect("new payment");
     Fixture {
         pool,
         account_id: account.id,
@@ -230,6 +211,173 @@ async fn absent_amount_is_treated_as_unverified_but_allowed_in_dev() {
 
     settle(&f.pool, true, &f.order_id, None).await.unwrap();
     assert!(is_premium(&f.pool, f.account_id).await);
+
+    f.purge().await;
+}
+
+async fn subscription_count(pool: &PgPool, account_id: Uuid) -> i64 {
+    sqlx::query_scalar("SELECT count(*) FROM subscriptions WHERE account_id = $1")
+        .bind(account_id)
+        .fetch_one(pool)
+        .await
+        .unwrap()
+}
+
+/// Two deliveries of the same webhook at once used to both pass the "already paid?"
+/// check and grant two subscriptions. The row lock serialises them.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn concurrent_duplicate_webhooks_grant_one_subscription() {
+    let f = fixture(10_000).await;
+
+    let attempts = (0..8).map(|_| {
+        let pool = f.pool.clone();
+        let order = f.order_id.clone();
+        tokio::spawn(async move {
+            settle_payment(&pool, "fib", &order, SettleStatus::Success, Some(10_000))
+                .await
+                .unwrap()
+        })
+    });
+    let mut settled = 0;
+    for handle in attempts {
+        if matches!(handle.await.unwrap(), SettleOutcome::Settled { .. }) {
+            settled += 1;
+        }
+    }
+
+    assert_eq!(settled, 1, "exactly one delivery may settle");
+    assert_eq!(subscription_count(&f.pool, f.account_id).await, 1);
+
+    f.purge().await;
+}
+
+/// The retry job settles through the same function, so a webhook rejected for its
+/// amount stays rejected however often it is retried.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn retrying_an_amount_mismatch_never_settles() {
+    let f = fixture(100_000).await;
+
+    for _ in 0..3 {
+        let outcome =
+            settle_payment(&f.pool, "fib", &f.order_id, SettleStatus::Success, Some(1))
+                .await
+                .unwrap();
+        assert!(matches!(outcome, SettleOutcome::AmountMismatch { .. }));
+        assert!(outcome.is_terminal(SettleStatus::Success));
+    }
+    assert!(!is_premium(&f.pool, f.account_id).await);
+    assert_eq!(payment_status(&f.pool, &f.order_id).await, "pending");
+
+    f.purge().await;
+}
+
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn another_gateways_webhook_cannot_settle_the_order() {
+    let f = fixture(10_000).await;
+
+    let outcome =
+        settle_payment(&f.pool, "fastpay", &f.order_id, SettleStatus::Success, Some(10_000))
+            .await
+            .unwrap();
+    assert!(matches!(outcome, SettleOutcome::NotFound));
+    assert!(!is_premium(&f.pool, f.account_id).await);
+
+    f.purge().await;
+}
+
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn failed_then_pending_webhooks() {
+    let f = fixture(10_000).await;
+
+    let pending = settle_payment(&f.pool, "fib", &f.order_id, SettleStatus::Pending, None)
+        .await
+        .unwrap();
+    assert!(matches!(pending, SettleOutcome::Unchanged));
+    assert!(!pending.is_terminal(SettleStatus::Pending), "pending is retried");
+
+    let failed = settle_payment(&f.pool, "fib", &f.order_id, SettleStatus::Failed, None)
+        .await
+        .unwrap();
+    assert!(matches!(failed, SettleOutcome::Failed { .. }));
+    assert_eq!(payment_status(&f.pool, &f.order_id).await, "failed");
+
+    // A repeated failure notice must not trigger a second "renewal failed" push.
+    let again = settle_payment(&f.pool, "fib", &f.order_id, SettleStatus::Failed, None)
+        .await
+        .unwrap();
+    assert!(matches!(again, SettleOutcome::Unchanged));
+
+    f.purge().await;
+}
+
+/// Paying before the current subscription ends adds the new period after it, instead
+/// of restarting from today and throwing the remaining days away.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn early_renewal_stacks_onto_the_remaining_time() {
+    let f = fixture(10_000).await;
+    settle(&f.pool, true, &f.order_id, Some(10_000)).await.unwrap();
+    let first = subscription::get_current(&f.pool, f.account_id)
+        .await
+        .unwrap()
+        .unwrap();
+
+    let renewal = format!("FIB-ORD-{}", Uuid::now_v7());
+    payment::create_payment(
+        &f.pool, f.account_id, "fib", &renewal, 10_000, "fib://pay", "premium_monthly", true, None,
+    )
+    .await
+    .unwrap()
+    .unwrap();
+    settle(&f.pool, true, &renewal, Some(10_000)).await.unwrap();
+
+    let second = subscription::get_current(&f.pool, f.account_id)
+        .await
+        .unwrap()
+        .unwrap();
+    let extra = second.expires_at - first.expires_at;
+    assert_eq!(extra.num_days(), 30, "renewal must add a full period: {extra:?}");
+
+    cleanup(
+        &f.pool,
+        &[format!("DELETE FROM webhook_events WHERE gateway_order_id = '{renewal}'")],
+    )
+    .await;
+    f.purge().await;
+}
+
+/// A retried intent with the same key must get the original payment back rather than a
+/// unique-constraint 500.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn idempotency_key_conflict_returns_none() {
+    let f = fixture(10_000).await;
+    let key = format!("idem-{}", Uuid::now_v7());
+
+    let first = payment::create_payment(
+        &f.pool, f.account_id, "fib", &format!("FIB-ORD-{}", Uuid::now_v7()), 10_000,
+        "fib://pay", "premium_monthly", true, Some(&key),
+    )
+    .await
+    .unwrap()
+    .expect("first insert");
+    let second = payment::create_payment(
+        &f.pool, f.account_id, "fib", &format!("FIB-ORD-{}", Uuid::now_v7()), 10_000,
+        "fib://pay", "premium_monthly", true, Some(&key),
+    )
+    .await
+    .unwrap();
+
+    assert!(second.is_none());
+    let found = payment::find_by_idempotency_key(&f.pool, &key)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(found.id, first.id);
 
     f.purge().await;
 }

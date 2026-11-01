@@ -44,8 +44,15 @@ async fn main() -> anyhow::Result<()> {
         pool.clone(),
         push.clone(),
         Duration::from_secs(5 * 60),
-        "refresh_materialized_views",
-        jobs::refresh_views,
+        "purge_rate_limit_buckets",
+        jobs::purge_rate_limits,
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(60),
+        "broadcast_pushes",
+        jobs::broadcast_pushes,
     ));
     tokio::spawn(run_interval(
         pool.clone(),
@@ -57,7 +64,21 @@ async fn main() -> anyhow::Result<()> {
     tokio::spawn(run_interval(
         pool.clone(),
         push.clone(),
-        Duration::from_secs(10 * 60),
+        Duration::from_secs(5 * 60),
+        "expire_abandoned_payments",
+        jobs::expire_abandoned_payments,
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(60),
+        "offline_vpn_nodes",
+        jobs::offline_vpn_nodes,
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(60),
         "stale_vpn_sessions",
         jobs::stale_vpn_sessions,
     ));
@@ -82,13 +103,17 @@ async fn main() -> anyhow::Result<()> {
         "subscription_expiry_warnings",
         jobs::subscription_expiry_warnings,
     ));
-    tokio::spawn(run_interval(
-        pool.clone(),
-        push.clone(),
-        Duration::from_secs(60 * 60),
-        "subscription_renew_failed_notices",
-        jobs::subscription_renew_failed_notices,
-    ));
+    // "Renewal failed" is only true once renewals are actually charged; until then this
+    // job would tell every auto-renew subscriber their renewal failed a day before expiry.
+    if qasa_payments::RENEWALS_ARE_CHARGED {
+        tokio::spawn(run_interval(
+            pool.clone(),
+            push.clone(),
+            Duration::from_secs(60 * 60),
+            "subscription_renew_failed_notices",
+            jobs::subscription_renew_failed_notices,
+        ));
+    }
 
     std::future::pending::<()>().await;
     Ok(())

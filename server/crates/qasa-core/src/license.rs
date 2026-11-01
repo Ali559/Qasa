@@ -19,6 +19,9 @@ pub struct LicenseClaims {
     pub tier: String,
     pub entitlements: Vec<String>,
     pub device_limit: u32,
+    /// Absent from tokens issued before the field existed, which must keep verifying.
+    #[serde(default)]
+    pub breach_monitor_limit: u32,
     pub iat: u64,
     pub exp: u64,
 }
@@ -92,6 +95,7 @@ impl LicenseTokenIssuer {
             tier: entitlements.tier.as_str().into(),
             entitlements: entitlement_names(entitlements),
             device_limit: entitlements.device_limit,
+            breach_monitor_limit: entitlements.breach_monitor_limit,
             iat: now.as_secs(),
             exp: (now + LICENSE_TTL).as_secs(),
         };

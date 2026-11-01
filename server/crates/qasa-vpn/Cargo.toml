@@ -9,6 +9,7 @@ path = "src/bin/agent.rs"
 
 [dependencies]
 anyhow.workspace = true
+base64.workspace = true
 clap = { version = "4", features = ["derive", "env"] }
 hex = "0.4"
 qasa-core.workspace = true

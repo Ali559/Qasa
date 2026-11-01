@@ -106,13 +106,6 @@ pub async fn upsert_plan(
     Ok(row)
 }
 
-pub async fn plan_amount(pool: &PgPool, plan_id: &str) -> anyhow::Result<i32> {
-    if let Some(plan) = get_plan(pool, plan_id).await? {
-        return Ok(plan.amount_iqd);
-    }
-    Ok(crate::repos::subscription::plan_amount_fallback(plan_id))
-}
-
 pub async fn plan_days(pool: &PgPool, plan_id: &str) -> anyhow::Result<i64> {
     if let Some(plan) = get_plan(pool, plan_id).await? {
         return Ok(plan.days as i64);

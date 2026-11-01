@@ -25,12 +25,12 @@ pub async fn analytics(
                 "label": "MRR",
                 "value": format_mrr(stats.mrr_iqd),
                 "unit": "IQD",
-                "meta": "this month"
+                "meta": "live subscriptions, monthly equivalent"
             },
             {
                 "label": "Paid Subscribers",
                 "value": stats.paid_subscribers.to_string(),
-                "meta": "active"
+                "meta": "paid through this period"
             },
             {
                 "label": "Free Devices",

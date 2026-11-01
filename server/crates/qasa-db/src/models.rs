@@ -9,6 +9,11 @@ pub struct AccountRow {
     pub tier: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    /// Set once the user deleted the account. Only `upsert_account` returns such rows.
+    pub deleted_at: Option<DateTime<Utc>>,
+    /// Set while staff have blocked the account.
+    pub blocked_at: Option<DateTime<Utc>>,
+    pub blocked_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow, Serialize)]
@@ -37,6 +42,9 @@ pub struct AdminUserRow {
 #[serde(rename_all = "camelCase")]
 pub struct AdminUserListItem {
     pub id: String,
+    /// The real account id, needed for account actions such as grants. `id` is the
+    /// masked display form.
+    pub account_id: String,
     pub status: String,
     pub tier: String,
     pub devices: String,

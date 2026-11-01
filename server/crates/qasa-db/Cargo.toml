@@ -17,4 +17,5 @@ hex = "0.4"
 sha2 = "0.10"
 
 [dev-dependencies]
+base64.workspace = true
 tokio = { workspace = true, features = ["macros", "rt-multi-thread", "sync"] }

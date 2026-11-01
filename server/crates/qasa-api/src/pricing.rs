@@ -4,7 +4,7 @@ use qasa_core::CoreError;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::auth::AdminAuth;
+use crate::auth::{AdminAuth, AdminWrite};
 use crate::error::ApiResult;
 use crate::state::AppState;
 
@@ -52,7 +52,7 @@ fn default_true() -> bool {
 
 pub async fn upsert_admin(
     State(state): State<AppState>,
-    AdminAuth(claims): AdminAuth,
+    AdminWrite(claims): AdminWrite,
     Json(body): Json<UpsertPlanRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
     if body.amount_iqd <= 0 || body.days <= 0 {
@@ -83,27 +83,103 @@ pub async fn upsert_admin(
     )
     .await?;
 
+    qasa_db::repos::admin::audit_now(
+        &state.pool,
+        claims.admin_id()?,
+        "upsert_plan",
+        "plan",
+        &plan.id,
+        json!({
+            "title": plan.title,
+            "amount_iqd": plan.amount_iqd,
+            "days": plan.days,
+            "vpn_quota_gb": plan.vpn_quota_gb,
+            "active": plan.active,
+            "notify_subscribers": body.notify_subscribers,
+        }),
+    )
+    .await?;
+
     let mut notified = 0i64;
     if body.notify_subscribers {
+        let (body_en, body_ckb, body_ar) = pricing_notice_bodies(&plan);
         let n = qasa_db::repos::notification::create(
             &state.pool,
             "Pricing updated",
             Some("نرخی نوێکرایەوە"),
             Some("تم تحديث الأسعار"),
-            &format!(
-                "{} is now {} IQD / {}.",
-                plan.title, plan.amount_iqd, plan.interval
-            ),
-            None,
-            None,
+            &body_en,
+            Some(&body_ckb),
+            Some(&body_ar),
             "subscribers",
             Some(claims.sub.parse().ok()).flatten(),
         )
         .await?;
         notified = qasa_db::repos::notification::fanout_receipts(&state.pool, n.id).await?;
-        // Push delivery uses FCM (iOS + Android) when QASA_FCM_* is configured.
         tracing::info!(notification_id = %n.id, notified, "pricing change notified");
     }
 
     Ok(Json(json!({ "plan": plan, "notified_accounts": notified })))
+}
+
+/// The pricing-change notice body in each app language. It used to be English only, so
+/// Kurdish and Arabic users got an English body under a translated title.
+///
+/// The ckb and ar wording awaits native review with the other 2026-11-01 strings.
+fn pricing_notice_bodies(plan: &qasa_db::repos::plan::PlanRow) -> (String, String, String) {
+    let amount = group_thousands(plan.amount_iqd);
+    let (per_en, per_ckb, per_ar) = match plan.interval.as_str() {
+        "yearly" => ("year", "ساڵ", "سنة"),
+        _ => ("month", "مانگ", "شهر"),
+    };
+    (
+        format!("{} is now {} IQD / {}.", plan.title, amount, per_en),
+        format!("{} ئێستا {} دینارە بۆ هەر {}.", plan.title, amount, per_ckb),
+        format!("أصبح سعر {} الآن {} دينار لكل {}.", plan.title, amount, per_ar),
+    )
+}
+
+fn group_thousands(n: i32) -> String {
+    let digits = n.to_string();
+    let mut out = String::new();
+    for (i, ch) in digits.chars().enumerate() {
+        if i > 0 && (digits.len() - i) % 3 == 0 {
+            out.push(',');
+        }
+        out.push(ch);
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn plan(interval: &str, amount: i32) -> qasa_db::repos::plan::PlanRow {
+        qasa_db::repos::plan::PlanRow {
+            id: "p".into(),
+            title: "Premium".into(),
+            interval: interval.into(),
+            amount_iqd: amount,
+            days: 30,
+            vpn_quota_gb: 100,
+            active: true,
+            sort_order: 0,
+            features_json: serde_json::json!([]),
+            updated_at: chrono::Utc::now(),
+            created_at: chrono::Utc::now(),
+        }
+    }
+
+    #[test]
+    fn pricing_notice_is_localised() {
+        let (en, ckb, ar) = pricing_notice_bodies(&plan("yearly", 100_000));
+        assert_eq!(en, "Premium is now 100,000 IQD / year.");
+        assert!(ckb.contains("100,000") && ckb.contains("ساڵ"), "{ckb}");
+        assert!(ar.contains("100,000") && ar.contains("سنة"), "{ar}");
+
+        let (en, _, ar) = pricing_notice_bodies(&plan("monthly", 9_500));
+        assert_eq!(en, "Premium is now 9,500 IQD / month.");
+        assert!(ar.contains("شهر"));
+    }
 }

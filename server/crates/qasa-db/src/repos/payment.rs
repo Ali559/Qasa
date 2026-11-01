@@ -19,6 +19,17 @@ pub struct PaymentRow {
     pub completed_at: Option<DateTime<Utc>>,
 }
 
+const PAYMENT_COLS: &str = r#"
+        id, account_id, subscription_id, gateway, gateway_order_id,
+        amount_iqd, status, deep_link, plan_id, auto_renew,
+        created_at, completed_at
+"#;
+
+/// Insert a pending payment.
+///
+/// Returns `None` when `idempotency_key` is already taken, so the caller can return the
+/// payment that owns it instead of failing on the unique constraint. Before this the
+/// retry a client is supposed to be able to make safely came back as a 500.
 pub async fn create_payment(
     pool: &PgPool,
     account_id: Uuid,
@@ -29,21 +40,20 @@ pub async fn create_payment(
     plan_id: &str,
     auto_renew: bool,
     idempotency_key: Option<&str>,
-) -> anyhow::Result<PaymentRow> {
+) -> anyhow::Result<Option<PaymentRow>> {
     let id = new_id();
     let plan_id = crate::repos::subscription::normalize_plan_id(plan_id);
-    let row = sqlx::query_as::<_, PaymentRow>(
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
         r#"
         INSERT INTO payments (
             id, account_id, gateway, gateway_order_id, amount_iqd, status,
             deep_link, plan_id, auto_renew, idempotency_key
         )
         VALUES ($1, $2, $3, $4, $5, 'pending', $6, $7, $8, $9)
-        RETURNING id, account_id, subscription_id, gateway, gateway_order_id,
-                  amount_iqd, status, deep_link, plan_id, auto_renew,
-                  created_at, completed_at
-        "#,
-    )
+        ON CONFLICT (idempotency_key) DO NOTHING
+        RETURNING {PAYMENT_COLS}
+        "#
+    ))
     .bind(id)
     .bind(account_id)
     .bind(gateway)
@@ -53,7 +63,20 @@ pub async fn create_payment(
     .bind(plan_id)
     .bind(auto_renew)
     .bind(idempotency_key)
-    .fetch_one(pool)
+    .fetch_optional(pool)
+    .await?;
+    Ok(row)
+}
+
+pub async fn find_by_idempotency_key(
+    pool: &PgPool,
+    idempotency_key: &str,
+) -> anyhow::Result<Option<PaymentRow>> {
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        "SELECT {PAYMENT_COLS} FROM payments WHERE idempotency_key = $1"
+    ))
+    .bind(idempotency_key)
+    .fetch_optional(pool)
     .await?;
     Ok(row)
 }
@@ -91,54 +114,139 @@ pub async fn find_by_gateway_order_id(
     Ok(row)
 }
 
-pub async fn mark_status(
+/// One page of an account's payments, newest first. `before` is the `created_at` of the
+/// last row of the previous page.
+pub async fn list_for_account(
     pool: &PgPool,
-    payment_id: Uuid,
-    status: &str,
-    subscription_id: Option<Uuid>,
-) -> anyhow::Result<PaymentRow> {
-    let completed_at = if status == "success" || status == "failed" {
-        Some(Utc::now())
-    } else {
-        None
-    };
-
-    let row = sqlx::query_as::<_, PaymentRow>(
+    account_id: Uuid,
+    before: Option<DateTime<Utc>>,
+    limit: i64,
+) -> anyhow::Result<Vec<PaymentRow>> {
+    let rows = sqlx::query_as::<_, PaymentRow>(&format!(
         r#"
-        UPDATE payments
-        SET status = $2,
-            subscription_id = COALESCE($3, subscription_id),
-            completed_at = COALESCE($4, completed_at)
-        WHERE id = $1
-        RETURNING id, account_id, subscription_id, gateway, gateway_order_id,
-                  amount_iqd, status, deep_link, plan_id, auto_renew,
-                  created_at, completed_at
-        "#,
-    )
-    .bind(payment_id)
-    .bind(status)
-    .bind(subscription_id)
-    .bind(completed_at)
-    .fetch_one(pool)
-    .await?;
-    Ok(row)
-}
-
-pub async fn list_for_admin(pool: &PgPool, limit: i64) -> anyhow::Result<Vec<PaymentRow>> {
-    let rows = sqlx::query_as::<_, PaymentRow>(
-        r#"
-        SELECT id, account_id, subscription_id, gateway, gateway_order_id,
-               amount_iqd, status, deep_link, plan_id, auto_renew,
-               created_at, completed_at
+        SELECT {PAYMENT_COLS}
         FROM payments
+        WHERE account_id = $1
+          AND ($2::timestamptz IS NULL OR created_at < $2)
         ORDER BY created_at DESC
-        LIMIT $1
-        "#,
-    )
+        LIMIT $3
+        "#
+    ))
+    .bind(account_id)
+    .bind(before)
     .bind(limit)
     .fetch_all(pool)
     .await?;
     Ok(rows)
+}
+
+#[derive(Debug, Default)]
+pub struct PaymentSearch<'a> {
+    /// Start of a gateway order id, or a whole account id.
+    pub q: Option<&'a str>,
+    pub status: Option<&'a str>,
+    pub gateway: Option<&'a str>,
+    pub before: Option<DateTime<Utc>>,
+}
+
+/// One page of all payments, newest first, filtered for the admin payments view.
+pub async fn search_for_admin(
+    pool: &PgPool,
+    search: &PaymentSearch<'_>,
+    limit: i64,
+) -> anyhow::Result<Vec<PaymentRow>> {
+    let q = search.q.map(str::trim).filter(|s| !s.is_empty());
+    let rows = sqlx::query_as::<_, PaymentRow>(&format!(
+        r#"
+        SELECT {PAYMENT_COLS}
+        FROM payments
+        WHERE ($1::text IS NULL
+               OR gateway_order_id LIKE $1 || '%'
+               OR account_id::text = lower($1))
+          AND ($2::text IS NULL OR status = $2)
+          AND ($3::text IS NULL OR gateway = $3)
+          AND ($4::timestamptz IS NULL OR created_at < $4)
+        ORDER BY created_at DESC
+        LIMIT $5
+        "#
+    ))
+    .bind(q)
+    .bind(search.status)
+    .bind(search.gateway)
+    .bind(search.before)
+    .bind(limit)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+#[derive(Debug, Clone, sqlx::FromRow, serde::Serialize)]
+pub struct RevenueDay {
+    pub day: DateTime<Utc>,
+    pub gateway: String,
+    pub total_iqd: i64,
+    pub tx_count: i64,
+}
+
+#[derive(Debug, Clone, sqlx::FromRow, serde::Serialize)]
+pub struct CountDay {
+    pub day: DateTime<Utc>,
+    pub count: i64,
+}
+
+/// Daily paid revenue per gateway, daily new accounts and daily new paid subscriptions
+/// over the last `days` days, for the dashboard charts that used to be mock data.
+///
+/// Read straight from the tables; at this size the queries are cheap. (A materialized
+/// view used to exist for this but was never read, and has been dropped.)
+pub async fn timeseries(
+    pool: &PgPool,
+    days: i32,
+) -> anyhow::Result<(Vec<RevenueDay>, Vec<CountDay>, Vec<CountDay>)> {
+    let revenue = sqlx::query_as::<_, RevenueDay>(
+        r#"
+        SELECT date_trunc('day', completed_at) AS day, gateway,
+               SUM(amount_iqd)::bigint AS total_iqd, COUNT(*)::bigint AS tx_count
+        FROM payments
+        WHERE status = 'success'
+          AND completed_at >= date_trunc('day', now()) - make_interval(days => $1)
+        GROUP BY 1, 2
+        ORDER BY 1, 2
+        "#,
+    )
+    .bind(days)
+    .fetch_all(pool)
+    .await?;
+
+    let signups = sqlx::query_as::<_, CountDay>(
+        r#"
+        SELECT date_trunc('day', created_at) AS day, COUNT(*)::bigint AS count
+        FROM accounts
+        WHERE created_at >= date_trunc('day', now()) - make_interval(days => $1)
+        GROUP BY 1
+        ORDER BY 1
+        "#,
+    )
+    .bind(days)
+    .fetch_all(pool)
+    .await?;
+
+    let new_paid = sqlx::query_as::<_, CountDay>(
+        r#"
+        SELECT date_trunc('day', created_at) AS day, COUNT(*)::bigint AS count
+        FROM subscriptions
+        WHERE granted_by IS NULL
+          AND amount_iqd > 0
+          AND created_at >= date_trunc('day', now()) - make_interval(days => $1)
+        GROUP BY 1
+        ORDER BY 1
+        "#,
+    )
+    .bind(days)
+    .fetch_all(pool)
+    .await?;
+
+    Ok((revenue, signups, new_paid))
 }
 
 pub async fn insert_webhook_event(
@@ -171,8 +279,62 @@ pub async fn insert_webhook_event(
     Ok(id)
 }
 
+/// Record a webhook whose signature the gateway verified, together with the outcome it
+/// verified. The retry job settles from these columns, never from `payload`.
+pub async fn insert_verified_webhook_event(
+    pool: &PgPool,
+    gateway: &str,
+    gateway_order_id: &str,
+    payload: &serde_json::Value,
+    event_status: &str,
+    reported_amount_iqd: Option<i32>,
+) -> anyhow::Result<Uuid> {
+    let id = new_id();
+    sqlx::query(
+        r#"
+        INSERT INTO webhook_events (
+            id, gateway, gateway_order_id, payload, signature_valid, processed,
+            event_status, reported_amount_iqd
+        )
+        VALUES ($1, $2, $3, $4, true, false, $5, $6)
+        "#,
+    )
+    .bind(id)
+    .bind(gateway)
+    .bind(gateway_order_id)
+    .bind(payload)
+    .bind(event_status)
+    .bind(reported_amount_iqd)
+    .execute(pool)
+    .await?;
+    Ok(id)
+}
+
+/// Mark a webhook event as handled so the retry job leaves it alone. `error` records why
+/// a terminal event did not settle (amount mismatch, unknown order).
+pub async fn finish_webhook_event(
+    pool: &PgPool,
+    id: Uuid,
+    error: Option<&str>,
+) -> anyhow::Result<()> {
+    sqlx::query(
+        r#"
+        UPDATE webhook_events
+        SET processed = true, error_message = COALESCE($2, error_message)
+        WHERE id = $1
+        "#,
+    )
+    .bind(id)
+    .bind(error)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Newest first; only events for one order when `gateway_order_id` is given.
 pub async fn list_webhooks_for_admin(
     pool: &PgPool,
+    gateway_order_id: Option<&str>,
     limit: i64,
 ) -> anyhow::Result<Vec<WebhookEventRow>> {
     let rows = sqlx::query_as::<_, WebhookEventRow>(
@@ -180,10 +342,12 @@ pub async fn list_webhooks_for_admin(
         SELECT id, gateway, gateway_order_id, payload, signature_valid, processed,
                error_message, received_at
         FROM webhook_events
+        WHERE ($1::text IS NULL OR gateway_order_id = $1)
         ORDER BY received_at DESC
-        LIMIT $1
+        LIMIT $2
         "#,
     )
+    .bind(gateway_order_id)
     .bind(limit)
     .fetch_all(pool)
     .await?;
@@ -203,7 +367,26 @@ pub struct WebhookEventRow {
 }
 
 pub async fn overview_stats(pool: &PgPool) -> anyhow::Result<OverviewStats> {
+    // Monthly recurring revenue: every live paid subscription at its monthly-equivalent
+    // price (a yearly plan counts as 1/12 per month). It used to be the cash collected
+    // this calendar month, which booked a whole yearly payment into a single month.
     let mrr: i64 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE(SUM(
+                 s.amount_iqd::numeric * 30
+                 / GREATEST(COALESCE(p.days, CASE WHEN s.plan_id = 'premium_yearly' THEN 365 ELSE 30 END), 1)
+               ), 0)::bigint
+        FROM subscriptions s
+        LEFT JOIN plans p ON p.id = s.plan_id
+        WHERE s.status IN ('active', 'cancelled')
+          AND s.expires_at > now()
+          AND s.granted_by IS NULL
+        "#,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    let collected_this_month: i64 = sqlx::query_scalar(
         r#"
         SELECT COALESCE(SUM(amount_iqd), 0)::bigint
         FROM payments
@@ -218,7 +401,8 @@ pub async fn overview_stats(pool: &PgPool) -> anyhow::Result<OverviewStats> {
         r#"
         SELECT COUNT(DISTINCT account_id)::bigint
         FROM subscriptions
-        WHERE status = 'active' AND expires_at > now()
+        WHERE status IN ('active', 'cancelled') AND expires_at > now()
+          AND granted_by IS NULL
         "#,
     )
     .fetch_one(pool)
@@ -228,8 +412,13 @@ pub async fn overview_stats(pool: &PgPool) -> anyhow::Result<OverviewStats> {
         r#"
         SELECT COUNT(*)::bigint
         FROM devices d
-        JOIN accounts a ON a.id = d.account_id
-        WHERE d.revoked_at IS NULL AND a.tier = 'free'
+        WHERE d.revoked_at IS NULL
+          AND NOT EXISTS (
+            SELECT 1 FROM subscriptions s
+            WHERE s.account_id = d.account_id
+              AND s.status IN ('active', 'cancelled')
+              AND s.expires_at > now()
+          )
         "#,
     )
     .fetch_one(pool)
@@ -237,6 +426,7 @@ pub async fn overview_stats(pool: &PgPool) -> anyhow::Result<OverviewStats> {
 
     Ok(OverviewStats {
         mrr_iqd: mrr,
+        collected_this_month_iqd: collected_this_month,
         paid_subscribers,
         free_devices,
     })
@@ -245,6 +435,7 @@ pub async fn overview_stats(pool: &PgPool) -> anyhow::Result<OverviewStats> {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct OverviewStats {
     pub mrr_iqd: i64,
+    pub collected_this_month_iqd: i64,
     pub paid_subscribers: i64,
     pub free_devices: i64,
 }

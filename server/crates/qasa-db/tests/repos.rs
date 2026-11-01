@@ -86,13 +86,16 @@ async fn active_peers_of(pool: &PgPool, node_id: Uuid) -> i32 {
 
 async fn connect_session(pool: &PgPool, node_id: Uuid) -> (Uuid, Account) {
     let acct = account_with_device(pool).await;
+    // A node allows one live peer per address and per key, so every session needs its own.
+    static NEXT_HOST: std::sync::atomic::AtomicU8 = std::sync::atomic::AtomicU8::new(2);
+    let host = NEXT_HOST.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     let session = vpn::create_session(
         pool,
         acct.id,
         acct.device_id,
         node_id,
-        "client-pubkey",
-        Ipv4Addr::new(10, 64, 99, 9),
+        &format!("pk-{}", Uuid::now_v7()),
+        Ipv4Addr::new(10, 64, 99, host),
     )
     .await
     .expect("create_session");
@@ -114,10 +117,9 @@ fn purge_account_sql(acct: &Account) -> String {
     format!(
         "DELETE FROM license_revocations WHERE account_id = '{id}'; \
          DELETE FROM vpn_sessions WHERE account_id = '{id}'; \
-         DELETE FROM devices WHERE id = '{device}'; \
+         DELETE FROM devices WHERE account_id = '{id}'; \
          DELETE FROM accounts WHERE id = '{id}';",
         id = acct.id,
-        device = acct.device_id
     )
 }
 
@@ -377,4 +379,201 @@ async fn list_revocations_includes_new_entries() {
     assert_eq!(row.reason.as_deref(), Some("manual"));
 
     purge_account(&pool, &acct).await;
+}
+
+// ------------------------------------------------------------- unlink and re-link
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
+
+/// The regression: unlinking only set `revoked_at`, which the auth path never read, so
+/// the unlinked device kept full API access until its 30-day token expired.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn unlinked_device_token_is_rejected() {
+    let pool = test_pool().await;
+    let acct = account_with_device(&pool).await;
+    let iat = now_secs() - 5;
+
+    assert!(device::is_license_live(&pool, acct.id, acct.device_id, "jti-a", iat)
+        .await
+        .unwrap());
+
+    assert!(device::revoke_device(&pool, acct.id, acct.device_id).await.unwrap());
+
+    assert!(
+        !device::is_license_live(&pool, acct.id, acct.device_id, "jti-a", iat)
+            .await
+            .unwrap(),
+        "a token of an unlinked device must stop working at once"
+    );
+
+    purge_account(&pool, &acct).await;
+}
+
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn token_for_another_account_is_rejected() {
+    let pool = test_pool().await;
+    let a = account_with_device(&pool).await;
+    let b = account_with_device(&pool).await;
+
+    assert!(!device::is_license_live(&pool, b.id, a.device_id, "jti-x", now_secs())
+        .await
+        .unwrap());
+
+    purge_account(&pool, &a).await;
+    purge_account(&pool, &b).await;
+}
+
+/// The regression: re-registering an unlinked device inserted a duplicate
+/// `(account_id, fingerprint)` row and failed with a 500. It now gets its row back, and
+/// tokens from before the unlink stay dead.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn unlinked_device_can_relink_without_reviving_old_tokens() {
+    let pool = test_pool().await;
+    let acct = account_with_device(&pool).await;
+    let row = sqlx::query_as::<_, (String,)>("SELECT fingerprint FROM devices WHERE id = $1")
+        .bind(acct.device_id)
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    let old_iat = now_secs() - 5;
+
+    device::revoke_device(&pool, acct.id, acct.device_id).await.unwrap();
+
+    let found = device::find_by_fingerprint(&pool, acct.id, &row.0)
+        .await
+        .unwrap()
+        .expect("unlinked row is still found");
+    assert!(found.revoked_at.is_some());
+
+    // iat has one-second resolution; a new token is issued in a later second.
+    tokio::time::sleep(std::time::Duration::from_millis(1100)).await;
+    let relinked = device::reactivate_device(&pool, found.id, "Renamed", "android", None)
+        .await
+        .unwrap();
+    assert_eq!(relinked.id, acct.device_id);
+    assert!(relinked.revoked_at.is_none());
+    assert_eq!(relinked.device_name, "Renamed");
+    assert_eq!(device::count_active(&pool, acct.id).await.unwrap(), 1);
+
+    assert!(
+        !device::is_license_live(&pool, acct.id, acct.device_id, "jti-old", old_iat)
+            .await
+            .unwrap(),
+        "tokens issued before the unlink must not come back"
+    );
+    assert!(device::is_license_live(&pool, acct.id, acct.device_id, "jti-new", now_secs())
+        .await
+        .unwrap());
+
+    purge_account(&pool, &acct).await;
+}
+
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn unlink_others_rejects_their_tokens_and_keeps_the_primary() {
+    let pool = test_pool().await;
+    let acct = account_with_device(&pool).await;
+    let second = device::insert_device(
+        &pool,
+        acct.id,
+        &format!("fp-{}", Uuid::now_v7()),
+        "Second",
+        "android",
+        None,
+    )
+    .await
+    .unwrap();
+    let iat = now_secs() - 5;
+
+    assert_eq!(device::revoke_all_except_primary(&pool, acct.id).await.unwrap(), 1);
+
+    assert!(device::is_license_live(&pool, acct.id, acct.device_id, "p", iat)
+        .await
+        .unwrap());
+    assert!(!device::is_license_live(&pool, acct.id, second.id, "s", iat)
+        .await
+        .unwrap());
+
+    purge_account(&pool, &acct).await;
+}
+
+// ------------------------------------------------------------- lapsed premium
+
+/// When Premium lapses the limit drops to 1 while several devices stay linked. Only the
+/// primary (oldest) is within the limit; unlinking it promotes the next one.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn only_the_primary_is_within_a_free_limit() {
+    let pool = test_pool().await;
+    let acct = account_with_device(&pool).await;
+    let second = device::insert_device(
+        &pool,
+        acct.id,
+        &format!("fp-{}", Uuid::now_v7()),
+        "Second",
+        "android",
+        None,
+    )
+    .await
+    .unwrap();
+
+    assert!(device::is_within_limit(&pool, acct.id, acct.device_id, 1).await.unwrap());
+    assert!(!device::is_within_limit(&pool, acct.id, second.id, 1).await.unwrap());
+    assert!(device::is_within_limit(&pool, acct.id, second.id, 5).await.unwrap());
+
+    device::revoke_device(&pool, acct.id, acct.device_id).await.unwrap();
+    assert!(!device::is_within_limit(&pool, acct.id, acct.device_id, 1).await.unwrap());
+    assert!(
+        device::is_within_limit(&pool, acct.id, second.id, 1).await.unwrap(),
+        "with the primary unlinked, the next device takes the free slot"
+    );
+
+    purge_account(&pool, &acct).await;
+}
+
+// ------------------------------------------------------------- unlink teardown
+
+/// Unlinking used to leave the push token (the unlinked phone kept getting alerts for
+/// the account) and the VPN session running.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn unlink_drops_push_token_and_ends_vpn_session() {
+    let pool = test_pool().await;
+    let node_id = node(&pool).await;
+    let (session_id, acct) = connect_session(&pool, node_id).await;
+    device::update_prefs(&pool, acct.device_id, Some("en"), Some("fcm-token"), Some(true))
+        .await
+        .unwrap();
+    assert_eq!(active_peers_of(&pool, node_id).await, 1);
+
+    device::revoke_device(&pool, acct.id, acct.device_id).await.unwrap();
+
+    let (token, enabled): (Option<String>, bool) = sqlx::query_as(
+        "SELECT push_token, notifications_enabled FROM devices WHERE id = $1",
+    )
+    .bind(acct.device_id)
+    .fetch_one(&pool)
+    .await
+    .unwrap();
+    assert_eq!(token, None);
+    assert!(!enabled);
+
+    let ended: bool =
+        sqlx::query_scalar("SELECT disconnected_at IS NOT NULL FROM vpn_sessions WHERE id = $1")
+            .bind(session_id)
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+    assert!(ended, "the unlinked device's VPN session must end");
+    assert_eq!(active_peers_of(&pool, node_id).await, 0);
+
+    purge_node(&pool, node_id, &[&acct]).await;
 }

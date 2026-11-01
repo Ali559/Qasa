@@ -3,7 +3,7 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: qasa
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qasa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       POSTGRES_DB: qasa
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -12,9 +12,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks: [qasa]
 
-  redis:
-    image: redis:7-alpine
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      QASA_PUBLIC_HOST: ${QASA_PUBLIC_HOST:-api.qasa.app}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks: [qasa]
 
   api:
     build:
@@ -23,7 +38,7 @@ services:
     command: qasa-api
     environment:
       QASA_ENV: prod
-      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/qasa
       BIND_ADDR: 0.0.0.0:8080
       QASA_ADMIN_JWT_SECRET: ${QASA_ADMIN_JWT_SECRET:?set QASA_ADMIN_JWT_SECRET}
       QASA_LICENSE_PRIVATE_KEY: ${QASA_LICENSE_PRIVATE_KEY:?set QASA_LICENSE_PRIVATE_KEY}
@@ -31,19 +46,21 @@ services:
       # Restrict /v1/admin/* to the VPN range. Strongly recommended: without it the
       # admin surface is reachable by anyone who can reach this port.
       QASA_ADMIN_ALLOW_CIDRS: ${QASA_ADMIN_ALLOW_CIDRS:-tailscale}
-      # Only set this to the proxy that actually fronts the API. Empty means the TCP
-      # peer address is always used, which is the safe default.
-      QASA_TRUSTED_PROXY_CIDRS: ${QASA_TRUSTED_PROXY_CIDRS:-}
+      # Caddy is the only thing that can reach the API (it publishes no port), and it
+      # lives on this fixed network, so its X-Forwarded-For is the real client address.
+      QASA_TRUSTED_PROXY_CIDRS: ${QASA_TRUSTED_PROXY_CIDRS:-172.30.0.0/24}
       # Device push. Without these, inbox rows still write and pushes are logged only.
       QASA_FCM_PROJECT_ID: ${QASA_FCM_PROJECT_ID:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON: ${QASA_FCM_SERVICE_ACCOUNT_JSON:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE: ${QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE:-}
       RUST_LOG: qasa_api=info,tower_http=info,sqlx=warn
-    ports:
-      - "8080:8080"
+    # No published port: all traffic comes through Caddy (TLS) on the internal network.
+    expose:
+      - "8080"
     depends_on:
       postgres:
         condition: service_healthy
+    networks: [qasa]
 
   worker:
     build:
@@ -52,7 +69,7 @@ services:
     command: qasa-worker
     environment:
       QASA_ENV: prod
-      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:-qasa}@postgres:5432/qasa
+      DATABASE_URL: postgres://qasa:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/qasa
       # The worker builds AppConfig too, and AppConfig panics in prod without this.
       QASA_ADMIN_JWT_SECRET: ${QASA_ADMIN_JWT_SECRET:?set QASA_ADMIN_JWT_SECRET}
       QASA_LICENSE_PRIVATE_KEY: ${QASA_LICENSE_PRIVATE_KEY:?set QASA_LICENSE_PRIVATE_KEY}
@@ -65,6 +82,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks: [qasa]
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  qasa:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

@@ -1,5 +1,7 @@
 pub mod account;
+pub mod account_deletion;
 pub mod admin;
+pub mod admin_accounts;
 pub mod breach;
 pub mod device;
 pub mod monitored_email;
@@ -7,6 +9,8 @@ pub mod notification;
 pub mod payment;
 pub mod plan;
 pub mod push_copy;
+pub mod rate_limit;
+pub mod settlement;
 pub mod subscription;
 pub mod vpn;
 pub mod vpn_usage;

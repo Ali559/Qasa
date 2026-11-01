@@ -14,7 +14,17 @@ impl FromRequestParts<AppState> for LicenseAuth {
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         let token = extract_bearer(&parts.headers)?.to_string();
         let claims = state.license_issuer.verify(&token)?;
-        if qasa_db::repos::device::is_jti_revoked(&state.pool, &claims.jti).await? {
+        // A valid signature is not enough: the device may have been unlinked since the
+        // token was issued, or the token revoked by an admin.
+        let live = qasa_db::repos::device::is_license_live(
+            &state.pool,
+            claims.account_id()?,
+            claims.device_id()?,
+            &claims.jti,
+            claims.iat,
+        )
+        .await?;
+        if !live {
             return Err(ApiError::Core(qasa_core::CoreError::Token(
                 "token revoked".into(),
             )));
@@ -23,6 +33,9 @@ impl FromRequestParts<AppState> for LicenseAuth {
     }
 }
 
+/// Any signed-in admin (read access). Besides the signature, the admin must still exist,
+/// not be disabled, and not have logged this token out; `claims.role` is replaced with
+/// the role currently stored, so a demotion applies on the next request.
 pub struct AdminAuth(pub qasa_core::AdminClaims);
 
 impl FromRequestParts<AppState> for AdminAuth {
@@ -30,8 +43,29 @@ impl FromRequestParts<AppState> for AdminAuth {
 
     async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
         let token = extract_bearer(&parts.headers)?.to_string();
-        let claims = state.admin_issuer.verify(&token)?;
+        let mut claims = state.admin_issuer.verify(&token)?;
+        let role = qasa_db::repos::admin::live_role(&state.pool, claims.admin_id()?, &claims.jti)
+            .await?
+            .ok_or_else(|| {
+                ApiError::Core(qasa_core::CoreError::Token("admin session ended".into()))
+            })?;
+        claims.role = role;
         Ok(AdminAuth(claims))
+    }
+}
+
+/// An admin allowed to change things. `viewer` admins get 403 on every mutating route.
+pub struct AdminWrite(pub qasa_core::AdminClaims);
+
+impl FromRequestParts<AppState> for AdminWrite {
+    type Rejection = ApiError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+        let AdminAuth(claims) = AdminAuth::from_request_parts(parts, state).await?;
+        if claims.role != "admin" {
+            return Err(ApiError::Core(qasa_core::CoreError::Forbidden));
+        }
+        Ok(AdminWrite(claims))
     }
 }
 

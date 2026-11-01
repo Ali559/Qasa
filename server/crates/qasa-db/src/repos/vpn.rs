@@ -52,6 +52,8 @@ pub struct VpnSessionRow {
     pub disconnected_at: Option<DateTime<Utc>>,
     pub bytes_tx: i64,
     pub bytes_rx: i64,
+    /// Latest WireGuard handshake the node reported for this peer.
+    pub last_handshake_at: Option<DateTime<Utc>>,
 }
 
 const NODE_SELECT: &str = r#"
@@ -109,7 +111,7 @@ pub async fn active_session_for_device(
     let row = sqlx::query_as::<_, VpnSessionRow>(
         r#"
         SELECT id, account_id, device_id, node_id, client_public_key,
-               host(assigned_ip) AS assigned_ip, connected_at, disconnected_at, bytes_tx, bytes_rx
+               host(assigned_ip) AS assigned_ip, connected_at, disconnected_at, bytes_tx, bytes_rx, last_handshake_at
         FROM vpn_sessions
         WHERE account_id = $1 AND device_id = $2 AND disconnected_at IS NULL
         ORDER BY connected_at DESC
@@ -123,6 +125,18 @@ pub async fn active_session_for_device(
     Ok(row)
 }
 
+/// Why a new session could not be created. The unique indexes on live sessions make
+/// these the losing side of a race rather than silent duplicates.
+#[derive(Debug, PartialEq, Eq)]
+pub enum SessionConflict {
+    /// Another live peer on this node already has the address; pick another.
+    IpTaken,
+    /// Another live peer on this node already uses this public key.
+    KeyTaken,
+    /// This device already has a live session (a concurrent connect won).
+    DeviceHasSession,
+}
+
 pub async fn create_session(
     pool: &PgPool,
     account_id: Uuid,
@@ -131,16 +145,32 @@ pub async fn create_session(
     client_public_key: &str,
     assigned_ip: Ipv4Addr,
 ) -> anyhow::Result<VpnSessionRow> {
+    match try_create_session(pool, account_id, device_id, node_id, client_public_key, assigned_ip)
+        .await?
+    {
+        Ok(row) => Ok(row),
+        Err(conflict) => anyhow::bail!("session conflict: {conflict:?}"),
+    }
+}
+
+pub async fn try_create_session(
+    pool: &PgPool,
+    account_id: Uuid,
+    device_id: Uuid,
+    node_id: Uuid,
+    client_public_key: &str,
+    assigned_ip: Ipv4Addr,
+) -> anyhow::Result<Result<VpnSessionRow, SessionConflict>> {
     let id = new_id();
     let ip_str = assigned_ip.to_string();
     let mut tx = pool.begin().await?;
 
-    let row = sqlx::query_as::<_, VpnSessionRow>(
+    let inserted = sqlx::query_as::<_, VpnSessionRow>(
         r#"
         INSERT INTO vpn_sessions (id, account_id, device_id, node_id, client_public_key, assigned_ip)
         VALUES ($1, $2, $3, $4, $5, $6::inet)
         RETURNING id, account_id, device_id, node_id, client_public_key,
-                  host(assigned_ip) AS assigned_ip, connected_at, disconnected_at, bytes_tx, bytes_rx
+                  host(assigned_ip) AS assigned_ip, connected_at, disconnected_at, bytes_tx, bytes_rx, last_handshake_at
         "#,
     )
     .bind(id)
@@ -150,7 +180,21 @@ pub async fn create_session(
     .bind(client_public_key)
     .bind(ip_str)
     .fetch_one(&mut *tx)
-    .await?;
+    .await;
+
+    let row = match inserted {
+        Ok(row) => row,
+        Err(sqlx::Error::Database(db)) if db.is_unique_violation() => {
+            let conflict = match db.constraint() {
+                Some("uniq_vpn_sessions_live_ip") => SessionConflict::IpTaken,
+                Some("uniq_vpn_sessions_live_key") => SessionConflict::KeyTaken,
+                Some("uniq_vpn_sessions_live_device") => SessionConflict::DeviceHasSession,
+                _ => return Err(sqlx::Error::Database(db).into()),
+            };
+            return Ok(Err(conflict));
+        }
+        Err(e) => return Err(e.into()),
+    };
 
     sqlx::query("UPDATE vpn_nodes SET active_peers = active_peers + 1 WHERE id = $1")
         .bind(node_id)
@@ -158,7 +202,7 @@ pub async fn create_session(
         .await?;
 
     tx.commit().await?;
-    Ok(row)
+    Ok(Ok(row))
 }
 
 pub async fn disconnect_session(pool: &PgPool, session_id: Uuid) -> anyhow::Result<bool> {
@@ -219,7 +263,9 @@ pub async fn update_heartbeat(
             memory_label = COALESCE($4, memory_label),
             bandwidth_label = COALESCE($5, bandwidth_label),
             active_peers = COALESCE($6, active_peers),
-            status = $7,
+            -- A heartbeat reports health; it must not undo a drain or retirement
+            -- that staff set.
+            status = CASE WHEN status IN ('draining', 'retired') THEN status ELSE $7 END,
             last_heartbeat = now()
         WHERE id = $1
         "#,
@@ -362,7 +408,8 @@ pub async fn vpn_admin_kpis(pool: &PgPool) -> anyhow::Result<VpnAdminKpis> {
     .fetch_one(pool)
     .await?;
 
-    let total_nodes: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM vpn_nodes")
+    let total_nodes: i64 =
+        sqlx::query_scalar("SELECT COUNT(*)::bigint FROM vpn_nodes WHERE status <> 'retired'")
         .fetch_one(pool)
         .await?;
 
@@ -382,4 +429,276 @@ pub async fn vpn_admin_kpis(pool: &PgPool) -> anyhow::Result<VpnAdminKpis> {
 pub struct VpnAdminKpis {
     pub total_peers: i64,
     pub uptime_pct: f64,
+}
+
+// ------------------------------------------------------------- staff node management
+
+pub struct NewNode<'a> {
+    pub name: &'a str,
+    pub city: &'a str,
+    pub public_ip: &'a str,
+    pub wg_public_key: &'a str,
+    pub endpoint_port: i32,
+    pub max_peers: i32,
+    pub ip_pool_cidr: &'a str,
+    pub service_name: &'a str,
+}
+
+/// Register a node. Starts `draining`, so it takes no peers until staff have seen its
+/// agent heartbeat and set it `online`.
+pub async fn create_node(
+    pool: &PgPool,
+    node: &NewNode<'_>,
+    agent_token_hash: &str,
+) -> anyhow::Result<VpnNodeRow> {
+    let id = new_id();
+    sqlx::query(
+        r#"
+        INSERT INTO vpn_nodes (
+            id, name, city, public_ip, wg_public_key, endpoint_port, max_peers,
+            status, agent_token_hash, ip_pool_cidr, service_name
+        )
+        VALUES ($1, $2, $3, $4::inet, $5, $6, $7, 'draining', $8, $9::cidr, $10)
+        "#,
+    )
+    .bind(id)
+    .bind(node.name)
+    .bind(node.city)
+    .bind(node.public_ip)
+    .bind(node.wg_public_key)
+    .bind(node.endpoint_port)
+    .bind(node.max_peers)
+    .bind(agent_token_hash)
+    .bind(node.ip_pool_cidr)
+    .bind(node.service_name)
+    .execute(pool)
+    .await?;
+    get_node(pool, id)
+        .await?
+        .ok_or_else(|| anyhow::anyhow!("node vanished after insert"))
+}
+
+#[derive(Debug, Default)]
+pub struct NodePatch<'a> {
+    pub name: Option<&'a str>,
+    pub city: Option<&'a str>,
+    pub max_peers: Option<i32>,
+    pub endpoint_port: Option<i32>,
+    pub wg_public_key: Option<&'a str>,
+    /// `online` or `draining`. Retirement goes through [`retire_node`].
+    pub status: Option<&'a str>,
+}
+
+pub async fn update_node(
+    pool: &PgPool,
+    node_id: Uuid,
+    patch: &NodePatch<'_>,
+) -> anyhow::Result<Option<VpnNodeRow>> {
+    let updated = sqlx::query(
+        r#"
+        UPDATE vpn_nodes
+        SET name = COALESCE($2, name),
+            city = COALESCE($3, city),
+            max_peers = COALESCE($4, max_peers),
+            endpoint_port = COALESCE($5, endpoint_port),
+            wg_public_key = COALESCE($6, wg_public_key),
+            status = COALESCE($7, status)
+        WHERE id = $1 AND status <> 'retired'
+        "#,
+    )
+    .bind(node_id)
+    .bind(patch.name)
+    .bind(patch.city)
+    .bind(patch.max_peers)
+    .bind(patch.endpoint_port)
+    .bind(patch.wg_public_key)
+    .bind(patch.status)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    if updated == 0 {
+        return Ok(None);
+    }
+    get_node(pool, node_id).await
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum RetireOutcome {
+    Retired,
+    NotFound,
+    /// Still carrying peers; drain it first.
+    HasActiveSessions(i64),
+}
+
+/// Take a node out of service for good. Kept as a row (sessions reference it) with
+/// status `retired`; it never takes peers again.
+pub async fn retire_node(pool: &PgPool, node_id: Uuid) -> anyhow::Result<RetireOutcome> {
+    let mut tx = pool.begin().await?;
+    let exists: Option<String> =
+        sqlx::query_scalar("SELECT status FROM vpn_nodes WHERE id = $1 FOR UPDATE")
+            .bind(node_id)
+            .fetch_optional(&mut *tx)
+            .await?;
+    if exists.is_none() {
+        return Ok(RetireOutcome::NotFound);
+    }
+    let live: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM vpn_sessions WHERE node_id = $1 AND disconnected_at IS NULL",
+    )
+    .bind(node_id)
+    .fetch_one(&mut *tx)
+    .await?;
+    if live > 0 {
+        return Ok(RetireOutcome::HasActiveSessions(live));
+    }
+    sqlx::query("UPDATE vpn_nodes SET status = 'retired', active_peers = 0 WHERE id = $1")
+        .bind(node_id)
+        .execute(&mut *tx)
+        .await?;
+    tx.commit().await?;
+    Ok(RetireOutcome::Retired)
+}
+
+/// Replace the node agent's token. The old one stops working immediately.
+pub async fn set_agent_token_hash(
+    pool: &PgPool,
+    node_id: Uuid,
+    agent_token_hash: &str,
+) -> anyhow::Result<bool> {
+    let n = sqlx::query(
+        "UPDATE vpn_nodes SET agent_token_hash = $2 WHERE id = $1 AND status <> 'retired'",
+    )
+    .bind(node_id)
+    .bind(agent_token_hash)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(n > 0)
+}
+
+// ------------------------------------------------------------- node agent sync
+
+/// The peers a node should have: every live session on it. A throttled account's peers
+/// carry the speed limit.
+pub async fn desired_peers(pool: &PgPool, node_id: Uuid) -> anyhow::Result<Vec<agent::Peer>> {
+    let rows = sqlx::query_as::<_, agent::Peer>(
+        r#"
+        SELECT s.client_public_key AS public_key,
+               host(s.assigned_ip) || '/32' AS allowed_ip,
+               COALESCE(u.throttled, false) AS throttled
+        FROM vpn_sessions s
+        LEFT JOIN vpn_usage u ON u.account_id = s.account_id
+        WHERE s.node_id = $1 AND s.disconnected_at IS NULL
+        ORDER BY s.connected_at
+        "#,
+    )
+    .bind(node_id)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+/// Row types for the agent sync, kept apart from the API's wire types.
+pub mod agent {
+    #[derive(Debug, Clone, sqlx::FromRow)]
+    pub struct Peer {
+        pub public_key: String,
+        pub allowed_ip: String,
+        pub throttled: bool,
+    }
+
+    /// One peer as the node reported it in a heartbeat.
+    #[derive(Debug, Clone)]
+    pub struct Stat<'a> {
+        pub public_key: &'a str,
+        pub last_handshake_unix: u64,
+        pub rx_bytes: u64,
+        pub tx_bytes: u64,
+    }
+}
+
+/// Record what a node reported per peer: the latest handshake, and the bytes moved since
+/// the last report. Returns `(account_id, new bytes)` per account that moved any, for
+/// usage metering. Peers with no live session on this node are ignored (the agent
+/// removes them on its next sync).
+///
+/// WireGuard counters are cumulative from when the peer was added to the interface, so
+/// a smaller value than stored means the peer was re-added: the whole value is new.
+pub async fn record_peer_stats(
+    pool: &PgPool,
+    node_id: Uuid,
+    stats: &[agent::Stat<'_>],
+) -> anyhow::Result<Vec<(Uuid, i64)>> {
+    let mut tx = pool.begin().await?;
+    let mut moved: std::collections::HashMap<Uuid, i64> = Default::default();
+    for st in stats {
+        let Some((session_id, account_id, rx, txb)) = sqlx::query_as::<_, (Uuid, Uuid, i64, i64)>(
+            r#"
+            SELECT id, account_id, bytes_rx, bytes_tx FROM vpn_sessions
+            WHERE node_id = $1 AND client_public_key = $2 AND disconnected_at IS NULL
+            FOR UPDATE
+            "#,
+        )
+        .bind(node_id)
+        .bind(st.public_key)
+        .fetch_optional(&mut *tx)
+        .await?
+        else {
+            continue;
+        };
+
+        let new_rx = i64::try_from(st.rx_bytes).unwrap_or(i64::MAX);
+        let new_tx = i64::try_from(st.tx_bytes).unwrap_or(i64::MAX);
+        let delta = |new: i64, old: i64| if new >= old { new - old } else { new };
+        let d = delta(new_rx, rx) + delta(new_tx, txb);
+
+        let handshake = (st.last_handshake_unix > 0)
+            .then(|| DateTime::from_timestamp(st.last_handshake_unix as i64, 0))
+            .flatten();
+        sqlx::query(
+            r#"
+            UPDATE vpn_sessions
+            SET bytes_rx = $2, bytes_tx = $3,
+                last_handshake_at = GREATEST(last_handshake_at, $4)
+            WHERE id = $1
+            "#,
+        )
+        .bind(session_id)
+        .bind(new_rx)
+        .bind(new_tx)
+        .bind(handshake)
+        .execute(&mut *tx)
+        .await?;
+
+        if d > 0 {
+            *moved.entry(account_id).or_default() += d;
+        }
+    }
+    tx.commit().await?;
+    Ok(moved.into_iter().collect())
+}
+
+#[derive(Debug, Clone, sqlx::FromRow, serde::Serialize)]
+pub struct PublicNode {
+    pub id: Uuid,
+    pub name: String,
+    pub city: String,
+    /// Live peers as a share of capacity, 0–100.
+    pub load_pct: i32,
+}
+
+/// Nodes a client may pick: online and not over the 80% connect threshold.
+pub async fn list_public_nodes(pool: &PgPool) -> anyhow::Result<Vec<PublicNode>> {
+    let rows = sqlx::query_as::<_, PublicNode>(
+        r#"
+        SELECT id, name, city,
+               LEAST(100, (active_peers * 100 / GREATEST(max_peers, 1)))::int AS load_pct
+        FROM vpn_nodes
+        WHERE status = 'online' AND active_peers * 100 < max_peers * 80
+        ORDER BY city, name
+        "#,
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
 }

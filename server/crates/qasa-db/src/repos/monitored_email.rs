@@ -95,6 +95,15 @@ pub async fn delete_hash(
     Ok(r.rows_affected() > 0)
 }
 
+pub async fn delete_by_id(pool: &PgPool, account_id: Uuid, monitor_id: Uuid) -> anyhow::Result<bool> {
+    let r = sqlx::query("DELETE FROM monitored_email_hashes WHERE account_id = $1 AND id = $2")
+        .bind(account_id)
+        .bind(monitor_id)
+        .execute(pool)
+        .await?;
+    Ok(r.rows_affected() > 0)
+}
+
 /// Full SHA-256 hex present in breach_hashes (prefix+suffix), not alerted in last 7 days.
 pub async fn find_unalerted_matches(pool: &PgPool, limit: i64) -> anyhow::Result<Vec<BreachAlertCandidate>> {
     let rows = sqlx::query_as::<_, BreachAlertCandidate>(

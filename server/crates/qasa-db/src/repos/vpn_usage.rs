@@ -36,6 +36,10 @@ pub async fn get_or_create(pool: &PgPool, account_id: Uuid) -> anyhow::Result<Vp
             WHEN vpn_usage.period_start < date_trunc('month', now()) THEN false
             ELSE vpn_usage.warned_80
           END,
+          throttle_notified = CASE
+            WHEN vpn_usage.period_start < date_trunc('month', now()) THEN false
+            ELSE vpn_usage.throttle_notified
+          END,
           updated_at = now()
         "#,
     )
@@ -55,48 +59,6 @@ pub async fn get_or_create(pool: &PgPool, account_id: Uuid) -> anyhow::Result<Vp
     Ok(row)
 }
 
-pub async fn add_bytes(pool: &PgPool, account_id: Uuid, delta: i64) -> anyhow::Result<VpnUsageRow> {
-    let _ = get_or_create(pool, account_id).await?;
-    let row = sqlx::query_as::<_, VpnUsageRow>(
-        r#"
-        UPDATE vpn_usage
-        SET bytes_used = bytes_used + $2, updated_at = now()
-        WHERE account_id = $1
-        RETURNING account_id, period_start, bytes_used, throttled, warned_80, updated_at
-        "#,
-    )
-    .bind(account_id)
-    .bind(delta)
-    .fetch_one(pool)
-    .await?;
-    Ok(row)
-}
-
-pub async fn set_throttled(pool: &PgPool, account_id: Uuid, throttled: bool) -> anyhow::Result<()> {
-    sqlx::query(
-        r#"
-        UPDATE vpn_usage SET throttled = $2, updated_at = now() WHERE account_id = $1
-        "#,
-    )
-    .bind(account_id)
-    .bind(throttled)
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
-pub async fn set_warned_80(pool: &PgPool, account_id: Uuid) -> anyhow::Result<()> {
-    sqlx::query(
-        r#"
-        UPDATE vpn_usage SET warned_80 = true, updated_at = now() WHERE account_id = $1
-        "#,
-    )
-    .bind(account_id)
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
 pub fn gb_to_bytes(gb: i32) -> i64 {
     (gb as i64) * 1024 * 1024 * 1024
 }
@@ -110,4 +72,71 @@ pub async fn analytics_totals(pool: &PgPool) -> anyhow::Result<(i64, i64)> {
             .fetch_one(pool)
             .await?;
     Ok((bytes, throttled))
+}
+
+/// What crossing a usage threshold should tell the user.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum UsageEvent {
+    /// Crossed 80% of the month's quota (sent once per period).
+    Warned80,
+    /// Used the whole quota: the account is now throttled (sent once per period).
+    Throttled,
+}
+
+/// Add bytes a node reported for this account, and apply the quota: throttle at 100%,
+/// and return the notices to send. Quota comes from the account's current plan (100 GB
+/// when it has none). Runs under a row lock so concurrent node reports cannot both send
+/// the same notice.
+pub async fn meter(pool: &PgPool, account_id: Uuid, delta: i64) -> anyhow::Result<Vec<UsageEvent>> {
+    get_or_create(pool, account_id).await?;
+    let mut tx = pool.begin().await?;
+    let (used, warned, throttled, notified): (i64, bool, bool, bool) = sqlx::query_as(
+        r#"
+        UPDATE vpn_usage SET bytes_used = bytes_used + $2, updated_at = now()
+        WHERE account_id = $1
+        RETURNING bytes_used, warned_80, throttled, throttle_notified
+        "#,
+    )
+    .bind(account_id)
+    .bind(delta)
+    .fetch_one(&mut *tx)
+    .await?;
+
+    let quota_gb: i32 = sqlx::query_scalar(
+        r#"
+        SELECT COALESCE((
+            SELECT p.vpn_quota_gb FROM subscriptions s
+            JOIN plans p ON p.id = s.plan_id
+            WHERE s.account_id = $1 AND s.status IN ('active', 'cancelled') AND s.expires_at > now()
+            ORDER BY s.expires_at DESC LIMIT 1
+        ), 100)
+        "#,
+    )
+    .bind(account_id)
+    .fetch_one(&mut *tx)
+    .await?;
+    let quota = gb_to_bytes(quota_gb).max(1);
+
+    let mut events = Vec::new();
+    if used >= quota && !throttled {
+        sqlx::query("UPDATE vpn_usage SET throttled = true WHERE account_id = $1")
+            .bind(account_id)
+            .execute(&mut *tx)
+            .await?;
+    }
+    if used >= quota && !notified {
+        sqlx::query("UPDATE vpn_usage SET throttle_notified = true, warned_80 = true WHERE account_id = $1")
+            .bind(account_id)
+            .execute(&mut *tx)
+            .await?;
+        events.push(UsageEvent::Throttled);
+    } else if used * 100 >= quota * 80 && !warned {
+        sqlx::query("UPDATE vpn_usage SET warned_80 = true WHERE account_id = $1")
+            .bind(account_id)
+            .execute(&mut *tx)
+            .await?;
+        events.push(UsageEvent::Warned80);
+    }
+    tx.commit().await?;
+    Ok(events)
 }

@@ -46,7 +46,10 @@ impl PaymentGateway for StubGateway {
             GatewayKind::Fastpay => "FP-ORD",
             GatewayKind::Superqi => "SQ-ORD",
         };
-        let gateway_order_id = format!("{}-{}", prefix, &order_ref[..8.min(order_ref.len())]);
+        // The whole ref: it is a UUIDv7, whose leading digits are only a timestamp, so a
+        // truncated prefix made every checkout within the same minute share one order id
+        // (and fail on the unique constraint).
+        let gateway_order_id = format!("{prefix}-{order_ref}");
         let scheme = match self.kind {
             GatewayKind::Fib => "fib",
             GatewayKind::Fastpay => "fastpay",
@@ -161,6 +164,14 @@ mod tests {
 
     /// `stub_for` is the constructor most likely to be reached from a prod path, so it
     /// must default to the safe variant.
+    #[tokio::test]
+    async fn order_ids_are_unique_back_to_back() {
+        let gw = StubGateway::new(GatewayKind::Fib, true);
+        let a = gw.create_intent(10_000, &new_order_ref()).await;
+        let b = gw.create_intent(10_000, &new_order_ref()).await;
+        assert_ne!(a.gateway_order_id, b.gateway_order_id);
+    }
+
     #[test]
     fn stub_for_is_not_settling() {
         assert!(!stub_for(GatewayKind::Fib).settles_payments());

@@ -8,7 +8,8 @@ use serde_json::json;
 pub enum ApiError {
     Core(CoreError),
     Internal(anyhow::Error),
-    RateLimited,
+    /// Over a request limit; the message says which.
+    RateLimited(&'static str),
     /// VPN / breach (and similar) require a live premium subscription.
     SubscriptionRequired,
 }
@@ -64,11 +65,11 @@ impl IntoResponse for ApiError {
                 Json(json!({ "error": "invalid_token", "message": msg })),
             )
                 .into_response(),
-            ApiError::RateLimited => (
+            ApiError::RateLimited(message) => (
                 StatusCode::TOO_MANY_REQUESTS,
                 Json(json!({
                     "error": "rate_limit_exceeded",
-                    "message": "Maximum 60 prefix queries per hour."
+                    "message": message,
                 })),
             )
                 .into_response(),

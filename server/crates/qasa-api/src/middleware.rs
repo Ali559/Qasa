@@ -47,33 +47,28 @@ pub async fn admin_tailscale_guard(
 /// the API directly could set `X-Forwarded-For: 100.64.1.1`, pass the Tailscale check,
 /// and drive the whole admin surface. `QASA_TRUSTED_PROXY_CIDRS` now gates that trust.
 fn client_ip<B>(config: &qasa_core::AppConfig, request: &Request<B>, peer: SocketAddr) -> IpAddr {
-    if let Some(forwarded) = forwarded_client_ip(config, request) {
-        return forwarded;
-    }
-    peer.ip()
+    resolve_client_ip(config, request.headers(), peer.ip())
 }
 
-/// Returns the leftmost-original address from `X-Forwarded-For`, but only when the
-/// immediate peer is a trusted proxy.
-fn forwarded_client_ip<B>(
+/// The address to attribute a request to: the leftmost `X-Forwarded-For` entry, but only
+/// when the immediate peer is a trusted proxy; otherwise the TCP peer itself.
+pub(crate) fn resolve_client_ip(
     config: &qasa_core::AppConfig,
-    request: &Request<B>,
-) -> Option<IpAddr> {
-    if config.trusted_proxy_cidrs.is_empty() {
-        return None;
+    headers: &axum::http::HeaderMap,
+    peer: IpAddr,
+) -> IpAddr {
+    if config.trusted_proxy_cidrs.is_empty() || !matches_net(&config.trusted_proxy_cidrs, peer) {
+        return peer;
     }
-    let peer = request.extensions().get::<ConnectInfo<SocketAddr>>()?.0.ip();
-    if !matches_net(&config.trusted_proxy_cidrs, peer) {
-        return None;
-    }
-    request
-        .headers()
-        .get("x-forwarded-for")?
-        .to_str()
-        .ok()?
-        .split(',')
-        .map(str::trim)
-        .find_map(|s| s.parse::<IpAddr>().ok())
+    headers
+        .get("x-forwarded-for")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| {
+            v.split(',')
+                .map(str::trim)
+                .find_map(|s| s.parse::<IpAddr>().ok())
+        })
+        .unwrap_or(peer)
 }
 
 fn allow_ip(cidrs: &[String], ip: IpAddr) -> bool {

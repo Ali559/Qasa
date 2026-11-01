@@ -84,8 +84,11 @@ done
 # ------------------------------------------------------------- run the tests
 
 say "running integration tests against ${DB_URL}"
-QASA_TEST_DATABASE_URL="$DB_URL" cargo test -p qasa-db --tests --offline -- --include-ignored "$@"
-status=$?
+# qasa-db: repository tests. qasa-api: the same database driven through the real HTTP
+# router (status codes, JSON bodies, auth). Both suites must pass.
+status=0
+QASA_TEST_DATABASE_URL="$DB_URL" cargo test -p qasa-db --tests --offline -- --include-ignored "$@" || status=$?
+QASA_TEST_DATABASE_URL="$DB_URL" cargo test -p qasa-api --offline -- --include-ignored "$@" || status=$?
 
 if [ "${KEEP_DB:-0}" != "1" ]; then
   say "leaving $DB_NAME in place for the next run (it is recreated each time)"

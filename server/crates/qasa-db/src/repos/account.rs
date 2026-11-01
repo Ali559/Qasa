@@ -4,6 +4,9 @@ use uuid::Uuid;
 
 use crate::models::AccountRow;
 
+/// Create the account on first register, or return the existing row. A deleted account
+/// is returned as-is (with `deleted_at` set) so the caller can refuse it; it is never
+/// revived.
 pub async fn upsert_account(pool: &PgPool, account_id: Uuid) -> anyhow::Result<AccountRow> {
     let public_id = mask_public_id(account_id);
     let row = sqlx::query_as::<_, AccountRow>(
@@ -11,7 +14,7 @@ pub async fn upsert_account(pool: &PgPool, account_id: Uuid) -> anyhow::Result<A
         INSERT INTO accounts (id, public_id, tier)
         VALUES ($1, $2, 'free')
         ON CONFLICT (id) DO UPDATE SET updated_at = now()
-        RETURNING id, public_id, tier, created_at, updated_at
+        RETURNING id, public_id, tier, created_at, updated_at, deleted_at, blocked_at, blocked_reason
         "#,
     )
     .bind(account_id)
@@ -21,12 +24,13 @@ pub async fn upsert_account(pool: &PgPool, account_id: Uuid) -> anyhow::Result<A
     Ok(row)
 }
 
+/// A live account. Deleted accounts are treated as not existing.
 pub async fn get_account(pool: &PgPool, account_id: Uuid) -> anyhow::Result<Option<AccountRow>> {
     let row = sqlx::query_as::<_, AccountRow>(
         r#"
-        SELECT id, public_id, tier, created_at, updated_at
+        SELECT id, public_id, tier, created_at, updated_at, deleted_at, blocked_at, blocked_reason
         FROM accounts
-        WHERE id = $1
+        WHERE id = $1 AND deleted_at IS NULL
         "#,
     )
     .bind(account_id)
@@ -47,46 +51,6 @@ pub async fn set_account_tier(pool: &PgPool, account_id: Uuid, tier: &str) -> an
     .execute(pool)
     .await?;
     Ok(())
-}
-
-pub async fn set_vault_initialized(pool: &PgPool, account_id: Uuid) -> anyhow::Result<()> {
-    sqlx::query(
-        r#"
-        UPDATE accounts SET vault_initialized = true, updated_at = now()
-        WHERE id = $1 AND vault_initialized = false
-        "#,
-    )
-    .bind(account_id)
-    .execute(pool)
-    .await?;
-    Ok(())
-}
-
-pub async fn is_vault_initialized(pool: &PgPool, account_id: Uuid) -> anyhow::Result<bool> {
-    let flag: bool = sqlx::query_scalar(
-        r#"
-        SELECT COALESCE(vault_initialized, false) FROM accounts WHERE id = $1
-        "#,
-    )
-    .bind(account_id)
-    .fetch_optional(pool)
-    .await?
-    .unwrap_or(false);
-    Ok(flag)
-}
-
-pub async fn list_accounts_for_admin(pool: &PgPool) -> anyhow::Result<Vec<AccountRow>> {
-    let rows = sqlx::query_as::<_, AccountRow>(
-        r#"
-        SELECT id, public_id, tier, created_at, updated_at
-        FROM accounts
-        ORDER BY created_at DESC
-        LIMIT 200
-        "#,
-    )
-    .fetch_all(pool)
-    .await?;
-    Ok(rows)
 }
 
 pub async fn seed_admin_if_missing(

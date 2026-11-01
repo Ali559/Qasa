@@ -16,6 +16,8 @@ pub async fn expire_subscriptions(pool: &PgPool) -> anyhow::Result<u64> {
     .await?
     .rows_affected();
 
+    // `expired` marks a lapsed account for the admin dashboard; its entitlements are
+    // Free (see `qasa_core::effective_tier`), so the user keeps their primary device.
     let expired_accounts = sqlx::query(
         r#"
         UPDATE accounts a
@@ -55,35 +57,33 @@ pub async fn expire_subscriptions(pool: &PgPool) -> anyhow::Result<u64> {
     Ok(expired_subs + expired_accounts + killed_vpn)
 }
 
-pub async fn refresh_materialized_views(pool: &PgPool) -> anyhow::Result<()> {
-    // Each view is retried CONCURRENTLY first and falls back to a blocking REFRESH.
-    // Previously every call ended in `.ok()`, so a broken view, a missing unique index,
-    // or a revoked permission all failed silently and the dashboard just showed stale
-    // numbers with nothing in the logs. Report the real error instead.
-    for view in ["mv_revenue_daily", "mv_active_subscribers"] {
-        refresh_one(pool, view).await?;
-    }
-    Ok(())
+/// Close checkouts nobody finished: `pending` payments older than `older_than_minutes`
+/// become `expired`. They used to stay pending forever.
+///
+/// This only tidies state. A gateway confirmation that still arrives later is honoured
+/// (`settle_payment` settles any order that is not already paid), because the money did
+/// move.
+pub async fn expire_abandoned_payments(pool: &PgPool, older_than_minutes: i32) -> anyhow::Result<u64> {
+    let result = sqlx::query(
+        r#"
+        UPDATE payments
+        SET status = 'expired', completed_at = now()
+        WHERE status = 'pending'
+          AND created_at < now() - make_interval(mins => $1)
+        "#,
+    )
+    .bind(older_than_minutes)
+    .execute(pool)
+    .await?;
+    Ok(result.rows_affected())
 }
 
-async fn refresh_one(pool: &PgPool, view: &str) -> anyhow::Result<()> {
-    let concurrent = sqlx::query(&format!("REFRESH MATERIALIZED VIEW CONCURRENTLY {view}"))
+/// Logged-out admin tokens only need remembering until they would have expired anyway.
+pub async fn purge_expired_admin_token_revocations(pool: &PgPool) -> anyhow::Result<u64> {
+    let result = sqlx::query("DELETE FROM admin_token_revocations WHERE expires_at < now()")
         .execute(pool)
-        .await;
-    match concurrent {
-        Ok(_) => return Ok(()),
-        Err(err) => {
-            // CONCURRENTLY needs a unique index; on the very first run it does not exist.
-            let blocking = sqlx::query(&format!("REFRESH MATERIALIZED VIEW {view}"))
-                .execute(pool)
-                .await;
-            if let Err(fallback_err) = blocking {
-                anyhow::bail!("failed to refresh {view}: {fallback_err} (concurrent attempt: {err})");
-            }
-            tracing::debug!(view, error = %err, "refreshed without CONCURRENTLY");
-        }
-    }
-    Ok(())
+        .await?;
+    Ok(result.rows_affected())
 }
 
 pub async fn purge_old_license_revocations(pool: &PgPool, days: i32) -> anyhow::Result<u64> {
@@ -99,52 +99,73 @@ pub async fn purge_old_license_revocations(pool: &PgPool, days: i32) -> anyhow::
     Ok(result.rows_affected())
 }
 
-pub async fn disconnect_stale_vpn_sessions(pool: &PgPool, stale_minutes: i32) -> anyhow::Result<u64> {
-    let stale = sqlx::query_as::<_, (uuid::Uuid, uuid::Uuid)>(
+/// End sessions the node no longer sees: no WireGuard handshake for
+/// `handshake_minutes`, or none at all `grace_minutes` after connecting (the device took
+/// the config but never brought the tunnel up). WireGuard re-handshakes about every two
+/// minutes while a tunnel is up, so a stale handshake means it is gone.
+///
+/// This replaces a check on `connected_at` alone, which ended every session five
+/// minutes after it started, however much it was in use.
+pub async fn disconnect_stale_vpn_sessions(
+    pool: &PgPool,
+    handshake_minutes: i32,
+    grace_minutes: i32,
+) -> anyhow::Result<u64> {
+    let mut tx = pool.begin().await?;
+    let nodes: Vec<uuid::Uuid> = sqlx::query_scalar(
         r#"
-        SELECT id, node_id
-        FROM vpn_sessions
+        UPDATE vpn_sessions SET disconnected_at = now()
         WHERE disconnected_at IS NULL
-          AND connected_at < now() - make_interval(mins => $1)
+          AND (
+            last_handshake_at < now() - make_interval(mins => $1)
+            OR (last_handshake_at IS NULL AND connected_at < now() - make_interval(mins => $2))
+          )
+        RETURNING node_id
         "#,
     )
-    .bind(stale_minutes)
-    .fetch_all(pool)
+    .bind(handshake_minutes)
+    .bind(grace_minutes)
+    .fetch_all(&mut *tx)
     .await?;
-
-    let mut disconnected = 0u64;
-    for (session_id, node_id) in stale {
-        let updated = sqlx::query(
+    if !nodes.is_empty() {
+        sqlx::query(
             r#"
-            UPDATE vpn_sessions SET disconnected_at = now()
-            WHERE id = $1 AND disconnected_at IS NULL
+            UPDATE vpn_nodes n SET active_peers = (
+                SELECT COUNT(*) FROM vpn_sessions s
+                WHERE s.node_id = n.id AND s.disconnected_at IS NULL
+            )
+            WHERE n.id = ANY($1)
             "#,
         )
-        .bind(session_id)
-        .execute(pool)
+        .bind(&nodes)
+        .execute(&mut *tx)
         .await?;
-
-        if updated.rows_affected() > 0 {
-            sqlx::query(
-                r#"
-                UPDATE vpn_nodes
-                SET active_peers = GREATEST(active_peers - 1, 0)
-                WHERE id = $1
-                "#,
-            )
-            .bind(node_id)
-            .execute(pool)
-            .await?;
-            disconnected += 1;
-        }
     }
-    Ok(disconnected)
+    tx.commit().await?;
+    Ok(nodes.len() as u64)
 }
 
+/// Nodes whose agent has not reported for `stale_secs` stop taking peers. A heartbeat
+/// brings them back; drained and retired nodes keep their status.
+pub async fn mark_offline_nodes(pool: &PgPool, stale_secs: i32) -> anyhow::Result<u64> {
+    let n = sqlx::query(
+        r#"
+        UPDATE vpn_nodes SET status = 'offline'
+        WHERE status IN ('online', 'warn')
+          AND (last_heartbeat IS NULL OR last_heartbeat < now() - make_interval(secs => $1))
+        "#,
+    )
+    .bind(stale_secs as f64)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(n)
+}
 pub async fn pending_webhook_retries(pool: &PgPool, max_retries: i32) -> anyhow::Result<Vec<WebhookRetryRow>> {
     let rows = sqlx::query_as::<_, WebhookRetryRow>(
         r#"
-        SELECT id, gateway, gateway_order_id, payload, retry_count
+        SELECT id, gateway, gateway_order_id, payload, retry_count,
+               event_status, reported_amount_iqd
         FROM webhook_events
         WHERE processed = false
           AND signature_valid = true
@@ -158,14 +179,6 @@ pub async fn pending_webhook_retries(pool: &PgPool, max_retries: i32) -> anyhow:
     .fetch_all(pool)
     .await?;
     Ok(rows)
-}
-
-pub async fn mark_webhook_processed(pool: &PgPool, id: uuid::Uuid) -> anyhow::Result<()> {
-    sqlx::query("UPDATE webhook_events SET processed = true WHERE id = $1")
-        .bind(id)
-        .execute(pool)
-        .await?;
-    Ok(())
 }
 
 pub async fn increment_webhook_retry(pool: &PgPool, id: uuid::Uuid, error: &str) -> anyhow::Result<()> {
@@ -190,6 +203,8 @@ pub struct WebhookRetryRow {
     pub gateway_order_id: Option<String>,
     pub payload: serde_json::Value,
     pub retry_count: i32,
+    pub event_status: Option<String>,
+    pub reported_amount_iqd: Option<i32>,
 }
 
 pub async fn telemetry_snapshot(pool: &PgPool) -> anyhow::Result<TelemetrySnapshot> {
@@ -201,7 +216,7 @@ pub async fn telemetry_snapshot(pool: &PgPool) -> anyhow::Result<TelemetrySnapsh
     .fetch_one(pool)
     .await?;
 
-    let accounts_total: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM accounts")
+    let accounts_total: i64 = sqlx::query_scalar("SELECT COUNT(*)::bigint FROM accounts WHERE deleted_at IS NULL")
         .fetch_one(pool)
         .await?;
 
@@ -233,14 +248,18 @@ pub struct ExpiringSubRow {
     pub expires_at: DateTime<Utc>,
 }
 
-/// Premium ending in 2–3 days with auto_renew off (once).
-pub async fn subs_needing_expiry_warning(pool: &PgPool) -> anyhow::Result<Vec<ExpiringSubRow>> {
+/// Premium ending within 3 days, warned once. Auto-renew subscriptions are included only
+/// when `include_auto_renew` (i.e. while renewals are not charged automatically).
+pub async fn subs_needing_expiry_warning(
+    pool: &PgPool,
+    include_auto_renew: bool,
+) -> anyhow::Result<Vec<ExpiringSubRow>> {
     let rows = sqlx::query_as::<_, ExpiringSubRow>(
         r#"
         SELECT id, account_id, auto_renew, expires_at
         FROM subscriptions
         WHERE status IN ('active', 'cancelled')
-          AND auto_renew = false
+          AND (auto_renew = false OR $1)
           AND expiry_warned_at IS NULL
           AND expires_at > now()
           AND expires_at <= now() + interval '3 days'
@@ -248,6 +267,7 @@ pub async fn subs_needing_expiry_warning(pool: &PgPool) -> anyhow::Result<Vec<Ex
         LIMIT 200
         "#,
     )
+    .bind(include_auto_renew)
     .fetch_all(pool)
     .await?;
     Ok(rows)

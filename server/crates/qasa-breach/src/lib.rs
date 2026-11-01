@@ -2,11 +2,9 @@ use thiserror::Error;
 
 pub mod ingest;
 pub mod prefix;
-pub mod rate_limit;
 
 pub use ingest::{parse_hash_line, split_hash};
 pub use prefix::{normalize_prefix, PrefixError};
-pub use rate_limit::{RateLimitError, RateLimiter};
 
 /// A candidate hash suffix returned for k-anonymity lookup.
 #[derive(Debug, Clone, serde::Serialize)]
@@ -19,6 +17,4 @@ pub struct BreachCandidate {
 pub enum BreachError {
     #[error("invalid prefix: {0}")]
     InvalidPrefix(#[from] PrefixError),
-    #[error("rate limit exceeded")]
-    RateLimited(#[from] RateLimitError),
 }
