@@ -34,7 +34,7 @@ isProject: false
 
 # iOS ↔ Android Parity v2
 
-Paths: `I/` = `qasa/qasa_ios/`, `A/` = `qasa_android/app/src/main/java/alibarznji/qasa/`.
+Paths: `I/` = `apps/ios/qasa_ios/`, `A/` = `apps/android/app/src/main/java/alibarznji/qasa/`.
 
 ## What the earlier plans got right / wrong
 

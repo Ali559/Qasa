@@ -4,7 +4,7 @@ import Foundation
 import Security
 
 /// Must stay byte-for-byte equivalent to the extension's `SharedMasterKeyDeriver`
-/// (`qasa/SharedAutofill/SharedMasterKeyDeriver.swift`). A divergence in the KDF
+/// (`apps/ios/SharedAutofill/SharedMasterKeyDeriver.swift`). A divergence in the KDF
 /// parameters makes the credential provider derive a different root key than the app,
 /// which breaks autofill for every user while the main app keeps working — silently.
 enum MasterKeyDeriver {

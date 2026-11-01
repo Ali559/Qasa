@@ -52,7 +52,7 @@ isProject: false
 
 # Server-dependent follow-ups
 
-Decisions here come from the product owner on 2026-11-01. Client paths: `I/` = `qasa/qasa_ios/`, `A/` = `qasa_android/app/src/main/java/alibarznji/qasa/`. Server: `server/crates/`.
+Decisions here come from the product owner on 2026-11-01. Client paths: `I/` = `apps/ios/qasa_ios/`, `A/` = `apps/android/app/src/main/java/alibarznji/qasa/`. Server: `server/crates/`.
 
 ## 1. LAN pairing with Argon2 (Rust)
 
@@ -559,7 +559,7 @@ Migration `20261101000005_ops_hygiene.sql`.
 
 ### Dashboard wiring — done 2026-11-01
 
-All the admin endpoints from sections 6–8 are now used by `dashboard/`.
+All the admin endpoints from sections 6–8 are now used by `apps/dashboard/`.
 
 **What changed:**
 - **Session:** role and email are stored at login. Logout calls the endpoint. A 401 sends the user back to login, and the error messages explain 403 (read-only) and 429.

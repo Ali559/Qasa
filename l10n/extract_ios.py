@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "qasa/qasa_ios/Resources/Localizable.xcstrings"
+SRC = ROOT / "apps/ios/qasa_ios/Resources/Localizable.xcstrings"
 DEST = Path(__file__).resolve().parent / "strings.json"
 KEYISH = re.compile(r"^[a-z][a-zA-Z0-9]*(\.[a-z][a-zA-Z0-9]*)+$")
 LANGS = ("en", "ar", "ckb")

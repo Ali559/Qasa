@@ -1,10 +1,10 @@
 # Qasa — Design System & Platform Parity Spec
 
 Normative reference for the Qasa visual design system **and** the behavioural contract that
-`qasa_android/` must satisfy. Companion to `architecture.md` (what exists) and
+`apps/android/` must satisfy. Companion to `architecture.md` (what exists) and
 `application-flow.md` (what happens).
 
-**Source of truth: the iOS app.** `qasa/qasa_ios/` defines every token, every component
+**Source of truth: the iOS app.** `apps/ios/qasa_ios/` defines every token, every component
 recipe, and every product behaviour. Android is a port, not a reinterpretation. When this
 document and the iOS code disagree, the iOS code wins and this document is the bug.
 

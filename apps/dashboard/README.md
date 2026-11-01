@@ -22,7 +22,7 @@ Vue 3 + TypeScript admin dashboard with **shadcn-vue** (Nova style), dark emeral
 ## Develop
 
 ```bash
-cd dashboard
+cd apps/dashboard
 bun install
 bun run dev
 ```

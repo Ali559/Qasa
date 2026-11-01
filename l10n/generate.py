@@ -14,10 +14,10 @@ ROOT = Path(__file__).resolve().parent.parent
 L10N = Path(__file__).resolve().parent
 LANGS = ("en", "ar", "ckb")
 
-IOS_MAIN = ROOT / "qasa/qasa_ios/Resources/Localizable.xcstrings"
-IOS_CREDENTIAL = ROOT / "qasa/QasaCredentialProvider/Localizable.xcstrings"
-IOS_PAYMENT = ROOT / "qasa/QasaPaymentNotification/Localizable.xcstrings"
-ANDROID_RES = ROOT / "qasa_android/app/src/main/res"
+IOS_MAIN = ROOT / "apps/ios/qasa_ios/Resources/Localizable.xcstrings"
+IOS_CREDENTIAL = ROOT / "apps/ios/QasaCredentialProvider/Localizable.xcstrings"
+IOS_PAYMENT = ROOT / "apps/ios/QasaPaymentNotification/Localizable.xcstrings"
+ANDROID_RES = ROOT / "apps/android/app/src/main/res"
 
 CREDENTIAL_KEYS = [
     "auth.unlock.placeholder",

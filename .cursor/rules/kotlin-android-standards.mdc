@@ -1,6 +1,6 @@
 ---
-description: Kotlin / Compose coding standards, size caps, and principles for qasa_android
-globs: qasa_android/**/*.kt
+description: Kotlin / Compose coding standards, size caps, and principles for apps/android
+globs: apps/android/**/*.kt
 alwaysApply: false
 ---
 

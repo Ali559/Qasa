@@ -12,10 +12,10 @@ python3 l10n/generate.py
 ```
 
 3. Do **not** hand-edit generated files:
-   - `qasa/qasa_ios/Resources/Localizable.xcstrings`
-   - `qasa/QasaCredentialProvider/Localizable.xcstrings`
-   - `qasa/QasaPaymentNotification/Localizable.xcstrings`
-   - `qasa_android/app/src/main/res/values*/strings.xml`
+   - `apps/ios/qasa_ios/Resources/Localizable.xcstrings`
+   - `apps/ios/QasaCredentialProvider/Localizable.xcstrings`
+   - `apps/ios/QasaPaymentNotification/Localizable.xcstrings`
+   - `apps/android/app/src/main/res/values*/strings.xml`
 
 ## Keys
 

@@ -6,7 +6,7 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd dashboard && VITE_QASA_API_URL= bunx vite --port 5179 --strictPort"
+        "cd apps/dashboard && VITE_QASA_API_URL= bunx vite --port 5179 --strictPort"
       ],
       "port": 5179
     },
@@ -15,7 +15,7 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd dashboard && VITE_QASA_API_URL=http://127.0.0.1:8099 bunx vite --port 5181 --strictPort"
+        "cd apps/dashboard && VITE_QASA_API_URL=http://127.0.0.1:8099 bunx vite --port 5181 --strictPort"
       ],
       "port": 5181
     },

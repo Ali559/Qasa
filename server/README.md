@@ -217,7 +217,7 @@ QASA_ENV=prod cargo run -p qasa-worker
 ## Dashboard (live API)
 
 ```bash
-cd dashboard
+cd apps/dashboard
 cp .env.example .env   # VITE_QASA_API_URL=http://localhost:8080
 bun run dev
 ```

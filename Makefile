@@ -1,6 +1,6 @@
 # Qasa local development helpers
 #
-#   make up        # start Postgres + Redis
+#   make up        # start Postgres
 #   make api       # run API locally (cargo)
 #   make dev       # up + api
 #   make down      # stop containers
@@ -10,7 +10,7 @@
 SHELL := /bin/bash
 ROOT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 SERVER := $(ROOT)/server
-ANDROID := $(ROOT)/qasa_android
+ANDROID := $(ROOT)/apps/android
 COMPOSE := docker compose -f $(SERVER)/docker/docker-compose.yml
 API_URL ?= http://127.0.0.1:8080
 
@@ -19,7 +19,7 @@ API_URL ?= http://127.0.0.1:8080
 help:
 	@echo "Qasa local commands"
 	@echo ""
-	@echo "  make up       Start Postgres + Redis (Docker)"
+	@echo "  make up       Start Postgres (Docker)"
 	@echo "  make down     Stop Docker services"
 	@echo "  make logs     Tail Docker logs"
 	@echo "  make env      Ensure server/.env exists (from .env.example)"
@@ -34,7 +34,7 @@ help:
 
 up:
 	$(COMPOSE) up -d
-	@echo "Postgres → localhost:5432  Redis → localhost:6379"
+	@echo "Postgres → localhost:$${QASA_POSTGRES_PORT:-5433}"
 
 down:
 	$(COMPOSE) down
@@ -79,7 +79,7 @@ worker: env
 	cd $(SERVER) && cargo run -p qasa-worker
 
 dash:
-	cd $(ROOT)/dashboard && bun run dev
+	cd $(ROOT)/apps/dashboard && bun run dev
 
 clean:
 	$(COMPOSE) down -v
