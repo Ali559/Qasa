@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LegalPlaceholderView: View {
     let title: String
-    var onOpenMenu: () -> Void
+    var onOpenMenu: (() -> Void)? = nil
     let bodyText: String
 
     /// Placeholder publish date for legal copy until real docs ship.

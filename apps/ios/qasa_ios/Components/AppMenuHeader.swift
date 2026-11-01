@@ -4,21 +4,15 @@ struct AppMenuHeader: View {
     @Environment(\.themePalette) private var theme
     @Environment(AppPreferences.self) private var prefs
     var title: String
-    var onMenu: () -> Void
+    /// Back action for pages opened on top of a tab; tab roots pass `nil` and show no button.
+    var onMenu: (() -> Void)?
     var trailing: AnyView? = nil
 
     var body: some View {
         HStack(spacing: 12) {
-            Button(action: onMenu) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(theme.textPrimary)
-                    .frame(width: 40, height: 40)
-                    .background(theme.cardBackground)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(theme.strokeChrome, lineWidth: 1))
+            if let onMenu {
+                HeaderBackButton(action: onMenu)
             }
-            .accessibilityLabel(L10n.tr("nav.openMenu", locale: prefs.locale))
 
             Text(title)
                 .font(.qasa(20, weight: .bold))
@@ -31,40 +25,32 @@ struct AppMenuHeader: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 64)
+        // No divider: the calm redesign lets the header sit on the page background.
         .background(theme.chrome)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(theme.strokeChrome).frame(height: 1)
-        }
     }
 }
 
 struct BrandMenuHeader: View {
     @Environment(\.themePalette) private var theme
     @Environment(AppPreferences.self) private var prefs
-    var onMenu: () -> Void
+    /// Back action for pages opened on top of a tab; tab roots pass `nil` and show no button.
+    var onMenu: (() -> Void)?
     var trailing: AnyView? = nil
     var titleSize: CGFloat = 20
 
     var body: some View {
         HStack(spacing: 12) {
-            Button(action: onMenu) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(theme.textPrimary)
-                    .frame(width: 40, height: 40)
-                    .background(theme.cardBackground)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(theme.strokeChrome, lineWidth: 1))
+            if let onMenu {
+                HeaderBackButton(action: onMenu)
             }
-            .accessibilityLabel(L10n.tr("nav.openMenu", locale: prefs.locale))
 
             HStack(spacing: 10) {
                 Image(systemName: "shield.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(theme.mint)
+                    .font(.qasa(16, weight: .semibold))
+                    .foregroundColor(theme.accent)
                 Text(L10n.tr("brand.name", locale: prefs.locale))
                     .font(.system(size: titleSize, weight: .heavy))
-                    .foregroundColor(theme.mint)
+                    .foregroundColor(theme.accent)
             }
 
             Spacer(minLength: 8)
@@ -73,9 +59,27 @@ struct BrandMenuHeader: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 64)
+        // No divider: the calm redesign lets the header sit on the page background.
         .background(theme.chrome)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(theme.strokeChrome).frame(height: 1)
+    }
+}
+
+/// 40pt circle with a back chevron. The side menu became bottom tabs, so pages one level
+/// below a tab get this instead of the menu button; the chevron flips in RTL.
+private struct HeaderBackButton: View {
+    @Environment(\.themePalette) private var theme
+    @Environment(AppPreferences.self) private var prefs
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "chevron.backward")
+                .font(.qasa(17, weight: .semibold))
+                .foregroundColor(theme.textPrimary)
+                .frame(width: 40, height: 40)
+                .background(theme.cardBackground)
+                .clipShape(Circle())
         }
+        .accessibilityLabel(L10n.tr("common.back", locale: prefs.locale))
     }
 }

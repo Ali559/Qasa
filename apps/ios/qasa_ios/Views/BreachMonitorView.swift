@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct BreachMonitorView: View {
-    var onOpenMenu: () -> Void = {}
+    var onOpenMenu: (() -> Void)? = nil
     var onUpgrade: () -> Void = {}
 
     @Environment(AppSession.self) private var session
@@ -73,7 +73,7 @@ struct BreachMonitorView: View {
     private var premiumGate: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(L10n.tr("breach.upgradeHint"))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
             PrimaryButton(title: L10n.tr("settings.upgradePremium"), icon: "star.fill") {
                 onUpgrade()
@@ -94,12 +94,12 @@ struct BreachMonitorView: View {
                 breachList
                 if let statusMessage {
                     Text(statusMessage)
-                        .font(.system(size: 13))
+                        .font(.qasa(13))
                         .foregroundColor(Theme.success)
                 }
                 if let errorMessage {
                     Text(errorMessage)
-                        .font(.system(size: 13))
+                        .font(.qasa(13))
                         .foregroundColor(Theme.danger)
                 }
             }
@@ -151,7 +151,7 @@ struct BreachMonitorView: View {
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
                         .foregroundColor(Theme.textPrimary)
-                        .tint(Theme.mint)
+                        .tint(Theme.accent)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
@@ -180,7 +180,7 @@ struct BreachMonitorView: View {
             SectionLabel(text: L10n.tr("breach.monitoredEmails"))
             if monitored.isEmpty {
                 Text(L10n.tr("breach.noneMonitored"))
-                    .font(.system(size: 14))
+                    .font(.qasa(14))
                     .foregroundColor(Theme.textSecondary)
                     .padding(.vertical, 8)
             } else {
@@ -195,10 +195,10 @@ struct BreachMonitorView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.email)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(item.status.title)
-                    .font(.system(size: 13))
+                    .font(.qasa(13))
                     .foregroundColor(item.status == .secure ? Theme.success : Theme.danger)
             }
             Spacer()
@@ -206,7 +206,7 @@ struct BreachMonitorView: View {
                 pendingRemoval = item
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.qasa(12, weight: .bold))
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 32, height: 32)
                     .background(Theme.chrome)
@@ -240,13 +240,13 @@ struct BreachMonitorView: View {
             selectedTab = status
         } label: {
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(selected ? Theme.mintOnPrimary : Theme.textSecondary)
+                .font(.qasa(14, weight: .semibold))
+                .foregroundColor(selected ? Theme.onAccent : Theme.textSecondary)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(selected ? Theme.mint : Theme.cardBackground)
+                .background(selected ? Theme.accent : Theme.cardBackground)
                 .clipShape(Capsule())
-                .overlay(Capsule().stroke(selected ? Theme.mint : Theme.stroke, lineWidth: 1))
+                .overlay(Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }
@@ -255,7 +255,7 @@ struct BreachMonitorView: View {
         VStack(alignment: .leading, spacing: 12) {
             if filteredResults.isEmpty {
                 Text(selectedTab == .unresolved ? L10n.tr("breach.noUnresolved") : L10n.tr("breach.noResolved"))
-                    .font(.system(size: 14))
+                    .font(.qasa(14))
                     .foregroundColor(Theme.textSecondary)
             } else {
                 ForEach(filteredResults, id: \.email) { result in

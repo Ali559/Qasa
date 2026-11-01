@@ -2,9 +2,9 @@ import SwiftUI
 import SwiftData
 
 struct VaultListView: View {
-    var onOpenMenu: () -> Void
+    var onOpenMenu: (() -> Void)? = nil
 
-    init(onOpenMenu: @escaping () -> Void = {}) {
+    init(onOpenMenu: (() -> Void)? = nil) {
         self.onOpenMenu = onOpenMenu
     }
 
@@ -49,7 +49,7 @@ struct VaultListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
-                BrandMenuHeader(onMenu: onOpenMenu, titleSize: 20)
+                AppMenuHeader(title: L10n.tr("vault.titleYours", locale: prefs.locale), onMenu: onOpenMenu)
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -134,7 +134,7 @@ struct VaultListView: View {
                 .font(.qasa(16))
                 .multilineTextAlignment(.leading)
                 .foregroundColor(Theme.textPrimary)
-                .tint(Theme.mint)
+                .tint(Theme.accent)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

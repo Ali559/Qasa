@@ -163,7 +163,7 @@ struct PricingResponse: Decodable {
     let plans: [PricingPlanDTO]
 }
 
-struct AppNotificationDTO: Decodable, Identifiable {
+nonisolated struct AppNotificationDTO: Decodable, Identifiable, Sendable {
     let id: String
     let title_en: String
     let title_ckb: String?
@@ -172,7 +172,8 @@ struct AppNotificationDTO: Decodable, Identifiable {
     let body_ckb: String?
     let body_ar: String?
     let created_at: String
-    let read_at: String?
+    /// `var` so Mark All Read / open can update the row before the server answers.
+    var read_at: String?
 
     func title(locale: String) -> String {
         switch locale {
@@ -191,11 +192,26 @@ struct AppNotificationDTO: Decodable, Identifiable {
     }
 }
 
-struct NotificationsListResponse: Decodable {
+/// `GET /v1/notifications`: newest first. `next_before` is nil on the last page.
+nonisolated struct NotificationsListResponse: Decodable, Sendable {
     let notifications: [AppNotificationDTO]
+    let unread_count: Int?
+    let next_before: String?
 }
 
-struct NotificationDetailResponse: Decodable {
+/// `GET /v1/notifications/unread-count`.
+nonisolated struct NotificationsUnreadCountResponse: Decodable, Sendable {
+    let unread_count: Int
+}
+
+/// `POST /v1/notifications/{id}/read` and `POST /v1/notifications/read-all`.
+nonisolated struct NotificationsReadResponse: Decodable, Sendable {
+    let ok: Bool?
+    let unread_count: Int?
+    let marked: Int?
+}
+
+nonisolated struct NotificationDetailResponse: Decodable, Sendable {
     let notification: AppNotificationDTO
 }
 

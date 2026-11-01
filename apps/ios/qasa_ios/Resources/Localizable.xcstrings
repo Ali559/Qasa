@@ -138,19 +138,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Remove %1$s from breach monitoring"
+            "value": "Stop watching %1$@ for leaks"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إزالة %1$s من مراقبة الاختراقات"
+            "value": "إيقاف متابعة %1$@ بحثًا عن تسريبات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "لابردنی %1$s لە چاودێری تێکشک"
+            "value": "چیتر %1$@ بۆ دزە سەیر مەکە"
           }
         }
       }
@@ -248,19 +248,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Already have a vault? Unlock"
+            "value": "I already use Qasa"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "هل لديك خزنة بالفعل؟ افتح"
+            "value": "أستخدم Qasa بالفعل"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پێشتر کۆگات هەیە؟ بکەرەوە"
+            "value": "پێشتر Qasa بەکاردەهێنم"
           }
         }
       }
@@ -270,19 +270,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enable Biometric Unlock"
+            "value": "Unlock with your fingerprint or face"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تفعيل الفتح بالبيانات الحيوية"
+            "value": "الفتح ببصمة الإصبع أو الوجه"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چالاککردنی کردنەوەی بایۆمەتریک"
+            "value": "کردنەوە بە پەنجەمۆر یان ڕوخسار"
           }
         }
       }
@@ -292,19 +292,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Use Face ID or Fingerprint"
+            "value": "Open Qasa without typing your password"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "استخدم Face ID أو بصمة الإصبع"
+            "value": "افتح Qasa دون كتابة كلمة المرور"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Face ID یان پەنجەمۆر بەکاربهێنە"
+            "value": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
           }
         }
       }
@@ -314,19 +314,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create Vault"
+            "value": "Get started"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إنشاء الخزنة"
+            "value": "ابدأ"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دروستکردنی کۆگا"
+            "value": "دەستپێبکە"
           }
         }
       }
@@ -336,19 +336,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create Local Vault"
+            "value": "Get started"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إنشاء خزنة محلية"
+            "value": "ابدأ"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دروستکردنی کۆگای ناوخۆیی"
+            "value": "دەستپێبکە"
           }
         }
       }
@@ -358,19 +358,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Confirm Password"
+            "value": "Type it again"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تأكيد كلمة المرور"
+            "value": "اكتبها مرة أخرى"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دڵنیاکردنەوەی وشەی نهێنی"
+            "value": "دووبارە بینووسەوە"
           }
         }
       }
@@ -380,19 +380,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enable Biometrics"
+            "value": "Use fingerprint or face"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تفعيل البيانات الحيوية"
+            "value": "استخدم البصمة أو الوجه"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چالاککردنی بایۆمەتریک"
+            "value": "پەنجەمۆر یان ڕوخسار بەکاربهێنە"
           }
         }
       }
@@ -402,7 +402,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter a master password."
+            "value": "Enter a main password."
           }
         },
         "ar": {
@@ -556,19 +556,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Set a master password to secure your local vault. This is the only key."
+            "value": "This one password opens all your other passwords. Pick something you'll remember."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "عيّن كلمة مرور رئيسية لتأمين خزنتك المحلية. هذا هو المفتاح الوحيد."
+            "value": "كلمة المرور هذه تفتح جميع كلمات مرورك الأخرى. اختر شيئًا ستتذكره."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەیەکی نهێنی سەرەکی دابنێ بۆ پاراستنی کۆگای ناوخۆیی. ئەمە تەنها کلیلیە."
+            "value": "ئەم یەک وشە نهێنییە هەموو وشە نهێنییەکانی ترت دەکاتەوە. شتێک هەڵبژێرە کە لەبیرت بمێنێت."
           }
         }
       }
@@ -578,19 +578,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create Vault"
+            "value": "Choose your main password"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إنشاء خزنة"
+            "value": "اختر كلمة مرورك الرئيسية"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دروستکردنی کۆگا"
+            "value": "وشەی نهێنی سەرەکیت هەڵبژێرە"
           }
         }
       }
@@ -622,19 +622,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zero-Knowledge"
+            "value": "Only you can see your passwords"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "معرفة صفرية"
+            "value": "أنت وحدك من يرى كلمات مرورك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زانینی سفر"
+            "value": "تەنها تۆ دەتوانیت وشە نهێنییەکانت ببینیت"
           }
         }
       }
@@ -644,19 +644,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your master password cannot be recovered by anyone—not even Qasa. If you lose it, your vault data is permanently inaccessible."
+            "value": "Not even Qasa can see them or reset your main password. If you forget it, your saved passwords can't be recovered."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا يمكن لأي شخص استعادة كلمة المرور الرئيسية—ولا حتى Qasa. إذا فقدتها، تصبح بيانات الخزنة غير قابلة للوصول نهائيًا."
+            "value": "حتى Qasa لا يمكنه رؤيتها أو إعادة تعيين كلمة مرورك الرئيسية. إذا نسيتها، لا يمكن استعادة كلمات المرور المحفوظة."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکیت لەلایەن کەسێکەوە ناگەڕێتەوە—تەنانەت Qasa. ئەگەر لەدەستی بدەیت، داتای کۆگا بۆ هەمیشە لەدەست دەچێت."
+            "value": "تەنانەت Qasa ناتوانێت بیانبینێت یان وشەی نهێنی سەرەکیت ڕێکبخاتەوە. ئەگەر لەبیرت چوو، وشە نهێنییە پاشەکەوتکراوەکانت ناگەڕێنەوە."
           }
         }
       }
@@ -666,19 +666,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Securing vault…"
+            "value": "Getting things ready…"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تأمين الخزنة…"
+            "value": "جارٍ التجهيز…"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پاراستنی کۆگا…"
+            "value": "ئامادەکردن…"
           }
         }
       }
@@ -688,19 +688,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock with Biometrics"
+            "value": "Use fingerprint or face"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فتح بالبيانات الحيوية"
+            "value": "استخدم البصمة أو الوجه"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوە بە بایۆمەتریک"
+            "value": "پەنجەمۆر یان ڕوخسار بەکاربهێنە"
           }
         }
       }
@@ -710,19 +710,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Biometric unlock failed. Enter your master password."
+            "value": "That didn't work. Enter your main password instead."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فشل الفتح بالبيانات الحيوية. أدخل كلمة المرور الرئيسية."
+            "value": "لم ينجح ذلك. أدخل كلمة مرورك الرئيسية بدلًا من ذلك."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی بایۆمەتریک سەرنەکەوت. وشەی نهێنی سەرەکی بنووسە."
+            "value": "سەرکەوتوو نەبوو. لەبری ئەوە وشەی نهێنی سەرەکیت بنووسە."
           }
         }
       }
@@ -732,19 +732,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Face ID or Fingerprint"
+            "value": "Open Qasa without typing your password"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Face ID أو بصمة الإصبع"
+            "value": "افتح Qasa دون كتابة كلمة المرور"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Face ID یان پەنجەمۆر"
+            "value": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
           }
         }
       }
@@ -776,19 +776,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enable biometrics when creating your vault."
+            "value": "You can turn on fingerprint or face unlock in Settings."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فعّل البيانات الحيوية عند إنشاء خزنتك."
+            "value": "يمكنك تفعيل الفتح بالبصمة أو الوجه من الإعدادات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بایۆمەتریک چالاک بکە کاتێک کۆگا دروست دەکەیت."
+            "value": "دەتوانیت کردنەوە بە پەنجەمۆر یان ڕوخسار لە ڕێکخستنەکان چالاک بکەیت."
           }
         }
       }
@@ -798,19 +798,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Local unlock only"
+            "value": "Private to you"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فتح محلي فقط"
+            "value": "خاصة بك وحدك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی ناوخۆیی تەنها"
+            "value": "تەنها بۆ تۆ"
           }
         }
       }
@@ -820,19 +820,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your vault never leaves this device. Qasa cannot reset or recover your master password."
+            "value": "Your passwords stay on this phone. Qasa can't reset your main password."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "خزنتك لا تغادر هذا الجهاز أبدًا. لا يمكن لـ Qasa إعادة تعيين أو استعادة كلمة المرور الرئيسية."
+            "value": "تبقى كلمات مرورك على هذا الهاتف. لا يمكن لـ Qasa إعادة تعيين كلمة مرورك الرئيسية."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆگاکەت هەرگیز ئەم ئامێرە جێناهێڵێت. Qasa ناتوانێت وشەی نهێنی سەرەکی بگەڕێنێتەوە."
+            "value": "وشە نهێنییەکانت لەسەر ئەم مۆبایلە دەمێننەوە. Qasa ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە."
           }
         }
       }
@@ -842,7 +842,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Master Password"
+            "value": "Main password"
           }
         },
         "ar": {
@@ -886,19 +886,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enter your master password to access your local vault."
+            "value": "Enter your main password to see your passwords."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "أدخل كلمة المرور الرئيسية للوصول إلى خزنتك المحلية."
+            "value": "أدخل كلمة مرورك الرئيسية لرؤية كلمات مرورك."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکی بنووسە بۆ دەستگەیشتن بە کۆگای ناوخۆیی."
+            "value": "وشەی نهێنی سەرەکیت بنووسە بۆ بینینی وشە نهێنییەکانت."
           }
         }
       }
@@ -908,19 +908,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock Vault"
+            "value": "Welcome back"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فتح الخزنة"
+            "value": "مرحبًا بعودتك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی کۆگا"
+            "value": "بەخێربێیتەوە"
           }
         }
       }
@@ -930,19 +930,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Incorrect master password."
+            "value": "That's not the right main password. Try again."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "كلمة المرور الرئيسية غير صحيحة."
+            "value": "كلمة المرور الرئيسية غير صحيحة. حاول مرة أخرى."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکی هەڵەیە."
+            "value": "ئەوە وشەی نهێنی سەرەکی دروست نییە. دووبارە هەوڵبدەرەوە."
           }
         }
       }
@@ -1216,19 +1216,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Try searching all vault items."
+            "value": "Try searching all your passwords."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "جرّب البحث في كل عناصر الخزنة."
+            "value": "جرّب البحث في جميع كلمات مرورك."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هەموو ئایتمەکانی قەڵا بگەڕێ."
+            "value": "لە هەموو وشە نهێنییەکانت بگەڕێ."
           }
         }
       }
@@ -1304,19 +1304,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock vault"
+            "value": "Unlock Qasa"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فتح الخزنة"
+            "value": "افتح Qasa"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی قەڵا"
+            "value": "Qasa بکەرەوە"
           }
         }
       }
@@ -1370,7 +1370,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wrong master password."
+            "value": "That's not the right main password."
           }
         },
         "ar": {
@@ -1382,7 +1382,7 @@
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکی هەڵەیە."
+            "value": "ئەوە وشەی نهێنی سەرەکی دروست نییە."
           }
         }
       }
@@ -1392,19 +1392,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "100% Local & Offline"
+            "value": "Stays on this phone"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "محلي بالكامل وغير متصل"
+            "value": "تبقى على هذا الهاتف"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "١٠٠٪ ناوخۆیی و دەرهێڵ"
+            "value": "لەسەر ئەم مۆبایلە دەمێنێتەوە"
           }
         }
       }
@@ -1480,19 +1480,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add to Monitoring"
+            "value": "Watch this email"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إضافة للمراقبة"
+            "value": "تابع هذا البريد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زیادکردن بۆ چاوەدێری"
+            "value": "ئەم ئیمەیڵە بپشکنە"
           }
         }
       }
@@ -1524,19 +1524,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld monitored addresses found in known breaches."
+            "value": "%lld of your emails showed up in data leaks."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تم العثور على %lld عناوين مراقبة في تسريبات معروفة."
+            "value": "ظهر %lld من بريدك في تسريبات بيانات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld ناونیشانی چاودێریکراو لە دزەکردنە ناسراوەکاندا دۆزرانەوە."
+            "value": "%lld لە ئیمەیڵەکانت لە دزەی زانیاریدا دەرکەوتن."
           }
         }
       }
@@ -1546,19 +1546,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld monitored address found in known breaches."
+            "value": "%lld of your emails showed up in a data leak."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تم العثور على %lld عنوان مراقب في تسريبات معروفة."
+            "value": "ظهر %lld من بريدك في تسريب بيانات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld ناونیشانی چاودێریکراو لە دزەکردنە ناسراوەکاندا دۆزرایەوە."
+            "value": "%lld لە ئیمەیڵەکانت لە دزەی زانیاریدا دەرکەوت."
           }
         }
       }
@@ -1568,19 +1568,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach Date: %@ • Discovered: %@"
+            "value": "Leaked: %@ • Found: %@"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تاريخ الاختراق: %@ • اكتشف: %@"
+            "value": "تسرّب: %@ • اكتُشف: %@"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بەرواری دزەکردن: %@ • دۆزرایەوە: %@"
+            "value": "دزەکرد: %@ • دۆزرایەوە: %@"
           }
         }
       }
@@ -1590,19 +1590,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breaches"
+            "value": "Leaks"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الاختراقات"
+            "value": "التسريبات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دزەکردنەکان"
+            "value": "دزەکان"
           }
         }
       }
@@ -1612,19 +1612,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compromised:"
+            "value": "What leaked:"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مخترَق:"
+            "value": "ما الذي تسرّب:"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زیانلێکەوتوو:"
+            "value": "چی دزەی کرد:"
           }
         }
       }
@@ -1634,19 +1634,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach Date: %@ • Discovered: %@"
+            "value": "Leaked: %@ • Found: %@"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تاريخ التسريب: %@ • اكتشف: %@"
+            "value": "تسرّب: %@ • اكتُشف: %@"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بەرواری دزەکردن: %@ • دۆزرایەوە: %@"
+            "value": "دزەکرد: %@ • دۆزرایەوە: %@"
           }
         }
       }
@@ -1656,19 +1656,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach detected"
+            "value": "Your email was in a data leak"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تم اكتشاف اختراق"
+            "value": "ظهر بريدك في تسريب بيانات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دزەکردن دۆزرایەوە"
+            "value": "ئیمەیڵەکەت لە دزەی زانیاریدا بووە"
           }
         }
       }
@@ -1678,19 +1678,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Email Monitoring"
+            "value": "Emails we watch for you"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مراقبة البريد"
+            "value": "البريد الذي نتابعه لك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چاوەدێری ئیمەیڵ"
+            "value": "ئەو ئیمەیڵانەی بۆت دەپشکنین"
           }
         }
       }
@@ -1766,19 +1766,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We'll send a push alert if a watched email appears in a breach. Upgrade for full scan details."
+            "value": "Get an alert when one of your emails shows up in a data leak, and see what to change. Included with Premium."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "سنرسل تنبيهًا إذا ظهر بريد مراقَب في تسريب. رقِّ للترقية لعرض التفاصيل."
+            "value": "احصل على تنبيه عندما يظهر أحد بريدك في تسريب بيانات، واعرف ما يجب تغييره. متاح مع بريميوم."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئاگاداری دەنێرین ئەگەر ئیمەیڵێکی چاودێریکراو لە دزەکردندا دەربکەوێت. بۆ وردەکاری تەواو بەرزبکەرەوە."
+            "value": "ئاگادار بکرێیتەوە کاتێک یەکێک لە ئیمەیڵەکانت لە دزەی زانیاریدا دەردەکەوێت، و بزانە چی بگۆڕیت. لەگەڵ پریمیەم بەردەستە."
           }
         }
       }
@@ -1788,19 +1788,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can monitor up to %lld emails on your plan."
+            "value": "Your plan can watch up to %lld emails."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يمكنك مراقبة حتى %lld بريدًا في خطتك."
+            "value": "يمكن لخطتك متابعة حتى %lld بريدًا."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دەتوانیت تا %lld ئیمەیڵ لەسەر پلانەکەت چاودێری بکەیت."
+            "value": "پلانەکەت دەتوانێت تا %lld ئیمەیڵ بپشکنێت."
           }
         }
       }
@@ -1810,19 +1810,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Monitored Emails"
+            "value": "Emails we watch for you"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "البريد المراقب"
+            "value": "البريد الذي نتابعه لك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئیمەیڵە چاودێریکراوەکان"
+            "value": "ئەو ئیمەیڵانەی بۆت دەپشکنین"
           }
         }
       }
@@ -1832,19 +1832,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No resolved breaches."
+            "value": "Nothing fixed yet."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد اختراقات محلولة."
+            "value": "لم يتم إصلاح شيء بعد."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ دزەکردنێکی چارەسەرکراو نییە."
+            "value": "هێشتا هیچ شتێک چاک نەکراوە."
           }
         }
       }
@@ -1854,19 +1854,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No unresolved breaches."
+            "value": "No leaks to fix. You're all set."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد اختراقات غير محلولة."
+            "value": "لا توجد تسريبات لإصلاحها. كل شيء على ما يرام."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ دزەکردنێکی چارەسەرنەکراو نییە."
+            "value": "هیچ دزەیەک نییە بۆ چاککردن. هەموو شتێک باشە."
           }
         }
       }
@@ -1876,19 +1876,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No emails monitored yet."
+            "value": "Add an email and we'll tell you if it shows up in a data leak."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا يوجد بريد مراقب بعد."
+            "value": "أضف بريدًا وسنخبرك إذا ظهر في تسريب بيانات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هێشتا هیچ ئیمەیڵێک چاودێری ناکرێت."
+            "value": "ئیمەیڵێک زیاد بکە و پێت دەڵێین ئەگەر لە دزەی زانیاریدا دەرکەوت."
           }
         }
       }
@@ -1898,19 +1898,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No resolved breaches."
+            "value": "Nothing fixed yet."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد تسريبات محلولة."
+            "value": "لم يتم إصلاح شيء بعد."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ دزەکردنێکی چارەسەرکراو نییە."
+            "value": "هێشتا هیچ شتێک چاک نەکراوە."
           }
         }
       }
@@ -1920,19 +1920,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No unresolved breaches."
+            "value": "No leaks to fix. You're all set."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد تسريبات غير محلولة."
+            "value": "لا توجد تسريبات لإصلاحها. كل شيء على ما يرام."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ دزەکردنێکی چارەنەکراو نییە."
+            "value": "هیچ دزەیەک نییە بۆ چاککردن. هەموو شتێک باشە."
           }
         }
       }
@@ -1942,19 +1942,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No emails monitored yet."
+            "value": "Add an email and we'll tell you if it shows up in a data leak."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد رسائل مراقَبة بعد."
+            "value": "أضف بريدًا وسنخبرك إذا ظهر في تسريب بيانات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هێشتا هیچ ئیمەیڵێک چاودێری ناکرێت."
+            "value": "ئیمەیڵێک زیاد بکە و پێت دەڵێین ئەگەر لە دزەی زانیاریدا دەرکەوت."
           }
         }
       }
@@ -2008,19 +2008,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop monitoring “%@”?"
+            "value": "Stop watching “%@” for leaks?"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إيقاف مراقبة “%@”؟"
+            "value": "إيقاف متابعة “%@” بحثًا عن تسريبات؟"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چاوەدێری “%@” بوەستێت؟"
+            "value": "چیتر “%@” بۆ دزە مەپشکنە؟"
           }
         }
       }
@@ -2360,19 +2360,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can monitor up to %lld emails on your plan."
+            "value": "Your plan can watch up to %lld emails."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يمكنك مراقبة ما يصل إلى %lld بريدًا إلكترونيًا في خطتك."
+            "value": "يمكن لخطتك متابعة حتى %lld بريدًا."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دەتوانیت تا %lld ئیمەیڵ لەسەر پلانەکەت چاوەدێری بکەیت."
+            "value": "پلانەکەت دەتوانێت تا %lld ئیمەیڵ بپشکنێت."
           }
         }
       }
@@ -2426,19 +2426,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stop monitoring %@?"
+            "value": "Stop watching %@?"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إيقاف مراقبة %@؟"
+            "value": "إيقاف متابعة %@؟"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وەستاندنی چاوەدێری %@؟"
+            "value": "پشکنینی %@ بوەستێنرێت؟"
           }
         }
       }
@@ -2448,19 +2448,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach Monitoring"
+            "value": "Email leak alerts"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مراقبة التسريبات"
+            "value": "تنبيهات تسريب البريد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چاوەدێری دزەکردن"
+            "value": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
           }
         }
       }
@@ -2492,19 +2492,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "We'll send a push alert if a watched email appears in a breach. Upgrade for full scan details."
+            "value": "Get an alert when one of your emails shows up in a data leak, and see what to change. Included with Premium."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "سنرسل تنبيهًا إذا ظهر بريد مراقب في اختراق. رقِّ للترقية لعرض تفاصيل الفحص."
+            "value": "احصل على تنبيه عندما يظهر أحد بريدك في تسريب بيانات، واعرف ما يجب تغييره. متاح مع بريميوم."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئاگادارییەک دەنێرین ئەگەر ئیمەیڵێکی چاودێریکراو لە دزەکردندا دەربکەوێت. بۆ وردەکاری تەواو، پلانی پریمیۆم هەڵبژێرە."
+            "value": "ئاگادار بکرێیتەوە کاتێک یەکێک لە ئیمەیڵەکانت لە دزەی زانیاریدا دەردەکەوێت، و بزانە چی بگۆڕیت. لەگەڵ پریمیەم بەردەستە."
           }
         }
       }
@@ -2879,6 +2879,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "زیادکردن"
+          }
+        }
+      }
+    },
+    "common.back": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رجوع"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕانەوە"
           }
         }
       }
@@ -5176,19 +5198,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Item Name"
+            "value": "Name"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اسم العنصر"
+            "value": "الاسم"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ناوی بڕگە"
+            "value": "ناو"
           }
         }
       }
@@ -5836,19 +5858,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save to Vault"
+            "value": "Save to my passwords"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "حفظ في الخزنة"
+            "value": "احفظ في كلمات مروري"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پاشەکەوتکردن لە کۆگا"
+            "value": "پاشەکەوت بکە لە وشە نهێنییەکانم"
           }
         }
       }
@@ -6491,6 +6513,490 @@
         }
       }
     },
+    "home.addfirst": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أضف كلمة مرور"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشەیەکی نهێنی زیاد بکە"
+          }
+        }
+      }
+    },
+    "home.allfine": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All good"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل شيء جيد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەموو باشە"
+          }
+        }
+      }
+    },
+    "home.allgoodBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing needs your attention right now."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا شيء يحتاج إلى انتباهك الآن."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە ئێستادا هیچ شتێک پێویستی بە سەرنجت نییە."
+          }
+        }
+      }
+    },
+    "home.allgoodTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your passwords look good"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمات مرورك بحالة جيدة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشە نهێنییەکانت باشن"
+          }
+        }
+      }
+    },
+    "home.attentionBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld used more than once, %2$lld easy to guess"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld مستخدمة أكثر من مرة، %2$lld سهلة التخمين"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld زیاتر لە جارێک بەکارهاتووە، %2$lld ئاسانە بۆ زانین"
+          }
+        }
+      }
+    },
+    "home.attentionHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changing them takes a minute and keeps your accounts safer."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تغييرها يستغرق دقيقة ويجعل حساباتك أكثر أمانًا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گۆڕینیان یەک خولەک دەخایەنێت و هەژمارەکانت پارێزراوتر دەکات."
+          }
+        }
+      }
+    },
+    "home.attentionTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A few passwords need a change"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعض كلمات المرور تحتاج إلى تغيير"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "چەند وشەیەکی نهێنی پێویستیان بە گۆڕین هەیە"
+          }
+        }
+      }
+    },
+    "home.checking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking your passwords…"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ فحص كلمات مرورك…"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پشکنینی وشە نهێنییەکانت…"
+          }
+        }
+      }
+    },
+    "home.emptyBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll remember it for you and tell you if it's ever at risk."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سنتذكرها لك ونخبرك إذا تعرضت للخطر."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بۆت لەبیر دەکەین و ئاگادارت دەکەینەوە ئەگەر کەوتە مەترسییەوە."
+          }
+        }
+      }
+    },
+    "home.emptyTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add your first password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أضف أول كلمة مرور"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یەکەم وشەی نهێنیت زیاد بکە"
+          }
+        }
+      }
+    },
+    "home.greetingAfternoon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good afternoon"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طاب يومك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ڕۆژت باش"
+          }
+        }
+      }
+    },
+    "home.greetingEvening": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good evening"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مساء الخير"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێوارەت باش"
+          }
+        }
+      }
+    },
+    "home.greetingMorning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Good morning"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صباح الخير"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەیانیت باش"
+          }
+        }
+      }
+    },
+    "home.healthAllgood": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All %lld passwords are strong and unique"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جميع كلمات المرور الـ %lld قوية وفريدة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەموو %lld وشە نهێنییەکان بەهێز و جیاوازن"
+          }
+        }
+      }
+    },
+    "home.healthTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password health"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صحة كلمات المرور"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەندروستیی وشە نهێنییەکان"
+          }
+        }
+      }
+    },
+    "home.leaksBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See if your email showed up in a data leak"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحقق مما إذا ظهر بريدك في تسريب بيانات"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بزانە ئایا ئیمەیڵەکەت لە دزەکردنی زانیاریدا دەرکەوتووە"
+          }
+        }
+      }
+    },
+    "home.tofix": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld to fix"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld للإصلاح"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld بۆ چاککردن"
+          }
+        }
+      }
+    },
+    "home.vpnConnect": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اتصال"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پەیوەستبوون"
+          }
+        }
+      }
+    },
+    "home.vpnDisconnect": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disconnect"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قطع الاتصال"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پچڕاندن"
+          }
+        }
+      }
+    },
+    "home.vpnOff": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not connected"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "غير متصل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پەیوەست نییە"
+          }
+        }
+      }
+    },
+    "home.vpnOn": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected through %@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متصل عبر %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پەیوەستە لە ڕێگەی %@"
+          }
+        }
+      }
+    },
+    "home.vpnPremium": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Included with Premium"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متاح مع بريميوم"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لەگەڵ پریمیەم بەردەستە"
+          }
+        }
+      }
+    },
     "honorific.miss": {
       "localizations": {
         "en": {
@@ -6936,19 +7442,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach Monitoring"
+            "value": "Email leak alerts"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مراقبة التسريبات"
+            "value": "تنبيهات تسريب البريد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چاوەدێری دزەکردن"
+            "value": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
           }
         }
       }
@@ -6958,19 +7464,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Collections"
+            "value": "Folders"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "المجموعات"
+            "value": "المجلدات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆکراوەکان"
+            "value": "بوخچەکان"
           }
         }
       }
@@ -6980,19 +7486,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Generator"
+            "value": "Password generator"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "المُولِّد"
+            "value": "مولّد كلمات المرور"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "دروستکەری وشە"
+            "value": "دروستکەری وشەی نهێنی"
           }
         }
       }
@@ -7068,7 +7574,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Password Health"
+            "value": "Password health"
           }
         },
         "ar": {
@@ -7080,7 +7586,7 @@
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "تەندروستی وشەی نهێنی"
+            "value": "تەندروستیی وشە نهێنییەکان"
           }
         }
       }
@@ -7090,7 +7596,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Privacy Policy"
+            "value": "Privacy policy"
           }
         },
         "ar": {
@@ -7102,7 +7608,7 @@
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "سیاسەتی نهێنێتی"
+            "value": "سیاسەتی تایبەتمەندی"
           }
         }
       }
@@ -7134,7 +7640,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Terms of Use"
+            "value": "Terms of use"
           }
         },
         "ar": {
@@ -7200,19 +7706,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vault"
+            "value": "Passwords"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الخزنة"
+            "value": "كلمات المرور"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆگای نهێنی"
+            "value": "وشە نهێنییەکان"
           }
         }
       }
@@ -7235,6 +7741,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "VPN"
+          }
+        }
+      }
+    },
+    "notifications.actionFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t update your notifications. Check your connection and try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تحديث إشعاراتك. تحقّق من اتصالك وحاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا ئاگادارییەکانت نوێ بکرێنەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە."
           }
         }
       }
@@ -7411,6 +7939,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "نەتوانرا ئەم ئاگادارییە بکرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
+    "notifications.permissionMessage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on notifications in Settings to get breach alerts and messages from Qasa."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من Qasa."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی Qasa وەربگریت."
+          }
+        }
+      }
+    },
+    "notifications.permissionNotNow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not Now"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس الآن"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێستا نا"
+          }
+        }
+      }
+    },
+    "notifications.permissionOpenSettings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فتح الإعدادات"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کردنەوەی ڕێکخستنەکان"
+          }
+        }
+      }
+    },
+    "notifications.permissionTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are off"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الإشعارات متوقفة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئاگادارییەکان کوژاونەتەوە"
           }
         }
       }
@@ -8366,19 +8982,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Breach Monitor"
+            "value": "Email leak alerts"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مراقبة الاختراق"
+            "value": "تنبيهات تسريب البريد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چاوەدێری دزەکردن"
+            "value": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
           }
         }
       }
@@ -9202,19 +9818,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Biometric Unlock"
+            "value": "Fingerprint or face unlock"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "الفتح بالبيانات الحيوية"
+            "value": "الفتح بالبصمة أو الوجه"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی بایۆمەتریک"
+            "value": "کردنەوە بە پەنجەمۆر یان ڕوخسار"
           }
         }
       }
@@ -9246,7 +9862,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Change Master Password"
+            "value": "Change main password"
           }
         },
         "ar": {
@@ -9400,7 +10016,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Current master password"
+            "value": "Current main password"
           }
         },
         "ar": {
@@ -9466,19 +10082,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Export Vault CSV"
+            "value": "Export passwords (CSV)"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تصدير CSV للخزنة"
+            "value": "تصدير كلمات المرور (CSV)"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هەناردەکردنی CSVی کۆگا"
+            "value": "هەناردەکردنی وشە نهێنییەکان (CSV)"
           }
         }
       }
@@ -9488,19 +10104,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nothing to export — the vault is empty."
+            "value": "Nothing to export yet."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا يوجد شيء للتصدير — الخزنة فارغة."
+            "value": "لا يوجد شيء للتصدير بعد."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ نییە بۆ هەناردەکردن — کۆگا بەتاڵە."
+            "value": "هێشتا هیچ نییە بۆ هەناردەکردن."
           }
         }
       }
@@ -9576,19 +10192,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Free Account"
+            "value": "Free plan"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "حساب مجاني"
+            "value": "الخطة المجانية"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هەژماری خۆڕایی"
+            "value": "پلانی خۆڕایی"
           }
         }
       }
@@ -9774,19 +10390,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You’ll need your master password to unlock again."
+            "value": "You'll need your main password to open it again."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ستحتاج إلى كلمة المرور الرئيسية للفتح مرة أخرى."
+            "value": "ستحتاج إلى كلمة مرورك الرئيسية لفتحه مرة أخرى."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پێویستت بە وشەی نهێنی سەرەکی دەبێت بۆ کردنەوەی دووبارە."
+            "value": "پێویستت بە وشەی نهێنی سەرەکیت دەبێت بۆ کردنەوەی دووبارە."
           }
         }
       }
@@ -9796,19 +10412,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lock Vault?"
+            "value": "Lock Qasa?"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "قفل الخزنة؟"
+            "value": "قفل Qasa؟"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆگا قفل بکرێت؟"
+            "value": "Qasa قفڵ بکرێت؟"
           }
         }
       }
@@ -9862,7 +10478,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Master password updated."
+            "value": "Main password updated."
           }
         },
         "ar": {
@@ -9884,7 +10500,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "New master password"
+            "value": "New main password"
           }
         },
         "ar": {
@@ -9994,19 +10610,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium Account"
+            "value": "Premium plan"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "حساب بريميوم"
+            "value": "خطة بريميوم"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هەژماری پرێمیەم"
+            "value": "پلانی پریمیەم"
           }
         }
       }
@@ -10358,7 +10974,7 @@
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بەرزکردنەوە بۆ پرێمیەم"
+            "value": "بەرزکردنەوە بۆ پریمیەم"
           }
         }
       }
@@ -10390,19 +11006,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Current master password is incorrect."
+            "value": "That's not your current main password."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "كلمة المرور الرئيسية الحالية غير صحيحة."
+            "value": "هذه ليست كلمة مرورك الرئيسية الحالية."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکی ئێستا هەڵەیە."
+            "value": "ئەوە وشەی نهێنی سەرەکی ئێستات نییە."
           }
         }
       }
@@ -11138,19 +11754,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Premium includes 5 devices, breach monitoring, and VPN."
+            "value": "Premium includes 5 devices, email leak alerts and VPN."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يشمل البريميوم 5 أجهزة ومراقبة الاختراق وVPN."
+            "value": "يشمل بريميوم 5 أجهزة وتنبيهات تسريب البريد وVPN."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پریمیۆم ٥ ئامێر، چاوەدێری دزەکردن، و VPN لەخۆدەگرێت."
+            "value": "پریمیەم ٥ ئامێر، ئاگادارکردنەوەی دزەی ئیمەیڵ و VPN لەخۆدەگرێت."
           }
         }
       }
@@ -11287,24 +11903,112 @@
         }
       }
     },
-    "vault.addNew": {
+    "tab.alerts": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add New"
+            "value": "Alerts"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "إضافة جديد"
+            "value": "التنبيهات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زیادکردنی نوێ"
+            "value": "ئاگادارییەکان"
+          }
+        }
+      }
+    },
+    "tab.home": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الرئيسية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سەرەکی"
+          }
+        }
+      }
+    },
+    "tab.passwords": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passwords"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمات المرور"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشە نهێنییەکان"
+          }
+        }
+      }
+    },
+    "tab.you": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أنت"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تۆ"
+          }
+        }
+      }
+    },
+    "vault.addNew": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What do you want to save?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ماذا تريد أن تحفظ؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەتەوێت چی پاشەکەوت بکەیت؟"
           }
         }
       }
@@ -11314,19 +12018,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Collection"
+            "value": "Folder"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "المجموعة"
+            "value": "المجلد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆکراوە"
+            "value": "بوخچە"
           }
         }
       }
@@ -11468,19 +12172,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This permanently removes “%@” from your vault."
+            "value": "This permanently removes “%@”."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "سيؤدي هذا إلى إزالة “%@” نهائيًا من خزنتك."
+            "value": "سيؤدي هذا إلى إزالة “%@” نهائيًا."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئەمە “%@” بە یەکجارەکی لە کۆگاکەت دەسڕێتەوە."
+            "value": "ئەمە “%@” بە یەکجارەکی دەسڕێتەوە."
           }
         }
       }
@@ -11600,19 +12304,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap + to add your first vault item."
+            "value": "Tap + to save your first password."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اضغط + لإضافة أول عنصر في الخزنة."
+            "value": "اضغط + لحفظ أول كلمة مرور."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "+ لێبدە بۆ زیادکردنی یەکەم بڕگەی کۆگا."
+            "value": "+ لێبدە بۆ پاشەکەوتکردنی یەکەم وشەی نهێنیت."
           }
         }
       }
@@ -11622,19 +12326,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No Items"
+            "value": "No passwords yet"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لا توجد عناصر"
+            "value": "لا توجد كلمات مرور بعد"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هیچ بڕگەیەک نییە"
+            "value": "هێشتا هیچ وشەیەکی نهێنی نییە"
           }
         }
       }
@@ -11798,19 +12502,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Login"
+            "value": "Password for a site or app"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تسجيل دخول"
+            "value": "كلمة مرور لموقع أو تطبيق"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "چوونەژوورەوە"
+            "value": "وشەی نهێنی بۆ ماڵپەڕ یان ئەپ"
           }
         }
       }
@@ -11908,19 +12612,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Personal Info"
+            "value": "About me"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "المعلومات الشخصية"
+            "value": "معلوماتي"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زانیاری کەسی"
+            "value": "دەربارەی من"
           }
         }
       }
@@ -11952,19 +12656,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Secure Notes"
+            "value": "Notes"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ملاحظات آمنة"
+            "value": "ملاحظات"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "تێبینییە پارێزراوەکان"
+            "value": "تێبینییەکان"
           }
         }
       }
@@ -12348,19 +13052,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search items..."
+            "value": "Search your passwords"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "البحث في العناصر..."
+            "value": "ابحث في كلمات مرورك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "گەڕان لە بڕگەکان..."
+            "value": "لە وشە نهێنییەکانت بگەڕێ"
           }
         }
       }
@@ -12713,6 +13417,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "ئەم بڕگەیە"
+          }
+        }
+      }
+    },
+    "vault.titleYours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your passwords"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمات مرورك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشە نهێنییەکانت"
           }
         }
       }
@@ -13228,19 +13954,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kill Switch"
+            "value": "Block internet if VPN drops"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "مفتاح القتل"
+            "value": "حظر الإنترنت إذا انقطع VPN"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کیل سویچ"
+            "value": "ئینتەرنێت ڕابگرە ئەگەر VPN پچڕا"
           }
         }
       }
@@ -13250,19 +13976,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Block internet if VPN disconnects"
+            "value": "Recommended on public Wi-Fi"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "احجب الإنترنت إذا انقطع VPN"
+            "value": "موصى به على شبكات Wi-Fi العامة"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئینتەرنێت ببڕە ئەگەر VPN پچڕا"
+            "value": "پێشنیارکراوە بۆ وای-فایی گشتی"
           }
         }
       }
@@ -13272,7 +13998,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Node"
+            "value": "Server"
           }
         },
         "ar": {
@@ -13360,19 +14086,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Upgrade to connect through Qasa VPN nodes."
+            "value": "Upgrade to browse privately through Qasa VPN."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "قم بالترقية للاتصال عبر خوادم VPN لـ Qasa."
+            "value": "قم بالترقية للتصفح بخصوصية عبر Qasa VPN."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بەرزبکەرەوە بۆ پەیوەستبوون لە ڕێگەی سێرڤەرەکانی VPNی Qasa."
+            "value": "بەرزبکەرەوە بۆ گەڕانی تایبەت لە ڕێگەی Qasa VPN."
           }
         }
       }
@@ -13382,19 +14108,63 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Virtual IP"
+            "value": "Your VPN address"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "IP افتراضي"
+            "value": "عنوان VPN الخاص بك"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "IPی مەجازی"
+            "value": "ناونیشانی VPNەکەت"
+          }
+        }
+      }
+    },
+    "you.about": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حول"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەربارە"
+          }
+        }
+      }
+    },
+    "you.account": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحساب"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەژمار"
           }
         }
       }

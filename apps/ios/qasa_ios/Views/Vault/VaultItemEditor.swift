@@ -146,14 +146,14 @@ struct VaultItemEditor: View {
                 .font(.qasa(16))
                 .multilineTextAlignment(.leading)
                 .foregroundColor(Theme.textPrimary)
-                .tint(Theme.mint)
+                .tint(Theme.accent)
 
                 Button {
                     showPasswordGenerator = true
                 } label: {
                     Image(systemName: "wand.and.stars")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Theme.mint)
+                        .font(.qasa(16, weight: .semibold))
+                        .foregroundColor(Theme.accent)
                         .frame(width: 28, height: 28)
                 }
                 .accessibilityLabel(L10n.tr("vault.generatePassword"))
@@ -162,7 +162,7 @@ struct VaultItemEditor: View {
                     passwordVisible.toggle()
                 } label: {
                     Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.qasa(16, weight: .medium))
                         .foregroundColor(Theme.textSecondary)
                         .frame(width: 28, height: 28)
                 }
@@ -190,7 +190,7 @@ struct VaultItemEditor: View {
                 Text(L10n.tr("vault.protectItem"))
                     .foregroundColor(Theme.textPrimary)
             }
-            .tint(Theme.mint)
+            .tint(Theme.accent)
             CollectionPickerField(collectionId: noteCollectionBinding)
         }
     }
@@ -213,15 +213,15 @@ struct VaultItemEditor: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Theme.cardBackground)
-                    .foregroundColor(Theme.mint)
+                    .foregroundColor(Theme.accent)
                     .cornerRadius(Theme.cornerRadius)
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                            .stroke(Theme.mint.opacity(0.4), lineWidth: 1)
+                            .stroke(Theme.accent.opacity(0.4), lineWidth: 1)
                     )
             }
             Text(L10n.tr("vault.nfcHint"))
-                .font(.caption)
+                .font(.qasa(12))
                 .foregroundColor(Theme.textSecondary)
         }
     }
@@ -249,7 +249,7 @@ struct VaultItemEditor: View {
                     ForEach(Honorific.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
                 .pickerStyle(.menu)
-                .tint(Theme.mint)
+                .tint(Theme.accent)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.cardBackground)
@@ -274,7 +274,7 @@ struct VaultItemEditor: View {
                 Picker(L10n.tr("field.type"), selection: emailKindBinding) {
                     ForEach(EmailKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-                .tint(Theme.mint)
+                .tint(Theme.accent)
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Theme.cardBackground)
@@ -297,7 +297,7 @@ struct VaultItemEditor: View {
                         ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                     }
                     .labelsHidden()
-                    .tint(Theme.mint)
+                    .tint(Theme.accent)
                     .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
                     .background(Theme.cardBackground)
@@ -328,8 +328,8 @@ struct VaultItemEditor: View {
                 FormFieldLabel(text: L10n.tr("field.phoneNumber"))
                 HStack(alignment: .center, spacing: 8) {
                     Text(Country.dialCode(for: phoneCountryBinding.wrappedValue))
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Theme.mint)
+                        .font(.qasa(16, weight: .semibold))
+                        .foregroundColor(Theme.accent)
                         .frame(minWidth: 64)
                         .frame(height: 50)
                         .padding(.horizontal, 12)
@@ -343,7 +343,7 @@ struct VaultItemEditor: View {
                     TextField(L10n.tr("field.phoneNumber"), text: phoneBinding(\.number))
                         .keyboardType(.phonePad)
                         .foregroundColor(Theme.textPrimary)
-                        .tint(Theme.mint)
+                        .tint(Theme.accent)
                         .padding(.horizontal, 14)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
@@ -747,7 +747,7 @@ struct AddressPhonePicker: View {
                     Text(row.displayName).tag(Optional(row.id))
                 }
             }
-            .tint(Theme.mint)
+            .tint(Theme.accent)
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.cardBackground)

@@ -31,7 +31,7 @@ struct VaultItemDetailView: View {
                 heroIcon
 
                 Text(row?.displayName ?? L10n.tr("vault.untitled"))
-                    .font(.system(size: 22, weight: .bold))
+                    .font(.qasa(22, weight: .bold))
                     .foregroundColor(Theme.textPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Theme.screenPadding)
@@ -53,7 +53,7 @@ struct VaultItemDetailView: View {
                         onEdit()
                     } label: {
                         Image(systemName: "pencil")
-                            .foregroundColor(Theme.mint)
+                            .foregroundColor(Theme.accent)
                     }
                     .accessibilityLabel(L10n.tr("common.edit"))
 
@@ -109,7 +109,7 @@ struct VaultItemDetailView: View {
 
     private var heroIcon: some View {
         Image(systemName: payload.systemImage)
-            .font(.system(size: 36, weight: .medium))
+            .font(.qasa(36, weight: .medium))
             .foregroundColor(Theme.textPrimary)
             .frame(width: 88, height: 88)
             .background(Theme.chrome)
@@ -153,7 +153,7 @@ struct VaultItemDetailView: View {
     private var organizationColorRow: some View {
         HStack {
             Text(L10n.tr("vault.color"))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
             if let noteColor = payload.organizationColor {
@@ -162,12 +162,12 @@ struct VaultItemDetailView: View {
                         .fill(noteColor.color)
                         .frame(width: 14, height: 14)
                     Text(noteColor.displayName)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.qasa(15, weight: .medium))
                         .foregroundColor(Theme.textPrimary)
                 }
             } else {
                 Text(L10n.tr("common.none"))
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.qasa(15, weight: .medium))
                     .foregroundColor(Theme.textSecondary)
             }
         }
@@ -177,11 +177,11 @@ struct VaultItemDetailView: View {
     private var organizationCollectionRow: some View {
         HStack {
             Text(L10n.tr("vault.collection"))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
             Text(collectionName ?? L10n.tr("common.none"))
-                .font(.system(size: 15, weight: .medium))
+                .font(.qasa(15, weight: .medium))
                 .foregroundColor(collectionName == nil ? Theme.textSecondary : Theme.textPrimary)
         }
         .padding(.vertical, 12)
@@ -202,11 +202,11 @@ struct VaultItemDetailView: View {
     private func historyRow(label: String, date: Date?) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(label)
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
             Spacer()
             Text(date.map { VaultDateFormat.display($0) } ?? L10n.tr("vault.never"))
-                .font(.system(size: 15, weight: .medium))
+                .font(.qasa(15, weight: .medium))
                 .foregroundColor(Theme.textPrimary)
                 .multilineTextAlignment(.trailing)
         }
@@ -216,10 +216,9 @@ struct VaultItemDetailView: View {
     private func detailCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.qasa(14, weight: .semibold))
                 .foregroundColor(Theme.textSecondary)
                 .textCase(.uppercase)
-                .tracking(0.6)
 
             content()
                 .padding(.horizontal, 16)
@@ -243,7 +242,7 @@ struct VaultItemDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(field.label)
-                    .font(.system(size: 13))
+                    .font(.qasa(13))
                     .foregroundColor(Theme.textSecondary)
                 Spacer()
                 if field.isSecret && !locked {
@@ -255,8 +254,8 @@ struct VaultItemDetailView: View {
                         }
                     } label: {
                         Image(systemName: hidden ? "eye" : "eye.slash")
-                            .font(.system(size: 14))
-                            .foregroundColor(Theme.mint)
+                            .font(.qasa(14))
+                            .foregroundColor(Theme.accent)
                     }
                     .buttonStyle(.plain)
                 }
@@ -264,7 +263,7 @@ struct VaultItemDetailView: View {
 
             if locked {
                 Text(L10n.tr("vault.lockedAuthenticate"))
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.qasa(15, weight: .medium))
                     .foregroundColor(Theme.textSecondary)
             } else if hidden {
                 Text(String(repeating: "•", count: min(max(field.value.count, 8), 16)))

@@ -4,6 +4,9 @@ import UIKit
 /// App-wide type for English (system) vs Kurdish/Arabic (`RudawRegular` from `rudawregular2.ttf`).
 enum AppTypography {
     static let rudawPostScriptName = "RudawRegular"
+    /// Rubik (variable, SIL OFL — `Resources/Rubik-OFL.txt`) for English: rounded and friendly,
+    /// matching Android. One variable file serves every weight.
+    static let rubikFamilyName = "Rubik"
 
     static var usesRudaw: Bool {
         switch AppLanguage.current {
@@ -16,14 +19,21 @@ enum AppTypography {
         if usesRudaw {
             return .custom(rudawPostScriptName, size: size)
         }
-        return .system(size: size, weight: weight)
+        return .custom(rubikFamilyName, size: size).weight(weight)
     }
 
     static func uiFont(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
         if usesRudaw, let custom = UIFont(name: rudawPostScriptName, size: size) {
             return custom
         }
-        return .systemFont(ofSize: size, weight: weight)
+        return rubikUIFont(size: size, weight: weight)
+    }
+
+    static func rubikUIFont(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let descriptor = UIFontDescriptor(fontAttributes: [.family: rubikFamilyName])
+            .addingAttributes([.traits: [UIFontDescriptor.TraitKey.weight: weight]])
+        let font = UIFont(descriptor: descriptor, size: size)
+        return font.familyName == rubikFamilyName ? font : .systemFont(ofSize: size, weight: weight)
     }
 
     /// Apply navigation / bar button fonts when language changes.
@@ -31,10 +41,10 @@ enum AppTypography {
         let useRudaw = language == .ckb || language == .ar
         let titleFont = useRudaw
             ? (UIFont(name: rudawPostScriptName, size: 17) ?? .systemFont(ofSize: 17, weight: .semibold))
-            : .systemFont(ofSize: 17, weight: .semibold)
+            : rubikUIFont(size: 17, weight: .semibold)
         let barFont = useRudaw
             ? (UIFont(name: rudawPostScriptName, size: 17) ?? .systemFont(ofSize: 17, weight: .regular))
-            : .systemFont(ofSize: 17, weight: .regular)
+            : rubikUIFont(size: 17, weight: .regular)
 
         let nav = UINavigationBarAppearance()
         nav.configureWithDefaultBackground()

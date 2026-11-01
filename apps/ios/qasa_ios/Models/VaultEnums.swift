@@ -225,7 +225,7 @@ enum NoteColor: String, Codable, CaseIterable {
 
     var color: Color {
         switch self {
-        case .mint: return Theme.mint
+        case .mint: return Color(hex: "2BB58A")
         case .gold: return Theme.gold
         case .blue: return Color(hex: "3B82F6")
         case .purple: return Color(hex: "A855F7")

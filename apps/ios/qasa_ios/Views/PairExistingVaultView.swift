@@ -62,7 +62,7 @@ struct PairExistingVaultView: View {
                 Button(action: onCancel) {
                     Text(L10n.tr("settings.cancel", locale: locale))
                         .font(.qasa(16, weight: .semibold))
-                        .foregroundColor(Theme.mint)
+                        .foregroundColor(Theme.accent)
                 }
                 Spacer()
             }
@@ -158,7 +158,7 @@ struct PairExistingVaultView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(L10n.tr("pair.successTitle", locale: locale))
                 .font(.qasa(22, weight: .bold))
-                .foregroundColor(Theme.mint)
+                .foregroundColor(Theme.accent)
                 .multilineTextAlignment(.leading)
             Text(L10n.tr("pair.successBody", locale: locale))
                 .font(.qasa(14))

@@ -71,12 +71,12 @@ struct PremiumUpgradeView: View {
 
                     if let statusMessage {
                         Text(statusMessage)
-                            .font(.system(size: 13))
-                            .foregroundColor(Theme.mint)
+                            .font(.qasa(13))
+                            .foregroundColor(Theme.accent)
                     }
                     if let errorMessage {
                         Text(errorMessage)
-                            .font(.system(size: 13))
+                            .font(.qasa(13))
                             .foregroundColor(Theme.danger)
                     }
                 }
@@ -104,15 +104,13 @@ struct PremiumUpgradeView: View {
 
                 if session.isPremium {
                     Text(L10n.tr("premium.alreadyPremium", locale: locale))
-                        .font(.kasoMono(12))
-                        .tracking(0.6)
+                        .font(.qasaLabel(12))
                         .foregroundColor(Theme.success)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
                 } else {
                     Text(L10n.tr("premium.opensWallet", locale: locale))
-                        .font(.kasoMono(12))
-                        .tracking(0.6)
+                        .font(.qasaLabel(12))
                         .foregroundColor(Theme.textSecondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
@@ -178,7 +176,7 @@ struct PremiumUpgradeView: View {
             HStack(spacing: 8) {
                 ForEach(plans) { plan in
                     Circle()
-                        .fill(plan.id == selectedPlanId ? Theme.mint : Theme.stroke)
+                        .fill(plan.id == selectedPlanId ? Theme.accent : Theme.stroke)
                         .frame(width: 7, height: 7)
                         .animation(.easeInOut(duration: 0.2), value: selectedPlanId)
                 }
@@ -200,21 +198,21 @@ struct PremiumUpgradeView: View {
                     Text(plan.interval == "yearly"
                           ? L10n.tr("premium.bestValue", locale: locale)
                           : L10n.tr("premium.upgradeToPro", locale: locale))
-                        .font(.kasoMono(12))
+                        .font(.qasaLabel(12))
                         .tracking(1.2)
                         .foregroundColor(Theme.gold)
                     HStack(alignment: .lastTextBaseline, spacing: 4) {
                         Text(plan.displayAmount)
-                            .font(.system(size: 28, weight: .heavy))
+                            .font(.qasa(28, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                         Text(plan.periodLabel)
-                            .font(.system(size: 14))
+                            .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                             .padding(.bottom, 4)
                     }
                     Text(plan.localizedTitle)
-                        .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .kasoMono(11))
-                        .foregroundColor(Theme.mint)
+                        .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .qasaLabel(11))
+                        .foregroundColor(Theme.accent)
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -231,7 +229,7 @@ struct PremiumUpgradeView: View {
         .cornerRadius(Theme.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(plan.id == selectedPlanId ? Theme.mint : Theme.stroke, lineWidth: 1)
+                .stroke(plan.id == selectedPlanId ? Theme.accent : Theme.stroke, lineWidth: 1)
         )
         .clipped()
     }
@@ -239,8 +237,8 @@ struct PremiumUpgradeView: View {
     private var autoRenewRow: some View {
         HStack(spacing: 12) {
             Image(systemName: "arrow.triangle.2.circlepath")
-                .foregroundColor(Theme.mint)
-                .font(.system(size: 18))
+                .foregroundColor(Theme.accent)
+                .font(.qasa(18))
             VStack(alignment: .leading, spacing: 2) {
                 Text(L10n.tr("premium.autoRenew", locale: locale))
                     .font(.qasa(15, weight: .semibold))
@@ -252,7 +250,7 @@ struct PremiumUpgradeView: View {
             Spacer()
             Toggle("", isOn: $autoRenew)
                 .labelsHidden()
-                .tint(Theme.mint)
+                .tint(Theme.accent)
         }
         .padding(16)
         .background(Theme.chrome)
@@ -291,21 +289,20 @@ struct PremiumUpgradeView: View {
                         .font(.qasa(14, weight: .semibold))
                         .foregroundColor(Theme.textPrimary)
                     Text(method.subtitle)
-                        .font(.kasoMono(12))
-                        .tracking(0.6)
+                        .font(.qasaLabel(12))
                         .foregroundColor(Theme.textSecondary)
                 }
                 Spacer()
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(selected ? Theme.mint : Theme.stroke)
-                    .font(.system(size: 20))
+                    .foregroundColor(selected ? Theme.accent : Theme.stroke)
+                    .font(.qasa(20))
             }
             .padding(17)
-            .background(selected ? Theme.mint.opacity(0.05) : Theme.chrome)
+            .background(selected ? Theme.accent.opacity(0.05) : Theme.chrome)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(selected ? Theme.mint : Theme.stroke, lineWidth: 1)
+                    .stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
             )
             .contentShape(Rectangle())
         }
@@ -315,7 +312,7 @@ struct PremiumUpgradeView: View {
     private func paymentBadge(_ method: PaymentMethod) -> some View {
         let isFIB = method.badgeText == "FIB"
         return Text(isFIB ? "First\nIraqi\nBank" : method.badgeText)
-            .font(.system(size: 9, weight: .bold))
+            .font(.qasa(9, weight: .bold))
             .multilineTextAlignment(.center)
             .foregroundColor(isFIB ? .black : .white)
             .frame(width: 48, height: 32)
@@ -400,10 +397,10 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(Theme.mint)
-                .font(.system(size: 18))
+                .foregroundColor(Theme.accent)
+                .font(.qasa(18))
             Text(text)
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textPrimary)
         }
     }

@@ -42,7 +42,7 @@ struct ValidatedDateField: View {
                 } label: {
                     Label(L10n.tr("date.pick", locale: locale), systemImage: "calendar")
                         .font(.qasa(13, weight: .semibold))
-                        .foregroundColor(Theme.mint)
+                        .foregroundColor(Theme.accent)
                 }
                 Spacer()
                 if let parseError {
@@ -61,14 +61,14 @@ struct ValidatedDateField: View {
                 )
                 .datePickerStyle(.graphical)
                 .environment(\.locale, locale)
-                .tint(Theme.mint)
+                .tint(Theme.accent)
                 .onChange(of: picked) { _, newValue in
                     text = displayFormatter.string(from: newValue)
                     parseError = nil
                 }
                 Button(L10n.tr("date.done", locale: locale)) { showPicker = false }
                     .font(.qasa(13, weight: .semibold))
-                    .foregroundColor(Theme.mint)
+                    .foregroundColor(Theme.accent)
             }
         }
     }

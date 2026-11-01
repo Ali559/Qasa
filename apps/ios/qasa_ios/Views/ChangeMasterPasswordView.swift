@@ -60,14 +60,14 @@ struct ChangeMasterPasswordView: View {
                         Task { await save() }
                     } label: {
                         HStack {
-                            if isSaving { ProgressView().tint(Theme.mintOnChip) }
+                            if isSaving { ProgressView().tint(Theme.onAccentChip) }
                             Text(L10n.tr("settings.saveMasterPassword", locale: locale))
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.qasa(16, weight: .semibold))
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .foregroundColor(Theme.mintOnChip)
-                        .background(canSave ? Theme.mint : Theme.mint.opacity(0.35))
+                        .foregroundColor(Theme.onAccentChip)
+                        .background(canSave ? Theme.accent : Theme.accent.opacity(0.35))
                         .cornerRadius(10)
                     }
                     .disabled(!canSave)

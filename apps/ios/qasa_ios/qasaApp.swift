@@ -206,6 +206,10 @@ struct qasaApp: App {
             .onChange(of: scenePhase) { _, phase in
                 AutoLockMonitor.shared.handleScenePhase(phase)
                 isShielded = AutoLockMonitor.shared.isObscured
+                if phase == .active {
+                    // Bell badge on foreground (silent without a license token).
+                    Task { await NotificationService.shared.refreshUnreadCount() }
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.obscureNotification)) { _ in
                 isShielded = true

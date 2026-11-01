@@ -35,10 +35,11 @@ nonisolated enum SharedVaultKeychain {
     static var kdfVersion: Int? {
         get {
             guard let data = data(for: .kdfVersion), data.count == 4 else { return nil }
-            return Int(data[0])
-                | (Int(data[1]) << 8)
-                | (Int(data[2]) << 16)
-                | (Int(data[3]) << 24)
+            // Big-endian, matching the setter (see `VaultKeychainStore.kdfVersion`).
+            return (Int(data[0]) << 24)
+                | (Int(data[1]) << 16)
+                | (Int(data[2]) << 8)
+                | Int(data[3])
         }
         set { setData(newValue.map { v in withUnsafeBytes(of: Int32(v).bigEndian) { Data($0) } }, for: .kdfVersion) }
     }

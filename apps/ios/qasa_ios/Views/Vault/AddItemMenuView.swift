@@ -78,7 +78,7 @@ struct AddItemMenuView: View {
                 }
             }
         }
-        .tint(Theme.mint)
+        .tint(Theme.accent)
     }
 
     @ViewBuilder

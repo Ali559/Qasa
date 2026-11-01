@@ -80,7 +80,7 @@ struct CountryMenuPicker: View {
         }
         .pickerStyle(.menu)
         .labelsHidden()
-        .tint(Theme.mint)
+        .tint(Theme.accent)
     }
 }
 
@@ -101,12 +101,12 @@ struct CollectionPickerField: View {
                         Text(c.name).tag(Optional(c.id))
                     }
                 }
-                .tint(Theme.mint)
+                .tint(Theme.accent)
                 Button {
                     showNew = true
                 } label: {
                     Image(systemName: "folder.badge.plus")
-                        .foregroundColor(Theme.mint)
+                        .foregroundColor(Theme.accent)
                 }
             }
             .padding(12)
@@ -186,7 +186,7 @@ struct VaultFormChrome<Content: View>: View {
                         action: onSave
                     )
                     .disabled(!canSave)
-                    .tint(Theme.mint)
+                    .tint(Theme.accent)
                 }
             }
         }

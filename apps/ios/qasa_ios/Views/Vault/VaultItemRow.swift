@@ -10,26 +10,38 @@ struct VaultItemRow: View {
     @State private var toast: String?
     @State private var payload: VaultPayload?
 
+    /// Logins show the site's letter on its brand colour; other kinds keep their symbol.
+    @ViewBuilder
+    private var tile: some View {
+        if row.kind == .login {
+            let logo = SiteLogo(name: row.displayName)
+            Text(logo.letter)
+                .font(.qasa(18, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 48, height: 48)
+                .background(logo.color)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        } else {
+            Image(systemName: (payload ?? fallbackPayload).systemImage)
+                .font(.qasa(18, weight: .medium))
+                .foregroundColor(Theme.accent)
+                .frame(width: 48, height: 48)
+                .background(Theme.cardMuted)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: (payload ?? fallbackPayload).systemImage)
-                .font(.system(size: 18, weight: .medium))
-                .foregroundColor(Theme.textPrimary)
-                .frame(width: 48, height: 48)
-                .background(Theme.chrome)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Theme.strokeChrome, lineWidth: 1)
-                )
+            tile
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.displayName)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.qasa(16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .lineLimit(1)
                 Text(row.subtitle)
-                    .font(.system(size: 14))
+                    .font(.qasa(14))
                     .foregroundColor(Theme.textSecondary)
                     .lineLimit(1)
             }
@@ -105,11 +117,11 @@ struct VaultItemRow: View {
         .overlay(alignment: .bottom) {
             if let toast {
                 Text(toast)
-                    .font(.caption.weight(.semibold))
+                    .font(.qasa(12, weight: .semibold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Theme.mint)
-                    .foregroundColor(Theme.mintOnPrimary)
+                    .background(Theme.accent)
+                    .foregroundColor(Theme.onAccent)
                     .cornerRadius(8)
                     .offset(y: 8)
                     .transition(.opacity)

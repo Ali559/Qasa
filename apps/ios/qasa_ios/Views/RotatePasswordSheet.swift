@@ -78,7 +78,7 @@ struct RotatePasswordSheet: View {
                     .foregroundColor(Theme.textSecondary)
                 if let errorMessage {
                     Text(errorMessage)
-                        .font(.system(size: 13))
+                        .font(.qasa(13))
                         .foregroundColor(Theme.danger)
                 }
                 PrimaryButton(title: L10n.tr("breach.rotateSave"), icon: "key.fill", cornerRadius: 8) {
@@ -106,30 +106,30 @@ struct RotatePasswordSheet: View {
         let isSelected = selectable && login.id == selectedId
         let row = HStack(spacing: 12) {
             Image(systemName: "person.badge.key")
-                .foregroundColor(isSelected ? Theme.mint : Theme.textSecondary)
+                .foregroundColor(isSelected ? Theme.accent : Theme.textSecondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(login.name)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 if !login.subtitle.isEmpty {
                     Text(login.subtitle)
-                        .font(.system(size: 13))
+                        .font(.qasa(13))
                         .foregroundColor(Theme.textSecondary)
                 }
             }
             Spacer(minLength: 0)
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(Theme.mint)
+                    .foregroundColor(Theme.accent)
             }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(isSelected ? Theme.mint.opacity(0.12) : Theme.cardBackground)
+        .background(isSelected ? Theme.accent.opacity(0.12) : Theme.cardBackground)
         .cornerRadius(Theme.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(isSelected ? Theme.mint : Theme.stroke, lineWidth: 1)
+                .stroke(isSelected ? Theme.accent : Theme.stroke, lineWidth: 1)
         )
 
         return Group {
@@ -176,12 +176,12 @@ struct RotatePasswordSheet: View {
             .font(.qasa(14))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
-            .background(Theme.mintDark.opacity(0.2))
-            .foregroundColor(Theme.mint)
+            .background(Theme.accentDark.opacity(0.2))
+            .foregroundColor(Theme.accent)
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(Theme.mint.opacity(0.3), lineWidth: 1)
+                    .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

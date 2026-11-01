@@ -16,7 +16,7 @@ enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
 }
 
 struct PasswordHealthView: View {
-    var onOpenMenu: () -> Void
+    var onOpenMenu: (() -> Void)? = nil
 
     @State private var animatedProgress: Double = 0
     @State private var animatedScore: Int = 0
@@ -32,7 +32,7 @@ struct PasswordHealthView: View {
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         NavigationLink(value: PasswordIssueTab.reused) {
-                            statCard(title: L10n.tr("health.passwords"), value: "\(report.totalPasswords)", accent: Theme.mint)
+                            statCard(title: L10n.tr("health.passwords"), value: "\(report.totalPasswords)", accent: Theme.accent)
                         }
                         .buttonStyle(.plain)
 
@@ -50,10 +50,10 @@ struct PasswordHealthView: View {
                     CardContainer {
                         VStack(alignment: .leading, spacing: 10) {
                             Text(L10n.tr("health.howScoring"))
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.qasa(16, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
                             Text(L10n.tr("health.howScoringBody"))
-                                .font(.system(size: 14))
+                                .font(.qasa(14))
                                 .foregroundColor(Theme.textSecondary)
                         }
                     }
@@ -97,11 +97,11 @@ struct PasswordHealthView: View {
 
                 VStack(spacing: 2) {
                     Text("\(animatedScore)")
-                        .font(.system(size: 44, weight: .bold))
+                        .font(.qasa(44, weight: .bold))
                         .foregroundColor(scoreColor(for: animatedScore))
                         .contentTransition(.numericText())
                     Text(L10n.tr("health.outOf100"))
-                        .font(.kasoMono(12))
+                        .font(.qasaLabel(12))
                         .foregroundColor(Theme.textSecondary)
                 }
                 .padding(.bottom, 8)
@@ -109,7 +109,7 @@ struct PasswordHealthView: View {
             .padding(.top, 8)
 
             Text(scoreLabel(for: animatedScore))
-                .font(.system(size: 18, weight: .semibold))
+                .font(.qasa(18, weight: .semibold))
                 .foregroundColor(Theme.textPrimary)
         }
         .frame(maxWidth: .infinity)
@@ -118,7 +118,7 @@ struct PasswordHealthView: View {
 
     private func scoreColor(for score: Int) -> Color {
         switch score {
-        case 80...100: return Theme.mint
+        case 80...100: return Theme.accent
         case 50..<80: return Theme.gold
         default: return Theme.danger
         }
@@ -146,10 +146,10 @@ struct PasswordHealthView: View {
     private func statCard(title: String, value: String, accent: Color) -> some View {
         VStack(spacing: 8) {
             Text(value)
-                .font(.system(size: 28, weight: .bold))
+                .font(.qasa(28, weight: .bold))
                 .foregroundColor(accent)
             Text(title)
-                .font(.system(size: 13))
+                .font(.qasa(13))
                 .foregroundColor(Theme.textSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -200,14 +200,14 @@ struct PasswordHealthIssuesView: View {
                         selectedTab = tab
                     } label: {
                         Text("\(tab.title) (\(count))")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(selected ? Theme.mintOnPrimary : Theme.textSecondary)
+                            .font(.qasa(14, weight: .semibold))
+                            .foregroundColor(selected ? Theme.onAccent : Theme.textSecondary)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 9)
-                            .background(selected ? Theme.mint : Theme.cardBackground)
+                            .background(selected ? Theme.accent : Theme.cardBackground)
                             .clipShape(Capsule())
                             .overlay(
-                                Capsule().stroke(selected ? Theme.mint : Theme.stroke, lineWidth: 1)
+                                Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
                             )
                     }
                     .buttonStyle(.plain)
@@ -276,7 +276,7 @@ struct HalfCircleGauge: View {
                 .trim(from: 0, to: min(max(progress, 0), 1))
                 .stroke(
                     AngularGradient(
-                        colors: [Theme.danger, Theme.gold, Theme.mint],
+                        colors: [Theme.danger, Theme.gold, Theme.accent],
                         center: .center,
                         startAngle: .degrees(180),
                         endAngle: .degrees(360)

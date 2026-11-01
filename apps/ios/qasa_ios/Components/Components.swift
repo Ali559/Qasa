@@ -11,22 +11,20 @@ struct KasoBrandHeader: View {
         HStack(spacing: 12) {
             HStack(spacing: 12) {
                 Image(systemName: "shield.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(theme.mint)
+                    .font(.qasa(16, weight: .semibold))
+                    .foregroundColor(theme.accent)
                     .frame(width: 16, height: 20)
                 Text(L10n.tr("brand.name", locale: prefs.locale))
                     .font(.system(size: titleSize, weight: .heavy))
-                    .foregroundColor(theme.mint)
+                    .foregroundColor(theme.accent)
             }
             Spacer()
             if let trailing { trailing }
         }
         .padding(.horizontal, 16)
         .frame(height: 64)
+        // No divider: the calm redesign lets the header sit on the page background.
         .background(theme.chrome)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(theme.strokeChrome).frame(height: 1)
-        }
     }
 }
 
@@ -44,8 +42,7 @@ struct StatusPill: View {
                 Circle().fill(dotColor).frame(width: 8, height: 8)
             }
             Text(text)
-                .font(.kasoMono(12))
-                .tracking(0.6)
+                .font(.qasaLabel(12))
                 .foregroundColor(textColor ?? theme.textOnChrome)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
@@ -71,13 +68,13 @@ struct PrimaryButton: View {
     var action: () -> Void
 
     var body: some View {
-        let fill = color ?? theme.mint
-        let label = textColor ?? theme.mintOnPrimary
+        let fill = color ?? theme.accent
+        let label = textColor ?? theme.onAccent
         Button(action: action) {
             HStack(spacing: 8) {
                 if let icon {
                     Image(systemName: icon)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.qasa(16, weight: .semibold))
                 }
                 Text(title)
                     .font(.qasa(18, weight: .semibold))
@@ -87,7 +84,7 @@ struct PrimaryButton: View {
             .background(fill)
             .foregroundColor(label)
             .cornerRadius(cornerRadius)
-            .shadow(color: fill == theme.mint ? theme.mint.opacity(0.3) : .clear, radius: 10, y: 0)
+            .shadow(color: fill == theme.accent ? theme.accent.opacity(0.3) : .clear, radius: 10, y: 0)
         }
     }
 }
@@ -120,9 +117,8 @@ struct SectionLabel: View {
     @Environment(\.themePalette) private var theme
     let text: String
     var body: some View {
-        Text(AppTypography.usesRudaw ? text : text.uppercased())
-            .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .kasoMono(12))
-            .tracking(AppTypography.usesRudaw ? 0 : 0.6)
+        Text(text)
+            .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
             .foregroundColor(theme.textSecondary)
     }
 }
@@ -149,7 +145,7 @@ struct ThemedTextField: View {
                 }
             }
             .foregroundColor(theme.textPrimary)
-            .tint(theme.mint)
+            .tint(theme.accent)
             if let trailing { trailing }
         }
         .padding(.horizontal, 16)
@@ -175,7 +171,7 @@ struct StrengthBar: View {
         HStack(spacing: 2) {
             ForEach(0..<segments, id: \.self) { i in
                 Capsule()
-                    .fill(i < filled ? (color ?? theme.mint) : theme.stroke)
+                    .fill(i < filled ? (color ?? theme.accent) : theme.stroke)
                     .frame(height: height)
             }
         }
@@ -196,17 +192,16 @@ struct StatBox: View {
             VStack(spacing: 8) {
                 Image(systemName: icon)
                     .foregroundColor(iconColor)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(label.uppercased())
-                    .font(.kasoMono(12))
-                    .tracking(0.6)
+                    .font(.qasa(16, weight: .semibold))
+                Text(label)
+                    .font(.qasaLabel(12))
                     .foregroundColor(theme.textSecondary)
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(value)
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.qasa(20, weight: .semibold))
                         .foregroundColor(theme.textPrimary)
                     Text(unit)
-                        .font(.system(size: 14))
+                        .font(.qasa(14))
                         .foregroundColor(theme.textSecondary)
                 }
             }
@@ -247,7 +242,7 @@ struct ToggleRow: View {
             Spacer()
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                .tint(theme.mint)
+                .tint(theme.accent)
         }
         .padding(.vertical, 8)
     }
@@ -271,22 +266,22 @@ struct NavChevronRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .foregroundColor(destructive ? theme.danger : theme.textPrimary)
-                    .font(.subheadline.weight(.medium))
+                    .font(.qasa(15, weight: .medium))
                 if let subtitle {
                     Text(subtitle)
                         .foregroundColor(theme.textSecondary)
-                        .font(.caption)
+                        .font(.qasa(12))
                 }
             }
             Spacer()
             if let trailingText {
                 Text(trailingText)
-                    .font(.caption)
+                    .font(.qasa(12))
                     .foregroundColor(theme.textSecondary)
             }
             if !destructive {
                 Image(systemName: "chevron.forward")
-                    .font(.caption)
+                    .font(.qasa(12))
                     .foregroundColor(theme.textTertiary)
             }
         }
@@ -303,12 +298,11 @@ struct PillBadge: View {
 
     var body: some View {
         Text(text)
-            .font(.kasoMono(12))
-            .tracking(0.6)
+            .font(.qasaLabel(12))
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(solid ? color : color.opacity(0.1))
-            .foregroundColor(solid ? theme.mintOnChip : color)
+            .foregroundColor(solid ? theme.onAccentChip : color)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .stroke(solid ? Color.clear : color.opacity(0.2), lineWidth: 1)
@@ -327,7 +321,7 @@ struct CheckToggleStyle: ToggleStyle {
         } label: {
             ZStack {
                 Capsule()
-                    .fill(configuration.isOn ? theme.mint : theme.stroke)
+                    .fill(configuration.isOn ? theme.accent : theme.stroke)
                     .frame(width: 48, height: 24)
 
                 Circle()
@@ -335,7 +329,7 @@ struct CheckToggleStyle: ToggleStyle {
                     .frame(width: 24, height: 24)
                     .overlay(
                         Image(systemName: "checkmark")
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.qasa(11, weight: .bold))
                             .foregroundColor(.white)
                             .opacity(configuration.isOn ? 1 : 0)
                     )
@@ -400,7 +394,7 @@ struct FilterChip: View {
                 .background(selectedBackground)
                 .foregroundColor(selectedForeground)
                 .overlay(
-                    Capsule().stroke(isSelected ? theme.mint : theme.stroke, lineWidth: 1)
+                    Capsule().stroke(isSelected ? theme.accent : theme.stroke, lineWidth: 1)
                 )
                 .clipShape(Capsule())
         }
@@ -410,17 +404,17 @@ struct FilterChip: View {
         guard isSelected else { return theme.cardBackground }
         // Light mode: soft mint fill so chips sit lightly on pale backgrounds.
         if colorScheme == .light {
-            return theme.mint.opacity(0.16)
+            return theme.accent.opacity(0.16)
         }
-        return theme.mintDark
+        return theme.accentDark
     }
 
     private var selectedForeground: Color {
         guard isSelected else { return theme.textSecondary }
         if colorScheme == .light {
-            return theme.mintDark
+            return theme.accentDark
         }
-        return theme.mintOnChip
+        return theme.onAccentChip
     }
 }
 
@@ -433,14 +427,14 @@ struct MintFAB: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(theme.mintOnPrimary)
+                .font(.qasa(18, weight: .bold))
+                .foregroundColor(theme.onAccent)
                 .frame(width: 56, height: 56)
-                .background(theme.mint)
+                .background(theme.accent)
                 .cornerRadius(Theme.cornerRadiusLarge)
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.cornerRadiusLarge)
-                        .stroke(theme.mint.opacity(0.5), lineWidth: 1)
+                        .stroke(theme.accent.opacity(0.5), lineWidth: 1)
                 )
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
         }

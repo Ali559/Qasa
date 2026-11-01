@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct CollectionsView: View {
-    var onOpenMenu: () -> Void
+    var onOpenMenu: (() -> Void)? = nil
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
@@ -82,8 +82,8 @@ struct CollectionsView: View {
         let count = cache.rows.filter { $0.collectionId == collection.id }.count
         return HStack(spacing: 14) {
             Image(systemName: "folder.fill")
-                .font(.system(size: 18))
-                .foregroundColor(Theme.mint)
+                .font(.qasa(18))
+                .foregroundColor(Theme.accent)
                 .frame(width: 48, height: 48)
                 .background(Theme.chrome)
                 .cornerRadius(10)
@@ -94,14 +94,14 @@ struct CollectionsView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(collection.name)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.qasa(16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(String(
                     format: L10n.tr(count == 1 ? "collections.itemCountOne" : "collections.itemCount"),
                     locale: AppLanguage.current.locale,
                     arguments: [count]
                 ))
-                    .font(.system(size: 13))
+                    .font(.qasa(13))
                     .foregroundColor(Theme.textSecondary)
             }
 

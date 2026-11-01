@@ -58,6 +58,26 @@ enum QasaConfig {
     static func notificationURL(id: String) -> URL {
         apiBaseURL.appending(path: "/v1/notifications/\(id)")
     }
+    /// One inbox page; `before` is the previous page's `next_before` (RFC 3339).
+    static func notificationsPageURL(limit: Int, before: String?) -> URL {
+        var items = [URLQueryItem(name: "limit", value: String(limit))]
+        if let before { items.append(URLQueryItem(name: "before", value: before)) }
+        var components = URLComponents(url: notificationsURL, resolvingAgainstBaseURL: false)
+        components?.percentEncodedQueryItems = items.map {
+            URLQueryItem(
+                name: $0.name,
+                value: $0.value?.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+            )
+        }
+        return components?.url ?? notificationsURL
+    }
+    static var notificationsUnreadCountURL: URL {
+        apiBaseURL.appending(path: "/v1/notifications/unread-count")
+    }
+    static var notificationsReadAllURL: URL { apiBaseURL.appending(path: "/v1/notifications/read-all") }
+    static func notificationReadURL(id: String) -> URL {
+        apiBaseURL.appending(path: "/v1/notifications/\(id)/read")
+    }
     static var devicePrefsURL: URL { apiBaseURL.appending(path: "/v1/devices/prefs") }
     static var breachMonitorURL: URL { apiBaseURL.appending(path: "/v1/breach/monitor") }
     static func breachPrefixURL(_ prefix: String) -> URL {

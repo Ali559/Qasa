@@ -83,7 +83,7 @@ struct WelcomePreferencesView: View {
         Theme.background
             .overlay(alignment: .top) {
                 LinearGradient(
-                    colors: [Theme.mint.opacity(0.12), Theme.mint.opacity(0)],
+                    colors: [Theme.accent.opacity(0.12), Theme.accent.opacity(0)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -107,14 +107,14 @@ struct WelcomePreferencesView: View {
                 Spacer(minLength: 8)
                 if selected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(Theme.mint)
+                        .font(.qasa(15, weight: .bold))
+                        .foregroundColor(Theme.accent)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
-            .background(selected ? Theme.mint.opacity(0.08) : Color.clear)
+            .background(selected ? Theme.accent.opacity(0.08) : Color.clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -130,8 +130,8 @@ struct WelcomePreferencesView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: themeIcon(theme))
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(selected ? Theme.mint : Theme.textSecondary)
+                    .font(.qasa(18, weight: .semibold))
+                    .foregroundColor(selected ? Theme.accent : Theme.textSecondary)
                     .frame(width: 28)
                 Text(L10n.tr(theme.displayNameKey, locale: locale))
                     .font(.qasa(17, weight: .semibold))
@@ -139,14 +139,14 @@ struct WelcomePreferencesView: View {
                 Spacer(minLength: 8)
                 if selected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(Theme.mint)
+                        .font(.qasa(15, weight: .bold))
+                        .foregroundColor(Theme.accent)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
-            .background(selected ? Theme.mint.opacity(0.08) : Color.clear)
+            .background(selected ? Theme.accent.opacity(0.08) : Color.clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

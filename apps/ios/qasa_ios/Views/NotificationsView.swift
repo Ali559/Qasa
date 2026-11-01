@@ -10,8 +10,12 @@ struct NotificationsView: View {
     @Environment(AppPreferences.self) private var prefs
     @Query(sort: \AppNotification.createdAt, order: .reverse) private var localNotes: [AppNotification]
 
-    @State private var remote: [AppNotificationDTO] = []
     @State private var selected: AppNotificationDTO?
+    private let service = NotificationService.shared
+    private var remote: [AppNotificationDTO] { service.items }
+    private var remoteHasUnread: Bool {
+        service.unreadCount > 0 || remote.contains { $0.read_at == nil }
+    }
     @State private var errorMessage: String?
 
     private var isEmbedded: Bool { onOpenMenu != nil }
@@ -51,6 +55,21 @@ struct NotificationsView: View {
                                         )
                                     }
                                     .listRowBackground(Theme.cardBackground)
+                                    .onAppear {
+                                        // End of the loaded pages scrolled into view.
+                                        if note.id == remote.last?.id {
+                                            Task { await service.loadMore() }
+                                        }
+                                    }
+                                }
+                                .onDelete { indexSet in
+                                    let ids = indexSet.map { remote[$0].id }
+                                    for id in ids { deleteRemote(id) }
+                                }
+                                if service.hasMore {
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                        .listRowBackground(Theme.cardBackground)
                                 }
                             }
                         }
@@ -86,7 +105,7 @@ struct NotificationsView: View {
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(.caption)
+                    .font(.qasa(12))
                     .foregroundColor(Theme.danger)
                     .padding(.bottom, 8)
             }
@@ -103,10 +122,11 @@ struct NotificationsView: View {
             }
         }
         .task {
-            remote = await NotificationService.shared.fetchList()
+            await service.fetchList()
             if let deepLinkId {
-                if let detail = try? await NotificationService.shared.fetchDetail(id: deepLinkId) {
+                if let detail = try? await service.fetchDetail(id: deepLinkId) {
                     selected = detail
+                    await service.markRead(id: detail.id)
                 }
             }
         }
@@ -119,10 +139,10 @@ struct NotificationsView: View {
                             .foregroundColor(Theme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Text(formatNotificationDate(note.created_at))
-                            .font(.caption)
+                            .font(.qasa(12))
                             .foregroundColor(Theme.textTertiary)
                         Text(note.body(locale: localeCode))
-                            .font(.body)
+                            .font(.qasa(17))
                             .foregroundColor(Theme.textSecondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -142,47 +162,62 @@ struct NotificationsView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .tint(Theme.mint)
+        .tint(Theme.accent)
     }
 
     private func notificationRow(title: String, body: String, date: String, unread: Bool) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Circle()
-                .fill(unread ? Theme.mint : Theme.stroke)
+                .fill(unread ? Theme.accent : Theme.stroke)
                 .frame(width: 8, height: 8)
                 .padding(.top, 6)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(body)
-                    .font(.caption)
+                    .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
                 Text(date)
-                    .font(.caption2)
+                    .font(.qasa(11))
                     .foregroundColor(Theme.textTertiary)
             }
         }
     }
 
+    /// Both sections: local rows in SwiftData, server rows through `read-all`.
     @ViewBuilder
     private var markAllButton: some View {
-        if localNotes.contains(where: { !$0.isRead }) {
+        if remoteHasUnread || localNotes.contains(where: { !$0.isRead }) {
             Button(L10n.tr("notifications.markAllRead", locale: AppPreferences.shared.locale)) {
                 for n in localNotes where !n.isRead { n.isRead = true }
                 try? modelContext.save()
+                if remoteHasUnread {
+                    Task {
+                        if await service.markAllRead() {
+                            errorMessage = nil
+                        } else {
+                            errorMessage = L10n.tr("notifications.actionFailed", locale: locale)
+                        }
+                    }
+                }
             }
-            .font(.caption.weight(.semibold))
-            .foregroundColor(Theme.mint)
+            .font(.qasa(12, weight: .semibold))
+            .foregroundColor(Theme.accent)
         }
     }
 
+    /// Show the row we already have and mark it read on the server.
     private func openRemote(_ note: AppNotificationDTO) async {
-        do {
-            selected = try await NotificationService.shared.fetchDetail(id: note.id)
-            remote = NotificationService.shared.items
-        } catch {
-            errorMessage = error.localizedDescription
+        selected = note
+        await service.markRead(id: note.id)
+    }
+
+    /// Optimistic per-user delete; the row comes back if the server call fails.
+    private func deleteRemote(_ id: String) {
+        if selected?.id == id { selected = nil }
+        service.delete(id: id) { ok in
+            errorMessage = ok ? nil : L10n.tr("notifications.actionFailed", locale: locale)
         }
     }
 

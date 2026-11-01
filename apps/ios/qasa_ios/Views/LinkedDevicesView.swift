@@ -51,7 +51,7 @@ struct LinkedDevicesView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
                             Text(L10n.tr("devices.activeDevices", locale: locale))
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(.qasa(20, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
                             Spacer()
                             if isLoading || isActing {
@@ -83,7 +83,7 @@ struct LinkedDevicesView: View {
                                     Image(systemName: "link.badge.minus")
                                     Text(L10n.tr("devices.unlinkAllOthers", locale: locale))
                                 }
-                                .font(.system(size: 14, weight: .semibold))
+                                .font(.qasa(14, weight: .semibold))
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .foregroundColor(Theme.danger)
@@ -172,12 +172,12 @@ struct LinkedDevicesView: View {
         HStack(spacing: 16) {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.backward")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.qasa(16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .frame(width: 32, height: 32)
             }
             Text(L10n.tr("devices.title", locale: locale))
-                .font(.system(size: 20, weight: .semibold))
+                .font(.qasa(20, weight: .semibold))
                 .foregroundColor(Theme.textOnChrome)
             Spacer()
             StatusPill(
@@ -275,20 +275,20 @@ struct LinkedDevicesView: View {
             } label: {
                 HStack(alignment: .top, spacing: 16) {
                     Image(systemName: platformIcon(device.platform))
-                        .font(.system(size: 28))
-                        .foregroundColor(Theme.mint)
+                        .font(.qasa(28))
+                        .foregroundColor(Theme.accent)
                         .frame(width: 40)
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
                             Text(device.device_name)
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.qasa(16, weight: .bold))
                                 .foregroundColor(Theme.textPrimary)
                                 .multilineTextAlignment(.leading)
                             if isCurrent {
                                 PillBadge(
                                     text: L10n.tr("devices.thisDevice", locale: locale),
-                                    color: Theme.mintDark,
+                                    color: Theme.accentDark,
                                     solid: true
                                 )
                             }
@@ -302,12 +302,12 @@ struct LinkedDevicesView: View {
                         }
 
                         Text(device.platform.uppercased())
-                            .font(.system(size: 13))
+                            .font(.qasa(13))
                             .foregroundColor(Theme.textSecondary)
 
                         if let locationText, !locationText.isEmpty {
                             Label(locationText, systemImage: "mappin.and.ellipse")
-                                .font(.system(size: 13))
+                                .font(.qasa(13))
                                 .foregroundColor(Theme.textSecondary)
                         }
 
@@ -318,7 +318,7 @@ struct LinkedDevicesView: View {
                                     activated
                                 )
                             )
-                            .font(.kasoMono(12))
+                            .font(.qasaLabel(12))
                             .foregroundColor(Theme.textTertiary)
                         }
                     }
@@ -327,7 +327,7 @@ struct LinkedDevicesView: View {
 
                     if !session.isPremium {
                         Image(systemName: "lock.fill")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.qasa(12, weight: .semibold))
                             .foregroundColor(Theme.goldMuted)
                     }
                 }
@@ -368,7 +368,7 @@ struct LinkedDevicesView: View {
                         Image(systemName: "link")
                         Text(L10n.tr("devices.unlink", locale: locale))
                     }
-                    .font(.system(size: 14))
+                    .font(.qasa(14))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 9)
                     .foregroundColor(Theme.textSecondary)
@@ -394,7 +394,7 @@ struct LinkedDevicesView: View {
                     bottomTrailingRadius: 0,
                     topTrailingRadius: 0
                 )
-                .fill(Theme.mint)
+                .fill(Theme.accent)
                 .frame(width: 4)
             }
         }
@@ -413,7 +413,7 @@ struct LinkedDevicesView: View {
                 Image(systemName: systemImage)
                 Text(title)
             }
-            .font(.system(size: 13, weight: .medium))
+            .font(.qasa(13, weight: .medium))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 9)
             .foregroundColor(
@@ -458,10 +458,10 @@ struct LinkedDevicesView: View {
     private func limitExceededBanner(_ error: DeviceLimitErrorBody) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(L10n.tr("devices.limitReached", locale: locale))
-                .font(.system(size: 16, weight: .bold))
+                .font(.qasa(16, weight: .bold))
                 .foregroundColor(Theme.danger)
             Text(error.message)
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
         }
         .padding(17)
@@ -486,10 +486,10 @@ struct LinkedDevicesView: View {
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         Text(L10n.tr("devices.needMore", locale: locale))
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.qasa(16, weight: .bold))
                             .foregroundColor(Theme.gold)
                         Text(L10n.tr("devices.upgradeHint", locale: locale))
-                            .font(.system(size: 14))
+                            .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                             .multilineTextAlignment(.leading)
@@ -518,9 +518,9 @@ struct LinkedDevicesView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "info.circle.fill")
                 .foregroundColor(Theme.info)
-                .font(.system(size: 18))
+                .font(.qasa(18))
             Text(L10n.tr("devices.infoNote", locale: locale))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)

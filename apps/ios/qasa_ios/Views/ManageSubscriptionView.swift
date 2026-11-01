@@ -37,7 +37,7 @@ struct ManageSubscriptionView: View {
                 HStack {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.qasa(14, weight: .semibold))
                             .foregroundColor(Theme.textPrimary)
                             .frame(width: 32, height: 32)
                     }
@@ -60,7 +60,7 @@ struct ManageSubscriptionView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     if isLoading {
                         ProgressView()
-                            .tint(Theme.mint)
+                            .tint(Theme.accent)
                             .frame(maxWidth: .infinity)
                             .padding(.top, 40)
                     } else if let subscription {
@@ -80,7 +80,7 @@ struct ManageSubscriptionView: View {
                     if let statusMessage {
                         Text(statusMessage)
                             .font(.qasa(13))
-                            .foregroundColor(Theme.mint)
+                            .foregroundColor(Theme.accent)
                     }
                     if let errorMessage {
                         Text(errorMessage)
@@ -122,13 +122,12 @@ struct ManageSubscriptionView: View {
                     .foregroundColor(Theme.textPrimary)
                 Spacer()
                 Text(isCancelled ? L10n.tr("sub.cancelling", locale: locale) : L10n.tr("sub.active", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .kasoMono(11))
-                    .tracking(AppTypography.usesRudaw ? 0 : 0.6)
-                    .foregroundColor(isCancelled ? Theme.gold : Theme.mint)
+                    .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .qasaLabel(11))
+                    .foregroundColor(isCancelled ? Theme.gold : Theme.accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .overlay(
-                        Capsule().stroke(isCancelled ? Theme.gold : Theme.mint, lineWidth: 1)
+                        Capsule().stroke(isCancelled ? Theme.gold : Theme.accent, lineWidth: 1)
                     )
             }
 
@@ -172,8 +171,8 @@ struct ManageSubscriptionView: View {
     private var autoRenewCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "arrow.triangle.2.circlepath")
-                .foregroundColor(Theme.mint)
-                .font(.system(size: 18))
+                .foregroundColor(Theme.accent)
+                .font(.qasa(18))
             VStack(alignment: .leading, spacing: 2) {
                 Text(L10n.tr("sub.autoRenew", locale: locale))
                     .font(.qasa(15, weight: .semibold))
@@ -194,7 +193,7 @@ struct ManageSubscriptionView: View {
                 }
             ))
             .labelsHidden()
-            .tint(Theme.mint)
+            .tint(Theme.accent)
             .disabled(isCancelled || isSaving || subscription == nil)
         }
         .padding(16)
@@ -247,7 +246,7 @@ struct ManageSubscriptionView: View {
                     .font(.qasa(15))
 
                 Text(L10n.tr("sub.cancelReasonOptional", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(11) : .kasoMono(11))
+                    .font(AppTypography.usesRudaw ? .qasa(11) : .qasaLabel(11))
                     .foregroundColor(Theme.textSecondary)
 
                 Spacer()

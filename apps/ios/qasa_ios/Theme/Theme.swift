@@ -1,7 +1,9 @@
 import SwiftUI
 import UIKit
 
-/// Semantic color palette for light and dark appearance.
+/// Semantic color palette for light and dark appearance. The calm + personal redesign
+/// (`docs/design/mobile-redesign-mockup.html`): misty lilac base, lavender for actions,
+/// a warm peach wash for "all good". Byte-identical to Android `QasaColors`.
 struct ThemePalette: Equatable {
     let background: Color
     let chrome: Color
@@ -11,10 +13,13 @@ struct ThemePalette: Equatable {
     let stroke: Color
     let strokeChrome: Color
 
-    let mint: Color
-    let mintDark: Color
-    let mintOnPrimary: Color
-    let mintOnChip: Color
+    /// Primary action colour: buttons, selected tabs, links.
+    let accent: Color
+    let accentDark: Color
+    /// Text and icons drawn on an `accent` fill.
+    let onAccent: Color
+    /// Text on a pale `cardMuted` accent chip.
+    let onAccentChip: Color
     let gold: Color
     let goldMuted: Color
     let cyan: Color
@@ -32,60 +37,69 @@ struct ThemePalette: Equatable {
     let textPlaceholder: Color
     let textOnChrome: Color
 
+    /// Warm wash behind the Home status when nothing needs attention.
+    let warm: Color
+    /// Cool wash behind the Home status when something does.
+    let calm: Color
+
     static let dark = ThemePalette(
-        background: Color(hex: "0F172A"),
-        chrome: Color(hex: "131315"),
-        cardBackground: Color(hex: "1E293B"),
-        cardBackgroundLight: Color(hex: "1F1F21"),
-        cardMuted: Color(hex: "1B1B1D"),
-        stroke: Color(hex: "334155"),
-        strokeChrome: Color(hex: "45464D"),
-        mint: Color(hex: "4EDEA3"),
-        mintDark: Color(hex: "00A572"),
-        mintOnPrimary: Color(hex: "003824"),
-        mintOnChip: Color(hex: "00311F"),
-        gold: Color(hex: "FBBF24"),
-        goldMuted: Color(hex: "F59E0B"),
-        cyan: Color(hex: "4CD7F6"),
-        info: Color(hex: "60A5FA"),
-        success: Color(hex: "10B981"),
-        danger: Color(hex: "EF4444"),
-        dangerBackground: Color(hex: "93000A"),
-        dangerText: Color(hex: "FFB4AB"),
-        dangerTextMuted: Color(hex: "FFDAD6"),
-        textPrimary: Color(hex: "E4E2E4"),
-        textSecondary: Color(hex: "C6C6CD"),
-        textTertiary: Color(hex: "64748B"),
-        textPlaceholder: Color(hex: "6B7280"),
-        textOnChrome: Color(hex: "BEC6E0")
+        background: Color(hex: "17152A"),
+        chrome: Color(hex: "17152A"),
+        cardBackground: Color(hex: "221F3A"),
+        cardBackgroundLight: Color(hex: "2A2745"),
+        cardMuted: Color(hex: "2F2B52"),
+        stroke: Color(hex: "332F4F"),
+        strokeChrome: Color(hex: "3A3658"),
+        accent: Color(hex: "A79BFF"),
+        accentDark: Color(hex: "7C6CF2"),
+        onAccent: Color(hex: "1B1640"),
+        onAccentChip: Color(hex: "E8E4FF"),
+        gold: Color(hex: "F5B84A"),
+        goldMuted: Color(hex: "E09A2B"),
+        cyan: Color(hex: "6CC6E3"),
+        info: Color(hex: "8FA6FF"),
+        success: Color(hex: "5CCB97"),
+        danger: Color(hex: "F27F7F"),
+        dangerBackground: Color(hex: "4A2030"),
+        dangerText: Color(hex: "FFB8B8"),
+        dangerTextMuted: Color(hex: "FFD3D3"),
+        textPrimary: Color(hex: "EEECF8"),
+        textSecondary: Color(hex: "B5B1CC"),
+        textTertiary: Color(hex: "7D7998"),
+        textPlaceholder: Color(hex: "7D7998"),
+        textOnChrome: Color(hex: "CFCBE6"),
+        warm: Color(hex: "3D2B3B"),
+        calm: Color(hex: "26233F")
     )
 
     static let light = ThemePalette(
-        background: Color(hex: "F4F6FA"),
-        chrome: Color(hex: "FFFFFF"),
+        background: Color(hex: "F6F4FB"),
+        chrome: Color(hex: "F6F4FB"),
         cardBackground: Color(hex: "FFFFFF"),
-        cardBackgroundLight: Color(hex: "EEF2F7"),
-        cardMuted: Color(hex: "E8EEF6"),
-        stroke: Color(hex: "D0D7E2"),
-        strokeChrome: Color(hex: "CBD5E1"),
-        mint: Color(hex: "00A572"),
-        mintDark: Color(hex: "008F63"),
-        mintOnPrimary: Color(hex: "FFFFFF"),
-        mintOnChip: Color(hex: "00311F"),
-        gold: Color(hex: "D97706"),
-        goldMuted: Color(hex: "B45309"),
-        cyan: Color(hex: "0891B2"),
-        info: Color(hex: "2563EB"),
-        success: Color(hex: "059669"),
-        danger: Color(hex: "DC2626"),
-        dangerBackground: Color(hex: "FEE2E2"),
-        dangerText: Color(hex: "991B1B"),
-        dangerTextMuted: Color(hex: "B91C1C"),
-        textPrimary: Color(hex: "0F172A"),
-        textSecondary: Color(hex: "475569"),
-        textTertiary: Color(hex: "94A3B8"),
-        textPlaceholder: Color(hex: "94A3B8"),
-        textOnChrome: Color(hex: "334155")
+        cardBackgroundLight: Color(hex: "F1EEFA"),
+        cardMuted: Color(hex: "ECE8FD"),
+        stroke: Color(hex: "EBE8F4"),
+        strokeChrome: Color(hex: "E4E0F0"),
+        accent: Color(hex: "7C6CF2"),
+        accentDark: Color(hex: "6656E0"),
+        onAccent: Color(hex: "FFFFFF"),
+        onAccentChip: Color(hex: "3A2FA0"),
+        gold: Color(hex: "E09A2B"),
+        goldMuted: Color(hex: "B7791F"),
+        cyan: Color(hex: "3FA7C9"),
+        info: Color(hex: "5B7CF0"),
+        success: Color(hex: "2F9E6C"),
+        danger: Color(hex: "E45D5D"),
+        dangerBackground: Color(hex: "FDEAEA"),
+        dangerText: Color(hex: "9E2F2F"),
+        dangerTextMuted: Color(hex: "B23C3C"),
+        textPrimary: Color(hex: "24213A"),
+        textSecondary: Color(hex: "6B6785"),
+        textTertiary: Color(hex: "A19DB8"),
+        textPlaceholder: Color(hex: "A19DB8"),
+        textOnChrome: Color(hex: "3A3654"),
+        warm: Color(hex: "FFD9C7"),
+        calm: Color(hex: "E6E3F2")
     )
 
     static func resolved(for scheme: ColorScheme) -> ThemePalette {
@@ -118,10 +132,10 @@ enum Theme {
     static let stroke = Color(light: ThemePalette.light.stroke, dark: ThemePalette.dark.stroke)
     static let strokeChrome = Color(light: ThemePalette.light.strokeChrome, dark: ThemePalette.dark.strokeChrome)
 
-    static let mint = Color(light: ThemePalette.light.mint, dark: ThemePalette.dark.mint)
-    static let mintDark = Color(light: ThemePalette.light.mintDark, dark: ThemePalette.dark.mintDark)
-    static let mintOnPrimary = Color(light: ThemePalette.light.mintOnPrimary, dark: ThemePalette.dark.mintOnPrimary)
-    static let mintOnChip = Color(light: ThemePalette.light.mintOnChip, dark: ThemePalette.dark.mintOnChip)
+    static let accent = Color(light: ThemePalette.light.accent, dark: ThemePalette.dark.accent)
+    static let accentDark = Color(light: ThemePalette.light.accentDark, dark: ThemePalette.dark.accentDark)
+    static let onAccent = Color(light: ThemePalette.light.onAccent, dark: ThemePalette.dark.onAccent)
+    static let onAccentChip = Color(light: ThemePalette.light.onAccentChip, dark: ThemePalette.dark.onAccentChip)
     static let gold = Color(light: ThemePalette.light.gold, dark: ThemePalette.dark.gold)
     static let goldMuted = Color(light: ThemePalette.light.goldMuted, dark: ThemePalette.dark.goldMuted)
     static let cyan = Color(light: ThemePalette.light.cyan, dark: ThemePalette.dark.cyan)
@@ -147,6 +161,8 @@ enum Theme {
         dark: ThemePalette.dark.textPlaceholder
     )
     static let textOnChrome = Color(light: ThemePalette.light.textOnChrome, dark: ThemePalette.dark.textOnChrome)
+    static let warm = Color(light: ThemePalette.light.warm, dark: ThemePalette.dark.warm)
+    static let calm = Color(light: ThemePalette.light.calm, dark: ThemePalette.dark.calm)
 
     /// Legacy aliases (same adaptive tokens).
     static let lightBackground = background
@@ -154,8 +170,9 @@ enum Theme {
     static let lightTextPrimary = textPrimary
     static let lightTextSecondary = textSecondary
 
-    static let cornerRadius: CGFloat = 12
-    static let cornerRadiusLarge: CGFloat = 16
+    // Rounder than before for the calm + personal redesign (matches Android QasaDimens).
+    static let cornerRadius: CGFloat = 20
+    static let cornerRadiusLarge: CGFloat = 24
     static let screenPadding: CGFloat = 20
 }
 
@@ -184,7 +201,13 @@ extension Font {
         .system(size: size, weight: weight, design: .monospaced)
     }
 
-    /// Body / UI text — Rudaw for ckb/ar, system otherwise.
+    /// Small labels, pills and badges: sentence case in the body face. The redesign dropped the
+    /// all-caps monospace labels because they read as technical; `kasoMono` is for secrets only.
+    static func qasaLabel(_ size: CGFloat) -> Font {
+        AppTypography.font(size: size + 1, weight: .medium)
+    }
+
+    /// Body / UI text — Rudaw for ckb/ar, Rubik otherwise.
     static func qasa(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         AppTypography.font(size: size, weight: weight)
     }

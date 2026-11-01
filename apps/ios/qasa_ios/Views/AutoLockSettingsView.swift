@@ -45,7 +45,7 @@ struct AutoLockSettingsView: View {
                                 Spacer()
                                 if prefs.autoLockMinutes == minutes {
                                     Image(systemName: "checkmark")
-                                        .foregroundColor(Theme.mint)
+                                        .foregroundColor(Theme.accent)
                                 }
                             }
                         }

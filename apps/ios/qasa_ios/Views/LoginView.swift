@@ -25,10 +25,10 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(L10n.tr("auth.unlock.title", locale: locale))
-                            .font(.system(size: 28, weight: .heavy))
+                            .font(.qasa(28, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                         Text(L10n.tr("auth.unlock.subtitle", locale: locale))
-                            .font(.system(size: 14))
+                            .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -52,7 +52,7 @@ struct LoginView: View {
 
                         if let errorMessage {
                             Text(errorMessage)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.qasa(13, weight: .medium))
                                 .foregroundColor(Theme.danger)
                         }
                     }
@@ -65,24 +65,23 @@ struct LoginView: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "touchid")
-                                    .font(.system(size: 22))
-                                    .foregroundColor(Theme.mint)
+                                    .font(.qasa(22))
+                                    .foregroundColor(Theme.accent)
                                     .frame(width: 40, height: 40)
                                     .background(Theme.cardBackgroundLight)
                                     .clipShape(Circle())
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(L10n.tr("auth.unlock.biometrics", locale: locale))
-                                        .font(.system(size: 16, weight: .semibold))
+                                        .font(.qasa(16, weight: .semibold))
                                         .foregroundColor(Theme.textPrimary)
                                     Text(L10n.tr("auth.unlock.biometricsHint", locale: locale))
-                                        .font(.kasoMono(12))
-                                        .tracking(0.6)
+                                        .font(.qasaLabel(12))
                                         .foregroundColor(Theme.textSecondary)
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.forward")
-                                    .font(.system(size: 13, weight: .semibold))
+                                    .font(.qasa(13, weight: .semibold))
                                     .foregroundColor(Theme.textTertiary)
                             }
                             .padding(16)
@@ -101,13 +100,13 @@ struct LoginView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 8) {
                                 Image(systemName: "shield.fill")
-                                    .foregroundColor(Theme.mint)
+                                    .foregroundColor(Theme.accent)
                                 Text(L10n.tr("auth.unlock.localOnly", locale: locale))
-                                    .font(.system(size: 16, weight: .semibold))
+                                    .font(.qasa(16, weight: .semibold))
                                     .foregroundColor(Theme.textPrimary)
                             }
                             Text(L10n.tr("auth.unlock.localOnlyBody", locale: locale))
-                                .font(.system(size: 14))
+                                .font(.qasa(14))
                                 .foregroundColor(Theme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

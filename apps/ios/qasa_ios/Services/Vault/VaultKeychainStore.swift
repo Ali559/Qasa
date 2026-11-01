@@ -37,10 +37,12 @@ nonisolated enum VaultKeychainStore {
     static var kdfVersion: Int? {
         get {
             guard let data = data(for: .kdfVersion), data.count == 4 else { return nil }
-            return Int(data[0])
-                | (Int(data[1]) << 8)
-                | (Int(data[2]) << 16)
-                | (Int(data[3]) << 24)
+            // Big-endian, matching the setter. Reading it little-endian turned v1 into
+            // 16777216 and locked every newly created vault out as "made by a newer version".
+            return (Int(data[0]) << 24)
+                | (Int(data[1]) << 16)
+                | (Int(data[2]) << 8)
+                | Int(data[3])
         }
         set {
             setData(newValue.map { v in withUnsafeBytes(of: Int32(v).bigEndian) { Data($0) } },

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct VPNView: View {
-    var onOpenMenu: () -> Void = {}
+    var onOpenMenu: (() -> Void)? = nil
     var onUpgrade: () -> Void = {}
 
     @Environment(AppSession.self) private var session
@@ -36,7 +36,7 @@ struct VPNView: View {
     private var premiumGate: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(L10n.tr("settings.requiresPremium", locale: locale))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
             PrimaryButton(title: L10n.tr("settings.upgradePremium", locale: locale), icon: "star.fill") {
                 onUpgrade()
@@ -116,21 +116,21 @@ struct VPNView: View {
                         .stroke(Theme.cyan.opacity(0.3), lineWidth: 1)
                         .frame(width: 160, height: 160)
                     Circle()
-                        .stroke((vpn.connected ? Theme.mint : Theme.stroke).opacity(0.5), lineWidth: 1)
+                        .stroke((vpn.connected ? Theme.accent : Theme.stroke).opacity(0.5), lineWidth: 1)
                         .frame(width: 140, height: 140)
                     Circle()
                         .fill(Theme.cardBackground)
                         .frame(width: 128, height: 128)
                         .overlay(
-                            Circle().stroke(vpn.connected ? Theme.mint : Theme.stroke, lineWidth: 2)
+                            Circle().stroke(vpn.connected ? Theme.accent : Theme.stroke, lineWidth: 2)
                         )
-                        .shadow(color: vpn.connected ? Theme.mint.opacity(0.4) : .clear, radius: 20)
+                        .shadow(color: vpn.connected ? Theme.accent.opacity(0.4) : .clear, radius: 20)
                     if vpn.isBusy {
                         ProgressView()
                     } else {
                         Image(systemName: "power")
-                            .font(.system(size: 36, weight: .medium))
-                            .foregroundColor(vpn.connected ? Theme.mint : Theme.textSecondary)
+                            .font(.qasa(36, weight: .medium))
+                            .foregroundColor(vpn.connected ? Theme.accent : Theme.textSecondary)
                     }
                 }
             }
@@ -143,8 +143,7 @@ struct VPNView: View {
                     .font(.qasa(20, weight: .semibold))
                     .foregroundColor(vpn.connected ? Theme.success : Theme.textSecondary)
                 Text(L10n.tr("vpn.sessionOnly", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(12) : .kasoMono(12))
-                    .tracking(AppTypography.usesRudaw ? 0 : 0.6)
+                    .font(AppTypography.usesRudaw ? .qasa(12) : .qasaLabel(12))
                     .foregroundColor(Theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -196,10 +195,9 @@ struct VPNView: View {
     private func metricCard(icon: String, label: String, value: String, highlighted: Bool) -> some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .foregroundColor(Theme.mint)
-            Text(AppTypography.usesRudaw ? label : label.uppercased())
-                .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .kasoMono(12))
-                .tracking(AppTypography.usesRudaw ? 0 : 0.6)
+                .foregroundColor(Theme.accent)
+            Text(label)
+                .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
                 .foregroundColor(Theme.textSecondary)
             Text(value)
                 .font(.system(size: 16, design: .monospaced))
@@ -211,7 +209,7 @@ struct VPNView: View {
         .cornerRadius(Theme.cornerRadius)
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(highlighted ? Theme.mint : Theme.stroke, lineWidth: highlighted ? 1.5 : 1)
+                .stroke(highlighted ? Theme.accent : Theme.stroke, lineWidth: highlighted ? 1.5 : 1)
         )
     }
 }

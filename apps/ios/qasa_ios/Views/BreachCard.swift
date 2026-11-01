@@ -12,7 +12,7 @@ struct BreachCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
                 Text(breach.title)
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.qasa(18, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 PillBadge(
                     text: breach.status == .unresolved ? L10n.tr("breach.unresolved") : L10n.tr("breach.resolved"),
@@ -22,13 +22,12 @@ struct BreachCard: View {
             }
 
             Text(String(format: L10n.tr("breach.breachDate"), breach.breachDate, breach.discoveredDate))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
 
             FlowLayout(spacing: 8) {
                 Text(L10n.tr("breach.compromised"))
-                    .font(.kasoMono(12))
-                    .tracking(0.6)
+                    .font(.qasaLabel(12))
                     .foregroundColor(Theme.textTertiary)
                     .padding(.trailing, 4)
 
@@ -70,10 +69,9 @@ struct BreachCard: View {
     private func compromisedChip(_ field: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: fieldIcon(field))
-                .font(.system(size: 10))
+                .font(.qasa(10))
             Text(field)
-                .font(.kasoMono(12))
-                .tracking(0.6)
+                .font(.qasaLabel(12))
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
@@ -92,7 +90,7 @@ struct BreachCard: View {
                 Image(systemName: "key.fill")
                 Text(L10n.tr("breach.rotatePassword"))
             }
-            .font(.system(size: 14))
+            .font(.qasa(14))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
             .foregroundColor(Theme.danger)
@@ -110,7 +108,7 @@ struct BreachCard: View {
             Image(systemName: "checkmark")
             Text(L10n.tr("breach.actionTaken"))
         }
-        .font(.system(size: 14))
+        .font(.qasa(14))
         .frame(maxWidth: .infinity)
         .padding(.vertical, 11)
         .foregroundColor(Theme.textTertiary)

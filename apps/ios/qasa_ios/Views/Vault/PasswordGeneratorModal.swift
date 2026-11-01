@@ -28,8 +28,8 @@ struct PasswordGeneratorModal: View {
                         .font(.qasa(17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Theme.mint)
-                        .foregroundColor(Theme.mintOnChip)
+                        .background(Theme.accent)
+                        .foregroundColor(Theme.onAccentChip)
                         .cornerRadius(Theme.cornerRadius)
                 }
                 .padding(.horizontal, Theme.screenPadding)
@@ -67,8 +67,8 @@ final class PasswordGeneratorModel: ObservableObject {
         switch score {
         case 0...3: return (L10n.tr("gen.weak"), 1, Theme.danger)
         case 4...5: return (L10n.tr("gen.fair"), 2, Theme.gold)
-        case 6...7: return (L10n.tr("gen.strong"), 4, Theme.mint)
-        default: return (L10n.tr("gen.veryStrong"), 5, Theme.mint)
+        case 6...7: return (L10n.tr("gen.strong"), 4, Theme.accent)
+        default: return (L10n.tr("gen.veryStrong"), 5, Theme.accent)
         }
     }
 
@@ -119,7 +119,7 @@ struct PasswordGeneratorContent: View {
     private var generatedPasswordCard: some View {
         ZStack {
             LinearGradient(
-                colors: [Theme.mint.opacity(0.1), .clear],
+                colors: [Theme.accent.opacity(0.1), .clear],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -155,12 +155,12 @@ struct PasswordGeneratorContent: View {
                     .font(.qasa(14))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
-                    .background(Theme.mintDark.opacity(0.2))
-                    .foregroundColor(Theme.mint)
+                    .background(Theme.accentDark.opacity(0.2))
+                    .foregroundColor(Theme.accent)
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.mint.opacity(0.3), lineWidth: 1)
+                            .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
                     )
                 }
             }
@@ -178,13 +178,12 @@ struct PasswordGeneratorContent: View {
         CardContainer(padding: compact ? 14 : 17, cornerRadius: Theme.cornerRadiusLarge) {
             HStack {
                 Text(L10n.tr("gen.strength"))
-                    .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .kasoMono(12))
-                    .tracking(AppTypography.usesRudaw ? 0 : 0.6)
+                    .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
                     .foregroundColor(Theme.textSecondary)
                 Spacer()
                 Text(model.strengthLabel.text)
                     .font(.qasa(14))
-                    .foregroundColor(Theme.mint)
+                    .foregroundColor(Theme.accent)
             }
             StrengthBar(
                 segments: 5,
@@ -206,8 +205,8 @@ struct PasswordGeneratorContent: View {
                             .foregroundColor(Theme.textPrimary)
                         Spacer()
                         Text("\(Int(model.length))")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(Theme.mint)
+                            .font(.qasa(20, weight: .semibold))
+                            .foregroundColor(Theme.accent)
                             .padding(.horizontal, 13)
                             .padding(.vertical, 5)
                             .background(Theme.cardMuted)
@@ -218,7 +217,7 @@ struct PasswordGeneratorContent: View {
                             )
                     }
                     Slider(value: $model.length, in: 8...32, step: 1)
-                        .tint(Theme.mint)
+                        .tint(Theme.accent)
                         .onChange(of: model.length) { _, _ in model.regenerate() }
                 }
 

@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 import LocalAuthentication
 
 struct SettingsView: View {
-    var onOpenMenu: () -> Void = {}
+    var onOpenMenu: (() -> Void)? = nil
     var onLogout: (() -> Void)? = nil
 
     @Environment(AppSession.self) private var session
@@ -97,8 +97,8 @@ struct SettingsView: View {
                             SectionLabel(text: L10n.tr("settings.linkedDevices", locale: locale))
                             Spacer()
                             Text(String(format: L10n.tr("settings.activeCount", locale: locale), linkedDeviceCount))
-                                .font(.kasoMono(12))
-                                .foregroundColor(Theme.mint)
+                                .font(.qasaLabel(12))
+                                .foregroundColor(Theme.accent)
                         }
                         CardContainer {
                             Button { showLinkedDevices = true } label: {
@@ -106,7 +106,7 @@ struct SettingsView: View {
                                     icon: "iphone",
                                     title: UIDevice.current.name,
                                     subtitle: L10n.tr("settings.thisDevice", locale: locale),
-                                    iconColor: Theme.mint
+                                    iconColor: Theme.accent
                                 )
                             }
                             .buttonStyle(.plain)
@@ -223,8 +223,8 @@ struct SettingsView: View {
 
                     if let statusMessage {
                         Text(statusMessage)
-                            .font(.caption)
-                            .foregroundColor(Theme.mint)
+                            .font(.qasa(12))
+                            .foregroundColor(Theme.accent)
                     }
                 }
                 .padding(Theme.screenPadding)
@@ -316,7 +316,7 @@ struct SettingsView: View {
         CardContainer {
             HStack(spacing: 12) {
                 Circle()
-                    .stroke(Theme.mint, lineWidth: 2)
+                    .stroke(Theme.accent, lineWidth: 2)
                     .frame(width: 56, height: 56)
                     .overlay(
                         Image(systemName: "person.fill")
@@ -325,25 +325,25 @@ struct SettingsView: View {
                     )
                 VStack(alignment: .leading, spacing: 4) {
                     Text(session.displayName)
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.qasa(16, weight: .bold))
                         .foregroundColor(Theme.textPrimary)
                     Text(session.email)
-                        .font(.system(size: 14))
+                        .font(.qasa(14))
                         .foregroundColor(Theme.textSecondary)
                     HStack(spacing: 4) {
                         Image(systemName: session.isPremium ? "trophy.fill" : "person")
-                            .font(.system(size: 10))
+                            .font(.qasa(10))
                         Text(
                             session.isPremium
                                 ? L10n.tr("settings.premiumAccount", locale: locale)
                                 : L10n.tr("settings.freeAccount", locale: locale)
                         )
-                        .font(.kasoMono(12))
+                        .font(.qasaLabel(12))
                     }
-                    .foregroundColor(session.isPremium ? Theme.mint : Theme.textSecondary)
+                    .foregroundColor(session.isPremium ? Theme.accent : Theme.textSecondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .overlay(Capsule().stroke(session.isPremium ? Theme.mint : Theme.stroke, lineWidth: 1))
+                    .overlay(Capsule().stroke(session.isPremium ? Theme.accent : Theme.stroke, lineWidth: 1))
                 }
                 Spacer()
             }
@@ -354,7 +354,7 @@ struct SettingsView: View {
                         ? L10n.tr("settings.manageSubscription", locale: locale)
                         : L10n.tr("settings.upgradePremium", locale: locale)
                 )
-                .font(.system(size: 14, weight: .medium))
+                .font(.qasa(14, weight: .medium))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .background(Theme.cardBackgroundLight)

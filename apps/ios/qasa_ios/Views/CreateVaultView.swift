@@ -37,10 +37,10 @@ struct CreateVaultView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(L10n.tr("auth.create.title", locale: locale))
-                            .font(.system(size: 28, weight: .heavy))
+                            .font(.qasa(28, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                         Text(L10n.tr("auth.create.subtitle", locale: locale))
-                            .font(.system(size: 14))
+                            .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                         if onPairExisting != nil {
@@ -48,8 +48,8 @@ struct CreateVaultView: View {
                                 onPairExisting?()
                             } label: {
                                 Text(L10n.tr("auth.create.pairExisting", locale: locale))
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(Theme.mint)
+                                    .font(.qasa(14, weight: .semibold))
+                                    .foregroundColor(Theme.accent)
                             }
                             .padding(.top, 4)
                         }
@@ -77,14 +77,12 @@ struct CreateVaultView: View {
                             VStack(spacing: 4) {
                                 HStack {
                                     Text(L10n.tr("auth.create.strength", locale: locale))
-                                        .font(.kasoMono(12))
-                                        .tracking(0.6)
+                                        .font(.qasaLabel(12))
                                         .foregroundColor(Theme.textSecondary)
                                     Spacer()
                                     Text(strength.label)
-                                        .font(.kasoMono(12))
-                                        .tracking(0.6)
-                                        .foregroundColor(Theme.mint)
+                                        .font(.qasaLabel(12))
+                                        .foregroundColor(Theme.accent)
                                 }
                                 StrengthBar(segments: 3, filled: strength.filled, color: strength.color)
                             }
@@ -105,7 +103,7 @@ struct CreateVaultView: View {
 
                     if let errorMessage {
                         Text(errorMessage)
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.qasa(13, weight: .medium))
                             .foregroundColor(Theme.danger)
                     }
 
@@ -116,21 +114,20 @@ struct CreateVaultView: View {
                                     .fill(Theme.cardBackgroundLight)
                                     .frame(width: 40, height: 40)
                                 Image(systemName: "touchid")
-                                    .foregroundColor(Theme.mint)
+                                    .foregroundColor(Theme.accent)
                             }
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(L10n.tr("auth.create.enableBiometrics", locale: locale))
-                                    .font(.system(size: 16))
+                                    .font(.qasa(16))
                                     .foregroundColor(Theme.textPrimary)
                                 Text(L10n.tr("auth.create.biometricsHint", locale: locale))
-                                    .font(.kasoMono(12))
-                                    .tracking(0.6)
+                                    .font(.qasaLabel(12))
                                     .foregroundColor(Theme.textSecondary)
                             }
                             Spacer()
                             Toggle("", isOn: $biometricsEnabled)
                                 .labelsHidden()
-                                .tint(Theme.mint)
+                                .tint(Theme.accent)
                         }
                     }
                     .padding(.top, 12)
@@ -139,8 +136,8 @@ struct CreateVaultView: View {
                         ZStack {
                             GeometryReader { geo in
                                 Image(systemName: "shield.fill")
-                                    .font(.system(size: 88, weight: .bold))
-                                    .foregroundStyle(Theme.mint.opacity(0.14))
+                                    .font(.qasa(88, weight: .bold))
+                                    .foregroundStyle(Theme.accent.opacity(0.14))
                                     // Pin to the physical trailing edge so RTL does not leave a hollow watermark on the leading side.
                                     .position(x: geo.size.width - 8, y: 28)
                                     .allowsHitTesting(false)
@@ -148,14 +145,14 @@ struct CreateVaultView: View {
 
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(spacing: 8) {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundColor(Theme.goldMuted)
+                                    Image(systemName: "lock.fill")
+                                        .foregroundColor(Theme.accent)
                                     Text(L10n.tr("auth.create.zeroKnowledge", locale: locale))
-                                        .font(.system(size: 20, weight: .semibold))
-                                        .foregroundColor(Theme.goldMuted)
+                                        .font(.qasa(16, weight: .semibold))
+                                        .foregroundColor(Theme.textPrimary)
                                 }
                                 Text(L10n.tr("auth.create.zeroKnowledgeBody", locale: locale))
-                                    .font(.system(size: 14))
+                                    .font(.qasa(14))
                                     .foregroundColor(Theme.textSecondary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
@@ -167,8 +164,8 @@ struct CreateVaultView: View {
                     if let onLogin {
                         Button(action: onLogin) {
                             Text(L10n.tr("auth.create.alreadyHave", locale: locale))
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Theme.mint)
+                                .font(.qasa(14, weight: .semibold))
+                                .foregroundColor(Theme.accent)
                                 .frame(maxWidth: .infinity)
                         }
                         .padding(.top, 8)

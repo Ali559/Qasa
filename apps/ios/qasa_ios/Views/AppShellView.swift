@@ -1,96 +1,113 @@
 import SwiftUI
 import SwiftData
 
+/// The four destinations that replaced the side menu in the calm + personal redesign.
+enum ShellTab: Hashable {
+    case home, passwords, alerts, you
+}
+
+/// Four bottom tabs (Home, Passwords, Alerts, You) replace the side menu. Every other page
+/// opens on top of the current tab with a back chevron and no tab bar; back returns to the tab.
+/// Mirrors Android `AppShellScreen`.
 struct AppShellView: View {
     var onLogout: (() -> Void)? = nil
 
     @Environment(AppSession.self) private var session
-    @State private var showMenu = false
-    @State private var page: AppPage = .vault
+    @Environment(AppPreferences.self) private var prefs
+    @State private var tab: ShellTab = .home
+    @State private var page: AppPage?
 
     var body: some View {
         ZStack {
-            Group {
-                switch page {
-                case .vault:
+            TabView(selection: $tab) {
+                Tab(L10n.tr("tab.home", locale: prefs.locale), systemImage: "house", value: ShellTab.home) {
+                    HomeView(onOpen: open, onTab: { tab = $0 })
+                }
+                Tab(L10n.tr("tab.passwords", locale: prefs.locale), systemImage: "key", value: ShellTab.passwords) {
                     NavigationStack {
-                        VaultListView(onOpenMenu: openMenu)
+                        VaultListView()
                     }
-                case .notifications:
-                    NotificationsView(onOpenMenu: openMenu)
-                case .generator:
-                    GeneratorView(onOpenMenu: openMenu)
-                case .passwordHealth:
-                    NavigationStack {
-                        PasswordHealthView(onOpenMenu: openMenu)
-                    }
-                case .breachMonitoring:
-                    BreachMonitorView(
-                        onOpenMenu: openMenu,
-                        onUpgrade: { selectPage(.premiumUpgrade) }
-                    )
-                case .vpn:
-                    VPNView(
-                        onOpenMenu: openMenu,
-                        onUpgrade: { selectPage(.premiumUpgrade) }
-                    )
-                case .collections:
-                    NavigationStack {
-                        CollectionsView(onOpenMenu: openMenu)
-                    }
-                case .settings:
-                    SettingsView(onOpenMenu: openMenu, onLogout: onLogout)
-                case .terms:
-                    LegalPlaceholderView(
-                        title: L10n.tr("nav.terms", locale: AppPreferences.shared.locale),
-                        onOpenMenu: openMenu,
-                        bodyText: L10n.tr("legal.termsBody", locale: AppPreferences.shared.locale)
-                    )
-                case .privacy:
-                    LegalPlaceholderView(
-                        title: L10n.tr("nav.privacy", locale: AppPreferences.shared.locale),
-                        onOpenMenu: openMenu,
-                        bodyText: L10n.tr("legal.privacyBody", locale: AppPreferences.shared.locale)
-                    )
-                case .premiumUpgrade:
-                    PremiumUpgradeView(onOpenMenu: openMenu, embedded: true)
+                }
+                Tab(L10n.tr("tab.alerts", locale: prefs.locale), systemImage: "bell.badge", value: ShellTab.alerts) {
+                    BreachMonitorView(onUpgrade: { open(.premiumUpgrade) })
+                }
+                Tab(L10n.tr("tab.you", locale: prefs.locale), systemImage: "person.crop.circle", value: ShellTab.you) {
+                    YouView(onOpen: open)
                 }
             }
             .environment(session)
 
-            if showMenu {
-                SideMenuView(
-                    isPresented: $showMenu,
-                    currentPage: page,
-                    onSelect: selectPage,
-                    onUpgrade: {
-                        selectPage(.premiumUpgrade)
-                    }
-                )
-                .environment(session)
-                .zIndex(10)
+            if let page {
+                pageContent(page)
+                    .environment(session)
+                    .themedBackground()
+                    .transition(.move(edge: .trailing))
+                    .zIndex(10)
             }
         }
-        .tint(Theme.mint)
+        .tint(Theme.accent)
         .onReceive(NotificationCenter.default.publisher(for: .qasaOpenNotifications)) { _ in
-            selectPage(.notifications)
+            open(.notifications)
         }
     }
 
-    private func openMenu() {
+    private func back() {
+        withAnimation(.easeOut(duration: 0.22)) { page = nil }
+    }
+
+    private func open(_ next: AppPage) {
         withAnimation(.easeOut(duration: 0.22)) {
-            showMenu = true
+            if next.requiresPremium && !session.isPremium {
+                page = .premiumUpgrade
+            } else if next == .vault {
+                // The two pages that became tabs switch tabs instead of stacking.
+                page = nil
+                tab = .passwords
+            } else if next == .breachMonitoring {
+                page = nil
+                tab = .alerts
+            } else {
+                page = next
+            }
         }
     }
 
-    private func selectPage(_ next: AppPage) {
-        if next.requiresPremium && !session.isPremium {
-            page = .premiumUpgrade
-        } else {
-            page = next
-        }
-        withAnimation(.easeOut(duration: 0.2)) {
-            showMenu = false
+    @ViewBuilder
+    private func pageContent(_ page: AppPage) -> some View {
+        switch page {
+        case .notifications:
+            NotificationsView(onOpenMenu: back)
+        case .generator:
+            GeneratorView(onOpenMenu: back)
+        case .passwordHealth:
+            NavigationStack {
+                PasswordHealthView(onOpenMenu: back)
+            }
+        case .vpn:
+            VPNView(onOpenMenu: back, onUpgrade: { open(.premiumUpgrade) })
+        case .collections:
+            NavigationStack {
+                CollectionsView(onOpenMenu: back)
+            }
+        case .settings:
+            SettingsView(onOpenMenu: back, onLogout: onLogout)
+        case .terms:
+            LegalPlaceholderView(
+                title: L10n.tr("nav.terms", locale: prefs.locale),
+                onOpenMenu: back,
+                bodyText: L10n.tr("legal.termsBody", locale: prefs.locale)
+            )
+        case .privacy:
+            LegalPlaceholderView(
+                title: L10n.tr("nav.privacy", locale: prefs.locale),
+                onOpenMenu: back,
+                bodyText: L10n.tr("legal.privacyBody", locale: prefs.locale)
+            )
+        case .premiumUpgrade:
+            PremiumUpgradeView(onOpenMenu: back, embedded: true)
+        case .vault, .breachMonitoring:
+            // Tabs, never stacked: `open` routes these to their tab.
+            EmptyView()
         }
     }
 }
@@ -98,5 +115,6 @@ struct AppShellView: View {
 #Preview {
     AppShellView()
         .environment(AppSession())
+        .environment(AppPreferences.shared)
         .modelContainer(for: VaultSchema.models, inMemory: true)
 }

@@ -51,10 +51,10 @@ struct LANSyncView: View {
     private var premiumBody: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(L10n.tr("lan.secureTitle", locale: locale))
-                .font(.system(size: 22, weight: .bold))
+                .font(.qasa(22, weight: .bold))
                 .foregroundColor(Theme.textPrimary)
             Text(L10n.tr("lan.secureBody", locale: locale))
-                .font(.system(size: 14))
+                .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
 
             Picker(L10n.tr("common.mode", locale: locale), selection: $mode) {
@@ -66,8 +66,8 @@ struct LANSyncView: View {
             ThemedTextField(icon: "number", placeholder: "6-digit code", text: $pairCode)
 
             Text(validationMessage ?? sync.statusMessage)
-                .font(.kasoMono(12))
-                .foregroundColor(Theme.mint)
+                .font(.qasaLabel(12))
+                .foregroundColor(Theme.accent)
 
             PrimaryButton(
                 title: mode == .host

@@ -292,19 +292,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Try searching all vault items."
+            "value": "Try searching all your passwords."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "جرّب البحث في كل عناصر الخزنة."
+            "value": "جرّب البحث في جميع كلمات مرورك."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "هەموو ئایتمەکانی قەڵا بگەڕێ."
+            "value": "لە هەموو وشە نهێنییەکانت بگەڕێ."
           }
         }
       }
@@ -380,19 +380,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock vault"
+            "value": "Unlock Qasa"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "فتح الخزنة"
+            "value": "افتح Qasa"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کردنەوەی قەڵا"
+            "value": "Qasa بکەرەوە"
           }
         }
       }
@@ -446,7 +446,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wrong master password."
+            "value": "That's not the right main password."
           }
         },
         "ar": {
@@ -458,7 +458,7 @@
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "وشەی نهێنی سەرەکی هەڵەیە."
+            "value": "ئەوە وشەی نهێنی سەرەکی دروست نییە."
           }
         }
       }
