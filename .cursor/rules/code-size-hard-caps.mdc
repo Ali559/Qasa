@@ -1,0 +1,38 @@
+---
+description: Hard caps for file and function size across all Qasa codebases
+alwaysApply: true
+---
+
+# Code size hard caps
+
+Enforce these limits on **new and edited** code. If a change would push a file over a hard cap, split first. Do not expand already-oversized files without extracting.
+
+## Caps (lines)
+
+| Codebase | Soft prefer | Hard max | Function / method hard max |
+|---|---|---|---|
+| iOS Swift (`qasa/**/*.swift`) | 250 | **400** | **50** |
+| Android Kotlin (`qasa_android/**/*.kt`) | 250 | **400** | **50** |
+| Rust server (`server/**/*.rs`) | 250 | **400** | **50** |
+| Dashboard Vue/TS (`dashboard/src/**/*.{vue,ts}`) | 150 | **300** | **40** |
+
+Count physical lines (including blanks/comments). Nested helpers inside a function count toward that function.
+
+## Soft vs hard
+
+- **Soft**: Prefer splitting when crossed (extract view/composable/module/helper).
+- **Hard**: Must split before merging more logic. Agent must not add net lines past hard max.
+
+## Exempt
+
+- Generated code (`**/build/**`, `**/generated/**`, `**/dist/**`, KSP/Hilt outputs)
+- Vendor / shadcn UI copies under `dashboard/src/components/ui/**` (do not grow further; wrap instead)
+- SQL migrations, lockfiles, asset catalogs, proto/schema dumps
+- One-off data tables (e.g. large static enum maps) — still prefer split by domain
+
+## Shared principles
+
+- One primary type / screen / route module per file when practical
+- Prefer many small pure helpers over one god function
+- Extract when a function has >3 responsibilities or deeply nested control flow (>3 levels)
+- New files should start under the soft prefer target

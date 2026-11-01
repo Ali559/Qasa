@@ -1,0 +1,169 @@
+package alibarznji.qasa.screens.vault
+
+import alibarznji.qasa.R
+import alibarznji.qasa.screens.vault.editor.EditorEnv
+import alibarznji.qasa.screens.vault.editor.EditorFields
+import alibarznji.qasa.screens.vault.editor.PasswordGeneratorSheet
+import alibarznji.qasa.screens.vault.editor.PhoneOption
+import alibarznji.qasa.screens.vault.editor.canSave
+import alibarznji.qasa.screens.vault.editor.typeLabelRes
+import alibarznji.qasa.theme.PrimaryButton
+import alibarznji.qasa.theme.QasaConfirmDialog
+import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.StickyBottomBar
+import alibarznji.qasa.vault.VaultItemKind
+import alibarznji.qasa.vault.VaultPayload
+import alibarznji.qasa.vault.VaultRepository
+import alibarznji.qasa.vault.db.VaultCollectionEntity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class EditorViewModel @Inject constructor(val repo: VaultRepository) : ViewModel() {
+    /** iOS `CollectionPickerField`'s `@Query` over `VaultCollection`. */
+    val collections: StateFlow<List<VaultCollectionEntity>> =
+        repo.observeCollections().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** iOS `AddressPhonePicker.phones`: every row whose decrypted payload is a Phone. */
+    suspend fun loadPhones(): List<PhoneOption> =
+        repo.getAllRows()
+            .filter { it.kind == VaultItemKind.PersonalInfo }
+            .mapNotNull { row ->
+                val payload = runCatching { repo.getPayload(row.id) }.getOrNull()
+                if (payload is VaultPayload.Phone) PhoneOption(row.id, row.displayName) else null
+            }
+
+    fun createCollection(name: String, onCreated: (String) -> Unit) {
+        viewModelScope.launch {
+            runCatching { repo.saveCollection(null, name) }.onSuccess(onCreated)
+        }
+    }
+}
+
+/**
+ * Port of iOS `VaultItemEditor` + `VaultFormChrome` (Views/Vault/VaultItemEditor.swift,
+ * FormHelpers.swift:156). Per-kind fields live in `editor/`.
+ */
+@Composable
+fun VaultItemEditorSheetContent(
+    initial: VaultPayload,
+    existingId: String?,
+    onDone: () -> Unit,
+    vm: EditorViewModel = hiltViewModel(),
+) {
+    var payload by remember(initial) { mutableStateOf(initial) }
+    var saving by remember { mutableStateOf(false) }
+    var saveError by remember { mutableStateOf<String?>(null) }
+    var showGenerator by remember { mutableStateOf(false) }
+    var phones by remember { mutableStateOf<List<PhoneOption>?>(null) }
+    val collections by vm.collections.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
+    val isEditing = existingId != null
+
+    // Only the address form links a phone; skip decrypting the vault for other kinds.
+    val needsPhones = payload is VaultPayload.Address
+    LaunchedEffect(needsPhones) {
+        if (needsPhones && phones == null) phones = runCatching { vm.loadPhones() }.getOrDefault(emptyList())
+    }
+
+    val env = EditorEnv(
+        collections = collections,
+        phones = phones,
+        onCreateCollection = vm::createCollection,
+        onGeneratePassword = { showGenerator = true },
+    )
+
+    Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
+        SheetChromeHeader(
+            title = stringResource(
+                if (isEditing) R.string.vault_editfmt else R.string.vault_newfmt,
+                stringResource(initial.typeLabelRes()),
+            ),
+            onDismiss = onDone,
+            dismissLabel = stringResource(R.string.common_cancel),
+        )
+        Column(
+            Modifier
+                .weight(1f, fill = false)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = QasaDimens.screenPadding)
+                .padding(top = QasaDimens.contentGap, bottom = QasaDimens.gap),
+        ) {
+            EditorFields(payload = payload, env = env, onChange = { payload = it })
+        }
+        StickyBottomBar {
+            PrimaryButton(
+                title = stringResource(if (isEditing) R.string.common_update else R.string.common_save),
+                // iOS: `.disabled(!canSave)` where canSave = non-blank displayName.
+                enabled = payload.canSave() && !saving,
+                onClick = {
+                    saving = true
+                    scope.launch {
+                        try {
+                            vm.repo.save(existingId, payload)
+                            onDone()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            saveError = e.localizedMessage ?: e.toString()
+                        } finally {
+                            saving = false
+                        }
+                    }
+                },
+            )
+        }
+    }
+
+    if (showGenerator) {
+        PasswordGeneratorSheet(
+            onDismiss = { showGenerator = false },
+            onUsePassword = { generated ->
+                (payload as? VaultPayload.Login)?.let { payload = it.copy(password = generated) }
+                showGenerator = false
+            },
+        )
+    }
+
+    saveError?.let { message ->
+        // iOS `.alert("vault.couldNotSave")` with a single OK.
+        QasaConfirmDialog(
+            title = stringResource(R.string.vault_couldnotsave),
+            message = message,
+            confirmLabel = stringResource(R.string.common_ok),
+            onConfirm = { saveError = null },
+            onDismiss = { saveError = null },
+            dismissLabel = null,
+            destructive = false,
+        )
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "app_name": {
+    "en": "Qasa",
+    "ar": "قاسا",
+    "ckb": "قاسا"
+  },
+  "autofill_service_description": {
+    "en": "Qasa password autofill",
+    "ar": "التعبئة التلقائية لكلمات مرور قاسا",
+    "ckb": "پڕکردنەوەی خۆکاری وشەی نهێنی قاسا"
+  }
+}

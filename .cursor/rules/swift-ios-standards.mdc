@@ -1,0 +1,42 @@
+---
+description: SwiftUI / iOS coding standards, size caps, and principles for qasa_ios
+globs: qasa/**/*.swift
+alwaysApply: false
+---
+
+# Swift / SwiftUI (iOS)
+
+Caps: soft **250** / hard **400** lines per file; functions **≤50** lines. Split views before growing past hard cap.
+
+## Principles (Context7 / Apple-aligned)
+
+- Prefer modern `@Observable` models owned with `@State`; mark observable classes `@MainActor`
+- View-owned state (`@State`, `@AppStorage`, env reads) is `private`; inputs (`let`, `@Binding`, `@Bindable`) are not
+- Decompose large views so state changes only re-evaluate affected subviews; use child `View` types or `Equatable` views for expensive branches
+- Prefer granular dependencies for list rows; avoid stuffing frequently changing values into `Environment`
+- Use `LazyVStack` / `LazyHStack` / `List` for long collections
+- Keep `body` declarative: side effects in `.task` / `.onChange`, not in computed layout
+
+## Structure
+
+- Screens in `Views/`; reusable UI in `Components/`; networking/persistence in `Services/`; models in `Models/`
+- One screen (or tightly related helpers) per file; extract rows, sheets, and form sections into sibling files when approaching soft cap
+- Prefer value types (`struct`) for models; `final class` only for shared services / observables
+
+## Do / Don't
+
+```swift
+// ❌ God view with mixed state + networking inline
+// ✅ Screen owns UI state; repository/service owns I/O; child views own isolated UI
+
+struct RowView: View {
+    let title: String
+    @Binding var isOn: Bool
+    @State private var expanded = false  // private view state
+    var body: some View { /* ≤50 lines or extract */ }
+}
+```
+
+- No force-unwraps in production paths; use `guard` / `if let` / `Result`
+- Avoid `AnyView` unless type erasure is required
+- Match existing Theme/Components APIs; do not invent parallel design tokens

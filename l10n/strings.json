@@ -1,0 +1,3241 @@
+{
+  "a11y.addItem": {
+    "en": "Add item",
+    "ar": "إضافة عنصر",
+    "ckb": "زیادکردنی بابەت"
+  },
+  "a11y.removeMonitor": {
+    "en": "Stop watching %1$@ for leaks",
+    "ar": "إيقاف متابعة %1$@ بحثًا عن تسريبات",
+    "ckb": "چیتر %1$@ بۆ دزە سەیر مەکە"
+  },
+  "a11y.back": {
+    "en": "Back",
+    "ar": "رجوع",
+    "ckb": "گەڕانەوە"
+  },
+  "a11y.copy": {
+    "en": "Copy",
+    "ar": "نسخ",
+    "ckb": "لەبەرگرتنەوە"
+  },
+  "a11y.healthScore": {
+    "en": "Password health score %d of 100",
+    "ar": "درجة صحة كلمة المرور %d من 100",
+    "ckb": "پلەی تەندروستی وشەی نهێنی %d لە 100"
+  },
+  "a11y.hidePassword": {
+    "en": "Hide password",
+    "ar": "إخفاء كلمة المرور",
+    "ckb": "شاردنەوەی وشەی نهێنی"
+  },
+  "a11y.selected": {
+    "en": "Selected",
+    "ar": "محدد",
+    "ckb": "هەڵبژێردراو"
+  },
+  "a11y.showPassword": {
+    "en": "Show password",
+    "ar": "إظهار كلمة المرور",
+    "ckb": "پیشاندانی وشەی نهێنی"
+  },
+  "a11y.strengthBar": {
+    "en": "Password strength, %1$d of %2$d",
+    "ar": "قوة كلمة المرور، %1$d من %2$d",
+    "ckb": "بەهێزی وشەی نهێنی، %1$d لە %2$d"
+  },
+  "a11y.vpnDial": {
+    "en": "VPN power button, %@",
+    "ar": "زر طاقة الشبكة الافتراضية، %@",
+    "ckb": "دوگمەی وزەی VPN، %@"
+  },
+  "auth.create.alreadyHave": {
+    "en": "I already use Qasa",
+    "ar": "أستخدم Qasa بالفعل",
+    "ckb": "پێشتر Qasa بەکاردەهێنم"
+  },
+  "auth.create.biometrics": {
+    "en": "Unlock with your fingerprint or face",
+    "ar": "الفتح ببصمة الإصبع أو الوجه",
+    "ckb": "کردنەوە بە پەنجەمۆر یان ڕوخسار"
+  },
+  "auth.create.biometricsHint": {
+    "en": "Open Qasa without typing your password",
+    "ar": "افتح Qasa دون كتابة كلمة المرور",
+    "ckb": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
+  },
+  "auth.create.button": {
+    "en": "Get started",
+    "ar": "ابدأ",
+    "ckb": "دەستپێبکە"
+  },
+  "auth.create.buttonLocal": {
+    "en": "Get started",
+    "ar": "ابدأ",
+    "ckb": "دەستپێبکە"
+  },
+  "auth.create.confirmPassword": {
+    "en": "Type it again",
+    "ar": "اكتبها مرة أخرى",
+    "ckb": "دووبارە بینووسەوە"
+  },
+  "auth.create.enableBiometrics": {
+    "en": "Use fingerprint or face",
+    "ar": "استخدم البصمة أو الوجه",
+    "ckb": "پەنجەمۆر یان ڕوخسار بەکاربهێنە"
+  },
+  "auth.create.enterPassword": {
+    "en": "Enter a main password.",
+    "ar": "أدخل كلمة مرور رئيسية.",
+    "ckb": "وشەی نهێنی سەرەکی بنووسە."
+  },
+  "auth.create.fair": {
+    "en": "Fair",
+    "ar": "متوسطة",
+    "ckb": "مامناوەند"
+  },
+  "auth.create.mismatch": {
+    "en": "Passwords do not match.",
+    "ar": "كلمتا المرور غير متطابقتين.",
+    "ckb": "وشە نهێنییەکان یەک ناگرنەوە."
+  },
+  "auth.create.pairExisting": {
+    "en": "I already have Qasa on another device",
+    "ar": "لدي Qasa بالفعل على جهاز آخر",
+    "ckb": "پێشتر Qasaم لەسەر ئامێرێکی تر هەیە"
+  },
+  "auth.create.reenter": {
+    "en": "Re-enter password",
+    "ar": "أعد إدخال كلمة المرور",
+    "ckb": "دووبارە وشەی نهێنی بنووسە"
+  },
+  "auth.create.strength": {
+    "en": "Strength",
+    "ar": "القوة",
+    "ckb": "هێز"
+  },
+  "auth.create.strong": {
+    "en": "Strong",
+    "ar": "قوية",
+    "ckb": "بەهێز"
+  },
+  "auth.create.subtitle": {
+    "en": "This one password opens all your other passwords. Pick something you'll remember.",
+    "ar": "كلمة المرور هذه تفتح جميع كلمات مرورك الأخرى. اختر شيئًا ستتذكره.",
+    "ckb": "ئەم یەک وشە نهێنییە هەموو وشە نهێنییەکانی ترت دەکاتەوە. شتێک هەڵبژێرە کە لەبیرت بمێنێت."
+  },
+  "auth.create.title": {
+    "en": "Choose your main password",
+    "ar": "اختر كلمة مرورك الرئيسية",
+    "ckb": "وشەی نهێنی سەرەکیت هەڵبژێرە"
+  },
+  "auth.create.weak": {
+    "en": "Weak",
+    "ar": "ضعيفة",
+    "ckb": "لاواز"
+  },
+  "auth.create.zeroKnowledge": {
+    "en": "Only you can see your passwords",
+    "ar": "أنت وحدك من يرى كلمات مرورك",
+    "ckb": "تەنها تۆ دەتوانیت وشە نهێنییەکانت ببینیت"
+  },
+  "auth.create.zeroKnowledgeBody": {
+    "en": "Not even Qasa can see them or reset your main password. If you forget it, your saved passwords can't be recovered.",
+    "ar": "حتى Qasa لا يمكنه رؤيتها أو إعادة تعيين كلمة مرورك الرئيسية. إذا نسيتها، لا يمكن استعادة كلمات المرور المحفوظة.",
+    "ckb": "تەنانەت Qasa ناتوانێت بیانبینێت یان وشەی نهێنی سەرەکیت ڕێکبخاتەوە. ئەگەر لەبیرت چوو، وشە نهێنییە پاشەکەوتکراوەکانت ناگەڕێنەوە."
+  },
+  "auth.securingVault": {
+    "en": "Getting things ready…",
+    "ar": "جارٍ التجهيز…",
+    "ckb": "ئامادەکردن…"
+  },
+  "auth.unlock.biometrics": {
+    "en": "Use fingerprint or face",
+    "ar": "استخدم البصمة أو الوجه",
+    "ckb": "پەنجەمۆر یان ڕوخسار بەکاربهێنە"
+  },
+  "auth.unlock.biometricsFailed": {
+    "en": "That didn't work. Enter your main password instead.",
+    "ar": "لم ينجح ذلك. أدخل كلمة مرورك الرئيسية بدلًا من ذلك.",
+    "ckb": "سەرکەوتوو نەبوو. لەبری ئەوە وشەی نهێنی سەرەکیت بنووسە."
+  },
+  "auth.unlock.biometricsHint": {
+    "en": "Open Qasa without typing your password",
+    "ar": "افتح Qasa دون كتابة كلمة المرور",
+    "ckb": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
+  },
+  "auth.unlock.button": {
+    "en": "Unlock",
+    "ar": "فتح",
+    "ckb": "کردنەوە"
+  },
+  "auth.unlock.enableBiometricsHint": {
+    "en": "You can turn on fingerprint or face unlock in Settings.",
+    "ar": "يمكنك تفعيل الفتح بالبصمة أو الوجه من الإعدادات.",
+    "ckb": "دەتوانیت کردنەوە بە پەنجەمۆر یان ڕوخسار لە ڕێکخستنەکان چالاک بکەیت."
+  },
+  "auth.unlock.localOnly": {
+    "en": "Private to you",
+    "ar": "خاصة بك وحدك",
+    "ckb": "تەنها بۆ تۆ"
+  },
+  "auth.unlock.localOnlyBody": {
+    "en": "Your passwords stay on this phone. Qasa can't reset your main password.",
+    "ar": "تبقى كلمات مرورك على هذا الهاتف. لا يمكن لـ Qasa إعادة تعيين كلمة مرورك الرئيسية.",
+    "ckb": "وشە نهێنییەکانت لەسەر ئەم مۆبایلە دەمێننەوە. Qasa ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە."
+  },
+  "auth.unlock.masterPassword": {
+    "en": "Main password",
+    "ar": "كلمة المرور الرئيسية",
+    "ckb": "وشەی نهێنی سەرەکی"
+  },
+  "auth.unlock.placeholder": {
+    "en": "Enter password",
+    "ar": "أدخل كلمة المرور",
+    "ckb": "وشەی نهێنی بنووسە"
+  },
+  "auth.unlock.subtitle": {
+    "en": "Enter your main password to see your passwords.",
+    "ar": "أدخل كلمة مرورك الرئيسية لرؤية كلمات مرورك.",
+    "ckb": "وشەی نهێنی سەرەکیت بنووسە بۆ بینینی وشە نهێنییەکانت."
+  },
+  "auth.unlock.title": {
+    "en": "Welcome back",
+    "ar": "مرحبًا بعودتك",
+    "ckb": "بەخێربێیتەوە"
+  },
+  "auth.unlock.wrongPassword": {
+    "en": "That's not the right main password. Try again.",
+    "ar": "كلمة المرور الرئيسية غير صحيحة. حاول مرة أخرى.",
+    "ckb": "ئەوە وشەی نهێنی سەرەکی دروست نییە. دووبارە هەوڵبدەرەوە."
+  },
+  "autofill.bank": {
+    "en": "Bank",
+    "ar": "بنك",
+    "ckb": "بانک"
+  },
+  "autofill.biometricFailed": {
+    "en": "Biometric unlock failed.",
+    "ar": "فشل الفتح البيومتري.",
+    "ckb": "کردنەوە بە بایۆمەتری سەرکەوتوو نەبوو."
+  },
+  "autofill.card": {
+    "en": "Card",
+    "ar": "بطاقة",
+    "ckb": "کارت"
+  },
+  "autofill.cardNumber": {
+    "en": "Card number",
+    "ar": "رقم البطاقة",
+    "ckb": "ژمارەی کارت"
+  },
+  "autofill.copied": {
+    "en": "Copied",
+    "ar": "تم النسخ",
+    "ckb": "لەبەرگیرا"
+  },
+  "autofill.copy": {
+    "en": "Copy",
+    "ar": "نسخ",
+    "ckb": "لەبەرگرتنەوە"
+  },
+  "autofill.cvv": {
+    "en": "CVV",
+    "ar": "CVV",
+    "ckb": "CVV"
+  },
+  "autofill.decryptFailed": {
+    "en": "Could not decrypt item.",
+    "ar": "تعذّر فك تشفير العنصر.",
+    "ckb": "نەتوانرا ئایتمەکە دەکۆد بکرێت."
+  },
+  "autofill.expiresIn": {
+    "en": "Expires in %ds",
+    "ar": "ينتهي خلال %dث",
+    "ckb": "لە %d چرکەدا بەسەر دەچێت"
+  },
+  "autofill.expiryDate": {
+    "en": "Expiry date",
+    "ar": "تاريخ الانتهاء",
+    "ckb": "بەرواری بەسەرچوون"
+  },
+  "autofill.nameOnCard": {
+    "en": "Name on card",
+    "ar": "الاسم على البطاقة",
+    "ckb": "ناو لەسەر کارت"
+  },
+  "autofill.noMatches": {
+    "en": "No matches",
+    "ar": "لا توجد مطابقات",
+    "ckb": "هیچ هاوتایەک نییە"
+  },
+  "autofill.noMatchesHint": {
+    "en": "Try searching all your passwords.",
+    "ar": "جرّب البحث في جميع كلمات مرورك.",
+    "ckb": "لە هەموو وشە نهێنییەکانت بگەڕێ."
+  },
+  "autofill.search": {
+    "en": "Search",
+    "ar": "بحث",
+    "ckb": "گەڕان"
+  },
+  "autofill.title": {
+    "en": "Qasa Autofill",
+    "ar": "تعبئة Qasa التلقائية",
+    "ckb": "پڕکردنەوەی خۆکاری Qasa"
+  },
+  "autofill.unlock": {
+    "en": "Unlock",
+    "ar": "فتح",
+    "ckb": "کردنەوە"
+  },
+  "autofill.unlockTitle": {
+    "en": "Unlock Qasa",
+    "ar": "افتح Qasa",
+    "ckb": "Qasa بکەرەوە"
+  },
+  "autofill.unlocking": {
+    "en": "Unlocking…",
+    "ar": "جارٍ الفتح…",
+    "ckb": "دەکرێتەوە…"
+  },
+  "autofill.useBiometrics": {
+    "en": "Use Face ID / Touch ID",
+    "ar": "استخدم Face ID / Touch ID",
+    "ckb": "Face ID / Touch ID بەکاربهێنە"
+  },
+  "autofill.wrongPassword": {
+    "en": "That's not the right main password.",
+    "ar": "كلمة المرور الرئيسية غير صحيحة.",
+    "ckb": "ئەوە وشەی نهێنی سەرەکی دروست نییە."
+  },
+  "brand.localOffline": {
+    "en": "Stays on this phone",
+    "ar": "تبقى على هذا الهاتف",
+    "ckb": "لەسەر ئەم مۆبایلە دەمێنێتەوە"
+  },
+  "brand.name": {
+    "en": "Qasa",
+    "ar": "Qasa",
+    "ckb": "Qasa"
+  },
+  "breach.actionTaken": {
+    "en": "Action Taken",
+    "ar": "تم اتخاذ إجراء",
+    "ckb": "کرداری ئەنجامدراو"
+  },
+  "breach.addEmail": {
+    "en": "Add Email",
+    "ar": "إضافة بريد",
+    "ckb": "زیادکردنی ئیمەیڵ"
+  },
+  "breach.addToMonitoring": {
+    "en": "Watch this email",
+    "ar": "تابع هذا البريد",
+    "ckb": "ئەم ئیمەیڵە بپشکنە"
+  },
+  "breach.atRisk": {
+    "en": "At Risk",
+    "ar": "معرّض للخطر",
+    "ckb": "لە مەترسیدایە"
+  },
+  "breach.breachDate": {
+    "en": "Leaked: %@ • Found: %@",
+    "ar": "تسرّب: %@ • اكتُشف: %@",
+    "ckb": "دزەکرد: %@ • دۆزرایەوە: %@"
+  },
+  "breach.breaches": {
+    "en": "Leaks",
+    "ar": "التسريبات",
+    "ckb": "دزەکان"
+  },
+  "breach.compromised": {
+    "en": "What leaked:",
+    "ar": "ما الذي تسرّب:",
+    "ckb": "چی دزەی کرد:"
+  },
+  "breach.dateLine": {
+    "en": "Leaked: %@ • Found: %@",
+    "ar": "تسرّب: %@ • اكتُشف: %@",
+    "ckb": "دزەکرد: %@ • دۆزرایەوە: %@"
+  },
+  "breach.detected": {
+    "en": "Your email was in a data leak",
+    "ar": "ظهر بريدك في تسريب بيانات",
+    "ckb": "ئیمەیڵەکەت لە دزەی زانیاریدا بووە"
+  },
+  "breach.emailMonitoring": {
+    "en": "Emails we watch for you",
+    "ar": "البريد الذي نتابعه لك",
+    "ckb": "ئەو ئیمەیڵانەی بۆت دەپشکنین"
+  },
+  "breach.emailPlaceholder": {
+    "en": "Enter email address...",
+    "ar": "أدخل عنوان البريد...",
+    "ckb": "ناونیشانی ئیمەیڵ بنووسە..."
+  },
+  "breach.emailsField": {
+    "en": "Emails",
+    "ar": "رسائل البريد",
+    "ckb": "ئیمەیڵەکان"
+  },
+  "breach.free": {
+    "en": "Free",
+    "ar": "مجاني",
+    "ckb": "بەخۆڕایی"
+  },
+  "breach.freeHint": {
+    "en": "Get an alert when one of your emails shows up in a data leak, and see what to change. Included with Premium.",
+    "ar": "احصل على تنبيه عندما يظهر أحد بريدك في تسريب بيانات، واعرف ما يجب تغييره. متاح مع بريميوم.",
+    "ckb": "ئاگادار بکرێیتەوە کاتێک یەکێک لە ئیمەیڵەکانت لە دزەی زانیاریدا دەردەکەوێت، و بزانە چی بگۆڕیت. لەگەڵ پریمیەم بەردەستە."
+  },
+  "breach.limitMessage": {
+    "en": "Your plan can watch up to %lld emails.",
+    "ar": "يمكن لخطتك متابعة حتى %lld بريدًا.",
+    "ckb": "پلانەکەت دەتوانێت تا %lld ئیمەیڵ بپشکنێت."
+  },
+  "breach.monitoredEmails": {
+    "en": "Emails we watch for you",
+    "ar": "البريد الذي نتابعه لك",
+    "ckb": "ئەو ئیمەیڵانەی بۆت دەپشکنین"
+  },
+  "breach.noResolved": {
+    "en": "Nothing fixed yet.",
+    "ar": "لم يتم إصلاح شيء بعد.",
+    "ckb": "هێشتا هیچ شتێک چاک نەکراوە."
+  },
+  "breach.noUnresolved": {
+    "en": "No leaks to fix. You're all set.",
+    "ar": "لا توجد تسريبات لإصلاحها. كل شيء على ما يرام.",
+    "ckb": "هیچ دزەیەک نییە بۆ چاککردن. هەموو شتێک باشە."
+  },
+  "breach.noneMonitored": {
+    "en": "Add an email and we'll tell you if it shows up in a data leak.",
+    "ar": "أضف بريدًا وسنخبرك إذا ظهر في تسريب بيانات.",
+    "ckb": "ئیمەیڵێک زیاد بکە و پێت دەڵێین ئەگەر لە دزەی زانیاریدا دەرکەوت."
+  },
+  "breach.noneResolved": {
+    "en": "Nothing fixed yet.",
+    "ar": "لم يتم إصلاح شيء بعد.",
+    "ckb": "هێشتا هیچ شتێک چاک نەکراوە."
+  },
+  "breach.noneUnresolved": {
+    "en": "No leaks to fix. You're all set.",
+    "ar": "لا توجد تسريبات لإصلاحها. كل شيء على ما يرام.",
+    "ckb": "هیچ دزەیەک نییە بۆ چاککردن. هەموو شتێک باشە."
+  },
+  "breach.noneYet": {
+    "en": "Add an email and we'll tell you if it shows up in a data leak.",
+    "ar": "أضف بريدًا وسنخبرك إذا ظهر في تسريب بيانات.",
+    "ckb": "ئیمەیڵێک زیاد بکە و پێت دەڵێین ئەگەر لە دزەی زانیاریدا دەرکەوت."
+  },
+  "breach.premium": {
+    "en": "Premium",
+    "ar": "بريميوم",
+    "ckb": "پریمیۆم"
+  },
+  "breach.recentScan": {
+    "en": "Recent scan",
+    "ar": "فحص حديث",
+    "ckb": "سکانکردنی نوێ"
+  },
+  "breach.removeEmailMessage": {
+    "en": "Stop watching “%@” for leaks?",
+    "ar": "إيقاف متابعة “%@” بحثًا عن تسريبات؟",
+    "ckb": "چیتر “%@” بۆ دزە مەپشکنە؟"
+  },
+  "breach.removeEmailTitle": {
+    "en": "Remove Email?",
+    "ar": "إزالة البريد؟",
+    "ckb": "ئیمەیڵ لاببرێت؟"
+  },
+  "breach.resolved": {
+    "en": "Resolved",
+    "ar": "محلولة",
+    "ckb": "چارەسەرکراو"
+  },
+  "breach.rotatePassword": {
+    "en": "Rotate Password",
+    "ar": "تغيير كلمة المرور",
+    "ckb": "گۆڕینی وشەی نهێنی"
+  },
+  "breach.saving": {
+    "en": "Saving…",
+    "ar": "جارٍ الحفظ…",
+    "ckb": "پاشەکەوتکردن…"
+  },
+  "breach.secure": {
+    "en": "Secure",
+    "ar": "آمن",
+    "ckb": "پارێزراو"
+  },
+  "breach.slotLimitMessage": {
+    "en": "Your plan can watch up to %lld emails.",
+    "ar": "يمكن لخطتك متابعة حتى %lld بريدًا.",
+    "ckb": "پلانەکەت دەتوانێت تا %lld ئیمەیڵ بپشکنێت."
+  },
+  "breach.slotLimitTitle": {
+    "en": "Slot Limit Reached",
+    "ar": "تم بلوغ حد الفتحات",
+    "ckb": "سنووری شوێن گەیشت"
+  },
+  "breach.slotsUsed": {
+    "en": "%lld of %lld slots used",
+    "ar": "%lld من %lld فتحات مستخدمة",
+    "ckb": "%lld لە %lld شوێن بەکارهاتووە"
+  },
+  "breach.stopTitle": {
+    "en": "Stop watching %@?",
+    "ar": "إيقاف متابعة %@؟",
+    "ckb": "پشکنینی %@ بوەستێنرێت؟"
+  },
+  "breach.title": {
+    "en": "Email leak alerts",
+    "ar": "تنبيهات تسريب البريد",
+    "ckb": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
+  },
+  "breach.unresolved": {
+    "en": "Unresolved",
+    "ar": "غير محلولة",
+    "ckb": "چارەسەرنەکراو"
+  },
+  "breach.upgradeHint": {
+    "en": "Get an alert when one of your emails shows up in a data leak, and see what to change. Included with Premium.",
+    "ar": "احصل على تنبيه عندما يظهر أحد بريدك في تسريب بيانات، واعرف ما يجب تغييره. متاح مع بريميوم.",
+    "ckb": "ئاگادار بکرێیتەوە کاتێک یەکێک لە ئیمەیڵەکانت لە دزەی زانیاریدا دەردەکەوێت، و بزانە چی بگۆڕیت. لەگەڵ پریمیەم بەردەستە."
+  },
+  "collections.assignHint": {
+    "en": "Assign items to “%@” from the item editor.",
+    "ar": "عيّن العناصر إلى “%@” من محرر العنصر.",
+    "ckb": "بڕگەکان بۆ “%@” لە دەستکاریکەری بڕگە دیاری بکە."
+  },
+  "collections.createTitle": {
+    "en": "New Collection",
+    "ar": "مجموعة جديدة",
+    "ckb": "کۆکراوەی نوێ"
+  },
+  "collections.deleteMessage": {
+    "en": "Items stay in your vault but will no longer belong to this collection.",
+    "ar": "تبقى العناصر في خزنتك لكنها لن تنتمي لهذه المجموعة.",
+    "ckb": "بڕگەکان لە کۆگا دەمێننەوە بەڵام چیتر سەر بەم کۆکراوەیە نابن."
+  },
+  "collections.deleteTitle": {
+    "en": "Delete Collection?",
+    "ar": "حذف المجموعة؟",
+    "ckb": "کۆکراوە بسڕدرێتەوە؟"
+  },
+  "collections.empty": {
+    "en": "Tap + to create your first collection.",
+    "ar": "اضغط + لإنشاء مجموعتك الأولى.",
+    "ckb": "کرتە لە + بکە بۆ دروستکردنی یەکەم کۆکراوە."
+  },
+  "collections.emptyCollectionTitle": {
+    "en": "Empty Collection",
+    "ar": "مجموعة فارغة",
+    "ckb": "کۆکراوەی بەتاڵ"
+  },
+  "collections.itemCount": {
+    "en": "%lld items",
+    "ar": "%lld عناصر",
+    "ckb": "%lld بڕگە"
+  },
+  "collections.itemCountOne": {
+    "en": "%lld item",
+    "ar": "%lld عنصر",
+    "ckb": "%lld بڕگە"
+  },
+  "collections.noneTitle": {
+    "en": "No Collections",
+    "ar": "لا توجد مجموعات",
+    "ckb": "هیچ کۆکراوەیەک نییە"
+  },
+  "collections.rename": {
+    "en": "Rename Collection",
+    "ar": "إعادة تسمية المجموعة",
+    "ckb": "گۆڕینی ناوی کۆکراوە"
+  },
+  "color.blue": {
+    "en": "Blue",
+    "ar": "أزرق",
+    "ckb": "شین"
+  },
+  "color.gold": {
+    "en": "Gold",
+    "ar": "ذهبي",
+    "ckb": "زێڕ"
+  },
+  "color.gray": {
+    "en": "Gray",
+    "ar": "رمادي",
+    "ckb": "خۆڵەمێشی"
+  },
+  "color.mint": {
+    "en": "Mint",
+    "ar": "نعناعي",
+    "ckb": "مینت"
+  },
+  "color.purple": {
+    "en": "Purple",
+    "ar": "أرجواني",
+    "ckb": "مۆر"
+  },
+  "color.red": {
+    "en": "Red",
+    "ar": "أحمر",
+    "ckb": "سور"
+  },
+  "common.add": {
+    "en": "Add",
+    "ar": "إضافة",
+    "ckb": "زیادکردن"
+  },
+  "common.back": {
+    "en": "Back",
+    "ar": "رجوع",
+    "ckb": "گەڕانەوە"
+  },
+  "common.cancel": {
+    "en": "Cancel",
+    "ar": "إلغاء",
+    "ckb": "هەڵوەشاندنەوە"
+  },
+  "common.close": {
+    "en": "Close",
+    "ar": "إغلاق",
+    "ckb": "داخستن"
+  },
+  "common.continue": {
+    "en": "Continue",
+    "ar": "متابعة",
+    "ckb": "بەردەوامبوون"
+  },
+  "common.create": {
+    "en": "Create",
+    "ar": "إنشاء",
+    "ckb": "دروستکردن"
+  },
+  "common.delete": {
+    "en": "Delete",
+    "ar": "حذف",
+    "ckb": "سڕینەوە"
+  },
+  "common.done": {
+    "en": "Done",
+    "ar": "تم",
+    "ckb": "تەواو"
+  },
+  "common.edit": {
+    "en": "Edit",
+    "ar": "تعديل",
+    "ckb": "دەستکاری"
+  },
+  "common.mode": {
+    "en": "Mode",
+    "ar": "الوضع",
+    "ckb": "دۆخ"
+  },
+  "common.name": {
+    "en": "Name",
+    "ar": "الاسم",
+    "ckb": "ناو"
+  },
+  "common.no": {
+    "en": "No",
+    "ar": "لا",
+    "ckb": "نەخێر"
+  },
+  "common.none": {
+    "en": "None",
+    "ar": "لا شيء",
+    "ckb": "هیچ"
+  },
+  "common.ok": {
+    "en": "OK",
+    "ar": "حسناً",
+    "ckb": "باشە"
+  },
+  "common.remove": {
+    "en": "Remove",
+    "ar": "إزالة",
+    "ckb": "لابردن"
+  },
+  "common.save": {
+    "en": "Save",
+    "ar": "حفظ",
+    "ckb": "پاشەکەوت"
+  },
+  "common.skip": {
+    "en": "Skip",
+    "ar": "تخطي",
+    "ckb": "تێپەڕاندن"
+  },
+  "common.update": {
+    "en": "Update",
+    "ar": "تحديث",
+    "ckb": "نوێکردنەوە"
+  },
+  "common.yes": {
+    "en": "Yes",
+    "ar": "نعم",
+    "ckb": "بەڵێ"
+  },
+  "copy.accountHolder": {
+    "en": "Copy Account Holder",
+    "ar": "نسخ صاحب الحساب",
+    "ckb": "لەبەرگرتنەوەی خاوەنی هەژمار"
+  },
+  "copy.accountNumber": {
+    "en": "Copy Account Number",
+    "ar": "نسخ رقم الحساب",
+    "ckb": "لەبەرگرتنەوەی ژمارەی هەژمار"
+  },
+  "copy.address": {
+    "en": "Copy Address",
+    "ar": "نسخ العنوان",
+    "ckb": "لەبەرگرتنەوەی ناونیشان"
+  },
+  "copy.city": {
+    "en": "Copy City",
+    "ar": "نسخ المدينة",
+    "ckb": "لەبەرگرتنەوەی شار"
+  },
+  "copy.company": {
+    "en": "Copy Company",
+    "ar": "نسخ الشركة",
+    "ckb": "لەبەرگرتنەوەی کۆمپانیا"
+  },
+  "copy.content": {
+    "en": "Copy Content",
+    "ar": "نسخ المحتوى",
+    "ckb": "لەبەرگرتنەوەی ناوەڕۆک"
+  },
+  "copy.email": {
+    "en": "Copy Email",
+    "ar": "نسخ البريد",
+    "ckb": "لەبەرگرتنەوەی ئیمەیڵ"
+  },
+  "copy.expiry": {
+    "en": "Copy Expiry",
+    "ar": "نسخ تاريخ الانتهاء",
+    "ckb": "لەبەرگرتنەوەی بەرواری بەسەرچوون"
+  },
+  "copy.jobTitle": {
+    "en": "Copy Job Title",
+    "ar": "نسخ المسمى الوظيفي",
+    "ckb": "لەبەرگرتنەوەی ناونیشانی کار"
+  },
+  "copy.name": {
+    "en": "Copy Name",
+    "ar": "نسخ الاسم",
+    "ckb": "لەبەرگرتنەوەی ناو"
+  },
+  "copy.number": {
+    "en": "Copy Number",
+    "ar": "نسخ الرقم",
+    "ckb": "لەبەرگرتنەوەی ژمارە"
+  },
+  "copy.password": {
+    "en": "Copy Password",
+    "ar": "نسخ كلمة المرور",
+    "ckb": "لەبەرگرتنەوەی وشەی نهێنی"
+  },
+  "copy.phone": {
+    "en": "Copy Phone Number",
+    "ar": "نسخ رقم الهاتف",
+    "ckb": "لەبەرگرتنەوەی ژمارەی تەلەفۆن"
+  },
+  "copy.routingNumber": {
+    "en": "Copy Routing Number",
+    "ar": "نسخ رقم التوجيه",
+    "ckb": "لەبەرگرتنەوەی ژمارەی ڕێڕەو"
+  },
+  "copy.securityCode": {
+    "en": "Copy Security Code",
+    "ar": "نسخ رمز الأمان",
+    "ckb": "لەبەرگرتنەوەی کۆدی پاراستن"
+  },
+  "copy.username": {
+    "en": "Copy Username",
+    "ar": "نسخ اسم المستخدم",
+    "ckb": "لەبەرگرتنەوەی ناوی بەکارهێنەر"
+  },
+  "copy.website": {
+    "en": "Copy Website",
+    "ar": "نسخ الموقع",
+    "ckb": "لەبەرگرتنەوەی وێبسایت"
+  },
+  "copy.zip": {
+    "en": "Copy Zip Code",
+    "ar": "نسخ الرمز البريدي",
+    "ckb": "لەبەرگرتنەوەی کۆدی پۆستە"
+  },
+  "date.done": {
+    "en": "Done",
+    "ar": "تم",
+    "ckb": "تەواو"
+  },
+  "date.hourAgo": {
+    "en": "1 hour ago",
+    "ar": "منذ ساعة",
+    "ckb": "١ کاتژمێر لەمەوبەر"
+  },
+  "date.hoursAgo": {
+    "en": "%lld hours ago",
+    "ar": "منذ %lld ساعة",
+    "ckb": "%lld کاتژمێر لەمەوبەر"
+  },
+  "date.invalidFormat": {
+    "en": "Use e.g. Nov 6 2000",
+    "ar": "مثال: ٦ نوفمبر ٢٠٠٠",
+    "ckb": "وەک نموونە: ٦ Nov ٢٠٠٠"
+  },
+  "date.justNow": {
+    "en": "Just now",
+    "ar": "الآن",
+    "ckb": "ئێستا"
+  },
+  "date.minuteAgo": {
+    "en": "1 minute ago",
+    "ar": "منذ دقيقة",
+    "ckb": "١ خولەک لەمەوبەر"
+  },
+  "date.minutesAgo": {
+    "en": "%lld minutes ago",
+    "ar": "منذ %lld دقيقة",
+    "ckb": "%lld خولەک لەمەوبەر"
+  },
+  "date.pick": {
+    "en": "Pick date",
+    "ar": "اختر تاريخًا",
+    "ckb": "بەروار هەڵبژێرە"
+  },
+  "devices.activatedAt": {
+    "en": "Activated %@",
+    "ar": "تم التفعيل %@",
+    "ckb": "چالاککرا لە %@"
+  },
+  "devices.activeDevices": {
+    "en": "Active Devices",
+    "ar": "الأجهزة النشطة",
+    "ckb": "ئامێرە چالاکەکان"
+  },
+  "devices.cannotUnlinkPrimary": {
+    "en": "The primary device can’t be unlinked while other devices remain. Unlink others first.",
+    "ar": "لا يمكن إلغاء ربط الجهاز الأساسي بينما توجد أجهزة أخرى. ألغِ ربط الأجهزة الأخرى أولاً.",
+    "ckb": "ناتوانیت ئامێری سەرەکی لاببەستیت کاتێک ئامێری تر ماوە. سەرەتا ئەوانی تر لاببەستە."
+  },
+  "devices.infoNote": {
+    "en": "Unlinking a device signs it out immediately. Local vault data on that device is not deleted from here.",
+    "ar": "إلغاء ربط جهاز يسجل خروجه فوراً. بيانات الخزنة المحلية على ذلك الجهاز لا تُحذف من هنا.",
+    "ckb": "لابردنی بەستنەوە دەستبەجێ ئامێرەکە دەردەکات. داتای ناوخۆیی لەو ئامێرە لێرەوە ناسرێتەوە."
+  },
+  "devices.limitReached": {
+    "en": "Device limit reached",
+    "ar": "تم بلوغ حد الأجهزة",
+    "ckb": "سنووری ئامێر گەیشت"
+  },
+  "devices.logout": {
+    "en": "Sign out",
+    "ar": "تسجيل الخروج",
+    "ckb": "دەرچوون"
+  },
+  "devices.logoutMessage": {
+    "en": "Sign out %@?",
+    "ar": "تسجيل الخروج من %@؟",
+    "ckb": "دەرچوون لە %@؟"
+  },
+  "devices.logoutTitle": {
+    "en": "Sign out device?",
+    "ar": "تسجيل الخروج من الجهاز؟",
+    "ckb": "دەرچوون لە ئامێر؟"
+  },
+  "devices.needMore": {
+    "en": "Need more devices?",
+    "ar": "هل تحتاج المزيد من الأجهزة؟",
+    "ckb": "پێویستت بە ئامێری زیاترە؟"
+  },
+  "devices.noneLinked": {
+    "en": "No devices linked yet.",
+    "ar": "لا توجد أجهزة مرتبطة بعد.",
+    "ckb": "هێشتا هیچ ئامێرێک بەستراوەتەوە."
+  },
+  "devices.primary": {
+    "en": "PRIMARY",
+    "ar": "أساسي",
+    "ckb": "سەرەکی"
+  },
+  "devices.sessionExpired": {
+    "en": "Session expired. Unlock the vault again.",
+    "ar": "انتهت الجلسة. أعد فتح الخزنة.",
+    "ckb": "دانیشتن بەسەرچوو. دووبارە کۆگا بکەرەوە."
+  },
+  "devices.thisDevice": {
+    "en": "THIS DEVICE",
+    "ar": "هذا الجهاز",
+    "ckb": "ئەم ئامێرە"
+  },
+  "devices.tierUsed": {
+    "en": "%1$@: %2$d/%3$d Used",
+    "ar": "%1$@: %2$d/%3$d مستخدم",
+    "ckb": "%1$@: %2$d/%3$d بەکارهاتوو"
+  },
+  "devices.title": {
+    "en": "Linked Devices",
+    "ar": "الأجهزة المرتبطة",
+    "ckb": "ئامێرە بەستراوەکان"
+  },
+  "devices.unlink": {
+    "en": "Unlink",
+    "ar": "إلغاء الربط",
+    "ckb": "لابردنی بەستنەوە"
+  },
+  "devices.unlinkAllMessage": {
+    "en": "This signs out every device except the primary (first linked) device. Local vault data is not deleted.",
+    "ar": "سيتم تسجيل خروج كل الأجهزة باستثناء الجهاز الأساسي (أول جهاز مرتبط). لن تُحذف بيانات الخزنة المحلية.",
+    "ckb": "هەموو ئامێرەکان جگە لە سەرەکی (یەکەم بەستراو) دەردەچن. داتای ناوخۆیی ناسرێتەوە."
+  },
+  "devices.unlinkAllOthers": {
+    "en": "Unlink all other devices",
+    "ar": "إلغاء ربط كل الأجهزة الأخرى",
+    "ckb": "لابردنی هەموو ئامێرەکانی تر"
+  },
+  "devices.unlinkAllTitle": {
+    "en": "Unlink other devices?",
+    "ar": "إلغاء ربط الأجهزة الأخرى؟",
+    "ckb": "لابردنی ئامێرەکانی تر؟"
+  },
+  "devices.unlinkMessage": {
+    "en": "Unlink %@? It will be signed out immediately.",
+    "ar": "إلغاء ربط %@؟ سيتم تسجيل خروجه فوراً.",
+    "ckb": "%@ لاببەستەوە؟ دەستبەجێ دەردەچێت."
+  },
+  "devices.unlinkTitle": {
+    "en": "Unlink Device?",
+    "ar": "إلغاء ربط الجهاز؟",
+    "ckb": "لابردنی بەستنەوەی ئامێر؟"
+  },
+  "devices.upgradeHint": {
+    "en": "Free is limited to 1 device. Unlink a remote device to free the slot, or upgrade for up to 5.",
+    "ar": "رقِّ إلى البريميوم لما يصل إلى 5 أجهزة في آن واحد.",
+    "ckb": "بۆ تا ٥ ئامێری هاوکات، بڕۆ بۆ پریمیۆم."
+  },
+  "emailKind.personal": {
+    "en": "Personal",
+    "ar": "شخصي",
+    "ckb": "کەسی"
+  },
+  "emailKind.work": {
+    "en": "Work",
+    "ar": "عمل",
+    "ckb": "کار"
+  },
+  "error.apiHostMisconfigured": {
+    "en": "This build cannot reach the Qasa server (%@). Online features are unavailable.",
+    "ar": "لا يمكن لهذا الإصدار الوصول إلى خادم Qasa (%@). الميزات عبر الإنترنت غير متاحة.",
+    "ckb": "ئەم وەرزەکە ناتوانێت بگات بۆ ڕاژەی Qasa (%@). تایبەتمەندییە ئۆنلاین بەردەست نین."
+  },
+  "error.decoding": {
+    "en": "Unexpected server response.",
+    "ar": "استجابة خادم غير متوقعة.",
+    "ckb": "وەڵامی سێرڤەر چاوەڕوانکراو نەبوو."
+  },
+  "error.forbidden": {
+    "en": "This feature requires a Premium subscription.",
+    "ar": "هذه الميزة تتطلب اشتراك بريميوم.",
+    "ckb": "ئەم تایبەتمەندییە پێویستی بە بەشداری پرێمیەم هەیە."
+  },
+  "error.invalidURL": {
+    "en": "Invalid API URL.",
+    "ar": "عنوان API غير صالح.",
+    "ckb": "URLی API هەڵەیە."
+  },
+  "error.server": {
+    "en": "Server error (%lld).",
+    "ar": "خطأ في الخادم (%lld).",
+    "ckb": "هەڵەی سێرڤەر (%lld)."
+  },
+  "error.unauthorized": {
+    "en": "Session expired. Unlock your vault again.",
+    "ar": "انتهت الجلسة. افتح خزنتك مرة أخرى.",
+    "ckb": "دانیشتن بەسەرچوو. دووبارە کۆگا بکەرەوە."
+  },
+  "error.vaultCreateTitle": {
+    "en": "Could not create vault",
+    "ar": "تعذّر إنشاء الخزنة",
+    "ckb": "دەستپێکردنی کۆگا سەرکەوتوو نەبوو"
+  },
+  "error.vaultNewerKdf": {
+    "en": "This vault was created by a newer version of Qasa (key format %d). Update the app to unlock it.",
+    "ar": "أُنشئت هذه الخزنة بإصدار أحدث من Qasa (تنسيق المفاتيح %d). حدّث التطبيق لفتحها.",
+    "ckb": "ئەم سندووقە لە وەرزی نووتری Qasa درووست کراوە (فۆرماتی کلیل %d). ئەپ بۆ نوێبکەوە بۆ کردنەوەی."
+  },
+  "error.vaultStoreBody": {
+    "ar": "لم يتمكّن Qasa من فتح خزنتك المشفّرة، لذلك لم يبدأ التطبيق. لم يتم حذف بياناتك.",
+    "ckb": "قاسا نەیتوانی کۆگای کۆدکراوەکەت بکاتەوە، بۆیە دەست پێنەکرد. داتاکەت نەسڕاوە.",
+    "en": "Qasa could not open your encrypted vault, so it has not started. Your data has NOT been deleted."
+  },
+  "error.vaultStoreDetail": {
+    "ar": "التفاصيل: %@",
+    "ckb": "وردەکاری: %@",
+    "en": "Details: %@"
+  },
+  "error.vaultStoreHelp": {
+    "ar": "عادةً يكون هذا بسبب امتلاء مساحة الجهاز. حرّر مساحة، ثم أنهِ التطبيق وافتح Qasa من جديد. لا تعِد تثبيت التطبيق حتى تُفتح الخزنة مجددًا.",
+    "ckb": "ئەمە زۆرجار لەبەرەوەی تەواو بوونی بۆشایییە. بۆشایی ئازاد بکە، پاشان ئەپەکە بەسەرەکەوە ببخە و دووبارە بیکەرەوە. ئەپەکە مەنە سەرناسێنەوە دەت تا کۆگا دووبارە بێتەوە.",
+    "en": "This is usually the device running out of storage. Free up space, then force-quit and reopen Qasa. Do not reinstall the app until the vault opens again."
+  },
+  "error.vaultStorePath": {
+    "ar": "ملف الخزنة: %@",
+    "ckb": "فایلی کۆگا: %@",
+    "en": "Vault file: %@"
+  },
+  "error.vaultStoreTitle": {
+    "ar": "الخزنة غير متاحة",
+    "ckb": "کۆگا بەردەست نییە",
+    "en": "Vault unavailable"
+  },
+  "field.accountHolder": {
+    "en": "Account Holder",
+    "ar": "صاحب الحساب",
+    "ckb": "خاوەنی هەژمار"
+  },
+  "field.accountNumber": {
+    "en": "Account Number",
+    "ar": "رقم الحساب",
+    "ckb": "ژمارەی هەژمار"
+  },
+  "field.address": {
+    "en": "Address",
+    "ar": "العنوان",
+    "ckb": "ناونیشان"
+  },
+  "field.apartment": {
+    "en": "Apartment",
+    "ar": "الشقة",
+    "ckb": "شوقە"
+  },
+  "field.bankName": {
+    "en": "Bank Name",
+    "ar": "اسم البنك",
+    "ckb": "ناوی بانک"
+  },
+  "field.birthDate": {
+    "en": "Birth Date",
+    "ar": "تاريخ الميلاد",
+    "ckb": "بەرواری لەدایکبوون"
+  },
+  "field.birthPlace": {
+    "en": "Birth Place",
+    "ar": "مكان الميلاد",
+    "ckb": "شوێنی لەدایکبوون"
+  },
+  "field.building": {
+    "en": "Building",
+    "ar": "المبنى",
+    "ckb": "بینا"
+  },
+  "field.cardNumber": {
+    "en": "Card Number",
+    "ar": "رقم البطاقة",
+    "ckb": "ژمارەی کارت"
+  },
+  "field.cardholder": {
+    "en": "Cardholder",
+    "ar": "حامل البطاقة",
+    "ckb": "خاوەنی کارت"
+  },
+  "field.city": {
+    "en": "City",
+    "ar": "المدينة",
+    "ckb": "شار"
+  },
+  "field.company": {
+    "en": "Company",
+    "ar": "الشركة",
+    "ckb": "کۆمپانیا"
+  },
+  "field.companyName": {
+    "en": "Company Name",
+    "ar": "اسم الشركة",
+    "ckb": "ناوی کۆمپانیا"
+  },
+  "field.content": {
+    "en": "Content",
+    "ar": "المحتوى",
+    "ckb": "ناوەڕۆک"
+  },
+  "field.defaultUsername": {
+    "en": "Default Username",
+    "ar": "اسم المستخدم الافتراضي",
+    "ckb": "ناوی بەکارهێنەری بنەڕەتی"
+  },
+  "field.doorCode": {
+    "en": "Door Code",
+    "ar": "رمز الباب",
+    "ckb": "کۆدی دەرگا"
+  },
+  "field.email": {
+    "en": "Email",
+    "ar": "البريد الإلكتروني",
+    "ckb": "ئیمەیڵ"
+  },
+  "field.expiryDate": {
+    "en": "Expiry Date",
+    "ar": "تاريخ الانتهاء",
+    "ckb": "بەرواری بەسەرچوون"
+  },
+  "field.firstName": {
+    "en": "First Name",
+    "ar": "الاسم الأول",
+    "ckb": "ناوی یەکەم"
+  },
+  "field.floor": {
+    "en": "Floor",
+    "ar": "الطابق",
+    "ckb": "نهۆم"
+  },
+  "field.issueDate": {
+    "en": "Issue Date",
+    "ar": "تاريخ الإصدار",
+    "ckb": "بەرواری دەرکردن"
+  },
+  "field.issuePlace": {
+    "en": "Issue Place",
+    "ar": "مكان الإصدار",
+    "ckb": "شوێنی دەرکردن"
+  },
+  "field.itemName": {
+    "en": "Name",
+    "ar": "الاسم",
+    "ckb": "ناو"
+  },
+  "field.jobTitle": {
+    "en": "Job Title",
+    "ar": "المسمى الوظيفي",
+    "ckb": "ناونیشانی کار"
+  },
+  "field.lastName": {
+    "en": "Last Name",
+    "ar": "اسم العائلة",
+    "ckb": "ناوی کۆتایی"
+  },
+  "field.middleName": {
+    "en": "Middle Name",
+    "ar": "الاسم الأوسط",
+    "ckb": "ناوی ناوەڕاست"
+  },
+  "field.name": {
+    "en": "Name",
+    "ar": "الاسم",
+    "ckb": "ناو"
+  },
+  "field.note": {
+    "en": "Note",
+    "ar": "ملاحظة",
+    "ckb": "تێبینی"
+  },
+  "field.number": {
+    "en": "Number",
+    "ar": "الرقم",
+    "ckb": "ژمارە"
+  },
+  "field.password": {
+    "en": "Password",
+    "ar": "كلمة المرور",
+    "ckb": "وشەی نهێنی"
+  },
+  "field.phoneNumber": {
+    "en": "Phone Number",
+    "ar": "رقم الهاتف",
+    "ckb": "ژمارەی تەلەفۆن"
+  },
+  "field.protected": {
+    "en": "Protected",
+    "ar": "محمي",
+    "ckb": "پارێزراو"
+  },
+  "field.recipient": {
+    "en": "Recipient",
+    "ar": "المستلم",
+    "ckb": "وەرگر"
+  },
+  "field.routingNumber": {
+    "en": "Routing Number",
+    "ar": "رقم التوجيه",
+    "ckb": "ژمارەی ڕێڕەو"
+  },
+  "field.securityCode": {
+    "en": "Security Code",
+    "ar": "رمز الأمان",
+    "ckb": "کۆدی ئاسایش"
+  },
+  "field.title": {
+    "en": "Title",
+    "ar": "العنوان",
+    "ckb": "ناونیشان"
+  },
+  "field.type": {
+    "en": "Type",
+    "ar": "النوع",
+    "ckb": "جۆر"
+  },
+  "field.username": {
+    "en": "Username",
+    "ar": "اسم المستخدم",
+    "ckb": "ناوی بەکارهێنەر"
+  },
+  "field.website": {
+    "en": "Website",
+    "ar": "الموقع",
+    "ckb": "ماڵپەڕ"
+  },
+  "field.websiteURL": {
+    "en": "Website URL",
+    "ar": "رابط الموقع",
+    "ckb": "بەستەری وێبسایت"
+  },
+  "field.zipCode": {
+    "en": "Zip Code",
+    "ar": "الرمز البريدي",
+    "ckb": "کۆدی پۆستە"
+  },
+  "gen.copied": {
+    "en": "Copied!",
+    "ar": "تم النسخ!",
+    "ckb": "لەبەرگیرایەوە!"
+  },
+  "gen.copy": {
+    "en": "Copy",
+    "ar": "نسخ",
+    "ckb": "لەبەرگرتنەوە"
+  },
+  "gen.copyPassword": {
+    "en": "Copy Password",
+    "ar": "نسخ كلمة المرور",
+    "ckb": "لەبەرگرتنەوەی وشەی نهێنی"
+  },
+  "gen.excludeAmbiguous": {
+    "en": "Exclude Ambiguous",
+    "ar": "استبعاد المتشابه",
+    "ckb": "دەرکردنی ناڕوونەکان"
+  },
+  "gen.fair": {
+    "en": "Fair",
+    "ar": "متوسطة",
+    "ckb": "مامناوەند"
+  },
+  "gen.generatedPassword": {
+    "en": "Generated Password",
+    "ar": "كلمة المرور المُنشأة",
+    "ckb": "وشەی نهێنی دروستکراو"
+  },
+  "gen.length": {
+    "en": "Length",
+    "ar": "الطول",
+    "ckb": "درێژی"
+  },
+  "gen.lowercase": {
+    "en": "Lowercase (a-z)",
+    "ar": "أحرف صغيرة (a-z)",
+    "ckb": "پیتە بچووکەکان (a-z)"
+  },
+  "gen.numbers": {
+    "en": "Numbers (0-9)",
+    "ar": "أرقام (0-9)",
+    "ckb": "ژمارەکان (0-9)"
+  },
+  "gen.pronounceable": {
+    "en": "Pronounceable",
+    "ar": "قابل للنطق",
+    "ckb": "ئاسان بۆ خوێندنەوە"
+  },
+  "gen.saveToVault": {
+    "en": "Save to my passwords",
+    "ar": "احفظ في كلمات مروري",
+    "ckb": "پاشەکەوت بکە لە وشە نهێنییەکانم"
+  },
+  "gen.strength": {
+    "en": "Strength",
+    "ar": "القوة",
+    "ckb": "هێز"
+  },
+  "gen.strong": {
+    "en": "Strong",
+    "ar": "قوية",
+    "ckb": "بەهێز"
+  },
+  "gen.symbols": {
+    "en": "Symbols (!@#$)",
+    "ar": "رموز (!@#$)",
+    "ckb": "هێماکان (!@#$)"
+  },
+  "gen.title": {
+    "en": "Password Generator",
+    "ar": "مولّد كلمات المرور",
+    "ckb": "دروستکەری وشەی نهێنی"
+  },
+  "gen.uppercase": {
+    "en": "Uppercase (A-Z)",
+    "ar": "أحرف كبيرة (A-Z)",
+    "ckb": "پیتە گەورەکان (A-Z)"
+  },
+  "gen.use": {
+    "en": "Use Password",
+    "ar": "استخدام كلمة المرور",
+    "ckb": "بەکارهێنانی وشەی نهێنی"
+  },
+  "gen.usePassword": {
+    "en": "Use Password",
+    "ar": "استخدام كلمة المرور",
+    "ckb": "بەکارهێنانی وشەی نهێنی"
+  },
+  "gen.veryStrong": {
+    "en": "Very Strong",
+    "ar": "قوية جدًا",
+    "ckb": "زۆر بەهێز"
+  },
+  "gen.veryWeak": {
+    "en": "Very Weak",
+    "ar": "ضعيفة جدًا",
+    "ckb": "زۆر لاواز"
+  },
+  "gen.weak": {
+    "en": "Weak",
+    "ar": "ضعيفة",
+    "ckb": "لاواز"
+  },
+  "health.excellent": {
+    "en": "Excellent",
+    "ar": "ممتاز",
+    "ckb": "نایاب"
+  },
+  "health.fair": {
+    "en": "Fair",
+    "ar": "متوسط",
+    "ckb": "مامناوەند"
+  },
+  "health.good": {
+    "en": "Good",
+    "ar": "جيد",
+    "ckb": "باش"
+  },
+  "health.howScoring": {
+    "en": "How scoring works",
+    "ar": "كيف يعمل التقييم",
+    "ckb": "چۆنیەتی خاڵدان"
+  },
+  "health.howScoringBody": {
+    "en": "Score starts at 100 and drops for weak or reused login passwords. Aim for unique, long passwords with mixed character types.",
+    "ar": "تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.",
+    "ckb": "خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز یان دووبارەکراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە."
+  },
+  "health.issuesTitle": {
+    "en": "Password Issues",
+    "ar": "مشكلات كلمات المرور",
+    "ckb": "کێشەکانی وشەی نهێنی"
+  },
+  "health.needsAttention": {
+    "en": "Needs Attention",
+    "ar": "يحتاج إلى انتباه",
+    "ckb": "پێویستی بە سەرنجدان هەیە"
+  },
+  "health.noReusedBody": {
+    "en": "None of your login passwords are reused.",
+    "ar": "لا تُعاد أي من كلمات مرور تسجيل الدخول.",
+    "ckb": "هیچ کام لە وشە نهێنییەکانی چوونەژوورەوەت دووبارە نەکراونەتەوە."
+  },
+  "health.noReusedTitle": {
+    "en": "No Reused Passwords",
+    "ar": "لا توجد كلمات مرور مُعادة",
+    "ckb": "هیچ وشەی نهێنی دووبارەکراو نییە"
+  },
+  "health.noWeakBody": {
+    "en": "None of your login passwords are marked weak.",
+    "ar": "لا تُصنَّف أي من كلمات مرور تسجيل الدخول كضعيفة.",
+    "ckb": "هیچ کام لە وشە نهێنییەکانی چوونەژوورەوەت وەک لاواز نیشان نەکراون."
+  },
+  "health.noWeakTitle": {
+    "en": "No Weak Passwords",
+    "ar": "لا توجد كلمات مرور ضعيفة",
+    "ckb": "هیچ وشەی نهێنی لاواز نییە"
+  },
+  "health.outOf100": {
+    "en": "out of 100",
+    "ar": "من 100",
+    "ckb": "لە ١٠٠"
+  },
+  "health.passwords": {
+    "en": "Passwords",
+    "ar": "كلمات المرور",
+    "ckb": "وشە نهێنییەکان"
+  },
+  "health.poor": {
+    "en": "Poor",
+    "ar": "ضعيف",
+    "ckb": "لاواز"
+  },
+  "health.reused": {
+    "en": "Reused",
+    "ar": "معاد استخدامها",
+    "ckb": "دووبارەکراو"
+  },
+  "health.strong": {
+    "en": "Strong",
+    "ar": "قوي",
+    "ckb": "بەهێز"
+  },
+  "health.weak": {
+    "en": "Weak",
+    "ar": "ضعيفة",
+    "ckb": "لاواز"
+  },
+  "honorific.miss": {
+    "en": "Miss",
+    "ar": "الآنسة",
+    "ckb": "خانم"
+  },
+  "honorific.mr": {
+    "en": "Mr",
+    "ar": "السيد",
+    "ckb": "بەڕێز"
+  },
+  "honorific.mrs": {
+    "en": "Mrs",
+    "ar": "السيدة",
+    "ckb": "خاتوون"
+  },
+  "honorific.ms": {
+    "en": "Ms",
+    "ar": "الآنسة",
+    "ckb": "خاتوون"
+  },
+  "honorific.mx": {
+    "en": "Mx",
+    "ar": "محايد",
+    "ckb": "بێ جیاکاری"
+  },
+  "honorific.none": {
+    "en": "None of these",
+    "ar": "لا شيء مما سبق",
+    "ckb": "هیچ کام لەمانە"
+  },
+  "lan.enterCode": {
+    "en": "Enter a shared code first.",
+    "ar": "أدخل رمزًا مشتركًا أولًا.",
+    "ckb": "سەرەتا کۆدێکی هاوبەش بنووسە."
+  },
+  "lan.findHost": {
+    "en": "Find host",
+    "ar": "العثور على المضيف",
+    "ckb": "دۆزینەوەی میواندار"
+  },
+  "lan.hostMode": {
+    "en": "This device has the vault",
+    "ar": "هذا الجهاز يحتوي على الخزنة",
+    "ckb": "ئەم ئامێرە کۆگای هەیە"
+  },
+  "lan.joinMode": {
+    "en": "Receive vault",
+    "ar": "استقبال الخزنة",
+    "ckb": "وەرگرتنی کۆگا"
+  },
+  "lan.requiresPremium": {
+    "en": "Device sync requires Premium. Both devices must be on the same Wi‑Fi.",
+    "ar": "مزامنة الأجهزة تتطلب بريميوم. يجب أن يكون الجهازان على نفس شبكة Wi‑Fi.",
+    "ckb": "هاوکاتکردنی ئامێر پێویستی بە پرێمیەم هەیە. هەردوو ئامێر دەبێت لەسەر هەمان Wi‑Fi بن."
+  },
+  "lan.secureBody": {
+    "en": "Vault ciphertext only. Enter the same 6-digit code on both devices. Never use public Wi‑Fi you do not trust.",
+    "ar": "نص الخزنة المشفر فقط. أدخل نفس الرمز المكون من 6 أرقام على الجهازين. لا تستخدم Wi‑Fi عامًا غير موثوق.",
+    "ckb": "تەنها داتای نهێنی کۆگا. هەمان کۆدی ٦ ژمارەیی لەسەر هەردوو ئامێر بنووسە. Wi‑Fiی گشتی بەکارمەهێنە."
+  },
+  "lan.secureTitle": {
+    "en": "Secure LAN sync",
+    "ar": "مزامنة LAN آمنة",
+    "ckb": "هاوکاتکردنی LANی پارێزراو"
+  },
+  "lan.startHost": {
+    "en": "Start hosting",
+    "ar": "بدء الاستضافة",
+    "ckb": "دەستپێکردنی میوانداری"
+  },
+  "lan.stop": {
+    "en": "Stop",
+    "ar": "إيقاف",
+    "ckb": "وەستان"
+  },
+  "lan.title": {
+    "en": "Sync on Wi‑Fi",
+    "ar": "المزامنة عبر Wi‑Fi",
+    "ckb": "هاوکاتکردن لەسەر Wi‑Fi"
+  },
+  "legal.lastUpdated": {
+    "en": "Last updated: %@",
+    "ar": "آخر تحديث: %@",
+    "ckb": "دوایین نوێکردنەوە: %@"
+  },
+  "legal.privacyBody": {
+    "en": "This Privacy Policy is a placeholder describing how Qasa will handle your data.\n\nVault contents are designed to stay encrypted and under your control. Full policy details will be published here before public release.",
+    "ar": "سياسة الخصوصية هذه نص مؤقت حول كيفية تعامل Qasa مع بياناتك.\n\nمحتويات الخزنة مصممة لتبقى مشفرة وتحت سيطرتك. ستُنشر التفاصيل الكاملة قبل الإطلاق العام.",
+    "ckb": "ئەم سیاسەتی نهێنێتییە جێگرەوەیە لەسەر چۆنیەتی مامەڵەی Qasa لەگەڵ داتاکانت.\n\nناوەڕۆکی کۆگا پارێزراو دەمێنێتەوە لەژێر کۆنترۆڵی تۆدا. وردەکاری تەواو پێش بڵاوکردنەوە دادەنرێت."
+  },
+  "legal.termsBody": {
+    "en": "These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.",
+    "ar": "شروط الاستخدام هذه نص مؤقت لاتفاقية Qasa القانونية.\n\nباستخدامك للتطبيق توافق على الالتزام بالقوانين المعمول بها. ستُنشر الشروط الكاملة هنا قبل الإطلاق العام.",
+    "ckb": "ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی Qasaن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت."
+  },
+  "nav.breachMonitoring": {
+    "en": "Email leak alerts",
+    "ar": "تنبيهات تسريب البريد",
+    "ckb": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
+  },
+  "nav.collections": {
+    "en": "Folders",
+    "ar": "المجلدات",
+    "ckb": "بوخچەکان"
+  },
+  "nav.generator": {
+    "en": "Password generator",
+    "ar": "مولّد كلمات المرور",
+    "ckb": "دروستکەری وشەی نهێنی"
+  },
+  "nav.myAccount": {
+    "en": "My Account",
+    "ar": "حسابي",
+    "ckb": "هەژمارەکەم"
+  },
+  "nav.notifications": {
+    "en": "Notifications",
+    "ar": "الإشعارات",
+    "ckb": "ئاگادارییەکان"
+  },
+  "nav.openMenu": {
+    "en": "Open menu",
+    "ar": "فتح القائمة",
+    "ckb": "کردنەوەی مێنیو"
+  },
+  "nav.passwordHealth": {
+    "en": "Password health",
+    "ar": "صحة كلمات المرور",
+    "ckb": "تەندروستیی وشە نهێنییەکان"
+  },
+  "nav.privacy": {
+    "en": "Privacy policy",
+    "ar": "سياسة الخصوصية",
+    "ckb": "سیاسەتی تایبەتمەندی"
+  },
+  "nav.settings": {
+    "en": "Settings",
+    "ar": "الإعدادات",
+    "ckb": "ڕێکخستنەکان"
+  },
+  "nav.terms": {
+    "en": "Terms of use",
+    "ar": "شروط الاستخدام",
+    "ckb": "مەرجەکانی بەکارهێنان"
+  },
+  "nav.tools": {
+    "en": "Tools",
+    "ar": "الأدوات",
+    "ckb": "ئامرازەکان"
+  },
+  "nav.upgrade": {
+    "en": "Upgrade",
+    "ar": "ترقية",
+    "ckb": "بەرزکردنەوە"
+  },
+  "nav.vault": {
+    "en": "Passwords",
+    "ar": "كلمات المرور",
+    "ckb": "وشە نهێنییەکان"
+  },
+  "nav.vpn": {
+    "en": "VPN",
+    "ar": "VPN",
+    "ckb": "VPN"
+  },
+  "notifications.actionFailed": {
+    "en": "Couldn’t update your notifications. Check your connection and try again.",
+    "ar": "تعذّر تحديث إشعاراتك. تحقّق من اتصالك وحاول مرة أخرى.",
+    "ckb": "نەتوانرا ئاگادارییەکانت نوێ بکرێنەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە."
+  },
+  "notifications.close": {
+    "en": "Close",
+    "ar": "إغلاق",
+    "ckb": "داخستن"
+  },
+  "notifications.detailTitle": {
+    "en": "Notification",
+    "ar": "إشعار",
+    "ckb": "ئاگاداری"
+  },
+  "notifications.empty": {
+    "en": "No Notifications",
+    "ar": "لا توجد إشعارات",
+    "ckb": "هیچ ئاگادارییەک نییە"
+  },
+  "notifications.emptyDesc": {
+    "en": "You’re all caught up.",
+    "ar": "أنت على اطلاع بكل شيء.",
+    "ckb": "هەموو شتێکت خوێندۆتەوە."
+  },
+  "notifications.fromQasa": {
+    "en": "From Qasa",
+    "ar": "من Qasa",
+    "ckb": "لە Qasa"
+  },
+  "notifications.markAllRead": {
+    "en": "Mark All Read",
+    "ar": "تحديد الكل كمقروء",
+    "ckb": "هەموو وەک خوێندراو نیشان بکە"
+  },
+  "notifications.onDevice": {
+    "en": "On this device",
+    "ar": "على هذا الجهاز",
+    "ckb": "لەسەر ئەم ئامێرە"
+  },
+  "notifications.permissionTitle": {
+    "en": "Notifications are off",
+    "ar": "الإشعارات متوقفة",
+    "ckb": "ئاگادارییەکان کوژاونەتەوە"
+  },
+  "notifications.permissionMessage": {
+    "en": "Turn on notifications in Settings to get breach alerts and messages from Qasa.",
+    "ar": "فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من Qasa.",
+    "ckb": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی Qasa وەربگریت."
+  },
+  "notifications.permissionOpenSettings": {
+    "en": "Open Settings",
+    "ar": "فتح الإعدادات",
+    "ckb": "کردنەوەی ڕێکخستنەکان"
+  },
+  "notifications.permissionNotNow": {
+    "en": "Not Now",
+    "ar": "ليس الآن",
+    "ckb": "ئێستا نا"
+  },
+  "notifications.title": {
+    "en": "Notifications",
+    "ar": "الإشعارات",
+    "ckb": "ئاگادارییەکان"
+  },
+  "onboarding.continue": {
+    "en": "Continue",
+    "ar": "متابعة",
+    "ckb": "بەردەوام بە"
+  },
+  "onboarding.headline": {
+    "en": "Your language and look",
+    "ar": "لغتك ومظهرك",
+    "ckb": "زمان و ڕووخسارەکەت"
+  },
+  "onboarding.language": {
+    "en": "Language",
+    "ar": "اللغة",
+    "ckb": "زمان"
+  },
+  "onboarding.subtitle": {
+    "en": "Choose these first so the rest of Qasa is easy to read. You can change them later in Settings.",
+    "ar": "اخترهما أولاً حتى يسهل قراءة قاسا. يمكنك تغييرهما لاحقاً من الإعدادات.",
+    "ckb": "سەرەتا ئەمانە هەڵبژێرە تا قەسا ئاسانتر دەخوێنرێتەوە. دواتر لە ڕێکخستنەکان دەتوانیت بیانگۆڕیت."
+  },
+  "onboarding.theme": {
+    "en": "Theme",
+    "ar": "المظهر",
+    "ckb": "ڕووکار"
+  },
+  "pair.accountHint": {
+    "en": "Or paste account ID from the other device (advanced)",
+    "ar": "أو الصق معرّف الحساب من الجهاز الآخر (متقدم)",
+    "ckb": "یان ناسنامەی هەژمار لە ئامێرەکەی تر بلکێنە (پێشکەوتوو)"
+  },
+  "pair.accountPlaceholder": {
+    "en": "Account UUID",
+    "ar": "معرّف الحساب",
+    "ckb": "ناسنامەی هەژمار"
+  },
+  "pair.body": {
+    "en": "Both devices must be on the same Wi-Fi. On your other phone open Settings → Linked Devices → Show pairing code, then enter it here. You will not create a second vault.",
+    "ar": "يجب أن يكون الجهازان على شبكة Wi-Fi نفسها. على الهاتف الآخر افتح الإعدادات ← الأجهزة المرتبطة ← إظهار رمز الاقتران، ثم أدخله هنا. لن تُنشئ خزنة ثانية.",
+    "ckb": "هەردوو ئامێرەکە دەبێت لەسەر هەمان وای-فای بن. لە مۆبایلەکەی تر ڕێکخستنەکان ← ئامێرە بەستراوەکان ← پیشاندانی کۆدی جووتکردن بکەرەوە، پاشان لێرە بینووسە. کۆگایەکی دووەم دروست ناکەیت."
+  },
+  "pair.checkFailed": {
+    "en": "Couldn’t verify this account. Check your connection and try again.",
+    "ar": "تعذر التحقق من هذا الحساب. تحقق من الاتصال ثم أعد المحاولة.",
+    "ckb": "نەتوانرا ئەم هەژمارە پشتڕاست بکرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵبدە."
+  },
+  "pair.checking": {
+    "en": "Checking…",
+    "ar": "جارٍ التحقق…",
+    "ckb": "پشکنین…"
+  },
+  "pair.codeLabel": {
+    "en": "Pairing code",
+    "ar": "رمز الاقتران",
+    "ckb": "کۆدی جووتکردن"
+  },
+  "pair.codePlaceholder": {
+    "en": "6-digit code",
+    "ar": "رمز من 6 أرقام",
+    "ckb": "کۆدی ٦ ژمارەیی"
+  },
+  "pair.continue": {
+    "en": "Continue",
+    "ar": "متابعة",
+    "ckb": "بەردەوام بە"
+  },
+  "pair.done": {
+    "en": "Continue to vault",
+    "ar": "متابعة إلى الخزنة",
+    "ckb": "بڕۆ بۆ کۆگا"
+  },
+  "pair.enterCode": {
+    "en": "Enter pairing code",
+    "ar": "أدخل رمز الاقتران",
+    "ckb": "کۆدی جووتکردن بنووسە"
+  },
+  "pair.headline": {
+    "en": "Already have Qasa on another device?",
+    "ar": "هل لديك قاسا بالفعل على جهاز آخر؟",
+    "ckb": "پێشتر Qasaت لەسەر ئامێرێکی تر هەیە؟"
+  },
+  "pair.invalidCode": {
+    "en": "Invalid code. Ask the other device to show a fresh pairing code, or paste the account ID.",
+    "ar": "رمز غير صالح. اطلب من الجهاز الآخر إظهار رمز اقتران جديد، أو الصق معرّف الحساب.",
+    "ckb": "کۆد هەڵەیە. داوا بکە ئامێرەکەی تر کۆدێکی نوێ پیشان بدات، یان ناسنامەی هەژمار بلکێنە."
+  },
+  "pair.limitExceeded": {
+    "en": "This account already has the maximum number of linked devices. Unlink one on the other device, then try again.",
+    "ar": "هذا الحساب بلغ الحد الأقصى للأجهزة المرتبطة. ألغِ ربط جهاز من الجهاز الآخر ثم أعد المحاولة.",
+    "ckb": "ئەم هەژمارە گەیشتووەتە زۆرترین ژمارەی ئامێر. یەکێکیان لە ئامێرەکەی تر لاببەستە، پاشان دووبارە هەوڵبدە."
+  },
+  "pair.premiumBody": {
+    "en": "You need to unlock Premium for multi-device linking. Free accounts can keep the vault open on one device only.",
+    "ar": "تحتاج إلى فتح الاشتراك المميز لربط أكثر من جهاز. الحسابات المجانية تبقي الخزنة مفتوحة على جهاز واحد فقط.",
+    "ckb": "بۆ بەستنی چەند ئامێرێک دەبێت پریمیۆم بکەیتەوە. هەژماری خۆڕایی تەنها لەسەر یەک ئامێر کۆگا دەکاتەوە."
+  },
+  "pair.premiumTitle": {
+    "en": "Premium required",
+    "ar": "يلزم الاشتراك المميز",
+    "ckb": "پریمیۆم پێویستە"
+  },
+  "pair.successBody": {
+    "en": "Next: create a master password on this device. Then unlock or sync the vault over LAN from Settings → Sync on this network.",
+    "ar": "التالي: أنشئ كلمة مرور رئيسية على هذا الجهاز. ثم افتح الخزنة أو زامنها عبر الشبكة المحلية من الإعدادات ← المزامنة على هذه الشبكة.",
+    "ckb": "دواتر: وشەی نهێنی سەرەکی لەم ئامێرە دروست بکە. پاشان کۆگا بکەرەوە یان لە ڕێکخستنەکان ← هاوکاتکردن لەم تۆڕەدا هاوکات بکە."
+  },
+  "pair.successTitle": {
+    "en": "Account linked",
+    "ar": "تم ربط الحساب",
+    "ckb": "هەژمار بەسترا"
+  },
+  "pair.title": {
+    "en": "Link Device",
+    "ar": "ربط الجهاز",
+    "ckb": "بەستنی ئامێر"
+  },
+  "phoneKind.cell": {
+    "en": "Cell",
+    "ar": "جوال",
+    "ckb": "مۆبایل"
+  },
+  "phoneKind.fax": {
+    "en": "Fax",
+    "ar": "فاكس",
+    "ckb": "فاکس"
+  },
+  "phoneKind.homePhone": {
+    "en": "Home Phone",
+    "ar": "هاتف المنزل",
+    "ckb": "تەلەفۆنی ماڵەوە"
+  },
+  "phoneKind.other": {
+    "en": "Other",
+    "ar": "أخرى",
+    "ckb": "هیتر"
+  },
+  "phoneKind.work": {
+    "en": "Work",
+    "ar": "عمل",
+    "ckb": "کار"
+  },
+  "phoneKind.workCell": {
+    "en": "Work Cell",
+    "ar": "جوال العمل",
+    "ckb": "مۆبایلی کار"
+  },
+  "phoneKind.workFax": {
+    "en": "Work Fax",
+    "ar": "فاكس العمل",
+    "ckb": "فاکسی کار"
+  },
+  "premium.activated": {
+    "en": "Premium activated.",
+    "ar": "تم تفعيل البريميوم.",
+    "ckb": "پریمیۆم چالاک کرا."
+  },
+  "premium.alreadyPremium": {
+    "en": "You're on Premium. Manage it from Settings.",
+    "ar": "أنت على البريميوم. أدِره من الإعدادات.",
+    "ckb": "تۆ لەسەر پریمیۆمیت. لە ڕێکخستنەکان بەڕێوەی ببە."
+  },
+  "premium.autoRenew": {
+    "en": "Auto-renew",
+    "ar": "التجديد التلقائي",
+    "ckb": "نوێبوونەوەی خۆکار"
+  },
+  "premium.autoRenewDetail": {
+    "en": "Renews automatically at the end of each period.",
+    "ar": "يتجدد تلقائيًا في نهاية كل فترة.",
+    "ckb": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+  },
+  "premium.autoRenewHint": {
+    "en": "Renews automatically at the end of each period.",
+    "ar": "يتجدد تلقائيًا في نهاية كل فترة.",
+    "ckb": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+  },
+  "premium.bestValue": {
+    "en": "BEST VALUE",
+    "ar": "أفضل قيمة",
+    "ckb": "باشترین نرخ"
+  },
+  "premium.completeInWallet": {
+    "en": "Complete payment in %@…",
+    "ar": "أكمل الدفع في %@…",
+    "ckb": "پارەدان لە %@ تەواو بکە…"
+  },
+  "premium.fastpay": {
+    "en": "FastPay",
+    "ar": "FastPay",
+    "ckb": "FastPay"
+  },
+  "premium.fastpaySub": {
+    "en": "Mobile Wallet",
+    "ar": "محفظة جوال",
+    "ckb": "جزدانی مۆبایل"
+  },
+  "premium.featureBreach": {
+    "en": "Email leak alerts",
+    "ar": "تنبيهات تسريب البريد",
+    "ckb": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
+  },
+  "premium.featureDevices": {
+    "en": "Protect up to 5 Devices",
+    "ar": "حماية حتى 5 أجهزة",
+    "ckb": "پاراستنی تا ٥ ئامێر"
+  },
+  "premium.featureSave": {
+    "en": "Save vs monthly",
+    "ar": "وفّر مقارنة بالشهري",
+    "ckb": "پاشەکەوت بەراورد بە مانگانە"
+  },
+  "premium.featureVPN": {
+    "en": "VPN",
+    "ar": "VPN",
+    "ckb": "VPN"
+  },
+  "premium.fib": {
+    "en": "First Iraqi Bank (FIB)",
+    "ar": "بنك العراق الأول (FIB)",
+    "ckb": "بانکی یەکەمی عێراق (FIB)"
+  },
+  "premium.fibSub": {
+    "en": "Instant Transfer",
+    "ar": "تحويل فوري",
+    "ckb": "گواستنەوەی خێرا"
+  },
+  "premium.installWalletApp": {
+    "en": "Install the %@ app to complete payment, then try again.",
+    "ar": "ثبّت تطبيق %@ لإكمال الدفع ثم أعد المحاولة.",
+    "ckb": "ئەپی %@ دابەزێنە بۆ تەواوکردنی پارەدان، پاشان دووبارە هەوڵ بدە."
+  },
+  "premium.licenseRefreshFailed": {
+    "en": "Payment succeeded but license refresh failed. Lock and unlock the vault.",
+    "ar": "نجح الدفع لكن فشل تحديث الترخيص. اقفل الخزنة وافتحها.",
+    "ckb": "پارەدان سەرکەوتوو بوو بەڵام نوێکردنەوەی مۆڵەت سەرنەکەوت. کۆگا قفڵ بکە و دووبارە بکەرەوە."
+  },
+  "premium.opensWallet": {
+    "en": "Opens your wallet app. We'll refresh your license when payment completes.",
+    "ar": "يفتح تطبيق المحفظة. سنحدّث الترخيص عند اكتمال الدفع.",
+    "ckb": "ئەپی جزدانەکەت دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو."
+  },
+  "premium.payVia": {
+    "en": "Pay %@ IQD via %@",
+    "ar": "ادفع %@ د.ع عبر %@",
+    "ckb": "پارەدانی %@ د.ع لە ڕێگەی %@"
+  },
+  "premium.paymentFailed": {
+    "en": "Payment did not complete. Try again.",
+    "ar": "لم يكتمل الدفع. حاول مرة أخرى.",
+    "ckb": "پارەدان تەواو نەبوو. دووبارە هەوڵ بدە."
+  },
+  "premium.paymentMethod": {
+    "en": "Payment method",
+    "ar": "طريقة الدفع",
+    "ckb": "شێوازی پارەدان"
+  },
+  "premium.periodMonth": {
+    "en": "IQD / mo",
+    "ar": "د.ع / شهر",
+    "ckb": "د.ع / مانگ"
+  },
+  "premium.periodYear": {
+    "en": "IQD / year",
+    "ar": "د.ع / سنة",
+    "ckb": "د.ع / ساڵ"
+  },
+  "premium.processing": {
+    "en": "Processing…",
+    "ar": "جارٍ المعالجة…",
+    "ckb": "پرۆسێسکردن…"
+  },
+  "premium.selectPayment": {
+    "en": "Select Payment Method",
+    "ar": "اختر طريقة الدفع",
+    "ckb": "شێوازی پارەدان هەڵبژێرە"
+  },
+  "premium.simulatingPayment": {
+    "en": "%@ app not available — simulating payment…",
+    "ar": "تطبيق %@ غير متاح — جارٍ محاكاة الدفع…",
+    "ckb": "ئەپی %@ بەردەست نییە — پارەدان خەیاڵی دەکرێت…"
+  },
+  "premium.superqi": {
+    "en": "SuperQi",
+    "ar": "SuperQi",
+    "ckb": "SuperQi"
+  },
+  "premium.superqiSub": {
+    "en": "Qi Card integration",
+    "ar": "تكامل بطاقة Qi",
+    "ckb": "یەکخستنی کارتی Qi"
+  },
+  "premium.title": {
+    "en": "Qasa Premium",
+    "ar": "قاسا بريميوم",
+    "ckb": "قاسا پریمیۆم"
+  },
+  "premium.upgradeToPro": {
+    "en": "UPGRADE TO PRO",
+    "ar": "الترقية إلى برو",
+    "ckb": "بەرزکردنەوە بۆ پرۆ"
+  },
+  "premium.walletHint": {
+    "en": "Opens your wallet app. We'll refresh your license when payment completes.",
+    "ar": "يفتح تطبيق المحفظة. سنحدّث رخصتك عند اكتمال الدفع.",
+    "ckb": "ئەپی جزدان دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو دەبێت."
+  },
+  "security.hidden": {
+    "en": "Qasa is hidden",
+    "ar": "Qasa مخفي",
+    "ckb": "Qasa پشتێ کراوە"
+  },
+  "session.qasaUser": {
+    "en": "Qasa User",
+    "ar": "مستخدم Qasa",
+    "ckb": "بەکارهێنەری Qasa"
+  },
+  "settings.activeCount": {
+    "en": "%lld Active",
+    "ar": "%lld نشط",
+    "ckb": "%lld چالاک"
+  },
+  "settings.appearance": {
+    "en": "Appearance",
+    "ar": "المظهر",
+    "ckb": "ڕوخسار"
+  },
+  "settings.autoLock": {
+    "en": "Auto-lock",
+    "ar": "القفل التلقائي",
+    "ckb": "قفلکردنی خۆکار"
+  },
+  "settings.autoLockHelp": {
+    "en": "After this many minutes of inactivity—or when you return from the background past this limit—the vault locks and you’ll need your master password or biometrics.",
+    "ar": "بعد هذه الدقائق من عدم النشاط—أو عند العودة من الخلفية بعد تجاوز هذا الحد—تُقفل الخزنة وستحتاج كلمة المرور الرئيسية أو القياسات الحيوية.",
+    "ckb": "دوای ئەم خولەکانە لە بێچالاکی—یان کاتێک لە پاشخان دەگەڕێیتەوە دوای ئەم سنوورە—کۆگا دەقوفڵێت و پێویستت بە وشەی نهێنی سەرەکی یان بایۆمەتریک دەبێت."
+  },
+  "settings.autoLockMinutesFmt": {
+    "en": "%d min",
+    "ar": "%d دقائق",
+    "ckb": "%d خولەک"
+  },
+  "settings.autoLockPresets": {
+    "en": "Presets",
+    "ar": "إعدادات مسبقة",
+    "ckb": "ئامادەکراوەکان"
+  },
+  "settings.autoLockValue": {
+    "en": "5 mins",
+    "ar": "٥ دقائق",
+    "ckb": "٥ خولەک"
+  },
+  "settings.autofill": {
+    "en": "Autofill",
+    "ar": "التعبئة التلقائية",
+    "ckb": "پڕکردنەوەی خۆکار"
+  },
+  "settings.autofillSubtitle": {
+    "en": "Enable Qasa in Passwords → AutoFill Passwords",
+    "ar": "فعّل Qasa من كلمات السر ← التعبئة التلقائية",
+    "ckb": "Qasa چالاک بکە لە Passwords → AutoFill Passwords"
+  },
+  "settings.biometricUnlock": {
+    "en": "Fingerprint or face unlock",
+    "ar": "الفتح بالبصمة أو الوجه",
+    "ckb": "کردنەوە بە پەنجەمۆر یان ڕوخسار"
+  },
+  "settings.cancel": {
+    "en": "Cancel",
+    "ar": "إلغاء",
+    "ckb": "هەڵوەشاندنەوە"
+  },
+  "settings.changeMasterPassword": {
+    "en": "Change main password",
+    "ar": "تغيير كلمة المرور الرئيسية",
+    "ckb": "گۆڕینی وشەی نهێنی سەرەکی"
+  },
+  "settings.changeMasterSubtitle": {
+    "en": "Enter your current master password, then choose a new one. All vault items are re-encrypted on this device. Other devices keep working until they unlock with the new password after sync—or re-register if they only have the old verifier.",
+    "ar": "أدخل كلمة المرور الرئيسية الحالية ثم اختر واحدةً جديدة. تُعاد تشفير كل عناصر الخزنة على هذا الجهاز.",
+    "ckb": "وشەی نهێنی سەرەکی ئێستا بنووسە، پاشان یەکێکی نوێ هەڵبژێرە. هەموو بڕگەکانی کۆگا لەم ئامێرە دووبارە کۆد دەکرێنەوە."
+  },
+  "settings.clear": {
+    "en": "Clear",
+    "ar": "مسح",
+    "ckb": "سڕینەوە"
+  },
+  "settings.clearAlertMessage": {
+    "en": "This permanently deletes your local vault. This cannot be undone.",
+    "ar": "سيؤدي هذا إلى حذف خزنتك المحلية نهائيًا. لا يمكن التراجع.",
+    "ckb": "ئەمە کۆگای ناوخۆیی بە یەکجارەکی دەسڕێتەوە. گەڕانەوە ناکرێت."
+  },
+  "settings.clearAlertTitle": {
+    "en": "Clear Local Data?",
+    "ar": "مسح البيانات المحلية؟",
+    "ckb": "داتای ناوخۆیی بسڕدرێتەوە؟"
+  },
+  "settings.clearLocalData": {
+    "en": "Clear Local Data",
+    "ar": "مسح البيانات المحلية",
+    "ckb": "سڕینەوەی داتای ناوخۆیی"
+  },
+  "settings.confirmMasterPassword": {
+    "en": "Confirm new password",
+    "ar": "تأكيد كلمة المرور الجديدة",
+    "ckb": "دڵنیابوونەوە لە وشەی نهێنی نوێ"
+  },
+  "settings.currentMasterPassword": {
+    "en": "Current main password",
+    "ar": "كلمة المرور الرئيسية الحالية",
+    "ckb": "وشەی نهێنی سەرەکی ئێستا"
+  },
+  "settings.dataAccount": {
+    "en": "Data & Account",
+    "ar": "البيانات والحساب",
+    "ckb": "داتا و هەژمار"
+  },
+  "settings.done": {
+    "en": "Done",
+    "ar": "تم",
+    "ckb": "تەواو"
+  },
+  "settings.exportCsv": {
+    "en": "Export passwords (CSV)",
+    "ar": "تصدير كلمات المرور (CSV)",
+    "ckb": "هەناردەکردنی وشە نهێنییەکان (CSV)"
+  },
+  "settings.exportEmpty": {
+    "ar": "لا يوجد شيء للتصدير بعد.",
+    "ckb": "هێشتا هیچ نییە بۆ هەناردەکردن.",
+    "en": "Nothing to export yet."
+  },
+  "settings.exportFailed": {
+    "ar": "فشل التصدير: %@",
+    "ckb": "هەناردەکردن سەرکەوتوو نەبوو: %@",
+    "en": "Export failed: %@"
+  },
+  "settings.exportPartial": {
+    "en": "Exported %lld item(s). %lld item(s) could not be decrypted and are NOT in this backup.",
+    "ar": "تم تصدير %lld عنصر. تعذر فك تشفير %lld عنصر وهي غير مشمولة في هذا النسخ الاحتياطي.",
+    "ckb": "%lld بابەت هەناردەکرا. %lld بابەت نەیتوانرا کۆدکراوە بکاتەوە و لەم کۆپیەدا نین."
+  },
+  "settings.exportPrepared": {
+    "ar": "تم تصدير %lld عنصر.",
+    "ckb": "%lld بابەت هەناردەکرا.",
+    "en": "Exported %lld item(s)."
+  },
+  "settings.freeAccount": {
+    "en": "Free plan",
+    "ar": "الخطة المجانية",
+    "ckb": "پلانی خۆڕایی"
+  },
+  "settings.freePlan": {
+    "en": "%@ Plan",
+    "ar": "خطة %@",
+    "ckb": "پلانی %@"
+  },
+  "settings.importBadHeader": {
+    "en": "The CSV header must contain the columns %@.",
+    "ar": "يجب أن تحتوي ترويسة CSV على الأعمدة %@.",
+    "ckb": "پێویستە سەردێڕی CSV ئەم ستوونانەی تێدابێت: %@."
+  },
+  "settings.importCsv": {
+    "en": "Import CSV",
+    "ar": "استيراد CSV",
+    "ckb": "هاوردەکردنی CSV"
+  },
+  "settings.importFailed": {
+    "ar": "فشل الاستيراد: %@",
+    "ckb": "هاوردەکردن سەرکەوتوو نەبوو: %@",
+    "en": "Import failed: %@"
+  },
+  "settings.importNothing": {
+    "ar": "لم يتم العثور على صفوف عناصر في ملف CSV.",
+    "ckb": "هیچ ڕیزی بابەت لە ئەو CSV ـدا نەدۆزرایەوە.",
+    "en": "No item rows were found in that CSV."
+  },
+  "settings.importSkipped": {
+    "ar": "تم استيراد %lld عنصر، وتخطي %lld عنصر موجود بالفعل.",
+    "ckb": "%lld بابەت هاوردەکرا، %lld بابەتی پێشتر لە کۆگادا بەجێهێڵدرا.",
+    "en": "Imported %lld item(s), skipped %lld already in the vault."
+  },
+  "settings.language": {
+    "en": "Language",
+    "ar": "اللغة",
+    "ckb": "زمان"
+  },
+  "settings.linkedDevices": {
+    "en": "Linked Devices",
+    "ar": "الأجهزة المرتبطة",
+    "ckb": "ئامێرە بەستراوەکان"
+  },
+  "settings.lockAlertMessage": {
+    "en": "You'll need your main password to open it again.",
+    "ar": "ستحتاج إلى كلمة مرورك الرئيسية لفتحه مرة أخرى.",
+    "ckb": "پێویستت بە وشەی نهێنی سەرەکیت دەبێت بۆ کردنەوەی دووبارە."
+  },
+  "settings.lockAlertTitle": {
+    "en": "Lock Qasa?",
+    "ar": "قفل Qasa؟",
+    "ckb": "Qasa قفڵ بکرێت؟"
+  },
+  "settings.logout": {
+    "en": "Logout",
+    "ar": "تسجيل الخروج",
+    "ckb": "چوونەدەرەوە"
+  },
+  "settings.manageSubscription": {
+    "en": "Manage Subscription",
+    "ar": "إدارة الاشتراك",
+    "ckb": "بەڕێوەبردنی بەشداری"
+  },
+  "settings.masterPasswordChanged": {
+    "en": "Main password updated.",
+    "ar": "تم تحديث كلمة المرور الرئيسية.",
+    "ckb": "وشەی نهێنی سەرەکی نوێکرایەوە."
+  },
+  "settings.newMasterPassword": {
+    "en": "New main password",
+    "ar": "كلمة المرور الرئيسية الجديدة",
+    "ckb": "وشەی نهێنی سەرەکی نوێ"
+  },
+  "settings.pairingCodeFmt": {
+    "en": "Code: %@ (10 min)",
+    "ar": "الرمز: %@ (١٠ دقائق)",
+    "ckb": "کۆد: %@ (١٠ خولەک)"
+  },
+  "settings.pairingSubtitle": {
+    "en": "For a new device on Wi‑Fi",
+    "ar": "لجهاز جديد على Wi‑Fi",
+    "ckb": "بۆ ئامێرێکی نوێ لەسەر Wi‑Fi"
+  },
+  "settings.parsedCsv": {
+    "ar": "تم استيراد %lld عنصر.",
+    "ckb": "%lld بابەت هاوردەکرا.",
+    "en": "Imported %lld item(s)."
+  },
+  "settings.passwordMismatch": {
+    "en": "New passwords don’t match.",
+    "ar": "كلمتا المرور الجديدتان غير متطابقتين.",
+    "ckb": "وشە نهێنییە نوێیەکان یەک ناگرنەوە."
+  },
+  "settings.premiumAccount": {
+    "en": "Premium plan",
+    "ar": "خطة بريميوم",
+    "ckb": "پلانی پریمیەم"
+  },
+  "settings.premiumLanSync": {
+    "en": "Premium LAN sync",
+    "ar": "مزامنة LAN للبريميوم",
+    "ckb": "هاوکاتکردنی LANی پرێمیەم"
+  },
+  "settings.premiumPlan": {
+    "en": "Premium Plan",
+    "ar": "خطة بريميوم",
+    "ckb": "پلانی پرێمیەم"
+  },
+  "settings.requiresPremium": {
+    "en": "Requires Premium",
+    "ar": "يتطلب بريميوم",
+    "ckb": "پێویستی بە پرێمیەم هەیە"
+  },
+  "settings.saveMasterPassword": {
+    "en": "Update password",
+    "ar": "تحديث كلمة المرور",
+    "ckb": "نوێکردنەوەی وشەی نهێنی"
+  },
+  "settings.security": {
+    "en": "Security",
+    "ar": "الأمان",
+    "ckb": "ئاسایش"
+  },
+  "settings.showPairingCode": {
+    "en": "Show pairing code",
+    "ar": "إظهار رمز الاقتران",
+    "ckb": "پیشاندانی کۆدی جووتکردن"
+  },
+  "settings.subscription": {
+    "en": "Subscription",
+    "ar": "الاشتراك",
+    "ckb": "بەشداری"
+  },
+  "settings.syncNetwork": {
+    "en": "Sync on this network",
+    "ar": "المزامنة على هذه الشبكة",
+    "ckb": "هاوکاتکردن لەسەر ئەم تۆڕە"
+  },
+  "settings.theme": {
+    "en": "Theme",
+    "ar": "السمة",
+    "ckb": "ڕووکار"
+  },
+  "settings.theme.dark": {
+    "en": "Dark",
+    "ar": "داكن",
+    "ckb": "تاریک"
+  },
+  "settings.theme.light": {
+    "en": "Light",
+    "ar": "فاتح",
+    "ckb": "ڕووناک"
+  },
+  "settings.theme.system": {
+    "en": "System",
+    "ar": "النظام",
+    "ckb": "سیستەم"
+  },
+  "settings.thisDevice": {
+    "en": "(This Device)",
+    "ar": "(هذا الجهاز)",
+    "ckb": "(ئەم ئامێرە)"
+  },
+  "settings.title": {
+    "en": "Settings",
+    "ar": "الإعدادات",
+    "ckb": "ڕێکخستنەکان"
+  },
+  "settings.upgradePremium": {
+    "en": "Upgrade to Premium",
+    "ar": "الترقية إلى بريميوم",
+    "ckb": "بەرزکردنەوە بۆ پریمیەم"
+  },
+  "settings.weakMasterPassword": {
+    "en": "Use at least 8 characters.",
+    "ar": "استخدم 8 أحرف على الأقل.",
+    "ckb": "لانیکەم ٨ پیت بەکاربهێنە."
+  },
+  "settings.wrongMasterPassword": {
+    "en": "That's not your current main password.",
+    "ar": "هذه ليست كلمة مرورك الرئيسية الحالية.",
+    "ckb": "ئەوە وشەی نهێنی سەرەکی ئێستات نییە."
+  },
+  "sub.accessContinues": {
+    "en": "Access continues until the end of the current period.",
+    "ar": "يستمر الوصول حتى نهاية الفترة الحالية.",
+    "ckb": "دەستگەیشتن تا کۆتایی ماوەی ئێستا بەردەوامە."
+  },
+  "sub.active": {
+    "en": "Active",
+    "ar": "نشط",
+    "ckb": "چالاک"
+  },
+  "sub.amount": {
+    "en": "Amount",
+    "ar": "المبلغ",
+    "ckb": "بڕ"
+  },
+  "sub.autoRenew": {
+    "en": "Auto-renew",
+    "ar": "التجديد التلقائي",
+    "ckb": "نوێبوونەوەی خۆکار"
+  },
+  "sub.autoRenewDisabled": {
+    "en": "Auto-renew disabled.",
+    "ar": "تم إيقاف التجديد التلقائي.",
+    "ckb": "نوێبوونەوەی خۆکار ناچالاک کرا."
+  },
+  "sub.autoRenewEnabled": {
+    "en": "Auto-renew enabled.",
+    "ar": "تم تفعيل التجديد التلقائي.",
+    "ckb": "نوێبوونەوەی خۆکار چالاک کرا."
+  },
+  "sub.autoRenewOff": {
+    "en": "Auto-renew disabled.",
+    "ar": "تم إيقاف التجديد التلقائي.",
+    "ckb": "نوێکردنەوەی خۆکار ناکارا کرا."
+  },
+  "sub.autoRenewOffCancelled": {
+    "en": "Turned off after cancellation.",
+    "ar": "أُوقف بعد الإلغاء.",
+    "ckb": "دوای هەڵوەشاندنەوە کوژایەوە."
+  },
+  "sub.autoRenewOn": {
+    "en": "Renews automatically at period end.",
+    "ar": "يتجدد تلقائيًا في نهاية الفترة.",
+    "ckb": "لە کۆتایی ماوەدا خۆکارانە نوێ دەبێتەوە."
+  },
+  "sub.cancelConfirmMessage": {
+    "en": "You'll keep Premium until %@. Auto-renew will be turned off.",
+    "ar": "ستحتفظ بالبريميوم حتى %@. سيُوقف التجديد التلقائي.",
+    "ckb": "پریمیۆم تا %@ دەمێنێتەوە. نوێبوونەوەی خۆکار دەکوژرێتەوە."
+  },
+  "sub.cancelConfirmTitle": {
+    "en": "Cancel subscription?",
+    "ar": "إلغاء الاشتراك؟",
+    "ckb": "بەشداری هەڵبوەشێتەوە؟"
+  },
+  "sub.cancelMessage": {
+    "en": "You'll keep Premium until %@. Auto-renew will be turned off.",
+    "ar": "ستحتفظ ببريميوم حتى %@. سيتم إيقاف التجديد التلقائي.",
+    "ckb": "پرێمیەم دەمێنێتەوە تا %@ . نوێکردنەوەی خۆکار دەکوژێتەوە."
+  },
+  "sub.cancelReasonOptional": {
+    "en": "Optional. You can skip and still cancel.",
+    "ar": "اختياري. يمكنك التخطي والإلغاء.",
+    "ckb": "ئارەزوومەندانە. دەتوانیت تێپەڕێیت و هێشتا هەڵیبوەشێنیتەوە."
+  },
+  "sub.cancelReasonPrompt": {
+    "en": "Help us improve — why are you cancelling?",
+    "ar": "ساعدنا على التحسين — لماذا تلغي؟",
+    "ckb": "یارمەتیمان بدە باشتر بین — بۆچی هەڵیدەوەشێنیتەوە؟"
+  },
+  "sub.cancelReasonTitle": {
+    "en": "Cancellation reason",
+    "ar": "سبب الإلغاء",
+    "ckb": "هۆکاری هەڵوەشاندنەوە"
+  },
+  "sub.cancelSubscription": {
+    "en": "Cancel Subscription",
+    "ar": "إلغاء الاشتراك",
+    "ckb": "هەڵوەشاندنەوەی بەشداری"
+  },
+  "sub.cancelTitle": {
+    "en": "Cancel subscription?",
+    "ar": "إلغاء الاشتراك؟",
+    "ckb": "بەشداری هەڵبوەشێنرێتەوە؟"
+  },
+  "sub.cancelled": {
+    "en": "Cancelled",
+    "ar": "أُلغي",
+    "ckb": "هەڵوەشایەوە"
+  },
+  "sub.cancelledUntil": {
+    "en": "Subscription cancelled. Premium stays active until %@.",
+    "ar": "تم إلغاء الاشتراك. يبقى البريميوم نشطًا حتى %@.",
+    "ckb": "بەشداری هەڵوەشایەوە. پریمیۆم تا %@ چالاک دەمێنێتەوە."
+  },
+  "sub.cancelling": {
+    "en": "Cancelling",
+    "ar": "قيد الإلغاء",
+    "ckb": "هەڵوەشاندنەوە"
+  },
+  "sub.cancellingEllipsis": {
+    "en": "Cancelling…",
+    "ar": "جارٍ الإلغاء…",
+    "ckb": "هەڵوەشاندنەوە…"
+  },
+  "sub.cancellingProgress": {
+    "en": "Cancelling…",
+    "ar": "جارٍ الإلغاء…",
+    "ckb": "هەڵوەشاندنەوە…"
+  },
+  "sub.confirmCancel": {
+    "en": "Confirm Cancel",
+    "ar": "تأكيد الإلغاء",
+    "ckb": "دڵنیابوونەوە لە هەڵوەشاندنەوە"
+  },
+  "sub.continue": {
+    "en": "Continue",
+    "ar": "متابعة",
+    "ckb": "بەردەوامبە"
+  },
+  "sub.iqd": {
+    "en": "IQD",
+    "ar": "د.ع",
+    "ckb": "د.ع"
+  },
+  "sub.keepPremium": {
+    "en": "Keep Premium",
+    "ar": "الإبقاء على البريميوم",
+    "ckb": "پریمیۆم بهێڵەوە"
+  },
+  "sub.manageTitle": {
+    "en": "Manage Subscription",
+    "ar": "إدارة الاشتراك",
+    "ckb": "بەڕێوەبردنی بەشداری"
+  },
+  "sub.noneActive": {
+    "en": "No active subscription found.",
+    "ar": "لا يوجد اشتراك نشط.",
+    "ckb": "هیچ بەشدارییەکی چالاک نەدۆزرایەوە."
+  },
+  "sub.noneFound": {
+    "en": "No active subscription found.",
+    "ar": "لم يُعثر على اشتراك نشط.",
+    "ckb": "هیچ بەشدارییەکی چالاک نەدۆزرایەوە."
+  },
+  "sub.planMonthly": {
+    "en": "Premium Monthly",
+    "ar": "بريميوم شهري",
+    "ckb": "پریمیۆمی مانگانە"
+  },
+  "sub.planYearly": {
+    "en": "Premium Yearly",
+    "ar": "بريميوم سنوي",
+    "ckb": "پریمیۆمی ساڵانە"
+  },
+  "sub.premiumIncludes": {
+    "en": "Premium includes 5 devices, email leak alerts and VPN.",
+    "ar": "يشمل بريميوم 5 أجهزة وتنبيهات تسريب البريد وVPN.",
+    "ckb": "پریمیەم ٥ ئامێر، ئاگادارکردنەوەی دزەی ئیمەیڵ و VPN لەخۆدەگرێت."
+  },
+  "sub.reasonTitle": {
+    "en": "Cancellation reason",
+    "ar": "سبب الإلغاء",
+    "ckb": "هۆکاری هەڵوەشاندنەوە"
+  },
+  "sub.renewsExpires": {
+    "en": "Renews / expires",
+    "ar": "يتجدد / ينتهي",
+    "ckb": "نوێبوونەوە / بەسەرچوون"
+  },
+  "sub.skip": {
+    "en": "Skip",
+    "ar": "تخطٍ",
+    "ckb": "تێپەڕاندن"
+  },
+  "sub.started": {
+    "en": "Started",
+    "ar": "بدأ",
+    "ckb": "دەستیپێکرد"
+  },
+  "sub.turnedOffCancel": {
+    "en": "Turned off after cancellation.",
+    "ar": "أُوقف بعد الإلغاء.",
+    "ckb": "دوای هەڵوەشاندنەوە کوژایەوە."
+  },
+  "vault.addNew": {
+    "en": "What do you want to save?",
+    "ar": "ماذا تريد أن تحفظ؟",
+    "ckb": "دەتەوێت چی پاشەکەوت بکەیت؟"
+  },
+  "vault.collection": {
+    "en": "Folder",
+    "ar": "المجلد",
+    "ckb": "بوخچە"
+  },
+  "vault.color": {
+    "en": "Color",
+    "ar": "اللون",
+    "ckb": "ڕەنگ"
+  },
+  "vault.couldNotSave": {
+    "en": "Could Not Save",
+    "ar": "تعذر الحفظ",
+    "ckb": "نەتوانرا پاشەکەوت بکرێت"
+  },
+  "vault.country": {
+    "en": "Country",
+    "ar": "البلد",
+    "ckb": "وڵات"
+  },
+  "vault.created": {
+    "en": "Created",
+    "ar": "أُنشئ",
+    "ckb": "دروستکراوە"
+  },
+  "vault.deleteItem": {
+    "en": "Delete Item",
+    "ar": "حذف العنصر",
+    "ckb": "سڕینەوەی بڕگە"
+  },
+  "vault.deleteItemMessage": {
+    "en": "This permanently removes “%@”.",
+    "ar": "سيؤدي هذا إلى إزالة “%@” نهائيًا.",
+    "ckb": "ئەمە “%@” بە یەکجارەکی دەسڕێتەوە."
+  },
+  "vault.deleteItemTitle": {
+    "en": "Delete Item?",
+    "ar": "حذف العنصر؟",
+    "ckb": "بڕگە بسڕدرێتەوە؟"
+  },
+  "vault.details": {
+    "en": "Details",
+    "ar": "التفاصيل",
+    "ckb": "وردەکارییەکان"
+  },
+  "vault.editFmt": {
+    "en": "Edit %@",
+    "ar": "تعديل %@",
+    "ckb": "دەستکاری %@"
+  },
+  "vault.editItem": {
+    "en": "Edit Item",
+    "ar": "تعديل العنصر",
+    "ckb": "دەستکاری بڕگە"
+  },
+  "vault.empty": {
+    "en": "No items yet",
+    "ar": "لا توجد عناصر بعد",
+    "ckb": "هێشتا هیچ بڕگەیەک نییە"
+  },
+  "vault.emptyHint": {
+    "en": "Tap + to save your first password.",
+    "ar": "اضغط + لحفظ أول كلمة مرور.",
+    "ckb": "+ لێبدە بۆ پاشەکەوتکردنی یەکەم وشەی نهێنیت."
+  },
+  "vault.emptyTitle": {
+    "en": "No passwords yet",
+    "ar": "لا توجد كلمات مرور بعد",
+    "ckb": "هێشتا هیچ وشەیەکی نهێنی نییە"
+  },
+  "vault.generatePassword": {
+    "en": "Generate password",
+    "ar": "إنشاء كلمة مرور",
+    "ckb": "دروستکردنی وشەی نهێنی"
+  },
+  "vault.hidePassword": {
+    "en": "Hide password",
+    "ar": "إخفاء كلمة المرور",
+    "ckb": "شاردنەوەی وشەی نهێنی"
+  },
+  "vault.history": {
+    "en": "History",
+    "ar": "السجل",
+    "ckb": "مێژوو"
+  },
+  "vault.kind.idDocument.add": {
+    "en": "ID",
+    "ar": "هوية",
+    "ckb": "ناسنامە"
+  },
+  "vault.kind.idDocument.tab": {
+    "en": "IDs",
+    "ar": "الهويات",
+    "ckb": "ناسنامەکان"
+  },
+  "vault.kind.login.add": {
+    "en": "Password for a site or app",
+    "ar": "كلمة مرور لموقع أو تطبيق",
+    "ckb": "وشەی نهێنی بۆ ماڵپەڕ یان ئەپ"
+  },
+  "vault.kind.login.tab": {
+    "en": "Logins",
+    "ar": "تسجيلات الدخول",
+    "ckb": "چوونەژوورەوەکان"
+  },
+  "vault.kind.payment.add": {
+    "en": "Payment",
+    "ar": "دفعة",
+    "ckb": "پارەدان"
+  },
+  "vault.kind.payment.tab": {
+    "en": "Payments",
+    "ar": "المدفوعات",
+    "ckb": "پارەدانەکان"
+  },
+  "vault.kind.personalInfo.add": {
+    "en": "Personal Information",
+    "ar": "معلومات شخصية",
+    "ckb": "زانیاری کەسی"
+  },
+  "vault.kind.personalInfo.tab": {
+    "en": "About me",
+    "ar": "معلوماتي",
+    "ckb": "دەربارەی من"
+  },
+  "vault.kind.secureNote.add": {
+    "en": "Secure Note",
+    "ar": "ملاحظة آمنة",
+    "ckb": "تێبینیی پارێزراو"
+  },
+  "vault.kind.secureNote.tab": {
+    "en": "Notes",
+    "ar": "ملاحظات",
+    "ckb": "تێبینییەکان"
+  },
+  "vault.lastUpdated": {
+    "en": "Last Updated",
+    "ar": "آخر تحديث",
+    "ckb": "دوایین نوێکردنەوە"
+  },
+  "vault.lastUsed": {
+    "en": "Last Used",
+    "ar": "آخر استخدام",
+    "ckb": "دوایین بەکارهێنان"
+  },
+  "vault.lockedAuthenticate": {
+    "en": "Locked — authenticate to view",
+    "ar": "مقفل — صادق للعرض",
+    "ckb": "قفلکراوە — ڕەسەنایەتی بکە بۆ بینین"
+  },
+  "vault.lockedProtected": {
+    "en": "Locked — authenticate to view",
+    "ar": "مقفل — صادق للعرض",
+    "ckb": "قفلکراوە — پشتڕاستکردنەوە پێویستە بۆ بینین"
+  },
+  "vault.mostRecent": {
+    "en": "Most Recent",
+    "ar": "الأحدث",
+    "ckb": "دوایینەکان"
+  },
+  "vault.never": {
+    "en": "Never",
+    "ar": "أبداً",
+    "ckb": "هەرگیز"
+  },
+  "vault.newCollection": {
+    "en": "New Collection",
+    "ar": "مجموعة جديدة",
+    "ckb": "کۆکراوەی نوێ"
+  },
+  "vault.newFmt": {
+    "en": "New %@",
+    "ar": "%@ جديد",
+    "ckb": "%@ی نوێ"
+  },
+  "vault.nfcHint": {
+    "en": "NFC scanning requires a compatible device and card.",
+    "ar": "يتطلب مسح NFC جهازاً وبطاقة متوافقين.",
+    "ckb": "سکانکردنی NFC پێویستی بە ئامێر و کارتی گونجاو هەیە."
+  },
+  "vault.noDetails": {
+    "en": "No details",
+    "ar": "لا توجد تفاصيل",
+    "ckb": "هیچ وردەکارییەک نییە"
+  },
+  "vault.openWebsite": {
+    "en": "Open Website",
+    "ar": "فتح الموقع",
+    "ckb": "کردنەوەی ماڵپەڕ"
+  },
+  "vault.organization": {
+    "en": "Organization",
+    "ar": "التنظيم",
+    "ckb": "ڕێکخستن"
+  },
+  "vault.protectItem": {
+    "en": "Protect Item",
+    "ar": "حماية العنصر",
+    "ckb": "پاراستنی بڕگە"
+  },
+  "vault.scanNFC": {
+    "en": "Scan with NFC",
+    "ar": "المسح عبر NFC",
+    "ckb": "سکانکردن بە NFC"
+  },
+  "vault.search": {
+    "en": "Search",
+    "ar": "بحث",
+    "ckb": "گەڕان"
+  },
+  "vault.searchPlaceholder": {
+    "en": "Search your passwords",
+    "ar": "ابحث في كلمات مرورك",
+    "ckb": "لە وشە نهێنییەکانت بگەڕێ"
+  },
+  "vault.showPassword": {
+    "en": "Show password",
+    "ar": "إظهار كلمة المرور",
+    "ckb": "پیشاندانی وشەی نهێنی"
+  },
+  "vault.subtype.address": {
+    "en": "Address",
+    "ar": "العنوان",
+    "ckb": "ناونیشان"
+  },
+  "vault.subtype.bank": {
+    "en": "Bank Account",
+    "ar": "حساب بنكي",
+    "ckb": "هەژماری بانک"
+  },
+  "vault.subtype.card": {
+    "en": "Credit / Debit Card",
+    "ar": "بطاقة ائتمان / خصم",
+    "ckb": "کارتی بانکی / قەرز"
+  },
+  "vault.subtype.company": {
+    "en": "Company",
+    "ar": "الشركة",
+    "ckb": "کۆمپانیا"
+  },
+  "vault.subtype.driverLicense": {
+    "en": "Driver License",
+    "ar": "رخصة قيادة",
+    "ckb": "مۆڵەتی شۆفێری"
+  },
+  "vault.subtype.email": {
+    "en": "Email",
+    "ar": "البريد الإلكتروني",
+    "ckb": "ئیمەیڵ"
+  },
+  "vault.subtype.idCard": {
+    "en": "ID Card",
+    "ar": "بطاقة هوية",
+    "ckb": "کارتی ناسنامە"
+  },
+  "vault.subtype.name": {
+    "en": "Name",
+    "ar": "الاسم",
+    "ckb": "ناو"
+  },
+  "vault.subtype.passport": {
+    "en": "Passport",
+    "ar": "جواز سفر",
+    "ckb": "پاسپۆرت"
+  },
+  "vault.subtype.phone": {
+    "en": "Phone Number",
+    "ar": "رقم الهاتف",
+    "ckb": "ژمارەی تەلەفۆن"
+  },
+  "vault.subtype.website": {
+    "en": "Website",
+    "ar": "الموقع",
+    "ckb": "ماڵپەڕ"
+  },
+  "vault.suggestedCheckout": {
+    "en": "Suggested for Checkout",
+    "ar": "مقترح للدفع",
+    "ckb": "پێشنیارکراو بۆ پارەدان"
+  },
+  "vault.suggestedGoogle": {
+    "en": "Suggested for Google Sign-In",
+    "ar": "مقترح لتسجيل الدخول عبر Google",
+    "ckb": "پێشنیارکراو بۆ چوونەژوورەوەی Google"
+  },
+  "vault.tab.all": {
+    "en": "All",
+    "ar": "الكل",
+    "ckb": "هەموو"
+  },
+  "vault.thisItem": {
+    "en": "this item",
+    "ar": "هذا العنصر",
+    "ckb": "ئەم بڕگەیە"
+  },
+  "vault.type.address": {
+    "en": "Address",
+    "ar": "عنوان",
+    "ckb": "ناونیشان"
+  },
+  "vault.type.bankAccount": {
+    "en": "Bank Account",
+    "ar": "حساب بنكي",
+    "ckb": "هەژماری بانک"
+  },
+  "vault.type.card": {
+    "en": "Card",
+    "ar": "بطاقة",
+    "ckb": "کارت"
+  },
+  "vault.type.company": {
+    "en": "Company",
+    "ar": "شركة",
+    "ckb": "کۆمپانیا"
+  },
+  "vault.type.driverLicense": {
+    "en": "Driver License",
+    "ar": "رخصة قيادة",
+    "ckb": "مۆڵەتی شۆفێری"
+  },
+  "vault.type.email": {
+    "en": "Email",
+    "ar": "بريد",
+    "ckb": "ئیمەیڵ"
+  },
+  "vault.type.idCard": {
+    "en": "ID Card",
+    "ar": "بطاقة هوية",
+    "ckb": "کارتی ناسنامە"
+  },
+  "vault.type.login": {
+    "en": "Login",
+    "ar": "تسجيل دخول",
+    "ckb": "چوونەژوورەوە"
+  },
+  "vault.type.name": {
+    "en": "Name",
+    "ar": "اسم",
+    "ckb": "ناو"
+  },
+  "vault.type.passport": {
+    "en": "Passport",
+    "ar": "جواز سفر",
+    "ckb": "پاسپۆرت"
+  },
+  "vault.type.phone": {
+    "en": "Phone Number",
+    "ar": "هاتف",
+    "ckb": "ژمارەی تەلەفۆن"
+  },
+  "vault.type.secureNote": {
+    "en": "Secure Note",
+    "ar": "ملاحظة آمنة",
+    "ckb": "تێبینیی پارێزراو"
+  },
+  "vault.type.website": {
+    "en": "Website",
+    "ar": "موقع",
+    "ckb": "ماڵپەڕ"
+  },
+  "vault.unlockProtectedNote": {
+    "en": "Unlock protected note",
+    "ar": "فتح الملاحظة المحمية",
+    "ckb": "کردنەوەی تێبینیی پارێزراو"
+  },
+  "vault.untitled": {
+    "en": "Untitled",
+    "ar": "بدون عنوان",
+    "ckb": "بێناو"
+  },
+  "vpn.autoConnect": {
+    "en": "Auto-connect",
+    "ar": "اتصال تلقائي",
+    "ckb": "پەیوەستبوونی خۆکار"
+  },
+  "vpn.autoConnectSub": {
+    "en": "On public or untrusted Wi-Fi",
+    "ar": "على شبكات Wi-Fi عامة أو غير موثوقة",
+    "ckb": "لەسەر Wi-Fiی گشتی یان متمانەپێنەکراو"
+  },
+  "vpn.autoSelect": {
+    "en": "Auto-select server",
+    "ar": "اختيار الخادم تلقائيًا",
+    "ckb": "هەڵبژاردنی خۆکاری سێرڤەر"
+  },
+  "vpn.brand": {
+    "en": "Qasa VPN",
+    "ar": "VPN لـ Qasa",
+    "ckb": "VPNی Qasa"
+  },
+  "vpn.connected": {
+    "en": "Connected",
+    "ar": "متصل",
+    "ckb": "پەیوەستکراو"
+  },
+  "vpn.disconnected": {
+    "en": "Disconnected",
+    "ar": "غير متصل",
+    "ckb": "پچڕاو"
+  },
+  "vpn.encryption": {
+    "en": "Encryption",
+    "ar": "التشفير",
+    "ckb": "شفرەکردن"
+  },
+  "vpn.killSwitch": {
+    "en": "Block internet if VPN drops",
+    "ar": "حظر الإنترنت إذا انقطع VPN",
+    "ckb": "ئینتەرنێت ڕابگرە ئەگەر VPN پچڕا"
+  },
+  "vpn.killSwitchSub": {
+    "en": "Recommended on public Wi-Fi",
+    "ar": "موصى به على شبكات Wi-Fi العامة",
+    "ckb": "پێشنیارکراوە بۆ وای-فایی گشتی"
+  },
+  "vpn.securityFeatures": {
+    "en": "Security Features",
+    "ar": "ميزات الأمان",
+    "ckb": "تایبەتمەندییەکانی ئاسایش"
+  },
+  "vpn.sessionOnly": {
+    "en": "API session only — WireGuard tunnel coming soon",
+    "ar": "جلسة API فقط — نفق WireGuard قريبًا",
+    "ckb": "دانیشتنی API تەنها — تونێلی WireGuard بەمزووانە"
+  },
+  "vpn.title": {
+    "en": "VPN",
+    "ar": "VPN",
+    "ckb": "VPN"
+  },
+  "vpn.virtualIP": {
+    "en": "Your VPN address",
+    "ar": "عنوان VPN الخاص بك",
+    "ckb": "ناونیشانی VPNەکەت"
+  },
+  "pair.adoptBody": {
+    "en": "Adopt an existing account ID and create a local vault on this device.",
+    "ar": "استخدم معرّف حساب موجود وأنشئ خزنة محلية على هذا الجهاز.",
+    "ckb": "ناسنامەی هەژمارێکی هەبوو بەکاربهێنە و کۆگایەکی ناوخۆیی لەسەر ئەم ئامێرە دروست بکە."
+  },
+  "pair.accountLabel": {
+    "en": "Account ID",
+    "ar": "معرّف الحساب",
+    "ckb": "ناسنامەی هەژمار"
+  },
+  "pair.adoptButton": {
+    "en": "Adopt account & create local vault",
+    "ar": "اعتماد الحساب وإنشاء خزنة محلية",
+    "ckb": "هەژمارەکە وەربگرە و کۆگای ناوخۆیی دروست بکە"
+  },
+  "settings.saving": {
+    "en": "Saving…",
+    "ar": "جارٍ الحفظ…",
+    "ckb": "پاشەکەوتکردن…"
+  },
+  "settings.biometricSealed": {
+    "en": "Sealed behind device authentication",
+    "ar": "محمي بمصادقة الجهاز",
+    "ckb": "پارێزراوە بە ناسینەوەی ئامێر"
+  },
+  "settings.biometricNoGate": {
+    "en": "No lock screen or authenticator on this device",
+    "ar": "لا توجد شاشة قفل أو وسيلة مصادقة على هذا الجهاز",
+    "ckb": "هیچ شاشەی قفڵ یان ناسێنەرێک لەسەر ئەم ئامێرە نییە"
+  },
+  "settings.biometricPending": {
+    "en": "Sealed on your next master password unlock",
+    "ar": "سيُحمى عند فتحك التالي بكلمة المرور الرئيسية",
+    "ckb": "لە کردنەوەی داهاتوو بە وشەی نهێنی سەرەکی دەپارێزرێت"
+  },
+  "settings.autofillSubtitleAndroid": {
+    "en": "Open system settings",
+    "ar": "فتح إعدادات النظام",
+    "ckb": "کردنەوەی ڕێکخستنەکانی سیستەم"
+  },
+  "settings.autoLockChipFmt": {
+    "en": "%lldm",
+    "ar": "%lld د",
+    "ckb": "%lld خ"
+  },
+  "lan.pairing": {
+    "en": "Pairing",
+    "ar": "الإقران",
+    "ckb": "جووتکردن"
+  },
+  "sub.status": {
+    "en": "Status",
+    "ar": "الحالة",
+    "ckb": "دۆخ"
+  },
+  "sub.plan": {
+    "en": "Plan",
+    "ar": "الخطة",
+    "ckb": "پلان"
+  },
+  "sub.billing": {
+    "en": "Billing",
+    "ar": "الفوترة",
+    "ckb": "پارەدان"
+  },
+  "gen.regenerate": {
+    "en": "Regenerate",
+    "ar": "إعادة الإنشاء",
+    "ckb": "دووبارە دروستکردنەوە"
+  },
+  "health.weakPasswords": {
+    "en": "Weak Passwords",
+    "ar": "كلمات المرور الضعيفة",
+    "ckb": "وشە نهێنییە لاوازەکان"
+  },
+  "health.reusedPasswords": {
+    "en": "Reused Passwords",
+    "ar": "كلمات المرور المُعادة",
+    "ckb": "وشە نهێنییە دووبارەکراوەکان"
+  },
+  "vpn.upgradeHint": {
+    "en": "Upgrade to browse privately through Qasa VPN.",
+    "ar": "قم بالترقية للتصفح بخصوصية عبر Qasa VPN.",
+    "ckb": "بەرزبکەرەوە بۆ گەڕانی تایبەت لە ڕێگەی Qasa VPN."
+  },
+  "vpn.node": {
+    "en": "Server",
+    "ar": "الخادم",
+    "ckb": "سێرڤەر"
+  },
+  "vpn.city": {
+    "en": "City",
+    "ar": "المدينة",
+    "ckb": "شار"
+  },
+  "breach.atRiskSummary": {
+    "en": "%lld of your emails showed up in data leaks.",
+    "ar": "ظهر %lld من بريدك في تسريبات بيانات.",
+    "ckb": "%lld لە ئیمەیڵەکانت لە دزەی زانیاریدا دەرکەوتن."
+  },
+  "breach.atRiskSummaryOne": {
+    "en": "%lld of your emails showed up in a data leak.",
+    "ar": "ظهر %lld من بريدك في تسريب بيانات.",
+    "ckb": "%lld لە ئیمەیڵەکانت لە دزەی زانیاریدا دەرکەوت."
+  },
+  "vault.item": {
+    "en": "Item",
+    "ar": "العنصر",
+    "ckb": "بڕگە"
+  },
+  "vault.loading": {
+    "en": "Loading…",
+    "ar": "جارٍ التحميل…",
+    "ckb": "بارکردن…"
+  },
+  "vault.copiedFmt": {
+    "en": "Copied %@",
+    "ar": "تم نسخ %@",
+    "ckb": "%@ لەبەرگیرایەوە"
+  },
+  "vault.noSearchMatches": {
+    "en": "No matches for this search",
+    "ar": "لا توجد نتائج مطابقة لهذا البحث",
+    "ckb": "هیچ ئەنجامێک بۆ ئەم گەڕانە نییە"
+  },
+  "vault.itemType": {
+    "en": "Item type",
+    "ar": "نوع العنصر",
+    "ckb": "جۆری بڕگە"
+  },
+  "vault.titleYours": {
+    "android": "vault_title_yours",
+    "en": "Your passwords",
+    "ar": "كلمات مرورك",
+    "ckb": "وشە نهێنییەکانت"
+  },
+  "a11y.moreActions": {
+    "en": "More actions",
+    "ar": "المزيد من الإجراءات",
+    "ckb": "کرداری زیاتر"
+  },
+  "notifications.openFailed": {
+    "en": "Couldn’t open this notification. Check your connection and try again.",
+    "ar": "تعذّر فتح هذا الإشعار. تحقّق من اتصالك وحاول مرة أخرى.",
+    "ckb": "نەتوانرا ئەم ئاگادارییە بکرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە."
+  },
+  "common.decrease": {
+    "en": "Decrease",
+    "ar": "إنقاص",
+    "ckb": "کەمکردنەوە"
+  },
+  "common.increase": {
+    "en": "Increase",
+    "ar": "زيادة",
+    "ckb": "زیادکردن"
+  },
+  "breach.rotateTitle": {
+    "en": "Rotate Password",
+    "ar": "تغيير كلمة المرور",
+    "ckb": "گۆڕینی وشەی نهێنی"
+  },
+  "breach.rotateNoLogins": {
+    "en": "No saved logins use this email.",
+    "ar": "لا توجد تسجيلات دخول محفوظة تستخدم هذا البريد.",
+    "ckb": "هیچ چوونەژوورەوەیەکی پاشەکەوتکراو ئەم ئیمەیڵە بەکارناهێنێت."
+  },
+  "breach.rotatePickLogin": {
+    "en": "Choose the login to update",
+    "ar": "اختر تسجيل الدخول المراد تحديثه",
+    "ckb": "ئەو چوونەژوورەوەیە هەڵبژێرە کە نوێ دەکرێتەوە"
+  },
+  "breach.rotateNewPassword": {
+    "en": "New password",
+    "ar": "كلمة المرور الجديدة",
+    "ckb": "وشەی نهێنی نوێ"
+  },
+  "breach.rotateHint": {
+    "en": "Change the password on the website first, then save it here.",
+    "ar": "غيّر كلمة المرور على الموقع أولاً، ثم احفظها هنا.",
+    "ckb": "سەرەتا وشەی نهێنی لەسەر ماڵپەڕەکە بگۆڕە، پاشان لێرە پاشەکەوتی بکە."
+  },
+  "breach.rotateSave": {
+    "en": "Save New Password",
+    "ar": "حفظ كلمة المرور الجديدة",
+    "ckb": "پاشەکەوتکردنی وشەی نهێنی نوێ"
+  },
+  "breach.rotateConfirmTitle": {
+    "en": "Replace saved password?",
+    "ar": "استبدال كلمة المرور المحفوظة؟",
+    "ckb": "وشەی نهێنی پاشەکەوتکراو بگۆڕدرێت؟"
+  },
+  "breach.rotateConfirmMessage": {
+    "en": "The saved password for “%@” will be replaced with the new one.",
+    "ar": "سيتم استبدال كلمة المرور المحفوظة لـ ”%@“ بكلمة المرور الجديدة.",
+    "ckb": "وشەی نهێنی پاشەکەوتکراوی ”%@“ بە نوێیەکە دەگۆڕدرێت."
+  },
+  "breach.rotateReplace": {
+    "en": "Replace",
+    "ar": "استبدال",
+    "ckb": "گۆڕین"
+  },
+  "breach.rotateSaved": {
+    "en": "Password updated for “%@”.",
+    "ar": "تم تحديث كلمة المرور لـ ”%@“.",
+    "ckb": "وشەی نهێنی بۆ ”%@“ نوێکرایەوە."
+  },
+  "home.addfirst": {
+    "en": "Add a password",
+    "ar": "أضف كلمة مرور",
+    "ckb": "وشەیەکی نهێنی زیاد بکە"
+  },
+  "home.allfine": {
+    "en": "All good",
+    "ar": "كل شيء جيد",
+    "ckb": "هەموو باشە"
+  },
+  "home.allgoodBody": {
+    "android": "home_allgood_body",
+    "en": "Nothing needs your attention right now.",
+    "ar": "لا شيء يحتاج إلى انتباهك الآن.",
+    "ckb": "لە ئێستادا هیچ شتێک پێویستی بە سەرنجت نییە."
+  },
+  "home.allgoodTitle": {
+    "android": "home_allgood_title",
+    "en": "Your passwords look good",
+    "ar": "كلمات مرورك بحالة جيدة",
+    "ckb": "وشە نهێنییەکانت باشن"
+  },
+  "home.attentionBody": {
+    "android": "home_attention_body",
+    "en": "%1$lld used more than once, %2$lld easy to guess",
+    "ar": "%1$lld مستخدمة أكثر من مرة، %2$lld سهلة التخمين",
+    "ckb": "%1$lld زیاتر لە جارێک بەکارهاتووە، %2$lld ئاسانە بۆ زانین"
+  },
+  "home.attentionHint": {
+    "android": "home_attention_hint",
+    "en": "Changing them takes a minute and keeps your accounts safer.",
+    "ar": "تغييرها يستغرق دقيقة ويجعل حساباتك أكثر أمانًا.",
+    "ckb": "گۆڕینیان یەک خولەک دەخایەنێت و هەژمارەکانت پارێزراوتر دەکات."
+  },
+  "home.attentionTitle": {
+    "android": "home_attention_title",
+    "en": "A few passwords need a change",
+    "ar": "بعض كلمات المرور تحتاج إلى تغيير",
+    "ckb": "چەند وشەیەکی نهێنی پێویستیان بە گۆڕین هەیە"
+  },
+  "home.checking": {
+    "en": "Checking your passwords…",
+    "ar": "جارٍ فحص كلمات مرورك…",
+    "ckb": "پشکنینی وشە نهێنییەکانت…"
+  },
+  "home.emptyBody": {
+    "android": "home_empty_body",
+    "en": "We'll remember it for you and tell you if it's ever at risk.",
+    "ar": "سنتذكرها لك ونخبرك إذا تعرضت للخطر.",
+    "ckb": "بۆت لەبیر دەکەین و ئاگادارت دەکەینەوە ئەگەر کەوتە مەترسییەوە."
+  },
+  "home.emptyTitle": {
+    "android": "home_empty_title",
+    "en": "Add your first password",
+    "ar": "أضف أول كلمة مرور",
+    "ckb": "یەکەم وشەی نهێنیت زیاد بکە"
+  },
+  "home.greetingAfternoon": {
+    "android": "home_greeting_afternoon",
+    "en": "Good afternoon",
+    "ar": "طاب يومك",
+    "ckb": "ڕۆژت باش"
+  },
+  "home.greetingEvening": {
+    "android": "home_greeting_evening",
+    "en": "Good evening",
+    "ar": "مساء الخير",
+    "ckb": "ئێوارەت باش"
+  },
+  "home.greetingMorning": {
+    "android": "home_greeting_morning",
+    "en": "Good morning",
+    "ar": "صباح الخير",
+    "ckb": "بەیانیت باش"
+  },
+  "home.healthAllgood": {
+    "android": "home_health_allgood",
+    "en": "All %lld passwords are strong and unique",
+    "ar": "جميع كلمات المرور الـ %lld قوية وفريدة",
+    "ckb": "هەموو %lld وشە نهێنییەکان بەهێز و جیاوازن"
+  },
+  "home.healthTitle": {
+    "android": "home_health_title",
+    "en": "Password health",
+    "ar": "صحة كلمات المرور",
+    "ckb": "تەندروستیی وشە نهێنییەکان"
+  },
+  "home.leaksBody": {
+    "android": "home_leaks_body",
+    "en": "See if your email showed up in a data leak",
+    "ar": "تحقق مما إذا ظهر بريدك في تسريب بيانات",
+    "ckb": "بزانە ئایا ئیمەیڵەکەت لە دزەکردنی زانیاریدا دەرکەوتووە"
+  },
+  "home.tofix": {
+    "en": "%lld to fix",
+    "ar": "%lld للإصلاح",
+    "ckb": "%lld بۆ چاککردن"
+  },
+  "home.vpnConnect": {
+    "android": "home_vpn_connect",
+    "en": "Connect",
+    "ar": "اتصال",
+    "ckb": "پەیوەستبوون"
+  },
+  "home.vpnDisconnect": {
+    "android": "home_vpn_disconnect",
+    "en": "Disconnect",
+    "ar": "قطع الاتصال",
+    "ckb": "پچڕاندن"
+  },
+  "home.vpnOff": {
+    "android": "home_vpn_off",
+    "en": "Not connected",
+    "ar": "غير متصل",
+    "ckb": "پەیوەست نییە"
+  },
+  "home.vpnOn": {
+    "android": "home_vpn_on",
+    "en": "Connected through %@",
+    "ar": "متصل عبر %@",
+    "ckb": "پەیوەستە لە ڕێگەی %@"
+  },
+  "home.vpnPremium": {
+    "android": "home_vpn_premium",
+    "en": "Included with Premium",
+    "ar": "متاح مع بريميوم",
+    "ckb": "لەگەڵ پریمیەم بەردەستە"
+  },
+  "tab.alerts": {
+    "en": "Alerts",
+    "ar": "التنبيهات",
+    "ckb": "ئاگادارییەکان"
+  },
+  "tab.home": {
+    "en": "Home",
+    "ar": "الرئيسية",
+    "ckb": "سەرەکی"
+  },
+  "tab.passwords": {
+    "en": "Passwords",
+    "ar": "كلمات المرور",
+    "ckb": "وشە نهێنییەکان"
+  },
+  "tab.you": {
+    "en": "You",
+    "ar": "أنت",
+    "ckb": "تۆ"
+  },
+  "you.about": {
+    "en": "About",
+    "ar": "حول",
+    "ckb": "دەربارە"
+  },
+  "you.account": {
+    "en": "Account",
+    "ar": "الحساب",
+    "ckb": "هەژمار"
+  }
+}

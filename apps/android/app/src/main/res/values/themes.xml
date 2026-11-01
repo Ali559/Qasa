@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Qasa" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- The app draws its own palette; the framework must not re-tint it. -->
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

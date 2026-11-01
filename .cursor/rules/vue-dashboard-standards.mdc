@@ -1,0 +1,37 @@
+---
+description: Vue 3 / TypeScript coding standards, size caps, and principles for dashboard
+globs: dashboard/src/**/*.{vue,ts}
+alwaysApply: false
+---
+
+# Vue 3 / TypeScript (dashboard)
+
+Caps: soft **150** / hard **300** lines per SFC or `.ts` module; functions **≤40** lines. Feature views split before hard cap.
+
+## Principles (Context7 / Vue + TS)
+
+- Always `<script setup lang="ts">` for components
+- Type props with `defineProps<{ ... }>()`; type emits with `defineEmits<{ event: [payload] }>()` (Vue 3.3+ tuple form)
+- Prefer Composition API: `ref` / `computed` / composables — no new Options API
+- Keep components presentational when possible; put API/data in `src/api/` + small composables next to views
+- `const` by default; narrow with type guards; avoid `any` (use `unknown` + narrow)
+- Strict TypeScript — do not weaken `tsconfig` for convenience
+
+## Structure
+
+- `views/` — route screens; `components/` — app chrome; `components/ui/` — shadcn-vue (treat as vendor: wrap, don't bloat)
+- `api/` — HTTP clients; `lib/` — pure helpers; `router/` — routes only
+- One view ≈ one route concern; extract tables/forms/charts into sibling components when nearing soft cap
+
+## Do / Don't
+
+```vue
+<script setup lang="ts">
+const props = defineProps<{ title: string; count?: number }>()
+const emit = defineEmits<{ change: [id: number] }>()
+</script>
+```
+
+- Do not enlarge `components/ui/**` primitives — compose them from views/feature components
+- Prefer existing Tailwind / shadcn-vue patterns over one-off CSS
+- Router and API modules stay free of UI markup

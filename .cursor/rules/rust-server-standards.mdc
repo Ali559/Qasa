@@ -1,0 +1,44 @@
+---
+description: Rust / Axum coding standards, size caps, and principles for server crates
+globs: server/**/*.rs
+alwaysApply: false
+---
+
+# Rust / Axum (server)
+
+Caps: soft **250** / hard **400** lines per file; functions **≤50** lines. Split route modules and repos before hard cap.
+
+## Principles (Context7 / Axum 0.8 + Rust idioms)
+
+- Handlers stay thin: extract (`State`, `Json`, `Path`, auth extractors) → call domain/repo → return `ApiResult` / `IntoResponse`
+- Share state with `State<AppState>` (`Arc` inside as needed); do not use globals
+- Compose apps with `Router::merge` / nested routers; apply middleware via `.layer` / `.route_layer` per route group
+- Fallible Tower services need `HandleError` (or project `ApiError`) so handler errors become HTTP responses
+- Prefer `thiserror` for typed library errors; `anyhow` only at binary/worker boundaries where already used
+- `serde` DTOs at the API edge; keep DB models in `qasa-db` — map explicitly, don't leak rows to clients
+
+## Module layout
+
+- `qasa-api`: HTTP routes by domain (`devices.rs`, `payments.rs`, …)
+- `qasa-core`: pure domain / crypto / license logic
+- `qasa-db`: sqlx repos + models
+- Feature crates (`qasa-breach`, `qasa-vpn`, `qasa-payments`, `qasa-push`, `qasa-worker`) own their domain
+
+## Rust style
+
+- `snake_case` items; small focused `impl` blocks
+- Prefer `&str` / borrowing at boundaries; own (`String`, `Vec`) when storing or returning
+- No `unwrap`/`expect` in request paths — propagate with `?` into `ApiError`
+- Avoid huge `match` arms: extract helpers early
+- Keep `unsafe` forbidden unless explicitly justified in-review (none expected here)
+
+```rust
+// ✅ Thin handler
+async fn create_user(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateUser>,
+) -> ApiResult<(StatusCode, Json<User>)> {
+    let user = state.users.create(payload).await?;
+    Ok((StatusCode::CREATED, Json(user)))
+}
+```

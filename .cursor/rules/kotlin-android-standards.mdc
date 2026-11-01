@@ -1,0 +1,43 @@
+---
+description: Kotlin / Compose coding standards, size caps, and principles for qasa_android
+globs: qasa_android/**/*.kt
+alwaysApply: false
+---
+
+# Kotlin / Jetpack Compose (Android)
+
+Caps: soft **250** / hard **400** lines per file; functions **≤50** lines. Screens and component dumps must split before hard cap.
+
+## Principles (Context7 / Android + Compose rules)
+
+- **State hoisting**: stateful screen + stateless content; pass values + lambdas, not `State<T>` holders
+- Hoist shared UI state to the nearest common ancestor; give child defaults (`rememberLazyListState()`) when reusable
+- Side effects only via `LaunchedEffect` / `DisposableEffect` / `rememberCoroutineScope` — composables stay idempotent
+- Cache expensive work with `remember`; stabilize lazy items with keys; use `derivedStateOf` / deferred reads to limit recomposition
+- Composable params: required first, then `modifier: Modifier = Modifier`, then other optionals, trailing `@Composable` content last
+- Apply the `modifier` only on the root layout node; children get fresh `Modifier`
+- Inject ViewModels as parameters with defaults (`viewModel: X = hiltViewModel()`), not hidden `viewModel()` calls inside the body
+
+## Kotlin conventions
+
+- Official style: `camelCase` functions/properties; file name = single public type, or UpperCamelCase describing contents (no `Util`)
+- Keep related declarations in one file only while size stays reasonable; otherwise split by feature
+- Prefer `val`, data classes, sealed hierarchies, and explicit visibility
+- Coroutines for async; never block the main thread
+
+## Structure
+
+- `screens/<feature>/` for UI + ViewModels; `vault/`, `network/`, `theme/` for domain/shared
+- Extract list items, dialogs, and sections into private or file-local composables when the screen nears soft cap
+
+```kotlin
+// ✅ Hoisted, testable content
+@Composable
+fun HelloScreen(vm: HelloVm = hiltViewModel()) {
+    val name by vm.name.collectAsState()
+    HelloContent(name = name, onNameChange = vm::onNameChange)
+}
+
+@Composable
+fun HelloContent(name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) { /* ... */ }
+```

@@ -1,0 +1,233 @@
+package alibarznji.qasa.network
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class RemoteDevice(
+    val id: String,
+    val device_name: String,
+    val platform: String,
+    val location: String? = null,
+    val created_at: String? = null,
+    val last_seen_at: String? = null,
+    val is_primary: Boolean? = null,
+)
+
+@Serializable
+data class RegisterDeviceRequest(
+    val account_id: String,
+    val device_fingerprint: String,
+    val device_name: String,
+    val platform: String,
+    val location: String? = null,
+)
+
+@Serializable
+data class RegisterDeviceResponse(
+    val device_id: String,
+    val license_token: String,
+    val devices_used: Int,
+    val device_limit: Int,
+    val tier: String,
+)
+
+@Serializable
+data class DeviceLinkCheckRequest(val account_id: String)
+
+@Serializable
+data class DeviceLinkCheckResponse(
+    val eligible: Boolean,
+    val tier: String,
+    val devices_used: Int,
+    val device_limit: Int,
+    val error: String? = null,
+)
+
+@Serializable
+data class DeviceListResponse(val devices: List<RemoteDevice>)
+
+@Serializable
+data class LicenseRefreshResponse(
+    val license_token: String,
+    val tier: String,
+    val device_limit: Int,
+)
+
+/** `GET /.well-known/qasa-license-key` — the Ed25519 verifying key. */
+@Serializable
+data class WellKnownLicenseKey(
+    val algorithm: String,
+    val public_key: String,
+)
+
+@Serializable
+data class PaymentIntentRequest(
+    val gateway: String,
+    val plan_id: String,
+    val auto_renew: Boolean,
+    val amount_iqd: Int? = null,
+    val idempotency_key: String? = null,
+)
+
+@Serializable
+data class PaymentIntentResponse(
+    val payment_id: String,
+    val gateway: String,
+    val gateway_order_id: String,
+    val deep_link: String,
+    val amount_iqd: Int,
+    val plan_id: String? = null,
+    val auto_renew: Boolean? = null,
+    val status: String,
+)
+
+@Serializable
+data class PaymentStatusResponse(
+    val payment_id: String,
+    val status: String,
+    val gateway: String,
+    val gateway_order_id: String,
+    val amount_iqd: Int,
+    val completed_at: String? = null,
+)
+
+@Serializable
+data class SubscriptionDTO(
+    val id: String,
+    val status: String,
+    val plan_id: String,
+    val amount_iqd: Int,
+    val auto_renew: Boolean,
+    val started_at: String,
+    val expires_at: String,
+    val cancelled_at: String? = null,
+    val cancellation_reason: String? = null,
+)
+
+@Serializable
+data class SubscriptionResponse(val subscription: SubscriptionDTO? = null)
+
+@Serializable
+data class SetAutoRenewRequest(val auto_renew: Boolean, val subscription_id: String? = null)
+
+@Serializable
+data class CancelSubscriptionRequest(val reason: String? = null, val subscription_id: String? = null)
+
+@Serializable
+data class PricingPlanDTO(
+    val id: String,
+    val title: String,
+    val interval: String,
+    val amount_iqd: Int,
+    val days: Int,
+    val vpn_quota_gb: Int? = null,
+    val active: Boolean? = null,
+    val sort_order: Int? = null,
+)
+
+@Serializable
+data class PricingResponse(val plans: List<PricingPlanDTO>)
+
+@Serializable
+data class AppNotificationDTO(
+    val id: String,
+    val title_en: String,
+    val title_ckb: String? = null,
+    val title_ar: String? = null,
+    val body_en: String,
+    val body_ckb: String? = null,
+    val body_ar: String? = null,
+    val created_at: String,
+    val read_at: String? = null,
+)
+
+/** `GET /v1/notifications`: newest first. [next_before] is null on the last page. */
+@Serializable
+data class NotificationsListResponse(
+    val notifications: List<AppNotificationDTO>,
+    val unread_count: Int? = null,
+    val next_before: String? = null,
+)
+
+/** `GET /v1/notifications/unread-count`. */
+@Serializable
+data class NotificationsUnreadCountResponse(val unread_count: Int)
+
+/** `POST /v1/notifications/{id}/read` and `POST /v1/notifications/read-all`. */
+@Serializable
+data class NotificationsReadResponse(
+    val ok: Boolean? = null,
+    val unread_count: Int? = null,
+    val marked: Int? = null,
+)
+
+@Serializable
+data class NotificationDetailResponse(val notification: AppNotificationDTO)
+
+@Serializable
+data class DevicePrefsRequest(
+    val locale: String? = null,
+    val push_token: String? = null,
+    val notifications_enabled: Boolean? = null,
+)
+
+@Serializable
+data class BreachPrefixResponse(
+    val prefix: String,
+    val count: Int,
+    val suffixes: List<BreachSuffixMatch>,
+)
+
+@Serializable
+data class BreachSuffixMatch(val suffix: String, val source: String)
+
+@Serializable
+data class BreachMonitorRegisterResponse(
+    val ok: Boolean? = null,
+    val matched: Boolean? = null,
+    val alerted: Boolean? = null,
+)
+
+@Serializable
+data class BreachMonitorBody(val email_hash: String, val label_hint: String? = null)
+
+@Serializable
+data class VPNConnectRequest(val client_public_key: String? = null)
+
+@Serializable
+data class VPNConnectResponse(val config: VPNWireGuardConfig? = null, val reused: Boolean? = null)
+
+@Serializable
+data class VPNWireGuardConfig(
+    val session_id: String? = null,
+    val endpoint: String? = null,
+    val assigned_ip: String? = null,
+)
+
+@Serializable
+data class VPNStatusResponse(
+    val connected: Boolean,
+    val session_id: String? = null,
+    val node: String? = null,
+    val city: String? = null,
+    val assigned_ip: String? = null,
+    val connected_at: String? = null,
+)
+
+@Serializable
+data class VPNDisconnectResponse(val disconnected: Boolean, val session_id: String? = null)
+
+@Serializable
+data class DeviceLimitErrorBody(
+    val error: String,
+    val message: String,
+    val devices_used: Int? = null,
+    val device_limit: Int? = null,
+    val devices: List<RemoteDevice>? = null,
+)
+
+@Serializable
+data class StubWebhookBody(val order_id: String, val status: String)
+
+@Serializable
+data class OkResponse(val ok: Boolean? = null)

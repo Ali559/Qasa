@@ -1,0 +1,42 @@
+# Qasa monorepo. Each app keeps its own .gitignore for tool-specific rules; this file
+# covers what applies everywhere, plus anything an app's own file misses.
+
+# OS / editors
+.DS_Store
+*.swp
+*~
+.vscode/
+!.vscode/extensions.json
+
+# Secrets and local environment (examples are committed)
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.p12
+*.jks
+*.keystore
+google-services.json
+GoogleService-Info.plist
+
+# Claude Code: personal settings stay local; the shared launch.json is committed
+.claude/settings.local.json
+
+# Server (Rust)
+server/target/
+
+# Android
+apps/android/.kotlin/
+apps/android/**/build/
+apps/android/.gradle/
+apps/android/local.properties
+
+# iOS / Xcode
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# Dashboard (Vue / Vite)
+apps/dashboard/node_modules/
+apps/dashboard/dist/
