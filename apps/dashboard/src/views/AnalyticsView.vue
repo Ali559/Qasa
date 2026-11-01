@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { RefreshCw } from '@lucide/vue'
-import { Badge } from '@/components/ui/badge'
+import { computed, onMounted, ref } from 'vue'
+import { Coins, HardDrive, RefreshCw, UserRoundCheck } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import StatTile from '@/components/kit/StatTile.vue'
 import { fetchAnalytics, type AnalyticsResponse } from '@/api/admin'
 import { isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
@@ -35,72 +35,101 @@ async function load() {
 }
 
 onMounted(load)
+
+const kpiStyle = [
+  { icon: Coins, accent: 'var(--chart-3)' },
+  { icon: UserRoundCheck, accent: 'var(--chart-2)' },
+  { icon: HardDrive, accent: 'var(--chart-4)' },
+]
+const styleFor = (i: number) => kpiStyle[i % kpiStyle.length]!
+
+// Each funnel step is drawn as a share of checkout attempts.
+const funnelSteps = computed(() => {
+  const f = data.value?.funnel
+  if (!f) return []
+  const base = Math.max(f.intents, 1)
+  return [
+    { label: 'Checkouts started', value: f.intents, pct: 100, color: 'var(--chart-1)' },
+    { label: 'Paid', value: f.success, pct: (f.success / base) * 100, color: 'var(--chart-4)' },
+    { label: 'Failed', value: f.failed, pct: (f.failed / base) * 100, color: 'var(--chart-2)' },
+  ]
+})
+
+function formatDate(value: string | null) {
+  return value ? new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Unknown date'
+}
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-6">
     <div class="flex justify-end">
-      <Button variant="outline" size="sm" :disabled="loading" @click="load">
+      <Button variant="outline" :disabled="loading" @click="load">
         <RefreshCw :class="{ 'animate-spin': loading }" />
         Refresh
       </Button>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <Card v-for="kpi in data?.kpis ?? []" :key="kpi.label">
-        <CardHeader class="pb-2">
-          <p class="text-muted-foreground font-mono text-[11px] tracking-wider uppercase">
-            {{ kpi.label }}
-          </p>
-          <CardTitle class="text-2xl">
-            {{ kpi.value }}
-            <span v-if="kpi.unit" class="text-muted-foreground text-sm font-normal">{{ kpi.unit }}</span>
-          </CardTitle>
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <StatTile
+        v-for="(kpi, i) in data?.kpis ?? []"
+        :key="kpi.label"
+        v-bind="kpi"
+        :icon="styleFor(i).icon"
+        :accent="styleFor(i).accent"
+      />
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-5">
+      <Card v-if="data?.funnel" class="gap-6 py-6 xl:col-span-3">
+        <CardHeader class="flex flex-row flex-wrap items-start justify-between gap-4 px-6">
+          <div>
+            <CardTitle class="text-xl font-bold">Payment funnel</CardTitle>
+            <CardDescription>From checkout to confirmed payment</CardDescription>
+          </div>
+          <div class="text-right">
+            <p class="font-heading text-4xl leading-none font-extrabold">{{ data.funnel.conversion_pct.toFixed(1) }}%</p>
+            <p class="text-muted-foreground mt-1 text-xs">of checkouts get paid</p>
+          </div>
         </CardHeader>
-        <CardContent>
-          <p class="text-muted-foreground text-xs">{{ kpi.meta }}</p>
+        <CardContent class="space-y-4 px-6">
+          <div v-for="step in funnelSteps" :key="step.label">
+            <div class="mb-1.5 flex justify-between text-sm">
+              <span class="font-medium">{{ step.label }}</span>
+              <span class="font-semibold tabular-nums">{{ step.value }}</span>
+            </div>
+            <div class="bg-muted h-7 rounded-xl shadow-[inset_0_2px_0_var(--edge)]">
+              <div
+                class="h-full min-w-7 rounded-xl"
+                :style="{ width: `${step.pct}%`, background: step.color, boxShadow: `inset 0 2px 0 rgb(255 255 255 / 0.3), 0 3px 0 color-mix(in oklch, ${step.color} 60%, black)` }"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card class="gap-5 py-6 xl:col-span-2">
+        <CardHeader class="px-6">
+          <CardTitle class="text-xl font-bold">Recent cancellations</CardTitle>
+          <CardDescription>What people said when they left</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3 px-6">
+          <figure
+            v-for="c in data?.cancellations ?? []"
+            :key="c.id"
+            class="bg-muted/60 rounded-2xl rounded-bl-md px-4 py-3"
+          >
+            <blockquote class="text-sm" :class="{ 'text-muted-foreground italic': !c.reason }">
+              {{ c.reason || 'No reason given' }}
+            </blockquote>
+            <figcaption class="text-muted-foreground mt-2 text-xs">
+              {{ c.planId }}, {{ formatDate(c.cancelledAt) }}
+            </figcaption>
+          </figure>
+          <p v-if="!(data?.cancellations?.length)" class="text-muted-foreground text-sm">
+            No one has cancelled yet.
+          </p>
         </CardContent>
       </Card>
     </div>
-
-    <Card v-if="data?.funnel">
-      <CardHeader>
-        <CardTitle>Payment funnel</CardTitle>
-      </CardHeader>
-      <CardContent class="flex flex-wrap gap-4 text-sm">
-        <Badge variant="secondary">Intents {{ data.funnel.intents }}</Badge>
-        <Badge variant="outline" class="border-emerald-400/40 text-emerald-300">
-          Success {{ data.funnel.success }}
-        </Badge>
-        <Badge variant="outline" class="border-red-400/40 text-red-300">
-          Failed {{ data.funnel.failed }}
-        </Badge>
-        <span class="text-muted-foreground">
-          Conversion {{ data.funnel.conversion_pct.toFixed(1) }}%
-        </span>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent cancellations</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-3">
-        <div
-          v-for="c in data?.cancellations ?? []"
-          :key="c.id"
-          class="bg-muted/40 rounded-lg border px-3 py-2 text-sm"
-        >
-          <div class="flex items-center justify-between gap-2">
-            <Badge variant="secondary">{{ c.planId }}</Badge>
-            <span class="text-muted-foreground font-mono text-xs">{{ c.cancelledAt }}</span>
-          </div>
-          <p class="mt-1">{{ c.reason || 'No reason given' }}</p>
-        </div>
-        <p v-if="!(data?.cancellations?.length)" class="text-muted-foreground text-sm">
-          No cancellations yet.
-        </p>
-      </CardContent>
-    </Card>
   </div>
 </template>

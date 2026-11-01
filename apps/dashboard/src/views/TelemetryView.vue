@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Download, Filter } from '@lucide/vue'
-import FadeIn from '@/components/FadeIn.vue'
-import { Badge } from '@/components/ui/badge'
+import { AlertTriangle, Database, Download, Filter, Timer, UsersRound } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import FilterChips from '@/components/kit/FilterChips.vue'
+import InkPanel from '@/components/kit/InkPanel.vue'
+import SegmentMeter from '@/components/kit/SegmentMeter.vue'
+import StatTile from '@/components/kit/StatTile.vue'
 import { events, resources, telemetryMetrics as mockTelemetry } from '@/data/mock'
 import { fetchTelemetry, type TelemetryMetric } from '@/api/admin'
 import { isLiveApiEnabled } from '@/api/client'
@@ -27,7 +25,39 @@ onMounted(async () => {
   }
 })
 
-const menaOnly = ref(true)
+const metricStyle = [
+  { icon: UsersRound, accent: 'var(--chart-2)' },
+  { icon: Timer, accent: 'var(--chart-3)' },
+  { icon: AlertTriangle, accent: 'var(--chart-4)' },
+  { icon: Database, accent: 'var(--chart-5)' },
+]
+const styleFor = (i: number) => metricStyle[i % metricStyle.length]!
+
+const region = ref<'mena' | 'global'>('mena')
+const regionOptions = [
+  { value: 'mena' as const, label: 'MENA' },
+  { value: 'global' as const, label: 'Global' },
+]
+const regionStats = computed(() =>
+  region.value === 'mena'
+    ? [
+        { label: 'Threats (1h)', value: '12,491', accent: 'var(--chart-2)' },
+        { label: 'Active connections', value: '45,103', accent: 'var(--chart-4)' },
+        { label: 'Average latency', value: '28 ms', accent: 'var(--chart-3)' },
+      ]
+    : [
+        { label: 'Threats (1h)', value: '28,104', accent: 'var(--chart-2)' },
+        { label: 'Active connections', value: '91,220', accent: 'var(--chart-4)' },
+        { label: 'Average latency', value: '42 ms', accent: 'var(--chart-3)' },
+      ],
+)
+
+const levelColor: Record<(typeof events)[number]['level'], string> = {
+  INFO: 'var(--ink-info)',
+  WARN: 'var(--ink-warn)',
+  DEBUG: 'var(--ink-ok)',
+  ERROR: 'var(--ink-bad)',
+}
 const hideDebug = ref(false)
 
 const visibleEvents = computed(() =>
@@ -35,147 +65,101 @@ const visibleEvents = computed(() =>
 )
 
 function exportEvents() {
-  toast.success('Telemetry export ready', {
-    description: `${visibleEvents.value.length} events included.`,
+  toast.success('Export started', {
+    description: `${visibleEvents.value.length} events in this file.`,
   })
 }
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex justify-end">
-      <Badge variant="outline" class="gap-1.5 px-3 py-1.5">
-        <span class="bg-primary size-1.5 animate-pulse rounded-full" />
-        SYSTEM OPERATIONAL
-      </Badge>
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <StatTile
+        v-for="(m, i) in telemetryMetrics"
+        :key="m.label"
+        :label="m.label"
+        :value="m.value"
+        :meta="m.meta"
+        :icon="styleFor(i).icon"
+        :accent="styleFor(i).accent"
+      />
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <FadeIn v-for="(m, i) in telemetryMetrics" :key="m.label" :delay="i * 0.05">
-        <Card>
-          <CardHeader class="pb-2">
-            <CardDescription class="font-mono text-[11px] tracking-wider uppercase">
-              {{ m.label }}
-            </CardDescription>
-            <CardTitle class="text-3xl font-semibold tracking-tight">{{ m.value }}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge :variant="m.tone === 'warn' ? 'outline' : 'secondary'" class="font-mono text-[11px]">
-              {{ m.meta }}
-            </Badge>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
-
-    <div class="grid gap-4 xl:grid-cols-3">
-      <FadeIn :delay="0.15" class="xl:col-span-2">
-        <Card class="h-full">
-          <CardHeader class="flex flex-row items-center justify-between gap-3">
-            <div>
-              <CardTitle>Node Distribution & Load</CardTitle>
-              <CardDescription>Threat and latency overview</CardDescription>
-            </div>
-            <div class="flex items-center gap-2">
-              <Label for="region" class="text-muted-foreground text-xs">{{ menaOnly ? 'MENA' : 'GLOBAL' }}</Label>
-              <Switch
-                id="region"
-                :checked="menaOnly"
-                @update:checked="(v: boolean) => (menaOnly = v)"
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div class="from-card to-muted/40 relative overflow-hidden rounded-xl border bg-gradient-to-br p-6">
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_55%_45%,oklch(0.45_0.08_170/0.2),transparent_45%)]" />
-              <div class="relative grid gap-3 sm:grid-cols-3">
-                <div class="bg-background/70 rounded-lg border p-3 backdrop-blur">
-                  <p class="text-muted-foreground text-xs">Threats (1h)</p>
-                  <p class="text-xl font-semibold">{{ menaOnly ? '12,491' : '28,104' }}</p>
-                </div>
-                <div class="bg-background/70 rounded-lg border p-3 backdrop-blur">
-                  <p class="text-muted-foreground text-xs">Active Connections</p>
-                  <p class="text-xl font-semibold">{{ menaOnly ? '45,103' : '91,220' }}</p>
-                </div>
-                <div class="bg-background/70 rounded-lg border p-3 backdrop-blur">
-                  <p class="text-muted-foreground text-xs">Latency</p>
-                  <p class="text-xl font-semibold">{{ menaOnly ? '28ms' : '42ms' }}</p>
-                </div>
-              </div>
-              <div class="text-muted-foreground relative mt-6 flex gap-4 font-mono text-[11px]">
-                <span class="inline-flex items-center gap-2"><i class="size-2 rounded-full bg-emerald-400" /> Optimal (&lt;50ms)</span>
-                <span class="inline-flex items-center gap-2"><i class="size-2 rounded-full bg-amber-400" /> Moderate (50-150ms)</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-
-      <FadeIn :delay="0.2">
-        <Card class="h-full">
-          <CardHeader>
-            <CardTitle>Resource Usage</CardTitle>
-            <CardDescription>Cluster capacity</CardDescription>
-          </CardHeader>
-          <CardContent class="space-y-5">
-            <div v-for="r in resources" :key="r.label" class="space-y-2">
-              <div class="flex justify-between text-sm">
-                <span class="text-muted-foreground">{{ r.label }}</span>
-                <span class="font-mono text-xs">{{ r.value }}</span>
-              </div>
-              <Progress :model-value="r.width" class="h-2" />
-            </div>
-          </CardContent>
-        </Card>
-      </FadeIn>
-    </div>
-
-    <FadeIn :delay="0.25">
-      <Card>
-        <CardHeader class="flex flex-row items-center justify-between gap-3">
+    <div class="grid gap-6 xl:grid-cols-3">
+      <Card class="gap-6 py-6 xl:col-span-2">
+        <CardHeader class="flex flex-row flex-wrap items-start justify-between gap-3 px-6">
           <div>
-            <CardTitle>Live Event Telemetry</CardTitle>
-            <CardDescription>Streaming service logs</CardDescription>
+            <CardTitle class="text-xl font-bold">Traffic and threats</CardTitle>
+            <CardDescription>Last hour, by region</CardDescription>
           </div>
-          <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" @click="hideDebug = !hideDebug">
-              <Filter />
-              {{ hideDebug ? 'Show debug' : 'Hide debug' }}
-            </Button>
-            <Button variant="outline" size="sm" @click="exportEvents">
-              <Download />
-              Export
-            </Button>
-          </div>
+          <FilterChips v-model="region" :options="regionOptions" label="Region" />
         </CardHeader>
-        <Separator />
-        <CardContent class="p-0">
-          <ScrollArea class="h-[280px]">
-            <ul class="divide-y font-mono text-xs">
-              <li
-                v-for="event in visibleEvents"
-                :key="event.time + event.message"
-                class="flex flex-col gap-1 px-6 py-3 sm:flex-row sm:gap-3"
-                :class="{ 'bg-destructive/5': event.level === 'ERROR' }"
-              >
-                <span class="text-muted-foreground shrink-0">{{ event.time }}</span>
-                <span
-                  class="w-16 shrink-0"
-                  :class="{
-                    'text-sky-300': event.level === 'INFO',
-                    'text-amber-300': event.level === 'WARN',
-                    'text-emerald-300': event.level === 'DEBUG',
-                    'text-red-300': event.level === 'ERROR',
-                  }"
-                >
-                  [{{ event.level }}]
-                </span>
-                <span>{{ event.message }}</span>
-              </li>
-            </ul>
-          </ScrollArea>
+        <CardContent class="grid gap-4 px-6 sm:grid-cols-3">
+          <div
+            v-for="stat in regionStats"
+            :key="stat.label"
+            class="rounded-3xl p-5 text-[#1c1b33]"
+            :style="{ background: stat.accent, boxShadow: `inset 0 2px 0 rgb(255 255 255 / 0.35), 0 4px 0 color-mix(in oklch, ${stat.accent} 60%, black)` }"
+          >
+            <p class="text-sm font-semibold opacity-75">{{ stat.label }}</p>
+            <p class="font-heading mt-3 text-4xl leading-none font-extrabold tabular-nums">{{ stat.value }}</p>
+          </div>
+          <p class="text-muted-foreground text-sm sm:col-span-3">
+            Latency under 50 ms is healthy; 50 to 150 ms means a node is under pressure.
+          </p>
         </CardContent>
       </Card>
-    </FadeIn>
+
+      <Card class="gap-6 py-6">
+        <CardHeader class="px-6">
+          <CardTitle class="text-xl font-bold">Cluster resources</CardTitle>
+          <CardDescription>Capacity used across all servers</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-5 px-6">
+          <div v-for="r in resources" :key="r.label" class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-muted-foreground">{{ r.label }}</span>
+              <span class="font-semibold tabular-nums">{{ r.value }}</span>
+            </div>
+            <SegmentMeter :value="r.width" :label="`${r.label} ${r.value}`" size="sm" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <InkPanel>
+      <div class="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-4">
+        <div>
+          <h2 class="font-heading text-xl font-bold">Live events</h2>
+          <p class="text-sidebar-foreground/60 text-sm">Newest first, from every service</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <Button variant="secondary" size="sm" @click="hideDebug = !hideDebug">
+            <Filter />
+            {{ hideDebug ? 'Show debug' : 'Hide debug' }}
+          </Button>
+          <Button variant="secondary" size="sm" @click="exportEvents">
+            <Download />
+            Export
+          </Button>
+        </div>
+      </div>
+      <ScrollArea class="h-[300px]">
+        <ul class="divide-sidebar-border divide-y border-t border-sidebar-border font-mono text-xs">
+          <li
+            v-for="event in visibleEvents"
+            :key="event.time + event.message"
+            class="flex flex-col gap-1.5 px-6 py-3 sm:flex-row sm:items-center sm:gap-4"
+          >
+            <span class="text-sidebar-foreground/55 shrink-0 tabular-nums">{{ event.time }}</span>
+            <span
+              class="w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-[0.7rem] font-semibold text-[#1c1b33]"
+              :style="{ background: levelColor[event.level] }"
+            >{{ event.level }}</span>
+            <span>{{ event.message }}</span>
+          </li>
+        </ul>
+      </ScrollArea>
+    </InkPanel>
   </div>
 </template>

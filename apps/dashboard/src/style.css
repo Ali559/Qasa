@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -7,9 +7,15 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-heading: "Bricolage Grotesque", var(--font-sans);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-sun: var(--sun);
+  --color-sun-ink: var(--sun-ink);
+  --color-lip: var(--lip);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,73 +53,166 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Qasa "toybox" palette: periwinkle canvas, ink, cobalt, sunflower. */
 :root {
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.18 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 250);
-  --primary: oklch(0.55 0.12 170);
-  --primary-foreground: oklch(0.98 0.01 170);
-  --secondary: oklch(0.96 0.01 250);
-  --secondary-foreground: oklch(0.25 0.02 250);
-  --muted: oklch(0.96 0.01 250);
-  --muted-foreground: oklch(0.5 0.02 250);
-  --accent: oklch(0.95 0.02 170);
-  --accent-foreground: oklch(0.28 0.06 170);
-  --destructive: oklch(0.58 0.22 25);
-  --border: oklch(0.9 0.01 250);
-  --input: oklch(0.9 0.01 250);
-  --ring: oklch(0.55 0.12 170);
-  --chart-1: oklch(0.62 0.14 170);
-  --chart-2: oklch(0.65 0.12 210);
-  --chart-3: oklch(0.75 0.14 85);
-  --chart-4: oklch(0.6 0.16 30);
-  --chart-5: oklch(0.55 0.08 280);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0.002 250);
-  --sidebar-foreground: oklch(0.18 0.02 250);
-  --sidebar-primary: oklch(0.55 0.12 170);
-  --sidebar-primary-foreground: oklch(0.98 0.01 170);
-  --sidebar-accent: oklch(0.95 0.02 170);
-  --sidebar-accent-foreground: oklch(0.28 0.06 170);
-  --sidebar-border: oklch(0.9 0.01 250);
-  --sidebar-ring: oklch(0.55 0.12 170);
+  --background: #e9ebf7;
+  --foreground: #1c1b33;
+  --card: #ffffff;
+  --card-foreground: #1c1b33;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b33;
+  --primary: #3d4bf5;
+  --primary-foreground: #ffffff;
+  --secondary: #dfe2f3;
+  --secondary-foreground: #1c1b33;
+  --muted: #e1e4f3;
+  --muted-foreground: #5e5f80;
+  --accent: #e3e5ff;
+  --accent-foreground: #2a33b8;
+  --destructive: #e5395f;
+  --border: #d6d9ec;
+  --input: #d0d4ea;
+  --ring: #3d4bf5;
+  --chart-1: #3d4bf5;
+  --chart-2: #ff5c8a;
+  --chart-3: #ffc53d;
+  --chart-4: #2bcb8f;
+  --chart-5: #8b5cf6;
+  --radius: 0.9rem;
+  --ok: #10915f;
+  --warn: #b77700;
+  --bad: #d92f55;
+  --sun: #ffc53d;
+  --sun-ink: #3a2a00;
+  --lip: #c6cbe6;
+  --sheen: rgb(255 255 255 / 0.9);
+  --edge: rgb(28 27 51 / 0.07);
+  --drop: rgb(40 44 110 / 0.35);
+  --sidebar: #1c1b33;
+  --sidebar-foreground: #e9ebf7;
+  --sidebar-primary: #ffc53d;
+  --sidebar-primary-foreground: #3a2a00;
+  --sidebar-accent: #2b2a4a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 0.08);
+  --sidebar-ring: #ffc53d;
 }
 
 .dark {
-  --background: oklch(0.14 0.015 260);
-  --foreground: oklch(0.96 0.01 250);
-  --card: oklch(0.18 0.018 260);
-  --card-foreground: oklch(0.96 0.01 250);
-  --popover: oklch(0.18 0.018 260);
-  --popover-foreground: oklch(0.96 0.01 250);
-  --primary: oklch(0.78 0.13 168);
-  --primary-foreground: oklch(0.18 0.04 168);
-  --secondary: oklch(0.24 0.02 260);
-  --secondary-foreground: oklch(0.96 0.01 250);
-  --muted: oklch(0.24 0.02 260);
-  --muted-foreground: oklch(0.7 0.02 250);
-  --accent: oklch(0.24 0.03 170);
-  --accent-foreground: oklch(0.9 0.05 170);
-  --destructive: oklch(0.68 0.18 22);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.78 0.13 168);
-  --chart-1: oklch(0.78 0.13 168);
-  --chart-2: oklch(0.74 0.11 210);
-  --chart-3: oklch(0.8 0.13 90);
-  --chart-4: oklch(0.7 0.16 30);
-  --chart-5: oklch(0.65 0.1 300);
-  --sidebar: oklch(0.16 0.016 260);
-  --sidebar-foreground: oklch(0.96 0.01 250);
-  --sidebar-primary: oklch(0.78 0.13 168);
-  --sidebar-primary-foreground: oklch(0.18 0.04 168);
-  --sidebar-accent: oklch(0.24 0.03 170);
-  --sidebar-accent-foreground: oklch(0.9 0.05 170);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.78 0.13 168);
+  --background: #13122a;
+  --foreground: #ecedfb;
+  --card: #1f1e3d;
+  --card-foreground: #ecedfb;
+  --popover: #1f1e3d;
+  --popover-foreground: #ecedfb;
+  --primary: #7e88ff;
+  --primary-foreground: #10102a;
+  --secondary: #2a2950;
+  --secondary-foreground: #ecedfb;
+  --muted: #2a2950;
+  --muted-foreground: #a3a5cc;
+  --accent: #2c2d5e;
+  --accent-foreground: #c7cbff;
+  --destructive: #ff6f8f;
+  --border: rgb(255 255 255 / 0.08);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: #7e88ff;
+  --chart-1: #7e88ff;
+  --chart-2: #ff7aa2;
+  --chart-3: #ffc53d;
+  --chart-4: #4be0a8;
+  --chart-5: #b18cff;
+  --ok: #4be0a8;
+  --warn: #ffc53d;
+  --bad: #ff6f8f;
+  --lip: #0a0920;
+  --sheen: rgb(255 255 255 / 0.06);
+  --edge: rgb(255 255 255 / 0.06);
+  --drop: rgb(0 0 0 / 0.6);
+  --sidebar: #0d0c20;
+  --sidebar-foreground: #ecedfb;
+  --sidebar-accent: #22214a;
+}
+
+/*
+ * Tactile layer. Unlayered on purpose so it wins over the vendor
+ * primitives' ring/shadow utilities without editing components/ui.
+ */
+[data-slot="card"] {
+  border-radius: 1.4rem;
+  box-shadow:
+    inset 0 1px 0 var(--sheen),
+    0 0 0 1px var(--edge),
+    0 5px 0 var(--lip),
+    0 22px 32px -22px var(--drop);
+}
+
+[data-slot="card-title"],
+h1,
+h2 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+
+[data-slot="button"] {
+  --btn-lip: var(--lip);
+  transition:
+    translate 80ms ease,
+    box-shadow 80ms ease,
+    background-color 150ms ease;
+}
+
+[data-slot="button"]:is(:not([data-variant]), [data-variant="default"]) {
+  --btn-lip: color-mix(in oklch, var(--primary) 55%, black);
+}
+
+[data-slot="button"]:is(:not([data-variant]), [data-variant="default"], [data-variant="outline"], [data-variant="secondary"]) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 3px 0 var(--btn-lip);
+}
+
+[data-slot="button"]:is(:not([data-variant]), [data-variant="default"], [data-variant="outline"], [data-variant="secondary"]):active:not(:disabled) {
+  translate: 0 3px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 0 0 var(--btn-lip);
+}
+
+[data-slot="input"],
+[data-slot="textarea"] {
+  border-radius: 0.8rem;
+  box-shadow: inset 0 2px 0 var(--edge);
+}
+
+[data-slot="table-head"] {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+[data-slot="table-row"] {
+  transition: background-color 120ms ease;
+}
+
+[data-slot="table-body"] [data-slot="table-row"]:hover {
+  background: color-mix(in oklch, var(--accent) 60%, transparent);
+}
+
+[data-slot="dialog-content"] {
+  border-radius: 1.4rem;
+}
+
+[data-slot="progress"] {
+  height: 0.7rem;
+  box-shadow: inset 0 2px 0 var(--edge);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {
