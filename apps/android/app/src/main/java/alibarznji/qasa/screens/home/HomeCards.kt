@@ -26,7 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.MailOutline
+import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.TipsAndUpdates
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.VpnLock
@@ -95,15 +95,16 @@ internal fun StatusHero(status: HomeStatus, onAddFirst: () -> Unit) {
     }
 }
 
-/** Three-colour bar: fine, reused and easy-to-guess passwords as shares of the total. */
+/** Three-colour bar: fine, reused and easy-to-guess passwords as shares of the total. Breached logins count as "to fix". */
 @Composable
 internal fun HealthCard(report: PasswordHealthReport?, onClick: () -> Unit) {
     val c = qasaColors
     val total = report?.totalPasswords ?: 0
     val reused = report?.reusedCount ?: 0
     val weak = report?.weakCount ?: 0
-    // A login can be both reused and weak; count it once.
-    val toFix = report?.let { r -> (r.reusedItems + r.weakItems).map { it.id }.toSet().size } ?: 0
+    val breached = report?.breachedCount ?: 0
+    // A login can be reused, weak and breached at once; count it once.
+    val toFix = report?.let { r -> (r.reusedItems + r.weakItems + r.breachedItems).map { it.id }.toSet().size } ?: 0
     HomeCard(onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.home_health_title), color = c.textPrimary, style = qasaText.rowTitle, modifier = Modifier.weight(1f))
@@ -124,10 +125,10 @@ internal fun HealthCard(report: PasswordHealthReport?, onClick: () -> Unit) {
         }
         Spacer(Modifier.height(QasaDimens.contentGap))
         Text(
-            if (toFix > 0) {
-                stringResource(R.string.home_attention_body, reused, weak)
-            } else {
-                stringResource(R.string.home_health_allgood, total)
+            when {
+                toFix == 0 -> stringResource(R.string.home_health_allgood, total)
+                breached > 0 -> stringResource(R.string.home_attention_breached_body, reused, weak, breached)
+                else -> stringResource(R.string.home_attention_body, reused, weak)
             },
             color = c.textSecondary,
             style = qasaText.bodySmall,
@@ -190,16 +191,20 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
     }
 }
 
+/**
+ * Breached-password check (free, on device). Replaced the email leak alerts card, which is
+ * parked (todo email-leak-alerts in docs/server-followups-plan.md).
+ */
 @Composable
-internal fun LeaksCard(onClick: () -> Unit) {
+internal fun BreachedCard(onClick: () -> Unit) {
     val c = qasaColors
     HomeCard(onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconTile(Icons.Outlined.MailOutline)
+            IconTile(Icons.Outlined.GppMaybe)
             Spacer(Modifier.size(QasaDimens.gapSmall))
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.nav_breachmonitoring), color = c.textPrimary, style = qasaText.rowTitle)
-                Text(stringResource(R.string.home_leaks_body), color = c.textSecondary, style = qasaText.bodySmall)
+                Text(stringResource(R.string.nav_breached_passwords), color = c.textPrimary, style = qasaText.rowTitle)
+                Text(stringResource(R.string.home_breached_body), color = c.textSecondary, style = qasaText.bodySmall)
             }
         }
     }

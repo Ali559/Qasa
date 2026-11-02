@@ -41,7 +41,7 @@ app/src/main/java/alibarznji/qasa/
   license/     # JWT parse + refresh
   device/      # Register + list/unlink
   payments/    # Payment intents + polling + subscription
-  breach/      # SHA-256 k-anonymity
+  breach/      # Pwned Passwords check (on device); email leak alerts parked
   vpn/         # Connect/status/disconnect (API only)
   credentials/ # AutofillService + Credential Manager provider
   push/        # FCM MessagingService + token store

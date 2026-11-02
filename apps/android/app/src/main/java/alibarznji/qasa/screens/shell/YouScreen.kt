@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.runtime.Composable
@@ -90,7 +91,7 @@ private val AppPage.youIcon: ImageVector
         AppPage.Notifications -> Icons.Outlined.Notifications
         AppPage.Generator -> Icons.Outlined.AutoFixHigh
         AppPage.PasswordHealth -> Icons.Outlined.MonitorHeart
-        AppPage.BreachMonitoring -> Icons.Outlined.Notifications
+        AppPage.BreachedPasswords -> Icons.Outlined.Shield
         AppPage.Vpn -> Icons.Outlined.VpnLock
         AppPage.Collections -> Icons.Outlined.Folder
         AppPage.Settings -> Icons.Outlined.Settings

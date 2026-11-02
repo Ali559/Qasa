@@ -88,6 +88,8 @@ pub async fn purge_revocations(pool: DbPool, _push: Arc<PushService>) -> anyhow:
 
 /// Scan monitored email hashes against breach dumps → multilingual device push.
 /// Only accounts with a live Premium subscription receive alerts.
+/// Not scheduled while email leak alerts are parked (see `main.rs`).
+#[allow(dead_code)]
 pub async fn breach_alert_scan(pool: DbPool, push: Arc<PushService>) -> anyhow::Result<()> {
     let matches = qasa_db::repos::monitored_email::find_unalerted_matches(&pool, 100).await?;
     let mut sent = 0u64;

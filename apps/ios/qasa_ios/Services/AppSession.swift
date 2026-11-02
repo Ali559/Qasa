@@ -57,7 +57,9 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
     case notifications
     case generator
     case passwordHealth
-    case breachMonitoring
+    case breachedPasswords
+    // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+    // case breachMonitoring
     case vpn
     case collections
     case settings
@@ -73,7 +75,7 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
         case .notifications: return "nav.notifications"
         case .generator: return "nav.generator"
         case .passwordHealth: return "nav.passwordHealth"
-        case .breachMonitoring: return "nav.breachMonitoring"
+        case .breachedPasswords: return "nav.breachedPasswords"
         case .vpn: return "nav.vpn"
         case .collections: return "nav.collections"
         case .settings: return "nav.settings"
@@ -93,7 +95,7 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
         case .notifications: return "bell.fill"
         case .generator: return "wand.and.stars"
         case .passwordHealth: return "heart.text.square.fill"
-        case .breachMonitoring: return "exclamationmark.shield.fill"
+        case .breachedPasswords: return "exclamationmark.shield.fill"
         case .vpn: return "network.badge.shield.half.filled"
         case .collections: return "folder.fill"
         case .settings: return "gearshape.fill"
@@ -105,7 +107,9 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
 
     var requiresPremium: Bool {
         switch self {
-        case .vpn, .breachMonitoring: return true
+        // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+        // case .vpn, .breachMonitoring: return true
+        case .vpn: return true
         default: return false
         }
     }

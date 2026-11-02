@@ -48,7 +48,7 @@ enum class HomeStatus { Loading, Empty, AllGood, NeedsAttention }
 internal fun homeStatus(report: PasswordHealthReport?): HomeStatus = when {
     report == null -> HomeStatus.Loading
     report.totalPasswords == 0 -> HomeStatus.Empty
-    report.reusedCount + report.weakCount == 0 -> HomeStatus.AllGood
+    report.reusedCount + report.weakCount + report.breachedCount == 0 -> HomeStatus.AllGood
     else -> HomeStatus.NeedsAttention
 }
 
@@ -101,7 +101,7 @@ fun HomeScreen(
                 HealthCard(report = report, onClick = { onOpen(AppPage.PasswordHealth) })
             }
             VpnCard(isPremium = isPremium, vm = vpnVm, onOpenVpn = { onOpen(AppPage.Vpn) })
-            LeaksCard(onClick = { onTab(ShellTab.Alerts) })
+            BreachedCard(onClick = { onTab(ShellTab.Alerts) })
         }
     }
 }

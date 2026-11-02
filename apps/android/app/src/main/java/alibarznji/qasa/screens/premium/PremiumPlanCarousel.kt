@@ -109,7 +109,8 @@ private fun PlanCard(plan: PricingPlanDTO, selected: Boolean, modifier: Modifier
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
     val features = buildList {
         add(stringResource(R.string.premium_featuredevices))
-        add(stringResource(R.string.premium_featurebreach))
+        // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+        // add(stringResource(R.string.premium_featurebreach))
         add(stringResource(R.string.premium_featurevpn))
         if (plan.isYearly) add(stringResource(R.string.premium_featuresave))
     }

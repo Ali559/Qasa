@@ -85,7 +85,7 @@ export interface PaymentRow {
 export const payments: PaymentRow[] = [
   { paymentId: 'demo-pay-1', timestamp: '2023-10-27 14:32:01', orderId: 'FIB-ORD-88921A', userId: 'USR-992K1', gateway: 'FIB', amount: '15,000', status: 'success' },
   { paymentId: 'demo-pay-2', timestamp: '2023-10-27 14:28:44', orderId: 'FP-ORD-44102B', userId: 'USR-110X9', gateway: 'FastPay', amount: '25,000', status: 'failed' },
-  { paymentId: 'demo-pay-3', timestamp: '2023-10-27 14:15:12', orderId: 'SQ-ORD-77301C', userId: 'USR-882M3', gateway: 'SuperQi', amount: '10,000', status: 'pending' },
+  { paymentId: 'demo-pay-3', timestamp: '2023-10-27 14:15:12', orderId: 'SQ-ORD-77301C', userId: 'USR-882M3', gateway: 'SuperQi', amount: '5,000', status: 'pending' },
   { paymentId: 'demo-pay-4', timestamp: '2023-10-27 13:58:09', orderId: 'FIB-ORD-88900Z', userId: 'USR-441N7', gateway: 'FIB', amount: '50,000', status: 'success' },
   { paymentId: 'demo-pay-5', timestamp: '2023-10-27 13:41:33', orderId: 'FP-ORD-43988A', userId: 'USR-220P2', gateway: 'FastPay', amount: '7,500', status: 'success' },
   { paymentId: 'demo-pay-6', timestamp: '2023-10-27 13:22:18', orderId: 'SQ-ORD-77011D', userId: 'USR-118Q4', gateway: 'SuperQi', amount: '12,000', status: 'pending' },

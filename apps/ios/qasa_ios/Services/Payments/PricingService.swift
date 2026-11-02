@@ -38,23 +38,23 @@ final class PricingService {
             id: "premium_monthly",
             title: "Premium Monthly",
             interval: "monthly",
-            amount_iqd: 10_000,
+            amount_iqd: 5_000,
             days: 30,
             vpn_quota_gb: 100,
             active: true,
             sort_order: 1,
-            features_json: .strings(["5 devices", "Breach monitoring", "VPN"])
+            features_json: .strings(["5 devices", "VPN"])
         ),
         PricingPlanDTO(
             id: "premium_yearly",
             title: "Premium Yearly",
             interval: "yearly",
-            amount_iqd: 100_000,
+            amount_iqd: 50_000,
             days: 365,
             vpn_quota_gb: 100,
             active: true,
             sort_order: 2,
-            features_json: .strings(["5 devices", "Breach monitoring", "VPN", "Save vs monthly"])
+            features_json: .strings(["5 devices", "VPN", "Save vs monthly"])
         ),
     ]
 }
@@ -79,7 +79,8 @@ extension PricingPlanDTO {
     var localizedFeatures: [String] {
         var items = [
             L10n.tr("premium.featureDevices"),
-            L10n.tr("premium.featureBreach"),
+            // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+            // L10n.tr("premium.featureBreach"),
             L10n.tr("premium.featureVPN")
         ]
         if interval == "yearly" {

@@ -117,6 +117,16 @@
     <string name="breach_title">ئاگادارکردنەوەی دزەی ئیمەیڵ</string>
     <string name="breach_unresolved">چارەسەرنەکراو</string>
     <string name="breach_upgradehint">ئاگادار بکرێیتەوە کاتێک یەکێک لە ئیمەیڵەکانت لە دزەی زانیاریدا دەردەکەوێت، و بزانە چی بگۆڕیت. لەگەڵ پریمیەم بەردەستە.</string>
+    <string name="breached_change_hint">سەرەتا لە ماڵپەڕەکەدا بیانگۆڕە، پاشان لێرە نوێیان بکەوە.</string>
+    <string name="breached_check_again">دووبارە بپشکنە</string>
+    <string name="breached_checking">پشکنینی وشە نهێنییەکانت…</string>
+    <string name="breached_found">%d لە وشە نهێنییەکانت لە دزەکردنی زانیاریدا دەرکەوتوون.</string>
+    <string name="breached_none_body">هیچ کام لە وشە نهێنییە پاشەکەوتکراوەکانت لە دزەکردنە ناسراوەکاندا نییە.</string>
+    <string name="breached_none_title">هیچ وشەیەکی نهێنی دزراو نییە</string>
+    <string name="breached_offline">نەتوانرا پشکنینی دزەکردن بکرێت. کاتێک ئینتەرنێتت هەبوو دووبارە هەوڵ بدەرەوە.</string>
+    <string name="breached_privacy_body">هەر وشەیەکی نهێنی لەسەر مۆبایلەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن.</string>
+    <string name="breached_privacy_title">پشکنینەکە چۆن کار دەکات</string>
+    <string name="breached_seen_count">%s جار لە دزەکاندا بینراوە</string>
     <string name="collections_assignhint">بڕگەکان بۆ “%s” لە دەستکاریکەری بڕگە دیاری بکە.</string>
     <string name="collections_createtitle">کۆکراوەی نوێ</string>
     <string name="collections_deletemessage">بڕگەکان لە کۆگا دەمێننەوە بەڵام چیتر سەر بەم کۆکراوەیە نابن.</string>
@@ -280,11 +290,12 @@
     <string name="gen_verystrong">زۆر بەهێز</string>
     <string name="gen_veryweak">زۆر لاواز</string>
     <string name="gen_weak">لاواز</string>
+    <string name="health_breached">دزراو</string>
     <string name="health_excellent">نایاب</string>
     <string name="health_fair">مامناوەند</string>
     <string name="health_good">باش</string>
     <string name="health_howscoring">چۆنیەتی خاڵدان</string>
-    <string name="health_howscoringbody">خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز یان دووبارەکراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە.</string>
+    <string name="health_howscoringbody">خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز، دووبارەکراو یان دزراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە.</string>
     <string name="health_issuestitle">کێشەکانی وشەی نهێنی</string>
     <string name="health_needsattention">پێویستی بە سەرنجدان هەیە</string>
     <string name="health_noreusedbody">هیچ کام لە وشە نهێنییەکانی چوونەژوورەوەت دووبارە نەکراونەتەوە.</string>
@@ -304,8 +315,10 @@
     <string name="home_allgood_body">لە ئێستادا هیچ شتێک پێویستی بە سەرنجت نییە.</string>
     <string name="home_allgood_title">وشە نهێنییەکانت باشن</string>
     <string name="home_attention_body">%1$d زیاتر لە جارێک بەکارهاتووە، %2$d ئاسانە بۆ زانین</string>
+    <string name="home_attention_breached_body">%1$d زیاتر لە جارێک بەکارهاتووە، %2$d ئاسانە بۆ زانین، %3$d لە دزەکردنی زانیاریدا</string>
     <string name="home_attention_hint">گۆڕینیان یەک خولەک دەخایەنێت و هەژمارەکانت پارێزراوتر دەکات.</string>
     <string name="home_attention_title">چەند وشەیەکی نهێنی پێویستیان بە گۆڕین هەیە</string>
+    <string name="home_breached_body">بزانە ئایا وشە نهێنییەکانت لە دزەکردنی زانیاریدا دەرکەوتوون</string>
     <string name="home_checking">پشکنینی وشە نهێنییەکانت…</string>
     <string name="home_empty_body">بۆت لەبیر دەکەین و ئاگادارت دەکەینەوە ئەگەر کەوتە مەترسییەوە.</string>
     <string name="home_empty_title">یەکەم وشەی نهێنیت زیاد بکە</string>
@@ -341,6 +354,7 @@
     <string name="legal_lastupdated">دوایین نوێکردنەوە: %s</string>
     <string name="legal_privacybody">ئەم سیاسەتی نهێنێتییە جێگرەوەیە لەسەر چۆنیەتی مامەڵەی قاسە لەگەڵ داتاکانت.\n\nناوەڕۆکی کۆگا پارێزراو دەمێنێتەوە لەژێر کۆنترۆڵی تۆدا. وردەکاری تەواو پێش بڵاوکردنەوە دادەنرێت.</string>
     <string name="legal_termsbody">ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی قاسەن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت.</string>
+    <string name="nav_breached_passwords">وشە نهێنییە دزراوەکان</string>
     <string name="nav_breachmonitoring">ئاگادارکردنەوەی دزەی ئیمەیڵ</string>
     <string name="nav_collections">بوخچەکان</string>
     <string name="nav_generator">دروستکەری وشەی نهێنی</string>
@@ -364,7 +378,7 @@
     <string name="notifications_markallread">هەموو وەک خوێندراو نیشان بکە</string>
     <string name="notifications_ondevice">لەسەر ئەم ئامێرە</string>
     <string name="notifications_openfailed">نەتوانرا ئەم ئاگادارییە بکرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەرەوە.</string>
-    <string name="notifications_permissionmessage">ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی قاسە وەربگریت.</string>
+    <string name="notifications_permissionmessage">ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری و نامەکانی قاسە وەربگریت.</string>
     <string name="notifications_permissionnotnow">ئێستا نا</string>
     <string name="notifications_permissionopensettings">کردنەوەی ڕێکخستنەکان</string>
     <string name="notifications_permissiontitle">ئاگادارییەکان کوژاونەتەوە</string>
@@ -537,7 +551,7 @@
     <string name="sub_plan">پلان</string>
     <string name="sub_planmonthly">پریمیۆمی مانگانە</string>
     <string name="sub_planyearly">پریمیۆمی ساڵانە</string>
-    <string name="sub_premiumincludes">پریمیەم ٥ ئامێر، ئاگادارکردنەوەی دزەی ئیمەیڵ و VPN لەخۆدەگرێت.</string>
+    <string name="sub_premiumincludes">پریمیەم ٥ ئامێر و VPN لەخۆدەگرێت.</string>
     <string name="sub_reasontitle">هۆکاری هەڵوەشاندنەوە</string>
     <string name="sub_renewsexpires">نوێبوونەوە / بەسەرچوون</string>
     <string name="sub_skip">تێپەڕاندن</string>

@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.tools.health
 
+import alibarznji.qasa.breach.PwnedPasswordsService
 import alibarznji.qasa.screens.PasswordHealthAnalyzer
 import alibarznji.qasa.screens.PasswordHealthReport
 import alibarznji.qasa.vault.EphemeralClipboard
@@ -9,12 +10,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -22,15 +28,29 @@ import kotlinx.coroutines.withContext
 class HealthViewModel @Inject constructor(
     val repo: VaultRepository,
     val clipboard: EphemeralClipboard,
+    private val pwned: PwnedPasswordsService,
 ) : ViewModel() {
+    /** Bumped by [recheckBreaches] to re-run the Pwned Passwords check. */
+    private val recheck = MutableStateFlow(0)
+
+    /** True while the Pwned Passwords check runs (the Breached tab shows "Checking…"). */
+    private val _breachChecking = MutableStateFlow(true)
+    val breachChecking: StateFlow<Boolean> = _breachChecking.asStateFlow()
+
+    /** Last successful counts, so a row edit does not blink Breached to 0 while re-checking. */
+    private var lastCounts: Map<String, Int>? = null
+
     /**
      * iOS `refreshReport()` (`PasswordHealthView.swift:81`) runs on appear; here it re-runs
      * on every row change, so editing or deleting an item from the issues screen updates
      * the gauge and the lists when the user comes back. `null` until the first pass, so
-     * the gauge does not count up to the empty report's 100 first.
+     * the gauge does not count up to the empty report's 100 first. Each pass also runs the
+     * Pwned Passwords check (only 5-char SHA-1 prefixes leave the device; ranges are cached
+     * for the process) and emits a second report with the breached logins.
      */
-    val report: StateFlow<PasswordHealthReport?> = repo.observeRows()
-        .map { rows ->
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val report: StateFlow<PasswordHealthReport?> = combine(repo.observeRows(), recheck) { rows, _ -> rows }
+        .transformLatest { rows ->
             val logins = rows.mapNotNull { row ->
                 val p = runCatching { repo.getPayload(row.id) }.getOrNull() as? VaultPayload.Login
                     ?: return@mapNotNull null
@@ -38,10 +58,32 @@ class HealthViewModel @Inject constructor(
                 val trimmed = p.password.trim()
                 if (trimmed.isEmpty()) null else row to trimmed
             }
-            PasswordHealthAnalyzer.analyze(logins)
+            // Local report straight away, then again once the Pwned Passwords check is back.
+            emit(PasswordHealthAnalyzer.analyze(logins, lastCounts))
+            if (logins.isEmpty()) {
+                _breachChecking.value = false
+                return@transformLatest
+            }
+            _breachChecking.value = true
+            try {
+                val counts = pwned.breachCounts(logins.map { it.second })
+                lastCounts = counts
+                emit(PasswordHealthAnalyzer.analyze(logins, counts))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                emit(PasswordHealthAnalyzer.analyze(logins).copy(breachCheckFailed = true))
+            } finally {
+                _breachChecking.value = false
+            }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    /** "Check again" after a failed (or finished) breach check. */
+    fun recheckBreaches() {
+        recheck.value++
+    }
 
     suspend fun loadPayload(id: String) = withContext(Dispatchers.Default) { repo.getPayload(id) }
 

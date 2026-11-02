@@ -117,6 +117,16 @@
     <string name="breach_title">تنبيهات تسريب البريد</string>
     <string name="breach_unresolved">غير محلولة</string>
     <string name="breach_upgradehint">احصل على تنبيه عندما يظهر أحد بريدك في تسريب بيانات، واعرف ما يجب تغييره. متاح مع بريميوم.</string>
+    <string name="breached_change_hint">غيّرها على الموقع أولًا، ثم حدّثها هنا.</string>
+    <string name="breached_check_again">افحص مجددًا</string>
+    <string name="breached_checking">جارٍ فحص كلمات المرور…</string>
+    <string name="breached_found">ظهرت %d من كلمات مرورك في تسريبات بيانات.</string>
+    <string name="breached_none_body">لا تظهر أي من كلمات المرور المحفوظة في تسريبات البيانات المعروفة.</string>
+    <string name="breached_none_title">لا توجد كلمات مرور مسرّبة</string>
+    <string name="breached_offline">تعذّر الوصول إلى فحص التسريبات. أعد المحاولة عند الاتصال بالإنترنت.</string>
+    <string name="breached_privacy_body">تُحوَّل كل كلمة مرور إلى بصمة (hash) على هاتفك، ولا يُرسَل إلى Have I Been Pwned سوى أول 5 أحرف منها. لا تغادر كلمات مرورك هذا الجهاز أبدًا.</string>
+    <string name="breached_privacy_title">كيف يعمل الفحص</string>
+    <string name="breached_seen_count">ظهرت %s مرة في التسريبات</string>
     <string name="collections_assignhint">عيّن العناصر إلى “%s” من محرر العنصر.</string>
     <string name="collections_createtitle">مجموعة جديدة</string>
     <string name="collections_deletemessage">تبقى العناصر في خزنتك لكنها لن تنتمي لهذه المجموعة.</string>
@@ -280,11 +290,12 @@
     <string name="gen_verystrong">قوية جدًا</string>
     <string name="gen_veryweak">ضعيفة جدًا</string>
     <string name="gen_weak">ضعيفة</string>
+    <string name="health_breached">مسرّبة</string>
     <string name="health_excellent">ممتاز</string>
     <string name="health_fair">متوسط</string>
     <string name="health_good">جيد</string>
     <string name="health_howscoring">كيف يعمل التقييم</string>
-    <string name="health_howscoringbody">تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.</string>
+    <string name="health_howscoringbody">تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها أو المسرّبة. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.</string>
     <string name="health_issuestitle">مشكلات كلمات المرور</string>
     <string name="health_needsattention">يحتاج إلى انتباه</string>
     <string name="health_noreusedbody">لا تُعاد أي من كلمات مرور تسجيل الدخول.</string>
@@ -304,8 +315,10 @@
     <string name="home_allgood_body">لا شيء يحتاج إلى انتباهك الآن.</string>
     <string name="home_allgood_title">كلمات مرورك بحالة جيدة</string>
     <string name="home_attention_body">%1$d مستخدمة أكثر من مرة، %2$d سهلة التخمين</string>
+    <string name="home_attention_breached_body">%1$d مستخدمة أكثر من مرة، %2$d سهلة التخمين، %3$d في تسريبات بيانات</string>
     <string name="home_attention_hint">تغييرها يستغرق دقيقة ويجعل حساباتك أكثر أمانًا.</string>
     <string name="home_attention_title">بعض كلمات المرور تحتاج إلى تغيير</string>
+    <string name="home_breached_body">تحقق مما إذا ظهرت كلمات مرورك في تسريب بيانات</string>
     <string name="home_checking">جارٍ فحص كلمات مرورك…</string>
     <string name="home_empty_body">سنتذكرها لك ونخبرك إذا تعرضت للخطر.</string>
     <string name="home_empty_title">أضف أول كلمة مرور</string>
@@ -341,6 +354,7 @@
     <string name="legal_lastupdated">آخر تحديث: %s</string>
     <string name="legal_privacybody">سياسة الخصوصية هذه نص مؤقت حول كيفية تعامل قاصة مع بياناتك.\n\nمحتويات الخزنة مصممة لتبقى مشفرة وتحت سيطرتك. ستُنشر التفاصيل الكاملة قبل الإطلاق العام.</string>
     <string name="legal_termsbody">شروط الاستخدام هذه نص مؤقت لاتفاقية قاصة القانونية.\n\nباستخدامك للتطبيق توافق على الالتزام بالقوانين المعمول بها. ستُنشر الشروط الكاملة هنا قبل الإطلاق العام.</string>
+    <string name="nav_breached_passwords">كلمات المرور المسرّبة</string>
     <string name="nav_breachmonitoring">تنبيهات تسريب البريد</string>
     <string name="nav_collections">المجلدات</string>
     <string name="nav_generator">مولّد كلمات المرور</string>
@@ -364,7 +378,7 @@
     <string name="notifications_markallread">تحديد الكل كمقروء</string>
     <string name="notifications_ondevice">على هذا الجهاز</string>
     <string name="notifications_openfailed">تعذّر فتح هذا الإشعار. تحقّق من اتصالك وحاول مرة أخرى.</string>
-    <string name="notifications_permissionmessage">فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من قاصة.</string>
+    <string name="notifications_permissionmessage">فعّل الإشعارات من الإعدادات لتصلك التنبيهات والرسائل من قاصة.</string>
     <string name="notifications_permissionnotnow">ليس الآن</string>
     <string name="notifications_permissionopensettings">فتح الإعدادات</string>
     <string name="notifications_permissiontitle">الإشعارات متوقفة</string>
@@ -537,7 +551,7 @@
     <string name="sub_plan">الخطة</string>
     <string name="sub_planmonthly">بريميوم شهري</string>
     <string name="sub_planyearly">بريميوم سنوي</string>
-    <string name="sub_premiumincludes">يشمل بريميوم 5 أجهزة وتنبيهات تسريب البريد وVPN.</string>
+    <string name="sub_premiumincludes">يشمل بريميوم 5 أجهزة وVPN.</string>
     <string name="sub_reasontitle">سبب الإلغاء</string>
     <string name="sub_renewsexpires">يتجدد / ينتهي</string>
     <string name="sub_skip">تخطٍ</string>

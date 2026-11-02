@@ -9,7 +9,15 @@ data class PasswordHealthReport(
     val score: Int,
     val reusedItems: List<VaultListRow>,
     val weakItems: List<VaultListRow>,
+    /** Logins whose password is in Pwned Passwords, most-seen first. */
+    val breachedItems: List<VaultListRow> = emptyList(),
+    /** Pwned Passwords count per row id, for [breachedItems]. */
+    val breachCounts: Map<String, Int> = emptyMap(),
+    /** The breach check ran and failed (usually offline). Breached stays 0 then. */
+    val breachCheckFailed: Boolean = false,
 ) {
+    val breachedCount: Int get() = breachedItems.size
+
     companion object {
         val empty = PasswordHealthReport(0, 0, 0, 100, emptyList(), emptyList())
     }
@@ -21,24 +29,42 @@ object PasswordHealthAnalyzer {
         "letmein", "admin", "welcome", "iloveyou", "monkey", "dragon",
     )
 
-    fun analyze(logins: List<Pair<VaultListRow, String>>): PasswordHealthReport {
+    /**
+     * Synchronous, like iOS. [breachCounts] maps a password to its Pwned Passwords count;
+     * null means not checked yet. Callers run [alibarznji.qasa.breach.PwnedPasswordsService]
+     * themselves and re-run this with the result.
+     */
+    fun analyze(
+        logins: List<Pair<VaultListRow, String>>,
+        breachCounts: Map<String, Int>? = null,
+    ): PasswordHealthReport {
         if (logins.isEmpty()) return PasswordHealthReport.empty
         val frequency = logins.groupingBy { it.second }.eachCount()
         val reusedItems = logins.filter { (frequency[it.second] ?: 0) > 1 }.map { it.first }
             .sortedBy { it.displayName.lowercase() }
         val weakItems = logins.filter { isWeak(it.second) }.map { it.first }
             .sortedBy { it.displayName.lowercase() }
+        val rowCounts = buildMap {
+            logins.forEach { (row, password) -> breachCounts?.get(password)?.let { put(row.id, it) } }
+        }
+        val breachedItems = logins.map { it.first }.filter { it.id in rowCounts }
+            .sortedByDescending { rowCounts[it.id] ?: 0 }
         val reusedCount = reusedItems.map { it.id }.toSet().size
         val weakCount = weakItems.map { it.id }.toSet().size
         var score = 100
         score -= weakCount * 12
         score -= reusedCount * 10
+        score -= breachedItems.size * 15
         if (logins.size >= 5) {
             val uniqueRatio = logins.map { it.second }.toSet().size.toDouble() / logins.size
             score -= ((1 - uniqueRatio) * 20).toInt()
         }
         score = score.coerceIn(0, 100)
-        return PasswordHealthReport(logins.size, reusedCount, weakCount, score, reusedItems, weakItems)
+        return PasswordHealthReport(
+            logins.size, reusedCount, weakCount, score, reusedItems, weakItems,
+            breachedItems = breachedItems,
+            breachCounts = rowCounts,
+        )
     }
 
     /**

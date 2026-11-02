@@ -27,7 +27,10 @@ todos:
     content: "Account lifecycle: deletion, device self-unregister + unlink teardown, breach monitor restore, breach limit in license (server done 2026-11-01); vault backup and recovery still need a product decision"
     status: completed
   - id: breach-data-source
-    content: "Breach data source for breach_hashes (SHA-256 email lists): product owner researching sources"
+    content: "Breach data source researched (2026-11-02): no source sells email hash lists; providers are per-lookup APIs. Folded into email-leak-alerts"
+    status: completed
+  - id: email-leak-alerts
+    content: "Email leak alerts parked until there are enough subscribers to pay for a provider (much later). See 'Email leak alerts: parked'"
     status: pending
   - id: account-recovery
     content: "Account recovery: design later (recovery_email_hash kept until then)"
@@ -407,9 +410,12 @@ Migration `20261101000003_account_lifecycle.sql` adds `accounts.deleted_at`.
 ### Still open
 
 - **Per-account salt for email hashes: rejected.** Matching depends on comparing the client's plain SHA-256 against `breach_hashes`, so a per-account salt would make server-side alerts impossible. The privacy model remains that the server holds hashes, not emails.
-- **Breach data source: pending (todo `breach-data-source`).** `breach_hashes` is filled by `qasa-breach ingest` from SHA-256 email lists. HIBP doesn't publish those, so a source has to be found. The product owner is researching where to get them (2026-11-01).
-  - The ingest CLI already accepts one 64-hex hash per line, with a `--source` label.
-  - Check each source's licence and terms before ingesting it.
+- **Email leak alerts: parked, much later (todo `email-leak-alerts`, product owner 2026-11-02).** No provider sells SHA-256 email lists, so `qasa-breach ingest` has nothing legitimate to load. Breached-password checks replaced the feature: they run on the device against HIBP Pwned Passwords, free for everyone (ARCHITECTURE.md §4.11). Premium dropped to 5,000 IQD a month / 50,000 IQD a year at the same time (migration `20261102000002_premium_price_5000.sql`).
+  - What is switched off: the Alerts tab, Home card and Premium bullet in both apps (commented out where wired), the dashboard's "Breach monitors" tile, and the worker's `breach_alert_scan`. The `/v1/breach/*` endpoints, tables, license entitlement and email screens stay in the code.
+  - To bring it back, the worker would query a provider per monitored email instead of matching a local list. Candidates:
+    - **HIBP Pro:** `/breachedaccount/range/{prefix}` takes the first 6 hex characters of the email's **SHA-1**, so the apps must also send that prefix (the server only stores SHA-256). From $379 a month. CC BY 4.0 attribution required. Non-matching range results must not be stored.
+    - **Enzoic:** partial **SHA-256** email lookups, which match today's hashes. Enterprise plan after vetting; ask for startup pricing.
+  - Rough break-even for HIBP Pro: about 100 Premium subscribers at 5,000 IQD a month, before wallet fees.
 - **Vault backup/sync: decided no (product owner, 2026-11-01).** There will be no cloud backup endpoint. Vault transfer between devices stays LAN-only (section 1).
 - **Recovery: pending, design later (todo `account-recovery`).** There is no account recovery today. Keep `accounts.recovery_email_hash` until the design is done; deletion already clears it. Don't drop it in the section 9 cleanup.
 

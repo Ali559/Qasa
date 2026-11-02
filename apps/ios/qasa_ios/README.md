@@ -33,7 +33,7 @@ qasa_ios/
   Services/License/                # JWT parse + refresh
   Services/Device/                 # Register + list/unlink devices
   Services/Payments/               # Payment intents + polling
-  Services/Breach/                 # SHA-256 k-anonymity prefix lookup
+  Services/Breach/                 # Pwned Passwords check (on device); email leak alerts parked
   Services/VPN/                    # Connect/status/disconnect (API only)
   Services/Identity/AppBootstrap.swift
 ```

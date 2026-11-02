@@ -89,13 +89,15 @@ async fn main() -> anyhow::Result<()> {
         "purge_license_revocations",
         jobs::purge_revocations,
     ));
-    tokio::spawn(run_interval(
-        pool.clone(),
-        push.clone(),
-        Duration::from_secs(10 * 60),
-        "breach_alert_scan",
-        jobs::breach_alert_scan,
-    ));
+    // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md):
+    // there is no breach data source yet, so the scan has nothing to match.
+    // tokio::spawn(run_interval(
+    //     pool.clone(),
+    //     push.clone(),
+    //     Duration::from_secs(10 * 60),
+    //     "breach_alert_scan",
+    //     jobs::breach_alert_scan,
+    // ));
     tokio::spawn(run_interval(
         pool.clone(),
         push.clone(),

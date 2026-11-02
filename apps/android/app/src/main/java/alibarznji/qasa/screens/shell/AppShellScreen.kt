@@ -23,7 +23,9 @@ import androidx.lifecycle.ViewModel
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.AppPage
 import alibarznji.qasa.screens.AppSession
-import alibarznji.qasa.screens.breach.BreachMonitorScreen
+// Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+// import alibarznji.qasa.screens.breach.BreachMonitorScreen
+import alibarznji.qasa.screens.breach.BreachedPasswordsScreen
 import alibarznji.qasa.screens.home.HomeScreen
 import alibarznji.qasa.screens.premium.PremiumUpgradeScreen
 import alibarznji.qasa.screens.settings.LegalPlaceholderScreen
@@ -73,7 +75,7 @@ fun AppShellScreen(
             target.requiresPremium && !isPremium -> page = AppPage.PremiumUpgrade
             // The two pages that became tabs switch tabs instead of stacking.
             target == AppPage.Vault -> { page = null; tab = ShellTab.Passwords }
-            target == AppPage.BreachMonitoring -> { page = null; tab = ShellTab.Alerts }
+            target == AppPage.BreachedPasswords -> { page = null; tab = ShellTab.Alerts }
             else -> page = target
         }
     }
@@ -103,7 +105,9 @@ fun AppShellScreen(
                         onTab = { tab = it },
                     )
                     ShellTab.Passwords -> VaultListScreen()
-                    ShellTab.Alerts -> BreachMonitorScreen(onUpgrade = { open(AppPage.PremiumUpgrade) })
+                    // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+                    // ShellTab.Alerts -> BreachMonitorScreen(onUpgrade = { open(AppPage.PremiumUpgrade) })
+                    ShellTab.Alerts -> BreachedPasswordsScreen()
                     ShellTab.You -> YouScreen(displayName = displayName, isPremium = isPremium, onOpen = ::open)
                 }
             }
@@ -139,6 +143,6 @@ private fun PageContent(
         )
         AppPage.PremiumUpgrade -> PremiumUpgradeScreen(onOpenMenu = back, onDone = back)
         // Tabs, never stacked: `open` routes these to their tab.
-        AppPage.Vault, AppPage.BreachMonitoring -> Unit
+        AppPage.Vault, AppPage.BreachedPasswords -> Unit
     }
 }

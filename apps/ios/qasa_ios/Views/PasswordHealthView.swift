@@ -4,6 +4,7 @@ import SwiftData
 enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
     case reused
     case weak
+    case breached
 
     var id: String { rawValue }
 
@@ -11,6 +12,7 @@ enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .reused: return L10n.tr("health.reused")
         case .weak: return L10n.tr("health.weak")
+        case .breached: return L10n.tr("health.breached")
         }
     }
 }
@@ -30,7 +32,7 @@ struct PasswordHealthView: View {
                 VStack(spacing: 28) {
                     scoreGauge
 
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                         NavigationLink(value: PasswordIssueTab.reused) {
                             statCard(title: L10n.tr("health.passwords"), value: "\(report.totalPasswords)", accent: Theme.accent)
                         }
@@ -45,6 +47,22 @@ struct PasswordHealthView: View {
                             statCard(title: L10n.tr("health.weak"), value: "\(report.weakCount)", accent: Theme.danger)
                         }
                         .buttonStyle(.plain)
+
+                        NavigationLink(value: PasswordIssueTab.breached) {
+                            statCard(
+                                title: L10n.tr("health.breached"),
+                                value: report.breachCheckFailed ? "—" : "\(report.breachedCount)",
+                                accent: Theme.danger
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    if report.breachCheckFailed {
+                        Text(L10n.tr("breached.offline"))
+                            .font(.qasa(13))
+                            .foregroundColor(Theme.textSecondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     CardContainer {
@@ -68,7 +86,8 @@ struct PasswordHealthView: View {
             PasswordHealthIssuesView(
                 initialTab: tab,
                 reusedItems: report.reusedItems,
-                weakItems: report.weakItems
+                weakItems: report.weakItems,
+                breachedItems: report.breachedItems
             )
         }
         .onAppear {
@@ -78,15 +97,11 @@ struct PasswordHealthView: View {
         .onChange(of: report.score) { _, _ in animateScore() }
     }
 
+    /// Local report straight away, then again once the Pwned Passwords check is back.
     private func refreshReport() {
-        let logins: [(row: VaultListRow, password: String)] = (try? VaultRepository.shared.allLoginPayloads())?
-            .compactMap { id, fields in
-                guard let row = VaultRepository.shared.cache.row(for: id) else { return nil }
-                let trimmed = fields.password.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return nil }
-                return (row, trimmed)
-            } ?? []
+        let logins = PasswordHealthAnalyzer.vaultLogins()
         report = PasswordHealthAnalyzer.analyze(logins: logins)
+        Task { report = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins) }
     }
 
     private var scoreGauge: some View {
@@ -167,6 +182,7 @@ struct PasswordHealthIssuesView: View {
     let initialTab: PasswordIssueTab
     let reusedItems: [VaultListRow]
     let weakItems: [VaultListRow]
+    let breachedItems: [VaultListRow]
 
     @State private var selectedTab: PasswordIssueTab
     @State private var editorMode: EditorPresentation?
@@ -176,60 +192,70 @@ struct PasswordHealthIssuesView: View {
         let mode: VaultItemEditor.Mode
     }
 
-    init(initialTab: PasswordIssueTab, reusedItems: [VaultListRow], weakItems: [VaultListRow]) {
+    init(initialTab: PasswordIssueTab, reusedItems: [VaultListRow], weakItems: [VaultListRow], breachedItems: [VaultListRow]) {
         self.initialTab = initialTab
         self.reusedItems = reusedItems
         self.weakItems = weakItems
+        self.breachedItems = breachedItems
         _selectedTab = State(initialValue: initialTab)
     }
 
-    private var currentItems: [VaultListRow] {
+    private var currentItems: [VaultListRow] { items(for: selectedTab) }
+
+    private var emptyCopy: (title: String, icon: String, body: String) {
         switch selectedTab {
+        case .reused:
+            return (L10n.tr("health.noReusedTitle"), "arrow.triangle.2.circlepath", L10n.tr("health.noReusedBody"))
+        case .weak:
+            return (L10n.tr("health.noWeakTitle"), "exclamationmark.triangle", L10n.tr("health.noWeakBody"))
+        case .breached:
+            return (L10n.tr("breached.noneTitle"), "checkmark.shield", L10n.tr("breached.noneBody"))
+        }
+    }
+
+    private func items(for tab: PasswordIssueTab) -> [VaultListRow] {
+        switch tab {
         case .reused: return reusedItems
         case .weak: return weakItems
+        case .breached: return breachedItems
         }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                ForEach(PasswordIssueTab.allCases) { tab in
-                    let count = tab == .reused ? reusedItems.count : weakItems.count
-                    let selected = selectedTab == tab
-                    Button {
-                        selectedTab = tab
-                    } label: {
-                        Text("\(tab.title) (\(count))")
-                            .font(.qasa(14, weight: .semibold))
-                            .foregroundColor(selected ? Theme.onAccent : Theme.textSecondary)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(selected ? Theme.accent : Theme.cardBackground)
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
-                            )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(PasswordIssueTab.allCases) { tab in
+                        let count = items(for: tab).count
+                        let selected = selectedTab == tab
+                        Button {
+                            selectedTab = tab
+                        } label: {
+                            Text("\(tab.title) (\(count))")
+                                .font(.qasa(14, weight: .semibold))
+                                .foregroundColor(selected ? Theme.onAccent : Theme.textSecondary)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 9)
+                                .background(selected ? Theme.accent : Theme.cardBackground)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-                Spacer()
+                .padding(.horizontal, Theme.screenPadding)
             }
-            .padding(.horizontal, Theme.screenPadding)
             .padding(.vertical, 14)
 
             ScrollView {
                 LazyVStack(spacing: 12) {
                     if currentItems.isEmpty {
                         ContentUnavailableView(
-                            selectedTab == .reused
-                                ? L10n.tr("health.noReusedTitle")
-                                : L10n.tr("health.noWeakTitle"),
-                            systemImage: selectedTab == .reused ? "arrow.triangle.2.circlepath" : "exclamationmark.triangle",
-                            description: Text(
-                                selectedTab == .reused
-                                    ? L10n.tr("health.noReusedBody")
-                                    : L10n.tr("health.noWeakBody")
-                            )
+                            emptyCopy.title,
+                            systemImage: emptyCopy.icon,
+                            description: Text(emptyCopy.body)
                         )
                         .padding(.top, 48)
                     } else {

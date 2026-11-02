@@ -29,12 +29,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/** iOS `PasswordIssueTab`: the two pill tabs of the issues screen. */
-enum class HealthIssueTab { REUSED, WEAK }
+/** iOS `PasswordIssueTab`: the pill tabs of the issues screen. */
+enum class HealthIssueTab { REUSED, WEAK, BREACHED }
 
 /**
- * iOS `PasswordHealthView` body (`PasswordHealthView.swift:26`): gauge, three stat cards
- * that each push the issues screen, and the "How scoring works" card, 28pt apart.
+ * iOS `PasswordHealthView` body (`PasswordHealthView.swift:26`): gauge, a 2×2 grid of stat
+ * cards that each push the issues screen, and the "How scoring works" card, 28pt apart.
  */
 @Composable
 internal fun HealthOverview(
@@ -67,30 +67,44 @@ internal fun HealthOverview(
         }
 
         Spacer(Modifier.height(HEALTH_SECTION_GAP))
-        // iOS order is Passwords / Reused / Weak, and the Passwords card opens the Reused
-        // tab (`PasswordHealthView.swift:34`) — there is no "all passwords" tab.
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
-            HealthStatCard(
-                title = stringResource(R.string.health_passwords),
-                value = shown.totalPasswords,
-                accent = c.accent,
-                onClick = { onOpenIssues(HealthIssueTab.REUSED) },
-                modifier = Modifier.weight(1f),
-            )
-            HealthStatCard(
-                title = stringResource(R.string.health_reused),
-                value = shown.reusedCount,
-                accent = c.gold,
-                onClick = { onOpenIssues(HealthIssueTab.REUSED) },
-                modifier = Modifier.weight(1f),
-            )
-            HealthStatCard(
-                title = stringResource(R.string.health_weak),
-                value = shown.weakCount,
-                accent = c.danger,
-                onClick = { onOpenIssues(HealthIssueTab.WEAK) },
-                modifier = Modifier.weight(1f),
-            )
+        // iOS order is Passwords / Reused, then Weak / Breached, and the Passwords card opens
+        // the Reused tab (`PasswordHealthView.swift:34`) — there is no "all passwords" tab.
+        Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
+                HealthStatCard(
+                    title = stringResource(R.string.health_passwords),
+                    value = shown.totalPasswords,
+                    accent = c.accent,
+                    onClick = { onOpenIssues(HealthIssueTab.REUSED) },
+                    modifier = Modifier.weight(1f),
+                )
+                HealthStatCard(
+                    title = stringResource(R.string.health_reused),
+                    value = shown.reusedCount,
+                    accent = c.gold,
+                    onClick = { onOpenIssues(HealthIssueTab.REUSED) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
+                HealthStatCard(
+                    title = stringResource(R.string.health_weak),
+                    value = shown.weakCount,
+                    accent = c.danger,
+                    onClick = { onOpenIssues(HealthIssueTab.WEAK) },
+                    modifier = Modifier.weight(1f),
+                )
+                HealthStatCard(
+                    title = stringResource(R.string.health_breached),
+                    value = shown.breachedCount,
+                    accent = c.danger,
+                    onClick = { onOpenIssues(HealthIssueTab.BREACHED) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (report?.breachCheckFailed == true) {
+                Text(stringResource(R.string.breached_offline), color = c.textSecondary, style = qasaText.bodySmall)
+            }
         }
 
         Spacer(Modifier.height(HEALTH_SECTION_GAP))

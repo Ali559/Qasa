@@ -6,6 +6,6 @@
 - [ ] **VPN.** Left off the page on purpose. `PROMO_SCRIPT.md` says not to show or mention it until
       the tunnel ships. When it does, add a feature tile and a Premium bullet in all three
       languages in `src/i18n.ts`.
-- [ ] **Free plan list.** The Free card lists "Password generator and health check".
-      `ARCHITECTURE.md` §4.4 only compares devices, leak alerts and VPN between plans, so confirm
-      both are really free, or move them under Premium in `src/i18n.ts` (en, ckb, ar).
+- [ ] **Much later: email leak alerts.** Parked (todo `email-leak-alerts` in
+      `docs/server-followups-plan.md`). Keep them off the page until they ship; the page only
+      talks about the free breached-password check.

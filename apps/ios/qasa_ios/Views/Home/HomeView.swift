@@ -9,7 +9,7 @@ enum HomeStatus {
         guard let report else { self = .loading; return }
         if report.totalPasswords == 0 {
             self = .empty
-        } else if report.reusedCount + report.weakCount == 0 {
+        } else if report.reusedCount + report.weakCount + report.breachedCount == 0 {
             self = .allGood
         } else {
             self = .needsAttention
@@ -48,7 +48,7 @@ struct HomeView: View {
                     HomeHealthCard(report: report, onTap: { onOpen(.passwordHealth) })
                 }
                 HomeVPNCard(isPremium: session.isPremium, onTap: { onOpen(.vpn) })
-                HomeLeaksCard(onTap: { onTab(.alerts) })
+                HomeBreachedCard(onTap: { onTab(.alerts) })
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 16)
@@ -117,15 +117,13 @@ struct HomeView: View {
         }
     }
 
-    /// Same pass as `PasswordHealthView.refreshReport`: trimmed, non-empty login passwords.
+    /// Local report straight away, then again once the Pwned Passwords check is back.
     private func refreshReport() {
-        let logins: [(row: VaultListRow, password: String)] = (try? VaultRepository.shared.allLoginPayloads())?
-            .compactMap { id, fields in
-                guard let row = VaultRepository.shared.cache.row(for: id) else { return nil }
-                let trimmed = fields.password.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return nil }
-                return (row, trimmed)
-            } ?? []
+        let logins = PasswordHealthAnalyzer.vaultLogins()
         report = PasswordHealthAnalyzer.analyze(logins: logins)
+        Task {
+            let checked = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins)
+            if !checked.breachCheckFailed { report = checked }
+        }
     }
 }

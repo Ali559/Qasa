@@ -29,7 +29,11 @@ struct AppShellView: View {
                     }
                 }
                 Tab(L10n.tr("tab.alerts", locale: prefs.locale), systemImage: "bell.badge", value: ShellTab.alerts) {
-                    BreachMonitorView(onUpgrade: { open(.premiumUpgrade) })
+                    NavigationStack {
+                        BreachedPasswordsView()
+                    }
+                    // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+                    // BreachMonitorView(onUpgrade: { open(.premiumUpgrade) })
                 }
                 Tab(L10n.tr("tab.you", locale: prefs.locale), systemImage: "person.crop.circle", value: ShellTab.you) {
                     YouView(onOpen: open)
@@ -63,7 +67,7 @@ struct AppShellView: View {
                 // The two pages that became tabs switch tabs instead of stacking.
                 page = nil
                 tab = .passwords
-            } else if next == .breachMonitoring {
+            } else if next == .breachedPasswords {
                 page = nil
                 tab = .alerts
             } else {
@@ -105,7 +109,7 @@ struct AppShellView: View {
             )
         case .premiumUpgrade:
             PremiumUpgradeView(onOpenMenu: back, embedded: true)
-        case .vault, .breachMonitoring:
+        case .vault, .breachedPasswords:
             // Tabs, never stacked: `open` routes these to their tab.
             EmptyView()
         }

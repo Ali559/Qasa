@@ -183,12 +183,12 @@ sequenceDiagram
 
     U->>A: Tap Upgrade
     A->>S: GET /v1/pricing  [none]
-    S-->>A: premium_monthly 10000 IQD, premium_yearly 100000 IQD
+    S-->>A: premium_monthly 5000 IQD, premium_yearly 50000 IQD
     U->>A: Pick plan + gateway + auto_renew
     A->>S: POST /v1/payments/intents  [Lic]
     Note over A: idempotency_key = UUID
     S->>S: insert payments (status=pending)
-    S-->>A: payment_id + fib://pay?amount=10000&ref=...
+    S-->>A: payment_id + fib://pay?amount=5000&ref=...
     A->>G: open deep link
     U->>G: approve payment
     G->>S: POST /v1/payments/webhook/{gateway}  [none]

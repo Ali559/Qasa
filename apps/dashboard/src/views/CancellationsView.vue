@@ -26,7 +26,7 @@ async function load() {
         id: 'demo-1',
         accountId: 'acc_demo',
         planId: 'premium_monthly',
-        amountIqd: 10000,
+        amountIqd: 5000,
         reason: 'Too expensive for now',
         cancelledAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 86400000 * 20).toISOString(),

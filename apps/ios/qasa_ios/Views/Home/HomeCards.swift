@@ -81,8 +81,9 @@ struct HomeHealthCard: View {
         let total = report?.totalPasswords ?? 0
         let reused = report?.reusedCount ?? 0
         let weak = report?.weakCount ?? 0
+        let breached = report?.breachedCount ?? 0
         // A login can be both reused and weak; count it once.
-        let toFix = report.map { Set(($0.reusedItems + $0.weakItems).map(\.id)).count } ?? 0
+        let toFix = report.map { Set(($0.reusedItems + $0.weakItems + $0.breachedItems).map(\.id)).count } ?? 0
         let fine = max(total - toFix, 0)
         return HomeCard(onTap: onTap) {
             HStack {
@@ -110,9 +111,11 @@ struct HomeHealthCard: View {
             .background(theme.stroke)
             .clipShape(Capsule())
             .padding(.vertical, 4)
-            Text(toFix > 0
-                 ? String(format: L10n.tr("home.attentionBody", locale: prefs.locale), reused, weak)
-                 : String(format: L10n.tr("home.healthAllgood", locale: prefs.locale), total))
+            Text(toFix == 0
+                 ? String(format: L10n.tr("home.healthAllgood", locale: prefs.locale), total)
+                 : breached > 0
+                 ? String(format: L10n.tr("home.attentionBreachedBody", locale: prefs.locale), reused, weak, breached)
+                 : String(format: L10n.tr("home.attentionBody", locale: prefs.locale), reused, weak))
                 .font(.qasa(13))
                 .foregroundColor(theme.textSecondary)
         }
@@ -171,7 +174,9 @@ struct HomeVPNCard: View {
     }
 }
 
-struct HomeLeaksCard: View {
+/// Breached-password check (free, on device). Replaced the email leak alerts card, which is
+/// parked (todo email-leak-alerts in docs/server-followups-plan.md).
+struct HomeBreachedCard: View {
     var onTap: () -> Void
 
     @Environment(\.themePalette) private var theme
@@ -180,12 +185,12 @@ struct HomeLeaksCard: View {
     var body: some View {
         HomeCard(onTap: onTap) {
             HStack(spacing: 12) {
-                HomeIconTile(systemImage: "envelope")
+                HomeIconTile(systemImage: "exclamationmark.shield")
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(L10n.tr("nav.breachMonitoring", locale: prefs.locale))
+                    Text(L10n.tr("nav.breachedPasswords", locale: prefs.locale))
                         .font(.qasa(16, weight: .semibold))
                         .foregroundColor(theme.textPrimary)
-                    Text(L10n.tr("home.leaksBody", locale: prefs.locale))
+                    Text(L10n.tr("home.breachedBody", locale: prefs.locale))
                         .font(.qasa(13))
                         .foregroundColor(theme.textSecondary)
                 }

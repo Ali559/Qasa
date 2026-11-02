@@ -60,4 +60,23 @@ class PasswordHealthAnalyzerTest {
         // (1 - 0.8) * 20 is 3.9999…, which truncates to 3 here and in Swift's Int(), so 65.
         assertEquals(65, report.score)
     }
+
+    @Test
+    fun breachedLoginsLowerScoreBy15AndSortByCount() {
+        val logins = listOf(
+            row("a") to "Zq9!vT4#mL2p",
+            row("b") to "Pw7\$kD3@nX8r",
+        )
+        val report = PasswordHealthAnalyzer.analyze(
+            logins,
+            breachCounts = mapOf("Zq9!vT4#mL2p" to 3, "Pw7\$kD3@nX8r" to 40),
+        )
+        assertEquals(2, report.breachedCount)
+        assertEquals(listOf("b", "a"), report.breachedItems.map { it.id })
+        assertEquals(40, report.breachCounts["b"])
+        assertEquals(70, report.score)
+        // Not checked yet: nothing breached, full score.
+        assertEquals(0, PasswordHealthAnalyzer.analyze(logins).breachedCount)
+        assertEquals(100, PasswordHealthAnalyzer.analyze(logins).score)
+    }
 }

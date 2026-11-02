@@ -1,7 +1,7 @@
 # Qasa architecture
 
 Qasa is a local-first password manager for iOS and Android, sold with Premium extras
-(more devices, breach monitoring, VPN) and paid for through Iraqi wallets (FIB, FastPay,
+(more devices, VPN, Wi‑Fi device sync) for 5,000 IQD a month or 50,000 IQD a year, and paid for through Iraqi wallets (FIB, FastPay,
 SuperQi). This document describes the whole system as it is in the code today: the Rust
 API and its worker, the node agent that runs on VPN servers, the two mobile apps and their
 extensions, the admin dashboard, and the shared localization.
@@ -178,7 +178,8 @@ nothing.
 | | Free | Premium |
 | --- | --- | --- |
 | Linked devices | 1 | 5 |
-| Breach monitoring | no | yes, 10 email hashes |
+| Breached-password check (on device, section 4.11) | yes | yes |
+| Email leak alerts | parked | parked (entitlement still issued: 10 email hashes) |
 | VPN | no | yes, monthly data quota from the plan (100 GB default), then 5 Mbps |
 
 - **When Premium lapses,** the account falls back to Free. Devices stay linked, but only
@@ -238,7 +239,7 @@ response. The admin users list keeps a bare-array body and returns its cursor in
 | `webhook_retry` | 1 min | Re-settle verified webhook events still pending, through the same settlement code as the API |
 | `offline_vpn_nodes` | 1 min | Nodes with no heartbeat for 2 min go `offline` |
 | `stale_vpn_sessions` | 1 min | End sessions with no handshake for 5 min (or none within 10 min of connecting) |
-| `breach_alert_scan` | 10 min | Match monitored hashes against breach data, push Premium accounts (at most weekly per hash) |
+| `breach_alert_scan` | not scheduled | Parked with email leak alerts. Would match monitored hashes against breach data and push Premium accounts (at most weekly per hash) |
 | `subscription_expiry_warnings` | 1 h | "Premium ends in 3 days" push |
 | `subscription_renew_failed_notices` | 1 h | Only scheduled once renewals are actually charged (`RENEWALS_ARE_CHARGED`) |
 | `purge_license_revocations` | 1 day | Drop expired token revocations, admin and device |
@@ -292,7 +293,23 @@ are in `server/crates/qasa-api/src/limits.rs`:
 The per-IP allowances are high on purpose: mobile carriers put many users behind one
 CGNAT address.
 
-### 4.11 Breach monitoring
+### 4.11 Breached passwords and email leak alerts
+
+**Breached-password check (live, free).** Both apps check saved login passwords against
+HIBP Pwned Passwords, with no Qasa server involved (`PwnedPasswordsService` on iOS and
+Android):
+
+- Each password is SHA-1 hashed on the device. Only the first 5 hex characters go to
+  `https://api.pwnedpasswords.com/range/{prefix}` (with `Add-Padding: true`), and the
+  returned suffixes are matched on the device. The service is free and needs no key.
+- Results feed the password health report (a "Breached" count, 15 points off the score
+  per breached login), the Home card, and the Alerts tab.
+- A failed check (usually offline) is shown as such; the apps never show a partial
+  "all clear".
+
+**Email leak alerts (parked, todo `email-leak-alerts`).** No affordable source of
+breached email data exists yet, so the apps no longer reach these screens and the worker
+doesn't schedule the scan. The server endpoints and tables below stay in place.
 
 - **Registering.** The app hashes each email it watches (SHA-256 of the trimmed,
   lowercased address) and registers the hash. The server keeps hashes, never addresses.

@@ -1325,9 +1325,9 @@
     "ckb": "چۆنیەتی خاڵدان"
   },
   "health.howScoringBody": {
-    "en": "Score starts at 100 and drops for weak or reused login passwords. Aim for unique, long passwords with mixed character types.",
-    "ar": "تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.",
-    "ckb": "خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز یان دووبارەکراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە."
+    "en": "Score starts at 100 and drops for weak, reused or breached login passwords. Aim for unique, long passwords with mixed character types.",
+    "ar": "تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها أو المسرّبة. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.",
+    "ckb": "خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز، دووبارەکراو یان دزراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە."
   },
   "health.issuesTitle": {
     "en": "Password Issues",
@@ -1600,9 +1600,9 @@
     "ckb": "ئاگادارییەکان کوژاونەتەوە"
   },
   "notifications.permissionMessage": {
-    "en": "Turn on notifications in Settings to get breach alerts and messages from Qasa.",
-    "ar": "فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من قاصة.",
-    "ckb": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی قاسە وەربگریت."
+    "en": "Turn on notifications in Settings to get alerts and messages from Qasa.",
+    "ar": "فعّل الإشعارات من الإعدادات لتصلك التنبيهات والرسائل من قاصة.",
+    "ckb": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری و نامەکانی قاسە وەربگریت."
   },
   "notifications.permissionOpenSettings": {
     "en": "Open Settings",
@@ -2405,9 +2405,9 @@
     "ckb": "پریمیۆمی ساڵانە"
   },
   "sub.premiumIncludes": {
-    "en": "Premium includes 5 devices, email leak alerts and VPN.",
-    "ar": "يشمل بريميوم 5 أجهزة وتنبيهات تسريب البريد وVPN.",
-    "ckb": "پریمیەم ٥ ئامێر، ئاگادارکردنەوەی دزەی ئیمەیڵ و VPN لەخۆدەگرێت."
+    "en": "Premium includes 5 devices and VPN.",
+    "ar": "يشمل بريميوم 5 أجهزة وVPN.",
+    "ckb": "پریمیەم ٥ ئامێر و VPN لەخۆدەگرێت."
   },
   "sub.reasonTitle": {
     "en": "Cancellation reason",
@@ -3237,5 +3237,85 @@
     "en": "Account",
     "ar": "الحساب",
     "ckb": "هەژمار"
+  },
+  "nav.breachedPasswords": {
+    "android": "nav_breached_passwords",
+    "en": "Breached passwords",
+    "ar": "كلمات المرور المسرّبة",
+    "ckb": "وشە نهێنییە دزراوەکان"
+  },
+  "home.breachedBody": {
+    "android": "home_breached_body",
+    "en": "Check if your passwords showed up in a data breach",
+    "ar": "تحقق مما إذا ظهرت كلمات مرورك في تسريب بيانات",
+    "ckb": "بزانە ئایا وشە نهێنییەکانت لە دزەکردنی زانیاریدا دەرکەوتوون"
+  },
+  "breached.checking": {
+    "en": "Checking your passwords…",
+    "ar": "جارٍ فحص كلمات المرور…",
+    "ckb": "پشکنینی وشە نهێنییەکانت…"
+  },
+  "breached.found": {
+    "en": "%lld of your passwords showed up in data breaches.",
+    "ar": "ظهرت %lld من كلمات مرورك في تسريبات بيانات.",
+    "ckb": "%lld لە وشە نهێنییەکانت لە دزەکردنی زانیاریدا دەرکەوتوون."
+  },
+  "breached.noneTitle": {
+    "android": "breached_none_title",
+    "en": "No breached passwords",
+    "ar": "لا توجد كلمات مرور مسرّبة",
+    "ckb": "هیچ وشەیەکی نهێنی دزراو نییە"
+  },
+  "breached.noneBody": {
+    "android": "breached_none_body",
+    "en": "None of your saved passwords appear in known data breaches.",
+    "ar": "لا تظهر أي من كلمات المرور المحفوظة في تسريبات البيانات المعروفة.",
+    "ckb": "هیچ کام لە وشە نهێنییە پاشەکەوتکراوەکانت لە دزەکردنە ناسراوەکاندا نییە."
+  },
+  "breached.seenCount": {
+    "android": "breached_seen_count",
+    "en": "Seen %@ times in breaches",
+    "ar": "ظهرت %@ مرة في التسريبات",
+    "ckb": "%@ جار لە دزەکاندا بینراوە"
+  },
+  "breached.changeHint": {
+    "android": "breached_change_hint",
+    "en": "Change these on the website first, then update them here.",
+    "ar": "غيّرها على الموقع أولًا، ثم حدّثها هنا.",
+    "ckb": "سەرەتا لە ماڵپەڕەکەدا بیانگۆڕە، پاشان لێرە نوێیان بکەوە."
+  },
+  "breached.privacyTitle": {
+    "android": "breached_privacy_title",
+    "en": "How the check works",
+    "ar": "كيف يعمل الفحص",
+    "ckb": "پشکنینەکە چۆن کار دەکات"
+  },
+  "breached.privacyBody": {
+    "android": "breached_privacy_body",
+    "en": "Each password is hashed on your phone, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device.",
+    "ar": "تُحوَّل كل كلمة مرور إلى بصمة (hash) على هاتفك، ولا يُرسَل إلى Have I Been Pwned سوى أول 5 أحرف منها. لا تغادر كلمات مرورك هذا الجهاز أبدًا.",
+    "ckb": "هەر وشەیەکی نهێنی لەسەر مۆبایلەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن."
+  },
+  "breached.offline": {
+    "en": "Couldn't reach the breach check. Try again when you're online.",
+    "ar": "تعذّر الوصول إلى فحص التسريبات. أعد المحاولة عند الاتصال بالإنترنت.",
+    "ckb": "نەتوانرا پشکنینی دزەکردن بکرێت. کاتێک ئینتەرنێتت هەبوو دووبارە هەوڵ بدەرەوە."
+  },
+  "breached.checkAgain": {
+    "android": "breached_check_again",
+    "en": "Check again",
+    "ar": "افحص مجددًا",
+    "ckb": "دووبارە بپشکنە"
+  },
+  "health.breached": {
+    "en": "Breached",
+    "ar": "مسرّبة",
+    "ckb": "دزراو"
+  },
+  "home.attentionBreachedBody": {
+    "android": "home_attention_breached_body",
+    "en": "%1$lld used more than once, %2$lld easy to guess, %3$lld in data breaches",
+    "ar": "%1$lld مستخدمة أكثر من مرة، %2$lld سهلة التخمين، %3$lld في تسريبات بيانات",
+    "ckb": "%1$lld زیاتر لە جارێک بەکارهاتووە، %2$lld ئاسانە بۆ زانین، %3$lld لە دزەکردنی زانیاریدا"
   }
 }

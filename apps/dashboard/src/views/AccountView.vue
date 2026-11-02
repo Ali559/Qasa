@@ -8,7 +8,7 @@ import {
   Gift,
   Gauge,
   LockOpen,
-  MailWarning,
+  // MailWarning, (breach monitors tile, parked)
   RefreshCw,
   ShieldCheck,
   Smartphone,
@@ -100,10 +100,11 @@ const tiles = computed(() => {
   if (!d) return []
   const gb = d.vpn_usage.bytes_used / 1_000_000_000
   return [
-    { label: 'Plan', value: d.entitlements.tier === 'premium' ? 'Premium' : 'Free', meta: d.entitlements.vpn ? 'VPN and breach alerts' : 'No VPN', icon: ShieldCheck, accent: 'var(--chart-2)' },
+    { label: 'Plan', value: d.entitlements.tier === 'premium' ? 'Premium' : 'Free', meta: d.entitlements.vpn ? 'VPN' : 'No VPN', icon: ShieldCheck, accent: 'var(--chart-2)' },
     { label: 'Devices', value: `${activeDevices.value.length} / ${d.entitlements.device_limit}`, meta: `${d.devices.length - activeDevices.value.length} unlinked`, icon: Smartphone, accent: 'var(--chart-4)' },
     { label: 'VPN data this period', value: gb >= 10 ? gb.toFixed(0) : gb.toFixed(1), unit: 'GB', meta: d.vpn_usage.throttled ? 'Throttled' : `since ${fmtDate(d.vpn_usage.period_start)}`, icon: Gauge, accent: 'var(--chart-3)' },
-    { label: 'Breach monitors', value: String(d.breach_monitors), meta: `limit ${d.entitlements.breach_monitor_limit}`, icon: MailWarning, accent: 'var(--chart-5)' },
+    // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+    // { label: 'Breach monitors', value: String(d.breach_monitors), meta: `limit ${d.entitlements.breach_monitor_limit}`, icon: MailWarning, accent: 'var(--chart-5)' },
   ]
 })
 
@@ -340,7 +341,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
         </div>
       </Card>
 
-      <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         <StatTile v-for="t in tiles" :key="t.label" v-bind="t" />
       </div>
 

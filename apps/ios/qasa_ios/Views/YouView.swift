@@ -82,7 +82,7 @@ private extension AppPage {
         case .notifications: return "bell"
         case .generator: return "wand.and.stars"
         case .passwordHealth: return "heart.text.square"
-        case .breachMonitoring: return "envelope"
+        case .breachedPasswords: return "exclamationmark.shield"
         case .vpn: return "network.badge.shield.half.filled"
         case .collections: return "folder"
         case .settings: return "gearshape"

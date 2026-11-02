@@ -13,6 +13,7 @@ import alibarznji.qasa.vault.VaultListRow
 import alibarznji.qasa.vault.VaultPayload
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,9 +24,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Text
@@ -41,7 +44,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 
 /**
- * iOS `PasswordHealthIssuesView` (`PasswordHealthView.swift:165`): Reused / Weak pill tabs
+ * iOS `PasswordHealthIssuesView` (`PasswordHealthView.swift:165`): Reused / Weak / Breached pill tabs
  * with counts, then the matching logins as vault rows (tap opens the item, overflow has
  * copy / edit / delete), or the iOS empty state for that tab.
  */
@@ -61,6 +64,7 @@ internal fun HealthIssuesScreen(
     val items = when (selected) {
         HealthIssueTab.REUSED -> report.reusedItems
         HealthIssueTab.WEAK -> report.weakItems
+        HealthIssueTab.BREACHED -> report.breachedItems
     }
     val loginLabel = stringResource(R.string.vault_kind_login_tab)
 
@@ -69,11 +73,16 @@ internal fun HealthIssuesScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
                 .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.drawerGap),
             horizontalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
         ) {
             HealthIssueTab.entries.forEach { tab ->
-                val count = if (tab == HealthIssueTab.REUSED) report.reusedItems.size else report.weakItems.size
+                val count = when (tab) {
+                    HealthIssueTab.REUSED -> report.reusedItems.size
+                    HealthIssueTab.WEAK -> report.weakItems.size
+                    HealthIssueTab.BREACHED -> report.breachedItems.size
+                }
                 IssuePill(
                     title = "${stringResource(tab.titleRes)} ($count)",
                     selected = tab == selected,
@@ -82,11 +91,15 @@ internal fun HealthIssuesScreen(
             }
         }
         if (items.isEmpty()) {
-            val reused = selected == HealthIssueTab.REUSED
+            val (title, hint, icon) = when (selected) {
+                HealthIssueTab.REUSED -> Triple(R.string.health_noreusedtitle, R.string.health_noreusedbody, Icons.Default.Sync)
+                HealthIssueTab.WEAK -> Triple(R.string.health_noweaktitle, R.string.health_noweakbody, Icons.Default.Warning)
+                HealthIssueTab.BREACHED -> Triple(R.string.breached_none_title, R.string.breached_none_body, Icons.Default.Shield)
+            }
             EmptyState(
-                title = stringResource(if (reused) R.string.health_noreusedtitle else R.string.health_noweaktitle),
-                hint = stringResource(if (reused) R.string.health_noreusedbody else R.string.health_noweakbody),
-                icon = if (reused) Icons.Default.Sync else Icons.Default.Warning,
+                title = stringResource(title),
+                hint = stringResource(hint),
+                icon = icon,
                 modifier = Modifier.padding(horizontal = QasaDimens.screenPadding),
             )
         } else {
@@ -120,6 +133,7 @@ private val HealthIssueTab.titleRes: Int
     get() = when (this) {
         HealthIssueTab.REUSED -> R.string.health_reused
         HealthIssueTab.WEAK -> R.string.health_weak
+        HealthIssueTab.BREACHED -> R.string.health_breached
     }
 
 /** iOS pill: 14 semibold, 14/9 padding, capsule; selected = accent fill + `onAccent`. */

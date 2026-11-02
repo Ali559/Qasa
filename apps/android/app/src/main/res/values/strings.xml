@@ -117,6 +117,16 @@
     <string name="breach_title">Email leak alerts</string>
     <string name="breach_unresolved">Unresolved</string>
     <string name="breach_upgradehint">Get an alert when one of your emails shows up in a data leak, and see what to change. Included with Premium.</string>
+    <string name="breached_change_hint">Change these on the website first, then update them here.</string>
+    <string name="breached_check_again">Check again</string>
+    <string name="breached_checking">Checking your passwords…</string>
+    <string name="breached_found">%d of your passwords showed up in data breaches.</string>
+    <string name="breached_none_body">None of your saved passwords appear in known data breaches.</string>
+    <string name="breached_none_title">No breached passwords</string>
+    <string name="breached_offline">Couldn\'t reach the breach check. Try again when you\'re online.</string>
+    <string name="breached_privacy_body">Each password is hashed on your phone, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device.</string>
+    <string name="breached_privacy_title">How the check works</string>
+    <string name="breached_seen_count">Seen %s times in breaches</string>
     <string name="collections_assignhint">Assign items to “%s” from the item editor.</string>
     <string name="collections_createtitle">New Collection</string>
     <string name="collections_deletemessage">Items stay in your vault but will no longer belong to this collection.</string>
@@ -280,11 +290,12 @@
     <string name="gen_verystrong">Very Strong</string>
     <string name="gen_veryweak">Very Weak</string>
     <string name="gen_weak">Weak</string>
+    <string name="health_breached">Breached</string>
     <string name="health_excellent">Excellent</string>
     <string name="health_fair">Fair</string>
     <string name="health_good">Good</string>
     <string name="health_howscoring">How scoring works</string>
-    <string name="health_howscoringbody">Score starts at 100 and drops for weak or reused login passwords. Aim for unique, long passwords with mixed character types.</string>
+    <string name="health_howscoringbody">Score starts at 100 and drops for weak, reused or breached login passwords. Aim for unique, long passwords with mixed character types.</string>
     <string name="health_issuestitle">Password Issues</string>
     <string name="health_needsattention">Needs Attention</string>
     <string name="health_noreusedbody">None of your login passwords are reused.</string>
@@ -304,8 +315,10 @@
     <string name="home_allgood_body">Nothing needs your attention right now.</string>
     <string name="home_allgood_title">Your passwords look good</string>
     <string name="home_attention_body">%1$d used more than once, %2$d easy to guess</string>
+    <string name="home_attention_breached_body">%1$d used more than once, %2$d easy to guess, %3$d in data breaches</string>
     <string name="home_attention_hint">Changing them takes a minute and keeps your accounts safer.</string>
     <string name="home_attention_title">A few passwords need a change</string>
+    <string name="home_breached_body">Check if your passwords showed up in a data breach</string>
     <string name="home_checking">Checking your passwords…</string>
     <string name="home_empty_body">We\'ll remember it for you and tell you if it\'s ever at risk.</string>
     <string name="home_empty_title">Add your first password</string>
@@ -341,6 +354,7 @@
     <string name="legal_lastupdated">Last updated: %s</string>
     <string name="legal_privacybody">This Privacy Policy is a placeholder describing how Qasa will handle your data.\n\nVault contents are designed to stay encrypted and under your control. Full policy details will be published here before public release.</string>
     <string name="legal_termsbody">These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.</string>
+    <string name="nav_breached_passwords">Breached passwords</string>
     <string name="nav_breachmonitoring">Email leak alerts</string>
     <string name="nav_collections">Folders</string>
     <string name="nav_generator">Password generator</string>
@@ -364,7 +378,7 @@
     <string name="notifications_markallread">Mark All Read</string>
     <string name="notifications_ondevice">On this device</string>
     <string name="notifications_openfailed">Couldn’t open this notification. Check your connection and try again.</string>
-    <string name="notifications_permissionmessage">Turn on notifications in Settings to get breach alerts and messages from Qasa.</string>
+    <string name="notifications_permissionmessage">Turn on notifications in Settings to get alerts and messages from Qasa.</string>
     <string name="notifications_permissionnotnow">Not Now</string>
     <string name="notifications_permissionopensettings">Open Settings</string>
     <string name="notifications_permissiontitle">Notifications are off</string>
@@ -537,7 +551,7 @@
     <string name="sub_plan">Plan</string>
     <string name="sub_planmonthly">Premium Monthly</string>
     <string name="sub_planyearly">Premium Yearly</string>
-    <string name="sub_premiumincludes">Premium includes 5 devices, email leak alerts and VPN.</string>
+    <string name="sub_premiumincludes">Premium includes 5 devices and VPN.</string>
     <string name="sub_reasontitle">Cancellation reason</string>
     <string name="sub_renewsexpires">Renews / expires</string>
     <string name="sub_skip">Skip</string>

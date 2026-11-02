@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
 
+// Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+// Nothing opens this screen any more; the Alerts tab shows `BreachedPasswordsView`.
 struct BreachMonitorView: View {
     var onOpenMenu: (() -> Void)? = nil
     var onUpgrade: () -> Void = {}
