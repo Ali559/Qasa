@@ -40,3 +40,6 @@ DerivedData/
 # Dashboard (Vue / Vite)
 apps/dashboard/node_modules/
 apps/dashboard/dist/
+
+# Local marketing drafts
+/PROMO_SCRIPT.md
