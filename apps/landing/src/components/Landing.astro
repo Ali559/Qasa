@@ -1,0 +1,659 @@
+---
+import "../styles/global.css";
+import Icon from "./Icon.astro";
+import Phone from "./Phone.astro";
+import { dictionaries, languages, type Lang } from "../i18n";
+
+const { lang } = Astro.props as { lang: Lang };
+const t = dictionaries[lang];
+const dir = lang === "en" ? "ltr" : "rtl";
+
+// TODO: replace with the real store listings before launch (see TODO.md).
+const APP_STORE_URL = "#download";
+const PLAY_STORE_URL = "#download";
+
+const typeIcons = ["key", "credit-card", "notes", "user", "id"];
+const pointIcons = ["device-mobile", "key", "cloud-off"];
+---
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta.title}</title>
+    <meta name="description" content={t.meta.description} />
+    <meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17152a" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={t.meta.title} />
+    <meta property="og:description" content={t.meta.description} />
+    <meta property="og:locale" content={{ en: "en_US", ckb: "ckb_IQ", ar: "ar_IQ" }[lang]} />
+    {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={l.href} />)}
+    <link rel="alternate" hreflang="x-default" href="/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/Rubik-Variable.ttf" as="font" type="font/ttf" crossorigin />
+    {dir === "rtl" && <link rel="preload" href="/fonts/rudawregular2.ttf" as="font" type="font/ttf" crossorigin />}
+    <script is:inline>document.documentElement.classList.add("js");</script>
+  </head>
+  <body>
+    <!-- Nav -->
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a href={languages.find((l) => l.lang === lang)!.href} class="brand" lang="en" aria-label="Qasa">
+          <span class="brand-mark"><Icon name="shield-check" filled size={18} /></span>
+          Qasa
+        </a>
+        <nav class="nav-links" aria-label="Main">
+          <a href="#features">{t.nav.features}</a>
+          <a href="#privacy">{t.nav.privacy}</a>
+          <a href="#pricing">{t.nav.pricing}</a>
+          <a href="#faq">{t.nav.faq}</a>
+        </nav>
+        <nav class="lang-switch" aria-label={t.nav.language}>
+          {languages.map((l) => (
+            <a href={l.href} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? "page" : undefined}>{l.label}</a>
+          ))}
+        </nav>
+        <a href="#download" class="btn btn-primary nav-cta">{t.nav.cta}</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true">
+          <span class="blob blob-a"></span>
+          <span class="blob blob-b"></span>
+          <span class="blob blob-c"></span>
+        </div>
+        <div class="wrap hero-inner">
+          <div class="hero-copy">
+            <span class="eyebrow"><span class="dot"><Icon name="lock-heart" size={13} /></span>{t.hero.eyebrow}</span>
+            <h1>{t.hero.h1} <em>{t.hero.h1Accent}</em></h1>
+            <p class="lede">{t.hero.lede}</p>
+            <div class="stores" id="download">
+              <a class="store" href={APP_STORE_URL}>
+                <Icon name="brand-apple" size={26} />
+                <span><small>{t.stores.appleSmall}</small><strong lang="en">App Store</strong></span>
+              </a>
+              <a class="store" href={PLAY_STORE_URL}>
+                <Icon name="brand-google-play" size={24} />
+                <span><small>{t.stores.playSmall}</small><strong lang="en">Google Play</strong></span>
+              </a>
+            </div>
+            <ul class="hero-points">
+              <li><Icon name="circle-check" size={18} /> {t.hero.noCard}</li>
+              <li><Icon name="circle-check" size={18} /> <span lang="en">English</span> · <span lang="ckb">کوردی</span> · <span lang="ar">العربية</span></li>
+            </ul>
+          </div>
+
+          <div class="hero-art">
+            <div class="halo" aria-hidden="true"></div>
+            <Phone t={t.phone} />
+            <div class="chip chip-1" aria-hidden="true">
+              <span class="chip-icon ok"><Icon name="circle-check" size={16} /></span>
+              <span><b>{t.hero.savedTitle}</b><small lang="en">instagram.com</small></span>
+            </div>
+            <div class="chip chip-2" aria-hidden="true">
+              <span class="chip-icon lav"><Icon name="lock" size={16} /></span>
+              <span><b>{t.hero.encryptedTitle}</b><small>{t.hero.encryptedSub}</small></span>
+            </div>
+            <div class="chip chip-3" aria-hidden="true">
+              <span class="chip-icon warn"><Icon name="mail-exclamation" size={16} /></span>
+              <span><b>{t.hero.leakTitle}</b><small>{t.hero.leakSub}</small></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payments strip -->
+      <section class="strip">
+        <div class="wrap strip-inner">
+          <p>{t.strip}</p>
+          <div class="wallets" lang="en">
+            <span class="wallet" style="--w:#0e7a5a">FIB</span>
+            <span class="wallet" style="--w:#e2232a">FastPay</span>
+            <span class="wallet" style="--w:#f2a900">SuperQi</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="features" id="features">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <p class="kicker">{t.features.kicker}</p>
+            <h2 class="title">{t.features.title}</h2>
+            <p class="lede">{t.features.lede}</p>
+          </div>
+
+          <div class="bento">
+            <article class="tile tile-wide reveal">
+              <div class="tile-copy">
+                <span class="tile-icon"><Icon name="folders" size={22} /></span>
+                <h3>{t.features.typesTitle}</h3>
+                <p>{t.features.typesBody}</p>
+              </div>
+              <div class="types">
+                {t.features.types.map((label, i) => (
+                  <span class="type"><Icon name={typeIcons[i]} size={18} />{label}</span>
+                ))}
+              </div>
+            </article>
+
+            <article class="tile reveal">
+              <div class="tile-copy">
+                <span class="tile-icon"><Icon name="hand-click" size={22} /></span>
+                <h3>{t.features.autofillTitle}</h3>
+                <p>{t.features.autofillBody}</p>
+              </div>
+              <div class="mini-form" aria-hidden="true">
+                <div class="field"><Icon name="mail" size={15} /> <bdi lang="en">sara.ahmed@gmail.com</bdi></div>
+                <div class="field"><Icon name="lock" size={15} /> ••••••••••••</div>
+                <div class="suggest">
+                  <span class="logo-sm" style="background:#ea4335">G</span>
+                  <span class="grow"><b lang="en">Gmail</b><small>{t.features.fillWith}</small></span>
+                  <span class="key"><Icon name="fingerprint" size={16} /></span>
+                </div>
+              </div>
+            </article>
+
+            <article class="tile tile-warm reveal">
+              <div class="tile-copy">
+                <span class="tile-icon"><Icon name="mail-exclamation" size={22} /></span>
+                <h3>{t.features.leaksTitle} <span class="pill pill-gold">{t.features.premium}</span></h3>
+                <p>{t.features.leaksBody}</p>
+              </div>
+              <div class="alert" aria-hidden="true">
+                <p class="alert-title">{t.features.alertTitle}</p>
+                <p class="alert-body">{t.features.alertBody}</p>
+                <span class="alert-btn">{t.features.alertButton}</span>
+              </div>
+            </article>
+
+            <article class="tile reveal">
+              <div class="tile-copy">
+                <span class="tile-icon"><Icon name="heart-rate-monitor" size={22} /></span>
+                <h3>{t.features.healthTitle}</h3>
+                <p>{t.features.healthBody}</p>
+              </div>
+              <div class="health" aria-hidden="true">
+                <div class="health-top"><b>{t.features.healthCard}</b><span class="pill pill-danger">{t.features.healthToFix}</span></div>
+                <div class="meter"><span style="width:74%;background:var(--success)"></span><span style="width:14%;background:var(--gold)"></span><span style="width:12%;background:var(--danger)"></span></div>
+                <p>{t.features.healthNote}</p>
+              </div>
+            </article>
+
+            <article class="tile reveal">
+              <div class="tile-copy">
+                <span class="tile-icon"><Icon name="language" size={22} /></span>
+                <h3>{t.features.langTitle}</h3>
+                <p>{t.features.langBody}</p>
+              </div>
+              <div class="langs" aria-hidden="true">
+                <span lang="en" dir="ltr">Good morning</span>
+                <span lang="ckb" dir="rtl">بەیانیت باش</span>
+                <span lang="ar" dir="rtl">صباح الخير</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section class="privacy" id="privacy">
+        <div class="wrap privacy-inner">
+          <div class="privacy-copy reveal">
+            <p class="kicker">{t.privacy.kicker}</p>
+            <h2 class="title">{t.privacy.title}</h2>
+            <p class="lede">{t.privacy.lede}</p>
+            <ul class="privacy-list">
+              {t.privacy.points.map((p, i) => (
+                <li>
+                  <span class="p-icon"><Icon name={pointIcons[i]} size={20} /></span>
+                  <span><b>{p.title}</b>{p.body}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="vault-diagram reveal" aria-hidden="true">
+            <div class="cloud-node">
+              <Icon name="server" size={26} />
+              <span>{t.privacy.server}</span>
+              <small>{t.privacy.serverSub}</small>
+            </div>
+            <div class="wire"><span class="stop"><Icon name="x" size={14} /></span></div>
+            <div class="phone-node">
+              <div class="rings"><span></span><span></span><span></span></div>
+              <div class="lockcore"><Icon name="lock-heart" size={40} /></div>
+              <span class="phone-label">{t.privacy.vault}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section class="pricing" id="pricing">
+        <div class="wrap">
+          <div class="section-head center reveal">
+            <p class="kicker">{t.pricing.kicker}</p>
+            <h2 class="title">{t.pricing.title}</h2>
+            <p class="lede">{t.pricing.lede}</p>
+          </div>
+
+          <div class="plans">
+            <article class="plan reveal">
+              <h3>{t.pricing.free}</h3>
+              <p class="plan-desc">{t.pricing.freeDesc}</p>
+              <p class="price"><b>{t.pricing.freePrice}</b> {t.pricing.currency}</p>
+              <ul>
+                {t.pricing.freeFeatures.map((f) => <li><Icon name="check" size={18} />{f}</li>)}
+              </ul>
+              <a href="#download" class="btn btn-ghost">{t.pricing.freeCta}</a>
+            </article>
+
+            <article class="plan plan-premium reveal">
+              <span class="best">{t.pricing.best}</span>
+              <h3>{t.pricing.premium}</h3>
+              <p class="plan-desc">{t.pricing.premiumDesc}</p>
+              <p class="price"><b>{t.pricing.monthPrice}</b> {t.pricing.currency} <span>{t.pricing.perMonth}</span></p>
+              <p class="price-alt">{t.pricing.yearPrefix} <b>{t.pricing.yearPrice}</b>{t.pricing.yearSuffix}</p>
+              <ul>
+                {t.pricing.premiumFeatures.map((f) => <li><Icon name="check" size={18} />{f}</li>)}
+              </ul>
+              <a href="#download" class="btn btn-primary">{t.pricing.premiumCta}</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="faq" id="faq">
+        <div class="wrap faq-inner">
+          <div class="section-head reveal">
+            <p class="kicker">{t.faq.kicker}</p>
+            <h2 class="title">{t.faq.title}</h2>
+          </div>
+          <div class="faq-list">
+            {t.faq.items.map((f) => (
+              <details class="reveal">
+                <summary>{f.q}<Icon name="plus" size={20} class="faq-plus" /></summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="cta">
+        <div class="wrap">
+          <div class="cta-card reveal">
+            <span class="cta-mark"><Icon name="shield-check" filled size={34} /></span>
+            <h2 class="title">{t.cta.title}</h2>
+            <p class="lede">{t.cta.lede}</p>
+            <div class="stores center">
+              <a class="store" href={APP_STORE_URL}>
+                <Icon name="brand-apple" size={26} />
+                <span><small>{t.stores.appleSmall}</small><strong lang="en">App Store</strong></span>
+              </a>
+              <a class="store" href={PLAY_STORE_URL}>
+                <Icon name="brand-google-play" size={24} />
+                <span><small>{t.stores.playSmall}</small><strong lang="en">Google Play</strong></span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <a href={languages.find((l) => l.lang === lang)!.href} class="brand" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={18} /></span>Qasa</a>
+        <nav aria-label="Footer">
+          <a href="#features">{t.nav.features}</a>
+          <a href="#privacy">{t.nav.privacy}</a>
+          <a href="#pricing">{t.nav.pricing}</a>
+          <a href="#faq">{t.nav.faq}</a>
+        </nav>
+        <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
+      </div>
+    </footer>
+
+    <script>
+      const els = document.querySelectorAll(".reveal");
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { rootMargin: "0px 0px -8% 0px" },
+      );
+      els.forEach((el) => io.observe(el));
+    </script>
+  </body>
+</html>
+
+<style>
+  /* Nav */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--background) 78%, transparent);
+    backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid color-mix(in srgb, var(--stroke) 70%, transparent);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 24px; height: 68px; }
+  /* The logo lockup is artwork: same order and font in every language. */
+  .brand { direction: ltr; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; color: var(--accent); letter-spacing: -0.01em; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center;
+    background: var(--accent); color: var(--on-accent);
+  }
+  .nav-links { display: flex; gap: 28px; margin-inline-start: auto; margin-inline-end: 4px; font-size: 15px; color: var(--text-2); font-weight: 500; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { height: 42px; padding: 0 18px; font-size: 14.5px; border-radius: 13px; }
+  @media (max-width: 760px) {
+    .nav-links { display: none; }
+  }
+
+  /* Language switcher */
+  .lang-switch {
+    display: flex; gap: 2px; padding: 3px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--stroke); font-size: 13px; font-weight: 500;
+  }
+  .lang-switch a { padding: 5px 10px; border-radius: 9px; color: var(--text-2); line-height: 1.4; }
+  .lang-switch a:hover { color: var(--text); }
+  .lang-switch a[aria-current="page"] { background: var(--card-muted); color: var(--on-accent-chip); }
+  @media (max-width: 760px) {
+    .lang-switch { margin-inline-start: auto; }
+    .nav-cta { display: none; }
+  }
+
+  /* Kurdish and Arabic: taller script needs looser leading. */
+  [dir="rtl"] .hero h1 { line-height: 1.3; letter-spacing: 0; }
+  [dir="rtl"] .title { line-height: 1.4; }
+  [dir="rtl"] .lede, [dir="rtl"] .tile-copy p { line-height: 1.8; }
+  [dir="rtl"] .privacy {
+    background: radial-gradient(900px 500px at 15% 50%, rgba(124, 108, 242, 0.28), transparent 70%), var(--night);
+  }
+
+  /* Hero */
+  .hero { position: relative; overflow: hidden; padding: clamp(40px, 7vw, 88px) 0 clamp(56px, 8vw, 104px); }
+  .hero-bg { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--card-muted) 0%, var(--background) 78%); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); }
+  .blob-a { width: 520px; height: 520px; background: var(--warm); opacity: 0.8; right: -120px; top: 40px; }
+  .blob-b { width: 420px; height: 420px; background: var(--accent); opacity: 0.16; left: -160px; top: 220px; }
+  .blob-c { width: 300px; height: 300px; background: #fbe9f1; opacity: 0.6; right: 30%; bottom: -80px; }
+  @media (prefers-color-scheme: dark) { .blob-c { background: var(--accent); opacity: 0.1; } }
+
+  .hero-inner { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 48px; }
+  .hero h1 {
+    margin-top: 22px; font-size: clamp(40px, 5.6vw, 66px); font-weight: 600; line-height: 1.02; letter-spacing: -0.035em;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero .lede { max-width: 520px; font-size: clamp(17px, 1.8vw, 19px); }
+  .stores { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .stores.center { justify-content: center; }
+  .hero-points { list-style: none; padding: 0; margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 14.5px; color: var(--text-2); }
+  .hero-points li { display: inline-flex; align-items: center; gap: 7px; }
+  .hero-points :global(.icon) { color: var(--success); }
+
+  .hero-art { position: relative; display: grid; place-items: center; min-height: 660px; }
+  .halo {
+    position: absolute; width: 480px; height: 480px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--card) 90%, transparent) 0 46%, color-mix(in srgb, var(--card) 45%, transparent) 47% 64%, color-mix(in srgb, var(--card) 18%, transparent) 65% 100%);
+  }
+  .hero-art > :global(.phone) { position: relative; rotate: 0deg; }
+  .chip {
+    position: absolute; display: flex; align-items: center; gap: 10px; padding-block: 10px; padding-inline: 10px 14px;
+    background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; box-shadow: var(--shadow-chip);
+    font-size: 13px; line-height: 1.25; z-index: 3;
+  }
+  .chip b { display: block; font-weight: 600; }
+  .chip small { display: block; color: var(--text-2); font-size: 12px; }
+  .chip-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; }
+  .chip-icon.ok { background: var(--success-wash); color: var(--success); }
+  .chip-icon.lav { background: var(--card-muted); color: var(--accent); }
+  .chip-icon.warn { background: var(--danger-bg); color: var(--danger); }
+  .chip-1 { inset-inline-start: -6%; top: 1%; }
+  .chip-2 { inset-inline-end: -6%; top: 44%; }
+  .chip-3 { inset-inline-start: 0%; bottom: 12%; }
+  @media (prefers-reduced-motion: no-preference) {
+    .chip { animation: float 6s ease-in-out infinite; }
+    .chip-2 { animation-delay: -2s; }
+    .chip-3 { animation-delay: -4s; }
+    @keyframes float { 50% { transform: translateY(-10px); } }
+  }
+
+  @media (max-width: 960px) {
+    .hero-inner { grid-template-columns: 1fr; text-align: center; }
+    .hero-copy { display: flex; flex-direction: column; align-items: center; }
+    .hero .lede { margin-inline: auto; }
+    .stores, .hero-points { justify-content: center; }
+    .hero-art { min-height: 0; padding: 24px 0; }
+    .chip-1 { inset-inline-start: 4%; }
+    .chip-2 { inset-inline-end: 2%; }
+  }
+  @media (max-width: 560px) {
+    .halo { width: 360px; height: 360px; }
+    .hero-art > :global(.phone) { transform: scale(0.9); margin: -30px 0; }
+    .chip { font-size: 12px; padding-block: 8px; padding-inline: 8px 12px; }
+    .chip small { font-size: 11px; }
+    .chip-1 { inset-inline-start: -2px; top: 10%; }
+    .chip-2 { inset-inline-end: -2px; top: 48%; }
+    .chip-3 { inset-inline-start: -2px; bottom: 6%; }
+  }
+
+  /* Payments strip */
+  .strip { border-block: 1px solid var(--stroke); background: var(--card); }
+  .strip-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; padding-block: 22px; }
+  .strip p { color: var(--text-2); font-size: 15px; }
+  .wallets { display: flex; gap: 10px; flex-wrap: wrap; }
+  .wallet {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 12px;
+    border: 1px solid var(--stroke); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+  }
+  .wallet::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--w); }
+
+  /* Features */
+  .features { padding: clamp(72px, 10vw, 128px) 0; }
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .tile {
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius-lg);
+    padding: 28px; display: flex; flex-direction: column; gap: 26px; overflow: hidden; position: relative;
+  }
+  .tile-wide { grid-column: span 2; }
+  .tile-warm { background: linear-gradient(160deg, var(--warm) 0%, var(--card) 70%); }
+  .tile-icon {
+    width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    background: var(--card-muted); color: var(--accent); margin-bottom: 18px;
+  }
+  .tile h3 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tile-copy p { margin-top: 8px; color: var(--text-2); font-size: 15px; line-height: 1.55; }
+  .tile > :last-child:not(.tile-copy) { margin-top: auto; }
+
+  .types { display: flex; flex-wrap: wrap; gap: 10px; }
+  .type {
+    display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 14px;
+    background: var(--background); border: 1px solid var(--stroke); font-weight: 500; font-size: 14.5px;
+  }
+  .type :global(.icon) { color: var(--accent); }
+  .type:nth-child(1) { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+  .type:nth-child(1) :global(.icon) { color: inherit; }
+
+  .mini-form { display: grid; gap: 8px; }
+  .field {
+    display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 12px;
+    background: var(--background); border: 1px solid var(--stroke); color: var(--text-2); font-size: 13.5px;
+  }
+  .suggest {
+    display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px;
+    background: var(--card); border: 1px solid var(--stroke); box-shadow: var(--shadow-chip); margin-top: 4px;
+  }
+  .suggest b { display: block; font-size: 14px; font-weight: 600; line-height: 1.2; }
+  .suggest small { display: block; font-size: 12px; color: var(--text-2); }
+  .grow { flex: 1; min-width: 0; }
+  .logo-sm { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: #fff; font-weight: 700; }
+  .key { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+
+  .alert { background: var(--card); border-radius: 18px; padding: 16px; border: 1px solid var(--stroke); }
+  .alert-title { font-weight: 600; font-size: 14.5px; color: var(--danger-text); }
+  .alert-body { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .alert-btn {
+    display: flex; justify-content: center; align-items: center; height: 40px; margin-top: 12px; border-radius: 12px;
+    background: var(--danger); color: #fff; font-weight: 600; font-size: 13.5px;
+  }
+
+  .health { background: var(--background); border: 1px solid var(--stroke); border-radius: 18px; padding: 16px; }
+  .health-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
+  .health-top b { font-weight: 500; }
+  .meter { height: 8px; border-radius: 99px; overflow: hidden; display: flex; gap: 2px; }
+  .health p { margin-top: 10px; font-size: 12.5px; color: var(--text-2); }
+
+  .langs { display: grid; gap: 8px; }
+  .langs span {
+    padding: 10px 14px; border-radius: 12px; background: var(--background); border: 1px solid var(--stroke); font-size: 15px; font-weight: 500;
+  }
+  .langs span { text-align: start; }
+
+  @media (max-width: 960px) {
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .tile-wide { grid-column: span 2; }
+  }
+  @media (max-width: 640px) {
+    .bento { grid-template-columns: 1fr; }
+    .tile-wide { grid-column: auto; }
+    .tile { padding: 22px; }
+  }
+
+  /* Privacy (always dark, like the app's night palette) */
+  .privacy {
+    background: radial-gradient(900px 500px at 85% 50%, rgba(124, 108, 242, 0.28), transparent 70%), var(--night);
+    color: var(--night-text); padding: clamp(72px, 10vw, 128px) 0;
+  }
+  .privacy .kicker { color: var(--night-accent); }
+  .privacy .lede { color: var(--night-text-2); }
+  .privacy-inner { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
+  .privacy-list { list-style: none; padding: 0; margin: 36px 0 0; display: grid; gap: 20px; }
+  .privacy-list li { display: flex; gap: 16px; align-items: flex-start; font-size: 15px; color: var(--night-text-2); }
+  .privacy-list b { display: block; color: var(--night-text); font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+  .p-icon {
+    width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; flex-shrink: 0;
+    background: var(--night-card); border: 1px solid var(--night-stroke); color: var(--night-accent);
+  }
+
+  .vault-diagram { display: grid; justify-items: center; gap: 0; }
+  .cloud-node {
+    display: grid; justify-items: center; gap: 4px; padding: 18px 28px; border-radius: 20px;
+    background: var(--night-card); border: 1px solid var(--night-stroke); color: var(--night-text-2); text-align: center;
+  }
+  .cloud-node span { color: var(--night-text); font-weight: 600; font-size: 15px; }
+  .cloud-node small { font-size: 12.5px; }
+  .wire {
+    width: 2px; height: 110px; position: relative;
+    background-image: linear-gradient(var(--night-stroke) 50%, transparent 0); background-size: 2px 10px;
+  }
+  .stop {
+    position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; background: #4a2030; color: #ffb8b8; border: 1px solid #6a2a40;
+  }
+  .phone-node { position: relative; display: grid; justify-items: center; padding-top: 14px; }
+  .rings { position: absolute; top: 14px; left: 50%; translate: -50% 0; width: 132px; height: 132px; }
+  .rings span {
+    position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(167, 155, 255, 0.35);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rings span { animation: ripple 3.6s ease-out infinite; }
+    .rings span:nth-child(2) { animation-delay: 1.2s; }
+    .rings span:nth-child(3) { animation-delay: 2.4s; }
+    @keyframes ripple { from { transform: scale(1); opacity: 1; } to { transform: scale(2.1); opacity: 0; } }
+  }
+  .lockcore {
+    position: relative; width: 132px; height: 132px; border-radius: 42px; display: grid; place-items: center;
+    background: linear-gradient(160deg, #2f2b52, #221f3a); border: 1px solid #3a3658; color: var(--night-accent);
+    box-shadow: 0 30px 60px -20px rgba(124, 108, 242, 0.6);
+  }
+  .phone-label { margin-top: 18px; font-weight: 600; font-size: 15px; }
+
+  @media (max-width: 900px) {
+    .privacy-inner { grid-template-columns: 1fr; gap: 56px; }
+  }
+
+  /* Pricing */
+  .pricing { padding: clamp(72px, 10vw, 128px) 0; }
+  .plans { display: grid; grid-template-columns: repeat(2, minmax(0, 420px)); justify-content: center; gap: 20px; }
+  .plan {
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius-xl); padding: 32px;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .plan h3 { font-size: 22px; font-weight: 600; }
+  .plan-desc { color: var(--text-2); font-size: 15px; margin-top: 6px; }
+  .price { margin-top: 24px; font-size: 18px; font-weight: 500; color: var(--text-2); }
+  .price b { font-size: 48px; font-weight: 600; color: var(--text); letter-spacing: -0.03em; }
+  .price span { font-size: 16px; }
+  .price-alt { margin-top: 4px; font-size: 14.5px; color: var(--text-2); }
+  .price-alt b { color: var(--text); font-weight: 600; }
+  .plan ul { list-style: none; padding: 0; margin: 28px 0 32px; display: grid; gap: 12px; font-size: 15px; }
+  .plan li { display: flex; gap: 10px; align-items: flex-start; }
+  .plan li :global(.icon) { color: var(--success); margin-top: 2px; }
+  .plan .btn { margin-top: auto; }
+  .plan-premium {
+    border: 2px solid var(--accent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card-muted) 70%, var(--card)) 0%, var(--card) 45%);
+    box-shadow: var(--shadow-soft);
+  }
+  .plan-premium li :global(.icon) { color: var(--accent); }
+  .best {
+    position: absolute; top: -14px; inset-inline-end: 28px; padding: 5px 12px; border-radius: 999px;
+    background: var(--gold); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  @media (max-width: 760px) {
+    .plans { grid-template-columns: 1fr; }
+    .plan { padding: 26px; }
+  }
+
+  /* FAQ */
+  .faq { padding: 0 0 clamp(72px, 10vw, 128px); }
+  .faq-inner { display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; align-items: start; }
+  .faq-list { display: grid; gap: 12px; }
+  details {
+    background: var(--card); border: 1px solid var(--stroke); border-radius: var(--radius); padding: 0 22px;
+  }
+  summary {
+    list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 20px 0; font-weight: 500; font-size: 16.5px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary :global(.faq-plus) { color: var(--accent); transition: rotate 0.2s ease; }
+  details[open] summary :global(.faq-plus) { rotate: 45deg; }
+  details p { padding: 0 0 20px; color: var(--text-2); font-size: 15px; line-height: 1.6; }
+  @media (max-width: 860px) {
+    .faq-inner { grid-template-columns: 1fr; gap: 0; }
+  }
+
+  /* CTA */
+  .cta { padding: 0 0 clamp(72px, 10vw, 112px); }
+  .cta-card {
+    text-align: center; padding: clamp(48px, 7vw, 80px) var(--gutter); border-radius: 36px; position: relative; overflow: hidden;
+    background:
+      radial-gradient(500px 300px at 15% 0%, color-mix(in srgb, var(--warm) 90%, transparent), transparent 70%),
+      radial-gradient(500px 300px at 90% 100%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+      var(--card-muted);
+  }
+  .cta-card .lede { max-width: 460px; margin-inline: auto; }
+  .cta-mark {
+    width: 72px; height: 72px; border-radius: 24px; margin: 0 auto 24px; display: grid; place-items: center;
+    background: var(--card); color: var(--accent); box-shadow: var(--shadow-soft);
+  }
+
+  /* Footer */
+  .footer { border-top: 1px solid var(--stroke); padding: 32px 0; }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .footer nav { display: flex; gap: 24px; flex-wrap: wrap; font-size: 14.5px; color: var(--text-2); }
+  .footer nav a:hover { color: var(--text); }
+  .footer p { font-size: 14px; color: var(--text-3); }
+</style>

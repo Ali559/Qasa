@@ -1,0 +1,20 @@
+---
+// Inlines a Tabler icon at build time, so the page ships no icon font or JS.
+import { readFileSync } from "node:fs";
+
+interface Props {
+  name: string;
+  size?: number;
+  filled?: boolean;
+  class?: string;
+}
+
+const { name, size = 20, filled = false, class: className } = Astro.props;
+const dir = filled ? "filled" : "outline";
+const raw = readFileSync(`node_modules/@tabler/icons/icons/${dir}/${name}.svg`, "utf8");
+const svg = raw
+  .replace(/class="[^"]*"/, `class="icon ${className ?? ""}" aria-hidden="true"`)
+  .replace(/width="24"/, `width="${size}"`)
+  .replace(/height="24"/, `height="${size}"`);
+---
+<Fragment set:html={svg} />

@@ -1,0 +1,109 @@
+---
+// The Passwords screen from the app, drawn in HTML so it stays crisp and themeable.
+// Sample data only.
+import Icon from "./Icon.astro";
+import type { Dict } from "../i18n";
+
+const { t } = Astro.props as { t: Dict["phone"] };
+
+const logins = [
+  { site: "Facebook", user: "sara.ahmed@gmail.com", mark: "f", bg: "#1877f2" },
+  { site: "WhatsApp", user: "+964 750 ••• 4821", mark: "W", bg: "#25d366" },
+  { site: "FIB", user: t.reused, mark: "F", bg: "#0e7a5a", warn: true },
+  { site: "Instagram", user: "sara.ahmed", mark: "I", bg: "linear-gradient(135deg,#f58529,#dd2a7b,#8134af)" },
+  { site: "Gmail", user: "sara.ahmed@gmail.com", mark: "G", bg: "#ea4335" },
+];
+---
+<div class="phone" role="img" aria-label={t.label}>
+  <div class="notch"></div>
+  <div class="status"><span>9:41</span><span class="status-icons"><Icon name="wifi" size={13} /><Icon name="battery-3" size={15} /></span></div>
+  <div class="screen">
+    <div class="greet">
+      <div>
+        <p class="muted">{t.greeting}</p>
+        <p class="name">{t.name}</p>
+      </div>
+      <span class="bell"><Icon name="bell" size={18} /></span>
+    </div>
+    <div class="search"><Icon name="search" size={16} /> {t.search}</div>
+    <div class="folders">
+      <span class="folder on">{t.folders[0]}</span>
+      <span class="folder"><Icon name="briefcase" size={13} /> {t.folders[1]}</span>
+      <span class="folder"><Icon name="heart" size={13} /> {t.folders[2]}</span>
+      <span class="folder"><Icon name="building-bank" size={13} /> {t.folders[3]}</span>
+    </div>
+    <div class="list">
+      {logins.map((l) => (
+        <div class="row">
+          <span class="logo" style={`background:${l.bg}`}>{l.mark}</span>
+          <div class="grow">
+            <p class="site" lang="en">{l.site}</p>
+            <p class:list={["user", { warn: l.warn }]}>{l.warn ? l.user : <bdi lang="en">{l.user}</bdi>}</p>
+          </div>
+          <Icon name="copy" size={16} class="copy" />
+        </div>
+      ))}
+    </div>
+    <span class="fab"><Icon name="plus" size={22} /></span>
+  </div>
+  <nav class="tabs">
+    <span><Icon name="home" size={20} />{t.tabs[0]}</span>
+    <span class="on"><Icon name="key" size={20} />{t.tabs[1]}</span>
+    <span><Icon name="bell-ringing" size={20} />{t.tabs[2]}</span>
+    <span><Icon name="user-circle" size={20} />{t.tabs[3]}</span>
+  </nav>
+</div>
+
+<style>
+  .phone {
+    --p-bg: var(--background);
+    width: 300px; height: 620px; border-radius: 48px; background: var(--p-bg);
+    border: 9px solid #1c1a2b; box-shadow: 0 0 0 1px #2c2944, var(--shadow-soft), 0 50px 100px -40px rgba(76, 61, 184, 0.45);
+    overflow: hidden; position: relative; display: flex; flex-direction: column;
+    font-size: 13px; color: var(--text); user-select: none;
+  }
+  .notch {
+    position: absolute; top: 8px; left: 50%; translate: -50% 0; width: 92px; height: 26px;
+    border-radius: 20px; background: #1c1a2b; z-index: 2;
+  }
+  .status { direction: ltr; display: flex; justify-content: space-between; padding: 12px 24px 0; font-size: 12px; font-weight: 600; }
+  .status-icons { display: flex; gap: 4px; align-items: center; }
+  .screen { flex: 1; padding: 18px 16px 0; display: flex; flex-direction: column; gap: 12px; position: relative; min-height: 0; }
+  .greet { display: flex; justify-content: space-between; align-items: center; }
+  .muted { color: var(--text-2); font-size: 12px; }
+  .name { font-size: 20px; font-weight: 600; line-height: 1.2; }
+  .bell { width: 38px; height: 38px; border-radius: 13px; background: var(--card); display: grid; place-items: center; }
+  .search {
+    height: 40px; border-radius: 13px; background: var(--card); display: flex; align-items: center; gap: 8px;
+    padding: 0 12px; color: var(--text-3); font-size: 12.5px;
+  }
+  .folders { display: flex; gap: 6px; }
+  .folder {
+    display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 11px;
+    background: var(--card); font-size: 11.5px; font-weight: 500; color: var(--text-2);
+  }
+  .folder.on { background: var(--accent); color: var(--on-accent); }
+  .list { background: var(--card); border-radius: 20px; padding: 4px 12px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
+  .row + .row { border-top: 1px solid var(--stroke); }
+  .logo {
+    width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center;
+    color: #fff; font-weight: 700; font-size: 15px; flex-shrink: 0;
+  }
+  .grow { flex: 1; min-width: 0; }
+  .site { font-weight: 500; font-size: 13.5px; line-height: 1.25; }
+  .user { color: var(--text-2); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user.warn { color: var(--danger); }
+  .row :global(.copy) { color: var(--text-3); }
+  .fab {
+    position: absolute; inset-inline-end: 16px; bottom: 14px; width: 50px; height: 50px; border-radius: 17px;
+    background: var(--accent); color: var(--on-accent); display: grid; place-items: center;
+    box-shadow: 0 12px 24px -10px var(--accent);
+  }
+  .tabs {
+    display: flex; justify-content: space-around; padding: 9px 4px 16px; background: var(--card);
+    border-top: 1px solid var(--stroke); font-size: 10px; color: var(--text-3);
+  }
+  .tabs span { display: grid; justify-items: center; gap: 3px; text-align: center; }
+  .tabs .on { color: var(--accent); font-weight: 600; }
+</style>

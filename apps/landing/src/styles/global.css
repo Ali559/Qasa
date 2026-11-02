@@ -1,0 +1,175 @@
+/* Tokens mirror apps/ios/qasa_ios/Theme/Theme.swift (the calm + personal palette). */
+
+@font-face {
+  font-family: "Rubik";
+  src: url("/fonts/Rubik-Variable.ttf") format("truetype");
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Rudaw";
+  src: url("/fonts/rudawregular2.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --background: #f6f4fb;
+  --card: #ffffff;
+  --card-light: #f1eefa;
+  --card-muted: #ece8fd;
+  --stroke: #ebe8f4;
+  --stroke-chrome: #e4e0f0;
+  --accent: #7c6cf2;
+  --accent-dark: #6656e0;
+  --on-accent: #ffffff;
+  --on-accent-chip: #3a2fa0;
+  --gold: #e09a2b;
+  --success: #2f9e6c;
+  --success-wash: #e2f5ec;
+  --danger: #e45d5d;
+  --danger-bg: #fdeaea;
+  --danger-text: #9e2f2f;
+  --text: #24213a;
+  --text-2: #6b6785;
+  --text-3: #a19db8;
+  --warm: #ffd9c7;
+  --calm: #e6e3f2;
+
+  /* Always-dark band (privacy section, phone bezel) regardless of scheme. */
+  --night: #17152a;
+  --night-card: #221f3a;
+  --night-stroke: #332f4f;
+  --night-text: #eeecf8;
+  --night-text-2: #b5b1cc;
+  --night-accent: #a79bff;
+
+  --shadow-soft: 0 24px 60px -30px rgba(76, 61, 184, 0.35);
+  --shadow-chip: 0 14px 30px -16px rgba(36, 33, 58, 0.35);
+
+  --radius: 20px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --gutter: clamp(16px, 4vw, 32px);
+  --max: 1160px;
+
+  --font: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-arabic: "Rudaw", "Rubik", system-ui, sans-serif;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #17152a;
+    --card: #221f3a;
+    --card-light: #2a2745;
+    --card-muted: #2f2b52;
+    --stroke: #332f4f;
+    --stroke-chrome: #3a3658;
+    --accent: #a79bff;
+    --accent-dark: #7c6cf2;
+    --on-accent: #1b1640;
+    --on-accent-chip: #e8e4ff;
+    --gold: #f5b84a;
+    --success: #5ccb97;
+    --success-wash: #1f3a33;
+    --danger: #f27f7f;
+    --danger-bg: #4a2030;
+    --danger-text: #ffb8b8;
+    --text: #eeecf8;
+    --text-2: #b5b1cc;
+    --text-3: #7d7998;
+    --warm: #3d2b3b;
+    --calm: #26233f;
+    --night: #0f0d1f;
+    --night-card: #1b1832;
+    --shadow-soft: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+    --shadow-chip: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; }
+.icon { flex-shrink: 0; }
+/* Arabic script: Rudaw face, and no tracking or case changes (they break cursive joining).
+   :lang() also matches descendants, so a whole ckb/ar page is covered and lang="en" opts out. */
+:lang(ar), :lang(ckb) { font-family: var(--font-arabic); letter-spacing: 0 !important; text-transform: none !important; }
+/* English islands inside a ckb/ar page (logo, store names, emails) would otherwise inherit Rudaw. */
+[lang="en"] { font-family: var(--font); }
+
+.wrap { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px 6px 8px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--stroke);
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+}
+.eyebrow .dot {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--card-muted); color: var(--accent);
+}
+
+.section-head { max-width: 640px; margin-bottom: clamp(32px, 5vw, 56px); }
+.section-head.center { margin-inline: auto; text-align: center; }
+.kicker {
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px;
+}
+.title {
+  font-size: clamp(30px, 4.4vw, 48px); font-weight: 600; line-height: 1.08; letter-spacing: -0.02em;
+}
+.lede { margin-top: 16px; font-size: clamp(16px, 1.6vw, 18px); color: var(--text-2); line-height: 1.6; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 52px; padding: 0 22px; border-radius: 16px;
+  font: inherit; font-size: 15.5px; font-weight: 600; cursor: pointer; border: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.btn-primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 24px -10px var(--accent); }
+.btn-primary:hover { background: var(--accent-dark); color: #fff; }
+.btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--stroke); }
+
+.store {
+  display: inline-flex; align-items: center; gap: 12px; height: 56px; padding: 0 20px 0 16px;
+  border-radius: 16px; background: var(--text); color: var(--background);
+  transition: transform 0.15s ease;
+}
+.store:hover { transform: translateY(-2px); }
+.store small { display: block; font-size: 11px; opacity: 0.7; line-height: 1.1; }
+.store strong { display: block; font-size: 17px; font-weight: 600; line-height: 1.2; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.pill-accent { background: var(--card-muted); color: var(--on-accent-chip); }
+.pill-danger { background: var(--danger-bg); color: var(--danger-text); }
+.pill-success { background: var(--success-wash); color: var(--success); }
+.pill-gold { background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold); }
+
+/* Reveal on scroll (progressive: content is visible without JS). */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .js .reveal.in { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

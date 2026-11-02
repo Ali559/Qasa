@@ -27,6 +27,15 @@
         "cd docs/design && /usr/bin/python3 -m http.server 5180 --bind 127.0.0.1"
       ],
       "port": 5180
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/landing && bunx astro dev --port 5182"
+      ],
+      "port": 5182
     }
   ]
 }

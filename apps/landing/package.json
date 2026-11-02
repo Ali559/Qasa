@@ -1,0 +1,16 @@
+{
+  "name": "landing",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "bun",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@tabler/icons": "^3.50.0",
+    "astro": "^7.4.4"
+  }
+}
