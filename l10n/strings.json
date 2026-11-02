@@ -51,8 +51,8 @@
   },
   "auth.create.alreadyHave": {
     "en": "I already use Qasa",
-    "ar": "أستخدم Qasa بالفعل",
-    "ckb": "پێشتر Qasa بەکاردەهێنم"
+    "ar": "أستخدم قاصة بالفعل",
+    "ckb": "پێشتر قاسە بەکاردەهێنم"
   },
   "auth.create.biometrics": {
     "en": "Unlock with your fingerprint or face",
@@ -61,8 +61,8 @@
   },
   "auth.create.biometricsHint": {
     "en": "Open Qasa without typing your password",
-    "ar": "افتح Qasa دون كتابة كلمة المرور",
-    "ckb": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
+    "ar": "افتح قاصة دون كتابة كلمة المرور",
+    "ckb": "قاسە بکەرەوە بەبێ نووسینی وشەی نهێنی"
   },
   "auth.create.button": {
     "en": "Get started",
@@ -101,8 +101,8 @@
   },
   "auth.create.pairExisting": {
     "en": "I already have Qasa on another device",
-    "ar": "لدي Qasa بالفعل على جهاز آخر",
-    "ckb": "پێشتر Qasaم لەسەر ئامێرێکی تر هەیە"
+    "ar": "لدي قاصة بالفعل على جهاز آخر",
+    "ckb": "پێشتر قاسەم لەسەر ئامێرێکی تر هەیە"
   },
   "auth.create.reenter": {
     "en": "Re-enter password",
@@ -141,8 +141,8 @@
   },
   "auth.create.zeroKnowledgeBody": {
     "en": "Not even Qasa can see them or reset your main password. If you forget it, your saved passwords can't be recovered.",
-    "ar": "حتى Qasa لا يمكنه رؤيتها أو إعادة تعيين كلمة مرورك الرئيسية. إذا نسيتها، لا يمكن استعادة كلمات المرور المحفوظة.",
-    "ckb": "تەنانەت Qasa ناتوانێت بیانبینێت یان وشەی نهێنی سەرەکیت ڕێکبخاتەوە. ئەگەر لەبیرت چوو، وشە نهێنییە پاشەکەوتکراوەکانت ناگەڕێنەوە."
+    "ar": "حتى قاصة لا يمكنها رؤيتها أو إعادة تعيين كلمة مرورك الرئيسية. إذا نسيتها، لا يمكن استعادة كلمات المرور المحفوظة.",
+    "ckb": "تەنانەت قاسە ناتوانێت بیانبینێت یان وشەی نهێنی سەرەکیت ڕێکبخاتەوە. ئەگەر لەبیرت چوو، وشە نهێنییە پاشەکەوتکراوەکانت ناگەڕێنەوە."
   },
   "auth.securingVault": {
     "en": "Getting things ready…",
@@ -161,8 +161,8 @@
   },
   "auth.unlock.biometricsHint": {
     "en": "Open Qasa without typing your password",
-    "ar": "افتح Qasa دون كتابة كلمة المرور",
-    "ckb": "Qasa بکەرەوە بەبێ نووسینی وشەی نهێنی"
+    "ar": "افتح قاصة دون كتابة كلمة المرور",
+    "ckb": "قاسە بکەرەوە بەبێ نووسینی وشەی نهێنی"
   },
   "auth.unlock.button": {
     "en": "Unlock",
@@ -181,8 +181,8 @@
   },
   "auth.unlock.localOnlyBody": {
     "en": "Your passwords stay on this phone. Qasa can't reset your main password.",
-    "ar": "تبقى كلمات مرورك على هذا الهاتف. لا يمكن لـ Qasa إعادة تعيين كلمة مرورك الرئيسية.",
-    "ckb": "وشە نهێنییەکانت لەسەر ئەم مۆبایلە دەمێننەوە. Qasa ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە."
+    "ar": "تبقى كلمات مرورك على هذا الهاتف. لا يمكن لقاصة إعادة تعيين كلمة مرورك الرئيسية.",
+    "ckb": "وشە نهێنییەکانت لەسەر ئەم مۆبایلە دەمێننەوە. قاسە ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە."
   },
   "auth.unlock.masterPassword": {
     "en": "Main password",
@@ -281,8 +281,8 @@
   },
   "autofill.title": {
     "en": "Qasa Autofill",
-    "ar": "تعبئة Qasa التلقائية",
-    "ckb": "پڕکردنەوەی خۆکاری Qasa"
+    "ar": "تعبئة قاصة التلقائية",
+    "ckb": "پڕکردنەوەی خۆکاری قاسە"
   },
   "autofill.unlock": {
     "en": "Unlock",
@@ -291,8 +291,8 @@
   },
   "autofill.unlockTitle": {
     "en": "Unlock Qasa",
-    "ar": "افتح Qasa",
-    "ckb": "Qasa بکەرەوە"
+    "ar": "افتح قاصة",
+    "ckb": "قاسە بکەرەوە"
   },
   "autofill.unlocking": {
     "en": "Unlocking…",
@@ -931,8 +931,8 @@
   },
   "error.apiHostMisconfigured": {
     "en": "This build cannot reach the Qasa server (%@). Online features are unavailable.",
-    "ar": "لا يمكن لهذا الإصدار الوصول إلى خادم Qasa (%@). الميزات عبر الإنترنت غير متاحة.",
-    "ckb": "ئەم وەرزەکە ناتوانێت بگات بۆ ڕاژەی Qasa (%@). تایبەتمەندییە ئۆنلاین بەردەست نین."
+    "ar": "لا يمكن لهذا الإصدار الوصول إلى خادم قاصة (%@). الميزات عبر الإنترنت غير متاحة.",
+    "ckb": "ئەم وەرزەکە ناتوانێت بگات بۆ ڕاژەی قاسە (%@). تایبەتمەندییە ئۆنلاین بەردەست نین."
   },
   "error.decoding": {
     "en": "Unexpected server response.",
@@ -966,12 +966,12 @@
   },
   "error.vaultNewerKdf": {
     "en": "This vault was created by a newer version of Qasa (key format %d). Update the app to unlock it.",
-    "ar": "أُنشئت هذه الخزنة بإصدار أحدث من Qasa (تنسيق المفاتيح %d). حدّث التطبيق لفتحها.",
-    "ckb": "ئەم سندووقە لە وەرزی نووتری Qasa درووست کراوە (فۆرماتی کلیل %d). ئەپ بۆ نوێبکەوە بۆ کردنەوەی."
+    "ar": "أُنشئت هذه الخزنة بإصدار أحدث من قاصة (تنسيق المفاتيح %d). حدّث التطبيق لفتحها.",
+    "ckb": "ئەم سندووقە لە وەرزی نووتری قاسە درووست کراوە (فۆرماتی کلیل %d). ئەپ بۆ نوێبکەوە بۆ کردنەوەی."
   },
   "error.vaultStoreBody": {
-    "ar": "لم يتمكّن Qasa من فتح خزنتك المشفّرة، لذلك لم يبدأ التطبيق. لم يتم حذف بياناتك.",
-    "ckb": "قاسا نەیتوانی کۆگای کۆدکراوەکەت بکاتەوە، بۆیە دەست پێنەکرد. داتاکەت نەسڕاوە.",
+    "ar": "لم تتمكّن قاصة من فتح خزنتك المشفّرة، لذلك لم يبدأ التطبيق. لم يتم حذف بياناتك.",
+    "ckb": "قاسە نەیتوانی کۆگای کۆدکراوەکەت بکاتەوە، بۆیە دەست پێنەکرد. داتاکەت نەسڕاوە.",
     "en": "Qasa could not open your encrypted vault, so it has not started. Your data has NOT been deleted."
   },
   "error.vaultStoreDetail": {
@@ -980,7 +980,7 @@
     "en": "Details: %@"
   },
   "error.vaultStoreHelp": {
-    "ar": "عادةً يكون هذا بسبب امتلاء مساحة الجهاز. حرّر مساحة، ثم أنهِ التطبيق وافتح Qasa من جديد. لا تعِد تثبيت التطبيق حتى تُفتح الخزنة مجددًا.",
+    "ar": "عادةً يكون هذا بسبب امتلاء مساحة الجهاز. حرّر مساحة، ثم أنهِ التطبيق وافتح قاصة من جديد. لا تعِد تثبيت التطبيق حتى تُفتح الخزنة مجددًا.",
     "ckb": "ئەمە زۆرجار لەبەرەوەی تەواو بوونی بۆشایییە. بۆشایی ئازاد بکە، پاشان ئەپەکە بەسەرەکەوە ببخە و دووبارە بیکەرەوە. ئەپەکە مەنە سەرناسێنەوە دەت تا کۆگا دووبارە بێتەوە.",
     "en": "This is usually the device running out of storage. Free up space, then force-quit and reopen Qasa. Do not reinstall the app until the vault opens again."
   },
@@ -1476,13 +1476,13 @@
   },
   "legal.privacyBody": {
     "en": "This Privacy Policy is a placeholder describing how Qasa will handle your data.\n\nVault contents are designed to stay encrypted and under your control. Full policy details will be published here before public release.",
-    "ar": "سياسة الخصوصية هذه نص مؤقت حول كيفية تعامل Qasa مع بياناتك.\n\nمحتويات الخزنة مصممة لتبقى مشفرة وتحت سيطرتك. ستُنشر التفاصيل الكاملة قبل الإطلاق العام.",
-    "ckb": "ئەم سیاسەتی نهێنێتییە جێگرەوەیە لەسەر چۆنیەتی مامەڵەی Qasa لەگەڵ داتاکانت.\n\nناوەڕۆکی کۆگا پارێزراو دەمێنێتەوە لەژێر کۆنترۆڵی تۆدا. وردەکاری تەواو پێش بڵاوکردنەوە دادەنرێت."
+    "ar": "سياسة الخصوصية هذه نص مؤقت حول كيفية تعامل قاصة مع بياناتك.\n\nمحتويات الخزنة مصممة لتبقى مشفرة وتحت سيطرتك. ستُنشر التفاصيل الكاملة قبل الإطلاق العام.",
+    "ckb": "ئەم سیاسەتی نهێنێتییە جێگرەوەیە لەسەر چۆنیەتی مامەڵەی قاسە لەگەڵ داتاکانت.\n\nناوەڕۆکی کۆگا پارێزراو دەمێنێتەوە لەژێر کۆنترۆڵی تۆدا. وردەکاری تەواو پێش بڵاوکردنەوە دادەنرێت."
   },
   "legal.termsBody": {
     "en": "These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.",
-    "ar": "شروط الاستخدام هذه نص مؤقت لاتفاقية Qasa القانونية.\n\nباستخدامك للتطبيق توافق على الالتزام بالقوانين المعمول بها. ستُنشر الشروط الكاملة هنا قبل الإطلاق العام.",
-    "ckb": "ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی Qasaن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت."
+    "ar": "شروط الاستخدام هذه نص مؤقت لاتفاقية قاصة القانونية.\n\nباستخدامك للتطبيق توافق على الالتزام بالقوانين المعمول بها. ستُنشر الشروط الكاملة هنا قبل الإطلاق العام.",
+    "ckb": "ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی قاسەن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت."
   },
   "nav.breachMonitoring": {
     "en": "Email leak alerts",
@@ -1581,8 +1581,8 @@
   },
   "notifications.fromQasa": {
     "en": "From Qasa",
-    "ar": "من Qasa",
-    "ckb": "لە Qasa"
+    "ar": "من قاصة",
+    "ckb": "لە قاسە"
   },
   "notifications.markAllRead": {
     "en": "Mark All Read",
@@ -1601,8 +1601,8 @@
   },
   "notifications.permissionMessage": {
     "en": "Turn on notifications in Settings to get breach alerts and messages from Qasa.",
-    "ar": "فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من Qasa.",
-    "ckb": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی Qasa وەربگریت."
+    "ar": "فعّل الإشعارات من الإعدادات لتصلك تنبيهات الاختراق والرسائل من قاصة.",
+    "ckb": "ئاگادارییەکان لە ڕێکخستنەکان چالاک بکە بۆ ئەوەی ئاگاداری دزەکردن و نامەکانی قاسە وەربگریت."
   },
   "notifications.permissionOpenSettings": {
     "en": "Open Settings",
@@ -1636,7 +1636,7 @@
   },
   "onboarding.subtitle": {
     "en": "Choose these first so the rest of Qasa is easy to read. You can change them later in Settings.",
-    "ar": "اخترهما أولاً حتى يسهل قراءة قاسا. يمكنك تغييرهما لاحقاً من الإعدادات.",
+    "ar": "اخترهما أولاً حتى يسهل قراءة قاصة. يمكنك تغييرهما لاحقاً من الإعدادات.",
     "ckb": "سەرەتا ئەمانە هەڵبژێرە تا قەسا ئاسانتر دەخوێنرێتەوە. دواتر لە ڕێکخستنەکان دەتوانیت بیانگۆڕیت."
   },
   "onboarding.theme": {
@@ -1696,8 +1696,8 @@
   },
   "pair.headline": {
     "en": "Already have Qasa on another device?",
-    "ar": "هل لديك قاسا بالفعل على جهاز آخر؟",
-    "ckb": "پێشتر Qasaت لەسەر ئامێرێکی تر هەیە؟"
+    "ar": "هل لديك قاصة بالفعل على جهاز آخر؟",
+    "ckb": "پێشتر قاسەت لەسەر ئامێرێکی تر هەیە؟"
   },
   "pair.invalidCode": {
     "en": "Invalid code. Ask the other device to show a fresh pairing code, or paste the account ID.",
@@ -1911,8 +1911,8 @@
   },
   "premium.title": {
     "en": "Qasa Premium",
-    "ar": "قاسا بريميوم",
-    "ckb": "قاسا پریمیۆم"
+    "ar": "قاصة بريميوم",
+    "ckb": "قاسە پریمیۆم"
   },
   "premium.upgradeToPro": {
     "en": "UPGRADE TO PRO",
@@ -1926,13 +1926,13 @@
   },
   "security.hidden": {
     "en": "Qasa is hidden",
-    "ar": "Qasa مخفي",
-    "ckb": "Qasa پشتێ کراوە"
+    "ar": "قاصة مخفية",
+    "ckb": "قاسە پشتێ کراوە"
   },
   "session.qasaUser": {
     "en": "Qasa User",
-    "ar": "مستخدم Qasa",
-    "ckb": "بەکارهێنەری Qasa"
+    "ar": "مستخدم قاصة",
+    "ckb": "بەکارهێنەری قاسە"
   },
   "settings.activeCount": {
     "en": "%lld Active",
@@ -1976,8 +1976,8 @@
   },
   "settings.autofillSubtitle": {
     "en": "Enable Qasa in Passwords → AutoFill Passwords",
-    "ar": "فعّل Qasa من كلمات السر ← التعبئة التلقائية",
-    "ckb": "Qasa چالاک بکە لە Passwords → AutoFill Passwords"
+    "ar": "فعّل قاصة من كلمات السر ← التعبئة التلقائية",
+    "ckb": "قاسە چالاک بکە لە Passwords → AutoFill Passwords"
   },
   "settings.biometricUnlock": {
     "en": "Fingerprint or face unlock",
@@ -2116,8 +2116,8 @@
   },
   "settings.lockAlertTitle": {
     "en": "Lock Qasa?",
-    "ar": "قفل Qasa؟",
-    "ckb": "Qasa قفڵ بکرێت؟"
+    "ar": "قفل قاصة؟",
+    "ckb": "قاسە قفڵ بکرێت؟"
   },
   "settings.logout": {
     "en": "Logout",
@@ -2826,8 +2826,8 @@
   },
   "vpn.brand": {
     "en": "Qasa VPN",
-    "ar": "VPN لـ Qasa",
-    "ckb": "VPNی Qasa"
+    "ar": "VPN قاصة",
+    "ckb": "VPNی قاسە"
   },
   "vpn.connected": {
     "en": "Connected",
@@ -2956,8 +2956,8 @@
   },
   "vpn.upgradeHint": {
     "en": "Upgrade to browse privately through Qasa VPN.",
-    "ar": "قم بالترقية للتصفح بخصوصية عبر Qasa VPN.",
-    "ckb": "بەرزبکەرەوە بۆ گەڕانی تایبەت لە ڕێگەی Qasa VPN."
+    "ar": "قم بالترقية للتصفح بخصوصية عبر VPN قاصة.",
+    "ckb": "بەرزبکەرەوە بۆ گەڕانی تایبەت لە ڕێگەی VPNی قاسە."
   },
   "vpn.node": {
     "en": "Server",

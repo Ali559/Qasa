@@ -342,13 +342,13 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تعبئة Qasa التلقائية"
+            "value": "تعبئة قاصة التلقائية"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "پڕکردنەوەی خۆکاری Qasa"
+            "value": "پڕکردنەوەی خۆکاری قاسە"
           }
         }
       }
@@ -386,13 +386,13 @@
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "افتح Qasa"
+            "value": "افتح قاصة"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Qasa بکەرەوە"
+            "value": "قاسە بکەرەوە"
           }
         }
       }
