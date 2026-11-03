@@ -23,21 +23,21 @@ struct PremiumUpgradeView: View {
                 name: L10n.tr("premium.fib", locale: locale),
                 subtitle: L10n.tr("premium.fibSub", locale: locale),
                 badgeText: "FIB",
-                badgeColorHex: "FFFFFF",
+                logoAsset: "WalletFIB",
                 gateway: "fib"
             ),
             PaymentMethod(
                 name: L10n.tr("premium.fastpay", locale: locale),
                 subtitle: L10n.tr("premium.fastpaySub", locale: locale),
                 badgeText: "FastPay",
-                badgeColorHex: "E31837",
+                logoAsset: "WalletFastPay",
                 gateway: "fastpay"
             ),
             PaymentMethod(
                 name: L10n.tr("premium.superqi", locale: locale),
                 subtitle: L10n.tr("premium.superqiSub", locale: locale),
                 badgeText: "SuperQi",
-                badgeColorHex: "2563EB",
+                logoAsset: "WalletSuperQi",
                 gateway: "superqi"
             )
         ]
@@ -309,15 +309,14 @@ struct PremiumUpgradeView: View {
         .buttonStyle(.plain)
     }
 
+    /// The wallet's own app icon, so people recognise the app they'll be sent to.
     private func paymentBadge(_ method: PaymentMethod) -> some View {
-        let isFIB = method.badgeText == "FIB"
-        return Text(isFIB ? "First\nIraqi\nBank" : method.badgeText)
-            .font(.qasa(9, weight: .bold))
-            .multilineTextAlignment(.center)
-            .foregroundColor(isFIB ? .black : .white)
-            .frame(width: 48, height: 32)
-            .background(isFIB ? Color.white : Color(hex: method.badgeColorHex))
-            .cornerRadius(4)
+        Image(method.logoAsset)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 36, height: 36)
+            .clipShape(RoundedRectangle(cornerRadius: 9))
+            .accessibilityHidden(true)
     }
 
     private func startPayment() async {

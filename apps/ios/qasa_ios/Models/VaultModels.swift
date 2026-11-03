@@ -126,6 +126,11 @@ enum VaultSeedData {
         let count = (try? context.fetchCount(descriptor)) ?? 0
         guard count == 0 else { return }
 
+        if ProcessInfo.processInfo.arguments.contains("-screenshotVault") {
+            seedScreenshotVault(context: context)
+            return
+        }
+
         let work = VaultCollection(name: "Work")
         let personal = VaultCollection(name: "Personal")
         context.insert(work)
@@ -153,4 +158,35 @@ enum VaultSeedData {
         try? context.save()
         #endif
     }
+
+    #if DEBUG
+    /// Marketing screenshots (landing page, store listings): launch with `-screenshotVault`.
+    /// Realistic local entries with fake values. Facebook and Instagram share a password,
+    /// Snapchat's is weak, and Gmail's is in Pwned Passwords, so Home, Password health and
+    /// Alerts all have something to show.
+    private static func seedScreenshotVault(context: ModelContext) {
+        let work = VaultCollection(name: "Work")
+        let personal = VaultCollection(name: "Personal")
+        let bank = VaultCollection(name: "Bank")
+        [work, personal, bank].forEach(context.insert)
+        try? context.save()
+
+        let samples: [VaultPayload] = [
+            .login(LoginFields(itemName: "Facebook", email: "sara.ahmed@gmail.com", password: "Hawler-Dusk-2024", website: "https://facebook.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "Instagram", username: "sara.ahmed", password: "Hawler-Dusk-2024", website: "https://instagram.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "FIB", username: "0750 123 4821", password: "Tz8#qLm2vR!x", website: "https://fib.iq", collectionId: bank.id)),
+            .login(LoginFields(itemName: "Gmail", email: "sara.ahmed@gmail.com", password: "sara1234", website: "https://mail.google.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "Asiacell", username: "0770 555 1290", password: "k9V$wQ1z!pA3", website: "https://asiacell.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "Snapchat", username: "sara.ahmed", password: "snapqasa9", website: "https://snapchat.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "Netflix", email: "sara.ahmed@gmail.com", password: "r7N@eB4u#Lx2", website: "https://netflix.com", collectionId: personal.id)),
+            .login(LoginFields(itemName: "Slack", email: "sara@company.iq", password: "fR5!mZ8q@Kd1", website: "https://slack.com", collectionId: work.id)),
+            .card(CardFields(itemName: "FIB Card", accountHolder: "Sara Ahmed", number: "4111111111111111", securityCode: "123", expiryDate: "08/29", note: "", color: .blue)),
+            .secureNote(SecureNoteFields(title: "Home Wi‑Fi", content: "Network: Ahmed-Home", color: .mint, protectItem: false)),
+        ]
+        for payload in samples {
+            _ = try? VaultRepository.shared.save(payload: payload)
+        }
+        try? context.save()
+    }
+    #endif
 }

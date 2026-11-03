@@ -1,7 +1,6 @@
 ---
 import "../styles/global.css";
 import Icon from "./Icon.astro";
-import Phone from "./Phone.astro";
 import { dictionaries, languages, type Lang } from "../i18n";
 
 const { lang } = Astro.props as { lang: Lang };
@@ -60,11 +59,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
     <main>
       <!-- Hero -->
       <section class="hero">
-        <div class="hero-bg" aria-hidden="true">
-          <span class="blob blob-a"></span>
-          <span class="blob blob-b"></span>
-          <span class="blob blob-c"></span>
-        </div>
+        <div class="hero-bg" aria-hidden="true"></div>
         <div class="wrap hero-inner">
           <div class="hero-copy">
             <span class="eyebrow"><span class="dot"><Icon name="lock-heart" size={13} /></span>{t.hero.eyebrow}</span>
@@ -81,24 +76,21 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
               </a>
             </div>
             <ul class="hero-points">
-              <li><Icon name="circle-check" size={18} /> {t.hero.noCard}</li>
+              <li><Icon name="circle-check" size={18} /> {t.hero.freeDevice}</li>
               <li><Icon name="circle-check" size={18} /> <span lang="en">English</span> · <span lang="ckb">کوردی</span> · <span lang="ar">العربية</span></li>
+              <li><Icon name="circle-check" size={18} /> {t.hero.neverServer}</li>
             </ul>
           </div>
 
           <div class="hero-art">
-            <div class="halo" aria-hidden="true"></div>
-            <Phone t={t.phone} />
-            <div class="chip chip-1" aria-hidden="true">
-              <span class="chip-icon ok"><Icon name="circle-check" size={16} /></span>
-              <span><b>{t.hero.savedTitle}</b><small lang="en">instagram.com</small></span>
-            </div>
-            <div class="chip chip-2" aria-hidden="true">
-              <span class="chip-icon lav"><Icon name="lock" size={16} /></span>
-              <span><b>{t.hero.encryptedTitle}</b><small>{t.hero.encryptedSub}</small></span>
-            </div>
-            <div class="chip chip-3" aria-hidden="true">
-              <span class="chip-icon warn"><Icon name="mail-exclamation" size={16} /></span>
+            <figure class="device">
+              <picture>
+                <source srcset={`/screens/passwords-${lang}-dark.webp`} media="(prefers-color-scheme: dark)" />
+                <img src={`/screens/passwords-${lang}-light.webp`} alt={t.hero.screenAlt} width="300" height="652" fetchpriority="high" />
+              </picture>
+            </figure>
+            <div class="chip" aria-hidden="true">
+              <span class="chip-icon warn"><Icon name="shield-exclamation" size={16} /></span>
               <span><b>{t.hero.leakTitle}</b><small>{t.hero.leakSub}</small></span>
             </div>
           </div>
@@ -110,9 +102,9 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
         <div class="wrap strip-inner">
           <p>{t.strip}</p>
           <div class="wallets" lang="en">
-            <span class="wallet" style="--w:#0e7a5a">FIB</span>
-            <span class="wallet" style="--w:#e2232a">FastPay</span>
-            <span class="wallet" style="--w:#f2a900">SuperQi</span>
+            <span class="wallet"><img src="/wallets/fib.png" alt="" width="28" height="28" />FIB</span>
+            <span class="wallet"><img src="/wallets/fastpay.png" alt="" width="28" height="28" />FastPay</span>
+            <span class="wallet"><img src="/wallets/superqi.png" alt="" width="28" height="28" />SuperQi</span>
           </div>
         </div>
       </section>
@@ -159,7 +151,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
 
             <article class="tile tile-warm reveal">
               <div class="tile-copy">
-                <span class="tile-icon"><Icon name="mail-exclamation" size={22} /></span>
+                <span class="tile-icon"><Icon name="shield-exclamation" size={22} /></span>
                 <h3>{t.features.leaksTitle} <span class="pill pill-success">{t.pricing.free}</span></h3>
                 <p>{t.features.leaksBody}</p>
               </div>
@@ -384,11 +376,6 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   /* Hero */
   .hero { position: relative; overflow: hidden; padding: clamp(40px, 7vw, 88px) 0 clamp(56px, 8vw, 104px); }
   .hero-bg { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--card-muted) 0%, var(--background) 78%); }
-  .blob { position: absolute; border-radius: 50%; filter: blur(70px); }
-  .blob-a { width: 520px; height: 520px; background: var(--warm); opacity: 0.8; right: -120px; top: 40px; }
-  .blob-b { width: 420px; height: 420px; background: var(--accent); opacity: 0.16; left: -160px; top: 220px; }
-  .blob-c { width: 300px; height: 300px; background: #fbe9f1; opacity: 0.6; right: 30%; bottom: -80px; }
-  @media (prefers-color-scheme: dark) { .blob-c { background: var(--accent); opacity: 0.1; } }
 
   .hero-inner { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 48px; }
   .hero h1 {
@@ -403,11 +390,12 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   .hero-points :global(.icon) { color: var(--success); }
 
   .hero-art { position: relative; display: grid; place-items: center; min-height: 660px; }
-  .halo {
-    position: absolute; width: 480px; height: 480px; border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--card) 90%, transparent) 0 46%, color-mix(in srgb, var(--card) 45%, transparent) 47% 64%, color-mix(in srgb, var(--card) 18%, transparent) 65% 100%);
+  /* Real app screenshot (assets from the DEBUG -screenshotVault seed, see SCREENSHOTS.md). */
+  .device {
+    margin: 0; position: relative; width: 300px; border-radius: 46px; padding: 9px; background: #1c1a2b;
+    box-shadow: 0 0 0 1px #2c2944, var(--shadow-soft), 0 50px 100px -40px rgba(76, 61, 184, 0.45);
   }
-  .hero-art > :global(.phone) { position: relative; rotate: 0deg; }
+  .device img { display: block; width: 100%; height: auto; border-radius: 37px; }
   .chip {
     position: absolute; display: flex; align-items: center; gap: 10px; padding-block: 10px; padding-inline: 10px 14px;
     background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; box-shadow: var(--shadow-chip);
@@ -416,18 +404,9 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   .chip b { display: block; font-weight: 600; }
   .chip small { display: block; color: var(--text-2); font-size: 12px; }
   .chip-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; }
-  .chip-icon.ok { background: var(--success-wash); color: var(--success); }
-  .chip-icon.lav { background: var(--card-muted); color: var(--accent); }
   .chip-icon.warn { background: var(--danger-bg); color: var(--danger); }
-  .chip-1 { inset-inline-start: -6%; top: 1%; }
-  .chip-2 { inset-inline-end: -6%; top: 44%; }
-  .chip-3 { inset-inline-start: 0%; bottom: 12%; }
-  @media (prefers-reduced-motion: no-preference) {
-    .chip { animation: float 6s ease-in-out infinite; }
-    .chip-2 { animation-delay: -2s; }
-    .chip-3 { animation-delay: -4s; }
-    @keyframes float { 50% { transform: translateY(-10px); } }
-  }
+  /* One still callout for the free breach check; the phone carries the rest. */
+  .chip { inset-inline-start: 2%; bottom: 14%; }
 
   @media (max-width: 960px) {
     .hero-inner { grid-template-columns: 1fr; text-align: center; }
@@ -435,12 +414,10 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
     .hero .lede { margin-inline: auto; }
     .stores, .hero-points { justify-content: center; }
     .hero-art { min-height: 0; padding: 24px 0; }
-    .chip-1 { inset-inline-start: 4%; }
-    .chip-2 { inset-inline-end: 2%; }
   }
   @media (max-width: 560px) {
     .halo { width: 360px; height: 360px; }
-    .hero-art > :global(.phone) { transform: scale(0.9); margin: -30px 0; }
+    .device { width: 270px; }
     .chip { font-size: 12px; padding-block: 8px; padding-inline: 8px 12px; }
     .chip small { font-size: 11px; }
     .chip-1 { inset-inline-start: -2px; top: 10%; }
@@ -454,10 +431,10 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   .strip p { color: var(--text-2); font-size: 15px; }
   .wallets { display: flex; gap: 10px; flex-wrap: wrap; }
   .wallet {
-    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 12px;
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding-inline: 6px 16px; border-radius: 12px;
     border: 1px solid var(--stroke); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
   }
-  .wallet::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--w); }
+  .wallet img { width: 28px; height: 28px; border-radius: 7px; }
 
   /* Features */
   .features { padding: clamp(72px, 10vw, 128px) 0; }

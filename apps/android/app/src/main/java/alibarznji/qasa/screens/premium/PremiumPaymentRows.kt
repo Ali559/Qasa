@@ -3,16 +3,16 @@ package alibarznji.qasa.screens.premium
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.MintSwitch
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,10 +31,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.style.TextAlign
 
 /**
  * `PaymentMethod` rows (PremiumUpgradeView.swift:20). `badge` is the wallet brand name (iOS
@@ -45,19 +45,19 @@ internal data class GatewayOption(
     val badge: String,
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
-    /** Brand colours from iOS `badgeColorHex`; wallet branding, not theme tokens. */
-    val badgeBackground: Color,
-    val badgeForeground: Color,
+    /** The wallet's own app icon (from assets/payment-logos), same as iOS `logoAsset`. */
+    @DrawableRes val logo: Int,
 )
 
 internal val premiumGateways = listOf(
-    GatewayOption("fib", "FIB", R.string.premium_fib, R.string.premium_fibsub, Color.White, Color.Black),
-    GatewayOption("fastpay", "FastPay", R.string.premium_fastpay, R.string.premium_fastpaysub, Color(0xFFE31837), Color.White),
-    GatewayOption("superqi", "SuperQi", R.string.premium_superqi, R.string.premium_superqisub, Color(0xFF2563EB), Color.White),
+    GatewayOption("fib", "FIB", R.string.premium_fib, R.string.premium_fibsub, R.drawable.wallet_fib),
+    GatewayOption("fastpay", "FastPay", R.string.premium_fastpay, R.string.premium_fastpaysub, R.drawable.wallet_fastpay),
+    GatewayOption("superqi", "SuperQi", R.string.premium_superqi, R.string.premium_superqisub, R.drawable.wallet_superqi),
 )
 
-// iOS badge frame is 48 x 32.
-private val BadgeHeight = QasaIconSize.x4l + QasaDimens.spaceSmall
+// iOS badge is 36 x 36 with a 9pt corner.
+private val BadgeSize = 36.dp
+private val BadgeRadius = 9.dp
 
 /** `autoRenewRow` (PremiumUpgradeView.swift:239): 18pt accent icon, 15/12 text, chrome card r8. */
 @Composable
@@ -126,22 +126,12 @@ private fun PaymentRow(option: GatewayOption, selected: Boolean, onClick: () -> 
     }
 }
 
-/** `paymentBadge` (PremiumUpgradeView.swift:317): 48x32, r4, 9pt bold; FIB spells out its name. */
+/** `paymentBadge` (PremiumUpgradeView.swift): the wallet's own app icon, 36dp, r9. */
 @Composable
 private fun PaymentBadge(option: GatewayOption) {
-    val style = qasaText.wordmark
-    Box(
-        modifier = Modifier
-            .size(width = QasaIconFrame.tile, height = BadgeHeight)
-            .background(option.badgeBackground, RoundedCornerShape(QasaDimens.radiusTiny)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            if (option.id == "fib") "First\nIraqi\nBank" else option.badge,
-            color = option.badgeForeground,
-            // Three 9pt lines must fit the 32pt badge, so the line height is tighter than the house ratio.
-            style = style.copy(lineHeight = style.fontSize * 1.1f),
-            textAlign = TextAlign.Center,
-        )
-    }
+    Image(
+        painter = painterResource(option.logo),
+        contentDescription = null,
+        modifier = Modifier.size(BadgeSize).clip(RoundedCornerShape(BadgeRadius)),
+    )
 }
