@@ -97,18 +97,6 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
         </div>
       </section>
 
-      <!-- Payments strip -->
-      <section class="strip">
-        <div class="wrap strip-inner">
-          <p>{t.strip}</p>
-          <div class="wallets" lang="en">
-            <span class="wallet"><img src="/wallets/fib.png" alt="" width="28" height="28" />FIB</span>
-            <span class="wallet"><img src="/wallets/fastpay.png" alt="" width="28" height="28" />FastPay</span>
-            <span class="wallet"><img src="/wallets/superqi.png" alt="" width="28" height="28" />SuperQi</span>
-          </div>
-        </div>
-      </section>
-
       <!-- Features -->
       <section class="features" id="features">
         <div class="wrap">
@@ -243,6 +231,14 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
               <p class="plan-desc">{t.pricing.premiumDesc}</p>
               <p class="price"><b>{t.pricing.monthPrice}</b> {t.pricing.currency} <span>{t.pricing.perMonth}</span></p>
               <p class="price-alt">{t.pricing.yearPrefix} <b>{t.pricing.yearPrice}</b>{t.pricing.yearSuffix}</p>
+              <div class="pay-with">
+                <span>{t.pricing.payWith}</span>
+                <div class="wallets" lang="en">
+                  <span class="wallet"><img src="/wallets/fib.png" alt="" width="24" height="24" />FIB</span>
+                  <span class="wallet"><img src="/wallets/fastpay.png" alt="" width="24" height="24" />FastPay</span>
+                  <span class="wallet"><img src="/wallets/superqi.png" alt="" width="24" height="24" />SuperQi</span>
+                </div>
+              </div>
               <ul>
                 {t.pricing.premiumFeatures.map((f) => <li><Icon name="check" size={18} />{f}</li>)}
               </ul>
@@ -409,25 +405,20 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
     .hero-art { min-height: 0; padding: 24px 0; }
   }
   @media (max-width: 560px) {
-    .halo { width: 360px; height: 360px; }
     .device { width: 270px; }
-    .chip { font-size: 12px; padding-block: 8px; padding-inline: 8px 12px; }
+    .chip { font-size: 12px; padding-block: 8px; padding-inline: 8px 12px; inset-inline-start: -2px; bottom: 6%; }
     .chip small { font-size: 11px; }
-    .chip-1 { inset-inline-start: -2px; top: 10%; }
-    .chip-2 { inset-inline-end: -2px; top: 48%; }
-    .chip-3 { inset-inline-start: -2px; bottom: 6%; }
   }
 
-  /* Payments strip */
-  .strip { border-block: 1px solid var(--stroke); background: var(--card); }
-  .strip-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px 32px; flex-wrap: wrap; padding-block: 22px; }
-  .strip p { color: var(--text-2); font-size: 15px; }
-  .wallets { display: flex; gap: 10px; flex-wrap: wrap; }
+  /* Wallets sit next to the price, where people decide how they'll pay. */
+  .pay-with { margin-top: 18px; display: grid; gap: 8px; }
+  .pay-with > span { font-size: 13px; font-weight: 600; color: var(--text-2); }
+  .wallets { display: flex; gap: 8px; flex-wrap: wrap; }
   .wallet {
-    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding-inline: 6px 16px; border-radius: 12px;
-    border: 1px solid var(--stroke); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+    display: inline-flex; align-items: center; gap: 7px; height: 36px; padding-inline: 5px 12px; border-radius: 11px;
+    border: 1px solid var(--stroke); background: var(--card); font-weight: 600; font-size: 14px;
   }
-  .wallet img { width: 28px; height: 28px; border-radius: 7px; }
+  .wallet img { width: 24px; height: 24px; border-radius: 6px; }
 
   /* Features */
   .features { padding: clamp(72px, 10vw, 128px) 0; }

@@ -30,7 +30,6 @@ const en = {
     leakSub: "Change your Gmail password",
   },
   stores: { appleSmall: "Download on the", playSmall: "Get it on" },
-  strip: "Premium is paid the way you already pay",
   features: {
     kicker: "What Qasa does",
     title: 'No more sticky notes, screenshots or "forgot password"',
@@ -90,8 +89,8 @@ const en = {
       "Everything in Free",
       "Use it on up to 5 devices",
       "Sync your devices on Wi‑Fi",
-      "Pay with FIB, FastPay or SuperQi",
     ],
+    payWith: "Pay with",
     premiumCta: "Get Premium in the app",
     best: "Best value · yearly",
   },
@@ -122,8 +121,8 @@ const en = {
     ],
   },
   cta: {
-    title: "Give your passwords a safe home",
-    lede: "Download Qasa and set your main password. It takes about a minute.",
+    title: "Set up Qasa in about a minute, free on your phone",
+    lede: "Download it and choose your main password.",
   },
 };
 
@@ -148,7 +147,6 @@ const ckb: Dict = {
     leakSub: "وشەی نهێنی Gmail بگۆڕە",
   },
   stores: { appleSmall: "دابەزاندن لە", playSmall: "دابەزاندن لە" },
-  strip: "پارەی پریمیۆم بەو جزدانانە بدە کە هەتە",
   features: {
     kicker: "قاسە چی دەکات",
     title: "چیتر نە کاغەزی چەسپاو، نە سکرینشۆت، نە «وشەی نهێنیم لەبیرچوو»",
@@ -208,8 +206,8 @@ const ckb: Dict = {
       "هەموو شتەکانی پلانی خۆڕایی",
       "بەکارهێنان لەسەر تا ٥ ئامێر",
       "هاوکاتکردنی ئامێرەکانت لەسەر Wi‑Fi",
-      "پارەدان بە FIB، FastPay یان SuperQi",
     ],
+    payWith: "پارەدان بە",
     premiumCta: "پریمیۆم لە ئەپەکەدا وەربگرە",
     best: "باشترین نرخ · ساڵانە",
   },
@@ -240,8 +238,8 @@ const ckb: Dict = {
     ],
   },
   cta: {
-    title: "ماڵێکی سەلامەت بدە بە وشە نهێنییەکانت",
-    lede: "قاسە دابەزێنە و وشەی نهێنی سەرەکییەکەت دابنێ. نزیکەی یەک خولەک دەخایەنێت.",
+    title: "قاسە لە نزیکەی یەک خولەکدا ئامادە بکە، بە خۆڕایی لەسەر مۆبایلەکەت",
+    lede: "دایبەزێنە و وشەی نهێنی سەرەکییەکەت هەڵبژێرە.",
   },
 };
 
@@ -264,7 +262,6 @@ const ar: Dict = {
     leakSub: "غيّر كلمة مرور Gmail",
   },
   stores: { appleSmall: "حمّله من", playSmall: "احصل عليه من" },
-  strip: "ادفع اشتراك بريميوم بالمحفظة التي تستخدمها أصلًا",
   features: {
     kicker: "ماذا تفعل قاصة",
     title: "وداعًا للأوراق اللاصقة ولقطات الشاشة و«نسيت كلمة المرور»",
@@ -324,8 +321,8 @@ const ar: Dict = {
       "كل ما في الخطة المجانية",
       "الاستخدام على ما يصل إلى 5 أجهزة",
       "مزامنة أجهزتك عبر Wi‑Fi",
-      "الدفع عبر FIB أو FastPay أو SuperQi",
     ],
+    payWith: "ادفع عبر",
     premiumCta: "احصل على بريميوم من التطبيق",
     best: "أفضل قيمة · سنوي",
   },
@@ -356,8 +353,8 @@ const ar: Dict = {
     ],
   },
   cta: {
-    title: "امنح كلمات مرورك مكانًا آمنًا",
-    lede: "حمّل قاصة واختر كلمة مرورك الرئيسية. الأمر يستغرق دقيقة تقريبًا.",
+    title: "جهّز قاصة في دقيقة تقريبًا، مجانًا على هاتفك",
+    lede: "حمّلها واختر كلمة مرورك الرئيسية.",
   },
 };
 
