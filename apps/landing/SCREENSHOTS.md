@@ -1,8 +1,13 @@
 # App screenshots for the landing page
 
-The hero shows the real Passwords screen from the iOS app: one image per language and theme in
-`public/screens/passwords-{en,ckb,ar}-{light,dark}.webp` (600 px wide, from the 1206 px
-simulator capture).
+Real iOS screens, one image per language and theme, 600 px wide (from the 1206 px simulator
+capture), in `public/screens/`:
+
+| File | Screen | Used in |
+| --- | --- | --- |
+| `passwords-<lang>-<theme>.webp` | Passwords tab | Hero |
+| `alerts-<lang>-<theme>.webp` | Alerts tab (breached passwords), top 70% | Features |
+| `health-<lang>-<theme>.webp` | You → Password health, top 88% | Features |
 
 ## Test vault
 
@@ -20,9 +25,10 @@ breach check finds one.
 3. First run only: launch with `-wipeLocalVault -screenshotVault -qasa.language en -qasa.hasCompletedWelcome YES`, create the vault with the test password and turn biometrics off.
 4. For each language (`en`, `ckb`, `ar`) and theme (`light`, `dark`): launch with
    `-screenshotVault -qasa.language <lang> -qasa.theme <theme> -qasa.hasCompletedWelcome YES`,
-   unlock, open the Passwords tab, then `xcrun simctl io booted screenshot --type=png passwords-<lang>-<theme>.png`.
-   With the Arabic keyboard active, typed text comes out in Arabic letters: paste the password
+   unlock, then capture each screen with `xcrun simctl io booted screenshot --type=png <screen>-<lang>-<theme>.png`:
+   the Passwords tab, the Alerts tab (wait a few seconds for the breach check), and You → Password health.
+   With the Arabic or Kurdish keyboard active, typed text comes out in that script: paste the password
    instead (`printf '…' | xcrun simctl pbcopy booted`, then long-press the field and choose Paste).
-5. Resize to 600 px wide, save as WebP (quality about 82) into `public/screens/`.
+5. Crop as in the table, resize to 600 px wide, save as WebP (quality about 82) into `public/screens/`.
 
 Keep the full-size PNGs out of the repo.
