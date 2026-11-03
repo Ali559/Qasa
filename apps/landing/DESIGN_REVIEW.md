@@ -89,7 +89,7 @@ and each headline says one specific thing.
 
 ## 4. Change list
 
-**Progress:** hero items 1–6 and features items 7–8 are done (2026-11-03). The autofill row
+**Progress:** hero items 1–6, features items 7–8 and privacy items 9–11 are done (2026-11-03). The autofill row
 still uses a drawn fill card: a real shot needs the AutoFill extension driven from Safari. The wallet strip now uses the real FIB,
 FastPay and SuperQi logos (`assets/payment-logos/`).
 

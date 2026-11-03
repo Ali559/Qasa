@@ -50,7 +50,7 @@ const en = {
   },
   privacy: {
     kicker: "Privacy, built in",
-    title: "We can't see your passwords. Not even if we wanted to.",
+    title: "Your passwords are encrypted on your phone, and only you hold the key.",
     lede: "Your vault is encrypted on your phone and stays there. Our server only counts your devices and handles payments. It never receives what's inside.",
     points: [
       { title: "Stored on your phone", body: "Not in someone else's cloud." },
@@ -60,6 +60,8 @@ const en = {
     server: "Qasa server",
     serverSub: "Devices & payments only",
     vault: "Your vault, encrypted",
+    spec: "AES‑256‑GCM, with a key made from your main password (PBKDF2, 310,000 rounds). The key never leaves your phone.",
+    never: "No one from Qasa will ever ask for your main password, not by phone, WhatsApp or email.",
   },
   pricing: {
     kicker: "Simple pricing",
@@ -166,7 +168,7 @@ const ckb: Dict = {
   },
   privacy: {
     kicker: "نهێنیپارێزی لە بنەڕەتەوە",
-    title: "ناتوانین وشە نهێنییەکانت ببینین. تەنانەت ئەگەر بمانەوێت.",
+    title: "وشە نهێنییەکانت لەسەر مۆبایلەکەت شفرە دەکرێن، و تەنها تۆ کلیلەکەت لایە.",
     lede: "کۆگاکەت لەسەر مۆبایلەکەت شفرە دەکرێت و هەر لەوێ دەمێنێتەوە. سێرڤەرەکەمان تەنها ئامێرەکانت دەژمێرێت و پارەدان ڕێکدەخات. هەرگیز ناوەڕۆکەکەی پێناگات.",
     points: [
       { title: "لەسەر مۆبایلەکەت هەڵدەگیرێت", body: "نەک لە هەوری کەسێکی تر." },
@@ -176,6 +178,8 @@ const ckb: Dict = {
     server: "سێرڤەری قاسە",
     serverSub: "تەنها ئامێر و پارەدان",
     vault: "کۆگاکەت، شفرەکراو",
+    spec: "شفرەکردنی ⁨AES‑256‑GCM⁩، بە کلیلێک کە بە ⁨PBKDF2⁩ و ٣١٠٬٠٠٠ جار لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت. کلیلەکە هەرگیز مۆبایلەکەت بەجێناهێڵێت.",
+    never: "هیچ کەسێک لە قاسەوە هەرگیز داوای وشەی نهێنی سەرەکییەکەت ناکات، نە بە تەلەفۆن، نە بە WhatsApp، نە بە ئیمەیڵ.",
   },
   pricing: {
     kicker: "نرخی ساکار",
@@ -280,7 +284,7 @@ const ar: Dict = {
   },
   privacy: {
     kicker: "الخصوصية في الأساس",
-    title: "لا يمكننا رؤية كلمات مرورك. حتى لو أردنا.",
+    title: "كلمات مرورك مشفّرة على هاتفك، والمفتاح معك وحدك.",
     lede: "خزنتك مشفّرة على هاتفك وتبقى هناك. خادمنا يعدّ أجهزتك ويتولى الدفع فقط، ولا يستلم محتواها أبدًا.",
     points: [
       { title: "مخزّنة على هاتفك", body: "وليس في سحابة شخص آخر." },
@@ -290,6 +294,8 @@ const ar: Dict = {
     server: "خادم قاصة",
     serverSub: "الأجهزة والدفع فقط",
     vault: "خزنتك، مشفّرة",
+    spec: "تشفير ⁨AES‑256‑GCM⁩، بمفتاح مشتق من كلمة مرورك الرئيسية عبر ⁨PBKDF2⁩ بـ 310,000 دورة. المفتاح لا يغادر هاتفك أبدًا.",
+    never: "لن يطلب منك أي أحد من قاصة كلمة مرورك الرئيسية أبدًا، لا عبر الهاتف ولا واتساب ولا البريد الإلكتروني.",
   },
   pricing: {
     kicker: "أسعار بسيطة",
