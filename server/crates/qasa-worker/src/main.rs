@@ -33,7 +33,10 @@ async fn main() -> anyhow::Result<()> {
     run_migrations(&pool).await?;
     let push = Arc::new(PushService::from_env());
     // Same rule as the API: stub gateways may only settle, and so only charge, in dev.
-    let gateways = Arc::new(jobs::Gateways::from_env(config.env.is_dev()));
+    let gateways = Arc::new(qasa_payments::Gateways::from_env(
+        config.env.is_dev(),
+        !config.env.is_prod(),
+    )?);
 
     tokio::spawn(run_interval(
         pool.clone(),
@@ -103,6 +106,7 @@ async fn main() -> anyhow::Result<()> {
     tokio::spawn(run_interval(
         pool.clone(),
         push.clone(),
+        // Sends renewal links first (see the job).
         Duration::from_secs(60 * 60),
         "subscription_expiry_warnings",
         with_gateways(&gateways, jobs::subscription_expiry_warnings),
@@ -113,6 +117,13 @@ async fn main() -> anyhow::Result<()> {
         Duration::from_secs(15 * 60),
         "charge_renewals",
         with_gateways(&gateways, jobs::charge_renewals),
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(5 * 60),
+        "check_open_payments",
+        with_gateways(&gateways, jobs::check_open_payments),
     ));
     tokio::spawn(run_interval(
         pool.clone(),
@@ -148,11 +159,11 @@ async fn run_interval<F, Fut>(
 
 /// Adapt a job that also needs the payment gateways to `run_interval`'s signature.
 fn with_gateways<F, Fut>(
-    gateways: &Arc<jobs::Gateways>,
+    gateways: &Arc<qasa_payments::Gateways>,
     job: F,
 ) -> impl Fn(qasa_db::DbPool, Arc<PushService>) -> Fut + Send + Sync + 'static
 where
-    F: Fn(qasa_db::DbPool, Arc<PushService>, Arc<jobs::Gateways>) -> Fut + Send + Sync + 'static,
+    F: Fn(qasa_db::DbPool, Arc<PushService>, Arc<qasa_payments::Gateways>) -> Fut + Send + Sync + 'static,
     Fut: std::future::Future<Output = anyhow::Result<()>> + Send + 'static,
 {
     let gateways = gateways.clone();

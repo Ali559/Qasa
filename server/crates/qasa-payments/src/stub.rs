@@ -2,8 +2,8 @@ use axum::http::HeaderMap;
 use uuid::Uuid;
 
 use crate::gateway::{
-    GatewayKind, PaymentError, PaymentGateway, PaymentIntent, RecurringCharge, WebhookEvent,
-    WebhookStatus,
+    GatewayKind, IntentRequest, PaymentError, PaymentGateway, PaymentIntent, RecurringCharge,
+    WebhookEvent, WebhookStatus,
 };
 
 /// A fake gateway used for local development and demos.
@@ -41,12 +41,12 @@ impl PaymentGateway for StubGateway {
         self.kind
     }
 
-    async fn create_intent(
-        &self,
-        amount_iqd: i32,
-        order_ref: &str,
-        _save_method: bool,
-    ) -> PaymentIntent {
+    fn is_live(&self) -> bool {
+        self.settles_payments
+    }
+
+    async fn create_intent(&self, req: &IntentRequest<'_>) -> Result<PaymentIntent, PaymentError> {
+        let (amount_iqd, order_ref) = (req.amount_iqd, req.order_ref);
         let prefix = self.order_prefix();
         // The whole ref: it is a UUIDv7, whose leading digits are only a timestamp, so a
         // truncated prefix made every checkout within the same minute share one order id
@@ -56,15 +56,16 @@ impl PaymentGateway for StubGateway {
             GatewayKind::Fib => "fib",
             GatewayKind::Fastpay => "fastpay",
             GatewayKind::Superqi => "superqi",
+            GatewayKind::Wayl => "wayl",
         };
-        PaymentIntent {
+        Ok(PaymentIntent {
             gateway_order_id,
             deep_link: format!("{scheme}://pay?amount={amount_iqd}&ref={order_ref}"),
             amount_iqd,
-        }
+        })
     }
 
-    fn verify_webhook(&self, _headers: &HeaderMap, body: &[u8]) -> Result<WebhookEvent, PaymentError> {
+    async fn verify_webhook(&self, _headers: &HeaderMap, body: &[u8]) -> Result<WebhookEvent, PaymentError> {
         // The signature check a real gateway would perform is missing entirely, so refuse
         // before any order lookup happens. Failing here keeps the row in `pending`, which
         // the reconciliation job can retry once a real integration exists.
@@ -118,6 +119,10 @@ impl PaymentGateway for StubGateway {
         self.settles_payments
     }
 
+    fn supports_renewal_links(&self) -> bool {
+        self.settles_payments
+    }
+
     async fn charge_saved(
         &self,
         token: &str,
@@ -151,6 +156,7 @@ impl StubGateway {
             GatewayKind::Fib => "FIB-ORD",
             GatewayKind::Fastpay => "FP-ORD",
             GatewayKind::Superqi => "SQ-ORD",
+            GatewayKind::Wayl => "WAYL-ORD",
         }
     }
 }
@@ -197,8 +203,8 @@ mod tests {
 
     /// The core regression: a non-settling stub must never accept a webhook, because
     /// its "verification" is just `serde_json` on attacker-controlled bytes.
-    #[test]
-    fn non_settling_stub_rejects_unsigned_webhooks() {
+    #[tokio::test]
+    async fn non_settling_stub_rejects_unsigned_webhooks() {
         for kind in [GatewayKind::Fib, GatewayKind::Fastpay, GatewayKind::Superqi] {
             let gw = StubGateway::new(kind, false);
             assert!(!gw.settles_payments());
@@ -207,7 +213,7 @@ mod tests {
                 body("FIB-ORD-deadbeef", "success", Some(1)),
                 body("FIB-ORD-deadbeef", "failed", None),
             ] {
-                match gw.verify_webhook(&HeaderMap::new(), &body) {
+                match gw.verify_webhook(&HeaderMap::new(), &body).await {
                     Err(PaymentError::GatewayNotLive(k)) => assert_eq!(k, kind),
                     other => panic!("{kind:?} accepted an unsigned webhook: {other:?}"),
                 }
@@ -220,8 +226,16 @@ mod tests {
     #[tokio::test]
     async fn order_ids_are_unique_back_to_back() {
         let gw = StubGateway::new(GatewayKind::Fib, true);
-        let a = gw.create_intent(10_000, &new_order_ref(), false).await;
-        let b = gw.create_intent(10_000, &new_order_ref(), false).await;
+        let (ra, rb) = (new_order_ref(), new_order_ref());
+        let req = |order_ref| IntentRequest {
+            amount_iqd: 10_000,
+            order_ref,
+            label: "Qasa Premium",
+            save_method: false,
+            expires_in_minutes: 60,
+        };
+        let a = gw.create_intent(&req(&ra)).await.unwrap();
+        let b = gw.create_intent(&req(&rb)).await.unwrap();
         assert_ne!(a.gateway_order_id, b.gateway_order_id);
     }
 
@@ -230,45 +244,45 @@ mod tests {
         assert!(!stub_for(GatewayKind::Fib).settles_payments());
     }
 
-    #[test]
-    fn settling_stub_reports_amount_for_comparison() {
+    #[tokio::test]
+    async fn settling_stub_reports_amount_for_comparison() {
         let gw = StubGateway::new(GatewayKind::Fib, true);
         let ev = gw
-            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", Some(25_000)))
+            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", Some(25_000))).await
             .expect("dev stub accepts webhooks");
         assert_eq!(ev.amount_iqd, Some(25_000));
         assert_eq!(ev.gateway_order_id, "FIB-ORD-abc");
         assert_eq!(ev.status, WebhookStatus::Success);
     }
 
-    #[test]
-    fn settling_stub_reports_absent_amount_as_none() {
+    #[tokio::test]
+    async fn settling_stub_reports_absent_amount_as_none() {
         let gw = StubGateway::new(GatewayKind::Fib, true);
         let ev = gw
-            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", None))
+            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", None)).await
             .unwrap();
         assert_eq!(ev.amount_iqd, None);
     }
 
-    #[test]
-    fn settling_stub_still_requires_an_order_id() {
+    #[tokio::test]
+    async fn settling_stub_still_requires_an_order_id() {
         let gw = StubGateway::new(GatewayKind::Fib, true);
         let raw = serde_json::to_vec(&serde_json::json!({ "status": "success" })).unwrap();
         assert!(matches!(
-            gw.verify_webhook(&HeaderMap::new(), &raw),
+            gw.verify_webhook(&HeaderMap::new(), &raw).await,
             Err(PaymentError::BadPayload(_))
         ));
     }
 
-    #[test]
-    fn settling_stub_returns_a_token_only_on_success() {
+    #[tokio::test]
+    async fn settling_stub_returns_a_token_only_on_success() {
         let gw = StubGateway::new(GatewayKind::Fib, true);
         let ok = gw
-            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", None))
+            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "success", None)).await
             .unwrap();
         assert_eq!(ok.payment_token.as_deref(), Some("stub-tok-FIB-ORD-abc"));
         let failed = gw
-            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "failed", None))
+            .verify_webhook(&HeaderMap::new(), &body("FIB-ORD-abc", "failed", None)).await
             .unwrap();
         assert_eq!(failed.payment_token, None);
     }

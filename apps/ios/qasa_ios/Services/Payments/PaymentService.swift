@@ -36,7 +36,8 @@ final class PaymentService {
         return response
     }
 
-    /// Returns whether the OS handed off to another app (wallet).
+    /// Returns whether the OS handed off to another app: a wallet scheme, or Safari for
+    /// an `https://` hosted checkout (Wayl).
     @MainActor
     func openDeepLink(_ deepLink: String) async -> Bool {
         guard let url = URL(string: deepLink) else { return false }

@@ -419,8 +419,9 @@
     <string name="premium_activated">تم تفعيل البريميوم.</string>
     <string name="premium_alreadypremium">أنت على البريميوم. أدِره من الإعدادات.</string>
     <string name="premium_autorenew">التجديد التلقائي</string>
-    <string name="premium_autorenewdetail">نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات.</string>
-    <string name="premium_autorenewhint">نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات.</string>
+    <string name="premium_autorenewdetail">قبل انتهاء كل فترة نرسل لك رابطاً لدفع الفترة التالية. لا يُخصم شيء حتى تدفعه بنفسك.</string>
+    <string name="premium_autorenewdetailcharge">نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات.</string>
+    <string name="premium_autorenewhint">قبل انتهاء كل فترة نرسل لك رابطاً لدفع الفترة التالية. لا يُخصم شيء حتى تدفعه بنفسك.</string>
     <string name="premium_bestvalue">أفضل قيمة</string>
     <string name="premium_completeinwallet">أكمل الدفع في %s…</string>
     <string name="premium_fastpay">FastPay</string>
@@ -549,6 +550,7 @@
     <string name="sub_noneactive">لا يوجد اشتراك نشط.</string>
     <string name="sub_nonefound">لم يُعثر على اشتراك نشط.</string>
     <string name="sub_paymentmethodremoved">تمت إزالة طريقة الدفع المحفوظة.</string>
+    <string name="sub_payrenewal">ادفع التجديد</string>
     <string name="sub_plan">الخطة</string>
     <string name="sub_planmonthly">بريميوم شهري</string>
     <string name="sub_planyearly">بريميوم سنوي</string>
@@ -556,7 +558,10 @@
     <string name="sub_reasontitle">سبب الإلغاء</string>
     <string name="sub_removepaymentmethod">إزالة طريقة الدفع المحفوظة</string>
     <string name="sub_removepaymentmethodconfirm">لن يجدد Qasa اشتراك Premium تلقائيًا حتى تدفع مرة أخرى مع تشغيل التجديد التلقائي.</string>
-    <string name="sub_renewalnotsetup">لم يُفعَّل بعد. ادفع تجديدك القادم من التطبيق مع تشغيل التجديد التلقائي وسنحفظ محفظتك للتجديدات التالية.</string>
+    <string name="sub_renewallinkready">تجديدك جاهز. ادفع %1$s دينار قبل %2$s ليستمر Premium؛ تُضاف المدة إلى ما تبقّى لديك.</string>
+    <string name="sub_renewalnotpaidyet">لم يُدفع بعد. إذا دفعت للتو، فقد يستغرق ظهوره هنا دقيقة.</string>
+    <string name="sub_renewalnotsetup">لن تتجدد هذه الخطة تلقائياً. سنذكّرك قبل انتهائها لتدفع الفترة التالية.</string>
+    <string name="sub_renewsbylink">قبل %1$s ببضعة أيام، سنرسل لك رابطاً لدفع %2$s دينار للفترة التالية.</string>
     <string name="sub_renewsexpires">يتجدد / ينتهي</string>
     <string name="sub_renewsvia">يتجدد في %1$s بمبلغ %2$s دينار عبر %3$s.</string>
     <string name="sub_skip">تخطٍ</string>

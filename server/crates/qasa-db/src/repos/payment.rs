@@ -16,10 +16,12 @@ pub struct PaymentRow {
     pub plan_id: String,
     pub auto_renew: bool,
     /// `checkout` (the user paid in the app) or `renewal` (the worker charged a saved
-    /// payment method).
+    /// payment method, or sent a renewal link).
     pub kind: String,
     /// For a renewal, the subscription it renews.
     pub renews_subscription_id: Option<Uuid>,
+    /// For a renewal link, when it stops working.
+    pub pay_by: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,
 }
@@ -27,7 +29,7 @@ pub struct PaymentRow {
 pub(crate) const PAYMENT_COLS: &str = r#"
         id, account_id, subscription_id, gateway, gateway_order_id,
         amount_iqd, status, deep_link, plan_id, auto_renew,
-        kind, renews_subscription_id, created_at, completed_at
+        kind, renews_subscription_id, pay_by, created_at, completed_at
 "#;
 
 /// Insert a pending payment.
@@ -143,6 +145,80 @@ pub async fn create_renewal_payment(
     .bind(amount_iqd)
     .bind(plan_id)
     .bind(key)
+    .bind(subscription_id)
+    .fetch_optional(pool)
+    .await?;
+    Ok(row)
+}
+
+/// A pending renewal paid through a link, before the link exists. The pending-renewal
+/// index allows one per subscription, so `None` means one is already out.
+pub async fn create_renewal_link_payment(
+    pool: &PgPool,
+    account_id: Uuid,
+    subscription_id: Uuid,
+    gateway: &str,
+    amount_iqd: i32,
+    plan_id: &str,
+    pay_by: DateTime<Utc>,
+) -> anyhow::Result<Option<PaymentRow>> {
+    let id = new_id();
+    let key = format!("renewal-link:{subscription_id}:{id}");
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        r#"
+        INSERT INTO payments (
+            id, account_id, gateway, amount_iqd, status, plan_id, auto_renew,
+            idempotency_key, kind, renews_subscription_id, pay_by
+        )
+        VALUES ($1, $2, $3, $4, 'pending', $5, true, $6, 'renewal', $7, $8)
+        ON CONFLICT DO NOTHING
+        RETURNING {PAYMENT_COLS}
+        "#
+    ))
+    .bind(id)
+    .bind(account_id)
+    .bind(gateway)
+    .bind(amount_iqd)
+    .bind(plan_id)
+    .bind(key)
+    .bind(subscription_id)
+    .bind(pay_by)
+    .fetch_optional(pool)
+    .await?;
+    Ok(row)
+}
+
+/// Attach the link the gateway created to a renewal payment.
+pub async fn set_link(
+    pool: &PgPool,
+    payment_id: Uuid,
+    gateway_order_id: &str,
+    deep_link: &str,
+) -> anyhow::Result<()> {
+    sqlx::query("UPDATE payments SET gateway_order_id = $2, deep_link = $3 WHERE id = $1")
+        .bind(payment_id)
+        .bind(gateway_order_id)
+        .bind(deep_link)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+/// The renewal link the customer can still pay for this subscription, if any.
+pub async fn open_renewal_link(
+    pool: &PgPool,
+    subscription_id: Uuid,
+) -> anyhow::Result<Option<PaymentRow>> {
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        r#"
+        SELECT {PAYMENT_COLS} FROM payments
+        WHERE renews_subscription_id = $1
+          AND kind = 'renewal'
+          AND status = 'pending'
+          AND deep_link IS NOT NULL
+          AND pay_by > now()
+        "#
+    ))
     .bind(subscription_id)
     .fetch_optional(pool)
     .await?;

@@ -2,6 +2,7 @@ use axum::extract::State;
 use axum::Json;
 use qasa_core::CoreError;
 use serde::Deserialize;
+use qasa_payments::GatewayKind;
 use serde_json::json;
 
 use crate::auth::{AdminAuth, AdminWrite};
@@ -12,7 +13,18 @@ pub async fn list_public(
     State(state): State<AppState>,
 ) -> ApiResult<Json<serde_json::Value>> {
     let plans = qasa_db::repos::plan::list_active(&state.pool).await?;
-    Ok(Json(json!({ "plans": plans })))
+    // What leaving auto-renew on means for each wallet the apps offer, so the checkout
+    // screen can say it truthfully: "charge" (we charge the saved wallet), "link" (we
+    // send a payment link before each period ends) or "none".
+    let auto_renew: serde_json::Map<String, serde_json::Value> =
+        [GatewayKind::Fib, GatewayKind::Fastpay, GatewayKind::Superqi]
+            .into_iter()
+            .map(|k| {
+                let mode = state.gateways.renewal_mode_for_checkout(k).as_str();
+                (k.as_str().to_string(), json!(mode))
+            })
+            .collect();
+    Ok(Json(json!({ "plans": plans, "auto_renew": auto_renew })))
 }
 
 pub async fn list_admin(

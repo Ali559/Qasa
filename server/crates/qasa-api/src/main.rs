@@ -167,6 +167,7 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route("/v1/payments/webhook/fib", post(payments::webhook_fib))
         .route("/v1/payments/webhook/fastpay", post(payments::webhook_fastpay))
         .route("/v1/payments/webhook/superqi", post(payments::webhook_superqi))
+        .route("/v1/payments/webhook/wayl", post(payments::webhook_wayl))
         .route("/v1/breach/prefix/{prefix}", get(breach::lookup_prefix))
         .route("/v1/breach/monitor", post(breach::register_monitor).get(breach::list_monitors).delete(breach::unregister_monitor))
         .route("/v1/breach/monitor/{monitor_id}", delete(breach::unregister_monitor_by_id))

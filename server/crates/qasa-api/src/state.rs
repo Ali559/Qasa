@@ -1,9 +1,8 @@
-use std::collections::HashMap;
 use std::sync::Arc;
 
 use qasa_core::{AdminTokenIssuer, AppConfig, LicenseKeyPair, LicenseTokenIssuer};
 use qasa_db::DbPool;
-use qasa_payments::{GatewayKind, PaymentGateway, StubGateway};
+use qasa_payments::Gateways;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -11,20 +10,19 @@ pub struct AppState {
     pub config: AppConfig,
     pub license_issuer: Arc<LicenseTokenIssuer>,
     pub admin_issuer: Arc<AdminTokenIssuer>,
-    pub gateways: Arc<HashMap<GatewayKind, StubGateway>>,
+    pub gateways: Arc<Gateways>,
     pub push: Arc<qasa_push::PushService>,
 }
 
 impl AppState {
     pub fn new(pool: DbPool, config: AppConfig, license_keys: LicenseKeyPair) -> Self {
-        // No payment gateway has a real integration yet — all three are stubs whose
-        // webhook handler performs no signature check. In prod they must therefore be
-        // unable to mark an order paid, otherwise anyone who can reach the webhook URL
-        // gets a free subscription by POSTing `{"order_id": "...", "status": "success"}`.
-        let settles_payments = config.env.is_dev();
-        let gateways = qasa_payments::all_stub_gateways(settles_payments)
-            .into_iter()
-            .collect();
+        // The FIB, FastPay and SuperQi gateways are stubs whose webhook handler performs no
+        // signature check. In prod they must therefore be unable to mark an order paid,
+        // otherwise anyone who can reach the webhook URL gets a free subscription by
+        // POSTing `{"order_id": "...", "status": "success"}`. Wayl, when configured, is
+        // the real one; its test mode is refused in prod.
+        let gateways = Gateways::from_env(config.env.is_dev(), !config.env.is_prod())
+            .expect("payment gateway configuration");
 
         Self {
             pool,
@@ -36,16 +34,8 @@ impl AppState {
         }
     }
 
-    pub fn gateway(&self, kind: GatewayKind) -> Option<&StubGateway> {
-        self.gateways.get(&kind)
-    }
-
     /// Gateways that can charge a saved method, as stored in `payment_methods.gateway`.
     pub fn recurring_gateways(&self) -> Vec<&'static str> {
-        self.gateways
-            .values()
-            .filter(|g| g.supports_recurring())
-            .map(|g| g.kind().as_str())
-            .collect()
+        self.gateways.recurring()
     }
 }

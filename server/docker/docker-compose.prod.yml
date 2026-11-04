@@ -53,6 +53,12 @@ services:
       QASA_FCM_PROJECT_ID: ${QASA_FCM_PROJECT_ID:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON: ${QASA_FCM_SERVICE_ACCOUNT_JSON:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE: ${QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE:-}
+      # Wayl checkout and renewal links. Off until QASA_WAYL_API_KEY is set; webhooks go to
+      # https://$QASA_PUBLIC_HOST/v1/payments/webhook/wayl.
+      QASA_WAYL_API_KEY: ${QASA_WAYL_API_KEY:-}
+      QASA_WAYL_WEBHOOK_SECRET: ${QASA_WAYL_WEBHOOK_SECRET:-}
+      QASA_WAYL_REDIRECT_URL: ${QASA_WAYL_REDIRECT_URL:-}
+      QASA_PUBLIC_HOST: ${QASA_PUBLIC_HOST:-api.qasa.app}
       RUST_LOG: qasa_api=info,tower_http=info,sqlx=warn
     # No published port: all traffic comes through Caddy (TLS) on the internal network.
     expose:
@@ -78,6 +84,11 @@ services:
       QASA_FCM_PROJECT_ID: ${QASA_FCM_PROJECT_ID:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON: ${QASA_FCM_SERVICE_ACCOUNT_JSON:-}
       QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE: ${QASA_FCM_SERVICE_ACCOUNT_JSON_INLINE:-}
+      # The worker creates renewal links and checks open payments with the same settings.
+      QASA_WAYL_API_KEY: ${QASA_WAYL_API_KEY:-}
+      QASA_WAYL_WEBHOOK_SECRET: ${QASA_WAYL_WEBHOOK_SECRET:-}
+      QASA_WAYL_REDIRECT_URL: ${QASA_WAYL_REDIRECT_URL:-}
+      QASA_PUBLIC_HOST: ${QASA_PUBLIC_HOST:-api.qasa.app}
       RUST_LOG: qasa_worker=info,sqlx=warn
     depends_on:
       postgres:

@@ -419,8 +419,9 @@
     <string name="premium_activated">Premium activated.</string>
     <string name="premium_alreadypremium">You\'re on Premium. Manage it from Settings.</string>
     <string name="premium_autorenew">Auto-renew</string>
-    <string name="premium_autorenewdetail">We charge your wallet the plan price at the end of each period until you turn this off in Settings.</string>
-    <string name="premium_autorenewhint">We charge your wallet the plan price at the end of each period until you turn this off in Settings.</string>
+    <string name="premium_autorenewdetail">Before each period ends, we send you a link to pay for the next one. Nothing is taken until you pay it.</string>
+    <string name="premium_autorenewdetailcharge">We charge your wallet the plan price at the end of each period until you turn this off in Settings.</string>
+    <string name="premium_autorenewhint">Before each period ends, we send you a link to pay for the next one. Nothing is taken until you pay it.</string>
     <string name="premium_bestvalue">BEST VALUE</string>
     <string name="premium_completeinwallet">Complete payment in %s…</string>
     <string name="premium_fastpay">FastPay</string>
@@ -549,6 +550,7 @@
     <string name="sub_noneactive">No active subscription found.</string>
     <string name="sub_nonefound">No active subscription found.</string>
     <string name="sub_paymentmethodremoved">Saved payment method removed.</string>
+    <string name="sub_payrenewal">Pay renewal</string>
     <string name="sub_plan">Plan</string>
     <string name="sub_planmonthly">Premium Monthly</string>
     <string name="sub_planyearly">Premium Yearly</string>
@@ -556,7 +558,10 @@
     <string name="sub_reasontitle">Cancellation reason</string>
     <string name="sub_removepaymentmethod">Remove saved payment method</string>
     <string name="sub_removepaymentmethodconfirm">Qasa won\'t renew Premium automatically until you pay again with auto-renew on.</string>
-    <string name="sub_renewalnotsetup">Not set up yet. Pay your next renewal in the app with auto-renew on and we\'ll save your wallet for the ones after.</string>
+    <string name="sub_renewallinkready">Your renewal is ready. Pay %1$s IQD by %2$s to keep Premium going; it adds on to the time you have left.</string>
+    <string name="sub_renewalnotpaidyet">Not paid yet. If you\'ve just paid, it can take a minute to show here.</string>
+    <string name="sub_renewalnotsetup">This plan won\'t renew by itself. We\'ll remind you before it ends so you can pay for the next period.</string>
+    <string name="sub_renewsbylink">A few days before %1$s, we\'ll send you a link to pay %2$s IQD for the next period.</string>
     <string name="sub_renewsexpires">Renews / expires</string>
     <string name="sub_renewsvia">Renews on %1$s for %2$s IQD with %3$s.</string>
     <string name="sub_skip">Skip</string>

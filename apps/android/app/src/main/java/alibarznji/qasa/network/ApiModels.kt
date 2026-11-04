@@ -110,14 +110,28 @@ data class SubscriptionDTO(
 )
 
 /**
- * Whether the period will really be charged automatically: `auto_renew` alone is not
- * enough, the gateway also needs a saved wallet. [gateway] is set while one is saved.
+ * How the next period gets paid. [mode] is `charge` (the saved wallet in [gateway] is
+ * charged), `link` (a payment link is sent a few days before `expires_at`) or `none`;
+ * older servers omit it and only [will_renew] says whether a saved wallet is charged.
+ * [link] is set once a renewal link is out, and stays payable even if auto-renew was
+ * turned off since.
  */
 @Serializable
 data class RenewalDTO(
     val will_renew: Boolean,
     val gateway: String? = null,
     val amount_iqd: Int? = null,
+    val mode: String? = null,
+    val link: RenewalLinkDTO? = null,
+)
+
+/** An unpaid renewal link; confirmed like a checkout by polling [payment_id]. */
+@Serializable
+data class RenewalLinkDTO(
+    val payment_id: String,
+    val url: String,
+    val amount_iqd: Int,
+    val pay_by: String,
 )
 
 @Serializable
@@ -145,8 +159,15 @@ data class PricingPlanDTO(
     val sort_order: Int? = null,
 )
 
+/**
+ * [auto_renew] maps a wallet id (`fib`, `fastpay`, `superqi`) to the renewal mode that
+ * leaving auto-renew on gives it (`charge`, `link` or `none`). Older servers omit it.
+ */
 @Serializable
-data class PricingResponse(val plans: List<PricingPlanDTO>)
+data class PricingResponse(
+    val plans: List<PricingPlanDTO>,
+    val auto_renew: Map<String, String>? = null,
+)
 
 @Serializable
 data class AppNotificationDTO(

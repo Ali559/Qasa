@@ -55,13 +55,24 @@ internal val premiumGateways = listOf(
     GatewayOption("superqi", "SuperQi", R.string.premium_superqi, R.string.premium_superqisub, R.drawable.wallet_superqi),
 )
 
+/**
+ * Display name for a `gateway` the server reports. `wayl` is the hosted checkout behind
+ * the wallets and has no row of its own; unknown ids are shown as sent.
+ */
+@Composable
+internal fun gatewayDisplayName(id: String?): String = when (id) {
+    null -> ""
+    "wayl" -> "Wayl"
+    else -> premiumGateways.firstOrNull { it.id == id }?.let { stringResource(it.title) } ?: id
+}
+
 // iOS badge is 36 x 36 with a 9pt corner.
 private val BadgeSize = 36.dp
 private val BadgeRadius = 9.dp
 
 /** `autoRenewRow` (PremiumUpgradeView.swift:239): 18pt accent icon, 15/12 text, chrome card r8. */
 @Composable
-internal fun PremiumAutoRenewRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+internal fun PremiumAutoRenewRow(checked: Boolean, chargesWallet: Boolean, onCheckedChange: (Boolean) -> Unit) {
     val c = qasaColors
     val shape = RoundedCornerShape(QasaDimens.radiusSmall)
     Row(
@@ -76,7 +87,12 @@ internal fun PremiumAutoRenewRow(checked: Boolean, onCheckedChange: (Boolean) ->
         Icon(Icons.Filled.Autorenew, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QasaDimens.spaceMicro)) {
             Text(stringResource(R.string.premium_autorenew), color = c.textPrimary, style = qasaText.bodySemibold15)
-            Text(stringResource(R.string.premium_autorenewdetail), color = c.textSecondary, style = qasaText.labelRegular)
+            // Only a wallet the server can charge renews by itself; the rest get a payment link.
+            Text(
+                stringResource(if (chargesWallet) R.string.premium_autorenewdetailcharge else R.string.premium_autorenewdetail),
+                color = c.textSecondary,
+                style = qasaText.labelRegular,
+            )
         }
         MintSwitch(checked = checked, onCheckedChange = onCheckedChange)
     }

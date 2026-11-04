@@ -69,7 +69,11 @@ pub async fn expire_abandoned_payments(pool: &PgPool, older_than_minutes: i32) -
         UPDATE payments
         SET status = 'expired', completed_at = now()
         WHERE status = 'pending'
-          AND created_at < now() - make_interval(mins => $1)
+          AND CASE
+                -- A renewal link stays open until its own deadline.
+                WHEN pay_by IS NOT NULL THEN pay_by < now()
+                ELSE created_at < now() - make_interval(mins => $1)
+              END
         "#,
     )
     .bind(older_than_minutes)
@@ -269,6 +273,8 @@ pub async fn subs_needing_expiry_warning(
           AND s.expires_at <= now() + interval '3 days'
           -- Once the worker has tried, "renewal failed" is the one message they get.
           AND NOT (s.auto_renew AND s.renewal_attempts > 0)
+          -- A renewal link already went out, which says the same and lets them pay.
+          AND NOT (s.auto_renew AND s.renewal_link_sent_at IS NOT NULL)
           AND NOT (
             s.auto_renew
             AND EXISTS (
@@ -354,5 +360,51 @@ pub async fn mark_renew_failed_notified(pool: &PgPool, subscription_id: Uuid) ->
     .bind(subscription_id)
     .execute(pool)
     .await?;
+    Ok(())
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct PaymentToCheck {
+    pub id: Uuid,
+    pub gateway: String,
+    pub gateway_order_id: String,
+}
+
+/// Payments on `gateways` whose webhook may have been missed: still open, or abandoned
+/// within the last day (a late payment still settles), and not asked about in the last
+/// `every_minutes`.
+pub async fn payments_to_check(
+    pool: &PgPool,
+    gateways: &[&str],
+    every_minutes: i32,
+    limit: i64,
+) -> anyhow::Result<Vec<PaymentToCheck>> {
+    let rows = sqlx::query_as::<_, PaymentToCheck>(
+        r#"
+        SELECT id, gateway, gateway_order_id
+        FROM payments
+        WHERE gateway = ANY($1)
+          AND gateway_order_id IS NOT NULL
+          AND (status = 'pending'
+               OR (status = 'expired' AND completed_at > now() - interval '1 day'))
+          AND (last_checked_at IS NULL
+               OR last_checked_at < now() - make_interval(mins => $2))
+        ORDER BY last_checked_at ASC NULLS FIRST
+        LIMIT $3
+        "#,
+    )
+    .bind(gateways)
+    .bind(every_minutes)
+    .bind(limit)
+    .fetch_all(pool)
+    .await?;
+    Ok(rows)
+}
+
+pub async fn mark_checked(pool: &PgPool, payment_id: Uuid) -> anyhow::Result<()> {
+    sqlx::query("UPDATE payments SET last_checked_at = now() WHERE id = $1")
+        .bind(payment_id)
+        .execute(pool)
+        .await?;
     Ok(())
 }

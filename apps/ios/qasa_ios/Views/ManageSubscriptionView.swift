@@ -22,6 +22,8 @@ struct ManageSubscriptionView: View {
     @State private var showRemovePaymentConfirm = false
     @State private var isRemovingPaymentMethod = false
 
+    @State private var isPayingRenewal = false
+
     private var locale: Locale { AppLanguage.current.locale }
 
     private var plan: SubscriptionPlan {
@@ -68,6 +70,9 @@ struct ManageSubscriptionView: View {
                             .padding(.top, 40)
                     } else if let subscription {
                         detailsCard(subscription)
+                        if let link = subscription.renewal?.link {
+                            renewalLinkCard(link)
+                        }
                         autoRenewCard
                         if !isCancelled {
                             cancelButton
@@ -187,16 +192,27 @@ struct ManageSubscriptionView: View {
         guard let sub = subscription, let renewal = sub.renewal, sub.auto_renew else {
             return L10n.tr("sub.autoRenewOn", locale: locale)
         }
-        guard renewal.will_renew else {
+        let amount = renewal.amount_iqd ?? sub.amount_iqd
+        if renewal.mode?.lowercased() == "link" {
+            return String(
+                format: L10n.tr("sub.renewsByLink", locale: locale),
+                formattedDate(sub.expires_at),
+                formattedIQD(amount)
+            )
+        }
+        guard renewal.chargesSavedWallet else {
             return L10n.tr("sub.renewalNotSetUp", locale: locale)
         }
-        let amount = renewal.amount_iqd ?? sub.amount_iqd
         return String(
             format: L10n.tr("sub.renewsVia", locale: locale),
             formattedDate(sub.expires_at),
-            amount.formatted(.number.grouping(.automatic).locale(locale)),
+            formattedIQD(amount),
             gatewayName(renewal.gateway)
         )
+    }
+
+    private func formattedIQD(_ amount: Int) -> String {
+        amount.formatted(.number.grouping(.automatic).locale(locale))
     }
 
     private func gatewayName(_ gateway: String?) -> String {
@@ -204,6 +220,7 @@ struct ManageSubscriptionView: View {
         case "fib": return L10n.tr("premium.fib", locale: locale)
         case "fastpay": return L10n.tr("premium.fastpay", locale: locale)
         case "superqi": return L10n.tr("premium.superqi", locale: locale)
+        case "wayl": return "Wayl"
         default: return gateway ?? "—"
         }
     }
@@ -236,7 +253,7 @@ struct ManageSubscriptionView: View {
                 .disabled(isCancelled || isSaving || subscription == nil)
             }
 
-            if subscription?.renewal?.gateway != nil {
+            if subscription?.renewal?.chargesSavedWallet == true {
                 Button {
                     showRemovePaymentConfirm = true
                 } label: {
@@ -254,6 +271,38 @@ struct ManageSubscriptionView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .stroke(Theme.stroke, lineWidth: 1)
+        )
+    }
+
+    /// A renewal link is out (the hosted checkout can't charge a saved wallet): let them pay it here.
+    private func renewalLinkCard(_ link: RenewalLinkDTO) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(
+                format: L10n.tr("sub.renewalLinkReady", locale: locale),
+                formattedIQD(link.amount_iqd),
+                formattedDate(link.pay_by)
+            ))
+                .font(.qasa(13))
+                .foregroundColor(Theme.textPrimary)
+
+            PrimaryButton(
+                title: isPayingRenewal
+                    ? L10n.tr("premium.processing", locale: locale)
+                    : L10n.tr("sub.payRenewal", locale: locale),
+                icon: "lock.fill",
+                cornerRadius: 8
+            ) {
+                Task { await payRenewal(link) }
+            }
+            .opacity(isPayingRenewal ? 0.6 : 1)
+            .disabled(isPayingRenewal)
+        }
+        .padding(16)
+        .background(Theme.chrome)
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Theme.accent, lineWidth: 1)
         )
     }
 
@@ -373,6 +422,42 @@ struct ManageSubscriptionView: View {
             subscription = sub
             autoRenew = sub?.auto_renew ?? true
             statusMessage = L10n.tr("sub.paymentMethodRemoved", locale: locale)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Same confirmation as checkout: open the hosted page, poll the payment, then reload.
+    private func payRenewal(_ link: RenewalLinkDTO) async {
+        isPayingRenewal = true
+        errorMessage = nil
+        statusMessage = nil
+        defer { isPayingRenewal = false }
+
+        guard await PaymentService.shared.openDeepLink(link.url) else {
+            errorMessage = L10n.tr("premium.paymentFailed", locale: locale)
+            return
+        }
+        let success = await PaymentService.shared.pollUntilComplete(paymentId: link.payment_id)
+        if success {
+            await MainActor.run {
+                session.syncFromLicense()
+            }
+        }
+        do {
+            let sub = try await SubscriptionService.shared.fetchCurrent()
+            subscription = sub
+            autoRenew = sub?.auto_renew ?? true
+            // Still open means they came back without paying (or it hasn't landed yet),
+            // not that the payment failed.
+            if !success {
+                if sub?.renewal?.link != nil {
+                    statusMessage = L10n.tr("sub.renewalNotPaidYet", locale: locale)
+                } else {
+                    errorMessage = PaymentService.shared.lastError
+                        ?? L10n.tr("premium.paymentFailed", locale: locale)
+                }
+            }
         } catch {
             errorMessage = error.localizedDescription
         }

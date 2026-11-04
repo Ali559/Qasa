@@ -18,7 +18,7 @@ todos:
     content: "Payments without a gateway: history, staff grants, abandoned-checkout expiry, no false renew pushes (done 2026-11-01)"
     status: completed
   - id: payments-live
-    content: "Payments needing a gateway: real FIB/FastPay/SuperQi integrations (incl. saved-wallet charges for renewals), gateway status reconciliation, refunds, App Store / Play billing decision. Renewal engine done 2026-11-04"
+    content: "Payments needing a gateway: Wayl gateway, renewal links and Wayl status checks done 2026-11-04 (switch on once the Wayl store is approved; first real 1,000 IQD purchase to confirm the webhook shape). Still open: refunds, direct FIB/FastPay/SuperQi if a saved-wallet charge is ever wanted, App Store / Play billing decision. Renewal engine done 2026-11-04"
     status: pending
   - id: lapsed-premium
     content: "Lapsed Premium falls back to Free; primary device keeps working (server done 2026-11-01)"

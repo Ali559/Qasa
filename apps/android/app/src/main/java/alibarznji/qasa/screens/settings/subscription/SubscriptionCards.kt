@@ -2,7 +2,9 @@ package alibarznji.qasa.screens.settings.subscription
 
 import alibarznji.qasa.R
 import alibarznji.qasa.network.SubscriptionDTO
-import alibarznji.qasa.screens.premium.premiumGateways
+import alibarznji.qasa.network.RenewalLinkDTO
+import alibarznji.qasa.screens.premium.gatewayDisplayName
+import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -137,20 +140,16 @@ internal fun AutoRenewCard(
     val locale = appLocale()
     val shape = RoundedCornerShape(QasaDimens.radiusSmall)
     val renewal = sub.renewal
+    // Older servers send no `mode`; there `will_renew` alone means a saved wallet is charged.
+    val mode = renewal?.mode ?: renewal?.let { if (it.will_renew) "charge" else "none" }
+    val expires = formatSubscriptionDate(sub.expires_at, locale)
+    val amount = NumberFormat.getIntegerInstance(locale).format(renewal?.amount_iqd ?: sub.amount_iqd)
     val subtitle = when {
         isCancelled -> stringResource(R.string.sub_autorenewoffcancelled)
-        checked && renewal?.will_renew == true -> {
-            val gateway = renewal.gateway
-            val gatewayName = premiumGateways.firstOrNull { it.id == gateway }?.let { stringResource(it.title) }
-                ?: gateway.orEmpty()
-            stringResource(
-                R.string.sub_renewsvia,
-                formatSubscriptionDate(sub.expires_at, locale),
-                NumberFormat.getIntegerInstance(locale).format(renewal.amount_iqd ?: sub.amount_iqd),
-                gatewayName,
-            )
-        }
-        checked && renewal != null -> stringResource(R.string.sub_renewalnotsetup)
+        checked && mode == "charge" ->
+            stringResource(R.string.sub_renewsvia, expires, amount, gatewayDisplayName(renewal?.gateway))
+        checked && mode == "link" -> stringResource(R.string.sub_renewsbylink, expires, amount)
+        checked && mode == "none" -> stringResource(R.string.sub_renewalnotsetup)
         else -> stringResource(R.string.sub_autorenewon)
     }
     Column(
@@ -169,11 +168,47 @@ internal fun AutoRenewCard(
             iconColor = c.accent,
             onCheckedChange = onChange,
         )
-        if (renewal?.gateway != null) {
+        // Only a charge-mode renewal has a saved wallet worth removing.
+        if (mode == "charge") {
             TextButton(onClick = onRemovePaymentMethod, enabled = enabled) {
                 Text(stringResource(R.string.sub_removepaymentmethod), color = c.danger, style = qasaText.bodySmallMedium)
             }
         }
+    }
+}
+
+/**
+ * An unpaid renewal link: what it costs, when it is due, and a button that opens it.
+ * Paying adds a period on top of the time left, so it is offered even after cancelling.
+ */
+@Composable
+internal fun RenewalLinkCard(link: RenewalLinkDTO, isConfirming: Boolean, onPay: () -> Unit) {
+    val c = qasaColors
+    val locale = appLocale()
+    val shape = RoundedCornerShape(QasaDimens.radiusSmall)
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(c.chrome, shape)
+            .border(QasaDimens.stroke, c.accent, shape)
+            .padding(QasaDimens.gap),
+        verticalArrangement = Arrangement.spacedBy(QasaDimens.gap),
+    ) {
+        Text(
+            stringResource(
+                R.string.sub_renewallinkready,
+                NumberFormat.getIntegerInstance(locale).format(link.amount_iqd),
+                formatSubscriptionDate(link.pay_by, locale),
+            ),
+            color = c.textPrimary,
+            style = qasaText.bodySmall,
+        )
+        PrimaryButton(
+            title = stringResource(if (isConfirming) R.string.premium_processing else R.string.sub_payrenewal),
+            icon = Icons.Filled.Lock,
+            enabled = !isConfirming,
+            onClick = onPay,
+        )
     }
 }
 

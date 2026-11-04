@@ -214,11 +214,13 @@ async fn subscription_reports_whether_it_will_really_renew() {
     pay(false).await;
     let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
     assert_eq!(body["subscription"]["renewal"]["will_renew"], false, "{body}");
+    assert_eq!(body["subscription"]["renewal"]["mode"], "none", "auto-renew off");
 
     pay(true).await;
     let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
     let renewal = &body["subscription"]["renewal"];
     assert_eq!(renewal["will_renew"], true, "{body}");
+    assert_eq!(renewal["mode"], "charge");
     assert_eq!(renewal["gateway"], "fib");
     let price: i32 = sqlx::query_scalar("SELECT amount_iqd FROM plans WHERE id = 'premium_monthly'")
         .fetch_one(&api.pool)
@@ -239,7 +241,14 @@ async fn subscription_reports_whether_it_will_really_renew() {
     assert_eq!((status, body["removed"].as_bool()), (StatusCode::OK, Some(true)));
     let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
     assert_eq!(body["subscription"]["auto_renew"], true);
-    assert_eq!(body["subscription"]["renewal"]["will_renew"], false, "no method, nothing to charge");
+    let renewal = &body["subscription"]["renewal"];
+    assert_eq!(renewal["will_renew"], false, "no method, nothing to charge");
+    assert_eq!(renewal["mode"], "link", "so it renews by a link instead");
+    assert!(renewal["link"].is_null(), "none sent yet");
+
+    // The checkout screen learns the same per wallet.
+    let (_, pricing) = api.call(Method::GET, "/v1/pricing", None, None).await;
+    assert_eq!(pricing["auto_renew"]["fib"], "charge", "{pricing}");
 }
 
 /// A locale-only update used to switch notifications off.

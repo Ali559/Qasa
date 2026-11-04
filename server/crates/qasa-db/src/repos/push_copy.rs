@@ -48,6 +48,18 @@ pub const SUB_RENEW_FAILED: LocalizedNotice = LocalizedNotice {
     body_ar: Cow::Borrowed("حاولنا تجديد Qasa Premium تلقائياً لكن الدفع لم يكتمل. لا تقلق — اضغط للدفع عبر FIB أو FastPay أو SuperQi وعد خلال لحظات 🚀"),
 };
 
+/// Auto-renew ON and renewal is by link: the link for the next period is ready.
+/// ckb/ar await native review (2026-11-04 strings).
+pub const SUB_RENEWAL_LINK: LocalizedNotice = LocalizedNotice {
+    kind: Cow::Borrowed("sub_renewal_link"),
+    title_en: Cow::Borrowed("💳 Your Premium renewal is ready"),
+    title_ckb: Cow::Borrowed("💳 نوێکردنەوەی پرێمیۆمەکەت ئامادەیە"),
+    title_ar: Cow::Borrowed("💳 تجديد Premium جاهز"),
+    body_en: Cow::Borrowed("Your Qasa Premium ends in a few days. Tap to pay for the next period in one step; it adds on to the time you have left."),
+    body_ckb: Cow::Borrowed("پرێمیۆمی قاسە لە چەند ڕۆژێکدا کۆتایی دێت. دەستی لێ بدە بۆ پارەدانی ماوەی داهاتوو بە یەک هەنگاو؛ دەچێتە سەر ئەو کاتەی ماوەتەوە."),
+    body_ar: Cow::Borrowed("ينتهي Qasa Premium خلال أيام. اضغط لدفع الفترة التالية بخطوة واحدة؛ تُضاف إلى المدة المتبقية لديك."),
+};
+
 /// 80% of the month's VPN data used. ckb/ar await native review (2026-11-02 strings).
 pub const VPN_USAGE_80: LocalizedNotice = LocalizedNotice {
     kind: Cow::Borrowed("vpn_usage_80"),

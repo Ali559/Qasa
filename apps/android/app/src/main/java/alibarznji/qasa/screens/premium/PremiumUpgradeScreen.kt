@@ -63,6 +63,7 @@ fun PremiumUpgradeScreen(
     var plans by remember { mutableStateOf(vm.pricing.plans.ifEmpty { PricingService.FALLBACK_PLANS }) }
     var gateway by remember { mutableStateOf("fib") }
     var autoRenew by remember { mutableStateOf(true) }
+    var autoRenewModes by remember { mutableStateOf(vm.pricing.autoRenewModes) }
     var status by remember { mutableStateOf<String?>(null) }
     var isError by remember { mutableStateOf(false) }
     // A second tap while an intent is in flight used to create a second order.
@@ -75,6 +76,7 @@ fun PremiumUpgradeScreen(
         // Sorted by sort_order; a failed refetch returns the last good list (PricingService).
         val fetched = vm.pricing.fetchPlans()
         if (fetched.isNotEmpty()) plans = fetched
+        autoRenewModes = vm.pricing.autoRenewModes
     }
 
     val pagerState = rememberPagerState(pageCount = { plans.size.coerceAtLeast(1) })
@@ -115,6 +117,8 @@ fun PremiumUpgradeScreen(
                                     scope.launch {
                                         try {
                                             val intent = vm.payments.createIntent(gateway, plan.id, plan.amount_iqd, autoRenew)
+                                            // `deep_link` is a wallet scheme or, behind Wayl, an
+                                            // https hosted page; ACTION_VIEW opens either one.
                                             val opened = try {
                                                 context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(intent.deep_link)))
                                                 true
@@ -185,7 +189,12 @@ fun PremiumUpgradeScreen(
         // iOS VStack(spacing: 16): carousel, auto-renew, payment methods, status, error.
         Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
             if (plans.isNotEmpty()) PremiumPlanCarousel(plans, pagerState)
-            PremiumAutoRenewRow(checked = autoRenew, onCheckedChange = { autoRenew = it })
+            PremiumAutoRenewRow(
+                checked = autoRenew,
+                // Unknown or missing means link mode, the default with Wayl.
+                chargesWallet = autoRenewModes?.get(gateway) == "charge",
+                onCheckedChange = { autoRenew = it },
+            )
             PremiumPaymentSection(selectedId = gateway, onSelect = { gateway = it })
             status?.let {
                 // iOS: status in accent, errors in danger.

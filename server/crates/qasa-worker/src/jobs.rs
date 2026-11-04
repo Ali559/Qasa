@@ -3,44 +3,16 @@ use std::sync::Arc;
 use chrono::Utc;
 use qasa_db::DbPool;
 use qasa_db::repos::push_copy::{
-    BREACH_ALERT_PREMIUM, SUB_EXPIRING_3D, SUB_RENEW_FAILED,
+    BREACH_ALERT_PREMIUM, SUB_EXPIRING_3D, SUB_RENEWAL_LINK, SUB_RENEW_FAILED,
 };
 use qasa_db::repos::settlement::{
     settle_payment, settle_payment_with_token, SettleOutcome, SettleStatus,
 };
 use qasa_payments::{
-    GatewayKind, PaymentError, PaymentGateway, StubGateway, WebhookStatus, RENEWAL_LEAD_HOURS,
-    RENEWAL_MAX_ATTEMPTS, RENEWAL_RETRY_HOURS,
+    GatewayKind, Gateways, IntentRequest, PaymentError, WebhookStatus, RENEWAL_LEAD_HOURS,
+    RENEWAL_LINK_LEAD_HOURS, RENEWAL_MAX_ATTEMPTS, RENEWAL_RETRY_HOURS,
 };
 use qasa_push::PushService;
-
-/// The payment gateways, as the worker sees them. Same construction rule as the API:
-/// stubs may only settle (and so only charge) in dev.
-pub struct Gateways(Vec<StubGateway>);
-
-impl Gateways {
-    pub fn from_env(settles_payments: bool) -> Self {
-        Self(
-            qasa_payments::all_stub_gateways(settles_payments)
-                .into_iter()
-                .map(|(_, g)| g)
-                .collect(),
-        )
-    }
-
-    fn get(&self, kind: GatewayKind) -> Option<&StubGateway> {
-        self.0.iter().find(|g| g.kind() == kind)
-    }
-
-    /// Gateways that can charge a saved method, as stored in `payment_methods.gateway`.
-    fn recurring(&self) -> Vec<&'static str> {
-        self.0
-            .iter()
-            .filter(|g| g.supports_recurring())
-            .map(|g| g.kind().as_str())
-            .collect()
-    }
-}
 
 pub async fn expire_subscriptions(pool: DbPool, _push: Arc<PushService>) -> anyhow::Result<()> {
     let n = qasa_db::repos::worker::expire_subscriptions(&pool).await?;
@@ -198,12 +170,20 @@ pub async fn broadcast_pushes(pool: DbPool, push: Arc<PushService>) -> anyhow::R
     Ok(())
 }
 
-/// Expires within 3 days and will not renew by itself → device push.
+/// Expires within 3 days, will not renew by itself, and no renewal link went out →
+/// device push.
+///
+/// Renewal links are sent first, in the same run: a subscription already inside both
+/// windows (as every one ending soon is on the day links are switched on) then gets the
+/// link and not the reminder as well.
 pub async fn subscription_expiry_warnings(
     pool: DbPool,
     push: Arc<PushService>,
     gateways: Arc<Gateways>,
 ) -> anyhow::Result<()> {
+    if let Err(err) = send_renewal_links(pool.clone(), push.clone(), gateways.clone()).await {
+        tracing::error!(error = %err, "renewal links before expiry warnings failed");
+    }
     let rows =
         qasa_db::repos::worker::subs_needing_expiry_warning(&pool, &gateways.recurring()).await?;
     let mut sent = 0u64;
@@ -296,7 +276,10 @@ async fn renew_one(
     gateways: &Gateways,
     r: &qasa_db::repos::renewal::DueRenewal,
 ) -> anyhow::Result<()> {
-    let Some(gateway) = GatewayKind::parse(&r.gateway).and_then(|k| gateways.get(k)) else {
+    let Some(gateway) = GatewayKind::parse(&r.gateway)
+        .and_then(|k| gateways.get(k))
+        .filter(|g| g.is_live())
+    else {
         return Ok(());
     };
     let kind = gateway.kind();
@@ -382,6 +365,171 @@ async fn renew_one(
         Err(err) => {
             qasa_db::repos::payment::fail_unplaced(pool, payment.id).await?;
             tracing::warn!(error = %err, subscription_id = %r.subscription_id, attempt, "renewal charge not placed");
+        }
+    }
+    Ok(())
+}
+
+/// Send a payment link for the next period to auto-renew subscriptions that no gateway
+/// can charge (Wayl cannot), `RENEWAL_LINK_LEAD_HOURS` before they end. Runs at the start
+/// of `subscription_expiry_warnings`.
+///
+/// The link is a renewal payment like a charged one: paying it goes through
+/// `settle_payment`, so the time stacks onto the current end date. It stays open until
+/// the period ends; after that the customer renews in the app. If the link cannot be
+/// created, the next run tries again, and the 3-day reminder goes out in its place.
+pub async fn send_renewal_links(
+    pool: DbPool,
+    push: Arc<PushService>,
+    gateways: Arc<Gateways>,
+) -> anyhow::Result<()> {
+    let Some(gateway) = gateways.renewal_links() else {
+        return Ok(());
+    };
+    let due = qasa_db::repos::renewal::due_links(
+        &pool,
+        &gateways.recurring(),
+        RENEWAL_LINK_LEAD_HOURS,
+        50,
+    )
+    .await?;
+    let mut sent = 0u32;
+    for r in &due {
+        match link_one(&pool, &push, gateway, r).await {
+            Ok(true) => sent += 1,
+            Ok(false) => {}
+            Err(err) => tracing::error!(
+                error = %err,
+                subscription_id = %r.subscription_id,
+                "renewal link not sent"
+            ),
+        }
+    }
+    if sent > 0 {
+        tracing::info!(sent, "renewal links sent");
+    }
+    Ok(())
+}
+
+async fn link_one(
+    pool: &DbPool,
+    push: &PushService,
+    gateway: &dyn qasa_payments::PaymentGateway,
+    r: &qasa_db::repos::renewal::DueLink,
+) -> anyhow::Result<bool> {
+    // A plan that can no longer be bought is not renewed; the 3-day reminder tells the
+    // customer to choose one.
+    let Some(plan) = qasa_db::repos::plan::get_plan(pool, &r.plan_id)
+        .await?
+        .filter(|p| p.active)
+    else {
+        return Ok(false);
+    };
+    if !qasa_db::repos::renewal::claim_link(pool, r.subscription_id).await? {
+        return Ok(false);
+    }
+
+    let Some(payment) = qasa_db::repos::payment::create_renewal_link_payment(
+        pool,
+        r.account_id,
+        r.subscription_id,
+        gateway.kind().as_str(),
+        plan.amount_iqd,
+        &plan.id,
+        r.expires_at,
+    )
+    .await?
+    else {
+        return Ok(false);
+    };
+
+    let order_ref = payment.id.simple().to_string();
+    let minutes_left = (r.expires_at - Utc::now()).num_minutes().max(60);
+    let label = format!("Qasa {}", plan.title);
+    let intent = gateway
+        .create_intent(&IntentRequest {
+            amount_iqd: plan.amount_iqd,
+            order_ref: &order_ref,
+            label: &label,
+            save_method: false,
+            expires_in_minutes: u32::try_from(minutes_left).unwrap_or(u32::MAX),
+        })
+        .await;
+    let intent = match intent {
+        Ok(intent) => intent,
+        Err(err) => {
+            qasa_db::repos::payment::fail_unplaced(pool, payment.id).await?;
+            qasa_db::repos::renewal::release_link(pool, r.subscription_id).await?;
+            return Err(err.into());
+        }
+    };
+    qasa_db::repos::payment::set_link(pool, payment.id, &intent.gateway_order_id, &intent.deep_link)
+        .await?;
+
+    let dedupe = format!("sub_renewal_link:{}", r.subscription_id);
+    push.notify_account(pool, r.account_id, &SUB_RENEWAL_LINK, &dedupe).await?;
+    Ok(true)
+}
+
+/// Minimum gap between two status checks of one payment.
+const CHECK_EVERY_MINUTES: i32 = 10;
+
+/// Ask gateways that can look an order up (Wayl) about payments still open, so a missed
+/// webhook does not leave a paid customer without Premium. Settles exactly as a webhook
+/// would.
+pub async fn check_open_payments(
+    pool: DbPool,
+    _push: Arc<PushService>,
+    gateways: Arc<Gateways>,
+) -> anyhow::Result<()> {
+    // Only gateways that really move money; the dev stubs have nothing to look up.
+    let pollable: Vec<&str> = [GatewayKind::Wayl]
+        .into_iter()
+        .filter(|k| gateways.get(*k).is_some_and(|g| g.is_live()))
+        .map(|k| k.as_str())
+        .collect();
+    if pollable.is_empty() {
+        return Ok(());
+    }
+    let rows =
+        qasa_db::repos::worker::payments_to_check(&pool, &pollable, CHECK_EVERY_MINUTES, 100)
+            .await?;
+    for p in rows {
+        qasa_db::repos::worker::mark_checked(&pool, p.id).await?;
+        let Some(gateway) = GatewayKind::parse(&p.gateway).and_then(|k| gateways.get(k)) else {
+            continue;
+        };
+        let event = match gateway.fetch_status(&p.gateway_order_id).await {
+            Ok(Some(event)) => event,
+            Ok(None) => continue,
+            Err(err) => {
+                tracing::warn!(error = %err, payment_id = %p.id, "payment status check failed");
+                continue;
+            }
+        };
+        let status = match event.status {
+            WebhookStatus::Success => SettleStatus::Success,
+            WebhookStatus::Failed => SettleStatus::Failed,
+            WebhookStatus::Pending => continue,
+        };
+        let outcome = settle_payment(&pool, &p.gateway, &p.gateway_order_id, status, event.amount_iqd)
+            .await?;
+        match outcome {
+            SettleOutcome::Settled { subscription, .. } => tracing::info!(
+                payment_id = %p.id,
+                expires_at = %subscription.expires_at,
+                "payment settled by status check"
+            ),
+            SettleOutcome::AmountMismatch { reported, expected } => tracing::warn!(
+                payment_id = %p.id,
+                reported,
+                expected,
+                "status check: amount mismatch"
+            ),
+            SettleOutcome::AccountDeleted { payment } => {
+                tracing::warn!(payment_id = %payment.id, "status check: account deleted; refund required")
+            }
+            _ => {}
         }
     }
     Ok(())

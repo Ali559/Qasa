@@ -406,7 +406,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
               <template v-if="detail.payment_method">
                 Renews with the saved {{ detail.payment_method.gateway.toUpperCase() }} wallet (saved {{ fmtDate(detail.payment_method.created_at) }}).
               </template>
-              <template v-else>No saved wallet, so nothing renews automatically.</template>
+              <template v-else>No saved wallet. With auto-renew on, a payment link for the next period is sent a few days before the end.</template>
             </CardDescription>
           </CardHeader>
           <CardContent class="px-0">
@@ -477,7 +477,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
                   <TableCell class="py-3.5 pl-6">
                     <p class="font-mono text-[0.8rem] font-medium">{{ p.gateway_order_id ?? p.payment_id }}</p>
                     <p class="text-muted-foreground text-xs">
-                      <span class="uppercase">{{ p.gateway }}</span>, {{ planLabel(p.plan_id) }}<template v-if="p.kind === 'renewal'">, automatic renewal</template>
+                      <span class="uppercase">{{ p.gateway }}</span>, {{ planLabel(p.plan_id) }}<template v-if="p.kind === 'renewal'">, renewal</template>
                     </p>
                   </TableCell>
                   <TableCell class="text-right">

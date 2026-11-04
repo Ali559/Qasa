@@ -3,10 +3,12 @@ package alibarznji.qasa.screens.settings
 import alibarznji.qasa.R
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.network.SubscriptionDTO
+import alibarznji.qasa.payments.PaymentService
 import alibarznji.qasa.payments.SubscriptionService
 import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.settings.subscription.AutoRenewCard
 import alibarznji.qasa.screens.settings.subscription.CancelSubscriptionButton
+import alibarznji.qasa.screens.settings.subscription.RenewalLinkCard
 import alibarznji.qasa.screens.settings.subscription.SubscriptionDetailsCard
 import alibarznji.qasa.screens.settings.subscription.appLocale
 import alibarznji.qasa.screens.settings.subscription.formatSubscriptionDate
@@ -19,6 +21,8 @@ import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,10 +45,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -52,6 +58,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SubViewModel @Inject constructor(
     val service: SubscriptionService,
+    val payments: PaymentService,
     private val license: LicenseManager,
     private val appSession: AppSession,
 ) : ViewModel() {
@@ -76,6 +83,10 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
     var showCancelConfirm by remember { mutableStateOf(false) }
     var showCancelReason by remember { mutableStateOf(false) }
     var showRemovePaymentConfirm by remember { mutableStateOf(false) }
+    // Set when the renewal link was opened; checked once the user is back in the app.
+    var pendingRenewalPaymentId by remember { mutableStateOf<String?>(null) }
+    var isConfirmingRenewal by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isCancelled = sub?.status?.lowercase() == "cancelled"
 
@@ -83,6 +94,8 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
     val autoRenewEnabledMsg = stringResource(R.string.sub_autorenewenabled)
     val autoRenewDisabledMsg = stringResource(R.string.sub_autorenewdisabled)
     val paymentMethodRemovedMsg = stringResource(R.string.sub_paymentmethodremoved)
+    val paymentFailedMsg = stringResource(R.string.premium_paymentfailed)
+    val renewalNotPaidYetMsg = stringResource(R.string.sub_renewalnotpaidyet)
 
     LaunchedEffect(Unit) {
         try {
@@ -140,6 +153,52 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
         }
     }
 
+    /** Same confirmation as checkout: poll the payment, then reload the subscription. */
+    fun confirmRenewal(paymentId: String) {
+        if (isConfirmingRenewal) return
+        scope.launch {
+            isConfirmingRenewal = true
+            errorMessage = null
+            statusMessage = null
+            try {
+                val ok = vm.payments.pollUntilComplete(paymentId)
+                vm.syncFromLicense()
+                val fetched = vm.service.current()
+                sub = fetched
+                autoRenew = fetched?.auto_renew ?: autoRenew
+                // Still open means they came back without paying (or it hasn't landed yet),
+                // not that the payment failed.
+                if (!ok) {
+                    if (fetched?.renewal?.link != null) statusMessage = renewalNotPaidYetMsg
+                    else errorMessage = paymentFailedMsg
+                }
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isConfirmingRenewal = false
+            }
+        }
+    }
+
+    fun openRenewalLink(paymentId: String, url: String) {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            pendingRenewalPaymentId = paymentId
+        } catch (e: Exception) {
+            errorMessage = e.message
+        }
+    }
+
+    // Keyed on Unit, not the id: setting the id while still resumed must not fire it
+    // before the browser or wallet has even opened.
+    LifecycleResumeEffect(Unit) {
+        pendingRenewalPaymentId?.let {
+            pendingRenewalPaymentId = null
+            confirmRenewal(it)
+        }
+        onPauseOrDispose {}
+    }
+
     fun removePaymentMethod() {
         if (isSaving) return
         scope.launch {
@@ -187,6 +246,14 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
             else -> {
                 SubscriptionDetailsCard(s, isCancelled)
                 Spacer(Modifier.height(QasaDimens.gap))
+                s.renewal?.link?.let { link ->
+                    RenewalLinkCard(
+                        link = link,
+                        isConfirming = isConfirmingRenewal,
+                        onPay = { openRenewalLink(link.payment_id, link.url) },
+                    )
+                    Spacer(Modifier.height(QasaDimens.gap))
+                }
                 AutoRenewCard(
                     sub = s,
                     checked = autoRenew,

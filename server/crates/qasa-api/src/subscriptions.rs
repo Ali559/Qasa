@@ -6,6 +6,7 @@ use serde_json::json;
 use uuid::Uuid;
 
 use qasa_db::repos::subscription::SubscriptionRow;
+use qasa_payments::RenewalMode;
 
 use crate::auth::LicenseAuth;
 use crate::error::ApiResult;
@@ -27,9 +28,13 @@ pub async fn get_current(
 /// The subscription as the apps see it.
 ///
 /// `renewal` says what will actually happen at `expires_at`, which the toggle alone does
-/// not: auto-renew only charges when a saved method on a recurring-capable gateway
-/// exists. `will_renew: false` with `auto_renew: true` means the next checkout (paid with
-/// auto-renew on) saves one; until then the customer renews by hand.
+/// not:
+/// - `mode: "charge"`: a saved method on a recurring-capable gateway will be charged
+///   (`will_renew` is true).
+/// - `mode: "link"`: no gateway can charge one (Wayl cannot), so a payment link for the
+///   next period is sent a few days before the end. `link` is that link once it is out.
+/// - `mode: "none"`: auto-renew is off, the subscription is not active, or nothing can
+///   take a payment; the customer renews by hand.
 async fn subscription_json(state: &AppState, s: &SubscriptionRow) -> ApiResult<serde_json::Value> {
     let gateway = qasa_db::repos::renewal::recurring_method_gateway(
         &state.pool,
@@ -37,16 +42,37 @@ async fn subscription_json(state: &AppState, s: &SubscriptionRow) -> ApiResult<s
         &state.recurring_gateways(),
     )
     .await?;
-    let will_renew = s.auto_renew && s.status == "active" && gateway.is_some();
-    // Renewals charge the plan's price at the time, which can differ from what was paid.
-    let price = if will_renew {
+    let renewing = s.auto_renew && s.status == "active";
+    let mode = if !renewing {
+        RenewalMode::None
+    } else if gateway.is_some() {
+        RenewalMode::Charge
+    } else if state.gateways.renewal_links().is_some() {
+        RenewalMode::Link
+    } else {
+        RenewalMode::None
+    };
+    // Renewals cost the plan's price at the time, which can differ from what was paid.
+    let price = if mode == RenewalMode::None {
+        None
+    } else {
         qasa_db::repos::plan::get_plan(&state.pool, &s.plan_id)
             .await?
             .filter(|p| p.active)
             .map(|p| p.amount_iqd)
-    } else {
-        None
     };
+    let mode = if price.is_none() { RenewalMode::None } else { mode };
+    // An open link is shown even with auto-renew since turned off: it can still be paid.
+    let link = qasa_db::repos::payment::open_renewal_link(&state.pool, s.id)
+        .await?
+        .map(|p| {
+            json!({
+                "payment_id": p.id,
+                "url": p.deep_link,
+                "amount_iqd": p.amount_iqd,
+                "pay_by": p.pay_by,
+            })
+        });
     Ok(json!({
         "id": s.id,
         "status": s.status,
@@ -58,9 +84,11 @@ async fn subscription_json(state: &AppState, s: &SubscriptionRow) -> ApiResult<s
         "cancelled_at": s.cancelled_at,
         "cancellation_reason": s.cancellation_reason,
         "renewal": {
-            "will_renew": will_renew && price.is_some(),
-            "gateway": gateway,
+            "mode": mode.as_str(),
+            "will_renew": mode == RenewalMode::Charge,
+            "gateway": gateway.filter(|_| mode == RenewalMode::Charge),
             "amount_iqd": price,
+            "link": link,
         },
     }))
 }

@@ -5,6 +5,8 @@ final class PricingService {
     static let shared = PricingService()
 
     private(set) var plans: [PricingPlanDTO] = []
+    /// Gateway → renewal mode from `/v1/pricing`; empty until fetched or on older servers.
+    private(set) var autoRenewModes: [String: String] = [:]
     private(set) var lastError: String?
 
     private init() {}
@@ -18,6 +20,7 @@ final class PricingService {
             )
             let sorted = response.plans.sorted { ($0.sort_order ?? 0) < ($1.sort_order ?? 0) }
             plans = sorted
+            autoRenewModes = response.auto_renew ?? [:]
             lastError = nil
             return sorted
         } catch {

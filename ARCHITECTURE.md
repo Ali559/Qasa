@@ -130,7 +130,7 @@ knows nothing about HTTP or SQL.
 | `qasa-api` | binary | HTTP router, auth extractors, request limits, handlers. Router tests in `src/router_tests.rs` |
 | `qasa-core` | library | Config, tiers and entitlements, Ed25519 license tokens, admin tokens, Argon2 password hashing |
 | `qasa-db` | library | Connection pool, migrations, one module per table group under `src/repos/`, integration tests under `tests/` |
-| `qasa-payments` | library | `PaymentGateway` trait (checkout, webhook, saved-method charge) and the three gateway stubs; renewal timing constants |
+| `qasa-payments` | library | `PaymentGateway` trait (checkout, webhook, status lookup, saved-method charge), the `Gateways` registry the API and worker share, the Wayl gateway, the three wallet stubs; renewal timing constants |
 | `qasa-push` | library | FCM HTTP v1 delivery, per-device locale, dead-token cleanup |
 | `qasa-breach` | library + CLI | Hash/prefix handling; `qasa-breach ingest` loads breach hashes |
 | `qasa-vpn` | library + binary | WireGuard config types, key checks, IP pool, `wg` dump parsing and sync planning; the `qasa-vpn-agent` binary |
@@ -215,7 +215,7 @@ and `server/crates/qasa-api/src/main.rs` is authoritative. By area:
 | --- | --- | --- |
 | Devices and license | `devices/register`, `devices/link-check`, `devices`, `devices/{id}`, `devices/me`, `devices/others`, `devices/prefs`, `license` | none for register/link-check; license otherwise |
 | Account | `DELETE account` (with `confirm_account_id`) | license |
-| Plans and billing | `pricing`, `subscription`, `subscription/auto-renew`, `subscription/cancel`, `DELETE payment-method`, `payments`, `payments/intents`, `payments/{id}`, `payments/webhook/{fib,fastpay,superqi}` | none for pricing/webhooks; license otherwise |
+| Plans and billing | `pricing`, `subscription`, `subscription/auto-renew`, `subscription/cancel`, `DELETE payment-method`, `payments`, `payments/intents`, `payments/{id}`, `payments/webhook/{fib,fastpay,superqi,wayl}` | none for pricing/webhooks; license otherwise |
 | Breach | `breach/prefix/{prefix}`, `breach/monitor` (+ `/{id}`) | license; Premium to look up or register |
 | VPN | `vpn/nodes`, `vpn/connect`, `vpn/disconnect`, `vpn/status` | license; Premium to connect |
 | Inbox | `notifications`, `notifications/unread-count`, `notifications/read-all`, `notifications/{id}`, `notifications/{id}/read` | license |
@@ -234,13 +234,14 @@ response. The admin users list keeps a bare-array body and returns its cursor in
 | Job | Every | What it does |
 | --- | --- | --- |
 | `expire_subscriptions` | 15 min | Expire ended subscriptions, mark accounts lapsed, end VPN sessions of non-subscribers |
-| `expire_abandoned_payments` | 5 min | `pending` checkouts older than 60 min become `expired` (a late confirmation still settles) |
+| `expire_abandoned_payments` | 5 min | `pending` checkouts older than 60 min, and renewal links past their `pay_by`, become `expired` (a late confirmation still settles) |
+| `check_open_payments` | 5 min | Ask Wayl about open (or abandoned in the last day) payments not checked in 10 min, and settle what it reports, in case a webhook was missed |
 | `broadcast_pushes` | 1 min | Push admin broadcasts to each device in its language, once per receipt, for up to 24 h |
 | `webhook_retry` | 1 min | Re-settle verified webhook events still pending, through the same settlement code as the API |
 | `offline_vpn_nodes` | 1 min | Nodes with no heartbeat for 2 min go `offline` |
 | `stale_vpn_sessions` | 1 min | End sessions with no handshake for 5 min (or none within 10 min of connecting) |
 | `breach_alert_scan` | not scheduled | Parked with email leak alerts. Would match monitored hashes against breach data and push Premium accounts (at most weekly per hash) |
-| `subscription_expiry_warnings` | 1 h | "Premium ends in 3 days" push, only to subscriptions that will not renew by themselves |
+| `subscription_expiry_warnings` | 1 h | First sends renewal links: a payment link for the next period to auto-renew subscriptions ending within 4 days that nothing can charge (section 4.8). Then the "Premium ends in 3 days" push, only to subscriptions that will not renew by themselves and got no link |
 | `charge_renewals` | 15 min | Charge saved methods for auto-renew subscriptions ending within 24 h (section 4.8) |
 | `subscription_renew_failed_notices` | 1 h | "We couldn't renew" push, once, after the worker's attempts are used up or the saved method was rejected |
 | `purge_license_revocations` | 1 day | Drop expired token revocations, admin and device |
@@ -251,14 +252,17 @@ response. The admin users list keeps a bare-array body and returns its cursor in
 1. **Intent.** The app calls `POST /payments/intents` with a gateway and a plan. The
    amount comes from `plans`; an `amount_iqd` that doesn't match is refused, and an
    `idempotency_key` makes retries safe. The server creates the gateway order and
-   returns a deep link to the wallet app.
-2. **Pay.** The user pays in the wallet app. The app polls `GET /payments/{id}`.
+   returns a deep link: to the wallet app, or, through Wayl, to Wayl's hosted page.
+   `Gateways::for_checkout` decides which gateway takes it: Wayl takes every checkout
+   once it is configured (its page offers the same wallets), otherwise the wallet picked.
+2. **Pay.** The user pays in the wallet app or on Wayl's page. The app polls
+   `GET /payments/{id}`.
 3. **Settle.** The gateway's webhook is verified, recorded in `webhook_events`, and passed
    to **`settle_payment`** (`qasa-db/src/repos/settlement.rs`), the only code path that
    turns money into an entitlement. In one transaction, with the payment row locked, it
    checks the gateway and the amount, then grants the subscription and marks the payment
    paid. Time stacks: paying early extends from the current end date. The worker's retry
-   job uses the same function.
+   and status-check jobs use the same function.
 4. **Refresh.** The app sees `success` and refreshes its license, which now carries
    Premium.
 
@@ -270,10 +274,15 @@ response. The admin users list keeps a bare-array body and returns its cursor in
   same transaction as the grant, but only if the payment had auto-renew on. A newer
   consented checkout replaces it. `DELETE /v1/payment-method` forgets it; deleting the
   account does too.
-- **Will it renew?** Only when auto-renew is on, a live method exists, and its gateway
-  `supports_recurring()`. `GET /v1/subscription` reports this as
-  `renewal: {will_renew, gateway, amount_iqd}`, which is what the apps show under the
-  toggle. Everything else lapses at its end date and gets the 3-day reminder.
+- **Will it renew?** `GET /v1/subscription` reports `renewal.mode`, which is what the
+  apps show under the toggle:
+  - `charge` when auto-renew is on, a live method exists, and its gateway
+    `supports_recurring()` (`will_renew` true).
+  - `link` when auto-renew is on but nothing can charge it and a gateway can send renewal
+    links (Wayl). `renewal.link` is the open link once it is out.
+  - `none` otherwise: it lapses at its end date and gets the 3-day reminder.
+  `GET /v1/pricing` says the same per wallet (`auto_renew`), so the checkout screen's
+  consent text matches what will happen.
 - **Charging.** `charge_renewals` picks subscriptions ending within
   `RENEWAL_LEAD_HOURS` (24). It counts the attempt first (`renewal::claim_attempt`, a
   compare-and-swap, so two runs cannot both charge), inserts a `renewal` payment at the
@@ -284,13 +293,34 @@ response. The admin users list keeps a bare-array body and returns its cursor in
   `RENEWAL_MAX_ATTEMPTS` (3), all before the end date. A rejected token is dropped at once.
   Either way the customer gets one `SUB_RENEW_FAILED` push and pays by hand; turning
   auto-renew off and on again starts a fresh round. An inactive plan is not renewed.
+- **Renewal links.** Wayl cannot charge a saved wallet at all, so where nothing can,
+  `send_renewal_links` (run by `subscription_expiry_warnings`) creates a `renewal` payment with a link for the next period
+  `RENEWAL_LINK_LEAD_HOURS` (96) before the end, and sends `SUB_RENEWAL_LINK`. One link
+  per period (`subscriptions.renewal_link_sent_at`). It stays open until the period ends
+  (`payments.pay_by`); paying it settles like any payment, so the time stacks. A link that
+  could not be created is retried on the next run, and if it never is, the 3-day reminder
+  goes out instead, since that reminder is skipped only once a link is sent. Links are
+  sent at the start of the reminder job, so a subscription inside both windows at once
+  gets only the link.
 
-The three gateways are stubs that settle, and charge saved methods, only in dev. The stub
-mints a token for every successful webhook; tokens starting `stub-decline` or
-`stub-revoked` exercise the failure paths. Real integrations, including which of FIB,
-FastPay and SuperQi can charge a saved wallet at all, and refunds are pending (todo
-`payments-live`). In prod no gateway `supports_recurring()` yet, so nothing is charged and
-every subscriber gets the 3-day reminder.
+**Wayl** (`qasa-payments/src/wayl.rs`) is the real gateway, switched on by
+`QASA_WAYL_API_KEY` with `QASA_WAYL_WEBHOOK_SECRET` (10 to 255 characters) and
+`QASA_PUBLIC_API_URL` (webhooks go to `{it}/v1/payments/webhook/wayl`); optional
+`QASA_WAYL_REDIRECT_URL`, and `QASA_WAYL_ENV=test` outside production only. A payment is
+a Wayl link whose `referenceId` is our order id. Wayl does not document its webhook body,
+so the webhook is trusted only to say which link changed: its HMAC-SHA256 signature
+(`x-wayl-signature-256`, hex, over the raw body) is checked, and the status and amount
+are then read back from `GET /api/v1/links/{referenceId}`. Only `Complete` and
+`Delivered` count as paid. If Wayl's API cannot be reached the order stays pending and
+`check_open_payments` asks again.
+
+The FIB, FastPay and SuperQi gateways are stubs that settle, charge saved methods and
+send renewal links only in dev. The stub mints a token for every successful webhook;
+tokens starting `stub-decline` or `stub-revoked` exercise the failure paths. Direct
+integrations, including whether any can charge a saved wallet, and refunds are pending
+(todo `payments-live`). In prod no gateway `supports_recurring()`, so nothing is charged:
+with Wayl configured, auto-renew subscribers get a renewal link, and without it every
+subscriber gets the 3-day reminder.
 
 ### 4.9 Notifications and push
 

@@ -9,6 +9,8 @@ pub enum GatewayKind {
     Fib,
     Fastpay,
     Superqi,
+    /// Wayl's hosted checkout, which takes FIB, Qi Card and other wallets on one page.
+    Wayl,
 }
 
 impl GatewayKind {
@@ -17,6 +19,7 @@ impl GatewayKind {
             Self::Fib => "fib",
             Self::Fastpay => "fastpay",
             Self::Superqi => "superqi",
+            Self::Wayl => "wayl",
         }
     }
 
@@ -25,9 +28,25 @@ impl GatewayKind {
             "fib" => Some(Self::Fib),
             "fastpay" => Some(Self::Fastpay),
             "superqi" => Some(Self::Superqi),
+            "wayl" => Some(Self::Wayl),
             _ => None,
         }
     }
+}
+
+/// What to ask a gateway for when creating a payment.
+#[derive(Debug, Clone)]
+pub struct IntentRequest<'a> {
+    pub amount_iqd: i32,
+    /// Our reference for the order. Gateways that let us choose the order id use it as is.
+    pub order_ref: &'a str,
+    /// What the customer sees on a hosted checkout page, e.g. "Qasa Premium (monthly)".
+    pub label: &'a str,
+    /// Ask the gateway to return a reusable token with the payment, for later renewals.
+    /// Set only when the customer left auto-renew on and the gateway can charge one.
+    pub save_method: bool,
+    /// How long the customer has to pay before the link stops working.
+    pub expires_in_minutes: u32,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -96,16 +115,28 @@ pub enum PaymentError {
 pub trait PaymentGateway: Send + Sync {
     fn kind(&self) -> GatewayKind;
 
-    /// `save_method` asks the gateway to return a reusable token with the payment, for
-    /// later renewals. Set only when the customer left auto-renew on.
-    async fn create_intent(&self, amount_iqd: i32, order_ref: &str, save_method: bool)
-        -> PaymentIntent;
+    /// Whether this gateway really moves money here, and so may turn a payment into an
+    /// entitlement. Checkouts on a gateway that is not live are refused up front.
+    fn is_live(&self) -> bool;
 
-    fn verify_webhook(&self, headers: &HeaderMap, body: &[u8]) -> Result<WebhookEvent, PaymentError>;
+    async fn create_intent(&self, req: &IntentRequest<'_>) -> Result<PaymentIntent, PaymentError>;
+
+    /// Check that a webhook really came from the gateway, and say what it reports.
+    async fn verify_webhook(&self, headers: &HeaderMap, body: &[u8]) -> Result<WebhookEvent, PaymentError>;
+
+    /// Ask the gateway for an order's current status, for orders whose webhook may have
+    /// been missed. `None` when the gateway has no way to look one up.
+    async fn fetch_status(&self, _gateway_order_id: &str) -> Result<Option<WebhookEvent>, PaymentError> {
+        Ok(None)
+    }
 
     /// Whether this gateway can charge a saved method without the customer approving
-    /// each payment. Renewals are only attempted on gateways that can.
+    /// each payment. Renewals are only charged on gateways that can.
     fn supports_recurring(&self) -> bool;
+
+    /// Whether a payment link from this gateway can stay open for days, long enough to
+    /// send one before a period ends and let the customer pay it when they like.
+    fn supports_renewal_links(&self) -> bool;
 
     /// Charge a saved method `amount_iqd`. `order_ref` is our payment id, passed so the
     /// gateway can refuse a duplicate charge if the call is retried.

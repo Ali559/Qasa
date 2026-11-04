@@ -37,12 +37,17 @@ class PricingService @Inject constructor(private val api: QasaApiClient) {
     var plans: List<PricingPlanDTO> = emptyList()
         private set
 
+    /** `auto_renew` from the last good fetch; null until then or on an older server. */
+    @Volatile
+    var autoRenewModes: Map<String, String>? = null
+        private set
+
     suspend fun fetchPlans(): List<PricingPlanDTO> = withContext(Dispatchers.IO) {
         try {
-            val sorted = api.get<PricingResponse>(QasaConfig.pricingUrl, authorized = false)
-                .plans
-                .sortedBy { it.sort_order ?: 0 }
+            val response = api.get<PricingResponse>(QasaConfig.pricingUrl, authorized = false)
+            val sorted = response.plans.sortedBy { it.sort_order ?: 0 }
             plans = sorted
+            autoRenewModes = response.auto_renew
             sorted
         } catch (_: Exception) {
             if (plans.isEmpty()) plans = FALLBACK_PLANS

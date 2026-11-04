@@ -3,7 +3,7 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
 use qasa_core::CoreError;
 use qasa_db::repos::settlement::{settle_payment_with_token, SettleOutcome, SettleStatus};
-use qasa_payments::{GatewayKind, PaymentGateway, WebhookStatus};
+use qasa_payments::{GatewayKind, IntentRequest, WebhookStatus, CHECKOUT_LINK_MINUTES};
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
@@ -69,16 +69,19 @@ pub async fn create_intent(
         }
     }
 
-    let kind = GatewayKind::parse(&body.gateway)
+    let picked = GatewayKind::parse(&body.gateway)
         .ok_or_else(|| CoreError::BadRequest(format!("unsupported gateway: {}", body.gateway)))?;
+    // Once Wayl is live it takes every checkout: its page offers the wallet they picked.
     let gateway = state
-        .gateway(kind)
+        .gateways
+        .for_checkout(picked)
         .ok_or_else(|| CoreError::BadRequest("gateway unavailable".into()))?;
+    let kind = gateway.kind();
 
-    // Outside dev, no gateway can actually move money, so refuse up front rather than
-    // handing back a deep link that opens nothing and leaving the user waiting on a
-    // payment that can never be confirmed.
-    if !gateway.settles_payments() {
+    // A gateway that cannot move money is refused up front rather than handing back a
+    // link that opens nothing and leaving the user waiting on a payment that can never be
+    // confirmed.
+    if !gateway.is_live() {
         return Err(CoreError::BadRequest(
             "payments are not available for this gateway".into(),
         )
@@ -89,9 +92,20 @@ pub async fn create_intent(
     // that can charge it later is asked to.
     let save_method = body.auto_renew && gateway.supports_recurring();
     let order_ref = qasa_payments::new_order_ref();
+    let label = format!("Qasa {}", plan.title);
     let intent = gateway
-        .create_intent(plan.amount_iqd, &order_ref, save_method)
-        .await;
+        .create_intent(&IntentRequest {
+            amount_iqd: plan.amount_iqd,
+            order_ref: &order_ref,
+            label: &label,
+            save_method,
+            expires_in_minutes: CHECKOUT_LINK_MINUTES,
+        })
+        .await
+        .map_err(|err| {
+            tracing::warn!(error = %err, gateway = kind.as_str(), "payment intent not created");
+            CoreError::BadRequest("the payment provider could not start this payment; try again".into())
+        })?;
 
     let created = qasa_db::repos::payment::create_payment(
         &state.pool,
@@ -233,6 +247,14 @@ pub async fn webhook_fastpay(
     handle_webhook(state, GatewayKind::Fastpay, headers, body).await
 }
 
+pub async fn webhook_wayl(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> ApiResult<StatusCode> {
+    handle_webhook(state, GatewayKind::Wayl, headers, body).await
+}
+
 pub async fn webhook_superqi(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -248,10 +270,11 @@ async fn handle_webhook(
     body: axum::body::Bytes,
 ) -> ApiResult<StatusCode> {
     let gateway = state
-        .gateway(kind)
+        .gateways
+        .get(kind)
         .ok_or_else(|| CoreError::BadRequest("gateway unavailable".into()))?;
 
-    let event = match gateway.verify_webhook(&headers, &body) {
+    let event = match gateway.verify_webhook(&headers, &body).await {
         Ok(event) => event,
         Err(e) => {
             let payload: serde_json::Value =

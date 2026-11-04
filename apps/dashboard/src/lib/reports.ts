@@ -4,6 +4,7 @@ const GATEWAY_META: Record<string, { name: string; color: string }> = {
   fib: { name: 'FIB', color: 'var(--chart-1)' },
   fastpay: { name: 'FastPay', color: 'var(--chart-3)' },
   superqi: { name: 'SuperQi', color: 'var(--chart-2)' },
+  wayl: { name: 'Wayl', color: 'var(--chart-4)' },
 }
 
 export function gatewayLabel(gateway: string) {

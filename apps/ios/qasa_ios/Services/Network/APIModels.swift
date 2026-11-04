@@ -114,9 +114,26 @@ struct SubscriptionDTO: Decodable, Identifiable {
 }
 
 struct RenewalDTO: Decodable {
+    /// "charge" (saved wallet), "link" (pay-by-link before expiry) or "none"; older servers omit it.
+    let mode: String?
     let will_renew: Bool
     let gateway: String?
     let amount_iqd: Int?
+    /// Set once a renewal link is out; still payable even if auto-renew was turned off since.
+    let link: RenewalLinkDTO?
+
+    /// Whether a saved wallet will be charged, falling back to `will_renew` on older servers.
+    var chargesSavedWallet: Bool {
+        if let mode { return mode.lowercased() == "charge" }
+        return will_renew
+    }
+}
+
+struct RenewalLinkDTO: Decodable {
+    let payment_id: String
+    let url: String
+    let amount_iqd: Int
+    let pay_by: String
 }
 
 struct RemovePaymentMethodResponse: Decodable {
@@ -176,6 +193,8 @@ enum FeaturesJSON: Decodable, Hashable {
 
 struct PricingResponse: Decodable {
     let plans: [PricingPlanDTO]
+    /// Gateway → renewal mode ("charge" / "link" / "none") when auto-renew is left on; older servers omit it.
+    let auto_renew: [String: String]?
 }
 
 nonisolated struct AppNotificationDTO: Decodable, Identifiable, Sendable {

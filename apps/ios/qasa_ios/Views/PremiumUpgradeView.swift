@@ -234,6 +234,13 @@ struct PremiumUpgradeView: View {
         .clipped()
     }
 
+    /// Only wallets the server can charge get the "we'll charge it" wording; unknown means pay-by-link.
+    private var autoRenewDetail: String {
+        PricingService.shared.autoRenewModes[selectedGateway]?.lowercased() == "charge"
+            ? L10n.tr("premium.autoRenewDetailCharge", locale: locale)
+            : L10n.tr("premium.autoRenewDetail", locale: locale)
+    }
+
     private var autoRenewRow: some View {
         HStack(spacing: 12) {
             Image(systemName: "arrow.triangle.2.circlepath")
@@ -243,7 +250,7 @@ struct PremiumUpgradeView: View {
                 Text(L10n.tr("premium.autoRenew", locale: locale))
                     .font(.qasa(15, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
-                Text(L10n.tr("premium.autoRenewDetail", locale: locale))
+                Text(autoRenewDetail)
                     .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
             }
@@ -349,8 +356,9 @@ struct PremiumUpgradeView: View {
                     format: L10n.tr("premium.simulatingPayment", locale: locale),
                     method.badgeText
                 )
+                // The server may route to another gateway (e.g. Wayl); its webhook is the one to hit.
                 try await PaymentService.shared.simulateStubPayment(
-                    gateway: gateway,
+                    gateway: intent.gateway,
                     gatewayOrderId: intent.gateway_order_id
                 )
                 #else

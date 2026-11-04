@@ -551,6 +551,7 @@ fn capitalize_gateway(gateway: &str) -> String {
         "fib" => "FIB".into(),
         "fastpay" => "FastPay".into(),
         "superqi" => "SuperQi".into(),
+        "wayl" => "Wayl".into(),
         other => other.to_string(),
     }
 }

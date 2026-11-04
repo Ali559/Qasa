@@ -419,8 +419,9 @@
     <string name="premium_activated">پریمیۆم چالاک کرا.</string>
     <string name="premium_alreadypremium">تۆ لەسەر پریمیۆمیت. لە ڕێکخستنەکان بەڕێوەی ببە.</string>
     <string name="premium_autorenew">نوێبوونەوەی خۆکار</string>
-    <string name="premium_autorenewdetail">لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە.</string>
-    <string name="premium_autorenewhint">لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە.</string>
+    <string name="premium_autorenewdetail">پێش کۆتایی هەر ماوەیەک، بەستەرێکت بۆ دەنێرین بۆ پارەدانی ماوەی داهاتوو. هیچ پارەیەک نابڕدرێت تا خۆت نەیدەیت.</string>
+    <string name="premium_autorenewdetailcharge">لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە.</string>
+    <string name="premium_autorenewhint">پێش کۆتایی هەر ماوەیەک، بەستەرێکت بۆ دەنێرین بۆ پارەدانی ماوەی داهاتوو. هیچ پارەیەک نابڕدرێت تا خۆت نەیدەیت.</string>
     <string name="premium_bestvalue">باشترین نرخ</string>
     <string name="premium_completeinwallet">پارەدان لە %s تەواو بکە…</string>
     <string name="premium_fastpay">FastPay</string>
@@ -549,6 +550,7 @@
     <string name="sub_noneactive">هیچ بەشدارییەکی چالاک نەدۆزرایەوە.</string>
     <string name="sub_nonefound">هیچ بەشدارییەکی چالاک نەدۆزرایەوە.</string>
     <string name="sub_paymentmethodremoved">ڕێگای پارەدانی پاشەکەوتکراو لابرا.</string>
+    <string name="sub_payrenewal">پارەی نوێکردنەوە بدە</string>
     <string name="sub_plan">پلان</string>
     <string name="sub_planmonthly">پریمیۆمی مانگانە</string>
     <string name="sub_planyearly">پریمیۆمی ساڵانە</string>
@@ -556,7 +558,10 @@
     <string name="sub_reasontitle">هۆکاری هەڵوەشاندنەوە</string>
     <string name="sub_removepaymentmethod">لابردنی ڕێگای پارەدانی پاشەکەوتکراو</string>
     <string name="sub_removepaymentmethodconfirm">قاسە پرێمیۆم خۆکارانە نوێ ناکاتەوە تا دووبارە بە نوێبوونەوەی خۆکاری چالاک پارە دەدەیت.</string>
-    <string name="sub_renewalnotsetup">هێشتا ڕێکنەخراوە. نوێکردنەوەی داهاتوو لە ئەپەکەوە بە نوێبوونەوەی خۆکاری چالاک بدە و جزدانەکەت بۆ جارەکانی دواتر پاشەکەوت دەکەین.</string>
+    <string name="sub_renewallinkready">نوێکردنەوەکەت ئامادەیە. %1$s دینار تا %2$s بدە بۆ بەردەوامبوونی پرێمیۆم؛ دەچێتە سەر ئەو کاتەی ماوەتەوە.</string>
+    <string name="sub_renewalnotpaidyet">هێشتا نەدراوە. ئەگەر ئێستا پارەت دا، لەوانەیە خولەکێک بخایەنێت تا لێرە دەربکەوێت.</string>
+    <string name="sub_renewalnotsetup">ئەم پلانە خۆی نوێ نابێتەوە. پێش کۆتاییهاتنی بیرت دەخەینەوە بۆ ئەوەی ماوەی داهاتوو بدەیت.</string>
+    <string name="sub_renewsbylink">چەند ڕۆژێک پێش %1$s، بەستەرێکت بۆ دەنێرین بۆ پارەدانی %2$s دینار بۆ ماوەی داهاتوو.</string>
     <string name="sub_renewsexpires">نوێبوونەوە / بەسەرچوون</string>
     <string name="sub_renewsvia">لە %1$s بە %2$s دینار لە ڕێگەی %3$s نوێ دەبێتەوە.</string>
     <string name="sub_skip">تێپەڕاندن</string>
