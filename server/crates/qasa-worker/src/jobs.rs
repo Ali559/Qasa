@@ -5,9 +5,42 @@ use qasa_db::DbPool;
 use qasa_db::repos::push_copy::{
     BREACH_ALERT_PREMIUM, SUB_EXPIRING_3D, SUB_RENEW_FAILED,
 };
-use qasa_db::repos::settlement::{settle_payment, SettleOutcome, SettleStatus};
-use qasa_payments::GatewayKind;
+use qasa_db::repos::settlement::{
+    settle_payment, settle_payment_with_token, SettleOutcome, SettleStatus,
+};
+use qasa_payments::{
+    GatewayKind, PaymentError, PaymentGateway, StubGateway, WebhookStatus, RENEWAL_LEAD_HOURS,
+    RENEWAL_MAX_ATTEMPTS, RENEWAL_RETRY_HOURS,
+};
 use qasa_push::PushService;
+
+/// The payment gateways, as the worker sees them. Same construction rule as the API:
+/// stubs may only settle (and so only charge) in dev.
+pub struct Gateways(Vec<StubGateway>);
+
+impl Gateways {
+    pub fn from_env(settles_payments: bool) -> Self {
+        Self(
+            qasa_payments::all_stub_gateways(settles_payments)
+                .into_iter()
+                .map(|(_, g)| g)
+                .collect(),
+        )
+    }
+
+    fn get(&self, kind: GatewayKind) -> Option<&StubGateway> {
+        self.0.iter().find(|g| g.kind() == kind)
+    }
+
+    /// Gateways that can charge a saved method, as stored in `payment_methods.gateway`.
+    fn recurring(&self) -> Vec<&'static str> {
+        self.0
+            .iter()
+            .filter(|g| g.supports_recurring())
+            .map(|g| g.kind().as_str())
+            .collect()
+    }
+}
 
 pub async fn expire_subscriptions(pool: DbPool, _push: Arc<PushService>) -> anyhow::Result<()> {
     let n = qasa_db::repos::worker::expire_subscriptions(&pool).await?;
@@ -169,12 +202,10 @@ pub async fn broadcast_pushes(pool: DbPool, push: Arc<PushService>) -> anyhow::R
 pub async fn subscription_expiry_warnings(
     pool: DbPool,
     push: Arc<PushService>,
+    gateways: Arc<Gateways>,
 ) -> anyhow::Result<()> {
-    // Without recurring charges an auto-renew subscription lapses like any other, so its
-    // owner needs the reminder too.
-    let include_auto_renew = !qasa_payments::RENEWALS_ARE_CHARGED;
     let rows =
-        qasa_db::repos::worker::subs_needing_expiry_warning(&pool, include_auto_renew).await?;
+        qasa_db::repos::worker::subs_needing_expiry_warning(&pool, &gateways.recurring()).await?;
     let mut sent = 0u64;
     for s in rows {
         let dedupe = format!("sub_expiring_3d:{}", s.id);
@@ -193,12 +224,18 @@ pub async fn subscription_expiry_warnings(
     Ok(())
 }
 
-/// Auto-renew ON but no recent successful payment near expiry → device push.
+/// The worker tried to renew and could not → device push, once per subscription.
 pub async fn subscription_renew_failed_notices(
     pool: DbPool,
     push: Arc<PushService>,
+    gateways: Arc<Gateways>,
 ) -> anyhow::Result<()> {
-    let rows = qasa_db::repos::worker::subs_needing_renew_failed_notice(&pool).await?;
+    let rows = qasa_db::repos::worker::subs_needing_renew_failed_notice(
+        &pool,
+        &gateways.recurring(),
+        RENEWAL_MAX_ATTEMPTS,
+    )
+    .await?;
     let mut sent = 0u64;
     for s in rows {
         let dedupe = format!("sub_renew_failed:{}", s.id);
@@ -217,11 +254,144 @@ pub async fn subscription_renew_failed_notices(
     Ok(())
 }
 
+/// Charge saved payment methods for auto-renew subscriptions that end soon.
+///
+/// Attempts start `RENEWAL_LEAD_HOURS` before the end and repeat every
+/// `RENEWAL_RETRY_HOURS`, up to `RENEWAL_MAX_ATTEMPTS`, so every retry lands while the
+/// customer still has Premium. A paid renewal goes through `settle_payment` like any
+/// checkout, so it stacks onto the current end date. When the attempts run out,
+/// `subscription_renew_failed_notices` tells the customer to pay by hand.
+pub async fn charge_renewals(
+    pool: DbPool,
+    _push: Arc<PushService>,
+    gateways: Arc<Gateways>,
+) -> anyhow::Result<()> {
+    let recurring = gateways.recurring();
+    if recurring.is_empty() {
+        return Ok(());
+    }
+    let due = qasa_db::repos::renewal::due(
+        &pool,
+        &recurring,
+        RENEWAL_LEAD_HOURS,
+        RENEWAL_MAX_ATTEMPTS,
+        RENEWAL_RETRY_HOURS,
+        50,
+    )
+    .await?;
+    for renewal in &due {
+        if let Err(err) = renew_one(&pool, &gateways, renewal).await {
+            tracing::error!(
+                error = %err,
+                subscription_id = %renewal.subscription_id,
+                "renewal attempt failed"
+            );
+        }
+    }
+    Ok(())
+}
+
+async fn renew_one(
+    pool: &DbPool,
+    gateways: &Gateways,
+    r: &qasa_db::repos::renewal::DueRenewal,
+) -> anyhow::Result<()> {
+    let Some(gateway) = GatewayKind::parse(&r.gateway).and_then(|k| gateways.get(k)) else {
+        return Ok(());
+    };
+    let kind = gateway.kind();
+
+    // Counted before charging, so a crash mid-charge cannot turn into a charge every run.
+    let Some(attempt) =
+        qasa_db::repos::renewal::claim_attempt(pool, r.subscription_id, r.renewal_attempts).await?
+    else {
+        return Ok(());
+    };
+
+    // The price at renewal time, not what was paid last period. A plan that can no longer
+    // be bought is not renewed; the customer is told to choose one.
+    let Some(plan) = qasa_db::repos::plan::get_plan(pool, &r.plan_id)
+        .await?
+        .filter(|p| p.active)
+    else {
+        qasa_db::repos::renewal::give_up(pool, r.subscription_id, RENEWAL_MAX_ATTEMPTS).await?;
+        tracing::info!(subscription_id = %r.subscription_id, plan_id = %r.plan_id, "plan inactive; not renewing");
+        return Ok(());
+    };
+
+    let Some(payment) = qasa_db::repos::payment::create_renewal_payment(
+        pool,
+        r.account_id,
+        r.subscription_id,
+        kind.as_str(),
+        plan.amount_iqd,
+        &plan.id,
+        attempt,
+    )
+    .await?
+    else {
+        return Ok(());
+    };
+
+    let order_ref = payment.id.simple().to_string();
+    match gateway.charge_saved(&r.token, plan.amount_iqd, &order_ref).await {
+        Ok(charge) => {
+            qasa_db::repos::payment::set_gateway_order_id(pool, payment.id, &charge.gateway_order_id)
+                .await?;
+            let status = match charge.status {
+                WebhookStatus::Success => SettleStatus::Success,
+                WebhookStatus::Failed => SettleStatus::Failed,
+                // The outcome arrives by webhook, like a checkout.
+                WebhookStatus::Pending => return Ok(()),
+            };
+            let outcome = settle_payment(
+                pool,
+                kind.as_str(),
+                &charge.gateway_order_id,
+                status,
+                charge.amount_iqd,
+            )
+            .await?;
+            match outcome {
+                SettleOutcome::Settled { subscription, .. } => tracing::info!(
+                    account_id = %r.account_id,
+                    expires_at = %subscription.expires_at,
+                    "subscription renewed"
+                ),
+                SettleOutcome::Failed { .. } => tracing::info!(
+                    subscription_id = %r.subscription_id,
+                    attempt,
+                    "renewal declined"
+                ),
+                SettleOutcome::AmountMismatch { reported, expected } => tracing::warn!(
+                    subscription_id = %r.subscription_id,
+                    reported,
+                    expected,
+                    "renewal amount mismatch; left pending"
+                ),
+                other => tracing::warn!(?other, subscription_id = %r.subscription_id, "renewal not settled"),
+            }
+        }
+        Err(PaymentError::TokenRejected) => {
+            // The customer removed it at the gateway, or it expired. Retrying cannot work;
+            // without a method the renew-failed notice goes out.
+            qasa_db::repos::payment::fail_unplaced(pool, payment.id).await?;
+            qasa_db::repos::payment_method::revoke(pool, r.method_id).await?;
+            tracing::info!(subscription_id = %r.subscription_id, "saved method rejected; dropped");
+        }
+        Err(err) => {
+            qasa_db::repos::payment::fail_unplaced(pool, payment.id).await?;
+            tracing::warn!(error = %err, subscription_id = %r.subscription_id, attempt, "renewal charge not placed");
+        }
+    }
+    Ok(())
+}
+
 /// Re-attempt settlement for verified webhooks that have not been handled yet.
 ///
 /// Goes through the same `settle_payment` as the API, so the amount check and the
 /// row lock apply here too. The previous copy of this logic skipped the amount check.
-pub async fn retry_webhooks(pool: DbPool, push: Arc<PushService>) -> anyhow::Result<()> {
+pub async fn retry_webhooks(pool: DbPool, _push: Arc<PushService>) -> anyhow::Result<()> {
     let pending = qasa_db::repos::worker::pending_webhook_retries(&pool, 5).await?;
     for event in pending {
         let Some(order_id) = event.gateway_order_id.as_deref() else {
@@ -255,8 +425,15 @@ pub async fn retry_webhooks(pool: DbPool, push: Arc<PushService>) -> anyhow::Res
                 .map(|v| i32::try_from(v).unwrap_or(-1))
         });
 
-        let outcome =
-            settle_payment(&pool, &event.gateway, order_id, status, reported_amount).await?;
+        let outcome = settle_payment_with_token(
+            &pool,
+            &event.gateway,
+            order_id,
+            status,
+            reported_amount,
+            event.payment_token.as_deref(),
+        )
+        .await?;
 
         if !outcome.is_terminal(status) {
             qasa_db::repos::worker::increment_webhook_retry(&pool, event.id, "still pending")
@@ -273,18 +450,6 @@ pub async fn retry_webhooks(pool: DbPool, push: Arc<PushService>) -> anyhow::Res
         match outcome {
             SettleOutcome::Settled { .. } => {
                 tracing::info!(order_id, gateway = %event.gateway, "webhook retry succeeded");
-            }
-            SettleOutcome::Failed { payment } if qasa_payments::RENEWALS_ARE_CHARGED => {
-                if let Some(sub) =
-                    qasa_db::repos::subscription::get_current(&pool, payment.account_id).await?
-                {
-                    if sub.auto_renew {
-                        let dedupe = format!("sub_renew_failed_pay:{}", payment.id);
-                        let _ = push
-                            .notify_account(&pool, payment.account_id, &SUB_RENEW_FAILED, &dedupe)
-                            .await;
-                    }
-                }
             }
             SettleOutcome::AccountDeleted { payment } => {
                 tracing::warn!(payment_id = %payment.id, "webhook retry: account deleted; refund required");

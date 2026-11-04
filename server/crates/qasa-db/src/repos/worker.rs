@@ -165,7 +165,7 @@ pub async fn pending_webhook_retries(pool: &PgPool, max_retries: i32) -> anyhow:
     let rows = sqlx::query_as::<_, WebhookRetryRow>(
         r#"
         SELECT id, gateway, gateway_order_id, payload, retry_count,
-               event_status, reported_amount_iqd
+               event_status, reported_amount_iqd, payment_token
         FROM webhook_events
         WHERE processed = false
           AND signature_valid = true
@@ -205,6 +205,7 @@ pub struct WebhookRetryRow {
     pub retry_count: i32,
     pub event_status: Option<String>,
     pub reported_amount_iqd: Option<i32>,
+    pub payment_token: Option<String>,
 }
 
 pub async fn telemetry_snapshot(pool: &PgPool) -> anyhow::Result<TelemetrySnapshot> {
@@ -248,26 +249,40 @@ pub struct ExpiringSubRow {
     pub expires_at: DateTime<Utc>,
 }
 
-/// Premium ending within 3 days, warned once. Auto-renew subscriptions are included only
-/// when `include_auto_renew` (i.e. while renewals are not charged automatically).
+/// Premium ending within 3 days that will not renew by itself, warned once.
+///
+/// "Renews by itself" means auto-renew on and a live saved method on one of
+/// `recurring_gateways`; see `repos::renewal`. Everyone else has to pay by hand, so they
+/// need the reminder, auto-renew toggle or not. A subscription the worker already tried
+/// to renew gets the renew-failed notice instead, never both.
 pub async fn subs_needing_expiry_warning(
     pool: &PgPool,
-    include_auto_renew: bool,
+    recurring_gateways: &[&str],
 ) -> anyhow::Result<Vec<ExpiringSubRow>> {
     let rows = sqlx::query_as::<_, ExpiringSubRow>(
         r#"
-        SELECT id, account_id, auto_renew, expires_at
-        FROM subscriptions
-        WHERE status IN ('active', 'cancelled')
-          AND (auto_renew = false OR $1)
-          AND expiry_warned_at IS NULL
-          AND expires_at > now()
-          AND expires_at <= now() + interval '3 days'
-        ORDER BY expires_at ASC
+        SELECT s.id, s.account_id, s.auto_renew, s.expires_at
+        FROM subscriptions s
+        WHERE s.status IN ('active', 'cancelled')
+          AND s.expiry_warned_at IS NULL
+          AND s.expires_at > now()
+          AND s.expires_at <= now() + interval '3 days'
+          -- Once the worker has tried, "renewal failed" is the one message they get.
+          AND NOT (s.auto_renew AND s.renewal_attempts > 0)
+          AND NOT (
+            s.auto_renew
+            AND EXISTS (
+              SELECT 1 FROM payment_methods m
+              WHERE m.account_id = s.account_id
+                AND m.revoked_at IS NULL
+                AND m.gateway = ANY($1)
+            )
+          )
+        ORDER BY s.expires_at ASC
         LIMIT 200
         "#,
     )
-    .bind(include_auto_renew)
+    .bind(recurring_gateways)
     .fetch_all(pool)
     .await?;
     Ok(rows)
@@ -285,27 +300,46 @@ pub async fn mark_expiry_warned(pool: &PgPool, subscription_id: Uuid) -> anyhow:
     Ok(())
 }
 
-/// Auto-renew on, expires within 24h, no successful payment in last 2 days — renew likely failed.
-pub async fn subs_needing_renew_failed_notice(pool: &PgPool) -> anyhow::Result<Vec<ExpiringSubRow>> {
+/// Renewals the worker tried and could not complete, notified once.
+///
+/// Either every attempt failed (`max_attempts`), or the saved method stopped being
+/// chargeable after an attempt (the gateway rejected the token). Only subscriptions the
+/// worker actually tried are included: an auto-renew toggle alone never produces a
+/// "renewal failed" message.
+pub async fn subs_needing_renew_failed_notice(
+    pool: &PgPool,
+    recurring_gateways: &[&str],
+    max_attempts: i32,
+) -> anyhow::Result<Vec<ExpiringSubRow>> {
     let rows = sqlx::query_as::<_, ExpiringSubRow>(
         r#"
         SELECT s.id, s.account_id, s.auto_renew, s.expires_at
         FROM subscriptions s
         WHERE s.status = 'active'
           AND s.auto_renew = true
+          AND s.renewal_attempts > 0
           AND s.renew_failed_notified_at IS NULL
           AND s.expires_at > now()
-          AND s.expires_at <= now() + interval '1 day'
           AND NOT EXISTS (
             SELECT 1 FROM payments p
-            WHERE p.account_id = s.account_id
-              AND p.status = 'success'
-              AND p.completed_at > now() - interval '2 days'
+            WHERE p.renews_subscription_id = s.id
+              AND p.status IN ('pending', 'success')
+          )
+          AND (
+            s.renewal_attempts >= $2
+            OR NOT EXISTS (
+              SELECT 1 FROM payment_methods m
+              WHERE m.account_id = s.account_id
+                AND m.revoked_at IS NULL
+                AND m.gateway = ANY($1)
+            )
           )
         ORDER BY s.expires_at ASC
         LIMIT 200
         "#,
     )
+    .bind(recurring_gateways)
+    .bind(max_attempts)
     .fetch_all(pool)
     .await?;
     Ok(rows)

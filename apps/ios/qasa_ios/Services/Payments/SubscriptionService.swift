@@ -97,6 +97,17 @@ final class SubscriptionService {
         return sub
     }
 
+    /// Forgets the saved wallet; auto-renew stays as set but nothing will be charged.
+    @discardableResult
+    func removePaymentMethod() async throws -> Bool {
+        let response: RemovePaymentMethodResponse = try await QasaAPIClient.shared.request(
+            QasaConfig.paymentMethodURL,
+            method: "DELETE"
+        )
+        lastError = nil
+        return response.removed
+    }
+
     @discardableResult
     func cancel(reason: String?, subscriptionId: String? = nil) async throws -> SubscriptionDTO {
         let trimmed = reason?.trimmingCharacters(in: .whitespacesAndNewlines)

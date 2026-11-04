@@ -112,6 +112,14 @@ pub async fn delete_account(
     .await?
     .rows_affected();
 
+    // Nothing may be charged once the account is gone.
+    sqlx::query(
+        "UPDATE payment_methods SET revoked_at = now() WHERE account_id = $1 AND revoked_at IS NULL",
+    )
+    .bind(account_id)
+    .execute(&mut *tx)
+    .await?;
+
     // An open checkout cannot complete for a deleted account. A confirmation that still
     // arrives is refused by `settle_payment` (`AccountDeleted`) for staff to refund.
     summary.payments_closed = sqlx::query(

@@ -32,6 +32,8 @@ async fn main() -> anyhow::Result<()> {
     let pool = connect(&config.database_url).await?;
     run_migrations(&pool).await?;
     let push = Arc::new(PushService::from_env());
+    // Same rule as the API: stub gateways may only settle, and so only charge, in dev.
+    let gateways = Arc::new(jobs::Gateways::from_env(config.env.is_dev()));
 
     tokio::spawn(run_interval(
         pool.clone(),
@@ -103,19 +105,22 @@ async fn main() -> anyhow::Result<()> {
         push.clone(),
         Duration::from_secs(60 * 60),
         "subscription_expiry_warnings",
-        jobs::subscription_expiry_warnings,
+        with_gateways(&gateways, jobs::subscription_expiry_warnings),
     ));
-    // "Renewal failed" is only true once renewals are actually charged; until then this
-    // job would tell every auto-renew subscriber their renewal failed a day before expiry.
-    if qasa_payments::RENEWALS_ARE_CHARGED {
-        tokio::spawn(run_interval(
-            pool.clone(),
-            push.clone(),
-            Duration::from_secs(60 * 60),
-            "subscription_renew_failed_notices",
-            jobs::subscription_renew_failed_notices,
-        ));
-    }
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(15 * 60),
+        "charge_renewals",
+        with_gateways(&gateways, jobs::charge_renewals),
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(60 * 60),
+        "subscription_renew_failed_notices",
+        with_gateways(&gateways, jobs::subscription_renew_failed_notices),
+    ));
 
     std::future::pending::<()>().await;
     Ok(())
@@ -139,6 +144,19 @@ async fn run_interval<F, Fut>(
             Err(err) => tracing::error!(job = name, error = %err, "failed"),
         }
     }
+}
+
+/// Adapt a job that also needs the payment gateways to `run_interval`'s signature.
+fn with_gateways<F, Fut>(
+    gateways: &Arc<jobs::Gateways>,
+    job: F,
+) -> impl Fn(qasa_db::DbPool, Arc<PushService>) -> Fut + Send + Sync + 'static
+where
+    F: Fn(qasa_db::DbPool, Arc<PushService>, Arc<jobs::Gateways>) -> Fut + Send + Sync + 'static,
+    Fut: std::future::Future<Output = anyhow::Result<()>> + Send + 'static,
+{
+    let gateways = gateways.clone();
+    move |pool, push| job(pool, push, gateways.clone())
 }
 
 fn init_tracing() {

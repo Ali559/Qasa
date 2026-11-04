@@ -10,6 +10,7 @@ import alibarznji.qasa.network.PaymentStatusResponse
 import alibarznji.qasa.network.PricingPlanDTO
 import alibarznji.qasa.network.PricingResponse
 import alibarznji.qasa.network.QasaApiClient
+import alibarznji.qasa.network.RemovePaymentMethodResponse
 import alibarznji.qasa.network.SetAutoRenewRequest
 import alibarznji.qasa.network.StubWebhookBody
 import alibarznji.qasa.network.SubscriptionDTO
@@ -159,6 +160,12 @@ class SubscriptionService @Inject constructor(private val api: QasaApiClient) {
             QasaConfig.subscriptionAutoRenewUrl,
             SetAutoRenewRequest(enabled, subscriptionId),
         ).subscription ?: throw SubscriptionNotFoundException()
+    }
+
+    /** Forgets the saved wallet; auto-renew keeps its value but nothing will be charged. */
+    suspend fun removePaymentMethod(): Boolean = withContext(Dispatchers.IO) {
+        val body = api.raw(QasaConfig.paymentMethodUrl, "DELETE", null, authorized = true)
+        api.json.decodeFromString(RemovePaymentMethodResponse.serializer(), body).removed
     }
 
     /** Blank reasons are sent as null, like iOS `cancel(reason:)`. */

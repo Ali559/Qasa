@@ -33,6 +33,7 @@ object QasaConfig {
     fun paymentWebhookUrl(gateway: String) = "$apiBaseUrl/v1/payments/webhook/$gateway"
     val subscriptionUrl get() = "$apiBaseUrl/v1/subscription"
     val subscriptionAutoRenewUrl get() = "$apiBaseUrl/v1/subscription/auto-renew"
+    val paymentMethodUrl get() = "$apiBaseUrl/v1/payment-method"
     val subscriptionCancelUrl get() = "$apiBaseUrl/v1/subscription/cancel"
     val pricingUrl get() = "$apiBaseUrl/v1/pricing"
     val notificationsUrl get() = "$apiBaseUrl/v1/notifications"

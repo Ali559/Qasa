@@ -38,6 +38,8 @@ pub async fn payment_detail(
             "amount_iqd": p.amount_iqd,
             "plan_id": p.plan_id,
             "auto_renew": p.auto_renew,
+            "kind": p.kind,
+            "renews_subscription_id": p.renews_subscription_id,
             "subscription_id": p.subscription_id,
             "created_at": p.created_at,
             "completed_at": p.completed_at,

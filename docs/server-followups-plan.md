@@ -18,7 +18,7 @@ todos:
     content: "Payments without a gateway: history, staff grants, abandoned-checkout expiry, no false renew pushes (done 2026-11-01)"
     status: completed
   - id: payments-live
-    content: "Payments needing a gateway: real FIB/FastPay/SuperQi integrations, gateway status reconciliation, recurring charges, refunds, App Store / Play billing decision"
+    content: "Payments needing a gateway: real FIB/FastPay/SuperQi integrations (incl. saved-wallet charges for renewals), gateway status reconciliation, refunds, App Store / Play billing decision. Renewal engine done 2026-11-04"
     status: pending
   - id: lapsed-premium
     content: "Lapsed Premium falls back to Free; primary device keeps working (server done 2026-11-01)"
@@ -331,7 +331,7 @@ Migration `20261101000002_payments_non_gateway.sql`.
 - **No false "renewal failed" pushes.**
   - `qasa_payments::RENEWALS_ARE_CHARGED = false` gates every renewal-failure path: the worker job isn't scheduled, and a failed webhook or retry sends no push.
   - While it is false, the 3-day expiry reminder goes to **all** subscribers, auto-renew ones included, since nothing renews by itself.
-  - Set it to `true` in the same change that adds recurring charges.
+  - Set it to `true` in the same change that adds recurring charges. (Replaced on 2026-11-04 by per-gateway `supports_recurring()`; the flag is gone.)
 - **Abandoned checkouts expire.**
   - A new worker job runs every 5 minutes and marks `pending` payments older than 60 minutes as `expired`.
   - A gateway confirmation that arrives later still settles, because the money moved.
@@ -355,7 +355,7 @@ Migration `20261101000002_payments_non_gateway.sql`.
 - **Gateway integrations.** For FIB, FastPay and SuperQi: real `create_intent` (merchant API, QR/deep link, expiry), webhook signature verification, and a status-query API. Keep the stub only in dev.
   - When a gateway's QR/intent has its own expiry, set `ABANDONED_PAYMENT_MINUTES` (`qasa-worker/src/jobs.rs`) to match.
 - **Reconciliation.** Ask the gateway for the status of `pending` payments before expiring them, and of `expired` ones for a while afterwards.
-- **Recurring charges.** Either implement renewals (tokenised wallet charge, if a gateway supports it) and flip `RENEWALS_ARE_CHARGED`, or redefine auto-renew in the apps as "remind me to pay".
+- **Recurring charges.** The renewal engine is built (2026-11-04, see ARCHITECTURE.md section 4.8). Each real gateway still needs `create_intent(…, save_method)` to request a token, the token read from its webhook, `charge_saved`, and `supports_recurring()` returning `true` only once the gateway confirms it allows merchant-initiated charges. A gateway that does not leaves its subscribers on manual renewal with the 3-day reminder.
 - **Refunds.** These need the gateway's refund API. Revoking a grant is the only "take back" there is today.
 - **Native stores.** Neither app uses StoreKit or Play Billing. If either app is distributed through the App Store or Play with digital-goods Premium, store policy may require IAP and server-side receipt validation. Decide this before launch.
 

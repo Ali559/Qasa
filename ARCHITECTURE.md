@@ -130,7 +130,7 @@ knows nothing about HTTP or SQL.
 | `qasa-api` | binary | HTTP router, auth extractors, request limits, handlers. Router tests in `src/router_tests.rs` |
 | `qasa-core` | library | Config, tiers and entitlements, Ed25519 license tokens, admin tokens, Argon2 password hashing |
 | `qasa-db` | library | Connection pool, migrations, one module per table group under `src/repos/`, integration tests under `tests/` |
-| `qasa-payments` | library | `PaymentGateway` trait and the three gateway stubs; `RENEWALS_ARE_CHARGED` flag |
+| `qasa-payments` | library | `PaymentGateway` trait (checkout, webhook, saved-method charge) and the three gateway stubs; renewal timing constants |
 | `qasa-push` | library | FCM HTTP v1 delivery, per-device locale, dead-token cleanup |
 | `qasa-breach` | library + CLI | Hash/prefix handling; `qasa-breach ingest` loads breach hashes |
 | `qasa-vpn` | library + binary | WireGuard config types, key checks, IP pool, `wg` dump parsing and sync planning; the `qasa-vpn-agent` binary |
@@ -199,7 +199,7 @@ or the worker starts. The main tables:
 | --- | --- | --- |
 | Accounts | `accounts` | `tier` (cache), `blocked_at`, `deleted_at` (a tombstone: a deleted id can never register again) |
 | Devices | `devices`, `license_revocations` | `UNIQUE(account_id, fingerprint)`; `revoked_at` = unlinked; `tokens_valid_after` kills older tokens; `push_token`, `locale`, `notifications_enabled` |
-| Billing | `plans`, `subscriptions`, `payments`, `webhook_events` | Price comes from `plans`. A payment moves from `pending` to `success`, `failed` or `expired` (abandoned). Webhook events record the verified status and amount |
+| Billing | `plans`, `subscriptions`, `payments`, `payment_methods`, `webhook_events` | Price comes from `plans`. A payment is a `checkout` or a `renewal` and moves from `pending` to `success`, `failed` or `expired` (abandoned). `payment_methods` holds at most one live gateway token per account, for renewals. Webhook events record the verified status, amount and token |
 | Breach | `breach_hashes`, `monitored_email_hashes` | Breach data keyed by 5-hex prefix; monitors are full SHA-256 hashes of emails |
 | VPN | `vpn_nodes`, `vpn_sessions`, `vpn_usage` | Unique indexes on live sessions per device, per (node, address) and per (node, key). `last_handshake_at` comes from the node |
 | Inbox | `notifications`, `notification_receipts` | One receipt per account per notification, carrying `read_at`, `pushed_at` and `deleted_at` (per-user delete) |
@@ -215,7 +215,7 @@ and `server/crates/qasa-api/src/main.rs` is authoritative. By area:
 | --- | --- | --- |
 | Devices and license | `devices/register`, `devices/link-check`, `devices`, `devices/{id}`, `devices/me`, `devices/others`, `devices/prefs`, `license` | none for register/link-check; license otherwise |
 | Account | `DELETE account` (with `confirm_account_id`) | license |
-| Plans and billing | `pricing`, `subscription`, `subscription/auto-renew`, `subscription/cancel`, `payments`, `payments/intents`, `payments/{id}`, `payments/webhook/{fib,fastpay,superqi}` | none for pricing/webhooks; license otherwise |
+| Plans and billing | `pricing`, `subscription`, `subscription/auto-renew`, `subscription/cancel`, `DELETE payment-method`, `payments`, `payments/intents`, `payments/{id}`, `payments/webhook/{fib,fastpay,superqi}` | none for pricing/webhooks; license otherwise |
 | Breach | `breach/prefix/{prefix}`, `breach/monitor` (+ `/{id}`) | license; Premium to look up or register |
 | VPN | `vpn/nodes`, `vpn/connect`, `vpn/disconnect`, `vpn/status` | license; Premium to connect |
 | Inbox | `notifications`, `notifications/unread-count`, `notifications/read-all`, `notifications/{id}`, `notifications/{id}/read` | license |
@@ -240,8 +240,9 @@ response. The admin users list keeps a bare-array body and returns its cursor in
 | `offline_vpn_nodes` | 1 min | Nodes with no heartbeat for 2 min go `offline` |
 | `stale_vpn_sessions` | 1 min | End sessions with no handshake for 5 min (or none within 10 min of connecting) |
 | `breach_alert_scan` | not scheduled | Parked with email leak alerts. Would match monitored hashes against breach data and push Premium accounts (at most weekly per hash) |
-| `subscription_expiry_warnings` | 1 h | "Premium ends in 3 days" push |
-| `subscription_renew_failed_notices` | 1 h | Only scheduled once renewals are actually charged (`RENEWALS_ARE_CHARGED`) |
+| `subscription_expiry_warnings` | 1 h | "Premium ends in 3 days" push, only to subscriptions that will not renew by themselves |
+| `charge_renewals` | 15 min | Charge saved methods for auto-renew subscriptions ending within 24 h (section 4.8) |
+| `subscription_renew_failed_notices` | 1 h | "We couldn't renew" push, once, after the worker's attempts are used up or the saved method was rejected |
 | `purge_license_revocations` | 1 day | Drop expired token revocations, admin and device |
 | `purge_rate_limit_buckets` | 5 min | Drop rate-limit windows older than a day |
 
@@ -261,9 +262,35 @@ response. The admin users list keeps a bare-array body and returns its cursor in
 4. **Refresh.** The app sees `success` and refreshes its license, which now carries
    Premium.
 
-The three gateways are stubs that settle only in dev. Real integrations, renewal charging
-and refunds are pending (todo `payments-live`). Until renewals are charged, `auto_renew`
-is a stored preference only, and no "renewal failed" message is ever sent.
+**Automatic renewals.**
+
+- **Consent and the saved method.** A checkout paid with `auto_renew` on asks the gateway
+  to save the wallet (`create_intent(…, save_method)`). The token arrives with the
+  successful webhook, and `settle_payment_with_token` stores it in `payment_methods` in the
+  same transaction as the grant, but only if the payment had auto-renew on. A newer
+  consented checkout replaces it. `DELETE /v1/payment-method` forgets it; deleting the
+  account does too.
+- **Will it renew?** Only when auto-renew is on, a live method exists, and its gateway
+  `supports_recurring()`. `GET /v1/subscription` reports this as
+  `renewal: {will_renew, gateway, amount_iqd}`, which is what the apps show under the
+  toggle. Everything else lapses at its end date and gets the 3-day reminder.
+- **Charging.** `charge_renewals` picks subscriptions ending within
+  `RENEWAL_LEAD_HOURS` (24). It counts the attempt first (`renewal::claim_attempt`, a
+  compare-and-swap, so two runs cannot both charge), inserts a `renewal` payment at the
+  plan's current price, then calls `charge_saved` with the payment id as the reference. A
+  synchronous answer goes straight to `settle_payment`; a pending one waits for the webhook
+  like a checkout. Paid time stacks onto the old end, and the new period keeps auto-renew.
+- **Failures.** A decline is retried after `RENEWAL_RETRY_HOURS` (6), up to
+  `RENEWAL_MAX_ATTEMPTS` (3), all before the end date. A rejected token is dropped at once.
+  Either way the customer gets one `SUB_RENEW_FAILED` push and pays by hand; turning
+  auto-renew off and on again starts a fresh round. An inactive plan is not renewed.
+
+The three gateways are stubs that settle, and charge saved methods, only in dev. The stub
+mints a token for every successful webhook; tokens starting `stub-decline` or
+`stub-revoked` exercise the failure paths. Real integrations, including which of FIB,
+FastPay and SuperQi can charge a saved wallet at all, and refunds are pending (todo
+`payments-live`). In prod no gateway `supports_recurring()` yet, so nothing is charged and
+every subscriber gets the 3-day reminder.
 
 ### 4.9 Notifications and push
 

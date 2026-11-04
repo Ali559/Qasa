@@ -19,6 +19,9 @@ struct ManageSubscriptionView: View {
     @State private var cancelReason = ""
     @State private var isCancelling = false
 
+    @State private var showRemovePaymentConfirm = false
+    @State private var isRemovingPaymentMethod = false
+
     private var locale: Locale { AppLanguage.current.locale }
 
     private var plan: SubscriptionPlan {
@@ -108,6 +111,14 @@ struct ManageSubscriptionView: View {
                 formattedDate(subscription?.expires_at)
             ))
         }
+        .alert(L10n.tr("sub.removePaymentMethod", locale: locale), isPresented: $showRemovePaymentConfirm) {
+            Button(L10n.tr("common.cancel", locale: locale), role: .cancel) {}
+            Button(L10n.tr("sub.removePaymentMethod", locale: locale), role: .destructive) {
+                Task { await removePaymentMethod() }
+            }
+        } message: {
+            Text(L10n.tr("sub.removePaymentMethodConfirm", locale: locale))
+        }
         .sheet(isPresented: $showCancelReason) {
             cancelReasonSheet
                 .appLocalization()
@@ -168,33 +179,74 @@ struct ManageSubscriptionView: View {
         }
     }
 
+    /// Cancelled / off / older servers keep the original wording.
+    private var autoRenewSubtitle: String {
+        if isCancelled {
+            return L10n.tr("sub.autoRenewOffCancelled", locale: locale)
+        }
+        guard let sub = subscription, let renewal = sub.renewal, sub.auto_renew else {
+            return L10n.tr("sub.autoRenewOn", locale: locale)
+        }
+        guard renewal.will_renew else {
+            return L10n.tr("sub.renewalNotSetUp", locale: locale)
+        }
+        let amount = renewal.amount_iqd ?? sub.amount_iqd
+        return String(
+            format: L10n.tr("sub.renewsVia", locale: locale),
+            formattedDate(sub.expires_at),
+            amount.formatted(.number.grouping(.automatic).locale(locale)),
+            gatewayName(renewal.gateway)
+        )
+    }
+
+    private func gatewayName(_ gateway: String?) -> String {
+        switch gateway?.lowercased() {
+        case "fib": return L10n.tr("premium.fib", locale: locale)
+        case "fastpay": return L10n.tr("premium.fastpay", locale: locale)
+        case "superqi": return L10n.tr("premium.superqi", locale: locale)
+        default: return gateway ?? "—"
+        }
+    }
+
     private var autoRenewCard: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "arrow.triangle.2.circlepath")
-                .foregroundColor(Theme.accent)
-                .font(.qasa(18))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L10n.tr("sub.autoRenew", locale: locale))
-                    .font(.qasa(15, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                Text(isCancelled
-                      ? L10n.tr("sub.autoRenewOffCancelled", locale: locale)
-                      : L10n.tr("sub.autoRenewOn", locale: locale))
-                    .font(.qasa(12))
-                    .foregroundColor(Theme.textSecondary)
-            }
-            Spacer()
-            Toggle("", isOn: Binding(
-                get: { autoRenew },
-                set: { newValue in
-                    guard !isCancelled, !isSaving, subscription != nil else { return }
-                    autoRenew = newValue
-                    Task { await updateAutoRenew(newValue) }
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .foregroundColor(Theme.accent)
+                    .font(.qasa(18))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.tr("sub.autoRenew", locale: locale))
+                        .font(.qasa(15, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                    Text(autoRenewSubtitle)
+                        .font(.qasa(12))
+                        .foregroundColor(Theme.textSecondary)
                 }
-            ))
-            .labelsHidden()
-            .tint(Theme.accent)
-            .disabled(isCancelled || isSaving || subscription == nil)
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { autoRenew },
+                    set: { newValue in
+                        guard !isCancelled, !isSaving, subscription != nil else { return }
+                        autoRenew = newValue
+                        Task { await updateAutoRenew(newValue) }
+                    }
+                ))
+                .labelsHidden()
+                .tint(Theme.accent)
+                .disabled(isCancelled || isSaving || subscription == nil)
+            }
+
+            if subscription?.renewal?.gateway != nil {
+                Button {
+                    showRemovePaymentConfirm = true
+                } label: {
+                    Text(L10n.tr("sub.removePaymentMethod", locale: locale))
+                        .font(.qasa(13, weight: .semibold))
+                        .foregroundColor(Theme.danger)
+                }
+                .buttonStyle(.plain)
+                .disabled(isRemovingPaymentMethod)
+            }
         }
         .padding(16)
         .background(Theme.chrome)
@@ -306,6 +358,22 @@ struct ManageSubscriptionView: View {
                 : L10n.tr("sub.autoRenewDisabled", locale: locale)
         } catch {
             autoRenew = subscription?.auto_renew ?? true
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func removePaymentMethod() async {
+        isRemovingPaymentMethod = true
+        errorMessage = nil
+        statusMessage = nil
+        defer { isRemovingPaymentMethod = false }
+        do {
+            try await SubscriptionService.shared.removePaymentMethod()
+            let sub = try await SubscriptionService.shared.fetchCurrent()
+            subscription = sub
+            autoRenew = sub?.auto_renew ?? true
+            statusMessage = L10n.tr("sub.paymentMethodRemoved", locale: locale)
+        } catch {
             errorMessage = error.localizedDescription
         }
     }

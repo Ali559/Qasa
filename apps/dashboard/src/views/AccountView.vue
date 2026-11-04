@@ -401,7 +401,13 @@ function auditSummary(payload: Record<string, unknown> | null) {
         <Card class="gap-0 py-0">
           <CardHeader class="px-6 pt-6 pb-4">
             <CardTitle class="text-xl font-bold">Subscriptions</CardTitle>
-            <CardDescription>Last 20, grants included</CardDescription>
+            <CardDescription>
+              Last 20, grants included.
+              <template v-if="detail.payment_method">
+                Renews with the saved {{ detail.payment_method.gateway.toUpperCase() }} wallet (saved {{ fmtDate(detail.payment_method.created_at) }}).
+              </template>
+              <template v-else>No saved wallet, so nothing renews automatically.</template>
+            </CardDescription>
           </CardHeader>
           <CardContent class="px-0">
             <Table>
@@ -420,7 +426,9 @@ function auditSummary(payload: Record<string, unknown> | null) {
                     <p v-if="isGrant(s)" class="text-muted-foreground text-xs">
                       Grant, {{ s.grant_days }} days: {{ s.grant_reason }}
                     </p>
-                    <p v-else class="text-muted-foreground text-xs">{{ fmtIqd(s.amount_iqd) }} IQD<template v-if="s.auto_renew">, auto-renew</template></p>
+                    <p v-else class="text-muted-foreground text-xs">
+                      {{ fmtIqd(s.amount_iqd) }} IQD<template v-if="s.auto_renew">, auto-renew</template><template v-if="s.renewal_attempts">, {{ s.renewal_attempts }} renewal {{ s.renewal_attempts === 1 ? 'attempt' : 'attempts' }}</template>
+                    </p>
                   </TableCell>
                   <TableCell>
                     <StatusPill v-if="s.grant_revoked_at" tone="bad">grant revoked</StatusPill>
@@ -468,7 +476,9 @@ function auditSummary(payload: Record<string, unknown> | null) {
                 <TableRow v-for="p in detail.payments" :key="p.payment_id">
                   <TableCell class="py-3.5 pl-6">
                     <p class="font-mono text-[0.8rem] font-medium">{{ p.gateway_order_id ?? p.payment_id }}</p>
-                    <p class="text-muted-foreground text-xs uppercase">{{ p.gateway }}, {{ planLabel(p.plan_id) }}</p>
+                    <p class="text-muted-foreground text-xs">
+                      <span class="uppercase">{{ p.gateway }}</span>, {{ planLabel(p.plan_id) }}<template v-if="p.kind === 'renewal'">, automatic renewal</template>
+                    </p>
                   </TableCell>
                   <TableCell class="text-right">
                     <span class="font-heading font-bold tabular-nums">{{ fmtIqd(p.amount_iqd) }}</span>

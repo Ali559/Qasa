@@ -401,6 +401,7 @@ pub async fn list_payments(
                 "gateway": capitalize_gateway(&p.gateway),
                 "amount": format_amount(p.amount_iqd),
                 "planId": p.plan_id,
+                "kind": p.kind,
                 "status": p.status,
             })
         })

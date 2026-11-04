@@ -12,7 +12,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::repos::payment::PaymentRow;
+use crate::repos::payment::{PaymentRow, PAYMENT_COLS};
 use crate::repos::subscription::{activate_subscription, SubscriptionRow};
 
 /// What the gateway says happened to an order, after it verified the webhook.
@@ -89,17 +89,29 @@ pub async fn settle_payment(
     status: SettleStatus,
     reported_amount_iqd: Option<i32>,
 ) -> anyhow::Result<SettleOutcome> {
+    settle_payment_with_token(pool, gateway, gateway_order_id, status, reported_amount_iqd, None)
+        .await
+}
+
+/// [`settle_payment`], also saving the reusable `payment_token` the gateway returned.
+///
+/// The token is kept only when the payment had auto-renew on: leaving it on at checkout
+/// is the customer's consent to be charged again. It is saved in the same transaction
+/// as the grant, so a paid renewal and its payment method never disagree.
+pub async fn settle_payment_with_token(
+    pool: &PgPool,
+    gateway: &str,
+    gateway_order_id: &str,
+    status: SettleStatus,
+    reported_amount_iqd: Option<i32>,
+    payment_token: Option<&str>,
+) -> anyhow::Result<SettleOutcome> {
     let mut tx = pool.begin().await?;
 
     let payment = sqlx::query_as::<_, PaymentRow>(
-        r#"
-        SELECT id, account_id, subscription_id, gateway, gateway_order_id,
-               amount_iqd, status, deep_link, plan_id, auto_renew,
-               created_at, completed_at
-        FROM payments
-        WHERE gateway_order_id = $1
-        FOR UPDATE
-        "#,
+        &format!(
+        "SELECT {PAYMENT_COLS} FROM payments WHERE gateway_order_id = $1 FOR UPDATE"
+    ),
     )
     .bind(gateway_order_id)
     .fetch_optional(&mut *tx)
@@ -155,6 +167,10 @@ pub async fn settle_payment(
                 payment.auto_renew,
             )
             .await?;
+            if let Some(token) = payment_token.filter(|_| payment.auto_renew) {
+                crate::repos::payment_method::save(&mut tx, payment.account_id, gateway, token)
+                    .await?;
+            }
             let payment = mark(&mut tx, payment.id, "success", Some(subscription.id)).await?;
             tx.commit().await?;
             Ok(SettleOutcome::Settled {
@@ -171,18 +187,16 @@ async fn mark(
     status: &str,
     subscription_id: Option<Uuid>,
 ) -> anyhow::Result<PaymentRow> {
-    let row = sqlx::query_as::<_, PaymentRow>(
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
         r#"
         UPDATE payments
         SET status = $2,
             subscription_id = COALESCE($3, subscription_id),
             completed_at = now()
         WHERE id = $1
-        RETURNING id, account_id, subscription_id, gateway, gateway_order_id,
-                  amount_iqd, status, deep_link, plan_id, auto_renew,
-                  created_at, completed_at
-        "#,
-    )
+        RETURNING {PAYMENT_COLS}
+        "#
+    ))
     .bind(payment_id)
     .bind(status)
     .bind(subscription_id)

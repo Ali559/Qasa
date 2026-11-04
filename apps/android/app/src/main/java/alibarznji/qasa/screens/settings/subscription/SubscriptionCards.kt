@@ -2,6 +2,7 @@ package alibarznji.qasa.screens.settings.subscription
 
 import alibarznji.qasa.R
 import alibarznji.qasa.network.SubscriptionDTO
+import alibarznji.qasa.screens.premium.premiumGateways
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,11 +119,40 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
-/** iOS `autoRenewCard` (ManageSubscriptionView.swift:172): chrome background, 8pt radius. */
+/**
+ * iOS `autoRenewCard` (ManageSubscriptionView.swift:172): chrome background, 8pt radius.
+ * With auto-renew on, [SubscriptionDTO.renewal] says whether a saved wallet will really be
+ * charged; [onRemovePaymentMethod] is offered while one is saved.
+ */
 @Composable
-internal fun AutoRenewCard(checked: Boolean, enabled: Boolean, isCancelled: Boolean, onChange: (Boolean) -> Unit) {
+internal fun AutoRenewCard(
+    sub: SubscriptionDTO,
+    checked: Boolean,
+    enabled: Boolean,
+    isCancelled: Boolean,
+    onChange: (Boolean) -> Unit,
+    onRemovePaymentMethod: () -> Unit,
+) {
     val c = qasaColors
+    val locale = appLocale()
     val shape = RoundedCornerShape(QasaDimens.radiusSmall)
+    val renewal = sub.renewal
+    val subtitle = when {
+        isCancelled -> stringResource(R.string.sub_autorenewoffcancelled)
+        checked && renewal?.will_renew == true -> {
+            val gateway = renewal.gateway
+            val gatewayName = premiumGateways.firstOrNull { it.id == gateway }?.let { stringResource(it.title) }
+                ?: gateway.orEmpty()
+            stringResource(
+                R.string.sub_renewsvia,
+                formatSubscriptionDate(sub.expires_at, locale),
+                NumberFormat.getIntegerInstance(locale).format(renewal.amount_iqd ?: sub.amount_iqd),
+                gatewayName,
+            )
+        }
+        checked && renewal != null -> stringResource(R.string.sub_renewalnotsetup)
+        else -> stringResource(R.string.sub_autorenewon)
+    }
     Column(
         Modifier
             .fillMaxWidth()
@@ -131,13 +162,18 @@ internal fun AutoRenewCard(checked: Boolean, enabled: Boolean, isCancelled: Bool
     ) {
         ToggleRow(
             title = stringResource(R.string.sub_autorenew),
-            subtitle = stringResource(if (isCancelled) R.string.sub_autorenewoffcancelled else R.string.sub_autorenewon),
+            subtitle = subtitle,
             checked = checked,
             enabled = enabled,
             icon = Icons.Filled.Autorenew,
             iconColor = c.accent,
             onCheckedChange = onChange,
         )
+        if (renewal?.gateway != null) {
+            TextButton(onClick = onRemovePaymentMethod, enabled = enabled) {
+                Text(stringResource(R.string.sub_removepaymentmethod), color = c.danger, style = qasaText.bodySmallMedium)
+            }
+        }
     }
 }
 

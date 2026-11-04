@@ -50,6 +50,8 @@ export type PaymentDetail = {
     amount_iqd: number
     plan_id: string
     auto_renew: boolean
+    kind?: 'checkout' | 'renewal'
+    renews_subscription_id?: string | null
     subscription_id: string | null
     created_at: string
     completed_at: string | null
@@ -89,6 +91,7 @@ export type AccountSubscription = {
   grant_days: number | null
   grant_reason: string | null
   grant_revoked_at: string | null
+  renewal_attempts?: number
 }
 
 export type AccountPayment = {
@@ -98,6 +101,7 @@ export type AccountPayment = {
   gateway_order_id: string | null
   amount_iqd: number
   plan_id: string
+  kind?: 'checkout' | 'renewal'
   created_at: string
   completed_at: string | null
 }
@@ -132,6 +136,8 @@ export type AccountDetail = {
   devices: AccountDevice[]
   subscriptions: AccountSubscription[]
   payments: AccountPayment[]
+  /** Saved for automatic renewals; null when there is none. */
+  payment_method?: { gateway: string; created_at: string } | null
   breach_monitors: number
   vpn_usage: {
     account_id: string

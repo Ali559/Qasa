@@ -79,6 +79,8 @@ data class PaymentIntentResponse(
     val plan_id: String? = null,
     val auto_renew: Boolean? = null,
     val status: String,
+    /** `checkout` or `renewal`; older servers omit it. */
+    val kind: String? = null,
 )
 
 @Serializable
@@ -89,6 +91,7 @@ data class PaymentStatusResponse(
     val gateway_order_id: String,
     val amount_iqd: Int,
     val completed_at: String? = null,
+    val kind: String? = null,
 )
 
 @Serializable
@@ -102,6 +105,19 @@ data class SubscriptionDTO(
     val expires_at: String,
     val cancelled_at: String? = null,
     val cancellation_reason: String? = null,
+    /** Null on servers without automatic renewals. */
+    val renewal: RenewalDTO? = null,
+)
+
+/**
+ * Whether the period will really be charged automatically: `auto_renew` alone is not
+ * enough, the gateway also needs a saved wallet. [gateway] is set while one is saved.
+ */
+@Serializable
+data class RenewalDTO(
+    val will_renew: Boolean,
+    val gateway: String? = null,
+    val amount_iqd: Int? = null,
 )
 
 @Serializable
@@ -109,6 +125,10 @@ data class SubscriptionResponse(val subscription: SubscriptionDTO? = null)
 
 @Serializable
 data class SetAutoRenewRequest(val auto_renew: Boolean, val subscription_id: String? = null)
+
+/** `DELETE /v1/payment-method`. */
+@Serializable
+data class RemovePaymentMethodResponse(val removed: Boolean)
 
 @Serializable
 data class CancelSubscriptionRequest(val reason: String? = null, val subscription_id: String? = null)

@@ -270,7 +270,9 @@ function exportLogs() {
           </div>
           <div class="bg-muted/60 rounded-2xl px-4 py-3">
             <dt class="text-muted-foreground text-xs">Plan</dt>
-            <dd class="font-semibold">{{ detail.payment.plan_id }}</dd>
+            <dd class="font-semibold">
+              {{ detail.payment.plan_id }}<template v-if="detail.payment.kind === 'renewal'">, automatic renewal</template>
+            </dd>
           </div>
           <div class="bg-muted/60 rounded-2xl px-4 py-3">
             <dt class="text-muted-foreground text-xs">Completed</dt>

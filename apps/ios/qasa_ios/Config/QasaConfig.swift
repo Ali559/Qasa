@@ -53,6 +53,7 @@ enum QasaConfig {
     static var subscriptionURL: URL { apiBaseURL.appending(path: "/v1/subscription") }
     static var subscriptionAutoRenewURL: URL { apiBaseURL.appending(path: "/v1/subscription/auto-renew") }
     static var subscriptionCancelURL: URL { apiBaseURL.appending(path: "/v1/subscription/cancel") }
+    static var paymentMethodURL: URL { apiBaseURL.appending(path: "/v1/payment-method") }
     static var pricingURL: URL { apiBaseURL.appending(path: "/v1/pricing") }
     static var notificationsURL: URL { apiBaseURL.appending(path: "/v1/notifications") }
     static func notificationURL(id: String) -> URL {

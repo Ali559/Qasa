@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use qasa_core::{AdminTokenIssuer, AppConfig, LicenseKeyPair, LicenseTokenIssuer};
 use qasa_db::DbPool;
-use qasa_payments::{GatewayKind, StubGateway};
+use qasa_payments::{GatewayKind, PaymentGateway, StubGateway};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -38,5 +38,14 @@ impl AppState {
 
     pub fn gateway(&self, kind: GatewayKind) -> Option<&StubGateway> {
         self.gateways.get(&kind)
+    }
+
+    /// Gateways that can charge a saved method, as stored in `payment_methods.gateway`.
+    pub fn recurring_gateways(&self) -> Vec<&'static str> {
+        self.gateways
+            .values()
+            .filter(|g| g.supports_recurring())
+            .map(|g| g.kind().as_str())
+            .collect()
     }
 }

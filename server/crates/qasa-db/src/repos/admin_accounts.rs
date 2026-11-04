@@ -98,6 +98,8 @@ pub struct AdminSubscriptionRow {
     pub grant_days: Option<i32>,
     pub grant_reason: Option<String>,
     pub grant_revoked_at: Option<DateTime<Utc>>,
+    /// Automatic renewal charges tried for this period.
+    pub renewal_attempts: i32,
 }
 
 pub async fn subscriptions(
@@ -109,7 +111,7 @@ pub async fn subscriptions(
         r#"
         SELECT id, status, plan_id, amount_iqd, auto_renew, started_at, expires_at,
                cancelled_at, cancellation_reason, granted_by, grant_days, grant_reason,
-               grant_revoked_at
+               grant_revoked_at, renewal_attempts
         FROM subscriptions
         WHERE account_id = $1
         ORDER BY created_at DESC

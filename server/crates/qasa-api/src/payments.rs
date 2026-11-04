@@ -2,8 +2,7 @@ use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::Json;
 use qasa_core::CoreError;
-use qasa_db::repos::push_copy::SUB_RENEW_FAILED;
-use qasa_db::repos::settlement::{settle_payment, SettleOutcome, SettleStatus};
+use qasa_db::repos::settlement::{settle_payment_with_token, SettleOutcome, SettleStatus};
 use qasa_payments::{GatewayKind, PaymentGateway, WebhookStatus};
 use serde::Deserialize;
 use serde_json::json;
@@ -86,8 +85,13 @@ pub async fn create_intent(
         .into());
     }
 
+    // Auto-renew left on is the customer's consent to save the method, but only a gateway
+    // that can charge it later is asked to.
+    let save_method = body.auto_renew && gateway.supports_recurring();
     let order_ref = qasa_payments::new_order_ref();
-    let intent = gateway.create_intent(plan.amount_iqd, &order_ref).await;
+    let intent = gateway
+        .create_intent(plan.amount_iqd, &order_ref, save_method)
+        .await;
 
     let created = qasa_db::repos::payment::create_payment(
         &state.pool,
@@ -137,6 +141,7 @@ fn intent_json(payment: &qasa_db::repos::payment::PaymentRow) -> serde_json::Val
         "amount_iqd": payment.amount_iqd,
         "plan_id": payment.plan_id,
         "auto_renew": payment.auto_renew,
+        "kind": payment.kind,
         "status": payment.status,
     })
 }
@@ -175,6 +180,7 @@ pub async fn list_mine(
                 "amount_iqd": p.amount_iqd,
                 "plan_id": p.plan_id,
                 "auto_renew": p.auto_renew,
+                "kind": p.kind,
                 "subscription_id": p.subscription_id,
                 "created_at": p.created_at,
                 "completed_at": p.completed_at,
@@ -206,6 +212,7 @@ pub async fn get_payment(
         "amount_iqd": payment.amount_iqd,
         "plan_id": payment.plan_id,
         "auto_renew": payment.auto_renew,
+        "kind": payment.kind,
         "completed_at": payment.completed_at,
     })))
 }
@@ -271,15 +278,17 @@ async fn handle_webhook(
         &event.raw_payload,
         status.as_str(),
         event.amount_iqd,
+        event.payment_token.as_deref(),
     )
     .await?;
 
-    let outcome = settle_payment(
+    let outcome = settle_payment_with_token(
         &state.pool,
         kind.as_str(),
         &event.gateway_order_id,
         status,
         event.amount_iqd,
+        event.payment_token.as_deref(),
     )
     .await?;
 
@@ -297,16 +306,16 @@ async fn handle_webhook(
         SettleOutcome::AmountMismatch { .. } => {
             Err(CoreError::BadRequest("payment amount mismatch".into()).into())
         }
-        SettleOutcome::Failed { payment } => {
-            notify_renew_failed(&state, &payment).await;
-            Ok(StatusCode::OK)
-        }
         SettleOutcome::AccountDeleted { payment } => {
             // Accepted so the gateway stops retrying; the event row records the refund.
             tracing::warn!(payment_id = %payment.id, "payment settled for a deleted account; refund required");
             Ok(StatusCode::OK)
         }
-        SettleOutcome::Settled { .. } | SettleOutcome::Unchanged => Ok(StatusCode::OK),
+        // A failed renewal is retried, and the customer told once every attempt is used
+        // up, by the worker (`subscription_renew_failed_notices`), not per webhook.
+        SettleOutcome::Settled { .. } | SettleOutcome::Failed { .. } | SettleOutcome::Unchanged => {
+            Ok(StatusCode::OK)
+        }
     }
 }
 
@@ -315,26 +324,5 @@ fn settle_status(status: WebhookStatus) -> SettleStatus {
         WebhookStatus::Success => SettleStatus::Success,
         WebhookStatus::Failed => SettleStatus::Failed,
         WebhookStatus::Pending => SettleStatus::Pending,
-    }
-}
-
-/// Live webhook failure → device push for auto-renew subscribers (never email).
-async fn notify_renew_failed(state: &AppState, payment: &qasa_db::repos::payment::PaymentRow) {
-    // Every payment today is a checkout the user started and watches in the app; a
-    // failure there is not a failed renewal.
-    if !qasa_payments::RENEWALS_ARE_CHARGED {
-        return;
-    }
-    let Ok(Some(sub)) =
-        qasa_db::repos::subscription::get_current(&state.pool, payment.account_id).await
-    else {
-        return;
-    };
-    if sub.auto_renew {
-        let dedupe = format!("sub_renew_failed_pay:{}", payment.id);
-        let _ = state
-            .push
-            .notify_account(&state.pool, payment.account_id, &SUB_RENEW_FAILED, &dedupe)
-            .await;
     }
 }

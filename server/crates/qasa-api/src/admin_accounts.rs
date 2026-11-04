@@ -29,6 +29,10 @@ pub async fn detail(
     let subscriptions = admin_accounts::subscriptions(&state.pool, account_id, 20).await?;
     let payments = payment::list_for_account(&state.pool, account_id, None, 20).await?;
     let monitors = admin_accounts::monitor_count(&state.pool, account_id).await?;
+    // The gateway and when it was saved; the token itself never leaves the server.
+    let payment_method = qasa_db::repos::payment_method::live_for_account(&state.pool, account_id)
+        .await?
+        .map(|m| json!({ "gateway": m.gateway, "created_at": m.created_at }));
     let usage = vpn_usage::get_or_create(&state.pool, account_id).await?;
     let audit = admin::list_audit(&state.pool, Some(&account_id.to_string()), None, 20).await?;
 
@@ -59,6 +63,7 @@ pub async fn detail(
                 "gateway_order_id": p.gateway_order_id,
                 "amount_iqd": p.amount_iqd,
                 "plan_id": p.plan_id,
+                "kind": p.kind,
                 "created_at": p.created_at,
                 "completed_at": p.completed_at,
             })
@@ -78,6 +83,7 @@ pub async fn detail(
         "devices": devices,
         "subscriptions": subscriptions,
         "payments": payments,
+        "payment_method": payment_method,
         "breach_monitors": monitors,
         "vpn_usage": usage,
         "audit": audit,

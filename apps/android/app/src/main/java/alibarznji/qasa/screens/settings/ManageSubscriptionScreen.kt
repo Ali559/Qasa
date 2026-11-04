@@ -75,12 +75,14 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
     var isSaving by remember { mutableStateOf(false) }
     var showCancelConfirm by remember { mutableStateOf(false) }
     var showCancelReason by remember { mutableStateOf(false) }
+    var showRemovePaymentConfirm by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val isCancelled = sub?.status?.lowercase() == "cancelled"
 
     val cancelledUntilFmt = stringResource(R.string.sub_cancelleduntil)
     val autoRenewEnabledMsg = stringResource(R.string.sub_autorenewenabled)
     val autoRenewDisabledMsg = stringResource(R.string.sub_autorenewdisabled)
+    val paymentMethodRemovedMsg = stringResource(R.string.sub_paymentmethodremoved)
 
     LaunchedEffect(Unit) {
         try {
@@ -138,6 +140,27 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
         }
     }
 
+    fun removePaymentMethod() {
+        if (isSaving) return
+        scope.launch {
+            isSaving = true
+            errorMessage = null
+            statusMessage = null
+            try {
+                vm.service.removePaymentMethod()
+                // Reload so the card drops the renewal line and the remove action.
+                val fetched = vm.service.current()
+                sub = fetched
+                autoRenew = fetched?.auto_renew ?: autoRenew
+                statusMessage = paymentMethodRemovedMsg
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isSaving = false
+            }
+        }
+    }
+
     ScreenScaffold(
         header = {
             BackChromeHeader(
@@ -165,10 +188,12 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
                 SubscriptionDetailsCard(s, isCancelled)
                 Spacer(Modifier.height(QasaDimens.gap))
                 AutoRenewCard(
+                    sub = s,
                     checked = autoRenew,
                     enabled = !isCancelled && !isSaving,
                     isCancelled = isCancelled,
                     onChange = ::updateAutoRenew,
+                    onRemovePaymentMethod = { showRemovePaymentConfirm = true },
                 )
                 if (!isCancelled) {
                     Spacer(Modifier.height(QasaDimens.gap))
@@ -199,6 +224,19 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
                 showCancelReason = true
             },
             onDismiss = { showCancelConfirm = false },
+        )
+    }
+
+    if (showRemovePaymentConfirm) {
+        QasaConfirmDialog(
+            title = stringResource(R.string.sub_removepaymentmethod),
+            message = stringResource(R.string.sub_removepaymentmethodconfirm),
+            confirmLabel = stringResource(R.string.sub_removepaymentmethod),
+            onConfirm = {
+                showRemovePaymentConfirm = false
+                removePaymentMethod()
+            },
+            onDismiss = { showRemovePaymentConfirm = false },
         )
     }
 

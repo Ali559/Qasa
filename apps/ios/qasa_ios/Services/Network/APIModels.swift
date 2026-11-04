@@ -85,6 +85,8 @@ struct PaymentIntentResponse: Decodable {
     let plan_id: String?
     let auto_renew: Bool?
     let status: String
+    /// "checkout" or "renewal"; older servers omit it.
+    let kind: String?
 }
 
 struct PaymentStatusResponse: Decodable {
@@ -94,6 +96,7 @@ struct PaymentStatusResponse: Decodable {
     let gateway_order_id: String
     let amount_iqd: Int
     let completed_at: String?
+    let kind: String?
 }
 
 struct SubscriptionDTO: Decodable, Identifiable {
@@ -106,6 +109,18 @@ struct SubscriptionDTO: Decodable, Identifiable {
     let expires_at: String
     let cancelled_at: String?
     let cancellation_reason: String?
+    /// Whether the saved wallet will actually be charged; older servers omit it.
+    let renewal: RenewalDTO?
+}
+
+struct RenewalDTO: Decodable {
+    let will_renew: Bool
+    let gateway: String?
+    let amount_iqd: Int?
+}
+
+struct RemovePaymentMethodResponse: Decodable {
+    let removed: Bool
 }
 
 struct SubscriptionResponse: Decodable {

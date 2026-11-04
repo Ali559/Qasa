@@ -9158,19 +9158,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Renews automatically at the end of each period."
+            "value": "We charge your wallet the plan price at the end of each period until you turn this off in Settings."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يتجدد تلقائيًا في نهاية كل فترة."
+            "value": "نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+            "value": "لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە."
           }
         }
       }
@@ -9180,19 +9180,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Renews automatically at the end of each period."
+            "value": "We charge your wallet the plan price at the end of each period until you turn this off in Settings."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يتجدد تلقائيًا في نهاية كل فترة."
+            "value": "نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+            "value": "لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە."
           }
         }
       }
@@ -11991,6 +11991,28 @@
         }
       }
     },
+    "sub.paymentMethodRemoved": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved payment method removed."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمت إزالة طريقة الدفع المحفوظة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ڕێگای پارەدانی پاشەکەوتکراو لابرا."
+          }
+        }
+      }
+    },
     "sub.plan": {
       "localizations": {
         "en": {
@@ -12101,6 +12123,72 @@
         }
       }
     },
+    "sub.removePaymentMethod": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove saved payment method"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إزالة طريقة الدفع المحفوظة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لابردنی ڕێگای پارەدانی پاشەکەوتکراو"
+          }
+        }
+      }
+    },
+    "sub.removePaymentMethodConfirm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa won't renew Premium automatically until you pay again with auto-renew on."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لن يجدد Qasa اشتراك Premium تلقائيًا حتى تدفع مرة أخرى مع تشغيل التجديد التلقائي."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە پرێمیۆم خۆکارانە نوێ ناکاتەوە تا دووبارە بە نوێبوونەوەی خۆکاری چالاک پارە دەدەیت."
+          }
+        }
+      }
+    },
+    "sub.renewalNotSetUp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not set up yet. Pay your next renewal in the app with auto-renew on and we'll save your wallet for the ones after."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُفعَّل بعد. ادفع تجديدك القادم من التطبيق مع تشغيل التجديد التلقائي وسنحفظ محفظتك للتجديدات التالية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هێشتا ڕێکنەخراوە. نوێکردنەوەی داهاتوو لە ئەپەکەوە بە نوێبوونەوەی خۆکاری چالاک بدە و جزدانەکەت بۆ جارەکانی دواتر پاشەکەوت دەکەین."
+          }
+        }
+      }
+    },
     "sub.renewsExpires": {
       "localizations": {
         "en": {
@@ -12119,6 +12207,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "نوێبوونەوە / بەسەرچوون"
+          }
+        }
+      }
+    },
+    "sub.renewsVia": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renews on %1$@ for %2$@ IQD with %3$@."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يتجدد في %1$@ بمبلغ %2$@ دينار عبر %3$@."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە %1$@ بە %2$@ دینار لە ڕێگەی %3$@ نوێ دەبێتەوە."
           }
         }
       }

@@ -15,14 +15,19 @@ pub struct PaymentRow {
     pub deep_link: Option<String>,
     pub plan_id: String,
     pub auto_renew: bool,
+    /// `checkout` (the user paid in the app) or `renewal` (the worker charged a saved
+    /// payment method).
+    pub kind: String,
+    /// For a renewal, the subscription it renews.
+    pub renews_subscription_id: Option<Uuid>,
     pub created_at: DateTime<Utc>,
     pub completed_at: Option<DateTime<Utc>>,
 }
 
-const PAYMENT_COLS: &str = r#"
+pub(crate) const PAYMENT_COLS: &str = r#"
         id, account_id, subscription_id, gateway, gateway_order_id,
         amount_iqd, status, deep_link, plan_id, auto_renew,
-        created_at, completed_at
+        kind, renews_subscription_id, created_at, completed_at
 "#;
 
 /// Insert a pending payment.
@@ -82,14 +87,9 @@ pub async fn find_by_idempotency_key(
 }
 
 pub async fn find_by_id(pool: &PgPool, payment_id: Uuid) -> anyhow::Result<Option<PaymentRow>> {
-    let row = sqlx::query_as::<_, PaymentRow>(
-        r#"
-        SELECT id, account_id, subscription_id, gateway, gateway_order_id,
-               amount_iqd, status, deep_link, plan_id, auto_renew,
-               created_at, completed_at
-        FROM payments WHERE id = $1
-        "#,
-    )
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        "SELECT {PAYMENT_COLS} FROM payments WHERE id = $1"
+    ))
     .bind(payment_id)
     .fetch_optional(pool)
     .await?;
@@ -100,18 +100,79 @@ pub async fn find_by_gateway_order_id(
     pool: &PgPool,
     gateway_order_id: &str,
 ) -> anyhow::Result<Option<PaymentRow>> {
-    let row = sqlx::query_as::<_, PaymentRow>(
-        r#"
-        SELECT id, account_id, subscription_id, gateway, gateway_order_id,
-               amount_iqd, status, deep_link, plan_id, auto_renew,
-               created_at, completed_at
-        FROM payments WHERE gateway_order_id = $1
-        "#,
-    )
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        "SELECT {PAYMENT_COLS} FROM payments WHERE gateway_order_id = $1"
+    ))
     .bind(gateway_order_id)
     .fetch_optional(pool)
     .await?;
     Ok(row)
+}
+
+/// Insert a pending renewal charge for `subscription_id`, before the gateway is called.
+///
+/// The row exists first so a crash between charging and recording can still be traced,
+/// and its id is the reference the gateway uses to refuse a duplicate charge. Returns
+/// `None` when this attempt already has a row (`idempotency_key`) or another renewal of
+/// the subscription is still pending.
+pub async fn create_renewal_payment(
+    pool: &PgPool,
+    account_id: Uuid,
+    subscription_id: Uuid,
+    gateway: &str,
+    amount_iqd: i32,
+    plan_id: &str,
+    attempt: i32,
+) -> anyhow::Result<Option<PaymentRow>> {
+    let id = new_id();
+    let key = format!("renewal:{subscription_id}:{attempt}");
+    let row = sqlx::query_as::<_, PaymentRow>(&format!(
+        r#"
+        INSERT INTO payments (
+            id, account_id, gateway, amount_iqd, status, plan_id, auto_renew,
+            idempotency_key, kind, renews_subscription_id
+        )
+        VALUES ($1, $2, $3, $4, 'pending', $5, true, $6, 'renewal', $7)
+        ON CONFLICT DO NOTHING
+        RETURNING {PAYMENT_COLS}
+        "#
+    ))
+    .bind(id)
+    .bind(account_id)
+    .bind(gateway)
+    .bind(amount_iqd)
+    .bind(plan_id)
+    .bind(key)
+    .bind(subscription_id)
+    .fetch_optional(pool)
+    .await?;
+    Ok(row)
+}
+
+/// Record the order id the gateway gave a renewal charge, so its webhook can find it.
+pub async fn set_gateway_order_id(
+    pool: &PgPool,
+    payment_id: Uuid,
+    gateway_order_id: &str,
+) -> anyhow::Result<()> {
+    sqlx::query("UPDATE payments SET gateway_order_id = $2 WHERE id = $1")
+        .bind(payment_id)
+        .bind(gateway_order_id)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+/// Mark a renewal failed when the gateway refused to place the charge at all, so there is
+/// no order id for `settle_payment` to look up.
+pub async fn fail_unplaced(pool: &PgPool, payment_id: Uuid) -> anyhow::Result<()> {
+    sqlx::query(
+        "UPDATE payments SET status = 'failed', completed_at = now() WHERE id = $1 AND status = 'pending'",
+    )
+    .bind(payment_id)
+    .execute(pool)
+    .await?;
+    Ok(())
 }
 
 /// One page of an account's payments, newest first. `before` is the `created_at` of the
@@ -288,15 +349,16 @@ pub async fn insert_verified_webhook_event(
     payload: &serde_json::Value,
     event_status: &str,
     reported_amount_iqd: Option<i32>,
+    payment_token: Option<&str>,
 ) -> anyhow::Result<Uuid> {
     let id = new_id();
     sqlx::query(
         r#"
         INSERT INTO webhook_events (
             id, gateway, gateway_order_id, payload, signature_valid, processed,
-            event_status, reported_amount_iqd
+            event_status, reported_amount_iqd, payment_token
         )
-        VALUES ($1, $2, $3, $4, true, false, $5, $6)
+        VALUES ($1, $2, $3, $4, true, false, $5, $6, $7)
         "#,
     )
     .bind(id)
@@ -305,6 +367,7 @@ pub async fn insert_verified_webhook_event(
     .bind(payload)
     .bind(event_status)
     .bind(reported_amount_iqd)
+    .bind(payment_token)
     .execute(pool)
     .await?;
     Ok(id)

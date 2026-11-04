@@ -160,6 +160,7 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route("/v1/subscription", get(subscriptions::get_current))
         .route("/v1/subscription/auto-renew", patch(subscriptions::set_auto_renew))
         .route("/v1/subscription/cancel", post(subscriptions::cancel))
+        .route("/v1/payment-method", delete(subscriptions::delete_payment_method))
         .route("/v1/payments", get(payments::list_mine))
         .route("/v1/payments/intents", post(payments::create_intent))
         .route("/v1/payments/{payment_id}", get(payments::get_payment))

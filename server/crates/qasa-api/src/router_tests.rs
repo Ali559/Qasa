@@ -188,6 +188,60 @@ async fn the_price_comes_from_the_plan() {
     assert_eq!(status, StatusCode::BAD_REQUEST);
 }
 
+/// What the apps show under the auto-renew toggle follows the saved method, not the
+/// toggle alone: paying with auto-renew on saves one, removing it stops renewals.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn subscription_reports_whether_it_will_really_renew() {
+    let api = Api::new().await;
+    let token = api.token(Uuid::now_v7(), "fp-r").await;
+
+    let pay = |auto_renew: bool| {
+        let (api, token) = (&api, &token);
+        async move {
+            let (status, intent) = api
+                .call(Method::POST, "/v1/payments/intents", Some(token), Some(json!({ "gateway": "fib", "plan_id": "premium_monthly", "auto_renew": auto_renew })))
+                .await;
+            assert_eq!(status, StatusCode::OK, "{intent}");
+            assert_eq!(intent["kind"], "checkout");
+            let (status, body) = api
+                .call(Method::POST, "/v1/payments/webhook/fib", None, Some(json!({ "order_id": intent["gateway_order_id"], "status": "success", "amount_iqd": intent["amount_iqd"] })))
+                .await;
+            assert_eq!(status, StatusCode::OK, "{body}");
+        }
+    };
+
+    pay(false).await;
+    let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
+    assert_eq!(body["subscription"]["renewal"]["will_renew"], false, "{body}");
+
+    pay(true).await;
+    let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
+    let renewal = &body["subscription"]["renewal"];
+    assert_eq!(renewal["will_renew"], true, "{body}");
+    assert_eq!(renewal["gateway"], "fib");
+    let price: i32 = sqlx::query_scalar("SELECT amount_iqd FROM plans WHERE id = 'premium_monthly'")
+        .fetch_one(&api.pool)
+        .await
+        .unwrap();
+    assert_eq!(renewal["amount_iqd"], price);
+
+    let (_, body) = api
+        .call(Method::PATCH, "/v1/subscription/auto-renew", Some(&token), Some(json!({ "auto_renew": false })))
+        .await;
+    assert_eq!(body["subscription"]["renewal"]["will_renew"], false, "toggle off stops it");
+    let (_, body) = api
+        .call(Method::PATCH, "/v1/subscription/auto-renew", Some(&token), Some(json!({ "auto_renew": true })))
+        .await;
+    assert_eq!(body["subscription"]["renewal"]["will_renew"], true, "and on again resumes it");
+
+    let (status, body) = api.call(Method::DELETE, "/v1/payment-method", Some(&token), None).await;
+    assert_eq!((status, body["removed"].as_bool()), (StatusCode::OK, Some(true)));
+    let (_, body) = api.call(Method::GET, "/v1/subscription", Some(&token), None).await;
+    assert_eq!(body["subscription"]["auto_renew"], true);
+    assert_eq!(body["subscription"]["renewal"]["will_renew"], false, "no method, nothing to charge");
+}
+
 /// A locale-only update used to switch notifications off.
 #[tokio::test]
 #[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]

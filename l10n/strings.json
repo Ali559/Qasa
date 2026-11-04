@@ -1785,14 +1785,14 @@
     "ckb": "نوێبوونەوەی خۆکار"
   },
   "premium.autoRenewDetail": {
-    "en": "Renews automatically at the end of each period.",
-    "ar": "يتجدد تلقائيًا في نهاية كل فترة.",
-    "ckb": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+    "en": "We charge your wallet the plan price at the end of each period until you turn this off in Settings.",
+    "ar": "نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات.",
+    "ckb": "لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە."
   },
   "premium.autoRenewHint": {
-    "en": "Renews automatically at the end of each period.",
-    "ar": "يتجدد تلقائيًا في نهاية كل فترة.",
-    "ckb": "لە کۆتایی هەر ماوەیەکدا خۆکارانە نوێ دەبێتەوە."
+    "en": "We charge your wallet the plan price at the end of each period until you turn this off in Settings.",
+    "ar": "نخصم سعر الخطة من محفظتك في نهاية كل فترة حتى توقف ذلك من الإعدادات.",
+    "ckb": "لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە."
   },
   "premium.bestValue": {
     "en": "BEST VALUE",
@@ -2293,6 +2293,31 @@
     "en": "Renews automatically at period end.",
     "ar": "يتجدد تلقائيًا في نهاية الفترة.",
     "ckb": "لە کۆتایی ماوەدا خۆکارانە نوێ دەبێتەوە."
+  },
+  "sub.renewsVia": {
+    "en": "Renews on %1$@ for %2$@ IQD with %3$@.",
+    "ar": "يتجدد في %1$@ بمبلغ %2$@ دينار عبر %3$@.",
+    "ckb": "لە %1$@ بە %2$@ دینار لە ڕێگەی %3$@ نوێ دەبێتەوە."
+  },
+  "sub.renewalNotSetUp": {
+    "en": "Not set up yet. Pay your next renewal in the app with auto-renew on and we'll save your wallet for the ones after.",
+    "ar": "لم يُفعَّل بعد. ادفع تجديدك القادم من التطبيق مع تشغيل التجديد التلقائي وسنحفظ محفظتك للتجديدات التالية.",
+    "ckb": "هێشتا ڕێکنەخراوە. نوێکردنەوەی داهاتوو لە ئەپەکەوە بە نوێبوونەوەی خۆکاری چالاک بدە و جزدانەکەت بۆ جارەکانی دواتر پاشەکەوت دەکەین."
+  },
+  "sub.removePaymentMethod": {
+    "en": "Remove saved payment method",
+    "ar": "إزالة طريقة الدفع المحفوظة",
+    "ckb": "لابردنی ڕێگای پارەدانی پاشەکەوتکراو"
+  },
+  "sub.removePaymentMethodConfirm": {
+    "en": "Qasa won't renew Premium automatically until you pay again with auto-renew on.",
+    "ar": "لن يجدد Qasa اشتراك Premium تلقائيًا حتى تدفع مرة أخرى مع تشغيل التجديد التلقائي.",
+    "ckb": "قاسە پرێمیۆم خۆکارانە نوێ ناکاتەوە تا دووبارە بە نوێبوونەوەی خۆکاری چالاک پارە دەدەیت."
+  },
+  "sub.paymentMethodRemoved": {
+    "en": "Saved payment method removed.",
+    "ar": "تمت إزالة طريقة الدفع المحفوظة.",
+    "ckb": "ڕێگای پارەدانی پاشەکەوتکراو لابرا."
   },
   "sub.cancelConfirmMessage": {
     "en": "You'll keep Premium until %@. Auto-renew will be turned off.",

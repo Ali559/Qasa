@@ -375,7 +375,11 @@ pub async fn set_auto_renew(
     let row = sqlx::query_as::<_, SubscriptionRow>(
         r#"
         UPDATE subscriptions
-        SET auto_renew = $3
+        SET auto_renew = $3,
+            -- Turning it back on after renewals gave up starts a fresh round, and a
+            -- fresh "renewal failed" notice if that round fails too.
+            renewal_attempts = CASE WHEN $3 AND NOT auto_renew THEN 0 ELSE renewal_attempts END,
+            renew_failed_notified_at = CASE WHEN $3 AND NOT auto_renew THEN NULL ELSE renew_failed_notified_at END
         WHERE id = $1
           AND account_id = $2
           AND status = 'active'
