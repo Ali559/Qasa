@@ -19,3 +19,12 @@ is tracked in [`docs/server-followups-plan.md`](docs/server-followups-plan.md).
 ```bash
 make help   # local dev commands: database, API, worker, dashboard, Android
 ```
+
+## License
+
+Qasa is source-available under the [Functional Source License, Version 1.1, ALv2 Future
+License](LICENSE.md) (FSL-1.1-ALv2). You may read, audit, run and change it for any
+purpose except offering a competing product or service. Each version becomes available
+under the Apache License 2.0 two years after it is released.
+
+The Qasa name and logo are not covered by the license.
