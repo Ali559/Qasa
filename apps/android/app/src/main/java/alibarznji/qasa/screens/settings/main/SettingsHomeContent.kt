@@ -114,6 +114,8 @@ fun SettingsHomeContent(
             confirmLabel = stringResource(R.string.settings_clear),
             onConfirm = {
                 scope.launch {
+                    // Tunnel off and the device's WireGuard key gone with the account.
+                    vm.vpn.forget()
                     vm.repo.clearAll()
                     vm.session.wipeVault()
                     // Same scope as iOS `VaultAuthStore.resetVaultAuth`: the licence goes too,

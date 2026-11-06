@@ -224,6 +224,8 @@ pub async fn status(
 
     let session =
         qasa_db::repos::vpn::active_session_for_device(&state.pool, account_id, device_id).await?;
+    // Reported with or without a session, so the app can show the data meter while off.
+    let usage = usage_json(&state, account_id).await?;
 
     match session {
         Some(s) => {
@@ -245,8 +247,9 @@ pub async fn status(
                 "connected_at": s.connected_at,
                 "last_handshake_at": s.last_handshake_at,
                 "tunnel_up": tunnel_up,
+                "usage": usage,
             })))
         }
-        None => Ok(Json(json!({ "connected": false }))),
+        None => Ok(Json(json!({ "connected": false, "usage": usage }))),
     }
 }

@@ -4,6 +4,8 @@ import alibarznji.qasa.R
 import alibarznji.qasa.screens.PasswordHealthReport
 import alibarznji.qasa.screens.breach.BreachLockedCard
 import alibarznji.qasa.screens.vpn.VpnViewModel
+import alibarznji.qasa.screens.vpn.rememberVpnToggle
+import alibarznji.qasa.vpn.VpnPhase
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconFrame
@@ -37,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +47,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 
 private val HeroDisc = 168.dp
 private val HeroCore = 104.dp
@@ -144,16 +144,17 @@ private fun RowScope.Segment(count: Int, total: Int, color: Color) {
 }
 
 /**
- * VPN state as it really is. Premium users can connect from here; the "tunnel coming
- * soon" note stays until the WireGuard tunnel ships, so Home never overstates protection.
+ * VPN state as it really is: "Connected" only once the node has answered a handshake.
+ * Premium users can connect from here.
  */
 @Composable
 internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit) {
     val c = qasaColors
     val connected by vm.vpn.connected.collectAsState()
+    val phase by vm.vpn.phase.collectAsState()
     val busy by vm.vpn.isBusy.collectAsState()
     val city by vm.vpn.city.collectAsState()
-    val scope = rememberCoroutineScope()
+    val toggle = rememberVpnToggle(vm.vpn)
     HomeCard(onClick = onOpenVpn) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconTile(Icons.Outlined.VpnLock)
@@ -163,7 +164,8 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
                 Text(
                     when {
                         !isPremium -> stringResource(R.string.home_vpn_premium)
-                        connected -> stringResource(R.string.home_vpn_on, city ?: "—")
+                        phase == VpnPhase.Connected -> stringResource(R.string.home_vpn_on, city ?: "—")
+                        phase == VpnPhase.Connecting -> stringResource(R.string.vpn_connecting)
                         else -> stringResource(R.string.home_vpn_off)
                     },
                     color = c.textSecondary,
@@ -172,9 +174,7 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
             }
             if (isPremium) {
                 QasaPressable(
-                    onClick = {
-                        if (!busy) scope.launch { if (connected) vm.vpn.disconnect() else vm.vpn.connect() }
-                    },
+                    onClick = toggle,
                     enabled = !busy,
                 ) {
                     Pill(
@@ -184,10 +184,6 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
                     )
                 }
             }
-        }
-        if (isPremium) {
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(stringResource(R.string.vpn_sessiononly), color = c.textTertiary, style = qasaText.labelRegular)
         }
     }
 }

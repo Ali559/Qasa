@@ -51,5 +51,6 @@ object QasaConfig {
     val vpnConnectUrl get() = "$apiBaseUrl/v1/vpn/connect"
     val vpnStatusUrl get() = "$apiBaseUrl/v1/vpn/status"
     val vpnDisconnectUrl get() = "$apiBaseUrl/v1/vpn/disconnect"
+    val vpnNodesUrl get() = "$apiBaseUrl/v1/vpn/nodes"
     val healthUrl get() = "$apiBaseUrl/health"
 }

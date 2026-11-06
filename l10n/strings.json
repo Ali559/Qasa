@@ -3457,5 +3457,65 @@
     "en": "Your score doesn't include breached passwords. Premium checks those too.",
     "ar": "لا تشمل نتيجتك كلمات المرور المسرّبة. يفحصها بريميوم أيضًا.",
     "ckb": "خاڵەکانت وشە نهێنییە دزراوەکان ناگرێتەوە. پریمیۆم ئەوانیش دەپشکنێت."
+  },
+  "vpn.connecting": {
+    "en": "Connecting…",
+    "ar": "جارٍ الاتصال…",
+    "ckb": "پەیوەستدەبێت…"
+  },
+  "vpn.chooseServer": {
+    "en": "Choose a server",
+    "ar": "اختر خادمًا",
+    "ckb": "سێرڤەرێک هەڵبژێرە"
+  },
+  "vpn.autoSelectSub": {
+    "en": "The least busy server",
+    "ar": "الخادم الأقل انشغالًا",
+    "ckb": "کەمترین سێرڤەری قەرەباڵغ"
+  },
+  "vpn.serverLoad": {
+    "en": "Load",
+    "ar": "الحِمل",
+    "ckb": "بار"
+  },
+  "vpn.noServers": {
+    "en": "No VPN servers are available right now. Try again soon.",
+    "ar": "لا تتوفر خوادم VPN حاليًا. حاول مرة أخرى قريبًا.",
+    "ckb": "ئێستا هیچ سێرڤەرێکی VPN بەردەست نییە. دواتر هەوڵ بدەرەوە."
+  },
+  "vpn.dataThisMonth": {
+    "en": "Data this month",
+    "ar": "البيانات هذا الشهر",
+    "ckb": "داتای ئەم مانگە"
+  },
+  "vpn.dataUsedFmt": {
+    "en": "%1$@ of %2$@",
+    "ar": "%1$@ من %2$@",
+    "ckb": "%1$@ لە %2$@"
+  },
+  "vpn.throttledFmt": {
+    "en": "You've used this month's data. Speed is limited to %lld Mbps until it resets.",
+    "ar": "استهلكت بيانات هذا الشهر. السرعة محدودة بـ %lld ميغابت/ث حتى تتجدد.",
+    "ckb": "داتای ئەم مانگەت بەکارهێنا. خێرایی سنووردارە بە %lld مێگابیت/چ تا نوێ دەبێتەوە."
+  },
+  "vpn.permissionDenied": {
+    "en": "Qasa needs permission to set up a VPN on this device.",
+    "ar": "تحتاج قاصة إلى إذن لإعداد VPN على هذا الجهاز.",
+    "ckb": "قاسە پێویستی بە مۆڵەتە بۆ ڕێکخستنی VPN لەسەر ئەم ئامێرە."
+  },
+  "vpn.noHandshake": {
+    "en": "Can't reach the VPN server. Try another server.",
+    "ar": "تعذّر الوصول إلى خادم VPN. جرّب خادمًا آخر.",
+    "ckb": "ناتوانرێت بگاتە سێرڤەری VPN. سێرڤەرێکی تر تاقی بکەرەوە."
+  },
+  "vpn.networkError": {
+    "en": "Can't reach Qasa. Check your internet connection.",
+    "ar": "تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت.",
+    "ckb": "ناتوانرێت بگاتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە."
+  },
+  "vpn.sessionEnded": {
+    "en": "The VPN session ended. Connect again to stay protected.",
+    "ar": "انتهت جلسة VPN. اتصل مجددًا لتبقى محميًا.",
+    "ckb": "دانیشتنی VPN کۆتایی هات. دووبارە پەیوەست ببە بۆ ئەوەی پارێزراو بیت."
   }
 }

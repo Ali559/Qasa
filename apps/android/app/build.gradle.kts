@@ -101,6 +101,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // WireGuard userspace backend (GoBackend) and its VpnService.
+    implementation(libs.wireguard.tunnel)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
     implementation(libs.retrofit)

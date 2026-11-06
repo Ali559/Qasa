@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.vpn
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Sync
@@ -33,14 +35,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-/** iOS `VPNView.swift:58` — capsule under the title: globe + "city — node" (or Auto-select). */
+/**
+ * iOS `VPNView.swift:58` — capsule under the title: globe + "city — node" (or Auto-select).
+ * Android: tapping it opens the server picker.
+ */
 @Composable
-internal fun VpnServerPill(city: String?, nodeName: String?) {
+internal fun VpnServerPill(city: String?, nodeName: String?, onClick: () -> Unit) {
     val c = qasaColors
     // iOS `serverLabel` (VPNView.swift:196): both parts must be known, else "Auto-select".
     val label = if (city != null && nodeName != null) "$city — $nodeName" else stringResource(R.string.vpn_autoselect)
     val shape = RoundedCornerShape(50)
-    Row(
+    QasaPressable(onClick = onClick) { Row(
         modifier = Modifier
             .background(c.cardBackground, shape)
             .border(QasaDimens.stroke, c.stroke, shape)
@@ -50,7 +55,8 @@ internal fun VpnServerPill(city: String?, nodeName: String?) {
     ) {
         Icon(Icons.Default.Public, contentDescription = null, tint = c.cyan)
         Text(label, color = c.textPrimary, style = qasaText.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
+        Icon(Icons.Default.ExpandMore, contentDescription = null, tint = c.textSecondary)
+    } }
 }
 
 /**
@@ -87,6 +93,8 @@ internal fun VpnSecurityFeaturesCard(
     onKillSwitch: (Boolean) -> Unit,
     autoConnect: Boolean,
     onAutoConnect: (Boolean) -> Unit,
+    /** Android: how the kill switch is actually enforced, shown while it is on. */
+    killSwitchHint: @Composable () -> Unit = {},
 ) {
     val c = qasaColors
     CardContainer(background = c.cardMuted) {
@@ -105,6 +113,7 @@ internal fun VpnSecurityFeaturesCard(
                 iconColor = c.danger,
                 iconBackground = c.dangerBackground.copy(alpha = 0.35f),
             )
+            if (killSwitch) killSwitchHint()
             ToggleRow(
                 title = stringResource(R.string.vpn_autoconnect),
                 subtitle = stringResource(R.string.vpn_autoconnectsub),

@@ -36,8 +36,9 @@ class AppPreferences @Inject constructor(
     private val _autoLockMinutes = MutableStateFlow(prefs.getInt(KEY_AUTO_LOCK, 5))
     val autoLockMinutes: StateFlow<Int> = _autoLockMinutes.asStateFlow()
 
-    // VPN preferences (premium page only). Saved so they survive restarts on both apps;
-    // nothing acts on them until a real tunnel exists (server follow-up plan).
+    // VPN preferences (premium page only). On Android the kill switch can only be enforced
+    // by the system's Always-on VPN setting, so the VPN page guides the user there;
+    // auto-connect is acted on by `VpnAutoConnector`.
     private val _vpnKillSwitch = MutableStateFlow(prefs.getBoolean(KEY_VPN_KILL_SWITCH, true))
     val vpnKillSwitch: StateFlow<Boolean> = _vpnKillSwitch.asStateFlow()
 
@@ -52,6 +53,15 @@ class AppPreferences @Inject constructor(
     fun setVpnAutoConnect(on: Boolean) {
         prefs.edit().putBoolean(KEY_VPN_AUTO_CONNECT, on).apply()
         _vpnAutoConnect.value = on
+    }
+
+    /** Server chosen in the region picker; null means let the server pick. */
+    private val _vpnNodeId = MutableStateFlow(prefs.getString(KEY_VPN_NODE_ID, null))
+    val vpnNodeId: StateFlow<String?> = _vpnNodeId.asStateFlow()
+
+    fun setVpnNodeId(id: String?) {
+        prefs.edit().putString(KEY_VPN_NODE_ID, id).apply()
+        _vpnNodeId.value = id
     }
 
     var hasCompletedWelcome: Boolean
@@ -124,6 +134,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_WELCOME = "qasa.welcomeCompleted"
         private const val KEY_VPN_KILL_SWITCH = "qasa.vpn.killSwitch"
         private const val KEY_VPN_AUTO_CONNECT = "qasa.vpn.autoConnect"
+        private const val KEY_VPN_NODE_ID = "qasa.vpn.nodeId"
         private const val KEY_NOTIF_REQUESTED = "qasa.notifications.permissionRequested"
         private const val KEY_NOTIF_PROMPTED_AT = "qasa.notifications.promptedAt"
         private const val KEY_NOTIF_SYNCED = "qasa.notifications.lastSyncedEnabled"

@@ -11,6 +11,7 @@ import alibarznji.qasa.theme.VpnPowerDial
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vpn.VPNService
+import alibarznji.qasa.vpn.VpnPhase
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,18 +57,31 @@ fun VPNScreen(
     val c = qasaColors
     val isPremium by vm.appSession.isPremium.collectAsState()
     val connected by vm.vpn.connected.collectAsState()
+    val phase by vm.vpn.phase.collectAsState()
+    val usage by vm.vpn.usage.collectAsState()
+    val nodes by vm.vpn.nodes.collectAsState()
+    val selectedNodeId by vm.prefs.vpnNodeId.collectAsState()
+    val systemKillSwitch by vm.vpn.systemKillSwitch.collectAsState()
     val isBusy by vm.vpn.isBusy.collectAsState()
     val nodeName by vm.vpn.nodeName.collectAsState()
     val city by vm.vpn.city.collectAsState()
     val assignedIP by vm.vpn.assignedIP.collectAsState()
     val lastError by vm.vpn.lastError.collectAsState()
-    // Saved preferences (kill switch defaults on, like iOS). The whole page is premium-only,
-    // so free users never reach these; acting on them needs a real tunnel (follow-up plan).
+    // Saved preferences (kill switch defaults on, like iOS). The whole page is premium-only.
+    // Auto-connect is acted on by `VpnAutoConnector`; the kill switch by Android's
+    // Always-on VPN setting, which the hint under it opens.
     val killSwitch by vm.prefs.vpnKillSwitch.collectAsState()
     val autoConnect by vm.prefs.vpnAutoConnect.collectAsState()
     val scope = rememberCoroutineScope()
+    val toggle = rememberVpnToggle(vm.vpn)
+    var showServers by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) { if (isPremium) vm.vpn.refreshStatus() }
+    LaunchedEffect(isPremium) {
+        if (isPremium) {
+            vm.vpn.refreshStatus()
+            vm.vpn.loadNodes()
+        }
+    }
 
     ScreenScaffold(
         header = { AppMenuHeader(title = stringResource(R.string.nav_vpn), onMenu = onOpenMenu, applyStatusBars = false) },
@@ -85,32 +102,38 @@ fun VPNScreen(
                 style = qasaText.styleForSize(28, FontWeight.ExtraBold),
             )
             Spacer(Modifier.height(QasaDimens.gap))
-            VpnServerPill(city = city, nodeName = nodeName)
+            VpnServerPill(
+                city = city ?: nodes.firstOrNull { it.id == selectedNodeId }?.city,
+                nodeName = nodeName ?: nodes.firstOrNull { it.id == selectedNodeId }?.name,
+                onClick = {
+                    showServers = true
+                    scope.launch { vm.vpn.loadNodes() }
+                },
+            )
 
             Spacer(Modifier.height(SectionSpacing + DialPadding))
             VpnPowerDial(
                 connected = connected,
-                busy = isBusy,
-                onClick = {
-                    // iOS `.disabled(vpn.isBusy)`.
-                    if (isBusy) return@VpnPowerDial
-                    scope.launch {
-                        if (connected) vm.vpn.disconnect() else vm.vpn.connect()
-                    }
-                },
+                // Spinner while a call is in flight or the tunnel waits for its first
+                // handshake; only the former blocks taps (connecting can be cancelled).
+                busy = isBusy || phase == VpnPhase.Connecting,
+                onClick = toggle,
             )
             Spacer(Modifier.height(SectionSpacing))
             Text(
-                if (connected) stringResource(R.string.vpn_connected) else stringResource(R.string.vpn_disconnected),
-                color = if (connected) c.success else c.textSecondary,
+                stringResource(
+                    when (phase) {
+                        VpnPhase.Connected -> R.string.vpn_connected
+                        VpnPhase.Connecting -> R.string.vpn_connecting
+                        VpnPhase.Disconnected -> R.string.vpn_disconnected
+                    },
+                ),
+                color = when (phase) {
+                    VpnPhase.Connected -> c.success
+                    VpnPhase.Connecting -> c.accent
+                    VpnPhase.Disconnected -> c.textSecondary
+                },
                 style = qasaText.statValue,
-            )
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(
-                stringResource(R.string.vpn_sessiononly),
-                color = c.textSecondary,
-                style = qasaText.sectionLabel,
-                textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(DialPadding))
 
@@ -119,6 +142,10 @@ fun VPNScreen(
                 Text(err, color = c.danger, style = qasaText.bodySmall, textAlign = TextAlign.Center)
             }
 
+            usage?.let {
+                Spacer(Modifier.height(SectionSpacing))
+                VpnDataCard(it)
+            }
             Spacer(Modifier.height(SectionSpacing))
             VpnMetricCard(
                 icon = Icons.Default.Key,
@@ -140,8 +167,21 @@ fun VPNScreen(
                 onKillSwitch = vm.prefs::setVpnKillSwitch,
                 autoConnect = autoConnect,
                 onAutoConnect = vm.prefs::setVpnAutoConnect,
+                killSwitchHint = { VpnKillSwitchHint(systemKillSwitch) },
             )
         }
+    }
+
+    if (showServers) {
+        VpnServerSheet(
+            nodes = nodes,
+            selectedId = selectedNodeId,
+            onSelect = { id ->
+                showServers = false
+                scope.launch { vm.vpn.selectNode(id) }
+            },
+            onDismiss = { showServers = false },
+        )
     }
 }
 

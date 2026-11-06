@@ -24,6 +24,7 @@ credentials = "1.3.0"
 googleServices = "4.4.2"
 firebaseBom = "33.7.0"
 codeScanner = "16.1.0"
+wireguardTunnel = "1.0.20260102"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,7 @@ androidx-credentials-play = { group = "androidx.credentials", name = "credential
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "codeScanner" }
+wireguard-tunnel = { group = "com.wireguard.android", name = "tunnel", version.ref = "wireguardTunnel" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

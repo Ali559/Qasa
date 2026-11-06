@@ -158,11 +158,19 @@ Migration `20261102000001_vpn_tunnel.sql`.
 ### Still pending
 
 - **Node-side throttling.** Throttled peers come with `throttle_mbps = 5`, but the agent doesn't shape traffic yet (it logs that). It needs `tc` per-peer rate limiting on the node.
-- **Device tunnels** (the client work above):
-  - **iOS:** a Packet Tunnel `NetworkExtension` target. Generate the WireGuard keypair on the device (private key in the Keychain) and send the public key on connect. Then build the tunnel from the returned `config`.
-  - **Android:** the same with `VpnService` and wireguard-android.
-  - **Kill switch and auto-connect:** as described above.
-  - **Use of the new API fields:** use `tunnel_up` for the "connected" UI, `GET /v1/vpn/nodes` for a region picker, and the `usage` block for a data meter.
+- **iOS device tunnel:** a Packet Tunnel `NetworkExtension` target. Generate the WireGuard keypair on the device (private key in the Keychain) and send the public key on connect. Then build the tunnel from the returned `config`. Kill switch and auto-connect as described above, plus the region picker and data meter Android has.
+
+### Android device tunnel — done 2026-11-06
+
+- **Tunnel:** wireguard-android `tunnel` 1.0.20260102 (`GoBackend` and its `VpnService`, declared by the library). `vpn/VPNService.kt` asks the API for a session, builds the config (`WireGuardConfigFactory`) and brings the tunnel up. The first connect shows Android's VPN consent dialog (`rememberVpnToggle`).
+- **Keys:** `WireGuardKeyStore` makes the keypair on the device and keeps the private key in encrypted preferences. "Clear device" and losing the device slot drop the tunnel and the key (`VPNService.forget`).
+- **State:** "Connected" means the device saw a handshake in the last 3 minutes; until then the dial shows "Connecting…". After 45 s with no handshake the page says the server can't be reached. Every 30 s the app checks `/vpn/status`: if the server ended the session it reconnects once, then gives up; a 401/403 (lapsed, unlinked) takes the tunnel down.
+- **Region picker:** tap the server pill. The choice is saved (`qasa.vpn.nodeId`); a node that went away falls back to auto-select.
+- **Data meter:** from the `usage` block. `/vpn/status` now returns `usage` too, connected or not.
+- **Auto-connect:** `VpnAutoConnector` connects once on joining open, WEP or OWE Wi-Fi (any Wi-Fi below Android 12, where the type can't be read). It runs while the process lives and never asks for consent itself.
+- **Kill switch:** Android apps can't enforce it. While it's on, the page explains the system's Always-on VPN + "Block connections without VPN" and opens VPN settings; once the system lockdown is on, it says so. Always-on starting the service connects (`GoBackend.setAlwaysOnCallback`).
+- **Debug builds** keep Qasa itself outside the tunnel so a local dev API stays reachable.
+- **Not verified on a device yet:** unit tests cover the config and Wi-Fi rules; a real node with a running agent is needed for an end-to-end check. The new ar/ckb text awaits native review.
 - **Peer cleanup on the node at startup** (stale peers after a crash) already happens on the first sync. No extra work.
 - **Dev:** seeded nodes have no agent, so with the worker on they go `offline` after 2 minutes. Run `qasa-vpn-agent` per node, or leave the worker off.
 
