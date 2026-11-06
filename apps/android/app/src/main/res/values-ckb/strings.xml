@@ -121,12 +121,15 @@
     <string name="breached_check_again">دووبارە بپشکنە</string>
     <string name="breached_checking">پشکنینی وشە نهێنییەکانت…</string>
     <string name="breached_found">%d لە وشە نهێنییەکانت لە دزەکردنی زانیاریدا دەرکەوتوون.</string>
+    <string name="breached_lockedbody">پریمیۆم هەموو وشەیەکی نهێنیی پاشەکەوتکراو لەگەڵ دزەکراوە ناسراوەکان بەراورد دەکات و پیشانت دەدات کامیان بگۆڕیت. تەنها کۆدێکی ٥ پیتی لە مۆبایلەکەت دەردەچێت.</string>
+    <string name="breached_lockedtitle">وشە نهێنییە دزراوەکان بدۆزەرەوە بە پریمیۆم</string>
     <string name="breached_none_body">هیچ کام لە وشە نهێنییە پاشەکەوتکراوەکانت لە دزەکردنە ناسراوەکاندا نییە.</string>
     <string name="breached_none_title">هیچ وشەیەکی نهێنی دزراو نییە</string>
     <string name="breached_offline">نەتوانرا پشکنینی دزەکردن بکرێت. کاتێک ئینتەرنێتت هەبوو دووبارە هەوڵ بدەرەوە.</string>
     <string name="breached_privacy_body">هەر وشەیەکی نهێنی لەسەر مۆبایلەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن.</string>
     <string name="breached_privacy_title">پشکنینەکە چۆن کار دەکات</string>
     <string name="breached_seen_count">%s جار لە دزەکاندا بینراوە</string>
+    <string name="breached_unlock">پریمیۆم وەربگرە</string>
     <string name="collections_assignhint">بڕگەکان بۆ “%s” لە دەستکاریکەری بڕگە دیاری بکە.</string>
     <string name="collections_createtitle">کۆکراوەی نوێ</string>
     <string name="collections_deletemessage">بڕگەکان لە کۆگا دەمێننەوە بەڵام چیتر سەر بەم کۆکراوەیە نابن.</string>
@@ -179,6 +182,7 @@
     <string name="copy_phone">لەبەرگرتنەوەی ژمارەی تەلەفۆن</string>
     <string name="copy_routingnumber">لەبەرگرتنەوەی ژمارەی ڕێڕەو</string>
     <string name="copy_securitycode">لەبەرگرتنەوەی کۆدی پاراستن</string>
+    <string name="copy_totp">لەبەرگرتنەوەی کۆدی دوو هەنگاوی</string>
     <string name="copy_username">لەبەرگرتنەوەی ناوی بەکارهێنەر</string>
     <string name="copy_website">لەبەرگرتنەوەی وێبسایت</string>
     <string name="copy_zip">لەبەرگرتنەوەی کۆدی پۆستە</string>
@@ -263,6 +267,7 @@
     <string name="field_routingnumber">ژمارەی ڕێڕەو</string>
     <string name="field_securitycode">کۆدی ئاسایش</string>
     <string name="field_title">ناونیشان</string>
+    <string name="field_totp">کۆدی دوو هەنگاوی</string>
     <string name="field_type">جۆر</string>
     <string name="field_username">ناوی بەکارهێنەر</string>
     <string name="field_website">ماڵپەڕ</string>
@@ -291,6 +296,7 @@
     <string name="gen_veryweak">زۆر لاواز</string>
     <string name="gen_weak">لاواز</string>
     <string name="health_breached">دزراو</string>
+    <string name="health_breachedlocked">خاڵەکانت وشە نهێنییە دزراوەکان ناگرێتەوە. پریمیۆم ئەوانیش دەپشکنێت.</string>
     <string name="health_excellent">نایاب</string>
     <string name="health_fair">مامناوەند</string>
     <string name="health_good">باش</string>
@@ -426,7 +432,7 @@
     <string name="premium_completeinwallet">پارەدان لە %s تەواو بکە…</string>
     <string name="premium_fastpay">FastPay</string>
     <string name="premium_fastpaysub">جزدانی مۆبایل</string>
-    <string name="premium_featurebreach">ئاگادارکردنەوەی دزەی ئیمەیڵ</string>
+    <string name="premium_featurebreach">پشکنینی وشە نهێنییە دزراوەکان</string>
     <string name="premium_featuredevices">پاراستنی تا ٥ ئامێر</string>
     <string name="premium_featuresave">پاشەکەوت بەراورد بە مانگانە</string>
     <string name="premium_featurevpn">VPN</string>
@@ -572,6 +578,18 @@
     <string name="tab_home">سەرەکی</string>
     <string name="tab_passwords">وشە نهێنییەکان</string>
     <string name="tab_you">تۆ</string>
+    <string name="totp_add">زیادکردنی کۆدی دوو هەنگاوی</string>
+    <string name="totp_cameradenied">قاسە پێویستی بە کامێرایە بۆ سکانکردنی کۆدی QR. لە ڕێکخستنەکاندا ڕێگەی پێبدە، یان لەبری ئەوە کلیلی ڕێکخستن بنووسە.</string>
+    <string name="totp_copied">کۆدی دوو هەنگاوی لەبەرگیرایەوە</string>
+    <string name="totp_enterkey">نووسینی کلیلی ڕێکخستن</string>
+    <string name="totp_hint">کاتێک ماڵپەڕێک داوات لێدەکات پشتڕاستکردنەوەی دوو هەنگاوی ڕێکبخەیت، کۆدی QR ـەکەی لێرە سکان بکە. ئینجا قاسە ئەو کۆدە ٦ ژمارەییەت پیشان دەدات کە دەینووسیت.</string>
+    <string name="totp_invalid">ئەمە کلیلێکی دروستی ڕێکخستنی دوو هەنگاوی نییە.</string>
+    <string name="totp_keyplaceholder">کلیلی ڕێکخستن یان بەستەری otpauth://</string>
+    <string name="totp_notqr">ئەم کۆدی QR ـە کۆدی ڕێکخستنی دوو هەنگاوی نییە.</string>
+    <string name="totp_remove">لابردنی کۆدی دوو هەنگاوی</string>
+    <string name="totp_scan">سکانکردنی کۆدی QR</string>
+    <string name="totp_scanhint">کامێراکە ڕووبکە ئەو کۆدی QR ـەی ماڵپەڕەکە بۆ پشتڕاستکردنەوەی دوو هەنگاوی پیشانی دەدات.</string>
+    <string name="totp_scantitle">کۆدی QR ـەکە سکان بکە</string>
     <string name="vault_addnew">دەتەوێت چی پاشەکەوت بکەیت؟</string>
     <string name="vault_collection">بوخچە</string>
     <string name="vault_color">ڕەنگ</string>

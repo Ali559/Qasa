@@ -35,6 +35,8 @@ enum AutofillSecrets: Codable, Sendable {
         var username: String
         var password: String
         var website: String
+        /// Normalised otpauth URI; nil for logins without 2FA and for indexes written before it.
+        var totp: String? = nil
     }
 
     struct Card: Codable, Sendable {

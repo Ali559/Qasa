@@ -48,7 +48,10 @@ struct HomeView: View {
                     HomeHealthCard(report: report, onTap: { onOpen(.passwordHealth) })
                 }
                 HomeVPNCard(isPremium: session.isPremium, onTap: { onOpen(.vpn) })
-                HomeBreachedCard(onTap: { onTab(.alerts) })
+                HomeBreachedCard(
+                    isPremium: session.isPremium,
+                    onTap: { session.isPremium ? onTab(.alerts) : onOpen(.premiumUpgrade) }
+                )
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 16)
@@ -68,6 +71,7 @@ struct HomeView: View {
         )
         .onAppear(perform: refreshReport)
         .onChange(of: cache.rows) { _, _ in refreshReport() }
+        .onChange(of: session.isPremium) { _, _ in refreshReport() }
         .task {
             await NotificationService.shared.refreshUnreadCount()
         }
@@ -118,12 +122,15 @@ struct HomeView: View {
     }
 
     /// Local report straight away, then again once the Pwned Passwords check is back.
+    /// Free accounts stop at the local report: the breach check is Premium-only.
     private func refreshReport() {
         let logins = PasswordHealthAnalyzer.vaultLogins()
-        report = PasswordHealthAnalyzer.analyze(logins: logins)
+        let isPremium = session.isPremium
+        report = PasswordHealthAnalyzer.analyze(logins: logins, breachLocked: !isPremium)
         Task {
-            let checked = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins)
-            if !checked.breachCheckFailed { report = checked }
+            let checked = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins, isPremium: isPremium)
+            // A check that finishes after the plan changed would bring back stale counts.
+            if !checked.breachCheckFailed, session.isPremium == isPremium { report = checked }
         }
     }
 }

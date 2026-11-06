@@ -2,6 +2,7 @@ package alibarznji.qasa.screens.tools.health
 
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.PasswordHealthReport
+import alibarznji.qasa.screens.breach.BreachLockedCard
 import alibarznji.qasa.screens.vault.RowCopy
 import alibarznji.qasa.screens.vault.list.VaultListItemRow
 import alibarznji.qasa.theme.BackChromeHeader
@@ -58,6 +59,7 @@ internal fun HealthIssuesScreen(
     onCopy: (String, RowCopy) -> Unit,
     onDelete: (String) -> Unit,
     loadPayload: suspend (String) -> VaultPayload?,
+    onUpgrade: () -> Unit,
 ) {
     val c = qasaColors
     var selected by rememberSaveable { mutableStateOf(initialTab) }
@@ -83,14 +85,18 @@ internal fun HealthIssuesScreen(
                     HealthIssueTab.WEAK -> report.weakItems.size
                     HealthIssueTab.BREACHED -> report.breachedItems.size
                 }
+                // A Free account's Breached count was never checked, so it shows no number.
+                val locked = tab == HealthIssueTab.BREACHED && report.breachLocked
                 IssuePill(
-                    title = "${stringResource(tab.titleRes)} ($count)",
+                    title = if (locked) stringResource(tab.titleRes) else "${stringResource(tab.titleRes)} ($count)",
                     selected = tab == selected,
                     onClick = { selected = tab },
                 )
             }
         }
-        if (items.isEmpty()) {
+        if (selected == HealthIssueTab.BREACHED && report.breachLocked) {
+            BreachLockedCard(onUpgrade = onUpgrade, modifier = Modifier.padding(horizontal = QasaDimens.screenPadding))
+        } else if (items.isEmpty()) {
             val (title, hint, icon) = when (selected) {
                 HealthIssueTab.REUSED -> Triple(R.string.health_noreusedtitle, R.string.health_noreusedbody, Icons.Default.Sync)
                 HealthIssueTab.WEAK -> Triple(R.string.health_noweaktitle, R.string.health_noweakbody, Icons.Default.Warning)

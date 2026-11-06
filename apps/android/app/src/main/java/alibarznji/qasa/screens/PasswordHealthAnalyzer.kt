@@ -15,6 +15,11 @@ data class PasswordHealthReport(
     val breachCounts: Map<String, Int> = emptyMap(),
     /** The breach check ran and failed (usually offline). Breached stays 0 then. */
     val breachCheckFailed: Boolean = false,
+    /**
+     * Free tier: the breach check is Premium, so it never ran. Breached stays 0, the score
+     * has no breach deduction, and the UI shows the locked state instead of a count.
+     */
+    val breachLocked: Boolean = false,
 ) {
     val breachedCount: Int get() = breachedItems.size
 

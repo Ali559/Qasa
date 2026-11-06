@@ -1,7 +1,8 @@
 import CryptoKit
 import Foundation
 
-/// Breached-password check against HIBP Pwned Passwords (free, no API key).
+/// Breached-password check against HIBP Pwned Passwords (no API key). Premium-only: callers
+/// go through `PasswordHealthAnalyzer.analyzeWithBreaches`, which never calls this on Free.
 /// k-anonymity: each password is SHA-1 hashed on device and only the first 5 hex characters
 /// leave the phone. The Qasa server is not involved. Mirrors Android `PwnedPasswordsService`.
 actor PwnedPasswordsService {
@@ -31,6 +32,11 @@ actor PwnedPasswordsService {
             }
         }
         return counts
+    }
+
+    /// Drops cached ranges, so nothing from a Premium session lingers after it lapses.
+    func clearCache() {
+        cache.removeAll()
     }
 
     private func range(for prefix: String) async throws -> [String: Int] {

@@ -13,7 +13,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
- * Breached-password check against HIBP Pwned Passwords (free, no API key). k-anonymity:
+ * Breached-password check against HIBP Pwned Passwords (no API key). Premium only: callers
+ * gate on the tier ([alibarznji.qasa.screens.tools.health.HealthViewModel]). k-anonymity:
  * each password is SHA-1 hashed on device and only the first 5 hex characters leave the
  * phone. The Qasa server is not involved. Mirrors iOS `PwnedPasswordsService`.
  */
@@ -39,6 +40,11 @@ class PwnedPasswordsService @Inject constructor() {
             counts += matchRange(range(prefix), entries)
         }
         return counts
+    }
+
+    /** Drops the cached ranges, e.g. when Premium lapses, so nothing from a past check lingers. */
+    suspend fun clearCache() {
+        cacheLock.withLock { cache.clear() }
     }
 
     private suspend fun range(prefix: String): Map<String, Int> {

@@ -31,6 +31,9 @@ internal object IosFieldsMapper {
             "itemName" to p.itemName, "email" to p.email, "username" to p.username,
             "password" to p.password, "website" to p.website, "note" to p.note,
             "collectionId" to uuidOut(p.collectionId),
+            // iOS `totp: String?`: written only when set, so a login without a 2FA code
+            // exports byte-for-byte as before (null values are omitted by the writer).
+            "totp" to p.totp.ifEmpty { null },
         )
         is VaultPayload.SecureNote -> mapOf(
             "title" to p.title, "content" to p.content,
@@ -101,7 +104,7 @@ internal object IosFieldsMapper {
             "login" -> VaultPayload.Login(
                 itemName = s("itemName"), email = s("email"), username = s("username"),
                 password = s("password"), website = s("website"), note = s("note"),
-                collectionId = uuid("collectionId"),
+                collectionId = uuid("collectionId"), totp = s("totp"),
             )
             "secureNote" -> VaultPayload.SecureNote(
                 title = s("title"), content = s("content"),

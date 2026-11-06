@@ -59,6 +59,7 @@ private fun LoginFields(p: VaultPayload.Login, env: EditorEnv, onChange: (VaultP
     FormTextField(R.string.field_email, p.email, keyboardType = KeyboardType.Email) { onChange(p.copy(email = it)) }
     FormTextField(R.string.field_username, p.username) { onChange(p.copy(username = it)) }
     PasswordFormField(p.password, { onChange(p.copy(password = it)) }, env.onGeneratePassword)
+    TotpFormField(p.totp) { onChange(p.copy(totp = it)) }
     FormTextField(R.string.field_website, p.website, keyboardType = KeyboardType.Uri) { onChange(p.copy(website = it)) }
     FormTextField(R.string.field_note, p.note) { onChange(p.copy(note = it)) }
     CollectionPickerField(p.collectionId, env.collections, { onChange(p.copy(collectionId = it)) }, env.onCreateCollection)

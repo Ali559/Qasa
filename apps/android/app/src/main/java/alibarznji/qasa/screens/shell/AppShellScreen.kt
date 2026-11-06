@@ -107,7 +107,7 @@ fun AppShellScreen(
                     ShellTab.Passwords -> VaultListScreen()
                     // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
                     // ShellTab.Alerts -> BreachMonitorScreen(onUpgrade = { open(AppPage.PremiumUpgrade) })
-                    ShellTab.Alerts -> BreachedPasswordsScreen()
+                    ShellTab.Alerts -> BreachedPasswordsScreen(onUpgrade = { open(AppPage.PremiumUpgrade) })
                     ShellTab.You -> YouScreen(displayName = displayName, isPremium = isPremium, onOpen = ::open)
                 }
             }
@@ -127,7 +127,7 @@ private fun PageContent(
     when (page) {
         AppPage.Notifications -> NotificationsScreen(onOpenMenu = back)
         AppPage.Generator -> GenerateScreen(onOpenMenu = back)
-        AppPage.PasswordHealth -> PasswordHealthScreen(onOpenMenu = back)
+        AppPage.PasswordHealth -> PasswordHealthScreen(onOpenMenu = back, onUpgrade = upgrade)
         AppPage.Vpn -> VPNScreen(onOpenMenu = back, onUpgrade = upgrade)
         AppPage.Collections -> CollectionsScreen(onOpenMenu = back)
         AppPage.Settings -> SettingsScreen(onOpenMenu = back, onLock = onLock, onUpgrade = upgrade)

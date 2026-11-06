@@ -64,6 +64,7 @@ private data class HealthEdit(val itemId: String, val payload: VaultPayload)
 @Composable
 fun PasswordHealthScreen(
     onOpenMenu: (() -> Unit)? = null,
+    onUpgrade: () -> Unit = {},
     vm: HealthViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -109,6 +110,7 @@ fun PasswordHealthScreen(
                     report = report,
                     onOpenMenu = onOpenMenu,
                     onOpenIssues = { tab -> navController.navigate(HealthRoutes.issues(tab)) },
+                    onUpgrade = onUpgrade,
                 )
             }
             composable(
@@ -127,6 +129,7 @@ fun PasswordHealthScreen(
                     onCopy = ::copy,
                     onDelete = vm::delete,
                     loadPayload = vm::loadPayload,
+                    onUpgrade = onUpgrade,
                 )
             }
             composable(

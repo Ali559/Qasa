@@ -29,6 +29,9 @@ enum VaultCSVError: LocalizedError {
 /// Format: a wide set of human-readable columns for the common fields, plus a `fields`
 /// column holding compact JSON of the concrete `*Fields` struct. Import prefers `fields`
 /// so the round trip is exact; the wide columns keep the file usable in a spreadsheet.
+///
+/// A login's 2FA code travels only inside `fields`, as `"totp"` (the otpauth URI), and only
+/// when the login has one. Android's `IosFieldsMapper` reads and writes the same key.
 enum VaultCSV {
     static let columns = [
         "type", "title", "username", "password", "url", "email",
@@ -109,7 +112,10 @@ enum VaultCSV {
         encoder.outputFormatting = [.sortedKeys]
         let data: Data?
         switch payload {
-        case .login(let f): data = try? encoder.encode(f)
+        case .login(var f):
+            // "" means no code; leave the key out, like Android does.
+            if !f.hasTOTP { f.totp = nil }
+            data = try? encoder.encode(f)
         case .secureNote(let f): data = try? encoder.encode(f)
         case .card(let f): data = try? encoder.encode(f)
         case .bankAccount(let f): data = try? encoder.encode(f)
@@ -190,7 +196,10 @@ enum VaultCSV {
                     username: value("username"),
                     password: value("password"),
                     website: value("url"),
-                    note: value("notes")
+                    note: value("notes"),
+                    // Other managers' flat exports name the 2FA column either way. A value
+                    // that isn't a valid TOTP setup key is dropped, not stored.
+                    totp: (try? TOTP.parse(value("totp").isEmpty ? value("login_totp") : value("totp")))?.uri
                 )))
             case "secureNote":
                 out.append(.secureNote(SecureNoteFields(
@@ -224,7 +233,10 @@ enum VaultCSV {
     private static func decodePayload(type: String, json: Data) -> VaultPayload? {
         let decoder = JSONDecoder()
         switch type {
-        case "login": return (try? decoder.decode(LoginFields.self, from: json)).map(VaultPayload.login)
+        case "login":
+            guard var f = try? decoder.decode(LoginFields.self, from: json) else { return nil }
+            if !f.hasTOTP { f.totp = nil }
+            return .login(f)
         case "secureNote": return (try? decoder.decode(SecureNoteFields.self, from: json)).map(VaultPayload.secureNote)
         case "card": return (try? decoder.decode(CardFields.self, from: json)).map(VaultPayload.card)
         case "bankAccount": return (try? decoder.decode(BankAccountFields.self, from: json)).map(VaultPayload.bankAccount)

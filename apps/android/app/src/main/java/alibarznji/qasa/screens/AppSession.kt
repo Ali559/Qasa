@@ -17,7 +17,7 @@ enum class AppPage(
     PasswordHealth(R.string.nav_passwordhealth),
     // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
     // BreachMonitoring(R.string.nav_breachmonitoring),
-    /** Free Pwned Passwords check; the Alerts tab. */
+    /** Pwned Passwords check; the Alerts tab. Premium, but the tab stays and shows the locked state. */
     BreachedPasswords(R.string.nav_breached_passwords),
     Vpn(R.string.nav_vpn),
     Collections(R.string.nav_collections),
@@ -27,8 +27,9 @@ enum class AppPage(
     PremiumUpgrade(R.string.nav_upgrade);
 
     val requiresPremium: Boolean
-        // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md);
-        // the breached-password check that replaced them is free.
+        // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
+        // The breached-password check is Premium, but its tab opens for everyone and shows
+        // the upsell itself, so it is not redirected here.
         get() = this == Vpn
 }
 

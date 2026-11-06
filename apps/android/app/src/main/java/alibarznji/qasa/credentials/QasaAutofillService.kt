@@ -56,8 +56,16 @@ class QasaAutofillService : AutofillService() {
                 setTextViewText(android.R.id.text1, entry.title)
             }
             val dataset = Dataset.Builder(presentation)
-            userId?.let { dataset.setValue(it, AutofillValue.forText(secrets.username.orEmpty())) }
-            passwordId?.let { dataset.setValue(it, AutofillValue.forText(secrets.password.orEmpty())) }
+            if (secrets.totp.isNullOrEmpty()) {
+                userId?.let { dataset.setValue(it, AutofillValue.forText(secrets.username.orEmpty())) }
+                passwordId?.let { dataset.setValue(it, AutofillValue.forText(secrets.password.orEmpty())) }
+            } else {
+                // A login with a 2FA code fills through AutofillTotpActivity, which copies
+                // the current code once the user picks it. The values come from there.
+                userId?.let { dataset.setValue(it, null) }
+                passwordId?.let { dataset.setValue(it, null) }
+                dataset.setAuthentication(AutofillTotpActivity.intentSender(this, entry.id, userId, passwordId))
+            }
             response.addDataset(dataset.build())
         }
         try {

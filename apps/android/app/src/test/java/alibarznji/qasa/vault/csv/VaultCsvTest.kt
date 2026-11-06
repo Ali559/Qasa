@@ -106,6 +106,39 @@ class VaultCsvTest {
         assertTrue(!VaultCsv.fieldsJson(VaultPayload.Login(itemName = "x")).contains("collectionId"))
     }
 
+    // 2FA codes: `totp` in the login's fields JSON, only when set (iOS `totp: String?`).
+
+    private val totpUri = "otpauth://totp/GitHub:ali?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ&issuer=GitHub"
+
+    @Test fun totpSurvivesExportImportThroughIosFields() {
+        val login = VaultPayload.Login(itemName = "GitHub", username = "ali", password = "pw", totp = totpUri)
+        val json = VaultCsv.fieldsJson(login)
+        assertTrue(json, json.contains("\"totp\":\"otpauth:\\/\\/totp\\/GitHub:ali?secret="))
+        assertEquals(listOf(login), VaultCsv.parseImport(VaultCsv.exportCsv(listOf(login))))
+        assertEquals(login, IosFieldsMapper.fromIosFields("login", json))
+    }
+
+    @Test fun totpKeyIsOmittedWhenEmptyAndOptionalOnImport() {
+        assertTrue(!VaultCsv.fieldsJson(VaultPayload.Login(itemName = "x")).contains("totp"))
+        // The pre-2FA iOS row has no "totp" key and still imports, with no code.
+        val back = VaultCsv.parseImport("$header\n$iosLogin").single() as VaultPayload.Login
+        assertEquals("", back.totp)
+        assertEquals(iosItems[0], back)
+    }
+
+    @Test fun flatTotpColumnsFromOtherManagers() {
+        val csv = """
+            type,title,password,totp,login_totp
+            login,A,pw,gezd gnbv gy3t qojq gezd gnbv gy3t qojq,
+            login,B,pw,,$totpUri
+            login,C,pw,not a key,
+        """.trimIndent()
+        assertEquals(
+            listOf("otpauth://totp/Qasa?secret=GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ", totpUri, ""),
+            VaultCsv.parseImport(csv).map { (it as VaultPayload.Login).totp },
+        )
+    }
+
     // Wide-column fallback (iOS: only login/secureNote/card/bankAccount are rebuilt).
 
     @Test fun wideColumnFallbackWithoutFieldsColumn() {

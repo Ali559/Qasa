@@ -14,6 +14,7 @@ struct VaultItemDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var revealedSecrets: Set<String> = []
     @State private var unlockedProtected = false
+    @State private var toast: String?
 
     private var row: VaultListRow? {
         cache.row(for: itemId)
@@ -42,6 +43,19 @@ struct VaultItemDetailView: View {
             }
             .padding(.top, 8)
             .padding(.bottom, 40)
+        }
+        .overlay(alignment: .bottom) {
+            if let toast {
+                Text(toast)
+                    .font(.qasa(13, weight: .semibold))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Theme.accent)
+                    .foregroundColor(Theme.onAccent)
+                    .cornerRadius(8)
+                    .padding(.bottom, 24)
+                    .transition(.opacity)
+            }
         }
         .background(Theme.background.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
@@ -107,6 +121,16 @@ struct VaultItemDetailView: View {
         }
     }
 
+    /// Same clipboard behaviour as copying the password.
+    private func copyTOTP(_ code: String) {
+        VaultClipboard.copy(code)
+        try? VaultRepository.shared.markUsed(id: itemId)
+        withAnimation { toast = L10n.tr("totp.copied") }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            withAnimation { toast = nil }
+        }
+    }
+
     private var heroIcon: some View {
         Image(systemName: payload.systemImage)
             .font(.qasa(36, weight: .medium))
@@ -134,6 +158,11 @@ struct VaultItemDetailView: View {
                         if index < fields.count - 1 {
                             Divider().background(Theme.stroke)
                         }
+                    }
+                    // Only codes are shown, never the 2FA secret.
+                    if case .login(let login) = payload, let totp = TOTP(stored: login.totp) {
+                        Divider().background(Theme.stroke)
+                        TOTPCodeRow(totp: totp, onCopy: copyTOTP)
                     }
                 }
             }

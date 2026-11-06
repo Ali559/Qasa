@@ -1,10 +1,14 @@
 import SwiftUI
 
-/// The Alerts tab: saved passwords that show up in HIBP Pwned Passwords. Free, and checked
-/// on device (`PwnedPasswordsService`): only a 5-character hash prefix leaves the phone.
+/// The Alerts tab: saved passwords that show up in HIBP Pwned Passwords. Premium-only, and
+/// checked on device (`PwnedPasswordsService`): only a 5-character hash prefix leaves the phone.
+/// Free accounts get `BreachLockedCard` and HIBP is never called.
 /// Replaced the Premium email leak alerts, which are parked (todo email-leak-alerts in
 /// docs/server-followups-plan.md). Mirrors Android `BreachedPasswordsScreen`.
 struct BreachedPasswordsView: View {
+    var onUpgrade: () -> Void = {}
+
+    @Environment(AppSession.self) private var session
     @Bindable private var cache = VaultRepository.shared.cache
     @State private var report: PasswordHealthReport?
     @State private var isChecking = false
@@ -23,8 +27,12 @@ struct BreachedPasswordsView: View {
             )
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    summary
-                    if let report, !report.breachedItems.isEmpty {
+                    if isLocked {
+                        BreachLockedCard(onUpgrade: onUpgrade)
+                    } else {
+                        summary
+                    }
+                    if !isLocked, let report, !report.breachedItems.isEmpty {
                         LazyVStack(spacing: 12) {
                             ForEach(report.breachedItems) { row in
                                 breachedRow(row, count: report.breachCounts[row.id] ?? 0)
@@ -42,12 +50,18 @@ struct BreachedPasswordsView: View {
         .toolbar(.hidden, for: .navigationBar)
         .task { await check() }
         .onChange(of: cache.rows) { _, _ in Task { await check() } }
+        // Purchase or refresh turns the check on; a lapse drops the results.
+        .onChange(of: session.isPremium) { _, _ in Task { await check() } }
         .sheet(item: $editorMode) { presentation in
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
             }
             .appLocalization()
         }
+    }
+
+    private var isLocked: Bool {
+        !session.isPremium || report?.breachLocked == true
     }
 
     @ViewBuilder
@@ -152,10 +166,45 @@ struct BreachedPasswordsView: View {
     }
 
     private func check() async {
+        guard session.isPremium else {
+            report = nil
+            await PwnedPasswordsService.shared.clearCache()
+            return
+        }
         guard !isChecking else { return }
         isChecking = true
         defer { isChecking = false }
-        report = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: PasswordHealthAnalyzer.vaultLogins())
+        report = await PasswordHealthAnalyzer.analyzeWithBreaches(
+            logins: PasswordHealthAnalyzer.vaultLogins(),
+            isPremium: session.isPremium
+        )
+    }
+}
+
+/// What Free accounts see wherever breach results would be: the breached-password check is
+/// Premium-only. The button opens the Premium upgrade page.
+struct BreachLockedCard: View {
+    var onUpgrade: () -> Void
+
+    var body: some View {
+        CardContainer(padding: 20) {
+            VStack(alignment: .leading, spacing: 10) {
+                Label(L10n.tr("breached.lockedTitle"), systemImage: "lock.shield.fill")
+                    .font(.qasa(18, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(L10n.tr("breached.lockedBody"))
+                    .font(.qasa(14))
+                    .foregroundColor(Theme.textSecondary)
+                PrimaryButton(
+                    title: L10n.tr("breached.unlock"),
+                    icon: "crown.fill",
+                    cornerRadius: 8,
+                    action: onUpgrade
+                )
+                .padding(.top, 6)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }
 
@@ -163,5 +212,6 @@ struct BreachedPasswordsView: View {
     NavigationStack {
         BreachedPasswordsView()
     }
+    .environment(AppSession())
     .environment(AppPreferences.shared)
 }

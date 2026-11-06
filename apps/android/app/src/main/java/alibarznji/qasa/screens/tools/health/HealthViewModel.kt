@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.tools.health
 
 import alibarznji.qasa.breach.PwnedPasswordsService
+import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.PasswordHealthAnalyzer
 import alibarznji.qasa.screens.PasswordHealthReport
 import alibarznji.qasa.vault.EphemeralClipboard
@@ -29,6 +30,7 @@ class HealthViewModel @Inject constructor(
     val repo: VaultRepository,
     val clipboard: EphemeralClipboard,
     private val pwned: PwnedPasswordsService,
+    appSession: AppSession,
 ) : ViewModel() {
     /** Bumped by [recheckBreaches] to re-run the Pwned Passwords check. */
     private val recheck = MutableStateFlow(0)
@@ -47,16 +49,29 @@ class HealthViewModel @Inject constructor(
      * the gauge does not count up to the empty report's 100 first. Each pass also runs the
      * Pwned Passwords check (only 5-char SHA-1 prefixes leave the device; ranges are cached
      * for the process) and emits a second report with the breached logins.
+     *
+     * The breach check is Premium. A Free account never calls HIBP: the report is marked
+     * [PasswordHealthReport.breachLocked], scored without the breach deduction, and any
+     * counts or ranges from an earlier Premium period are dropped. The tier is part of the
+     * key, so buying Premium runs the check and a lapse locks it again straight away.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val report: StateFlow<PasswordHealthReport?> = combine(repo.observeRows(), recheck) { rows, _ -> rows }
-        .transformLatest { rows ->
+    val report: StateFlow<PasswordHealthReport?> =
+        combine(repo.observeRows(), recheck, appSession.isPremium) { rows, _, premium -> rows to premium }
+        .transformLatest { (rows, premium) ->
             val logins = rows.mapNotNull { row ->
                 val p = runCatching { repo.getPayload(row.id) }.getOrNull() as? VaultPayload.Login
                     ?: return@mapNotNull null
                 // iOS trims and skips blank passwords, so empty logins are neither weak nor reused.
                 val trimmed = p.password.trim()
                 if (trimmed.isEmpty()) null else row to trimmed
+            }
+            if (!premium) {
+                lastCounts = null
+                pwned.clearCache()
+                _breachChecking.value = false
+                emit(PasswordHealthAnalyzer.analyze(logins).copy(breachLocked = true))
+                return@transformLatest
             }
             // Local report straight away, then again once the Pwned Passwords check is back.
             emit(PasswordHealthAnalyzer.analyze(logins, lastCounts))

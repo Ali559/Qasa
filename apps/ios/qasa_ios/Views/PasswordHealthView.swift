@@ -19,6 +19,9 @@ enum PasswordIssueTab: String, CaseIterable, Identifiable, Hashable {
 
 struct PasswordHealthView: View {
     var onOpenMenu: (() -> Void)? = nil
+    var onUpgrade: () -> Void = {}
+
+    @Environment(AppSession.self) private var session
 
     @State private var animatedProgress: Double = 0
     @State private var animatedScore: Int = 0
@@ -48,17 +51,27 @@ struct PasswordHealthView: View {
                         }
                         .buttonStyle(.plain)
 
-                        NavigationLink(value: PasswordIssueTab.breached) {
-                            statCard(
-                                title: L10n.tr("health.breached"),
-                                value: report.breachCheckFailed ? "—" : "\(report.breachedCount)",
-                                accent: Theme.danger
-                            )
+                        if breachLocked {
+                            // Premium-only: no count on Free, the card opens the upgrade page.
+                            Button(action: onUpgrade) {
+                                statCard(title: L10n.tr("health.breached"), systemImage: "lock.fill", accent: Theme.textSecondary)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NavigationLink(value: PasswordIssueTab.breached) {
+                                statCard(
+                                    title: L10n.tr("health.breached"),
+                                    value: report.breachCheckFailed ? "—" : "\(report.breachedCount)",
+                                    accent: Theme.danger
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
 
-                    if report.breachCheckFailed {
+                    if breachLocked {
+                        BreachLockedCard(onUpgrade: onUpgrade)
+                    } else if report.breachCheckFailed {
                         Text(L10n.tr("breached.offline"))
                             .font(.qasa(13))
                             .foregroundColor(Theme.textSecondary)
@@ -87,7 +100,9 @@ struct PasswordHealthView: View {
                 initialTab: tab,
                 reusedItems: report.reusedItems,
                 weakItems: report.weakItems,
-                breachedItems: report.breachedItems
+                breachedItems: report.breachedItems,
+                breachLocked: breachLocked,
+                onUpgrade: onUpgrade
             )
         }
         .onAppear {
@@ -95,13 +110,25 @@ struct PasswordHealthView: View {
             animateScore()
         }
         .onChange(of: report.score) { _, _ in animateScore() }
+        // Purchase or license refresh runs the check; a lapse rescores without it.
+        .onChange(of: session.isPremium) { _, _ in refreshReport() }
+    }
+
+    private var breachLocked: Bool {
+        !session.isPremium || report.breachLocked
     }
 
     /// Local report straight away, then again once the Pwned Passwords check is back.
+    /// On Free the score has no breach deduction and HIBP is never called.
     private func refreshReport() {
         let logins = PasswordHealthAnalyzer.vaultLogins()
-        report = PasswordHealthAnalyzer.analyze(logins: logins)
-        Task { report = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins) }
+        let isPremium = session.isPremium
+        report = PasswordHealthAnalyzer.analyze(logins: logins, breachLocked: !isPremium)
+        Task {
+            let checked = await PasswordHealthAnalyzer.analyzeWithBreaches(logins: logins, isPremium: isPremium)
+            // A check that finishes after the plan changed would bring back stale counts.
+            if session.isPremium == isPremium { report = checked }
+        }
     }
 
     private var scoreGauge: some View {
@@ -126,6 +153,13 @@ struct PasswordHealthView: View {
             Text(scoreLabel(for: animatedScore))
                 .font(.qasa(18, weight: .semibold))
                 .foregroundColor(Theme.textPrimary)
+
+            if breachLocked {
+                Text(L10n.tr("health.breachedLocked"))
+                    .font(.qasa(13))
+                    .foregroundColor(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -158,11 +192,18 @@ struct PasswordHealthView: View {
         }
     }
 
-    private func statCard(title: String, value: String, accent: Color) -> some View {
+    private func statCard(title: String, value: String = "", systemImage: String? = nil, accent: Color) -> some View {
         VStack(spacing: 8) {
-            Text(value)
-                .font(.qasa(28, weight: .bold))
-                .foregroundColor(accent)
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.qasa(24, weight: .semibold))
+                    .foregroundColor(accent)
+                    .frame(height: 34)
+            } else {
+                Text(value)
+                    .font(.qasa(28, weight: .bold))
+                    .foregroundColor(accent)
+            }
             Text(title)
                 .font(.qasa(13))
                 .foregroundColor(Theme.textSecondary)
@@ -183,6 +224,8 @@ struct PasswordHealthIssuesView: View {
     let reusedItems: [VaultListRow]
     let weakItems: [VaultListRow]
     let breachedItems: [VaultListRow]
+    var breachLocked = false
+    var onUpgrade: () -> Void = {}
 
     @State private var selectedTab: PasswordIssueTab
     @State private var editorMode: EditorPresentation?
@@ -192,11 +235,20 @@ struct PasswordHealthIssuesView: View {
         let mode: VaultItemEditor.Mode
     }
 
-    init(initialTab: PasswordIssueTab, reusedItems: [VaultListRow], weakItems: [VaultListRow], breachedItems: [VaultListRow]) {
+    init(
+        initialTab: PasswordIssueTab,
+        reusedItems: [VaultListRow],
+        weakItems: [VaultListRow],
+        breachedItems: [VaultListRow],
+        breachLocked: Bool = false,
+        onUpgrade: @escaping () -> Void = {}
+    ) {
         self.initialTab = initialTab
         self.reusedItems = reusedItems
         self.weakItems = weakItems
         self.breachedItems = breachedItems
+        self.breachLocked = breachLocked
+        self.onUpgrade = onUpgrade
         _selectedTab = State(initialValue: initialTab)
     }
 
@@ -228,10 +280,11 @@ struct PasswordHealthIssuesView: View {
                     ForEach(PasswordIssueTab.allCases) { tab in
                         let count = items(for: tab).count
                         let selected = selectedTab == tab
+                        let locked = tab == .breached && breachLocked
                         Button {
                             selectedTab = tab
                         } label: {
-                            Text("\(tab.title) (\(count))")
+                            Text(locked ? tab.title : "\(tab.title) (\(count))")
                                 .font(.qasa(14, weight: .semibold))
                                 .foregroundColor(selected ? Theme.onAccent : Theme.textSecondary)
                                 .padding(.horizontal, 14)
@@ -251,7 +304,10 @@ struct PasswordHealthIssuesView: View {
 
             ScrollView {
                 LazyVStack(spacing: 12) {
-                    if currentItems.isEmpty {
+                    if selectedTab == .breached && breachLocked {
+                        BreachLockedCard(onUpgrade: onUpgrade)
+                            .padding(.top, 8)
+                    } else if currentItems.isEmpty {
                         ContentUnavailableView(
                             emptyCopy.title,
                             systemImage: emptyCopy.icon,

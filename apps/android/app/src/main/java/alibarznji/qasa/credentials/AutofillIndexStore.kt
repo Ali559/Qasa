@@ -37,6 +37,8 @@ data class AutofillSecrets(
     val number: String? = null,
     val securityCode: String? = null,
     val accountNumber: String? = null,
+    /** The login's otpauth URI, encrypted with the password so autofill can copy its code. */
+    val totp: String? = null,
 )
 
 @Singleton
@@ -69,7 +71,11 @@ class AutofillIndexStore @Inject constructor(
         val enc = try { session.requireEncKey() } catch (_: Exception) { return null }
         return when (payload) {
             is VaultPayload.Login -> {
-                val secrets = AutofillSecrets(username = payload.username.ifBlank { payload.email }, password = payload.password)
+                val secrets = AutofillSecrets(
+                    username = payload.username.ifBlank { payload.email },
+                    password = payload.password,
+                    totp = payload.totp.ifEmpty { null },
+                )
                 val blob = VaultCrypto.encrypt(json.encodeToString(secrets).toByteArray(), enc)
                 AutofillIndexEntry(
                     id = id,

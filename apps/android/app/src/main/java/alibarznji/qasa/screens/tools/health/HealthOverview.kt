@@ -2,6 +2,8 @@ package alibarznji.qasa.screens.tools.health
 
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.PasswordHealthReport
+import alibarznji.qasa.screens.breach.BreachLockedCard
+import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.HalfCircleGauge
@@ -13,6 +15,11 @@ import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +48,7 @@ internal fun HealthOverview(
     report: PasswordHealthReport?,
     onOpenMenu: (() -> Unit)?,
     onOpenIssues: (HealthIssueTab) -> Unit,
+    onUpgrade: () -> Unit,
 ) {
     val c = qasaColors
     val shown = report ?: PasswordHealthReport.empty
@@ -63,6 +71,16 @@ internal fun HealthOverview(
             Spacer(Modifier.height(HEALTH_GAUGE_LABEL_GAP))
             if (report != null) {
                 Text(scoreLabel(report.score), color = c.textPrimary, style = qasaText.cardTitle)
+            }
+            // Free tier: say the score leaves breaches out, rather than implying none were found.
+            if (report?.breachLocked == true) {
+                Spacer(Modifier.height(QasaDimens.contentGap))
+                Text(
+                    stringResource(R.string.health_breachedlocked),
+                    color = c.textSecondary,
+                    style = qasaText.bodySmall,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
 
@@ -100,10 +118,14 @@ internal fun HealthOverview(
                     accent = c.danger,
                     onClick = { onOpenIssues(HealthIssueTab.BREACHED) },
                     modifier = Modifier.weight(1f),
+                    locked = shown.breachLocked,
                 )
             }
             if (report?.breachCheckFailed == true) {
                 Text(stringResource(R.string.breached_offline), color = c.textSecondary, style = qasaText.bodySmall)
+            }
+            if (report?.breachLocked == true) {
+                BreachLockedCard(onUpgrade = onUpgrade)
             }
         }
 
@@ -139,6 +161,8 @@ private fun HealthStatCard(
     accent: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Free tier's Breached card: a lock instead of a count that was never checked. */
+    locked: Boolean = false,
 ) {
     val c = qasaColors
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
@@ -152,7 +176,13 @@ private fun HealthStatCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
         ) {
-            Text("$value", color = accent, style = qasaText.hero)
+            if (locked) {
+                Box(Modifier.height(HEALTH_STAT_VALUE_HEIGHT), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.x4l))
+                }
+            } else {
+                Text("$value", color = accent, style = qasaText.hero)
+            }
             Text(
                 title,
                 color = c.textSecondary,
@@ -163,6 +193,9 @@ private fun HealthStatCard(
         }
     }
 }
+
+/** The 28pt bold value's line height, so a locked card is as tall as the others. */
+private val HEALTH_STAT_VALUE_HEIGHT = 34.dp
 
 /** iOS `VStack(spacing: 28)` between the gauge, stat grid and scoring card. */
 private val HEALTH_SECTION_GAP = 28.dp

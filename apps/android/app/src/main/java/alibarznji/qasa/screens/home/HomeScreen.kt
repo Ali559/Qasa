@@ -101,7 +101,11 @@ fun HomeScreen(
                 HealthCard(report = report, onClick = { onOpen(AppPage.PasswordHealth) })
             }
             VpnCard(isPremium = isPremium, vm = vpnVm, onOpenVpn = { onOpen(AppPage.Vpn) })
-            BreachedCard(onClick = { onTab(ShellTab.Alerts) })
+            BreachedCard(
+                locked = !isPremium,
+                onClick = { onTab(ShellTab.Alerts) },
+                onUpgrade = { onOpen(AppPage.PremiumUpgrade) },
+            )
         }
     }
 }

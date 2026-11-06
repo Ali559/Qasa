@@ -30,7 +30,7 @@ struct AppShellView: View {
                 }
                 Tab(L10n.tr("tab.alerts", locale: prefs.locale), systemImage: "bell.badge", value: ShellTab.alerts) {
                     NavigationStack {
-                        BreachedPasswordsView()
+                        BreachedPasswordsView(onUpgrade: { open(.premiumUpgrade) })
                     }
                     // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
                     // BreachMonitorView(onUpgrade: { open(.premiumUpgrade) })
@@ -85,7 +85,7 @@ struct AppShellView: View {
             GeneratorView(onOpenMenu: back)
         case .passwordHealth:
             NavigationStack {
-                PasswordHealthView(onOpenMenu: back)
+                PasswordHealthView(onOpenMenu: back, onUpgrade: { open(.premiumUpgrade) })
             }
         case .vpn:
             VPNView(onOpenMenu: back, onUpgrade: { open(.premiumUpgrade) })

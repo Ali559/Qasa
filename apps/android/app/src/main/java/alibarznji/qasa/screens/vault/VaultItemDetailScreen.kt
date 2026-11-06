@@ -6,6 +6,7 @@ import alibarznji.qasa.screens.vault.detail.DetailField
 import alibarznji.qasa.screens.vault.detail.DetailFieldRow
 import alibarznji.qasa.screens.vault.detail.HistoryCard
 import alibarznji.qasa.screens.vault.detail.OrganizationCard
+import alibarznji.qasa.screens.vault.detail.TotpDetailRow
 import alibarznji.qasa.screens.vault.detail.detailFields
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.QasaConfirmDialog
@@ -20,6 +21,7 @@ import alibarznji.qasa.vault.VaultListRow
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultSession
+import alibarznji.qasa.vault.totp.TotpClipboard
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -122,6 +124,14 @@ fun VaultItemDetailScreen(
         scope.launch { vm.repo.markUsed(itemId) }
     }
 
+    fun copyTotp(code: String) {
+        // Same as the password row's copy, flagged sensitive (see TotpClipboard).
+        TotpClipboard.copy(context, code)
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        Toast.makeText(context, context.getString(R.string.totp_copied), Toast.LENGTH_SHORT).show()
+        scope.launch { vm.repo.markUsed(itemId) }
+    }
+
     // A protected note is gated per item, per unlock: the session records the decision so
     // re-composing (scroll, edit round-trip, rotation) does not re-prompt, and `lock()`
     // clears it. Fails closed — no hardware, cancel, or lockout leaves the note masked.
@@ -193,6 +203,8 @@ fun VaultItemDetailScreen(
             Text(name, color = c.textPrimary, style = qasaText.sectionHeadline, textAlign = TextAlign.Center)
             DetailsCard(
                 fields = p.detailFields(context::getString),
+                totp = (p as? VaultPayload.Login)?.totp?.ifEmpty { null },
+                onCopyTotp = ::copyTotp,
                 unlocked = unlocked,
                 shownSecrets = shownSecrets,
                 onToggle = { field, locked ->
@@ -258,6 +270,8 @@ private fun HeroIcon(p: VaultPayload) {
 @Composable
 private fun DetailsCard(
     fields: List<DetailField>,
+    totp: String?,
+    onCopyTotp: (String) -> Unit,
     unlocked: Boolean,
     shownSecrets: Set<Int>,
     onToggle: (DetailField, Boolean) -> Unit,
@@ -265,9 +279,12 @@ private fun DetailsCard(
 ) {
     val c = qasaColors
     DetailCard(stringResource(R.string.vault_details)) {
-        if (fields.isEmpty()) {
+        if (fields.isEmpty() && totp == null) {
             Text(stringResource(R.string.vault_nodetails), color = c.textSecondary, style = qasaText.bodyMedium)
         }
+        // The live 2FA code sits under the password, or last when there is none.
+        val totpAfter = fields.indexOfFirst { it.label == R.string.field_password }.takeIf { it >= 0 } ?: fields.lastIndex
+        if (totp != null && totpAfter < 0) TotpDetailRow(totp, onCopyTotp)
         fields.forEachIndexed { index, field ->
             val locked = field.secret && !unlocked
             DetailFieldRow(
@@ -277,6 +294,10 @@ private fun DetailsCard(
                 onToggleShown = { onToggle(field, locked) },
                 onCopy = { onCopy(field, locked) },
             )
+            if (totp != null && index == totpAfter) {
+                HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
+                TotpDetailRow(totp, onCopyTotp)
+            }
             if (index < fields.lastIndex) {
                 HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
             }

@@ -254,6 +254,11 @@ struct LoginFields: Codable, Equatable {
     var website: String = ""
     var note: String = ""
     var collectionId: UUID?
+    /// Normalised `otpauth://totp/...` URI (see `TOTP`). Optional so logins saved before
+    /// 2FA codes existed still decode; nil and "" both mean no code. Android: `totp: String = ""`.
+    var totp: String?
+
+    var hasTOTP: Bool { !(totp ?? "").isEmpty }
 }
 
 struct SecureNoteFields: Codable, Equatable {

@@ -1820,9 +1820,9 @@
     "ckb": "جزدانی مۆبایل"
   },
   "premium.featureBreach": {
-    "en": "Email leak alerts",
-    "ar": "تنبيهات تسريب البريد",
-    "ckb": "ئاگادارکردنەوەی دزەی ئیمەیڵ"
+    "en": "Breached password check",
+    "ar": "فحص كلمات المرور المسرّبة",
+    "ckb": "پشکنینی وشە نهێنییە دزراوەکان"
   },
   "premium.featureDevices": {
     "en": "Protect up to 5 Devices",
@@ -3367,5 +3367,95 @@
     "en": "%1$lld used more than once, %2$lld easy to guess, %3$lld in data breaches",
     "ar": "%1$lld مستخدمة أكثر من مرة، %2$lld سهلة التخمين، %3$lld في تسريبات بيانات",
     "ckb": "%1$lld زیاتر لە جارێک بەکارهاتووە، %2$lld ئاسانە بۆ زانین، %3$lld لە دزەکردنی زانیاریدا"
+  },
+  "field.totp": {
+    "en": "2FA code",
+    "ar": "رمز التحقق بخطوتين",
+    "ckb": "کۆدی دوو هەنگاوی"
+  },
+  "copy.totp": {
+    "en": "Copy 2FA Code",
+    "ar": "نسخ رمز التحقق",
+    "ckb": "لەبەرگرتنەوەی کۆدی دوو هەنگاوی"
+  },
+  "totp.add": {
+    "en": "Add 2FA code",
+    "ar": "إضافة رمز التحقق بخطوتين",
+    "ckb": "زیادکردنی کۆدی دوو هەنگاوی"
+  },
+  "totp.scan": {
+    "en": "Scan QR code",
+    "ar": "مسح رمز QR",
+    "ckb": "سکانکردنی کۆدی QR"
+  },
+  "totp.enterKey": {
+    "en": "Enter setup key",
+    "ar": "إدخال مفتاح الإعداد",
+    "ckb": "نووسینی کلیلی ڕێکخستن"
+  },
+  "totp.keyPlaceholder": {
+    "en": "Setup key or otpauth:// link",
+    "ar": "مفتاح الإعداد أو رابط otpauth://",
+    "ckb": "کلیلی ڕێکخستن یان بەستەری otpauth://"
+  },
+  "totp.invalid": {
+    "en": "That isn't a valid 2FA setup key.",
+    "ar": "هذا ليس مفتاح إعداد صالحًا للتحقق بخطوتين.",
+    "ckb": "ئەمە کلیلێکی دروستی ڕێکخستنی دوو هەنگاوی نییە."
+  },
+  "totp.hint": {
+    "en": "When a site asks you to set up two-step verification, scan its QR code here. Qasa then shows the 6-digit code to type in.",
+    "ar": "عندما يطلب منك موقع إعداد التحقق بخطوتين، امسح رمز QR الخاص به هنا. ستعرض لك قاصة الرمز المكوّن من 6 أرقام لتكتبه.",
+    "ckb": "کاتێک ماڵپەڕێک داوات لێدەکات پشتڕاستکردنەوەی دوو هەنگاوی ڕێکبخەیت، کۆدی QR ـەکەی لێرە سکان بکە. ئینجا قاسە ئەو کۆدە ٦ ژمارەییەت پیشان دەدات کە دەینووسیت."
+  },
+  "totp.copied": {
+    "en": "2FA code copied",
+    "ar": "تم نسخ رمز التحقق",
+    "ckb": "کۆدی دوو هەنگاوی لەبەرگیرایەوە"
+  },
+  "totp.remove": {
+    "en": "Remove 2FA code",
+    "ar": "إزالة رمز التحقق بخطوتين",
+    "ckb": "لابردنی کۆدی دوو هەنگاوی"
+  },
+  "totp.scanTitle": {
+    "en": "Scan the QR code",
+    "ar": "امسح رمز QR",
+    "ckb": "کۆدی QR ـەکە سکان بکە"
+  },
+  "totp.scanHint": {
+    "en": "Point the camera at the QR code the site shows for two-step verification.",
+    "ar": "وجّه الكاميرا نحو رمز QR الذي يعرضه الموقع للتحقق بخطوتين.",
+    "ckb": "کامێراکە ڕووبکە ئەو کۆدی QR ـەی ماڵپەڕەکە بۆ پشتڕاستکردنەوەی دوو هەنگاوی پیشانی دەدات."
+  },
+  "totp.cameraDenied": {
+    "en": "Qasa needs the camera to scan the QR code. Allow it in Settings, or enter the setup key instead.",
+    "ar": "تحتاج قاصة إلى الكاميرا لمسح رمز QR. اسمح بها من الإعدادات، أو أدخل مفتاح الإعداد بدلًا من ذلك.",
+    "ckb": "قاسە پێویستی بە کامێرایە بۆ سکانکردنی کۆدی QR. لە ڕێکخستنەکاندا ڕێگەی پێبدە، یان لەبری ئەوە کلیلی ڕێکخستن بنووسە."
+  },
+  "totp.notQr": {
+    "en": "That QR code isn't a 2FA setup code.",
+    "ar": "رمز QR هذا ليس رمز إعداد للتحقق بخطوتين.",
+    "ckb": "ئەم کۆدی QR ـە کۆدی ڕێکخستنی دوو هەنگاوی نییە."
+  },
+  "breached.lockedTitle": {
+    "en": "Find leaked passwords with Premium",
+    "ar": "اكتشف كلمات المرور المسرّبة مع بريميوم",
+    "ckb": "وشە نهێنییە دزراوەکان بدۆزەرەوە بە پریمیۆم"
+  },
+  "breached.lockedBody": {
+    "en": "Premium checks every saved password against known data breaches and shows which ones to change. Only a 5-character code ever leaves your phone.",
+    "ar": "يفحص بريميوم كل كلمة مرور محفوظة مقابل التسريبات المعروفة ويُظهر لك ما يجب تغييره. لا يغادر هاتفك سوى رمز من 5 أحرف.",
+    "ckb": "پریمیۆم هەموو وشەیەکی نهێنیی پاشەکەوتکراو لەگەڵ دزەکراوە ناسراوەکان بەراورد دەکات و پیشانت دەدات کامیان بگۆڕیت. تەنها کۆدێکی ٥ پیتی لە مۆبایلەکەت دەردەچێت."
+  },
+  "breached.unlock": {
+    "en": "Get Premium",
+    "ar": "احصل على بريميوم",
+    "ckb": "پریمیۆم وەربگرە"
+  },
+  "health.breachedLocked": {
+    "en": "Your score doesn't include breached passwords. Premium checks those too.",
+    "ar": "لا تشمل نتيجتك كلمات المرور المسرّبة. يفحصها بريميوم أيضًا.",
+    "ckb": "خاڵەکانت وشە نهێنییە دزراوەکان ناگرێتەوە. پریمیۆم ئەوانیش دەپشکنێت."
   }
 }

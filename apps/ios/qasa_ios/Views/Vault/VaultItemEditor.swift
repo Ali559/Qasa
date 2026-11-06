@@ -126,6 +126,7 @@ struct VaultItemEditor: View {
             FormTextField(title: L10n.tr("field.email"), text: loginBinding(\.email))
             FormTextField(title: L10n.tr("field.username"), text: loginBinding(\.username))
             passwordField
+            TOTPEditorField(totp: loginTOTPBinding)
             FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website))
             FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note))
             CollectionPickerField(collectionId: loginCollectionBinding)
@@ -417,6 +418,17 @@ struct VaultItemEditor: View {
             set: { newValue in
                 guard case .login(var f) = payload else { return }
                 f[keyPath: keyPath] = newValue
+                payload = .login(f)
+            }
+        )
+    }
+
+    private var loginTOTPBinding: Binding<String?> {
+        Binding(
+            get: { if case .login(let f) = payload { return f.totp }; return nil },
+            set: { newValue in
+                guard case .login(var f) = payload else { return }
+                f.totp = (newValue ?? "").isEmpty ? nil : newValue
                 payload = .login(f)
             }
         )

@@ -12,6 +12,9 @@ struct PasswordHealthReport {
     var breachCounts: [UUID: Int] = [:]
     /// The breach check ran and failed (usually offline). Breached stays 0 then.
     var breachCheckFailed = false
+    /// Free plan: the breach check is Premium-only, so it never ran and the score has no
+    /// breach deduction. Screens show `breached.locked*` instead of a count.
+    var breachLocked = false
 
     var breachedCount: Int { breachedItems.count }
 
@@ -44,7 +47,18 @@ enum PasswordHealthAnalyzer {
 
     /// Local analysis plus the Pwned Passwords check. Never throws: a failed check comes back
     /// as `breachCheckFailed` on an otherwise complete report.
-    static func analyzeWithBreaches(logins: [(row: VaultListRow, password: String)]) async -> PasswordHealthReport {
+    ///
+    /// The check is Premium-only. `isPremium` is the caller's `AppSession.isPremium`; the
+    /// license is checked too, so a lapsed one never reaches HIBP even before the session
+    /// re-syncs. Without Premium nothing leaves the phone and cached ranges are dropped.
+    static func analyzeWithBreaches(
+        logins: [(row: VaultListRow, password: String)],
+        isPremium: Bool
+    ) async -> PasswordHealthReport {
+        guard isPremium, LicenseManager.shared.isPremium else {
+            await PwnedPasswordsService.shared.clearCache()
+            return analyze(logins: logins, breachLocked: true)
+        }
         guard !logins.isEmpty else { return .empty }
         do {
             let counts = try await PwnedPasswordsService.shared.breachCounts(for: logins.map(\.password))
@@ -57,11 +71,18 @@ enum PasswordHealthAnalyzer {
     }
 
     /// `breachCounts` maps a password to its Pwned Passwords count; nil means not checked yet.
+    /// `breachLocked` marks a Free-plan report (no counts, no breach deduction).
     static func analyze(
         logins: [(row: VaultListRow, password: String)],
-        breachCounts: [String: Int]? = nil
+        breachCounts: [String: Int]? = nil,
+        breachLocked: Bool = false
     ) -> PasswordHealthReport {
-        guard !logins.isEmpty else { return .empty }
+        guard !logins.isEmpty else {
+            var report = PasswordHealthReport.empty
+            report.breachLocked = breachLocked
+            return report
+        }
+        let breachCounts = breachLocked ? nil : breachCounts
 
         var frequency: [String: Int] = [:]
         for entry in logins {
@@ -109,7 +130,8 @@ enum PasswordHealthAnalyzer {
             reusedItems: reusedItems,
             weakItems: weakItems,
             breachedItems: breachedItems,
-            breachCounts: rowCounts
+            breachCounts: rowCounts,
+            breachLocked: breachLocked
         )
     }
 

@@ -121,12 +121,15 @@
     <string name="breached_check_again">Check again</string>
     <string name="breached_checking">Checking your passwords…</string>
     <string name="breached_found">%d of your passwords showed up in data breaches.</string>
+    <string name="breached_lockedbody">Premium checks every saved password against known data breaches and shows which ones to change. Only a 5-character code ever leaves your phone.</string>
+    <string name="breached_lockedtitle">Find leaked passwords with Premium</string>
     <string name="breached_none_body">None of your saved passwords appear in known data breaches.</string>
     <string name="breached_none_title">No breached passwords</string>
     <string name="breached_offline">Couldn\'t reach the breach check. Try again when you\'re online.</string>
     <string name="breached_privacy_body">Each password is hashed on your phone, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device.</string>
     <string name="breached_privacy_title">How the check works</string>
     <string name="breached_seen_count">Seen %s times in breaches</string>
+    <string name="breached_unlock">Get Premium</string>
     <string name="collections_assignhint">Assign items to “%s” from the item editor.</string>
     <string name="collections_createtitle">New Collection</string>
     <string name="collections_deletemessage">Items stay in your vault but will no longer belong to this collection.</string>
@@ -179,6 +182,7 @@
     <string name="copy_phone">Copy Phone Number</string>
     <string name="copy_routingnumber">Copy Routing Number</string>
     <string name="copy_securitycode">Copy Security Code</string>
+    <string name="copy_totp">Copy 2FA Code</string>
     <string name="copy_username">Copy Username</string>
     <string name="copy_website">Copy Website</string>
     <string name="copy_zip">Copy Zip Code</string>
@@ -263,6 +267,7 @@
     <string name="field_routingnumber">Routing Number</string>
     <string name="field_securitycode">Security Code</string>
     <string name="field_title">Title</string>
+    <string name="field_totp">2FA code</string>
     <string name="field_type">Type</string>
     <string name="field_username">Username</string>
     <string name="field_website">Website</string>
@@ -291,6 +296,7 @@
     <string name="gen_veryweak">Very Weak</string>
     <string name="gen_weak">Weak</string>
     <string name="health_breached">Breached</string>
+    <string name="health_breachedlocked">Your score doesn\'t include breached passwords. Premium checks those too.</string>
     <string name="health_excellent">Excellent</string>
     <string name="health_fair">Fair</string>
     <string name="health_good">Good</string>
@@ -426,7 +432,7 @@
     <string name="premium_completeinwallet">Complete payment in %s…</string>
     <string name="premium_fastpay">FastPay</string>
     <string name="premium_fastpaysub">Mobile Wallet</string>
-    <string name="premium_featurebreach">Email leak alerts</string>
+    <string name="premium_featurebreach">Breached password check</string>
     <string name="premium_featuredevices">Protect up to 5 Devices</string>
     <string name="premium_featuresave">Save vs monthly</string>
     <string name="premium_featurevpn">VPN</string>
@@ -572,6 +578,18 @@
     <string name="tab_home">Home</string>
     <string name="tab_passwords">Passwords</string>
     <string name="tab_you">You</string>
+    <string name="totp_add">Add 2FA code</string>
+    <string name="totp_cameradenied">Qasa needs the camera to scan the QR code. Allow it in Settings, or enter the setup key instead.</string>
+    <string name="totp_copied">2FA code copied</string>
+    <string name="totp_enterkey">Enter setup key</string>
+    <string name="totp_hint">When a site asks you to set up two-step verification, scan its QR code here. Qasa then shows the 6-digit code to type in.</string>
+    <string name="totp_invalid">That isn\'t a valid 2FA setup key.</string>
+    <string name="totp_keyplaceholder">Setup key or otpauth:// link</string>
+    <string name="totp_notqr">That QR code isn\'t a 2FA setup code.</string>
+    <string name="totp_remove">Remove 2FA code</string>
+    <string name="totp_scan">Scan QR code</string>
+    <string name="totp_scanhint">Point the camera at the QR code the site shows for two-step verification.</string>
+    <string name="totp_scantitle">Scan the QR code</string>
     <string name="vault_addnew">What do you want to save?</string>
     <string name="vault_collection">Folder</string>
     <string name="vault_color">Color</string>

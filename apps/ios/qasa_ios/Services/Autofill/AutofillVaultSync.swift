@@ -29,7 +29,13 @@ enum AutofillVaultSync {
         switch payload {
         case .login(let f):
             let secrets = AutofillSecrets.login(
-                .init(email: f.email, username: f.username, password: f.password, website: f.website)
+                .init(
+                    email: f.email,
+                    username: f.username,
+                    password: f.password,
+                    website: f.website,
+                    totp: f.hasTOTP ? f.totp : nil
+                )
             )
             guard let blob = try? encodeSecrets(secrets, key: encKey) else { return nil }
             let host = AutofillContextMatcher.normalizeHost(f.website)

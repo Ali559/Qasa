@@ -43,6 +43,13 @@ sealed class VaultPayload {
         val website: String = "",
         val note: String = "",
         val collectionId: String? = null,
+        /**
+         * Normalised `otpauth://totp/...` URI (see [alibarznji.qasa.vault.totp.Totp]); empty
+         * means no 2FA code. iOS stores it as `LoginFields.totp: String?`. Items saved
+         * before it existed decode with the default ([VaultJson] ignores unknown keys and
+         * fills missing ones from defaults).
+         */
+        val totp: String = "",
     ) : VaultPayload() {
         override val kind get() = VaultItemKind.Login
         override fun displayName() = itemName.ifBlank { "Untitled" }

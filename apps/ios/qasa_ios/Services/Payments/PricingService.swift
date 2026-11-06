@@ -82,8 +82,9 @@ extension PricingPlanDTO {
     var localizedFeatures: [String] {
         var items = [
             L10n.tr("premium.featureDevices"),
-            // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
-            // L10n.tr("premium.featureBreach"),
+            // "Breached password check" (Pwned Passwords). Email leak alerts stay parked
+            // (todo email-leak-alerts in docs/server-followups-plan.md).
+            L10n.tr("premium.featureBreach"),
             L10n.tr("premium.featureVPN")
         ]
         if interval == "yearly" {

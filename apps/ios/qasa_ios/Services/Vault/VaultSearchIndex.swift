@@ -38,7 +38,8 @@ enum VaultSearchIndex {
     static func searchableStrings(from payload: VaultPayload) -> [String] {
         switch payload {
         case .login(let f):
-            return [f.itemName, f.email, f.username, f.website, f.note]
+            // The 2FA issuer only; the secret never goes into the index.
+            return [f.itemName, f.email, f.username, f.website, f.note, TOTP(stored: f.totp)?.issuer ?? ""]
         case .secureNote(let f):
             return [f.title, f.content]
         case .card(let f):

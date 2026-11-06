@@ -53,7 +53,8 @@ import kotlinx.coroutines.launch
 private data class BreachedEdit(val itemId: String, val payload: VaultPayload)
 
 /**
- * The free Alerts tab: which saved login passwords appear in HIBP Pwned Passwords. Shares
+ * The Alerts tab: which saved login passwords appear in HIBP Pwned Passwords. Premium only;
+ * a Free account sees [BreachLockedCard] and the check never runs. Shares
  * [HealthViewModel]'s report, so the check, the cache and the counts match Password Health.
  * Replaced the Premium email leak alerts ([BreachMonitorScreen]), which are parked
  * (todo email-leak-alerts in docs/server-followups-plan.md).
@@ -62,6 +63,7 @@ private data class BreachedEdit(val itemId: String, val payload: VaultPayload)
 @Composable
 fun BreachedPasswordsScreen(
     onOpenMenu: (() -> Unit)? = null,
+    onUpgrade: () -> Unit = {},
     vm: HealthViewModel = hiltViewModel(),
 ) {
     val report by vm.report.collectAsState()
@@ -75,6 +77,7 @@ fun BreachedPasswordsScreen(
         Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionGap)) {
             val current = report
             when {
+                current?.breachLocked == true -> BreachLockedCard(onUpgrade = onUpgrade)
                 current == null || checking -> CheckingRow()
                 current.breachCheckFailed -> OfflineState(onRetry = vm::recheckBreaches)
                 current.breachedItems.isEmpty() -> {

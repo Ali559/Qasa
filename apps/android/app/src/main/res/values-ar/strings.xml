@@ -121,12 +121,15 @@
     <string name="breached_check_again">افحص مجددًا</string>
     <string name="breached_checking">جارٍ فحص كلمات المرور…</string>
     <string name="breached_found">ظهرت %d من كلمات مرورك في تسريبات بيانات.</string>
+    <string name="breached_lockedbody">يفحص بريميوم كل كلمة مرور محفوظة مقابل التسريبات المعروفة ويُظهر لك ما يجب تغييره. لا يغادر هاتفك سوى رمز من 5 أحرف.</string>
+    <string name="breached_lockedtitle">اكتشف كلمات المرور المسرّبة مع بريميوم</string>
     <string name="breached_none_body">لا تظهر أي من كلمات المرور المحفوظة في تسريبات البيانات المعروفة.</string>
     <string name="breached_none_title">لا توجد كلمات مرور مسرّبة</string>
     <string name="breached_offline">تعذّر الوصول إلى فحص التسريبات. أعد المحاولة عند الاتصال بالإنترنت.</string>
     <string name="breached_privacy_body">تُحوَّل كل كلمة مرور إلى بصمة (hash) على هاتفك، ولا يُرسَل إلى Have I Been Pwned سوى أول 5 أحرف منها. لا تغادر كلمات مرورك هذا الجهاز أبدًا.</string>
     <string name="breached_privacy_title">كيف يعمل الفحص</string>
     <string name="breached_seen_count">ظهرت %s مرة في التسريبات</string>
+    <string name="breached_unlock">احصل على بريميوم</string>
     <string name="collections_assignhint">عيّن العناصر إلى “%s” من محرر العنصر.</string>
     <string name="collections_createtitle">مجموعة جديدة</string>
     <string name="collections_deletemessage">تبقى العناصر في خزنتك لكنها لن تنتمي لهذه المجموعة.</string>
@@ -179,6 +182,7 @@
     <string name="copy_phone">نسخ رقم الهاتف</string>
     <string name="copy_routingnumber">نسخ رقم التوجيه</string>
     <string name="copy_securitycode">نسخ رمز الأمان</string>
+    <string name="copy_totp">نسخ رمز التحقق</string>
     <string name="copy_username">نسخ اسم المستخدم</string>
     <string name="copy_website">نسخ الموقع</string>
     <string name="copy_zip">نسخ الرمز البريدي</string>
@@ -263,6 +267,7 @@
     <string name="field_routingnumber">رقم التوجيه</string>
     <string name="field_securitycode">رمز الأمان</string>
     <string name="field_title">العنوان</string>
+    <string name="field_totp">رمز التحقق بخطوتين</string>
     <string name="field_type">النوع</string>
     <string name="field_username">اسم المستخدم</string>
     <string name="field_website">الموقع</string>
@@ -291,6 +296,7 @@
     <string name="gen_veryweak">ضعيفة جدًا</string>
     <string name="gen_weak">ضعيفة</string>
     <string name="health_breached">مسرّبة</string>
+    <string name="health_breachedlocked">لا تشمل نتيجتك كلمات المرور المسرّبة. يفحصها بريميوم أيضًا.</string>
     <string name="health_excellent">ممتاز</string>
     <string name="health_fair">متوسط</string>
     <string name="health_good">جيد</string>
@@ -426,7 +432,7 @@
     <string name="premium_completeinwallet">أكمل الدفع في %s…</string>
     <string name="premium_fastpay">FastPay</string>
     <string name="premium_fastpaysub">محفظة جوال</string>
-    <string name="premium_featurebreach">تنبيهات تسريب البريد</string>
+    <string name="premium_featurebreach">فحص كلمات المرور المسرّبة</string>
     <string name="premium_featuredevices">حماية حتى 5 أجهزة</string>
     <string name="premium_featuresave">وفّر مقارنة بالشهري</string>
     <string name="premium_featurevpn">VPN</string>
@@ -572,6 +578,18 @@
     <string name="tab_home">الرئيسية</string>
     <string name="tab_passwords">كلمات المرور</string>
     <string name="tab_you">أنت</string>
+    <string name="totp_add">إضافة رمز التحقق بخطوتين</string>
+    <string name="totp_cameradenied">تحتاج قاصة إلى الكاميرا لمسح رمز QR. اسمح بها من الإعدادات، أو أدخل مفتاح الإعداد بدلًا من ذلك.</string>
+    <string name="totp_copied">تم نسخ رمز التحقق</string>
+    <string name="totp_enterkey">إدخال مفتاح الإعداد</string>
+    <string name="totp_hint">عندما يطلب منك موقع إعداد التحقق بخطوتين، امسح رمز QR الخاص به هنا. ستعرض لك قاصة الرمز المكوّن من 6 أرقام لتكتبه.</string>
+    <string name="totp_invalid">هذا ليس مفتاح إعداد صالحًا للتحقق بخطوتين.</string>
+    <string name="totp_keyplaceholder">مفتاح الإعداد أو رابط otpauth://</string>
+    <string name="totp_notqr">رمز QR هذا ليس رمز إعداد للتحقق بخطوتين.</string>
+    <string name="totp_remove">إزالة رمز التحقق بخطوتين</string>
+    <string name="totp_scan">مسح رمز QR</string>
+    <string name="totp_scanhint">وجّه الكاميرا نحو رمز QR الذي يعرضه الموقع للتحقق بخطوتين.</string>
+    <string name="totp_scantitle">امسح رمز QR</string>
     <string name="vault_addnew">ماذا تريد أن تحفظ؟</string>
     <string name="vault_collection">المجلد</string>
     <string name="vault_color">اللون</string>

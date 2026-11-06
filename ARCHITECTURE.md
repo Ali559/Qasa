@@ -50,7 +50,8 @@ qasa/
 │   ├── crates/            qasa-api, qasa-core, qasa-db, qasa-payments, qasa-push,
 │   │                      qasa-breach, qasa-vpn, qasa-worker
 │   ├── migrations/        Postgres schema (sqlx, applied on start)
-│   ├── docker/            dev + prod compose, Caddyfile, Dockerfile
+│   ├── deploy/            production: Debian setup, systemd units, Caddyfile, deploy
+│   ├── docker/            dev Postgres (compose)
 │   └── scripts/           integration tests, API smoke test
 ├── apps/
 │   ├── ios/               Xcode project: app + AutoFill and notification extensions
@@ -178,7 +179,8 @@ nothing.
 | | Free | Premium |
 | --- | --- | --- |
 | Linked devices | 1 | 5 |
-| Breached-password check (on device, section 4.11) | yes | yes |
+| 2FA codes for saved logins (on device) | yes | yes |
+| Breached-password check (on device, section 4.11) | no | yes |
 | Email leak alerts | parked | parked (entitlement still issued: 10 email hashes) |
 | VPN | no | yes, monthly data quota from the plan (100 GB default), then 5 Mbps |
 
@@ -352,9 +354,10 @@ CGNAT address.
 
 ### 4.11 Breached passwords and email leak alerts
 
-**Breached-password check (live, free).** Both apps check saved login passwords against
+**Breached-password check (live, Premium).** Both apps check saved login passwords against
 HIBP Pwned Passwords, with no Qasa server involved (`PwnedPasswordsService` on iOS and
-Android):
+Android). The apps run it only while the license says Premium; Free shows a locked card
+with an upgrade button, and its health score leaves breaches out.
 
 - Each password is SHA-1 hashed on the device. Only the first 5 hex characters go to
   `https://api.pwnedpasswords.com/range/{prefix}` (with `Add-Padding: true`), and the
@@ -406,16 +409,25 @@ node agent ──(6) POST …/heartbeat {cpu, mem, peers: [handshake, rx, tx]}�
 
 ### 4.13 Deployment
 
-`server/docker/docker-compose.prod.yml` runs Postgres, the API, the worker and Caddy on a
-fixed internal network (`172.30.0.0/24`):
+Production is one Debian 13 server with no Docker (runbook: [`docs/deploy.md`](docs/deploy.md),
+files in `server/deploy/`):
 
-- **Caddy** gets the certificate for `QASA_PUBLIC_HOST`, proxies to `api:8080`, blocks
-  `/metrics` from the public internet, and sets HSTS and other security headers.
-- **Required secrets.** The stack refuses to start without `POSTGRES_PASSWORD`,
-  `QASA_ADMIN_JWT_SECRET` and `QASA_LICENSE_PRIVATE_KEY`. `DATABASE_URL` has no default in
-  prod.
+- **Caddy** serves the landing page at `qasa-app.com`, proxies `api.qasa-app.com` to the
+  API on `127.0.0.1:8080`, gets and renews the certificates, blocks `/metrics` publicly,
+  and sets HSTS and other security headers.
+- **The API and worker** are systemd services (`qasa-api`, `qasa-worker`) running as the
+  unprivileged `qasa` user under a strict sandbox, configured by `/etc/qasa/qasa.env`.
+  The API applies migrations as it starts.
+- **PostgreSQL 18** runs on the same machine, listening on localhost only; only the `qasa`
+  role may connect, and only to the `qasa` database. Dumped nightly by `qasa-backup.timer`.
+- **Required secrets.** The API refuses to start in prod without `QASA_ADMIN_JWT_SECRET`
+  and `QASA_LICENSE_PRIVATE_KEY`; `DATABASE_URL` has no default in prod.
+  `setup-debian.sh` generates them.
+- **Forwarded addresses.** The API trusts `X-Forwarded-For` only from loopback
+  (`QASA_TRUSTED_PROXY_CIDRS`), where Caddy is, so the admin CIDR guard and rate limits see
+  the real client address.
 - **The admin surface** is restricted to `QASA_ADMIN_ALLOW_CIDRS` (default `tailscale`).
-  How admins reach it through Caddy over the tailnet is still to be settled at deploy time.
+  How admins reach it is still to be settled.
 - **VPN nodes** are separate hosts running WireGuard and `qasa-vpn-agent`.
 
 ---
@@ -467,7 +479,7 @@ Inside `qasa_ios/`:
 | `Views/` | Screens (Home, vault, generator, breach, VPN, notifications, settings, pairing, Premium upgrade) |
 | `Services/` | Vault, Network (`QasaAPIClient`), License (offline token verification), Device registration, Payments, Breach, VPN, Notifications, Sync (LAN, Bonjour) |
 | `Models/`, `Components/`, `Theme/` | Data model and the design-system building blocks |
-| `Config/QasaConfig.swift` | Endpoint URLs. The API base URL comes from the build setting `QASA_API_URL`: localhost in Debug, `https://api.qasa.app` in Release |
+| `Config/QasaConfig.swift` | Endpoint URLs. The API base URL comes from the build setting `QASA_API_URL`: localhost in Debug, `https://api.qasa-app.com` in Release |
 
 ---
 
@@ -480,7 +492,7 @@ tokens) and kotlinx.serialization. Package `alibarznji.qasa`:
 | --- | --- |
 | `vault/` | Repository, session (unlocked state), crypto, Room database, CSV import/export, biometric gate |
 | `credentials/` | `QasaAutofillService` (Android Autofill) and `QasaCredentialProviderService` (Credential Manager). Autofill requires the app to be unlocked |
-| `network/`, `config/` | OkHttp API client (logging only in debug builds), API models, endpoint URLs (`10.0.2.2` in debug, `https://api.qasa.app` in release) |
+| `network/`, `config/` | OkHttp API client (logging only in debug builds), API models, endpoint URLs (`10.0.2.2` in debug, `https://api.qasa-app.com` in release) |
 | `license/`, `device/` | Token verification and device registration |
 | `payments/`, `breach/`, `vpn/`, `notifications/` | Feature services matching the iOS ones |
 | `push/` | FCM token handling, `DevicePrefsSync` (all prefs updates), the Android 13+ notification-permission prompt |

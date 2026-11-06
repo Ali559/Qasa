@@ -211,6 +211,8 @@ struct CredentialProviderRootView: View {
             switch secrets {
             case .login(let login):
                 let user = login.username.isEmpty ? login.email : login.username
+                // The site usually asks for the 2FA code right after the password.
+                TOTPPasteboard.copyCurrentCode(stored: login.totp)
                 onProvideLogin(user, login.password)
             case .card, .bank:
                 showedPaymentDrawer = true

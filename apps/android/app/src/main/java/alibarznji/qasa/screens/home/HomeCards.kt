@@ -2,6 +2,7 @@ package alibarznji.qasa.screens.home
 
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.PasswordHealthReport
+import alibarznji.qasa.screens.breach.BreachLockedCard
 import alibarznji.qasa.screens.vpn.VpnViewModel
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
@@ -192,12 +193,17 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
 }
 
 /**
- * Breached-password check (free, on device). Replaced the email leak alerts card, which is
- * parked (todo email-leak-alerts in docs/server-followups-plan.md).
+ * Breached-password check (Premium, on device). Replaced the email leak alerts card, which
+ * is parked (todo email-leak-alerts in docs/server-followups-plan.md). [locked] is the Free
+ * tier: the upsell, whose button opens the Premium screen.
  */
 @Composable
-internal fun BreachedCard(onClick: () -> Unit) {
+internal fun BreachedCard(locked: Boolean, onClick: () -> Unit, onUpgrade: () -> Unit) {
     val c = qasaColors
+    if (locked) {
+        BreachLockedCard(onUpgrade = onUpgrade)
+        return
+    }
     HomeCard(onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconTile(Icons.Outlined.GppMaybe)

@@ -174,27 +174,34 @@ struct HomeVPNCard: View {
     }
 }
 
-/// Breached-password check (free, on device). Replaced the email leak alerts card, which is
-/// parked (todo email-leak-alerts in docs/server-followups-plan.md).
+/// Breached-password check (Premium, on device). Replaced the email leak alerts card, which is
+/// parked (todo email-leak-alerts in docs/server-followups-plan.md). On Free it shows the
+/// locked copy and taps through to the upgrade page, like `HomeVPNCard`.
 struct HomeBreachedCard: View {
+    let isPremium: Bool
     var onTap: () -> Void
 
     @Environment(\.themePalette) private var theme
     @Environment(AppPreferences.self) private var prefs
 
     var body: some View {
+        let l = prefs.locale
         HomeCard(onTap: onTap) {
             HStack(spacing: 12) {
-                HomeIconTile(systemImage: "exclamationmark.shield")
+                HomeIconTile(systemImage: isPremium ? "exclamationmark.shield" : "lock.shield")
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(L10n.tr("nav.breachedPasswords", locale: prefs.locale))
+                    Text(L10n.tr(isPremium ? "nav.breachedPasswords" : "breached.lockedTitle", locale: l))
                         .font(.qasa(16, weight: .semibold))
                         .foregroundColor(theme.textPrimary)
-                    Text(L10n.tr("home.breachedBody", locale: prefs.locale))
+                    Text(L10n.tr(isPremium ? "home.breachedBody" : "breached.lockedBody", locale: l))
                         .font(.qasa(13))
                         .foregroundColor(theme.textSecondary)
                 }
                 Spacer(minLength: 0)
+            }
+            if !isPremium {
+                HomePill(text: L10n.tr("breached.unlock", locale: l),
+                         background: theme.cardMuted, color: theme.onAccentChip)
             }
         }
     }

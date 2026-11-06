@@ -12,6 +12,12 @@ class VaultPayloadRoundTripTest {
     @Test fun personalEmail() = roundTrip(VaultPayload.PersonalEmail(itemName = "x", type = "work", email = "a@b.c"))
     @Test fun phone() = roundTrip(VaultPayload.Phone(itemName = "x", type = "workCell", number = "123"))
     @Test fun login() = roundTrip(VaultPayload.Login(itemName = "x", password = "p"))
+    @Test fun loginWithTotp() = roundTrip(VaultPayload.Login(itemName = "x", totp = "otpauth://totp/Qasa?secret=ABC"))
+
+    @Test fun loginSavedBefore2faStillDecodes() {
+        val legacy = """{"type":"login","itemName":"x","password":"p","collectionId":null}"""
+        assertEquals(VaultPayload.Login(itemName = "x", password = "p"), VaultJson.decodePayload(legacy.toByteArray()))
+    }
 
     @Test fun defaultsUseIosRawValues() {
         val json = String(VaultJson.encodePayload(VaultPayload.Phone(number = "1")))

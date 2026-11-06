@@ -19,6 +19,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A10000000000000000000046 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 903FFA2D301F9A73007AEC54 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 903FFA34301F9A73007AEC54;
+			remoteInfo = qasa;
+		};
 		A1000000000000000000000E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 903FFA2D301F9A73007AEC54 /* Project object */;
@@ -56,6 +63,7 @@
 		A10000000000000000000010 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
 		A10000000000000000000022 /* QasaPaymentNotification.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QasaPaymentNotification.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000000000000000002D /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
+		A10000000000000000000040 /* qasaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = qasaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000000000000000002F /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -113,6 +121,11 @@
 			path = QasaPaymentNotification;
 			sourceTree = "<group>";
 		};
+		A10000000000000000000041 /* qasaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = qasaTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +157,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000043 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -164,6 +184,7 @@
 				A10000000000000000000001 /* SharedAutofill */,
 				A10000000000000000000002 /* QasaCredentialProvider */,
 				A10000000000000000000020 /* QasaPaymentNotification */,
+				A10000000000000000000041 /* qasaTests */,
 				903FFA36301F9A73007AEC54 /* Products */,
 				90156C93304335AD005DE5AE /* Recovered References */,
 			);
@@ -175,6 +196,7 @@
 				903FFA35301F9A73007AEC54 /* qasa.app */,
 				A10000000000000000000004 /* QasaCredentialProvider.appex */,
 				A10000000000000000000022 /* QasaPaymentNotification.appex */,
+				A10000000000000000000040 /* qasaTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -257,6 +279,29 @@
 			productReference = A10000000000000000000022 /* QasaPaymentNotification.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		A10000000000000000000045 /* qasaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000000000000000000004A /* Build configuration list for PBXNativeTarget "qasaTests" */;
+			buildPhases = (
+				A10000000000000000000042 /* Sources */,
+				A10000000000000000000043 /* Frameworks */,
+				A10000000000000000000044 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000047 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000041 /* qasaTests */,
+			);
+			name = qasaTests;
+			packageProductDependencies = (
+			);
+			productName = qasaTests;
+			productReference = A10000000000000000000040 /* qasaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -275,6 +320,10 @@
 					};
 					A10000000000000000000023 = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					A10000000000000000000045 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 903FFA34301F9A73007AEC54;
 					};
 				};
 			};
@@ -301,6 +350,7 @@
 				903FFA34301F9A73007AEC54 /* qasa */,
 				A10000000000000000000005 /* QasaCredentialProvider */,
 				A10000000000000000000023 /* QasaPaymentNotification */,
+				A10000000000000000000045 /* qasaTests */,
 			);
 		};
 /* End PBXProject section */
@@ -321,6 +371,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A10000000000000000000026 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A10000000000000000000044 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -351,6 +408,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000042 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -363,6 +427,11 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000023 /* QasaPaymentNotification */;
 			targetProxy = A1000000000000000000002B /* PBXContainerItemProxy */;
+		};
+		A10000000000000000000047 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 903FFA34301F9A73007AEC54 /* qasa */;
+			targetProxy = A10000000000000000000046 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -548,7 +617,7 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Attach a photo to a vault item.";
 				INFOPLIST_KEY_NSSiriUsageDescription = "Fill logins and cards in other apps using Qasa Autofill.";
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsLocalNetworking = YES;
-				INFOPLIST_KEY_QASA_API_URL = "https://api.qasa.app";
+				INFOPLIST_KEY_QASA_API_URL = "https://api.qasa-app.com";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
@@ -696,6 +765,48 @@
 			};
 			name = Release;
 		};
+		A10000000000000000000048 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R6H3Y7XP76;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = alibarznji.qasaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/qasa.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/qasa";
+			};
+			name = Debug;
+		};
+		A10000000000000000000049 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R6H3Y7XP76;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = alibarznji.qasaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/qasa.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/qasa";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -731,6 +842,15 @@
 			buildConfigurations = (
 				A10000000000000000000027 /* Debug */,
 				A10000000000000000000028 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000000000000000000004A /* Build configuration list for PBXNativeTarget "qasaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000048 /* Debug */,
+				A10000000000000000000049 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -54,7 +54,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            buildConfigField("String", "QASA_API_URL", "\"https://api.qasa.app\"")
+            buildConfigField("String", "QASA_API_URL", "\"https://api.qasa-app.com\"")
         }
     }
 
@@ -111,6 +111,8 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.credentials)
+    // 2FA QR codes: Google's code scanner runs in Play services, so no camera permission.
+    implementation(libs.play.services.code.scanner)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

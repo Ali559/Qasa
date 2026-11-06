@@ -1,6 +1,7 @@
 package alibarznji.qasa.vault.csv
 
 import alibarznji.qasa.vault.VaultPayload
+import alibarznji.qasa.vault.totp.Totp
 
 /** iOS `VaultCSVError`; the UI maps these to `settings.importNothing` / `settings.importBadHeader`. */
 sealed class VaultCsvException : Exception() {
@@ -141,6 +142,9 @@ object VaultCsv {
                     VaultPayload.Login(
                         itemName = title, email = value("email"), username = value("username"),
                         password = value("password"), website = value("url"), note = value("notes"),
+                        // Other managers' flat exports name the 2FA column either way; a
+                        // value that isn't a valid TOTP secret is dropped, not stored.
+                        totp = Totp.normalize(value("totp").ifEmpty { value("login_totp") }).orEmpty(),
                     ),
                 )
                 "secureNote" -> out.add(VaultPayload.SecureNote(title = title, content = value("content")))

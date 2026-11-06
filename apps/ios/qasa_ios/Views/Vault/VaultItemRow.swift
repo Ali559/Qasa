@@ -67,6 +67,17 @@ struct VaultItemRow: View {
                     }
                 }
 
+                // Not a `CopyAction`: the code changes every period, so it's generated on tap.
+                if case .login(let login) = payload, let totp = TOTP(stored: login.totp) {
+                    Button {
+                        VaultClipboard.copy(totp.code())
+                        try? VaultRepository.shared.markUsed(id: row.id)
+                        flash(L10n.tr("totp.copied"))
+                    } label: {
+                        Label(L10n.tr("copy.totp"), systemImage: "doc.on.doc")
+                    }
+                }
+
                 if let urlString = (payload ?? fallbackPayload).websiteURL,
                    let url = normalizedURL(urlString) {
                     Button {
