@@ -5,17 +5,22 @@
 #
 #   ssh qasa-api 'bash -s' < server/deploy/setup-debian.sh
 #
-# Safe to run again; every step checks what is already there. Afterwards, deploy the code
-# with server/deploy/deploy.sh.
+# Safe to run again; every step checks what is already there. Afterwards, set up the
+# Cloudflare Tunnel (docs/deploy.md: you authorise it in Cloudflare once), then deploy the
+# code with server/deploy/deploy.sh.
+#
+# To exempt your own address from fail2ban, pass it in:
+#   ssh <host> 'QASA_SSH_ALLOW_IP=1.2.3.4 bash -s' < server/deploy/setup-debian.sh
 #
 # - SSH: keys only (root keeps key login; passwords off). Refuses if root has no key.
-# - Firewall: SSH, HTTP and HTTPS only.
+# - Firewall: SSH only. Web traffic arrives through the Cloudflare Tunnel.
 # - Automatic security updates, rebooting at 04:00 when a kernel update needs it.
-# - fail2ban for SSH.
+# - fail2ban: three failed SSH logins within a day bans the address permanently.
 # - PostgreSQL 18 from the PostgreSQL apt repository, local connections only, with the
 #   qasa role and database.
-# - Caddy from its apt repository, Rust for building the server, and the `qasa` system
-#   user the services run as.
+# - Caddy from its apt repository (local only, behind the tunnel), cloudflared from
+#   Cloudflare's, Rust for building the server, and the `qasa` system user the services
+#   run as.
 # - /etc/qasa/qasa.env with the database URL and freshly generated secrets.
 #
 set -euo pipefail
@@ -54,13 +59,12 @@ EOF
 sshd -t
 systemctl reload ssh
 
-say "firewall: SSH, HTTP and HTTPS only"
+say "firewall: SSH only"
 ufw default deny incoming >/dev/null
 ufw default allow outgoing >/dev/null
 ufw allow 22/tcp >/dev/null
-ufw allow 80/tcp >/dev/null
-ufw allow 443/tcp >/dev/null
-ufw allow 443/udp >/dev/null
+# The site and API come in through the Cloudflare Tunnel, never by this address.
+for rule in 80/tcp 443/tcp 443/udp; do ufw delete allow "$rule" >/dev/null 2>&1 || true; done
 ufw --force enable
 
 say "automatic security updates"
@@ -78,17 +82,28 @@ cat > /etc/apt/apt.conf.d/53qasa-origins <<'EOF'
 Unattended-Upgrade::Origins-Pattern {
         "origin=apt.postgresql.org";
         "origin=cloudsmith/caddy/stable";
+        "origin=cloudflared";
 };
 EOF
 systemctl enable --now unattended-upgrades >/dev/null
 
-say "fail2ban for SSH"
-cat > /etc/fail2ban/jail.d/qasa.local <<'EOF'
+say "fail2ban: permanent bans after three failed SSH logins"
+cat > /etc/fail2ban/jail.d/qasa.local <<EOF
+# SSH: three failed logins within a day and the address is banned for good.
+# Unban with: fail2ban-client set sshd unbanip <ip>
 [sshd]
-enabled = true
-backend = systemd
-maxretry = 5
-bantime = 1h
+enabled  = true
+backend  = systemd
+maxretry = 3
+findtime = 1d
+bantime  = -1
+ignoreip = 127.0.0.1/8 ::1 ${QASA_SSH_ALLOW_IP:-}
+EOF
+# Keep bans for years, so permanent bans survive restarts (the default forgets anything
+# older than a day).
+cat > /etc/fail2ban/fail2ban.d/qasa.local <<'EOF'
+[DEFAULT]
+dbpurgeage = 3650d
 EOF
 systemctl enable --now fail2ban >/dev/null
 systemctl restart fail2ban
@@ -188,6 +203,16 @@ if [ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]; then
 fi
 apt-get install -yq caddy
 
+say "cloudflared"
+if ! command -v cloudflared >/dev/null; then
+  install -d -m 0755 /usr/share/keyrings
+  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg -o /usr/share/keyrings/cloudflare-main.gpg
+  echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main" \
+    > /etc/apt/sources.list.d/cloudflared.list
+  apt-get update -q
+fi
+apt-get install -yq cloudflared
+
 say "Rust, for building the server here"
 if [ ! -x /root/.cargo/bin/cargo ]; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
@@ -196,4 +221,8 @@ fi
 /root/.cargo/bin/cargo --version
 
 say "done"
-echo "Next, from your Mac: server/deploy/deploy.sh"
+if [ ! -f /etc/cloudflared/config.yml ]; then
+  echo "Next: set up the Cloudflare Tunnel (docs/deploy.md), then from your Mac: server/deploy/deploy.sh"
+else
+  echo "Next, from your Mac: server/deploy/deploy.sh"
+fi

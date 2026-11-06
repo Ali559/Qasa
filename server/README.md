@@ -186,10 +186,12 @@ systemd services, and PostgreSQL 18. Setup and deploys are scripted in
 deploy/deploy.sh   # from your Mac: build the landing page, copy, build and restart on the server
 ```
 
-Caddy is the only way in: it terminates TLS, replaces any client-sent `X-Forwarded-For`,
-and blocks `/metrics` publicly. The API listens on `127.0.0.1:8080` and trusts
-`X-Forwarded-For` only from loopback (`QASA_TRUSTED_PROXY_CIDRS`), so the admin CIDR guard
-and rate limits see the real client address. `DATABASE_URL` has no default in prod.
+Web traffic arrives only through a Cloudflare Tunnel: Cloudflare terminates TLS,
+`cloudflared` hands requests to Caddy on `127.0.0.1:80`, and the firewall allows only SSH.
+Caddy sets `X-Forwarded-For` to Cloudflare's `Cf-Connecting-IP` and blocks `/metrics`. The
+API listens on `127.0.0.1:8080` and trusts `X-Forwarded-For` only from loopback
+(`QASA_TRUSTED_PROXY_CIDRS`), so the admin CIDR guard and rate limits see the real client
+address. `DATABASE_URL` has no default in prod.
 
 ### Rate limits
 

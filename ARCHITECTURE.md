@@ -412,9 +412,12 @@ node agent ──(6) POST …/heartbeat {cpu, mem, peers: [handshake, rx, tx]}�
 Production is one Debian 13 server with no Docker (runbook: [`docs/deploy.md`](docs/deploy.md),
 files in `server/deploy/`):
 
+- **A Cloudflare Tunnel** is the only way in for web traffic. Cloudflare terminates HTTPS
+  and `cloudflared` brings requests to Caddy on `127.0.0.1:80`; the firewall allows only
+  SSH, so nothing answers on the server's IP. fail2ban bans an address permanently after
+  three failed SSH logins.
 - **Caddy** serves the landing page at `qasa-app.com`, proxies `api.qasa-app.com` to the
-  API on `127.0.0.1:8080`, gets and renews the certificates, blocks `/metrics` publicly,
-  and sets HSTS and other security headers.
+  API on `127.0.0.1:8080`, blocks `/metrics`, and sets HSTS and other security headers.
 - **The API and worker** are systemd services (`qasa-api`, `qasa-worker`) running as the
   unprivileged `qasa` user under a strict sandbox, configured by `/etc/qasa/qasa.env`.
   The API applies migrations as it starts.
@@ -423,9 +426,9 @@ files in `server/deploy/`):
 - **Required secrets.** The API refuses to start in prod without `QASA_ADMIN_JWT_SECRET`
   and `QASA_LICENSE_PRIVATE_KEY`; `DATABASE_URL` has no default in prod.
   `setup-debian.sh` generates them.
-- **Forwarded addresses.** The API trusts `X-Forwarded-For` only from loopback
-  (`QASA_TRUSTED_PROXY_CIDRS`), where Caddy is, so the admin CIDR guard and rate limits see
-  the real client address.
+- **Forwarded addresses.** Caddy sets `X-Forwarded-For` to Cloudflare's `Cf-Connecting-IP`
+  alone, and the API trusts that header only from loopback (`QASA_TRUSTED_PROXY_CIDRS`),
+  so the admin CIDR guard and rate limits see the real client address.
 - **The admin surface** is restricted to `QASA_ADMIN_ALLOW_CIDRS` (default `tailscale`).
   How admins reach it is still to be settled.
 - **VPN nodes** are separate hosts running WireGuard and `qasa-vpn-agent`.

@@ -1,0 +1,14 @@
+# Cloudflare Tunnel config, installed as /etc/cloudflared/config.yml (see docs/deploy.md).
+# Replace TUNNEL_ID with the id `cloudflared tunnel create qasa` printed. Every hostname
+# goes to Caddy on 127.0.0.1:80, which picks the site by Host header.
+tunnel: TUNNEL_ID
+credentials-file: /etc/cloudflared/TUNNEL_ID.json
+
+ingress:
+  - hostname: api.qasa-app.com
+    service: http://127.0.0.1:80
+  - hostname: qasa-app.com
+    service: http://127.0.0.1:80
+  - hostname: www.qasa-app.com
+    service: http://127.0.0.1:80
+  - service: http_status:404

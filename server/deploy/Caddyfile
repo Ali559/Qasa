@@ -1,9 +1,16 @@
-# Public entry point: HTTPS for the landing page and the API. Caddy obtains and renews
-# the certificates itself; the API listens on 127.0.0.1 only.
-#
-# Caddy replaces any X-Forwarded-For a client sends with the real peer address, so the
-# API trusts this hop (QASA_TRUSTED_PROXY_CIDRS = loopback) without letting callers spoof
-# their address.
+# The web server behind the Cloudflare Tunnel. Cloudflare terminates HTTPS and the
+# tunnel (cloudflared, /etc/cloudflared/config.yml) brings every request here, to
+# 127.0.0.1:80. Nothing listens publicly: the firewall allows only SSH, so the site and
+# API cannot be reached by the server's IP address.
+
+{
+	# Cloudflare holds the certificates.
+	auto_https off
+	servers {
+		# Only cloudflared, on this machine, connects.
+		trusted_proxies static 127.0.0.1/32 ::1/128
+	}
+}
 
 (security_headers) {
 	header {
@@ -14,19 +21,26 @@
 	}
 }
 
-api.qasa-app.com {
+http://api.qasa-app.com {
+	bind 127.0.0.1
 	encode zstd gzip
 	import security_headers
 
-	# Prometheus scrapes 127.0.0.1:8080/metrics locally; never serve it publicly.
+	# Prometheus scrapes 127.0.0.1:8080/metrics locally; never serve it through the tunnel.
 	@metrics path /metrics
 	respond @metrics 404
 
-	reverse_proxy 127.0.0.1:8080
+	reverse_proxy 127.0.0.1:8080 {
+		# The API takes the first X-Forwarded-For address. Cloudflare sets
+		# Cf-Connecting-IP to the real client and overwrites any a client sends, so pass
+		# only that; a client-supplied X-Forwarded-For is dropped.
+		header_up X-Forwarded-For {http.request.header.Cf-Connecting-IP}
+	}
 }
 
 # The landing page (apps/landing), copied here by deploy.sh.
-qasa-app.com {
+http://qasa-app.com {
+	bind 127.0.0.1
 	encode zstd gzip
 	import security_headers
 	header X-Frame-Options DENY
@@ -39,6 +53,7 @@ qasa-app.com {
 	file_server
 }
 
-www.qasa-app.com {
+http://www.qasa-app.com {
+	bind 127.0.0.1
 	redir https://qasa-app.com{uri} permanent
 }
