@@ -1,0 +1,10 @@
+[Unit]
+Description=Dump the Qasa database
+After=postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+ExecStart=/usr/local/sbin/qasa-backup-db

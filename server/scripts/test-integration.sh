@@ -20,6 +20,8 @@ HOST_PORT="${QASA_POSTGRES_PORT:-5433}"
 DB_NAME="qasa_test"
 DB_USER="qasa"
 CONTAINER="qasa-test-postgres"
+# Same major version as production (PostgreSQL 18 on the server).
+IMAGE="postgres:18"
 DB_URL="postgres://${DB_USER}:${DB_USER}@127.0.0.1:${HOST_PORT}/${DB_NAME}"
 
 say() { printf '\n\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -28,6 +30,13 @@ die() { printf '\n\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 command -v docker >/dev/null || die "docker is required"
 
 # ---------------------------------------------------------------- container
+
+# A container left over from an older Postgres is replaced, not reused.
+if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER" &&
+   [ "$(docker inspect -f '{{.Config.Image}}' "$CONTAINER")" != "$IMAGE" ]; then
+  say "replacing $CONTAINER, which runs $(docker inspect -f '{{.Config.Image}}' "$CONTAINER")"
+  docker rm -f "$CONTAINER" >/dev/null
+fi
 
 if docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   say "reusing running container $CONTAINER"
@@ -46,7 +55,7 @@ else
     --health-interval 2s \
     --health-timeout 3s \
     --health-retries 20 \
-    postgres:16 >/dev/null
+    "$IMAGE" >/dev/null
 fi
 
 say "waiting for postgres to become healthy (first boot runs initdb, which takes a while)"

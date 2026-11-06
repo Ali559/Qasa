@@ -158,7 +158,7 @@ cargo run -p qasa-vpn --bin qasa-vpn-agent -- \
 
 # On a node: dry run first, then apply
 qasa-vpn-agent --node-id <uuid> --agent-token <token-from-admin> \
-  --api-url https://api.qasa.app --wg-interface wg0          # logs changes only
+  --api-url https://api.qasa-app.com --wg-interface wg0          # logs changes only
 qasa-vpn-agent ... --wg-interface wg0 --apply                # runs `wg set`
 ```
 
@@ -178,20 +178,18 @@ Phase 5 features activate **only when `QASA_ENV=prod`**:
 - Required secrets: `QASA_ADMIN_JWT_SECRET`, `QASA_LICENSE_PRIVATE_KEY`
 - Dev seeds (VPN nodes, admin user) are **disabled** in prod
 
+Production runs directly on a Debian 13 server (no Docker): Caddy, the API and worker as
+systemd services, and PostgreSQL 18. Setup and deploys are scripted in
+[`deploy/`](deploy/); the runbook is [`docs/deploy.md`](../docs/deploy.md).
+
 ```bash
-# Production stack: Caddy (TLS, ports 80/443) → API (no published port) + worker + Postgres
-export POSTGRES_PASSWORD=<strong-password>
-export QASA_ADMIN_JWT_SECRET=<strong-secret>
-export QASA_LICENSE_PRIVATE_KEY=<base64-key>
-export QASA_PUBLIC_HOST=api.qasa.app   # Caddy gets the certificate for this name
-docker compose -f docker/docker-compose.prod.yml up --build
+deploy/deploy.sh   # from your Mac: build the landing page, copy, build and restart on the server
 ```
 
-The compose file refuses to start without those secrets. Caddy is the only way in: it
-terminates TLS, drops any client-sent `X-Forwarded-For`, and blocks `/metrics`
-publicly. The API trusts `X-Forwarded-For` only from the fixed compose network
-(`172.30.0.0/24`, `QASA_TRUSTED_PROXY_CIDRS`), so the admin CIDR guard and rate limits
-see the real client address. `DATABASE_URL` has no default in prod.
+Caddy is the only way in: it terminates TLS, replaces any client-sent `X-Forwarded-For`,
+and blocks `/metrics` publicly. The API listens on `127.0.0.1:8080` and trusts
+`X-Forwarded-For` only from loopback (`QASA_TRUSTED_PROXY_CIDRS`), so the admin CIDR guard
+and rate limits see the real client address. `DATABASE_URL` has no default in prod.
 
 ### Rate limits
 

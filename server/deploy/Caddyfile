@@ -1,0 +1,44 @@
+# Public entry point: HTTPS for the landing page and the API. Caddy obtains and renews
+# the certificates itself; the API listens on 127.0.0.1 only.
+#
+# Caddy replaces any X-Forwarded-For a client sends with the real peer address, so the
+# API trusts this hop (QASA_TRUSTED_PROXY_CIDRS = loopback) without letting callers spoof
+# their address.
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		-Server
+	}
+}
+
+api.qasa-app.com {
+	encode zstd gzip
+	import security_headers
+
+	# Prometheus scrapes 127.0.0.1:8080/metrics locally; never serve it publicly.
+	@metrics path /metrics
+	respond @metrics 404
+
+	reverse_proxy 127.0.0.1:8080
+}
+
+# The landing page (apps/landing), copied here by deploy.sh.
+qasa-app.com {
+	encode zstd gzip
+	import security_headers
+	header X-Frame-Options DENY
+
+	# Astro fingerprints everything under /_astro, so it can be cached for good.
+	@hashed path /_astro/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	root * /var/www/qasa-app.com
+	file_server
+}
+
+www.qasa-app.com {
+	redir https://qasa-app.com{uri} permanent
+}
