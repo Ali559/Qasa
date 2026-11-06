@@ -124,6 +124,13 @@ const en = {
     title: "Set up Qasa in about a minute, free on your phone",
     lede: "Download it and choose your main password.",
   },
+  soon: {
+    title: "Qasa: coming soon to iPhone and Android",
+    eyebrow: "Coming soon to iPhone and Android",
+    badge: "Coming soon",
+    stores: "On the App Store and Google Play",
+    pricing: "Free on one device. Premium is 5,000 IQD a month, paid in the app with FIB, FastPay or SuperQi.",
+  },
 };
 
 export type Dict = typeof en;
@@ -241,6 +248,13 @@ const ckb: Dict = {
     title: "قاسە لە نزیکەی یەک خولەکدا ئامادە بکە، بە خۆڕایی لەسەر مۆبایلەکەت",
     lede: "دایبەزێنە و وشەی نهێنی سەرەکییەکەت هەڵبژێرە.",
   },
+  soon: {
+    title: "قاسە: بەم زووانە لەسەر iPhone و Android",
+    eyebrow: "بەم زووانە لەسەر iPhone و Android",
+    badge: "بەم زووانە",
+    stores: "لە App Store و Google Play",
+    pricing: "بە خۆڕایی لەسەر یەک ئامێر. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع دەبێت، لەناو ئەپەکەدا بە FIB، FastPay یان SuperQi دەدرێت.",
+  },
 };
 
 const ar: Dict = {
@@ -355,6 +369,13 @@ const ar: Dict = {
   cta: {
     title: "جهّز قاصة في دقيقة تقريبًا، مجانًا على هاتفك",
     lede: "حمّلها واختر كلمة مرورك الرئيسية.",
+  },
+  soon: {
+    title: "قاصة: قريبًا على iPhone و Android",
+    eyebrow: "قريبًا على iPhone و Android",
+    badge: "قريبًا",
+    stores: "على App Store و Google Play",
+    pricing: "مجاني على جهاز واحد. بريميوم بـ 5,000 د.ع شهريًا، يُدفع داخل التطبيق عبر FIB أو FastPay أو SuperQi.",
   },
 };
 

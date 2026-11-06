@@ -36,6 +36,15 @@
         "cd apps/landing && bunx astro dev --port 5182"
       ],
       "port": 5182
+    },
+    {
+      "name": "landing-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/landing && bunx astro preview --port 5186"
+      ],
+      "port": 5186
     }
   ]
 }
