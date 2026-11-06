@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.settings
 
+import alibarznji.qasa.vpn.VPNService
 import alibarznji.qasa.R
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.license.LicenseManager
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -52,9 +54,12 @@ class LinkedDevicesViewModel @Inject constructor(
     val license: LicenseManager,
     val appSession: AppSession,
     private val autoLock: AutoLockMonitor,
+    private val vpn: VPNService,
 ) : ViewModel() {
     /** iOS `LicenseManager.shared.clear()` when this device loses its slot; the session follows. */
     fun clearLicense() {
+        // The server already ended this device's VPN session; drop the tunnel and key too.
+        viewModelScope.launch { vpn.forget() }
         license.clear()
         appSession.syncFromLicense(license)
     }

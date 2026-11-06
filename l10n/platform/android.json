@@ -8,5 +8,20 @@
     "en": "Qasa password autofill",
     "ar": "التعبئة التلقائية لكلمات مرور قاصة",
     "ckb": "پڕکردنەوەی خۆکاری وشەی نهێنی قاسە"
+  },
+  "vpn_killswitch_android_hint": {
+    "en": "Android enforces this only when Qasa is your Always-on VPN with “Block connections without VPN” turned on.",
+    "ar": "لا يفرض أندرويد هذا إلا عندما تكون قاصة شبكة VPN الدائمة لديك مع تفعيل «حظر الاتصالات بدون VPN».",
+    "ckb": "ئەندرۆید تەنها ئەوکاتە ئەمە جێبەجێ دەکات کە قاسە VPNی هەمیشە-چالاکت بێت و «ڕێگری لە پەیوەندی بێ VPN» چالاک بێت."
+  },
+  "vpn_killswitch_android_on": {
+    "en": "Android is blocking connections outside Qasa VPN.",
+    "ar": "يحظر أندرويد الاتصالات خارج VPN قاصة.",
+    "ckb": "ئەندرۆید ڕێگری لە پەیوەندییەکانی دەرەوەی VPNی قاسە دەکات."
+  },
+  "vpn_open_vpn_settings": {
+    "en": "Open VPN settings",
+    "ar": "فتح إعدادات VPN",
+    "ckb": "کردنەوەی ڕێکخستنەکانی VPN"
   }
 }

@@ -107,7 +107,7 @@ flowchart LR
   WALLET -- webhooks --> API
   NODE -- "heartbeat + peer stats,<br/>fetch desired peers" --> CADDY
   IOS -. "WireGuard tunnel (planned)" .-> NODE
-  AND -. "WireGuard tunnel (planned)" .-> NODE
+  AND == "WireGuard tunnel" ==> NODE
   IOS <-. "LAN pairing / vault transfer" .-> AND
 ```
 
@@ -403,9 +403,11 @@ node agent ──(6) POST …/heartbeat {cpu, mem, peers: [handshake, rx, tx]}�
 - **Nodes** are managed from the dashboard (create, drain, retire, rotate the agent token).
   The agent's `--apply` flag is required before it changes WireGuard; without it, it only
   logs what it would change.
-- **Pending** (todo `vpn-tunnel`): the device tunnels themselves (an iOS
-  `NetworkExtension` packet tunnel and Android `VpnService`), and node-side rate limiting
-  for throttled peers.
+- **Android** runs the tunnel with wireguard-android's `GoBackend` (`apps/android/.../vpn/`):
+  consent dialog on first connect, region picker, data meter, auto-connect on open Wi-Fi,
+  and the kill switch through the system's Always-on VPN setting.
+- **Pending** (todo `vpn-tunnel`): the iOS `NetworkExtension` packet tunnel, and node-side
+  rate limiting for throttled peers.
 
 ### 4.13 Deployment
 

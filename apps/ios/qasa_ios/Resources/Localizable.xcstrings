@@ -14763,6 +14763,28 @@
         }
       }
     },
+    "vpn.autoSelectSub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The least busy server"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخادم الأقل انشغالًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کەمترین سێرڤەری قەرەباڵغ"
+          }
+        }
+      }
+    },
     "vpn.brand": {
       "localizations": {
         "en": {
@@ -14781,6 +14803,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "VPNی قاسە"
+          }
+        }
+      }
+    },
+    "vpn.chooseServer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a server"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر خادمًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سێرڤەرێک هەڵبژێرە"
           }
         }
       }
@@ -14825,6 +14869,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "پەیوەستکراو"
+          }
+        }
+      }
+    },
+    "vpn.connecting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecting…"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الاتصال…"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پەیوەستدەبێت…"
+          }
+        }
+      }
+    },
+    "vpn.dataThisMonth": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data this month"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البيانات هذا الشهر"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داتای ئەم مانگە"
+          }
+        }
+      }
+    },
+    "vpn.dataUsedFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ of %2$@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ من %2$@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ لە %2$@"
           }
         }
       }
@@ -14917,6 +15027,72 @@
         }
       }
     },
+    "vpn.networkError": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't reach Qasa. Check your internet connection."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناتوانرێت بگاتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە."
+          }
+        }
+      }
+    },
+    "vpn.noHandshake": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't reach the VPN server. Try another server."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر الوصول إلى خادم VPN. جرّب خادمًا آخر."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناتوانرێت بگاتە سێرڤەری VPN. سێرڤەرێکی تر تاقی بکەرەوە."
+          }
+        }
+      }
+    },
+    "vpn.noServers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No VPN servers are available right now. Try again soon."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تتوفر خوادم VPN حاليًا. حاول مرة أخرى قريبًا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێستا هیچ سێرڤەرێکی VPN بەردەست نییە. دواتر هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
     "vpn.node": {
       "localizations": {
         "en": {
@@ -14935,6 +15111,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "سێرڤەر"
+          }
+        }
+      }
+    },
+    "vpn.permissionDenied": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa needs permission to set up a VPN on this device."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحتاج قاصة إلى إذن لإعداد VPN على هذا الجهاز."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە پێویستی بە مۆڵەتە بۆ ڕێکخستنی VPN لەسەر ئەم ئامێرە."
           }
         }
       }
@@ -14961,6 +15159,50 @@
         }
       }
     },
+    "vpn.serverLoad": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحِمل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بار"
+          }
+        }
+      }
+    },
+    "vpn.sessionEnded": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The VPN session ended. Connect again to stay protected."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "انتهت جلسة VPN. اتصل مجددًا لتبقى محميًا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دانیشتنی VPN کۆتایی هات. دووبارە پەیوەست ببە بۆ ئەوەی پارێزراو بیت."
+          }
+        }
+      }
+    },
     "vpn.sessionOnly": {
       "localizations": {
         "en": {
@@ -14979,6 +15221,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "دانیشتنی API تەنها — تونێلی WireGuard بەمزووانە"
+          }
+        }
+      }
+    },
+    "vpn.throttledFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've used this month's data. Speed is limited to %lld Mbps until it resets."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استهلكت بيانات هذا الشهر. السرعة محدودة بـ %lld ميغابت/ث حتى تتجدد."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داتای ئەم مانگەت بەکارهێنا. خێرایی سنووردارە بە %lld مێگابیت/چ تا نوێ دەبێتەوە."
           }
         }
       }

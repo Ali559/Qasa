@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.settings
 
+import alibarznji.qasa.vpn.VPNService
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.device.DeviceRegistrationService
@@ -37,6 +38,7 @@ class SettingsViewModel @Inject constructor(
     val appSession: AppSession,
     val devices: DeviceRegistrationService,
     val license: LicenseManager,
+    val vpn: VPNService,
 ) : ViewModel()
 
 @OptIn(ExperimentalMaterial3Api::class)

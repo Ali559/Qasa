@@ -534,10 +534,14 @@ async fn vpn_connect_agent_sync_and_status() {
     assert_eq!(hb["metered_accounts"], 1);
     let (_, status_body) = api.call(Method::GET, "/v1/vpn/status", Some(&token), None).await;
     assert_eq!(status_body["tunnel_up"], true);
+    assert_eq!(status_body["usage"]["bytes_used"], 5120, "status reports metered usage");
 
     let (status, _) = api.call(Method::POST, "/v1/vpn/disconnect", Some(&token), None).await;
     assert_eq!(status, StatusCode::OK);
-    let (_, peers) = agent(Method::GET, format!("/v1/internal/vpn/nodes/{node}/peers"), None).await;
+let (_, status_body) = api.call(Method::GET, "/v1/vpn/status", Some(&token), None).await;
+    assert_eq!(status_body["connected"], false);
+    assert_eq!(status_body["usage"]["bytes_used"], 5120, "usage is reported while disconnected");
+        let (_, peers) = agent(Method::GET, format!("/v1/internal/vpn/nodes/{node}/peers"), None).await;
     assert_eq!(peers["peers"], json!([]), "a disconnected peer is no longer desired");
 
     let mut bad = Request::builder()

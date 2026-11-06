@@ -233,26 +233,70 @@ data class BreachMonitorRegisterResponse(
 data class BreachMonitorBody(val email_hash: String, val label_hint: String? = null)
 
 @Serializable
-data class VPNConnectRequest(val client_public_key: String? = null)
+data class VPNConnectRequest(
+    val client_public_key: String? = null,
+    /** A node from `GET /v1/vpn/nodes`; null lets the server pick the least loaded one. */
+    val node_id: String? = null,
+)
 
 @Serializable
-data class VPNConnectResponse(val config: VPNWireGuardConfig? = null, val reused: Boolean? = null)
+data class VPNConnectResponse(
+    val config: VPNWireGuardConfig? = null,
+    val node: VPNNodeRef? = null,
+    val reused: Boolean? = null,
+    val usage: VPNUsage? = null,
+)
 
+/** `qasa_vpn::WireGuardConfig`: everything the device needs to bring the tunnel up. */
 @Serializable
 data class VPNWireGuardConfig(
     val session_id: String? = null,
-    val endpoint: String? = null,
-    val assigned_ip: String? = null,
+    /** `host:port` of the node. */
+    val endpoint: String,
+    val server_public_key: String,
+    val client_public_key: String? = null,
+    /** Bare IPv4 address inside the node's pool; the interface uses it as a /32. */
+    val client_ip: String,
+    val dns: List<String> = emptyList(),
+    val allowed_ips: List<String> = listOf("0.0.0.0/0", "::/0"),
+    val persistent_keepalive: Int = 25,
+)
+
+@Serializable
+data class VPNNodeRef(val id: String, val name: String, val city: String)
+
+/** A row of `GET /v1/vpn/nodes`: online and under 80% load. */
+@Serializable
+data class VPNNode(val id: String, val name: String, val city: String, val load_pct: Int = 0)
+
+@Serializable
+data class VPNNodesResponse(val nodes: List<VPNNode> = emptyList())
+
+/** Monthly data against the plan's quota; past it the node limits speed to [throttle_mbps]. */
+@Serializable
+data class VPNUsage(
+    val bytes_used: Long = 0,
+    val quota_bytes: Long = 0,
+    val quota_gb: Int = 0,
+    val throttled: Boolean = false,
+    val throttle_mbps: Int? = null,
+    val period_start: String? = null,
 )
 
 @Serializable
 data class VPNStatusResponse(
+    /** A session exists on the server. */
     val connected: Boolean,
     val session_id: String? = null,
     val node: String? = null,
+    val node_id: String? = null,
     val city: String? = null,
     val assigned_ip: String? = null,
     val connected_at: String? = null,
+    val last_handshake_at: String? = null,
+    /** The node saw a WireGuard handshake in the last 3 minutes. */
+    val tunnel_up: Boolean = false,
+    val usage: VPNUsage? = null,
 )
 
 @Serializable
