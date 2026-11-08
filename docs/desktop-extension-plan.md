@@ -16,6 +16,40 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 1 built (not yet checked by hand in the app window).**
+- `core/qasa-vault` gained the payload model (`payload.rs`: reads iOS's `{"login":{"_0":…}}`
+  and Android's `{"type":…}` shapes, writes the iOS shape), the country list, 2FA codes
+  (`totp.rs`), CSV import/export (`csv.rs`), password health (`health.rs`) and the
+  generator (`generator.rs`). 61 tests.
+- Desktop core (`src-tauri/src/vault/`): SQLite vault with tombstones and per-item search
+  tokens, create/unlock (raw then trimmed password, as iOS), lock, auto-lock timer
+  (15 s tick, prefs minutes, UI reports activity), save/delete/list, folders, change
+  master password as one all-or-nothing re-key, clear local data, health, generator,
+  2FA, CSV through native file dialogs, secret copying with a 30 s clear for card/bank
+  fields that only clears if Qasa's value is still there, and an http(s)-only
+  open-website command.
+- Screens: Welcome, Create vault, Unlock, the sidebar shell (Home, Passwords, Alerts,
+  You), Passwords as list + detail, add-item drill-down, the editor for all 13 types,
+  generator (page and sheet), Password health with issue lists, Folders, Settings
+  (Change main password, Auto-lock, Appearance, CSV, Clear local data, Logout), Terms
+  and Privacy.
+- Desktop-specific choices:
+  - Protected notes ask for the main password once per unlock (iOS asks for Face ID or
+    the passcode); Touch ID / Windows Hello replace this in phase 3.
+  - 2FA QR codes are read from an image file (a screenshot) instead of the camera.
+  - The Suggested section is left out: on iOS it comes from a mock context provider.
+  - iOS no-ops are implemented or dropped: generator "Save to my passwords" opens a new
+    login; the disabled "Pronounceable" toggle and the NFC button are gone.
+  - Phone-only wording ("on this phone") has desktop overrides in
+    `l10n/platform/desktop.json`, with drafted ar/ckb text for a native speaker to review.
+- Left for later phases: account rows (profile, plan, upgrade, linked devices, pairing,
+  notifications, VPN), biometrics, Wi‑Fi sync, and the browser-extension row in Settings.
+- Checked: Rust tests (core 61, desktop 9 including every item type in the UI's JSON
+  shape), `vue-tsc` and the production build, every screen in a browser against an
+  in-memory stand-in for the core, and the real app starting and creating its vault
+  file. **Not checked:** clicking through the real app window (macOS blocks screen
+  capture from this session), and the native file dialogs.
+
 **2026-11-08 — Phase 0 done.**
 - `core/qasa-vault`: PBKDF2/HKDF key derivation, the verifier, AES-256-GCM, kdfVersion
   encoding and the blind search index. `tests/vectors.json` holds the golden vectors

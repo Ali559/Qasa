@@ -26,12 +26,31 @@ pub enum ThemePreference {
     Dark,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", default)]
 pub struct Prefs {
     pub language: Language,
     pub theme: ThemePreference,
     pub has_completed_welcome: bool,
+    /// Minutes of inactivity before the vault locks, 1–60 (iOS default 5).
+    pub auto_lock_minutes: u32,
+}
+
+impl Prefs {
+    pub fn auto_lock_minutes(&self) -> u32 {
+        self.auto_lock_minutes.clamp(1, 60)
+    }
+}
+
+impl Default for Prefs {
+    fn default() -> Self {
+        Self {
+            language: Language::default(),
+            theme: ThemePreference::default(),
+            has_completed_welcome: false,
+            auto_lock_minutes: 5,
+        }
+    }
 }
 
 fn prefs_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -40,6 +59,15 @@ fn prefs_path(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 /// The saved preferences, or the defaults when nothing is saved or the file is unreadable.
+/// The saved preferences (for the Rust side, e.g. the auto-lock timer).
+pub fn load(app: &AppHandle) -> Prefs {
+    prefs_path(app)
+        .ok()
+        .and_then(|path| fs::read(path).ok())
+        .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+        .unwrap_or_default()
+}
+
 #[tauri::command]
 pub fn get_prefs(app: AppHandle) -> Prefs {
     let prefs = prefs_path(&app)
@@ -73,10 +101,10 @@ mod tests {
 
     #[test]
     fn json_shape_matches_the_ui() {
-        let prefs = Prefs { language: Language::Ckb, theme: ThemePreference::Dark, has_completed_welcome: true };
+        let prefs = Prefs { language: Language::Ckb, theme: ThemePreference::Dark, has_completed_welcome: true, auto_lock_minutes: 15 };
         assert_eq!(
             serde_json::to_string(&prefs).unwrap(),
-            r#"{"language":"ckb","theme":"dark","hasCompletedWelcome":true}"#
+            r#"{"language":"ckb","theme":"dark","hasCompletedWelcome":true,"autoLockMinutes":15}"#
         );
     }
 

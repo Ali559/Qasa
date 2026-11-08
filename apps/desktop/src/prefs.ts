@@ -12,9 +12,11 @@ export interface Prefs {
   language: Language
   theme: ThemePreference
   hasCompletedWelcome: boolean
+  /** Minutes of inactivity before the vault locks, 1–60 (iOS default 5). */
+  autoLockMinutes: number
 }
 
-const DEFAULTS: Prefs = { language: 'en', theme: 'system', hasCompletedWelcome: false }
+const DEFAULTS: Prefs = { language: 'en', theme: 'system', hasCompletedWelcome: false, autoLockMinutes: 5 }
 const BROWSER_KEY = 'qasa.prefs'
 const inTauri = '__TAURI_INTERNALS__' in window
 
