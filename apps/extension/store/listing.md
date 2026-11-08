@@ -142,7 +142,10 @@ plus a content script on `<all_urls>` (no `host_permissions` entry).
 
 > Stores two small values in chrome.storage.local: the pairing with the desktop app (a
 > random client id and the key for the encrypted channel) and the user's chosen display
-> language for the popup. No passwords, logins or browsing data are stored.
+> language for the popup. No passwords or browsing data are stored. During a sign-in that
+> asks for the username and password on separate pages, the username from the first page
+> is held in chrome.storage.session (in memory, cleared when the browser closes) for at
+> most 10 minutes, so the second page can offer to save both together.
 
 **activeTab**
 
@@ -183,7 +186,8 @@ Why: "collected" in the Chrome Web Store sense means sent off the user's device 
 developer or a third party. The extension sends nothing to Qasa or anyone else and makes no
 network requests. Logins it fills come from, and logins it saves go to, the Qasa desktop
 app on the same computer, over native messaging. The only things it stores are the pairing
-key and the popup language, in the browser's local extension storage.
+key and the popup language, in the browser's local extension storage, and, during a
+multi-step sign-in, that page's username in memory for at most 10 minutes.
 
 If a reviewer pushes back (the extension does read and fill passwords), the fallback is to
 tick **Authentication information** and **Website content**, with "handled on the device
@@ -199,9 +203,8 @@ only, never transmitted". Don't tick anything else.
 **Firefox AMO data collection:** no data collected or transmitted. AMO now asks new
 extensions to declare this in the manifest as
 `browser_specific_settings.gecko.data_collection_permissions: { required: ["none"] }`.
-The Firefox manifest (`scripts/manifest.ts`) doesn't have it yet, and `web-ext` 8.3.0 doesn't
-flag it; check the AMO validator on first upload, and add the key if it asks (Firefox before
-140 ignores it with a warning, so it may also mean raising `strict_min_version`).
+The Firefox manifest (`scripts/manifest.ts`) declares exactly that, with `strict_min_version`
+140.0, the first Firefox (and the current ESR) that reads the key.
 
 ---
 

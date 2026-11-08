@@ -69,7 +69,12 @@ outputs.push(await build({
     emptyOutDir: false,
     target: 'es2022',
     watch: watch ? {} : null,
-    rollupOptions: { input: join(ROOT, 'src/popup/popup.html') },
+    rollupOptions: {
+      input: join(ROOT, 'src/popup/popup.html'),
+      // Fonts keep stable names: the service worker also reads them for the in-page menu
+      // (src/shared/fonts.ts).
+      output: { assetFileNames: (a) => (/\.(ttf|woff2?)$/.test(a.names?.[0] ?? a.name ?? '') ? 'fonts/[name][extname]' : 'assets/[name]-[hash][extname]') },
+    },
   },
 }))
 outputs.push(await build(script('src/background/index.ts', 'background.js')))

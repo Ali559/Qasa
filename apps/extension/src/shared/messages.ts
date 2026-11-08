@@ -44,6 +44,8 @@ export type ContentRequest =
   | { kind: 'save'; username: string; password: string }
   /** Step 1 of a multi-step sign-in: kept in memory for this tab and site only. */
   | { kind: 'rememberUsername'; username: string }
+  /** The in-page menu's font files (content/fonts.ts). */
+  | { kind: 'fonts' }
 
 export type BgRequest = PopupRequest | ContentRequest
 

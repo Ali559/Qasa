@@ -57,6 +57,24 @@ test('multi-step: the username from step 1 is saved with the password from step 
   await expect.poll(() => env.fake.saves).toEqual([{ url: `${env.servers.main}/multistep-2.html`, username: 'steps@user.test', password: 'step-two-password' }])
 })
 
+test('multi-step: the username survives the service worker being stopped between steps', async ({ env }) => {
+  const page = await env.context.newPage()
+  await page.goto(`${env.servers.main}/multistep-1.html`)
+  await page.locator('#username').pressSequentially('restart@user.test')
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.waitForURL('**/multistep-2.html')
+  // MV3 workers are stopped whenever the browser likes; storage.session outlives them.
+  // Stop this one by hand, by closing its DevTools target. (With the username kept in a
+  // variable instead, this test fails: the save arrives without it.)
+  const cdp = await env.context.newCDPSession(page)
+  const { targetInfos } = await cdp.send('Target.getTargets')
+  const worker = targetInfos.find((t) => t.type === 'service_worker' && t.url.endsWith('/background.js'))!
+  await cdp.send('Target.closeTarget', { targetId: worker.targetId })
+  await page.locator('#password').pressSequentially('after-restart-password')
+  await page.getByRole('button', { name: 'Sign in' }).click()
+  await expect.poll(() => env.fake.saves).toEqual([{ url: `${env.servers.main}/multistep-2.html`, username: 'restart@user.test', password: 'after-restart-password' }])
+})
+
 test('submitting a login Qasa just filled, unchanged, sends nothing', async ({ env }) => {
   const page = await env.context.newPage()
   await page.goto(`${env.servers.main}/login.html`)

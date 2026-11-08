@@ -8,7 +8,10 @@
 //     data is the pairing (bridge.ts).
 import type { BgRequest, BgResponse, BridgeStatus, ContentRequest, LoginMatch, PopupRequest, SearchHit } from '@ext/shared/messages'
 import { isWebUrl, NATIVE_HOST } from '@ext/shared/protocol'
+import type { FontBytes } from '@ext/content/fonts'
+import { FONT_FILES } from '@ext/shared/fonts'
 import { Bridge, BridgeError, type PairingStore, type StoredPairing } from './bridge'
+import { UsernameMemory } from './usernames'
 
 const PAIRING_KEY = 'pairing'
 
@@ -34,15 +37,36 @@ const bridge = new Bridge(() => chrome.runtime.connectNative(NATIVE_HOST), store
 
 // MARK: multi-step sign-in memory
 
-/** Username typed on step 1 of a multi-step sign-in, per tab, in memory only. Cleared
- *  when the tab leaves the site or closes, and after a save that used it. */
-const rememberedUsernames = new Map<number, { host: string; username: string }>()
+/** Step 1's username (usernames.ts). Cleared when the tab closes or leaves the site, and
+ *  after a save that used it. */
+const usernames = new UsernameMemory(chrome.storage.session)
 
-chrome.tabs.onRemoved.addListener((tabId) => rememberedUsernames.delete(tabId))
+chrome.tabs.onRemoved.addListener((tabId) => void usernames.forget(tabId))
 chrome.tabs.onUpdated.addListener((tabId, change) => {
-  const kept = rememberedUsernames.get(tabId)
-  if (kept && change.url && hostOf(change.url) !== kept.host) rememberedUsernames.delete(tabId)
+  if (change.url) void usernames.leftTo(tabId, hostOf(change.url))
 })
+
+// MARK: fonts for the in-page menu
+
+/** The bundled fonts as base64, read once per worker life (content/fonts.ts). */
+let fontBytes: Promise<FontBytes> | undefined
+
+async function readFont(path: string): Promise<string> {
+  const buf = new Uint8Array(await (await fetch(chrome.runtime.getURL(path))).arrayBuffer())
+  let bin = ''
+  for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000))
+  return btoa(bin)
+}
+
+function fonts(): Promise<FontBytes> {
+  fontBytes ??= Promise.all([readFont(FONT_FILES.rubik), readFont(FONT_FILES.rudaw)])
+    .then(([rubik, rudaw]) => ({ rubik, rudaw }))
+    .catch((e) => {
+      fontBytes = undefined
+      throw e
+    })
+  return fontBytes
+}
 
 function hostOf(url: string): string {
   try {
@@ -119,22 +143,23 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
     case 'totp':
       return (await bridge.request('totp', { itemId: String(req.itemId), url })).code
     case 'rememberUsername':
-      if (req.username) rememberedUsernames.set(tabId, { host: hostOf(url), username: String(req.username) })
+      await usernames.remember(tabId, hostOf(url), String(req.username ?? ''))
       return null
+    case 'fonts':
+      return fonts()
     case 'save': {
       if (!req.password) throw new BridgeError('bad')
-      let username = String(req.username ?? '')
-      const kept = rememberedUsernames.get(tabId)
-      if (!username && kept?.host === hostOf(url)) username = kept.username
+      const kept = await usernames.recall(tabId, hostOf(url))
+      const username = String(req.username ?? '') || kept || ''
       const r = await bridge.request('save', { url, username, password: String(req.password) })
-      if (kept) rememberedUsernames.delete(tabId)
+      if (kept !== undefined) await usernames.forget(tabId)
       return r.result
     }
   }
 }
 
 const POPUP_ONLY = new Set(['pair', 'search', 'copy', 'generate'])
-const CONTENT_ONLY = new Set(['matches', 'fill', 'totp', 'save', 'rememberUsername'])
+const CONTENT_ONLY = new Set(['matches', 'fill', 'totp', 'save', 'rememberUsername', 'fonts'])
 
 async function handle(req: BgRequest, sender: chrome.runtime.MessageSender): Promise<unknown> {
   if (!req || typeof req !== 'object' || typeof req.kind !== 'string') throw new BridgeError('bad')

@@ -55,7 +55,12 @@ export function firefoxManifest(version: string) {
     browser_specific_settings: {
       gecko: {
         id: GECKO_ID,
-        strict_min_version: '128.0',
+        // 140 (the current ESR) is the first Firefox that reads data_collection_permissions.
+        strict_min_version: '140.0',
+        // AMO asks every new add-on to declare what it collects. Qasa sends nothing to
+        // anyone: logins move only between the extension and the desktop app, on this
+        // computer (store/listing.md, privacy answers).
+        data_collection_permissions: { required: ['none'] },
       },
     },
   }
