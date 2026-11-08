@@ -1,5 +1,8 @@
 # Qasa browser extension
 
+
+Before release: the open steps for the desktop app and this extension are in [`apps/desktop/TODO.md`](../desktop/TODO.md).
+
 Manifest V3 extension for Chrome/Chromium/Edge and Firefox (plan:
 [`docs/desktop-extension-plan.md`](../../docs/desktop-extension-plan.md) §8). It fills and
 saves logins from the Qasa desktop app; it stores no vault data itself.
@@ -16,7 +19,8 @@ content script ⇄ service worker ⇄ (native messaging) nm-host ⇄ (unix socke
 | `src/background/` | Service worker: the native port, pairing, request/reply matching, sender checks |
 | `src/content/` | Field detection, in-page icon and menu (closed shadow root), clickjacking guard, fill, save capture |
 | `src/popup/` | Vue popup, built from the desktop's components, tokens, fonts and i18n (`@` → `../desktop/src`) |
-| `scripts/` | Build (three Vite builds → `dist/chrome`, `dist/firefox`), manifests, aliases, vector generator |
+| `scripts/` | Build (three Vite builds → `dist/chrome`, `dist/firefox`), store packaging (`package.ts`), manifests, aliases, vector generator |
+| `store/listing.md` | Store copy (en, ar), single purpose, permission justifications, privacy answers, image sizes |
 | `test/unit/` | Vitest: protocol + vector, bridge, field detection / save / fill (happy-dom) |
 | `test/e2e/` | Playwright with the unpacked Chrome build, the real nm-host and `test/fake-desktop.ts` |
 | `test/fixtures/` | Static pages for the e2e suite, served on `127.0.0.1` and `localhost` (two origins) |
@@ -60,6 +64,34 @@ macOS for Chrome, `~/Library/Application Support/Google/Chrome/NativeMessagingHo
 
 (Firefox: `~/Library/Application Support/Mozilla/NativeMessagingHosts/`, with
 `"allowed_extensions": ["extension@qasa-app.com"]` instead of `allowed_origins`.)
+
+## Store packages
+
+```sh
+bun run package      # type-check, store build, zips in release/
+bun run lint:store   # web-ext lint on the unpacked Firefox store build
+```
+
+`package` runs `scripts/build.ts --store` into `release/unpacked/{chrome,firefox}` (the
+Chrome manifest without the dev `key`, since the stores assign their own id; `version` from
+`package.json`, so bump it there first), then writes to `release/` (gitignored):
+
+| File | Upload to |
+| --- | --- |
+| `qasa-chrome-<ver>.zip` | Chrome Web Store and Edge Add-ons (the same zip) |
+| `qasa-firefox-<ver>.zip` | Firefox Add-ons (AMO) |
+| `qasa-extension-source-<ver>.zip` | AMO's "source code" upload, required because the code is bundled |
+
+The source zip keeps the monorepo layout: `apps/extension/` without `node_modules`, `dist`,
+`release`, test output or `.dev-key.pem`, plus only the `apps/desktop/src/` files the build
+aliases in (what the bundles contain, what `vue-tsc` reads, and the fonts the CSS loads), and
+a `SOURCE-BUILD.md` with the steps (`bun install --frozen-lockfile && bun run build:store`).
+A build from the extracted zip is byte-identical to `release/unpacked/`. Zipping uses the
+`zip` CLI (preinstalled on macOS and the GitHub runners).
+
+Listing copy, permission justifications and privacy answers are in
+[`store/listing.md`](store/listing.md). After the first Chrome and Edge uploads, add the ids the
+stores assign to the desktop's host manifest ([`EXTENSION_IDS.md`](EXTENSION_IDS.md)).
 
 ## Tests
 

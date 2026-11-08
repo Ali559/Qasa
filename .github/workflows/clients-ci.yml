@@ -1,0 +1,75 @@
+# Checks for the shared core, the desktop app and the browser extension on every push
+# and pull request that touches them. (The server has its own checks.)
+name: Clients CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['core/**', 'apps/desktop/**', 'apps/extension/**', 'l10n/**', '.github/workflows/clients-ci.yml']
+  pull_request:
+    paths: ['core/**', 'apps/desktop/**', 'apps/extension/**', 'l10n/**', '.github/workflows/clients-ci.yml']
+
+env:
+  CARGO_INCREMENTAL: '0'
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: core
+      - name: Vault crypto, golden vectors, sync protocol
+        working-directory: core
+        run: cargo test
+
+  desktop:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/desktop/src-tauri
+            apps/desktop/nm-host
+      - uses: oven-sh/setup-bun@v2
+      - name: Generated files are current (strings, theme tokens)
+        run: |
+          python3 l10n/generate.py --check
+          cd apps/desktop && bun install --frozen-lockfile && bun run tokens:check
+      - name: Interface type check
+        working-directory: apps/desktop
+        run: bunx vue-tsc -b
+      - name: nm-host
+        working-directory: apps/desktop/nm-host
+        run: cargo test
+      # tauri-build wants the nm-host sidecar to exist before the app compiles.
+      - name: Rust core of the app
+        working-directory: apps/desktop
+        run: |
+          bun scripts/sidecar.ts --debug
+          cd src-tauri && cargo test
+
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      # The extension builds against the desktop's design system and strings.
+      - name: Install
+        run: |
+          (cd apps/desktop && bun install --frozen-lockfile)
+          (cd apps/extension && bun install --frozen-lockfile)
+      - name: Unit tests, build, Firefox lint
+        working-directory: apps/extension
+        run: |
+          bun run test
+          bun run build
+          bun run lint:firefox

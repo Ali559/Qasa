@@ -38,10 +38,11 @@ function base(version: string) {
   }
 }
 
-export function chromeManifest(version: string) {
+/** `store: true` drops the dev `key`: the Chrome Web Store and Edge Add-ons assign their own. */
+export function chromeManifest(version: string, { store = false } = {}) {
   return {
     ...base(version),
-    key: DEV_PUBLIC_KEY,
+    ...(store ? {} : { key: DEV_PUBLIC_KEY }),
     minimum_chrome_version: '116',
     background: { service_worker: 'background.js' },
   }

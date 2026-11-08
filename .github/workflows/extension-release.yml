@@ -1,0 +1,33 @@
+# Packages the browser extension for the stores when an `extension-v*` tag is pushed
+# (apps/extension: `bun run package`). The zips are attached to the workflow run, not to a
+# GitHub release, so "latest release" stays the desktop app that the download links use.
+# Uploading to the Chrome Web Store, Edge Add-ons and Firefox AMO is done by hand
+# (apps/extension/store/listing.md).
+name: Extension release
+
+on:
+  push:
+    tags: ['extension-v*']
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install
+        run: |
+          (cd apps/desktop && bun install --frozen-lockfile)
+          (cd apps/extension && bun install --frozen-lockfile)
+      - name: Test and package
+        working-directory: apps/extension
+        run: |
+          bun run test
+          bun run package
+          bun run lint:store
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qasa-extension-${{ github.ref_name }}
+          path: apps/extension/release/*.zip
+          if-no-files-found: error

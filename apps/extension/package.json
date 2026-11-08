@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "bun scripts/build.ts --watch",
     "build": "vue-tsc --noEmit -p tsconfig.json && bun scripts/build.ts",
+    "build:store": "vue-tsc --noEmit -p tsconfig.json && bun scripts/build.ts --store",
+    "package": "bun scripts/package.ts",
     "test": "vitest run",
     "e2e": "bun run build && playwright test",
     "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "lint:store": "web-ext lint --source-dir release/unpacked/firefox",
     "vectors": "bun scripts/make-vectors.ts",
     "e2e:real": "bun run build && playwright test -c playwright.real.config.ts"
   },

@@ -16,6 +16,47 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 6: release pipeline (ready, waiting on certificates).**
+- **Desktop app:**
+  - nm-host is a bundled sidecar: `scripts/sidecar.ts` builds it for each target, lipo'd
+    for universal macOS.
+  - The icon has the macOS shape (`scripts/app-icon.py`).
+  - Hardened runtime with no entitlements.
+  - `tauri-plugin-updater`: a quiet check 10 s after launch, Settings → Check for updates,
+    and an "Install and restart" prompt. The archives are signed with
+    `~/.tauri/qasa-desktop-updater.key`.
+  - A local release build bundled `qasa-nm-host` and signed `Qasa.app.tar.gz`.
+- **Fix:** the four `bridge_*` commands were missing from the isolation allow-list, which
+  would have blocked the extension prompts in the real app. A test now checks every
+  registered command against it.
+- **CI:**
+  - `desktop-release.yml` (tag `desktop-v*`): universal dmg, NSIS and msi, AppImage and
+    deb; a draft release with `latest.json` and version-free asset names. Apple and Azure
+    signing are used only when their secrets exist.
+  - `clients-ci.yml`: tests for the core, desktop and extension.
+  - `extension-release.yml`: the store zips.
+- **Server:** Caddy redirects `qasa-app.com/desktop/latest.json` and
+  `/desktop/download/<os>` to the latest published GitHub release. Not deployed yet.
+- **Landing:** a "Qasa on your computer" section with OS detection, and `/download` pages
+  in en, ar and ckb.
+- **Extension:** `bun run package` makes the store zips (no `key`) and a source zip whose
+  build reproduces byte-identical output. `store/listing.md` has the listing text,
+  permission justifications and privacy answers.
+- **Runbook:** [`desktop-release.md`](desktop-release.md).
+- **Still to do, by the account owner:**
+  - Developer ID certificate and notarization secrets.
+  - Azure Trusted Signing.
+  - The updater key as a secret.
+  - Deploy the Caddyfile.
+  - Tag and publish the first release.
+  - Submit the extension to the stores, then add the store ids to `CHROME_EXTENSION_IDS`
+    and release the desktop app before the listings go live.
+  - A privacy policy page on qasa-app.com, which the stores require.
+- **Not checked:**
+  - The workflows haven't run on GitHub yet.
+  - Signed, notarized and Windows/Linux builds.
+  - An update installing over an older version.
+
 **2026-11-08 — Phase 5: the browser extension.**
 - **Protocol:** written down in §8.2.1:
   - P-256 pairing with a 6-digit code on both screens;
@@ -629,13 +670,15 @@ path on every OS, for tests.
 
 | Target | Format | Signing |
 | --- | --- | --- |
-| macOS | Universal `.dmg` | Developer ID + notarization (existing Apple account). Keychain access group entitlement for Touch ID |
+| macOS | Universal `.dmg` | Developer ID + notarization (existing Apple account). Hardened runtime, no entitlements: Touch ID uses CryptoKit Enclave keys, which need no keychain access group |
 | Windows | NSIS `.exe` + `.msi` | Azure Trusted Signing (about $10 a month) |
 | Linux | AppImage + `.deb` | Update signature only |
 | Extension | Chrome Web Store, Edge Add-ons, Firefox AMO | Store review. Firefox needs a stable `browser_specific_settings.gecko.id` |
 
-- **Auto-update:** `tauri-plugin-updater` with signed manifests served from
-  `qasa-app.com/desktop/` by the existing Caddy. The nm-host updates with the app.
+- **Auto-update:** `tauri-plugin-updater` reads `qasa-app.com/desktop/latest.json`, which
+  Caddy redirects to the latest published GitHub release; archives are signed with the
+  updater key. The nm-host updates with the app (it is a bundled sidecar). Steps and
+  secrets: [`desktop-release.md`](desktop-release.md).
 - **Distribution:** direct download only. The Mac App Store is avoided because of the
   in-app-purchase rule for subscriptions and the sandbox limits on native messaging.
 - **Landing page:** a Download section that detects the OS, plus extension store links.

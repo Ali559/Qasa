@@ -1,0 +1,90 @@
+---
+// The standalone download page (/download, /ckb/download, /ar/download). The browser
+// extension's popup links here when the desktop app isn't installed, so it has to work
+// while the home page is still the coming-soon page: just the header, the desktop and
+// extension downloads, and a footer.
+import "../styles/global.css";
+import Icon from "./Icon.astro";
+import DesktopDownloads from "./DesktopDownloads.astro";
+import { dictionaries, downloadHrefs, languages, type Lang } from "../i18n";
+
+const { lang } = Astro.props as { lang: Lang };
+const t = dictionaries[lang];
+const dir = lang === "en" ? "ltr" : "rtl";
+const home = languages.find((l) => l.lang === lang)!.href;
+---
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.desktop.pageTitle}</title>
+    <meta name="description" content={t.desktop.pageDescription} />
+    <meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17152a" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content={t.desktop.pageTitle} />
+    <meta property="og:description" content={t.desktop.pageDescription} />
+    <meta property="og:locale" content={{ en: "en_US", ckb: "ckb_IQ", ar: "ar_IQ" }[lang]} />
+    {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={downloadHrefs[l.lang]} />)}
+    <link rel="alternate" hreflang="x-default" href={downloadHrefs.en} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/Rubik-Variable.ttf" as="font" type="font/ttf" crossorigin />
+    {dir === "rtl" && <link rel="preload" href="/fonts/rudawregular2.ttf" as="font" type="font/ttf" crossorigin />}
+  </head>
+  <body>
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a href={home} class="brand" lang="en" aria-label="Qasa">
+          <span class="brand-mark"><Icon name="shield-check" filled size={18} /></span>
+          Qasa
+        </a>
+        <nav class="lang-switch" aria-label={t.nav.language}>
+          {languages.map((l) => (
+            <a href={downloadHrefs[l.lang]} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? "page" : undefined}>{l.label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="bg" aria-hidden="true"></div>
+      <DesktopDownloads lang={lang} heading="h1" />
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <a href={home} class="brand small" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={15} /></span>Qasa</a>
+        <a href={home} class="phones"><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
+        <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  body { min-height: 100dvh; display: flex; flex-direction: column; }
+  main { flex: 1; position: relative; }
+  main > :global(.desktop) { position: relative; padding-top: clamp(40px, 7vw, 80px); }
+  .bg { position: absolute; inset: 0 0 auto; height: 420px; pointer-events: none; background: linear-gradient(180deg, var(--card-muted) 0%, var(--background) 100%); }
+
+  .nav { border-bottom: 1px solid color-mix(in srgb, var(--stroke) 70%, transparent); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 68px; }
+  /* The logo lockup is artwork: same order and font in every language. */
+  .brand { direction: ltr; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; color: var(--accent); letter-spacing: -0.01em; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+  .brand.small { font-size: 16px; gap: 8px; }
+  .brand.small .brand-mark { width: 26px; height: 26px; border-radius: 8px; }
+
+  .lang-switch {
+    display: flex; gap: 2px; padding: 3px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--stroke); font-size: 13px; font-weight: 500;
+  }
+  .lang-switch a { padding: 5px 10px; border-radius: 9px; color: var(--text-2); line-height: 1.4; }
+  .lang-switch a:hover { color: var(--text); }
+  .lang-switch a[aria-current="page"] { background: var(--card-muted); color: var(--on-accent-chip); }
+
+  .footer { border-top: 1px solid var(--stroke); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-3); }
+  .phones { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-weight: 500; }
+  .phones:hover { color: var(--text); }
+</style>

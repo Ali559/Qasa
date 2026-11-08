@@ -8,7 +8,7 @@ import type { Plugin } from 'vite'
 const here = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 
 export const ROOT = here('..')
-const DESKTOP_SRC = here('../../desktop/src/')
+export const DESKTOP_SRC = here('../../desktop/src/')
 const CATALOGS = `${DESKTOP_SRC}i18n/`
 
 export const aliases = [
