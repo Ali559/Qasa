@@ -7,6 +7,7 @@ pub mod commands;
 pub mod error;
 pub mod store;
 pub mod tools;
+pub mod biometrics;
 
 use std::collections::HashMap;
 use std::path::Path;
@@ -17,7 +18,12 @@ use qasa_vault::{decode_kdf_version, derive_root_key, encode_kdf_version, genera
 use serde::Serialize;
 
 use error::{CommandError, CommandResult};
-use store::{now_ms, CollectionRow, ItemRow, Store, META_KDF_VERSION, META_SALT, META_VERIFIER};
+use biometrics::{Biometrics, BiometricStatus, PlatformBiometrics};
+use qasa_biometric::Sealed;
+use qasa_vault::RootKey;
+use store::{
+    now_ms, CollectionRow, ItemRow, Store, META_BIOMETRIC_ENABLED, META_BIOMETRIC_SEALED, META_KDF_VERSION, META_SALT, META_VERIFIER,
+};
 
 /// Minimum master password length, counted in characters (iOS `password.count >= 8`).
 pub const MIN_PASSWORD_CHARS: usize = 8;
@@ -65,6 +71,7 @@ pub struct Vault {
     store: Store,
     keys: Option<VaultKeys>,
     last_activity: Instant,
+    bio: Box<dyn Biometrics>,
 }
 
 fn new_id() -> String {
@@ -91,11 +98,11 @@ fn has_primary_copy(p: &VaultPayload) -> bool {
 
 impl Vault {
     pub fn open(path: &Path) -> CommandResult<Self> {
-        Ok(Self::with_store(Store::open(path)?))
+        Ok(Self::with_store(Store::open(path)?, Box::new(PlatformBiometrics)))
     }
 
-    fn with_store(store: Store) -> Self {
-        Self { store, keys: None, last_activity: Instant::now() }
+    fn with_store(store: Store, bio: Box<dyn Biometrics>) -> Self {
+        Self { store, keys: None, last_activity: Instant::now(), bio }
     }
 
     // MARK: session
@@ -126,7 +133,7 @@ impl Vault {
     }
 
     /// iOS `VaultSession.createVault`: the password is used exactly as typed.
-    pub fn create(&mut self, password: &str) -> CommandResult<()> {
+    pub fn create(&mut self, password: &str, biometrics: bool) -> CommandResult<()> {
         if self.store.vault_exists()? {
             return Err(CommandError::VaultExists);
         }
@@ -139,6 +146,10 @@ impl Vault {
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &root.verifier())?;
         self.keys = Some(root.subkeys());
+        if biometrics && self.bio.available() {
+            self.store.set_meta(META_BIOMETRIC_ENABLED, b"1")?;
+            self.seal(&root);
+        }
         self.note_activity();
         Ok(())
     }
@@ -159,6 +170,10 @@ impl Vault {
             if root.matches_verifier(&verifier) {
                 self.keys = Some(root.subkeys());
                 self.note_activity();
+                // iOS: "Sealed on your next master password unlock".
+                if self.biometric_enabled()? && self.store.meta(META_BIOMETRIC_SEALED)?.is_none() {
+                    self.seal(&root);
+                }
                 return Ok(());
             }
             if candidate == trimmed {
@@ -421,7 +436,92 @@ impl Vault {
         self.store.set_meta(META_SALT, &new_salt)?;
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &new_root.verifier())?;
+        // The old seal holds the old root key: replace it.
+        self.store.delete_meta(META_BIOMETRIC_SEALED)?;
+        if self.biometric_enabled()? {
+            self.seal(&new_root);
+        }
         Ok(())
+    }
+
+    // MARK: biometrics
+
+    fn biometric_enabled(&self) -> CommandResult<bool> {
+        Ok(self.store.meta(META_BIOMETRIC_ENABLED)?.as_deref() == Some(b"1".as_slice()))
+    }
+
+    /// Seals the root key. A failure only leaves the seal pending (the next password
+    /// unlock tries again); it never blocks the unlock that triggered it.
+    fn seal(&mut self, root: &RootKey) {
+        match self.bio.seal(root.as_bytes()) {
+            Ok(sealed) => {
+                if let Ok(json) = serde_json::to_vec(&sealed) {
+                    let _ = self.store.set_meta(META_BIOMETRIC_SEALED, &json);
+                }
+            }
+            Err(e) => eprintln!("[qasa] biometric seal failed: {e}"),
+        }
+    }
+
+    pub fn biometric_status(&self) -> CommandResult<BiometricStatus> {
+        Ok(BiometricStatus {
+            kind: self.bio.kind(),
+            enabled: self.biometric_enabled()?,
+            sealed: self.store.meta(META_BIOMETRIC_SEALED)?.is_some(),
+        })
+    }
+
+    /// iOS toggle: on means "seal at the next password unlock"; off forgets the seal.
+    pub fn set_biometric_enabled(&mut self, enabled: bool) -> CommandResult<BiometricStatus> {
+        self.keys()?;
+        if enabled {
+            if !self.bio.available() {
+                return Err(CommandError::Invalid("biometrics unavailable".into()));
+            }
+            self.store.set_meta(META_BIOMETRIC_ENABLED, b"1")?;
+        } else {
+            self.store.delete_meta(META_BIOMETRIC_ENABLED)?;
+            self.store.delete_meta(META_BIOMETRIC_SEALED)?;
+        }
+        self.biometric_status()
+    }
+
+    /// The seal to open, read without holding the vault while the prompt is up.
+    pub fn sealed(&self) -> CommandResult<Option<Sealed>> {
+        if !self.biometric_enabled()? {
+            return Ok(None);
+        }
+        Ok(self.store.meta(META_BIOMETRIC_SEALED)?.and_then(|b| serde_json::from_slice(&b).ok()))
+    }
+
+    /// Unlocks with a root key the platform unsealed. Checked against the stored verifier,
+    /// so a wrong or stale seal can never open the vault.
+    pub fn unlock_with_root(&mut self, root: RootKey) -> CommandResult<()> {
+        let verifier = self.store.meta(META_VERIFIER)?.ok_or(CommandError::NoVault)?;
+        if !root.matches_verifier(&verifier) {
+            self.store.delete_meta(META_BIOMETRIC_SEALED)?;
+            return Err(CommandError::BiometricInvalidated);
+        }
+        self.keys = Some(root.subkeys());
+        self.note_activity();
+        Ok(())
+    }
+
+    /// Whether an unsealed root key is this vault's (protected notes).
+    pub fn root_matches(&self, root: &RootKey) -> CommandResult<bool> {
+        let verifier = self.store.meta(META_VERIFIER)?.ok_or(CommandError::NoVault)?;
+        Ok(root.matches_verifier(&verifier))
+    }
+
+    /// The platform key is gone (fingerprints changed): drop the seal; the next password
+    /// unlock makes a new one.
+    pub fn forget_seal(&mut self) -> CommandResult<()> {
+        self.store.delete_meta(META_BIOMETRIC_SEALED)
+    }
+
+    #[cfg(test)]
+    pub fn biometrics(&self) -> &dyn Biometrics {
+        self.bio.as_ref()
     }
 
     /// "Clear local data": locks and deletes every item, collection and the key material.
@@ -437,7 +537,7 @@ mod tests {
     use qasa_vault::payload::{LoginFields, SecureNoteFields};
 
     fn vault() -> Vault {
-        Vault::with_store(Store::in_memory())
+        Vault::with_store(Store::in_memory(), Box::new(biometrics::tests::FakeBiometrics::default()))
     }
 
     fn login(name: &str) -> VaultPayload {
@@ -448,21 +548,21 @@ mod tests {
     fn create_lock_unlock() {
         let mut v = vault();
         assert_eq!(v.status().unwrap(), VaultStatus { exists: false, unlocked: false, unsupported_kdf_version: None });
-        assert!(matches!(v.create("short"), Err(CommandError::WeakPassword)));
-        v.create(" pass word ").unwrap();
+        assert!(matches!(v.create("short", false), Err(CommandError::WeakPassword)));
+        v.create(" pass word ", false).unwrap();
         assert!(v.status().unwrap().unlocked);
         v.lock();
         assert!(matches!(v.list(), Err(CommandError::Locked)));
         assert!(matches!(v.unlock("wrong one"), Err(CommandError::WrongPassword)));
         // The trimmed form is tried too, but the raw form must work.
         v.unlock(" pass word ").unwrap();
-        assert!(matches!(v.create("another one"), Err(CommandError::VaultExists)));
+        assert!(matches!(v.create("another one", false), Err(CommandError::VaultExists)));
     }
 
     #[test]
     fn save_list_get_delete() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         let saved = v.save(None, &login("GitHub")).unwrap();
         assert_eq!((saved.display_name.as_str(), saved.variant.as_str()), ("GitHub", "login"));
         assert!(saved.has_primary_copy);
@@ -478,7 +578,7 @@ mod tests {
     #[test]
     fn change_password_rekeys_everything() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         let a = v.save(None, &login("A")).unwrap();
         assert!(matches!(v.change_password("nope", "password2"), Err(CommandError::WrongPassword)));
         assert!(matches!(v.change_password("password1", "  short "), Err(CommandError::WeakPassword)));
@@ -492,7 +592,7 @@ mod tests {
     #[test]
     fn collections_count_and_release_items() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         let c = v.create_collection(" Work ").unwrap();
         assert_eq!(c.name, "Work");
         let note = VaultPayload::SecureNote(SecureNoteFields { title: "n".into(), collection_id: Some(c.id.clone()), ..Default::default() });
@@ -510,7 +610,7 @@ mod tests {
     #[test]
     fn ui_shaped_payloads_save() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         let shapes = [
             r#"{"variant":"login","fields":{"itemName":"GitHub","email":"","username":"","password":"p","website":"","note":""}}"#,
             r#"{"variant":"secureNote","fields":{"title":"n","content":"","color":"mint","protectItem":true}}"#,
@@ -537,7 +637,7 @@ mod tests {
     #[test]
     fn verify_password_does_not_unlock() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         assert!(v.verify_password("password1").unwrap());
         assert!(!v.verify_password("nope").unwrap());
         v.lock();
@@ -545,9 +645,43 @@ mod tests {
     }
 
     #[test]
+    fn biometric_seal_lifecycle() {
+        let mut v = vault();
+        v.create("password1", true).unwrap();
+        let status = v.biometric_status().unwrap();
+        assert!(status.enabled && status.sealed);
+
+        // Unlock with the unsealed root key.
+        v.lock();
+        let sealed = v.sealed().unwrap().unwrap();
+        let root = v.biometrics().unseal(&sealed, "test").unwrap();
+        v.unlock_with_root(RootKey::from_bytes(root)).unwrap();
+        assert!(v.is_unlocked());
+
+        // A password change reseals under the new root.
+        v.change_password("password1", "password2").unwrap();
+        v.lock();
+        let sealed = v.sealed().unwrap().unwrap();
+        let root = v.biometrics().unseal(&sealed, "test").unwrap();
+        v.unlock_with_root(RootKey::from_bytes(root)).unwrap();
+
+        // A stale root never opens the vault and drops the seal.
+        v.lock();
+        assert!(matches!(v.unlock_with_root(RootKey::from_bytes([9u8; 32])), Err(CommandError::BiometricInvalidated)));
+        assert!(!v.biometric_status().unwrap().sealed);
+        // …and the next password unlock seals again (iOS "pending").
+        v.unlock("password2").unwrap();
+        assert!(v.biometric_status().unwrap().sealed);
+
+        // Turning it off forgets the seal.
+        v.set_biometric_enabled(false).unwrap();
+        assert_eq!(v.sealed().unwrap(), None);
+    }
+
+    #[test]
     fn wipe_removes_the_vault() {
         let mut v = vault();
-        v.create("password1").unwrap();
+        v.create("password1", false).unwrap();
         v.save(None, &login("A")).unwrap();
         v.wipe().unwrap();
         assert_eq!(v.status().unwrap(), VaultStatus { exists: false, unlocked: false, unsupported_kdf_version: None });

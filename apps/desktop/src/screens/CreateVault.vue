@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// iOS `CreateVaultView`. The biometrics card arrives with Touch ID / Windows Hello in
-// phase 3, and "I already have Qasa on another device" with Wi‑Fi pairing in phase 4.
-import { KeyRound, Lock, LockKeyhole, Shield } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+// iOS `CreateVaultView`. The biometrics card shows when the computer has Touch ID or
+// Windows Hello; "I already have Qasa on another device" arrives with Wi‑Fi pairing (phase 4).
+import { Fingerprint, KeyRound, Lock, LockKeyhole, ScanFace, Shield } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
@@ -11,9 +11,10 @@ import SectionLabel from '@/components/SectionLabel.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import StrengthBar from '@/components/StrengthBar.vue'
 import TextField from '@/components/TextField.vue'
+import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
-import { isCommandError } from '@/vault/types'
+import { isCommandError, type BiometricStatus } from '@/vault/types'
 
 const emit = defineEmits<{ created: [] }>()
 const t = useT()
@@ -22,6 +23,13 @@ const password = ref('')
 const confirm = ref('')
 const error = ref<string | null>(null)
 const busy = ref(false)
+const bio = ref<BiometricStatus | null>(null)
+/** iOS defaults the toggle on. */
+const biometrics = ref(true)
+
+onMounted(async () => {
+  bio.value = await vaultApi.biometricStatus().catch(() => null)
+})
 
 /** Characters, not UTF-16 units, as Swift's `String.count`. */
 const length = computed(() => [...password.value].length)
@@ -48,7 +56,7 @@ async function create() {
   error.value = null
   busy.value = true
   try {
-    await vaultApi.create(password.value)
+    await vaultApi.create(password.value, biometrics.value && bio.value?.kind !== 'none' && !!bio.value)
     password.value = ''
     confirm.value = ''
     emit('created')
@@ -104,6 +112,20 @@ async function create() {
       </div>
 
       <p v-if="error" class="error" role="alert">{{ error }}</p>
+
+      <CardContainer v-if="bio && bio.kind !== 'none'" class="biometric">
+        <div class="bio-row">
+          <span class="bio-icon">
+            <ScanFace v-if="bio.kind === 'windowsHello'" :size="20" />
+            <Fingerprint v-else :size="20" />
+          </span>
+          <span class="bio-text">
+            <span class="bio-title">{{ t('auth.create.enableBiometrics') }}</span>
+            <span class="bio-hint">{{ t('auth.create.biometricsHint') }}</span>
+          </span>
+          <ToggleSwitch v-model="biometrics" :label="t('auth.create.enableBiometrics')" />
+        </div>
+      </CardContainer>
 
       <CardContainer muted class="zero-knowledge">
         <Shield class="watermark" :size="88" fill="currentColor" aria-hidden="true" />
@@ -186,6 +208,43 @@ async function create() {
   font-size: 13px;
   font-weight: 500;
   color: var(--danger);
+}
+
+.biometric {
+  margin-top: 12px;
+}
+
+.bio-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bio-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card-background-light);
+  color: var(--accent);
+}
+
+.bio-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.bio-title {
+  font-size: 16px;
+}
+
+.bio-hint {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .zero-knowledge {

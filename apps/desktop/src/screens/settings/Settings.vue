@@ -1,25 +1,41 @@
 <script setup lang="ts">
-// iOS `SettingsView`, phase 1 (local vault only): Security, Appearance, Data & Account,
+// iOS `SettingsView`: profile, Security (with fingerprint / Hello unlock), Linked devices,
+// Appearance, Data & Account,
 // with the same rows, order, alerts and status line. The profile card, biometric unlock,
 // Autofill, Linked Devices (pairing code, sync network) and Premium arrive in later phases.
-import { Clock, Download, Ellipsis, Globe, LogOut, Moon, Trash2, Upload } from 'lucide-vue-next'
-import { ref } from 'vue'
+import {
+  Clock,
+  Crown,
+  Download,
+  Ellipsis,
+  Fingerprint,
+  Globe,
+  Laptop,
+  LogOut,
+  Moon,
+  ScanFace,
+  Trash2,
+  Upload,
+  User,
+  UserX,
+} from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 
+import { accountApi } from '@/account/api'
+import { account, forgetAccount } from '@/account/store'
 import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavChevronRow from '@/components/NavChevronRow.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
+import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { LANGUAGE_NAMES } from '@/i18n'
+import { openSubPage } from '@/nav'
 import { prefs, useT } from '@/prefs'
-import { accountApi } from '@/account/api'
-import { forgetAccount } from '@/account/store'
+import { vaultApi } from '@/vault/api'
 import { loadVault, session } from '@/vault/session'
 import { toolsApi } from '@/vault/tools'
-import { isCommandError } from '@/vault/types'
-import { Crown, Laptop, User, UserX } from 'lucide-vue-next'
-import { account } from '@/account/store'
-import { openSubPage } from '@/nav'
+import { isCommandError, type BiometricStatus } from '@/vault/types'
 import AppearanceSheet from './AppearanceSheet.vue'
 import AutoLockSheet from './AutoLockSheet.vue'
 import ChangeMasterPassword from './ChangeMasterPassword.vue'
@@ -33,6 +49,29 @@ const appearanceSheet = ref<'language' | 'theme' | null>(null)
 const showClearDataAlert = ref(false)
 const showLogoutConfirm = ref(false)
 const showDeleteAccount = ref(false)
+
+// iOS biometric toggle: on means "sealed at the next main-password unlock"; the subtitle
+// says which of the three states it is in.
+const bio = ref<BiometricStatus | null>(null)
+onMounted(async () => {
+  bio.value = await vaultApi.biometricStatus().catch(() => null)
+})
+const bioOn = computed({
+  get: () => bio.value?.enabled ?? false,
+  set: async (on: boolean) => {
+    try {
+      bio.value = await vaultApi.setBiometric(on)
+    } catch (e) {
+      statusMessage.value = () => describe(e)
+    }
+  },
+})
+const bioSubtitle = computed(() => {
+  if (!bio.value?.enabled) return ''
+  if (bio.value.sealed) return t('settings.biometricSealed')
+  if (bio.value.kind === 'none') return t('settings.biometricNoGate')
+  return t('settings.biometricPending')
+})
 /** The iOS status line, re-read on render so it follows a language change. */
 const statusMessage = ref<(() => string) | null>(null)
 const busy = ref(false)
@@ -160,6 +199,20 @@ function logout() {
           :title="t('settings.changeMasterPassword')"
           @click="showChangeMasterPassword = true"
         />
+        <template v-if="bio && (bio.kind !== 'none' || bio.enabled)">
+          <hr class="divider" />
+          <div class="toggle-row">
+            <span class="toggle-icon">
+              <ScanFace v-if="bio.kind === 'windowsHello'" :size="18" />
+              <Fingerprint v-else :size="18" />
+            </span>
+            <span class="toggle-text">
+              <span class="toggle-title">{{ t('settings.biometricUnlock') }}</span>
+              <span v-if="bioSubtitle" class="toggle-subtitle">{{ bioSubtitle }}</span>
+            </span>
+            <ToggleSwitch v-model="bioOn" :label="t('settings.biometricUnlock')" :disabled="bio.kind === 'none' && !bio.enabled" />
+          </div>
+        </template>
         <hr class="divider" />
         <NavChevronRow
           :icon="Clock"
@@ -327,6 +380,40 @@ function logout() {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.toggle-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.toggle-title {
+  font-size: 16px;
+}
+
+.toggle-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
 }
 
 .label-row {

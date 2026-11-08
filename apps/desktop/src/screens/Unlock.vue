@@ -1,7 +1,8 @@
 <script setup lang="ts">
-// iOS `LoginView`. The biometric row arrives in phase 3.
-import { LockOpen, Lock, Shield } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+// iOS `LoginView`: main password, and the fingerprint / Hello row when it is turned on and
+// sealed for this vault.
+import { ChevronRight, Fingerprint, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
@@ -12,7 +13,7 @@ import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { session } from '@/vault/session'
-import { isCommandError } from '@/vault/types'
+import { isCommandError, type BiometricStatus } from '@/vault/types'
 
 const emit = defineEmits<{ unlocked: [] }>()
 const t = useT()
@@ -21,6 +22,28 @@ const password = ref('')
 const error = ref<string | null>(null)
 const busy = ref(false)
 const canUnlock = computed(() => password.value.trim().length > 0 && !busy.value)
+const bio = ref<BiometricStatus | null>(null)
+const showBiometric = computed(() => !!bio.value && bio.value.kind !== 'none' && bio.value.enabled && bio.value.sealed)
+
+onMounted(async () => {
+  bio.value = await vaultApi.biometricStatus().catch(() => null)
+})
+
+async function unlockWithBiometrics() {
+  if (busy.value) return
+  busy.value = true
+  try {
+    await vaultApi.unlockBiometric(t('auth.unlock.biometricsHint'))
+    error.value = null
+    emit('unlocked')
+  } catch (e) {
+    // Dismissing the prompt is not an error; anything else falls back to the password.
+    if (!(isCommandError(e) && e.code === 'cancelled')) error.value = t('auth.unlock.biometricsFailed')
+    bio.value = await vaultApi.biometricStatus().catch(() => null)
+  } finally {
+    busy.value = false
+  }
+}
 
 async function unlock() {
   if (!canUnlock.value) return
@@ -69,6 +92,18 @@ async function unlock() {
         />
         <p v-if="error" class="error" role="alert">{{ error }}</p>
       </div>
+
+      <button v-if="showBiometric" type="button" class="bio" :disabled="busy" @click="unlockWithBiometrics">
+        <span class="bio-icon">
+          <ScanFace v-if="bio?.kind === 'windowsHello'" :size="22" />
+          <Fingerprint v-else :size="22" />
+        </span>
+        <span class="bio-text">
+          <span class="bio-title">{{ t('auth.unlock.biometrics') }}</span>
+          <span class="bio-hint">{{ t('auth.unlock.biometricsHint') }}</span>
+        </span>
+        <ChevronRight class="mirror-rtl chevron" :size="16" />
+      </button>
 
       <CardContainer muted class="local-only">
         <div class="lo-title">
@@ -121,6 +156,57 @@ async function unlock() {
   font-size: 13px;
   font-weight: 500;
   color: var(--danger);
+}
+
+.bio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--corner-radius);
+  background: var(--card-background);
+  text-align: start;
+  cursor: pointer;
+}
+
+.bio:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--stroke));
+}
+
+.bio-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card-background-light);
+  color: var(--accent);
+}
+
+.bio-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.bio-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bio-hint {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.chevron {
+  color: var(--text-tertiary);
 }
 
 .local-only {

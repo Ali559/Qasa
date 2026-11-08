@@ -16,6 +16,25 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 3 built (Touch ID checked on hardware; Windows Hello type-checked only).**
+- `apps/desktop/biometric` (`qasa-biometric`): seals the 32-byte root key with AES-256-GCM
+  under a key only the platform can produce after the user authenticates.
+  - macOS: ECDH between a Secure Enclave P-256 key created with `.biometryCurrentSet`
+    (via a small Swift bridge, `swift/`, built by `swift-rs`) and a software ephemeral key.
+    Works in unsigned dev builds: CryptoKit's Enclave keys need no keychain entitlement.
+    Adding or removing a fingerprint destroys the Enclave key, so the seal fails closed.
+  - Windows: a Windows Hello key (`KeyCredentialManager`, RSA PKCS#1 v1.5, deterministic)
+    signs a stored random challenge. Creating it asks for Hello once. Type-checked with
+    `cargo check --target x86_64-pc-windows-msvc` (rustup's toolchain); **never run**.
+  - Linux: not offered.
+- Vault: the iOS rule — turning it on seals at the next main-password unlock (or right away
+  when chosen on Create vault); a master-password change reseals; a seal that no longer
+  matches the verifier is dropped and the next password unlock makes a new one; Clear local
+  data removes it. The prompt runs outside the vault lock.
+- UI: the Create vault card (on by default, as iOS), the Unlock row, Settings → Fingerprint
+  or face unlock with iOS's three subtitles, and protected notes ask for Touch ID / Hello
+  first, falling back to the main password.
+
 **2026-11-08 — Phase 2 built.**
 - Desktop core `src-tauri/src/account/`: account id, device fingerprint, license token and
   the cached verifying key in the OS keychain (`keyring`); the API client (debug:

@@ -37,8 +37,53 @@ pub fn vault_status(state: State<'_, VaultState>) -> CommandResult<VaultStatus> 
 // PBKDF2 at 310,000 iterations takes a moment: run these off the main thread.
 
 #[tauri::command]
-pub async fn vault_create(state: State<'_, VaultState>, password: String) -> CommandResult<()> {
-    with(&state, |v| v.create(&password))
+pub async fn vault_create(state: State<'_, VaultState>, password: String, biometrics: Option<bool>) -> CommandResult<()> {
+    with(&state, |v| v.create(&password, biometrics.unwrap_or(false)))
+}
+
+#[tauri::command]
+pub fn vault_biometric_status(state: State<'_, VaultState>) -> CommandResult<super::biometrics::BiometricStatus> {
+    with(&state, |v| v.biometric_status())
+}
+
+#[tauri::command]
+pub fn vault_set_biometric(state: State<'_, VaultState>, enabled: bool) -> CommandResult<super::biometrics::BiometricStatus> {
+    with(&state, |v| v.set_biometric_enabled(enabled))
+}
+
+/// Opens the seal with Touch ID / Hello, outside the vault lock (the prompt can stay up
+/// for a while), then checks the result against the verifier.
+async fn unseal_root(state: &State<'_, VaultState>, reason: String) -> CommandResult<qasa_vault::RootKey> {
+    let sealed = with(state, |v| v.sealed())?.ok_or(CommandError::BiometricUnavailable)?;
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        use super::biometrics::{Biometrics, PlatformBiometrics};
+        PlatformBiometrics.unseal(&sealed, &reason)
+    })
+        .await
+        .map_err(|e| CommandError::Storage(e.to_string()))?;
+    match result {
+        Ok(root) => Ok(qasa_vault::RootKey::from_bytes(root)),
+        Err(qasa_biometric::Error::Cancelled) => Err(CommandError::Cancelled),
+        Err(qasa_biometric::Error::Unavailable) => Err(CommandError::BiometricUnavailable),
+        Err(_) => {
+            // Fingerprints changed or the key is gone: fail closed and reseal later.
+            with(state, |v| v.forget_seal())?;
+            Err(CommandError::BiometricInvalidated)
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn vault_unlock_biometric(state: State<'_, VaultState>, reason: String) -> CommandResult<()> {
+    let root = unseal_root(&state, reason).await?;
+    with(&state, |v| v.unlock_with_root(root))
+}
+
+/// The protected-note gate with Touch ID / Hello: true when the user authenticated.
+#[tauri::command]
+pub async fn vault_verify_biometric(state: State<'_, VaultState>, reason: String) -> CommandResult<bool> {
+    let root = unseal_root(&state, reason).await?;
+    with(&state, |v| v.root_matches(&root))
 }
 
 #[tauri::command]
