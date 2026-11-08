@@ -7,6 +7,16 @@
 - [ ] **Store links.** Both App Store and Google Play buttons point at `#download`. Put the real
       listings in `APP_STORE_URL` and `PLAY_STORE_URL` in `src/components/Landing.astro`; every
       language page picks them up.
+- [ ] **Extension store links.** The Chrome, Edge and Firefox buttons in the "Qasa on your
+      computer" section point at `#desktop`. Once the extension is published, put the listings
+      in `CHROME_STORE_URL`, `EDGE_STORE_URL` and `FIREFOX_STORE_URL` in
+      `src/components/DesktopDownloads.astro`; the full page and `/download` (all three
+      languages) pick them up. The desktop buttons already use the stable
+      `/desktop/download/{macos,windows,linux-appimage,linux-deb}` links, which the server
+      redirects to the latest GitHub release.
+- [ ] **Desktop wording.** The section says the desktop app pairs with the phone over Wi‑Fi.
+      If the Free plan's one-device limit stays (desktop plan, open decision 1), consider
+      saying that phone + computer together needs Premium.
 - [ ] **VPN.** Left off the page on purpose. `PROMO_SCRIPT.md` says not to show or mention it until
       the tunnel ships. When it does, add a feature tile and a Premium bullet in all three
       languages in `src/i18n.ts`.

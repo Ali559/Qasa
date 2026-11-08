@@ -11,6 +11,9 @@ export const languages: { lang: Lang; label: string; href: string }[] = [
   { lang: "ar", label: "العربية", href: "/ar/" },
 ];
 
+/** The standalone download page in each language (the extension popup links to /download). */
+export const downloadHrefs: Record<Lang, string> = { en: "/download", ckb: "/ckb/download", ar: "/ar/download" };
+
 const en = {
   meta: {
     title: "Qasa: your passwords, kept safe on your phone",
@@ -130,6 +133,26 @@ const en = {
     badge: "Coming soon",
     stores: "On the App Store and Google Play",
     pricing: "Free on one device. Premium is 5,000 IQD a month, paid in the app with FIB, FastPay or SuperQi.",
+  },
+  desktop: {
+    kicker: "Desktop and browser",
+    title: "Qasa on your computer",
+    lede: "The same vault on macOS, Windows and Linux, encrypted on your computer. Pair it with your phone and keep both in sync over your own Wi‑Fi.",
+    downloadFor: "Download for",
+    yourComputer: "Your computer",
+    macReq: "macOS 11 or later, Apple silicon and Intel",
+    winReq: "Windows 10 or later, 64-bit",
+    linuxReq: "64-bit Linux",
+    debNote: "Debian, Ubuntu",
+    appImageNote: "Any distribution",
+    extTitle: "Browser extension",
+    extBody: "Fills your logins in the browser with one click, and offers to save new ones. Your vault stays on your computer.",
+    extNeeds: "Needs the Qasa desktop app installed and running on the same computer.",
+    addTo: "Add to",
+    chromium: "Brave, Opera and other Chromium browsers use the Chrome Web Store version.",
+    pageTitle: "Download Qasa for macOS, Windows and Linux",
+    pageDescription: "Qasa for macOS, Windows and Linux, and the browser extension for Chrome, Edge and Firefox. Your vault stays encrypted on your computer.",
+    phones: "Qasa on iPhone and Android",
   },
 };
 
@@ -255,6 +278,26 @@ const ckb: Dict = {
     stores: "لە App Store و Google Play",
     pricing: "بە خۆڕایی لەسەر یەک ئامێر. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع دەبێت، لەناو ئەپەکەدا بە FIB، FastPay یان SuperQi دەدرێت.",
   },
+  desktop: {
+    kicker: "کۆمپیوتەر و وێبگەڕ",
+    title: "قاسە لەسەر کۆمپیوتەرەکەت",
+    lede: "هەمان کۆگا لەسەر ⁨macOS⁩، ⁨Windows⁩ و ⁨Linux⁩، شفرەکراو لەسەر کۆمپیوتەرەکەت. بە مۆبایلەکەتەوە گرێی بدە و هەردووکیان لە ڕێگەی ⁨Wi‑Fi⁩ ـی خۆتەوە هاوکات بهێڵەوە.",
+    downloadFor: "دابەزاندن بۆ",
+    yourComputer: "کۆمپیوتەرەکەت",
+    macReq: "⁨macOS 11⁩ یان نوێتر، ⁨Apple silicon⁩ و ⁨Intel⁩",
+    winReq: "⁨Windows 10⁩ یان نوێتر، ⁨64-bit⁩",
+    linuxReq: "⁨Linux⁩ ـی ⁨64-bit⁩",
+    debNote: "⁨Debian⁩، ⁨Ubuntu⁩",
+    appImageNote: "هەموو دابەشکراوەکان",
+    extTitle: "زیادکراوی وێبگەڕ",
+    extBody: "بە یەک کرتە چوونەژوورەوەکانت لە وێبگەڕدا پڕدەکاتەوە، و پێشنیاری پاشەکەوتکردنی چوونەژوورەوە نوێکان دەکات. کۆگاکەت لەسەر کۆمپیوتەرەکەت دەمێنێتەوە.",
+    extNeeds: "پێویستی بە ئەپی قاسەی کۆمپیوتەر هەیە کە لەسەر هەمان کۆمپیوتەر دامەزرابێت و کراوە بێت.",
+    addTo: "زیادکردن بۆ",
+    chromium: "⁨Brave⁩، ⁨Opera⁩ و وێبگەڕەکانی تری ⁨Chromium⁩ وەشانی ⁨Chrome Web Store⁩ بەکاردەهێنن.",
+    pageTitle: "قاسە بۆ ⁨macOS⁩، ⁨Windows⁩ و ⁨Linux⁩ دابەزێنە",
+    pageDescription: "قاسە بۆ macOS، Windows و Linux، و زیادکراوی وێبگەڕ بۆ Chrome، Edge و Firefox. کۆگاکەت لەسەر کۆمپیوتەرەکەت شفرەکراو دەمێنێتەوە.",
+    phones: "قاسە لەسەر iPhone و Android",
+  },
 };
 
 const ar: Dict = {
@@ -376,6 +419,26 @@ const ar: Dict = {
     badge: "قريبًا",
     stores: "على App Store و Google Play",
     pricing: "مجاني على جهاز واحد. بريميوم بـ 5,000 د.ع شهريًا، يُدفع داخل التطبيق عبر FIB أو FastPay أو SuperQi.",
+  },
+  desktop: {
+    kicker: "الحاسوب والمتصفح",
+    title: "قاصة على حاسوبك",
+    lede: "الخزنة نفسها على macOS وWindows وLinux، مشفّرة على حاسوبك. اربطها بهاتفك وأبقِهما متزامنين عبر شبكة Wi‑Fi الخاصة بك.",
+    downloadFor: "تنزيل لنظام",
+    yourComputer: "حاسوبك",
+    macReq: "macOS 11 أو أحدث، معالجات Apple وIntel",
+    winReq: "Windows 10 أو أحدث، 64 بت",
+    linuxReq: "Linux بنظام 64 بت",
+    debNote: "Debian وUbuntu",
+    appImageNote: "أي توزيعة",
+    extTitle: "إضافة المتصفح",
+    extBody: "تملأ تسجيلات دخولك في المتصفح بنقرة واحدة، وتعرض حفظ الجديدة منها. وتبقى خزنتك على حاسوبك.",
+    extNeeds: "تحتاج إلى تطبيق قاصة لسطح المكتب مثبّتًا ومفتوحًا على الحاسوب نفسه.",
+    addTo: "أضِفها إلى",
+    chromium: "متصفحات Brave وOpera وغيرها من متصفحات Chromium تستخدم نسخة Chrome Web Store.",
+    pageTitle: "حمّل قاصة لأنظمة macOS وWindows وLinux",
+    pageDescription: "قاصة لأنظمة macOS وWindows وLinux، وإضافة المتصفح لـ Chrome وEdge وFirefox. تبقى خزنتك مشفّرة على حاسوبك.",
+    phones: "قاصة على iPhone و Android",
   },
 };
 

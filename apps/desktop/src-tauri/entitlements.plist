@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Hardened runtime entitlements for the Developer ID build (notarization needs the
+     hardened runtime). Qasa needs no exceptions: no JIT, no unsigned libraries, no
+     camera or microphone. Wi-Fi sync and the API use plain sockets, which the hardened
+     runtime allows outside the App Sandbox (Qasa isn't sandboxed: native messaging needs
+     to start nm-host from browser processes). -->
+<plist version="1.0">
+<dict>
+</dict>
+</plist>

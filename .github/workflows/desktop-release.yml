@@ -1,0 +1,145 @@
+# Builds, signs and drafts a desktop release (plan §10) when a `desktop-v*` tag is pushed:
+#
+#   git tag desktop-v0.1.0 && git push origin desktop-v0.1.0
+#
+# - macOS: one universal .dmg, signed with Developer ID and notarized.
+# - Windows: NSIS .exe and .msi, signed with Azure Trusted Signing.
+# - Linux: AppImage and .deb.
+# Every bundle also gets an updater archive signed with the updater key, and latest.json
+# is attached for tauri-plugin-updater. The release stays a draft: check it, then publish.
+# qasa-app.com/desktop/latest.json and /desktop/download/* redirect to the latest
+# published release (server/deploy/Caddyfile), so publishing is what ships it.
+#
+# Secrets (Settings → Secrets and variables → Actions; docs/desktop-release.md):
+#   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD   updater key (required)
+#   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+#   APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID                         macOS signing + notarizing
+#   AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID,
+#   AZURE_SIGNING_ENDPOINT, AZURE_SIGNING_ACCOUNT, AZURE_SIGNING_PROFILE  Windows signing
+# Without the Apple or Azure secrets the build still runs, unsigned, so the pipeline can
+# be tried before the certificates exist.
+name: Desktop release
+
+on:
+  push:
+    tags: ['desktop-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target universal-apple-darwin
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - os: windows-latest
+            args: ''
+            rust-targets: ''
+          - os: ubuntu-22.04
+            args: ''
+            rust-targets: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev pkg-config
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/desktop/src-tauri
+            apps/desktop/nm-host
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install the interface's dependencies
+        working-directory: apps/desktop
+        run: bun install --frozen-lockfile
+
+      # Optional signing secrets reach the build only when they are set: Tauri treats a
+      # set-but-empty APPLE_CERTIFICATE as a certificate to import, and fails.
+      - name: Signing environment
+        shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          AZURE_SIGNING_PROFILE: ${{ secrets.AZURE_SIGNING_PROFILE }}
+        run: |
+          # Heredoc form, so a multi-line value (a wrapped base64 certificate) survives.
+          pass() { for name in "$@"; do [ -n "${!name}" ] && printf '%s<<QASA_EOF\n%s\nQASA_EOF\n' "$name" "${!name}" >> "$GITHUB_ENV"; done; true; }
+          if [ "$RUNNER_OS" = macOS ] && [ -n "$APPLE_CERTIFICATE" ]; then
+            pass APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+          fi
+          # The signing command names the Azure account, so it lives in secrets and is
+          # written as a config overlay, not kept in tauri.conf.json.
+          if [ "$RUNNER_OS" = Windows ] && [ -n "$AZURE_SIGNING_ACCOUNT" ]; then
+            pass AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID
+            cargo install trusted-signing-cli --locked
+            printf '{ "bundle": { "windows": { "signCommand": "trusted-signing-cli -e %s -a %s -c %s -d Qasa %%1" } } }\n' \
+              "$AZURE_SIGNING_ENDPOINT" "$AZURE_SIGNING_ACCOUNT" "$AZURE_SIGNING_PROFILE" > apps/desktop/src-tauri/tauri.signing.json
+            echo "SIGNING_ARGS=--config src-tauri/tauri.signing.json" >> "$GITHUB_ENV"
+          fi
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_INCREMENTAL: '0'
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: bun run tauri
+          args: ${{ matrix.args }} ${{ env.SIGNING_ARGS }}
+          tagName: ${{ github.ref_name }}
+          releaseName: Qasa desktop ${{ github.ref_name }}
+          releaseBody: See the assets below. Download links on qasa-app.com/download.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+
+  # Version-free copies, so /desktop/download/<os> can redirect to
+  # releases/latest/download/<name> without knowing the version.
+  stable-names:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Attach Qasa-macOS.dmg, Qasa-Windows-Setup.exe, Qasa-Linux.AppImage, Qasa-Linux.deb
+        run: |
+          set -euo pipefail
+          mkdir out && cd out
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -p '*universal.dmg' -p '*x64-setup.exe' -p '*amd64.AppImage' -p '*amd64.deb'
+          mv ./*universal.dmg Qasa-macOS.dmg
+          mv ./*x64-setup.exe Qasa-Windows-Setup.exe
+          mv ./*amd64.AppImage Qasa-Linux.AppImage
+          mv ./*amd64.deb Qasa-Linux.deb
+          gh release upload "$TAG" -R "$GITHUB_REPOSITORY" --clobber Qasa-macOS.dmg Qasa-Windows-Setup.exe Qasa-Linux.AppImage Qasa-Linux.deb

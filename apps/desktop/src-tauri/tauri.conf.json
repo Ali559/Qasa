@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.qasa-app.desktop",
   "build": {
-    "beforeDevCommand": "bun run dev",
+    "beforeDevCommand": "bun scripts/sidecar.ts && bun run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "bun run build",
+    "beforeBuildCommand": "bun scripts/sidecar.ts && bun run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -25,13 +25,22 @@
       "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src ipc: http://ipc.localhost",
       "pattern": {
         "use": "isolation",
-        "options": { "dir": "../isolation" }
+        "options": {
+          "dir": "../isolation"
+        }
       }
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "app",
+      "dmg",
+      "nsis",
+      "msi",
+      "appimage",
+      "deb"
+    ],
     "category": "Utility",
     "shortDescription": "Local-first password manager",
     "icon": [
@@ -40,6 +49,47 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "externalBin": [
+      "binaries/qasa-nm-host"
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "Qasa",
+    "homepage": "https://qasa-app.com",
+    "copyright": "© 2026 Qasa",
+    "longDescription": "Qasa keeps your passwords, cards and notes encrypted on your own devices, syncs them over your Wi-Fi, and fills them in your browser through the Qasa extension.",
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.plist"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "Arabic"
+        ]
+      },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVCMUIyRTBDQ0MwQTQ4NjgKUldSb1NBck1EQzRiVzkrVzBvbWlyaHVqT1d0Q0NOTUJiR2U0NkdoTFU4MnJWZUdhRjI2d3AwUTIK",
+      "endpoints": [
+        "https://qasa-app.com/desktop/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

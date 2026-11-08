@@ -398,5 +398,60 @@
     "ar": "حدث خطأ ما. حاول مجدداً.",
     "ckb": "هەڵەیەک ڕوویدا. دووبارە هەوڵبدەرەوە.",
     "en": "Something went wrong. Try again."
+  },
+  "update.section": {
+    "ar": "التحديثات",
+    "ckb": "نوێکردنەوەکان",
+    "en": "Updates"
+  },
+  "update.check": {
+    "ar": "البحث عن تحديثات",
+    "ckb": "پشکنین بۆ نوێکردنەوە",
+    "en": "Check for updates"
+  },
+  "update.version": {
+    "ar": "الإصدار %@",
+    "ckb": "وەشانی %@",
+    "en": "Version %@"
+  },
+  "update.checking": {
+    "ar": "جارٍ التحقق…",
+    "ckb": "پشکنین…",
+    "en": "Checking…"
+  },
+  "update.upToDate": {
+    "ar": "قاصة محدّثة",
+    "ckb": "قاسە نوێیە",
+    "en": "Qasa is up to date"
+  },
+  "update.failed": {
+    "ar": "تعذّر البحث عن تحديثات. حاول مرة أخرى لاحقاً.",
+    "ckb": "نەتوانرا بۆ نوێکردنەوە بپشکنرێت. دواتر دووبارە هەوڵبدەرەوە.",
+    "en": "Couldn't check for updates. Try again later."
+  },
+  "update.availableTitle": {
+    "ar": "قاصة %@ متاحة",
+    "ckb": "قاسە %@ بەردەستە",
+    "en": "Qasa %@ is available"
+  },
+  "update.availableBody": {
+    "ar": "تُعيد قاصة التشغيل لإكمال التثبيت. سيُقفل خزنتك، لذا ستفتحها مجدداً بكلمة مرورك الرئيسية.",
+    "ckb": "قاسە دووبارە دەکرێتەوە بۆ تەواوکردنی دامەزراندن. گەنجینەکەت دادەخرێت، بۆیە بە وشەی نهێنیی سەرەکیت دووبارە دەیکەیتەوە.",
+    "en": "Qasa restarts to finish installing. Your vault locks, so you'll unlock it again with your main password."
+  },
+  "update.install": {
+    "ar": "التثبيت وإعادة التشغيل",
+    "ckb": "دامەزراندن و دەستپێکردنەوە",
+    "en": "Install and restart"
+  },
+  "update.later": {
+    "ar": "لاحقاً",
+    "ckb": "دواتر",
+    "en": "Later"
+  },
+  "update.installing": {
+    "ar": "جارٍ تنزيل التحديث…",
+    "ckb": "نوێکردنەوە دادەبەزێت…",
+    "en": "Downloading the update…"
   }
 }

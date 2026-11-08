@@ -14,6 +14,7 @@ import {
   LogOut,
   Moon,
   Puzzle,
+  RefreshCw,
   ScanFace,
   Trash2,
   Upload,
@@ -37,6 +38,7 @@ import { prefs, useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { loadVault, session } from '@/vault/session'
 import { toolsApi } from '@/vault/tools'
+import { checkForUpdate, updater } from '@/updater'
 import { isCommandError, type BiometricStatus } from '@/vault/types'
 import AppearanceSheet from './AppearanceSheet.vue'
 import AutoLockSheet from './AutoLockSheet.vue'
@@ -44,6 +46,28 @@ import ChangeMasterPassword from './ChangeMasterPassword.vue'
 
 const emit = defineEmits<{ back: []; lock: [] }>()
 const t = useT()
+
+/** Under "Check for updates": the result of the last check the user asked for. */
+const updateStatus = computed(() => {
+  switch (updater.stage) {
+    case 'checking':
+      return t('update.checking')
+    case 'upToDate':
+      return t('update.upToDate')
+    case 'failed':
+      return t('update.failed')
+    case 'available':
+      return t('update.availableTitle', updater.next)
+    default:
+      return undefined
+  }
+})
+
+function checkNow() {
+  // An update already found reopens its prompt.
+  if (updater.stage === 'available') updater.dismissed = false
+  else checkForUpdate()
+}
 
 const showChangeMasterPassword = ref(false)
 const showAutoLock = ref(false)
@@ -293,6 +317,20 @@ function logout() {
           destructive
           :disabled="busy || !account.status?.accountId"
           @click="showDeleteAccount = true"
+        />
+      </CardContainer>
+    </section>
+
+    <section class="group">
+      <SectionLabel :text="t('update.section')" />
+      <CardContainer>
+        <NavChevronRow
+          :icon="RefreshCw"
+          :title="t('update.check')"
+          :subtitle="updateStatus"
+          :trailing-text="updater.current ? t('update.version', updater.current) : undefined"
+          :disabled="updater.stage === 'checking' || updater.stage === 'downloading'"
+          @click="checkNow"
         />
       </CardContainer>
     </section>

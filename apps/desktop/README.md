@@ -11,6 +11,8 @@ bun run dev           # the interface alone in a browser, prefs in localStorage
 bun run tauri build   # a release bundle for this OS
 ```
 
+Releases, signing, the updater and the nm-host sidecar: [`docs/desktop-release.md`](../../docs/desktop-release.md).
+
 ## Rules
 
 - **Keys never reach the webview.** Vault crypto runs in Rust (`core/qasa-vault`); the

@@ -25,6 +25,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
@@ -142,4 +144,24 @@ fn spawn_auto_lock(app: tauri::AppHandle) {
             let _ = app.emit("vault-locked", ());
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    /// Every command the app registers must be on the isolation allow-list, or the
+    /// webview's calls to it are dropped silently (README: "New Tauri commands").
+    #[test]
+    fn isolation_allows_every_registered_command() {
+        let lib = include_str!("lib.rs");
+        let allowed = include_str!("../../isolation/index.js");
+        let start = lib.find("generate_handler![").expect("handler list");
+        let list = &lib[start..start + lib[start..].find("])").unwrap()];
+        let missing: Vec<&str> = list
+            .split(|c: char| c == ',' || c == '[' || c.is_whitespace())
+            .filter_map(|path| path.rsplit("::").next())
+            .filter(|name| !name.is_empty() && *name != "generate_handler!")
+            .filter(|name| !allowed.contains(&format!("'{name}'")))
+            .collect();
+        assert!(missing.is_empty(), "add to isolation/index.js: {missing:?}");
+    }
 }

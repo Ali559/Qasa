@@ -1,7 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "The main window. Only core window events and Qasa's own commands.",
-  "windows": ["main"],
-  "permissions": ["core:default"]
+  "description": "The main window. Core window events, the updater, relaunch after an update, and Qasa's own commands.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "updater:default",
+    "process:allow-restart"
+  ]
 }

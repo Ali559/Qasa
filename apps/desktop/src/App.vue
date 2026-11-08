@@ -14,6 +14,8 @@ import Unlock from '@/screens/Unlock.vue'
 import WelcomePreferences from '@/screens/WelcomePreferences.vue'
 import PairExisting from '@/screens/sync/PairExisting.vue'
 import BridgePrompts from '@/screens/bridge/BridgePrompts.vue'
+import UpdatePrompt from '@/screens/UpdatePrompt.vue'
+import { scheduleUpdateCheck } from '@/updater'
 import { protectedReason } from '@/vault/protectedGate'
 import { attachAutoLock, loadVault, lockVault, refreshStatus, session } from '@/vault/session'
 import { watchEffect } from 'vue'
@@ -74,6 +76,7 @@ async function logoutDevice() {
 }
 
 onMounted(() => {
+  scheduleUpdateCheck()
   attachAutoLock(() => {
     stopInboxPolling()
     resetNav()
@@ -93,6 +96,7 @@ defineExpose({ session })
   <Unlock v-else-if="stage === 'unlock'" @unlocked="enterShell" />
   <Shell v-else @lock="lock" @logout="confirmLogout = true" />
   <BridgePrompts />
+  <UpdatePrompt />
   <ConfirmDialog
     :open="confirmLogout"
     :title="t('settings.clearAlertTitle')"

@@ -16,7 +16,11 @@
     "paths": {
       "@/prefs": ["./src/popup/prefs.ts"],
       "@/*": ["../desktop/src/*"],
-      "@ext/*": ["./src/*"]
+      "@ext/*": ["./src/*"],
+      // The bundles dedupe these to this package's copies (scripts/build.ts); type-check
+      // against the same ones, so the store source zip builds without apps/desktop/node_modules.
+      "vue": ["./node_modules/vue"],
+      "lucide-vue-next": ["./node_modules/lucide-vue-next"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "scripts/**/*.ts", "test/**/*.ts", "*.config.ts", "../desktop/src/env.d.ts"]

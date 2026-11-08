@@ -49,6 +49,17 @@ http://qasa-app.com {
 	@hashed path /_astro/*
 	header @hashed Cache-Control "public, max-age=31536000, immutable"
 
+	# The desktop app (plan §10): its updater feed and the download buttons point at
+	# stable addresses here, which redirect to the latest published GitHub release
+	# (.github/workflows/desktop-release.yml attaches latest.json and version-free copies
+	# of each installer). Publishing a draft release ships it; nothing is stored here.
+	# 302, not 301: a cached permanent redirect would outlive the next release's move.
+	redir /desktop/latest.json https://github.com/Ali559/Qasa/releases/latest/download/latest.json 302
+	redir /desktop/download/macos https://github.com/Ali559/Qasa/releases/latest/download/Qasa-macOS.dmg 302
+	redir /desktop/download/windows https://github.com/Ali559/Qasa/releases/latest/download/Qasa-Windows-Setup.exe 302
+	redir /desktop/download/linux-appimage https://github.com/Ali559/Qasa/releases/latest/download/Qasa-Linux.AppImage 302
+	redir /desktop/download/linux-deb https://github.com/Ali559/Qasa/releases/latest/download/Qasa-Linux.deb 302
+
 	root * /var/www/qasa-app.com
 	file_server
 }

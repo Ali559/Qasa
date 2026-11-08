@@ -1,0 +1,202 @@
+---
+// "Qasa on your computer": desktop downloads and the browser extension. Used on the full
+// page (Landing.astro) and on the standalone /download page, which the extension popup
+// links to when the desktop app isn't installed.
+import Icon from "./Icon.astro";
+import { dictionaries, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+  /** The download page uses the title as its h1; the full page nests it under the hero's. */
+  heading?: "h1" | "h2";
+}
+
+const { lang, heading = "h2" } = Astro.props;
+const t = dictionaries[lang].desktop;
+const Heading = heading;
+
+// Stable links; the server redirects each one to the latest GitHub release asset.
+const MACOS_URL = "/desktop/download/macos";
+const WINDOWS_URL = "/desktop/download/windows";
+const LINUX_APPIMAGE_URL = "/desktop/download/linux-appimage";
+const LINUX_DEB_URL = "/desktop/download/linux-deb";
+
+// TODO: replace with the real store listings once the extension is published (see TODO.md).
+const CHROME_STORE_URL = "#desktop";
+const EDGE_STORE_URL = "#desktop";
+const FIREFOX_STORE_URL = "#desktop";
+---
+<section class="desktop" id="desktop">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <p class="kicker">{t.kicker}</p>
+      <Heading class="title">{t.title}</Heading>
+      <p class="lede">{t.lede}</p>
+    </div>
+
+    <div class="platforms reveal" data-platforms>
+      <article class="platform" data-os="macos">
+        <span class="pill pill-accent detected-pill">{t.yourComputer}</span>
+        <span class="platform-icon"><Icon name="brand-apple" size={26} /></span>
+        <h3 lang="en">macOS</h3>
+        <p class="req">{t.macReq}</p>
+        <p class="file"><bdi lang="en">.dmg</bdi></p>
+        <div class="platform-actions">
+          <a class="dl" href={MACOS_URL} download>
+            <Icon name="download" size={18} />
+            <span>{t.downloadFor} <bdi lang="en">macOS</bdi></span>
+          </a>
+        </div>
+      </article>
+
+      <article class="platform" data-os="windows">
+        <span class="pill pill-accent detected-pill">{t.yourComputer}</span>
+        <span class="platform-icon"><Icon name="brand-windows" size={26} /></span>
+        <h3 lang="en">Windows</h3>
+        <p class="req">{t.winReq}</p>
+        <p class="file"><bdi lang="en">.exe</bdi></p>
+        <div class="platform-actions">
+          <a class="dl" href={WINDOWS_URL} download>
+            <Icon name="download" size={18} />
+            <span>{t.downloadFor} <bdi lang="en">Windows</bdi></span>
+          </a>
+        </div>
+      </article>
+
+      <article class="platform" data-os="linux">
+        <span class="pill pill-accent detected-pill">{t.yourComputer}</span>
+        <span class="platform-icon"><Icon name="terminal-2" size={26} /></span>
+        <h3 lang="en">Linux</h3>
+        <p class="req">{t.linuxReq}</p>
+        <p class="file"><bdi lang="en">AppImage</bdi>: {t.appImageNote} · <bdi lang="en">.deb</bdi>: {t.debNote}</p>
+        <div class="platform-actions two">
+          <a class="dl" href={LINUX_APPIMAGE_URL} download>
+            <Icon name="download" size={18} />
+            <bdi lang="en">AppImage</bdi>
+          </a>
+          <a class="dl" href={LINUX_DEB_URL} download>
+            <Icon name="download" size={18} />
+            <bdi lang="en">.deb</bdi>
+          </a>
+        </div>
+      </article>
+    </div>
+
+    <div class="extension reveal">
+      <div class="extension-copy">
+        <span class="platform-icon"><Icon name="puzzle" size={24} /></span>
+        <div>
+          <h3>{t.extTitle}</h3>
+          <p>{t.extBody}</p>
+          <p class="needs"><Icon name="device-desktop" size={18} /> <span>{t.extNeeds}</span></p>
+        </div>
+      </div>
+      <div class="extension-stores">
+        <div class="stores">
+          <a class="store" href={CHROME_STORE_URL}>
+            <Icon name="brand-chrome" size={24} />
+            <span><small>{t.addTo}</small><strong lang="en">Chrome</strong></span>
+          </a>
+          <a class="store" href={EDGE_STORE_URL}>
+            <Icon name="brand-edge" size={24} />
+            <span><small>{t.addTo}</small><strong lang="en">Edge</strong></span>
+          </a>
+          <a class="store" href={FIREFOX_STORE_URL}>
+            <Icon name="brand-firefox" size={24} />
+            <span><small>{t.addTo}</small><strong lang="en">Firefox</strong></span>
+          </a>
+        </div>
+        <p class="chromium">{t.chromium}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  // Put the visitor's own OS first and make it the primary button. No match (a phone,
+  // or no JS): the three platforms stay equal, in their default order.
+  (function () {
+    var list = document.querySelector("[data-platforms]");
+    if (!list) return;
+    var nav = navigator;
+    var p = ((nav.userAgentData && nav.userAgentData.platform) || nav.platform || "").toLowerCase();
+    var ua = (nav.userAgent || "").toLowerCase();
+    var os = null;
+    if (/android|iphone|ipad|ipod/.test(ua) || (nav.maxTouchPoints > 1 && /mac/.test(p))) os = null;
+    else if (/mac/.test(p) || /mac os x/.test(ua)) os = "macos";
+    else if (/win/.test(p) || /windows/.test(ua)) os = "windows";
+    else if (/linux|x11|cros/.test(p) || /linux|x11/.test(ua)) os = "linux";
+    if (!os) return;
+    var card = list.querySelector('[data-os="' + os + '"]');
+    if (!card) return;
+    card.classList.add("is-detected");
+    list.prepend(card);
+  })();
+</script>
+
+<style>
+  /* On the full page it follows the features section, whose bottom padding is the gap;
+     the download page sets its own top padding. */
+  .desktop { padding: 0 0 clamp(72px, 10vw, 128px); }
+
+  .platforms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .platform {
+    position: relative; display: flex; flex-direction: column; align-items: flex-start;
+    padding: 28px; border-radius: var(--radius-lg); background: var(--card); border: 1px solid var(--stroke);
+  }
+  .platform h3 { margin-top: 18px; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .req { margin-top: 4px; color: var(--text-2); font-size: 14.5px; line-height: 1.5; }
+  .platform-icon {
+    width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; flex-shrink: 0;
+    background: var(--card-muted); color: var(--accent);
+  }
+  .platform-actions { margin-top: auto; padding-top: 24px; display: flex; gap: 10px; width: 100%; }
+  .platform-actions.two .dl { flex: 1; }
+  .dl {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px; height: 50px; padding: 0 20px;
+    border-radius: 15px; background: var(--text); color: var(--background); font-weight: 600; font-size: 15px;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .platform-actions:not(.two) .dl { width: 100%; }
+  .dl:hover { transform: translateY(-1px); }
+  .file { margin-top: 2px; font-size: 13px; color: var(--text-3); }
+
+  /* The visitor's own OS: first, outlined, with the accent button. */
+  .detected-pill { display: none; position: absolute; top: 28px; inset-inline-end: 28px; }
+  .platform.is-detected { border: 2px solid var(--accent); padding: 27px; box-shadow: var(--shadow-soft); }
+  .platform.is-detected .detected-pill { display: inline-flex; top: 27px; inset-inline-end: 27px; }
+  .platform.is-detected .dl { background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 24px -10px var(--accent); }
+  .platform.is-detected .dl:hover { background: var(--accent-dark); color: #fff; }
+
+  .extension {
+    margin-top: 16px; display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 28px 40px;
+    padding: 28px; border-radius: var(--radius-lg); background: var(--card-muted);
+  }
+  .extension-copy { display: flex; gap: 18px; align-items: flex-start; }
+  .extension-copy .platform-icon { background: var(--card); }
+  .extension h3 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .extension-copy p { margin-top: 6px; color: var(--text-2); font-size: 15px; line-height: 1.6; }
+  .extension-copy .needs {
+    margin-top: 14px; display: flex; gap: 8px; align-items: flex-start; color: var(--on-accent-chip); font-weight: 500; font-size: 14.5px;
+  }
+  .needs :global(.icon) { margin-top: 2px; color: var(--accent); }
+  .stores { display: flex; flex-wrap: wrap; gap: 10px; }
+  .extension-stores .store { padding-inline: 16px 20px; }
+  .chromium { margin-top: 12px; font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+
+  /* Kurdish and Arabic: taller script needs looser leading. */
+  [dir="rtl"] .title { line-height: 1.4; }
+  [dir="rtl"] .lede, [dir="rtl"] .extension-copy p, [dir="rtl"] .req { line-height: 1.8; }
+
+  @media (max-width: 960px) {
+    .platforms { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+    .extension { grid-template-columns: 1fr; max-width: 520px; margin-inline: auto; }
+  }
+  @media (max-width: 560px) {
+    .platform, .extension { padding: 22px; }
+    .platform.is-detected { padding: 21px; }
+    .detected-pill { top: 22px; inset-inline-end: 22px; }
+    .platform.is-detected .detected-pill { top: 21px; inset-inline-end: 21px; }
+    .extension-copy { flex-direction: column; gap: 14px; }
+  }
+</style>
