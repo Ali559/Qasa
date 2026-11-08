@@ -1,1 +1,0 @@
-{"root":["./src/env.d.ts","./src/main.ts","./src/prefs.ts","./src/i18n/index.ts","./src/app.vue","./src/components/brandheader.vue","./src/components/choicelist.vue","./src/components/primarybutton.vue","./src/components/sectionlabel.vue","./src/screens/welcomepreferences.vue","./vite.config.ts"],"version":"5.9.3"}

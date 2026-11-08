@@ -6,9 +6,15 @@
 //! the iOS and Android test suites check the same file.
 
 mod aead;
+pub mod country;
+pub mod csv;
 mod error;
+pub mod generator;
+pub mod health;
 mod kdf;
+pub mod payload;
 mod search;
+pub mod totp;
 
 pub use aead::{decrypt, encrypt, NONCE_LEN, TAG_LEN};
 pub use error::VaultError;

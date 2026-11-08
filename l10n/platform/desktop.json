@@ -1,1 +1,57 @@
-{}
+{
+  "auth.unlock.localOnlyBody": {
+    "ar": "تبقى كلمات مرورك على هذا الحاسوب. لا يمكن لقاصة إعادة تعيين كلمة مرورك الرئيسية.",
+    "ckb": "وشە نهێنییەکانت لەسەر ئەم کۆمپیوتەرە دەمێننەوە. قاسە ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە.",
+    "en": "Your passwords stay on this computer. Qasa can't reset your main password."
+  },
+  "brand.localOffline": {
+    "ar": "تبقى على هذا الحاسوب",
+    "ckb": "لەسەر ئەم کۆمپیوتەرە دەمێنێتەوە",
+    "en": "Stays on this computer"
+  },
+  "breached.lockedBody": {
+    "ar": "يفحص بريميوم كل كلمة مرور محفوظة مقابل التسريبات المعروفة ويُظهر لك ما يجب تغييره. لا يغادر حاسوبك سوى رمز من 5 أحرف.",
+    "ckb": "پریمیۆم هەموو وشەیەکی نهێنیی پاشەکەوتکراو لەگەڵ دزەکراوە ناسراوەکان بەراورد دەکات و پیشانت دەدات کامیان بگۆڕیت. تەنها کۆدێکی ٥ پیتی لە کۆمپیوتەرەکەت دەردەچێت.",
+    "en": "Premium checks every saved password against known data breaches and shows which ones to change. Only a 5-character code ever leaves your computer."
+  },
+  "breached.privacyBody": {
+    "ar": "تُحوَّل كل كلمة مرور إلى بصمة (hash) على حاسوبك، ولا يُرسَل إلى Have I Been Pwned سوى أول 5 أحرف منها. لا تغادر كلمات مرورك هذا الجهاز أبدًا.",
+    "ckb": "هەر وشەیەکی نهێنی لەسەر کۆمپیوتەرەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن.",
+    "en": "Each password is hashed on your computer, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device."
+  },
+  "home.vpnDesktop": {
+    "ar": "استخدم VPN من تطبيق قاصة على هاتفك",
+    "ckb": "VPN لە قاسەی سەر مۆبایلەکەت بەکاربهێنە",
+    "en": "Use the VPN from Qasa on your phone"
+  },
+  "protected.title": {
+    "ar": "أدخل كلمة مرورك الرئيسية",
+    "ckb": "وشەی نهێنی سەرەکیت بنووسە",
+    "en": "Enter your main password"
+  },
+  "shell.lock": {
+    "ar": "قفل",
+    "ckb": "قوفڵدان",
+    "en": "Lock"
+  },
+  "totp.noQrInImage": {
+    "ar": "لم يُعثر على رمز QR في تلك الصورة.",
+    "ckb": "هیچ کۆدێکی QR لەو وێنەیەدا نەدۆزرایەوە.",
+    "en": "No QR code was found in that image."
+  },
+  "totp.scanImage": {
+    "ar": "قراءة رمز QR من صورة",
+    "ckb": "خوێندنەوەی کۆدی QR لە وێنەیەک",
+    "en": "Read QR code from an image"
+  },
+  "vault.emptyHint": {
+    "ar": "انقر + لحفظ أول كلمة مرور.",
+    "ckb": "کرتە لە + بکە بۆ پاشەکەوتکردنی یەکەم وشەی نهێنیت.",
+    "en": "Click + to save your first password."
+  },
+  "vault.selectItem": {
+    "ar": "اختر عنصرًا لعرض تفاصيله.",
+    "ckb": "بڕگەیەک هەڵبژێرە بۆ بینینی وردەکارییەکانی.",
+    "en": "Choose an item to see its details."
+  }
+}

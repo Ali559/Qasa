@@ -1,56 +1,71 @@
 <script setup lang="ts">
-// App state machine, as on iOS (docs/design.md §12.1):
-// launching → welcome preferences → create vault | unlock → shell.
-// Phase 0 has only the first step; the rest arrives in phase 1.
-import { ref } from 'vue'
+// App state machine, as iOS `qasaApp.RootView` (docs/design.md §12.1):
+// launching → welcome → create vault | unlock → shell, plus the store-error screen.
+import { onMounted, ref } from 'vue'
 
-import BrandHeader from '@/components/BrandHeader.vue'
+import { resetNav } from '@/nav'
 import { prefs } from '@/prefs'
+import CreateVault from '@/screens/CreateVault.vue'
+import Shell from '@/screens/Shell.vue'
+import Unlock from '@/screens/Unlock.vue'
 import WelcomePreferences from '@/screens/WelcomePreferences.vue'
+import { attachAutoLock, loadVault, lockVault, refreshStatus, session } from '@/vault/session'
 
-const showWelcome = ref(!prefs.hasCompletedWelcome)
+type Stage = 'launching' | 'welcome' | 'create' | 'unlock' | 'shell'
+const stage = ref<Stage>('launching')
 
-function showWelcomeAgain() {
-  prefs.hasCompletedWelcome = false
-  showWelcome.value = true
+async function route() {
+  try {
+    const status = await refreshStatus()
+    if (status.unlocked) {
+      await loadVault()
+      stage.value = 'shell'
+    } else if (status.exists) {
+      stage.value = 'unlock'
+    } else {
+      stage.value = prefs.hasCompletedWelcome ? 'create' : 'welcome'
+    }
+  } catch (e) {
+    console.error('Could not read the vault status', e)
+    stage.value = 'unlock'
+  }
 }
+
+async function enterShell() {
+  resetNav()
+  await refreshStatus()
+  await loadVault()
+  stage.value = 'shell'
+}
+
+async function lock() {
+  await lockVault()
+  resetNav()
+  await route()
+}
+
+onMounted(() => {
+  attachAutoLock(() => {
+    resetNav()
+    route()
+  })
+  route()
+})
+
+defineExpose({ session })
 </script>
 
 <template>
-  <WelcomePreferences v-if="showWelcome" @continue="showWelcome = false" />
-
-  <!-- Development stand-in until phase 1 brings Create vault and Unlock. Not localized. -->
-  <div v-else class="next-phase">
-    <BrandHeader />
-    <main>
-      <p>Create vault and Unlock arrive in phase 1.</p>
-      <button type="button" @click="showWelcomeAgain">Show Welcome again</button>
-    </main>
-  </div>
+  <div v-if="stage === 'launching'" class="launching" />
+  <WelcomePreferences v-else-if="stage === 'welcome'" @continue="stage = 'create'" />
+  <CreateVault v-else-if="stage === 'create'" @created="enterShell" />
+  <Unlock v-else-if="stage === 'unlock'" @unlocked="enterShell" />
+  <Shell v-else @lock="lock" />
 </template>
 
 <style scoped>
-.next-phase {
-  display: flex;
-  flex-direction: column;
+.launching {
   height: 100%;
-}
-
-.next-phase main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex: 1;
-  color: var(--text-secondary);
-}
-
-.next-phase button {
-  padding: 8px 16px;
-  border: 1px solid var(--stroke);
-  border-radius: 999px;
-  background: var(--card-background);
-  cursor: pointer;
+  background: var(--background);
 }
 </style>
