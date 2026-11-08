@@ -28,6 +28,8 @@ arboard = "3"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp"] }
 qasa-biometric = { path = "../biometric" }
 qasa-vault = { path = "../../../core/qasa-vault" }
+qasa-sync = { path = "../../../core/qasa-sync" }
+mdns-sd = "0.13"
 rqrr = "0.9"
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }

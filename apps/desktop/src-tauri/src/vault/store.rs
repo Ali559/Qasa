@@ -41,6 +41,21 @@ CREATE TABLE IF NOT EXISTS collections (
 );
 ";
 
+/// Additive schema changes for vault files made by earlier builds.
+fn migrate(conn: &Connection) -> rusqlite::Result<()> {
+    let has_updated: bool = conn
+        .prepare("SELECT 1 FROM pragma_table_info('collections') WHERE name = 'updated_at'")?
+        .exists([])?;
+    if !has_updated {
+        // Wi‑Fi sync merges collections by last change.
+        conn.execute_batch(
+            "ALTER TABLE collections ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0;
+             UPDATE collections SET updated_at = created_at;",
+        )?;
+    }
+    Ok(())
+}
+
 pub const META_SALT: &str = "kdf_salt";
 pub const META_VERIFIER: &str = "password_verifier";
 pub const META_KDF_VERSION: &str = "kdf_version";
@@ -86,6 +101,7 @@ impl Store {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "foreign_keys", "ON")?;
         conn.execute_batch(SCHEMA)?;
+        migrate(&conn)?;
         Ok(Self { conn })
     }
 
@@ -93,6 +109,7 @@ impl Store {
     pub fn in_memory() -> Self {
         let conn = Connection::open_in_memory().unwrap();
         conn.execute_batch(SCHEMA).unwrap();
+        migrate(&conn).unwrap();
         Self { conn }
     }
 
@@ -272,15 +289,113 @@ impl Store {
 
     pub fn put_collection(&self, id: &str, name: &str, created_at: i64) -> CommandResult<()> {
         self.conn.execute(
-            "INSERT INTO collections (id, name, created_at) VALUES (?1, ?2, ?3)
-             ON CONFLICT(id) DO UPDATE SET name = excluded.name, deleted_at = NULL",
-            params![id, name, created_at],
+            "INSERT INTO collections (id, name, created_at, updated_at) VALUES (?1, ?2, ?3, ?4)
+             ON CONFLICT(id) DO UPDATE SET name = excluded.name, deleted_at = NULL, updated_at = excluded.updated_at",
+            params![id, name, created_at, now_ms()],
         )?;
         Ok(())
     }
 
     pub fn delete_collection(&self, id: &str) -> CommandResult<()> {
-        self.conn.execute("UPDATE collections SET deleted_at = ?2 WHERE id = ?1", params![id, now_ms()])?;
+        let now = now_ms();
+        self.conn.execute("UPDATE collections SET deleted_at = ?2, updated_at = ?2 WHERE id = ?1", params![id, now])?;
+        Ok(())
+    }
+
+    // MARK: sync (raw rows, tombstones included)
+
+    /// Every item row, deleted ones too, for a Wi‑Fi sync snapshot.
+    pub fn sync_items(&self) -> CommandResult<Vec<qasa_sync::WireItem>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, kind, envelope, payload, schema_version, created_at, updated_at, last_used_at,
+                    collection_id, deleted_at FROM items",
+        )?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok(qasa_sync::WireItem {
+                    id: r.get(0)?,
+                    kind: r.get(1)?,
+                    envelope: r.get(2)?,
+                    payload: r.get(3)?,
+                    schema_version: r.get(4)?,
+                    created_at: r.get(5)?,
+                    updated_at: r.get(6)?,
+                    last_used_at: r.get(7)?,
+                    collection_id: r.get(8)?,
+                    deleted_at: r.get(9)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    pub fn sync_collections(&self) -> CommandResult<Vec<qasa_sync::WireCollection>> {
+        let mut stmt = self.conn.prepare("SELECT id, name, created_at, updated_at, deleted_at FROM collections")?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok(qasa_sync::WireCollection {
+                    id: r.get(0)?,
+                    name: r.get(1)?,
+                    created_at: r.get(2)?,
+                    updated_at: r.get(3)?,
+                    deleted_at: r.get(4)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    /// Writes winning remote rows as they are (still vault-key ciphertext). Search tokens
+    /// for these items are rebuilt at the next unlock, when the search key is available.
+    pub fn apply_sync(&mut self, plan: &qasa_sync::MergePlan) -> CommandResult<u32> {
+        let tx = self.conn.transaction()?;
+        for i in &plan.items {
+            tx.execute(
+                "INSERT INTO items (id, kind, envelope, payload, schema_version, legacy_payload,
+                                    created_at, updated_at, last_used_at, collection_id, deleted_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, NULL, ?6, ?7, ?8, ?9, ?10)
+                 ON CONFLICT(id) DO UPDATE SET
+                    kind = excluded.kind, envelope = excluded.envelope, payload = excluded.payload,
+                    schema_version = excluded.schema_version, legacy_payload = NULL,
+                    created_at = excluded.created_at, updated_at = excluded.updated_at,
+                    last_used_at = excluded.last_used_at, collection_id = excluded.collection_id,
+                    deleted_at = excluded.deleted_at",
+                params![i.id, i.kind, i.envelope, i.payload, i.schema_version, i.created_at, i.updated_at, i.last_used_at, i.collection_id, i.deleted_at],
+            )?;
+            tx.execute("DELETE FROM search_tokens WHERE item_id = ?1", [&i.id])?;
+        }
+        for c in &plan.collections {
+            tx.execute(
+                "INSERT INTO collections (id, name, created_at, updated_at, deleted_at) VALUES (?1, ?2, ?3, ?4, ?5)
+                 ON CONFLICT(id) DO UPDATE SET name = excluded.name, created_at = excluded.created_at,
+                    updated_at = excluded.updated_at, deleted_at = excluded.deleted_at",
+                params![c.id, c.name, c.created_at, c.updated_at, c.deleted_at],
+            )?;
+        }
+        tx.commit()?;
+        Ok((plan.items.len() + plan.collections.len()) as u32)
+    }
+
+    /// Item ids with no search tokens (synced in while locked).
+    pub fn items_missing_tokens(&self) -> CommandResult<Vec<String>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id FROM items i WHERE deleted_at IS NULL
+               AND NOT EXISTS (SELECT 1 FROM search_tokens t WHERE t.item_id = i.id)",
+        )?;
+        let ids = stmt.query_map([], |r| r.get(0))?.collect::<Result<Vec<String>, _>>()?;
+        Ok(ids)
+    }
+
+    pub fn put_tokens(&mut self, id: &str, hashes: &[String]) -> CommandResult<()> {
+        let tx = self.conn.transaction()?;
+        tx.execute("DELETE FROM search_tokens WHERE item_id = ?1", [id])?;
+        {
+            let mut insert = tx.prepare("INSERT OR IGNORE INTO search_tokens (item_id, token_hash) VALUES (?1, ?2)")?;
+            for h in hashes {
+                insert.execute(params![id, h])?;
+            }
+        }
+        tx.commit()?;
         Ok(())
     }
 

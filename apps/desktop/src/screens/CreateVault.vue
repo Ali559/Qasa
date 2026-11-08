@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // iOS `CreateVaultView`. The biometrics card shows when the computer has Touch ID or
-// Windows Hello; "I already have Qasa on another device" arrives with Wi‑Fi pairing (phase 4).
+// Windows Hello; "I already have Qasa on another device" joins a vault over Wi‑Fi.
 import { Fingerprint, KeyRound, Lock, LockKeyhole, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
@@ -16,7 +16,7 @@ import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { isCommandError, type BiometricStatus } from '@/vault/types'
 
-const emit = defineEmits<{ created: [] }>()
+const emit = defineEmits<{ created: []; pair: [] }>()
 const t = useT()
 
 const password = ref('')
@@ -76,6 +76,7 @@ async function create() {
       <div class="intro">
         <h1 class="title">{{ t('auth.create.title') }}</h1>
         <p class="subtitle">{{ t('auth.create.subtitle') }}</p>
+        <button type="button" class="pair" @click="emit('pair')">{{ t('auth.create.pairExisting') }}</button>
       </div>
 
       <div class="group">
@@ -172,6 +173,18 @@ async function create() {
   margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+.pair {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .group {

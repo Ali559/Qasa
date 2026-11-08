@@ -170,6 +170,7 @@ impl Vault {
             if root.matches_verifier(&verifier) {
                 self.keys = Some(root.subkeys());
                 self.note_activity();
+                let _ = self.rebuild_missing_tokens();
                 // iOS: "Sealed on your next master password unlock".
                 if self.biometric_enabled()? && self.store.meta(META_BIOMETRIC_SEALED)?.is_none() {
                     self.seal(&root);
@@ -504,6 +505,7 @@ impl Vault {
         }
         self.keys = Some(root.subkeys());
         self.note_activity();
+        let _ = self.rebuild_missing_tokens();
         Ok(())
     }
 
@@ -522,6 +524,57 @@ impl Vault {
     #[cfg(test)]
     pub fn biometrics(&self) -> &dyn Biometrics {
         self.bio.as_ref()
+    }
+
+    // MARK: Wi‑Fi sync
+
+    pub fn sync_meta(&self) -> CommandResult<Option<qasa_sync::VaultMeta>> {
+        let (Some(salt), Some(verifier)) = (self.store.meta(META_SALT)?, self.store.meta(META_VERIFIER)?) else {
+            return Ok(None);
+        };
+        let kdf_version = decode_kdf_version(self.store.meta(META_KDF_VERSION)?.as_deref())?;
+        Ok(Some(qasa_sync::VaultMeta { salt, kdf_version, verifier }))
+    }
+
+    pub fn sync_snapshot(&self) -> CommandResult<qasa_sync::Snapshot> {
+        Ok(qasa_sync::Snapshot { items: self.store.sync_items()?, collections: self.store.sync_collections()? })
+    }
+
+    /// A new computer takes the other device's vault key material. Only when this
+    /// computer has no vault: an existing one is never overwritten.
+    pub fn sync_adopt(&mut self, meta: &qasa_sync::VaultMeta) -> CommandResult<()> {
+        if self.store.vault_exists()? {
+            return Err(CommandError::VaultExists);
+        }
+        if meta.kdf_version > KDF_VERSION {
+            return Err(CommandError::UnsupportedKdf);
+        }
+        self.store.set_meta(META_SALT, &meta.salt)?;
+        self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(meta.kdf_version))?;
+        self.store.set_meta(META_VERIFIER, &meta.verifier)?;
+        Ok(())
+    }
+
+    pub fn sync_apply(&mut self, plan: &qasa_sync::MergePlan) -> CommandResult<u32> {
+        let n = self.store.apply_sync(plan)?;
+        if self.keys.is_some() {
+            self.rebuild_missing_tokens()?;
+        }
+        Ok(n)
+    }
+
+    /// Search tokens for items that arrived by sync while locked (needs the search key).
+    pub fn rebuild_missing_tokens(&mut self) -> CommandResult<()> {
+        let keys = self.keys()?;
+        let search = *keys.search();
+        for id in self.store.items_missing_tokens()? {
+            let Some(row) = self.store.item(&id)? else { continue };
+            let Ok(payload) = self.decrypt_payload(&row) else { continue };
+            let Ok(envelope) = self.decrypt_envelope(&row, &payload) else { continue };
+            let hashes = payload.search_token_hashes(&envelope, &search);
+            self.store.put_tokens(&id, &hashes)?;
+        }
+        Ok(())
     }
 
     /// "Clear local data": locks and deletes every item, collection and the key material.
@@ -676,6 +729,30 @@ mod tests {
         // Turning it off forgets the seal.
         v.set_biometric_enabled(false).unwrap();
         assert_eq!(v.sealed().unwrap(), None);
+    }
+
+    #[test]
+    fn sync_adopt_then_unlock_with_the_same_password() {
+        let mut phone = vault();
+        phone.create("password1", false).unwrap();
+        let saved = phone.save(None, &login("GitHub")).unwrap();
+        let gone = phone.save(None, &login("Gone")).unwrap().id;
+        phone.delete(&gone).unwrap();
+        let snapshot = phone.sync_snapshot().unwrap();
+        assert_eq!(snapshot.items.len(), 2, "tombstones are part of the snapshot");
+
+        let mut desktop = vault();
+        desktop.sync_adopt(&phone.sync_meta().unwrap().unwrap()).unwrap();
+        let plan = qasa_sync::merge(&desktop.sync_snapshot().unwrap(), &snapshot, store::now_ms());
+        assert_eq!(desktop.sync_apply(&plan).unwrap(), 2);
+        desktop.unlock("password1").unwrap();
+        let (items, _) = desktop.list().unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].id, saved.id);
+        // Search tokens were rebuilt at unlock.
+        assert!(desktop.store.items_missing_tokens().unwrap().is_empty());
+        // An existing vault is never overwritten.
+        assert!(matches!(desktop.sync_adopt(&phone.sync_meta().unwrap().unwrap()), Err(CommandError::VaultExists)));
     }
 
     #[test]

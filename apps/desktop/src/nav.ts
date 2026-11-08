@@ -16,6 +16,7 @@ export type AppPage =
   | 'premiumUpgrade'
   | 'manageSubscription'
   | 'linkedDevices'
+  | 'wifiSync'
 
 export const nav = reactive({
   tab: 'home' as ShellTab,

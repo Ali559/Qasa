@@ -16,6 +16,34 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 4, first half: the protocol and the desktop (phones not yet).**
+- `core/qasa-sync`: the code is stretched with Argon2id (19 MiB, 2 passes, per-session salt)
+  into SPAKE2; both sides confirm the key (HMAC over the transcript, constant-time check,
+  host first) before anything else; then AES-256-GCM frames with per-direction keys and
+  counters. Items cross still encrypted with the vault key. Intros decide the plan: a
+  device without a vault adopts the other's vault and account (only inside the
+  authenticated channel, closing the rebinding hole); same vault → both merge; different
+  vaults or none → refused, nothing changes. Merge: newest `updated_at` wins per item and
+  collection, ties break identically on both sides, deletes are tombstones kept 90 days.
+  11 tests over real local TCP (adopt, two-way merge with a delete, different vaults,
+  wrong code moves nothing and rebinds nothing).
+- Desktop: snapshots read raw rows (tombstones included); applied rows are written as
+  ciphertext, and their search tokens are rebuilt at the next unlock; adopting never
+  overwrites an existing vault. Collections gained `updated_at` (migration for existing
+  files). Hosting advertises `_qasa-sync._tcp` under the computer's name — never the code,
+  which iOS currently puts in the service name — on a random port; a code works for one
+  session, 3 attempts or 2 minutes. mDNS round trip checked on this network.
+- Screens: Settings → Linked Devices → Sync on this network (Premium; host shows the code
+  with a countdown, join lists devices and takes the code), and "I already have Qasa on
+  another device" on Create vault, which copies the vault and sends you to Unlock.
+- **Still to do in phase 4:** the phone ports — UniFFI builds of `qasa-sync` (XCFramework,
+  `cargo-ndk`), `deletedAt` tombstones in SwiftData and Room, iOS `NWBrowser`/Android
+  `NsdManager` discovery feeding the shared session, Android's payload shape mapped to the
+  canonical (iOS) one, the new `sync.*` strings promoted into `l10n/strings.json`, and
+  removing the code from the iOS service name. Until then the desktop can only sync with
+  another desktop.
+- Build note: the disk filled during this phase; build with `CARGO_INCREMENTAL=0`.
+
 **2026-11-08 — Phase 3 built (Touch ID checked on hardware; Windows Hello type-checked only).**
 - `apps/desktop/biometric` (`qasa-biometric`): seals the 32-byte root key with AES-256-GCM
   under a key only the platform can produce after the user authenticates.

@@ -12,11 +12,12 @@ import CreateVault from '@/screens/CreateVault.vue'
 import Shell from '@/screens/Shell.vue'
 import Unlock from '@/screens/Unlock.vue'
 import WelcomePreferences from '@/screens/WelcomePreferences.vue'
+import PairExisting from '@/screens/sync/PairExisting.vue'
 import { protectedReason } from '@/vault/protectedGate'
 import { attachAutoLock, loadVault, lockVault, refreshStatus, session } from '@/vault/session'
 import { watchEffect } from 'vue'
 
-type Stage = 'launching' | 'welcome' | 'create' | 'unlock' | 'shell'
+type Stage = 'launching' | 'welcome' | 'create' | 'pair' | 'unlock' | 'shell'
 const stage = ref<Stage>('launching')
 const t = useT()
 /** Logging this computer out also wipes its vault, so it asks like Clear local data. */
@@ -86,7 +87,8 @@ defineExpose({ session })
 <template>
   <div v-if="stage === 'launching'" class="launching" />
   <WelcomePreferences v-else-if="stage === 'welcome'" @continue="stage = 'create'" />
-  <CreateVault v-else-if="stage === 'create'" @created="enterShell" />
+  <CreateVault v-else-if="stage === 'create'" @created="enterShell" @pair="stage = 'pair'" />
+  <PairExisting v-else-if="stage === 'pair'" @back="stage = 'create'" @paired="route" />
   <Unlock v-else-if="stage === 'unlock'" @unlocked="enterShell" />
   <Shell v-else @lock="lock" @logout="confirmLogout = true" />
   <ConfirmDialog
