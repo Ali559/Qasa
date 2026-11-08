@@ -26,7 +26,7 @@ firebaseBom = "33.7.0"
 codeScanner = "16.1.0"
 wireguardTunnel = "1.0.20260102"
 # UniFFI Kotlin bindings for core/qasa-ffi (Wi‑Fi sync) load the Rust library through JNA.
-jna = "5.14.0"
+jna = "5.19.1"
 sqliteJdbc = "3.41.2.2"
 
 [libraries]

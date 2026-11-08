@@ -35,8 +35,17 @@ Steps that need the account owner. The details for each are in
       `bridge.*`, `ext.*` and `update.*` in `l10n/platform/desktop.json`, the landing
       page's desktop section, and the store listing.
 - [ ] **Not tested yet:**
-  - the fixtures in Firefox;
   - real Chrome and Edge;
   - Windows and Linux builds;
   - an update installing over an older version;
-  - Android Wi‑Fi sync on a device.
+  - phone ⇄ desktop through the desktop window itself (no tool here can drive a native
+    window).
+
+  The extension passed 14 checks in Firefox 159 on 2026-11-09 (`bun run e2e:firefox`).
+  Android Wi‑Fi sync was tested on 2026-11-08 on the emulator: pair, adopt, unlock,
+  items and folder. The emulator can't see the Mac's mDNS, so debug builds take a host
+  with `adb shell setprop debug.qasa.sync_peer 10.0.2.2:<port>`.
+- [ ] **16 KB pages on Android.** The emulator flags the WireGuard libraries (`libwg*.so`)
+      and `libandroidx.graphics.path.so` as not 16 KB compatible. Google Play requires 16
+      KB support for apps targeting Android 15+. The sync library is aligned, and JNA was
+      raised to 5.19.1 for its RELRO fix.

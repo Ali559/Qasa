@@ -1,5 +1,7 @@
 package alibarznji.qasa.sync
 
+import alibarznji.qasa.BuildConfig
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
@@ -109,12 +111,32 @@ class SyncDiscovery @Inject constructor(
             override fun onServiceLost(info: NsdServiceInfo) = lost(info.serviceName)
         }
         discovery = listener
+        debugPeer()?.let { _peers.value = listOf(it) }
         try {
             nsd.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, listener)
         } catch (e: Exception) {
             Log.w(TAG, "discovery failed", e)
             discovery = null
         }
+    }
+
+    /**
+     * Debug builds only: a host the emulator can't discover. The emulator sits behind its
+     * own NAT, so mDNS from the Mac never reaches it; the Mac is 10.0.2.2 from inside.
+     * `adb shell setprop debug.qasa.sync_peer 10.0.2.2:<port>` lists that host as a peer.
+     */
+    private fun debugPeer(): SyncPeer? {
+        if (!BuildConfig.DEBUG) return null
+        val raw = try {
+            @SuppressLint("PrivateApi")
+            val props = Class.forName("android.os.SystemProperties")
+            props.getMethod("get", String::class.java).invoke(null, "debug.qasa.sync_peer") as? String
+        } catch (_: Exception) {
+            null
+        }
+        val host = raw?.substringBeforeLast(':')?.takeIf { it.isNotBlank() } ?: return null
+        val port = raw.substringAfterLast(':').toIntOrNull()?.takeIf { it in 1..65535 } ?: return null
+        return SyncPeer(name = "Debug host ($host)", platform = "", host = host, port = port)
     }
 
     @Synchronized
