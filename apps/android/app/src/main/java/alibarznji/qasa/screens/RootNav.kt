@@ -85,6 +85,10 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
     val storeFailure by vm.store.failure.collectAsState()
     val shielded by vm.autoLock.shielded.collectAsState()
     var welcomeDone by remember { mutableStateOf(vm.prefs.hasCompletedWelcome) }
+    // Observed, so a vault adopted over Wi‑Fi on the Link Device flow leads to Unlock —
+    // once that flow (still showing its success step) closes.
+    val vaultExists by vm.session.vaultExistsFlow.collectAsState()
+    var pairOpen by remember { mutableStateOf(false) }
 
     val bootstrapping by vm.bootstrapping.collectAsState()
     val configurationError = remember { QasaConfig.configurationError }
@@ -121,9 +125,12 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
                     // show the error screen and never offer to delete it.
                     storeFailure != null -> VaultStoreErrorView(storeFailure!!)
                     unlocked -> AppShellScreen(onLock = { vm.onLocked() })
-                    vm.session.vaultExists -> UnlockScreen(onUnlocked = { vm.onUnlocked() })
+                    vaultExists && !pairOpen -> UnlockScreen(onUnlocked = { vm.onUnlocked() })
                     !welcomeDone -> WelcomePreferencesScreen(onContinue = { welcomeDone = true })
-                    else -> CreateVaultScreen(onCreated = { vm.onUnlocked() })
+                    else -> CreateVaultScreen(
+                        onCreated = { vm.onUnlocked() },
+                        onPairOpenChanged = { pairOpen = it },
+                    )
                 }
                 if (bootstrapping) {
                     SecuringVaultCard(Modifier.align(Alignment.Center))

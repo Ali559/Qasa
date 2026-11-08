@@ -6,11 +6,23 @@ final class VaultCollection {
     var id: UUID
     var name: String
     var createdAt: Date
+    /// Last rename (or create). `nil` on folders made before Wi‑Fi sync: read as `createdAt`.
+    var updatedAt: Date?
+    /// A tombstone: the folder was deleted at this time. The row stays so the delete
+    /// reaches other devices over Wi‑Fi sync (plan §6.3). Every read filters these out.
+    var deletedAt: Date?
 
     init(name: String) {
         self.id = UUID()
         self.name = name
         self.createdAt = Date()
+        self.updatedAt = self.createdAt
+        self.deletedAt = nil
+    }
+
+    /// Only live folders, for `@Query` and fetches.
+    static var live: Predicate<VaultCollection> {
+        #Predicate<VaultCollection> { $0.deletedAt == nil }
     }
 }
 
@@ -26,6 +38,10 @@ final class VaultItemRecord {
     var createdAt: Date
     var lastUsedAt: Date?
     var collectionId: UUID?
+    /// A tombstone: the item was deleted at this time. Envelope and payload are empty and
+    /// the row stays so the delete reaches other devices over Wi‑Fi sync (plan §6.3).
+    /// Every read filters these out.
+    var deletedAt: Date?
 
     init(kind: VaultItemKind) {
         self.id = UUID()
@@ -38,6 +54,12 @@ final class VaultItemRecord {
         self.createdAt = Date()
         self.lastUsedAt = nil
         self.collectionId = nil
+        self.deletedAt = nil
+    }
+
+    /// Only live items (no tombstones), for fetches.
+    static var live: Predicate<VaultItemRecord> {
+        #Predicate<VaultItemRecord> { $0.deletedAt == nil }
     }
 
     var kind: VaultItemKind {

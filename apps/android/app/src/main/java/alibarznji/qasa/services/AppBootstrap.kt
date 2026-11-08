@@ -5,6 +5,7 @@ import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.push.DevicePrefsSync
 import alibarznji.qasa.push.PushTokenRegistrar
 import alibarznji.qasa.screens.AppSession
+import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultSession
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,9 +18,19 @@ class AppBootstrap @Inject constructor(
     private val devicePrefs: DevicePrefsSync,
     private val pushTokenRegistrar: PushTokenRegistrar,
     private val appSession: AppSession,
+    private val vault: VaultRepository,
 ) {
 
     suspend fun onVaultUnlocked() {
+        // Rows synced in while locked (a vault adopted over Wi‑Fi) need search tokens,
+        // which only the unlocked search key can build. Never blocks the unlock.
+        try {
+            vault.reindexSearchIfPending()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Search falls back to no tokens for those items; the flag stays set to retry.
+        }
         pushTokenRegistrar.refreshTokenIfAvailable()
         // The verifying key must exist before any token is trusted, and before the UI
         // reads `isPremium` — verification fails closed without one.

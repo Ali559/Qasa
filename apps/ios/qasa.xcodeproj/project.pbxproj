@@ -16,6 +16,7 @@
 		A1000000000000000000002E /* UserNotificationsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002D /* UserNotificationsUI.framework */; };
 		A10000000000000000000030 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002F /* UserNotifications.framework */; };
 		C5CDB440F5E09F2D88A1EE8D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 5ED306401D2B0715A6BCB1B2 /* FirebaseMessaging */; };
+		A10000000000000000000051 /* QasaFFI.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000050 /* QasaFFI.xcframework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		A1000000000000000000002D /* UserNotificationsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotificationsUI.framework; path = System/Library/Frameworks/UserNotificationsUI.framework; sourceTree = SDKROOT; };
 		A10000000000000000000040 /* qasaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = qasaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000000000000000002F /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		A10000000000000000000050 /* QasaFFI.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = QasaFFI.xcframework; path = Frameworks/QasaFFI.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -137,6 +139,7 @@
 				5860C733FFB7F3801CB5CC78 /* FirebaseCore in Frameworks */,
 				C5CDB440F5E09F2D88A1EE8D /* FirebaseMessaging in Frameworks */,
 				A10000000000000000000011 /* AuthenticationServices.framework in Frameworks */,
+				A10000000000000000000051 /* QasaFFI.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,6 +176,7 @@
 				A10000000000000000000010 /* AuthenticationServices.framework */,
 				A1000000000000000000002D /* UserNotificationsUI.framework */,
 				A1000000000000000000002F /* UserNotifications.framework */,
+				A10000000000000000000050 /* QasaFFI.xcframework */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";

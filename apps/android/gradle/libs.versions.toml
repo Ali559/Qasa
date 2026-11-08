@@ -25,6 +25,9 @@ googleServices = "4.4.2"
 firebaseBom = "33.7.0"
 codeScanner = "16.1.0"
 wireguardTunnel = "1.0.20260102"
+# UniFFI Kotlin bindings for core/qasa-ffi (Wi‑Fi sync) load the Rust library through JNA.
+jna = "5.14.0"
+sqliteJdbc = "3.41.2.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,6 +69,8 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "codeScanner" }
 wireguard-tunnel = { group = "com.wireguard.android", name = "tunnel", version.ref = "wireguardTunnel" }
+jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqliteJdbc" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

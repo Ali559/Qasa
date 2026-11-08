@@ -32,6 +32,7 @@ class VaultRepository @Inject constructor(
     private val store: VaultStoreHolder,
     private val session: VaultSession,
     private val autofillIndex: AutofillIndexStore,
+    private val secureStore: VaultSecureStore,
 ) {
     /**
      * Resolved per call: the store may fail to open, and the UI shows
@@ -87,8 +88,12 @@ class VaultRepository @Inject constructor(
     /** iOS `markUsed`: copying or opening a secret stamps "last used" (and updated, as iOS does). */
     suspend fun markUsed(id: String) = dao.markUsed(id, System.currentTimeMillis())
 
+    /**
+     * A tombstone, not a row delete, so the delete reaches the user's other devices on the
+     * next Wi‑Fi sync (the merge keeps tombstones for 90 days).
+     */
     suspend fun delete(id: String) {
-        dao.deleteItem(id)
+        dao.tombstoneItem(id, System.currentTimeMillis())
         dao.deleteTokensForItem(id)
         rebuildAutofillIndex()
     }
@@ -107,11 +112,14 @@ class VaultRepository @Inject constructor(
 
     suspend fun saveCollection(id: String?, name: String): String {
         val cid = id ?: UUID.randomUUID().toString().lowercase()
+        val now = System.currentTimeMillis()
+        val existing = id?.let { old -> dao.getCollections().firstOrNull { it.id == old } }
         dao.upsertCollection(
             VaultCollectionEntity(
                 id = cid,
                 name = name,
-                createdAt = System.currentTimeMillis(),
+                createdAt = existing?.createdAt ?: now,
+                updatedAt = now,
             ),
         )
         return cid
@@ -121,7 +129,7 @@ class VaultRepository @Inject constructor(
     suspend fun renameCollection(id: String, name: String) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
-        dao.renameCollection(id, trimmed)
+        dao.renameCollection(id, trimmed, System.currentTimeMillis())
     }
 
     // On-device notifications (iOS `AppNotification` SwiftData model, `NotificationsView`).
@@ -138,7 +146,7 @@ class VaultRepository @Inject constructor(
      * un-assigned first, so nothing keeps pointing at a collection that no longer exists.
      */
     suspend fun deleteCollection(id: String) {
-        for (item in dao.getAllItems().filter { it.collectionId == id }) {
+        for (item in dao.getAllItems().filter { it.collectionId.equals(id, ignoreCase = true) }) {
             val payload = getPayload(item.id) ?: continue
             val cleared = when (payload) {
                 is VaultPayload.Login -> payload.copy(collectionId = null)
@@ -147,7 +155,7 @@ class VaultRepository @Inject constructor(
             }
             save(item.id, cleared)
         }
-        dao.deleteCollection(id)
+        dao.tombstoneCollection(id, System.currentTimeMillis())
     }
 
     suspend fun reencryptAll(oldEnc: ByteArray, newEnc: ByteArray, newSearch: ByteArray) {
@@ -178,6 +186,41 @@ class VaultRepository @Inject constructor(
         dao.clearTokens()
         dao.clearCollections()
         autofillIndex.clear()
+    }
+
+    /**
+     * After a Wi‑Fi sync wrote rows: list screens follow Room on their own; the autofill
+     * index is rebuilt here, and search tokens now when unlocked (else at the next unlock).
+     */
+    suspend fun refreshAfterSync() {
+        if (session.isUnlocked) reindexSearchIfPending()
+        rebuildAutofillIndex()
+    }
+
+    /**
+     * Rebuilds search tokens for every item when synced rows arrived without them
+     * ([VaultSecureStore.searchReindexPending]). Runs right after unlock, when the search
+     * key exists. Items that don't decrypt keep no tokens rather than failing the unlock.
+     */
+    suspend fun reindexSearchIfPending() {
+        if (!secureStore.searchReindexPending || !session.isUnlocked) return
+        val enc = session.requireEncKey()
+        val search = session.requireSearchKey()
+        for (item in dao.getAllItems()) {
+            val payload = try {
+                VaultJson.decodePayload(VaultCrypto.decrypt(item.encryptedPayload, enc))
+            } catch (_: Exception) {
+                continue
+            }
+            dao.deleteTokensForItem(item.id)
+            val hashes = VaultSearchIndex.searchableStrings(payload)
+                .flatMap { VaultSearchIndex.tokenHashes(it, search) }
+                .distinct()
+                .map { VaultSearchTokenEntity(itemId = item.id, tokenHash = it) }
+            if (hashes.isNotEmpty()) dao.insertTokens(hashes)
+        }
+        secureStore.searchReindexPending = false
+        rebuildAutofillIndex()
     }
 
     private fun decryptRow(item: VaultItemEntity): VaultListRow? = try {

@@ -37,6 +37,10 @@ android {
         versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // libqasa_ffi.so (Wi‑Fi sync) is built for these ABIs only; JNA ships more, and a
+        // device picking one of those would find no sync library.
+        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
+
         buildConfigField("String", "QASA_API_URL", "\"http://10.0.2.2:8080\"")
         buildConfigField("String", "QASA_LICENSE_PUBLIC_KEY", "\"$qasaLicensePublicKey\"")
 
@@ -109,6 +113,8 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+    // JNA for the UniFFI bindings (uniffi.qasa_ffi): the aar carries libjnidispatch per ABI.
+    implementation(libs.jna) { artifact { type = "aar" } }
 
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
@@ -121,6 +127,8 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Real SQLite on the JVM: runs the vault DAO's SQL and the Room migration in unit tests.
+    testImplementation(libs.sqlite.jdbc)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -27,8 +27,14 @@ final class VaultRepository {
 
     func warmCache() async {
         guard let context else { return }
-        let descriptor = FetchDescriptor<VaultItemRecord>(sortBy: [SortDescriptor(\.updatedAt, order: .reverse)])
+        let descriptor = FetchDescriptor<VaultItemRecord>(
+            predicate: VaultItemRecord.live,
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
         guard let records = try? context.fetch(descriptor) else { return }
+        // Items that arrived over Wi‑Fi sync carry no search tokens (they are keyed per
+        // device's search key, which only exists while unlocked).
+        rebuildMissingSearchTokens(records)
         var pairs: [(VaultItemRecord, VaultEnvelope)] = []
         for record in records {
             if let envelope = try? decryptEnvelope(record) {
@@ -73,13 +79,32 @@ final class VaultRepository {
         return row
     }
 
+    /// Deletes as a tombstone: the row stays (empty) so the delete reaches other devices
+    /// over Wi‑Fi sync, and every read skips it.
     func delete(id: UUID) throws {
         guard let context, let record = fetchRecord(id: id) else { return }
         deleteSearchTokens(for: id)
-        context.delete(record)
+        Self.markDeleted(record, at: Date())
         try context.save()
         cache.remove(id: id)
         Task { await syncAutofillIndex() }
+    }
+
+    /// Clears an item's data and marks it deleted (plan §6.3).
+    static func markDeleted(_ record: VaultItemRecord, at now: Date) {
+        record.encryptedEnvelope = Data()
+        record.encryptedPayload = Data()
+        record.legacyPayloadData = nil
+        record.deletedAt = now
+        record.updatedAt = now
+    }
+
+    /// Deletes a folder as a tombstone, like items.
+    static func deleteCollection(_ collection: VaultCollection, context: ModelContext) {
+        let now = Date()
+        collection.deletedAt = now
+        collection.updatedAt = now
+        try? context.save()
     }
 
     func payload(for id: UUID) throws -> VaultPayload {
@@ -109,7 +134,7 @@ final class VaultRepository {
 
     func allLoginPayloads() throws -> [(UUID, LoginFields)] {
         guard let context else { return [] }
-        let descriptor = FetchDescriptor<VaultItemRecord>()
+        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
         let records = (try? context.fetch(descriptor)) ?? []
         return records.compactMap { record -> (UUID, LoginFields)? in
             guard record.kind == .login else { return nil }
@@ -126,7 +151,7 @@ final class VaultRepository {
     /// complete backup.
     func allPayloads() -> (payloads: [VaultPayload], decryptFailureCount: Int) {
         guard let context else { return ([], 0) }
-        let descriptor = FetchDescriptor<VaultItemRecord>()
+        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
         guard let records = try? context.fetch(descriptor) else { return ([], 0) }
         var out: [VaultPayload] = []
         var failures = 0
@@ -151,7 +176,7 @@ final class VaultRepository {
     /// Decrypt every item with `oldEnc` / re-encrypt with `newEnc`, and rebuild search tokens.
     func rekeyAllItems(oldEnc: SymmetricKey, newEnc: SymmetricKey, newSearch: SymmetricKey) throws {
         guard let context else { throw VaultCryptoError.vaultLocked }
-        let descriptor = FetchDescriptor<VaultItemRecord>()
+        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
         let records = try context.fetch(descriptor)
 
         for record in records {
@@ -190,7 +215,7 @@ final class VaultRepository {
 
     private func fetchRecord(id: UUID) -> VaultItemRecord? {
         guard let context else { return nil }
-        var descriptor = FetchDescriptor<VaultItemRecord>(predicate: #Predicate { $0.id == id })
+        var descriptor = FetchDescriptor<VaultItemRecord>(predicate: #Predicate { $0.id == id && $0.deletedAt == nil })
         descriptor.fetchLimit = 1
         return try? context.fetch(descriptor).first
     }
@@ -244,9 +269,25 @@ final class VaultRepository {
         }
     }
 
+    /// Builds search tokens for live items that have none (synced items, or items whose
+    /// tokens a sync update dropped). Needs the vault unlocked.
+    private func rebuildMissingSearchTokens(_ records: [VaultItemRecord]) {
+        guard let context, let searchKey = try? VaultSession.shared.requireSearchKey() else { return }
+        let tokens = (try? context.fetch(FetchDescriptor<VaultSearchToken>())) ?? []
+        let indexed = Set(tokens.map(\.itemId))
+        var changed = false
+        for record in records where !indexed.contains(record.id) {
+            guard let payload = try? decryptPayload(record) else { continue }
+            let envelope = (try? decryptEnvelope(record)) ?? VaultEnvelope(from: payload)
+            replaceSearchTokens(for: record.id, envelope: envelope, payload: payload, searchKey: searchKey)
+            changed = true
+        }
+        if changed { try? context.save() }
+    }
+
     private func migrateLegacyIfNeeded() async {
         guard let context else { return }
-        let descriptor = FetchDescriptor<VaultItemRecord>()
+        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
         guard let records = try? context.fetch(descriptor) else { return }
         guard records.contains(where: { $0.schemaVersion < 1 && ($0.legacyPayloadData != nil || !$0.encryptedPayload.isEmpty) }) else { return }
         guard VaultSession.shared.isUnlocked else { return }
@@ -259,9 +300,12 @@ final class VaultRepository {
         try? context.save()
     }
 
+    /// Unit tests turn this off so they never touch the AutoFill extension's real index.
+    var autofillSyncEnabled = true
+
     private func syncAutofillIndex() async {
-        guard VaultSession.shared.isUnlocked, let context else { return }
-        let descriptor = FetchDescriptor<VaultItemRecord>()
+        guard autofillSyncEnabled, VaultSession.shared.isUnlocked, let context else { return }
+        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
         guard let records = try? context.fetch(descriptor) else { return }
         var pairs: [(UUID, VaultPayload)] = []
         for record in records {

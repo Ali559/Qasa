@@ -226,7 +226,7 @@ fun VaultItemDetailScreen(
                 },
             )
             val collectionId = p.collectionId() ?: row?.collectionId
-            OrganizationCard(p, collections.firstOrNull { it.id == collectionId }?.name)
+            OrganizationCard(p, collections.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name)
             HistoryCard(row?.createdAt, row?.updatedAt, row?.lastUsedAt)
         }
     }

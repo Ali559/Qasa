@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +66,8 @@ class CreateVaultViewModel @Inject constructor(val session: VaultSession) : View
 @Composable
 fun CreateVaultScreen(
     onCreated: () -> Unit,
+    /** True while the Link Device flow covers this screen (it may adopt a vault). */
+    onPairOpenChanged: (Boolean) -> Unit = {},
     vm: CreateVaultViewModel = hiltViewModel(),
 ) {
     val c = qasaColors
@@ -78,6 +81,10 @@ fun CreateVaultScreen(
     // the password has to be sealed first or the prompt is torn down mid-attempt.
     var sealCipher by remember { mutableStateOf<Cipher?>(null) }
 
+    DisposableEffect(showPair) {
+        onPairOpenChanged(showPair)
+        onDispose { onPairOpenChanged(false) }
+    }
     if (showPair) {
         BackHandler { showPair = false }
         PairExistingVaultScreen(onDone = { showPair = false })

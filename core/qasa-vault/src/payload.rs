@@ -406,6 +406,23 @@ impl VaultPayload {
         serde_json::to_vec(&Value::Object(outer)).expect("payloads always serialize")
     }
 
+    /// Android's shape: `{"type":"login", …fields}`, with the Name / Email / Phone `type`
+    /// field renamed to `honorific` / `emailType` / `phoneType` (the discriminator owns
+    /// `type`). What the Android app stores inside its ciphertext.
+    pub fn to_android_json(&self) -> Vec<u8> {
+        let Value::Object(mut fields) = self.fields_value() else { unreachable!("fields are an object") };
+        if let Some(v) = fields.remove("type") {
+            let key = match self {
+                VaultPayload::Name(_) => "honorific",
+                VaultPayload::PersonalEmail(_) => "emailType",
+                _ => "phoneType",
+            };
+            fields.insert(key.into(), v);
+        }
+        fields.insert("type".into(), Value::String(self.variant().into()));
+        serde_json::to_vec(&Value::Object(fields)).expect("payloads always serialize")
+    }
+
     /// Reads the iOS shape, or Android's `{"type": …}` shape.
     pub fn from_stored_json(bytes: &[u8]) -> Result<Self, PayloadParseError> {
         let value: Value = serde_json::from_slice(bytes).map_err(|_| PayloadParseError)?;
@@ -618,6 +635,19 @@ mod tests {
         let old = br#"{"type":"phone","phoneType":"workCell","number":"1"}"#;
         let VaultPayload::Phone(p) = VaultPayload::from_stored_json(old).unwrap() else { panic!() };
         assert_eq!((p.kind, p.country_code.as_str()), (PhoneKind::WorkCell, "IQ"));
+    }
+
+    #[test]
+    fn android_shape_round_trips() {
+        for p in [
+            VaultPayload::Name(NameFields { honorific: Honorific::Mrs, first_name: "Sara".into(), ..Default::default() }),
+            VaultPayload::Phone(PhoneFields { kind: PhoneKind::HomePhone, number: "1".into(), ..Default::default() }),
+            VaultPayload::Login(LoginFields { item_name: "x".into(), totp: Some("otpauth://totp/x?secret=A".into()), ..Default::default() }),
+        ] {
+            let json: Value = serde_json::from_slice(&p.to_android_json()).unwrap();
+            assert_eq!(json["type"], p.variant());
+            assert_eq!(VaultPayload::from_stored_json(&p.to_android_json()).unwrap(), p);
+        }
     }
 
     #[test]

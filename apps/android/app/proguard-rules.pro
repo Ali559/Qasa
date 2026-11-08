@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Wi‑Fi sync: UniFFI bindings (uniffi.qasa_ffi) call into Rust through JNA, which finds
+# structures, callbacks and library interfaces by reflection.
+-keep class com.sun.jna.** { *; }
+-keep class * implements com.sun.jna.** { *; }
+-dontwarn java.awt.**
+-keep class uniffi.** { *; }

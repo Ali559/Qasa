@@ -5,7 +5,7 @@ struct CollectionsView: View {
     var onOpenMenu: (() -> Void)? = nil
 
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
 
     @Bindable private var cache = VaultRepository.shared.cache
 
@@ -148,6 +148,7 @@ struct CollectionsView: View {
         let trimmed = editName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         editing.name = trimmed
+        editing.updatedAt = Date()
         try? modelContext.save()
         self.editing = nil
     }
@@ -169,8 +170,7 @@ struct CollectionsView: View {
                 _ = try? VaultRepository.shared.save(payload: payload, id: row.id)
             }
         }
-        modelContext.delete(deleting)
-        try? modelContext.save()
+        VaultRepository.deleteCollection(deleting, context: modelContext)
         self.deleting = nil
     }
 }
