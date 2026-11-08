@@ -22,6 +22,7 @@ import Notifications from './tools/Notifications.vue'
 import PremiumUpgrade from './premium/PremiumUpgrade.vue'
 import ManageSubscription from './premium/ManageSubscription.vue'
 import WifiSync from './sync/WifiSync.vue'
+import BrowserExtension from './settings/BrowserExtension.vue'
 
 const emit = defineEmits<{ lock: []; logout: [] }>()
 const t = useT()
@@ -90,6 +91,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <ManageSubscription v-else-if="nav.page === 'manageSubscription'" key="subscription" @back="back" />
         <LinkedDevices v-else-if="nav.page === 'linkedDevices'" key="devices" @back="back" @logout="emit('logout')" />
         <WifiSync v-else-if="nav.page === 'wifiSync'" key="wifi" @back="back" />
+        <BrowserExtension v-else-if="nav.page === 'browserExtension'" key="extension" @back="back" />
         <Legal v-else-if="nav.page === 'terms'" key="terms" kind="terms" @back="back" />
         <Legal v-else-if="nav.page === 'privacy'" key="privacy" kind="privacy" @back="back" />
         <Home v-else-if="nav.tab === 'home'" key="home" />

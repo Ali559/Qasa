@@ -2,6 +2,7 @@
 //! every network call live here (docs/desktop-extension-plan.md §3).
 
 mod account;
+mod bridge;
 mod clipboard;
 mod prefs;
 mod sync;
@@ -33,6 +34,11 @@ pub fn run() {
             let account = account::Account::new(api, Box::new(account::secrets::KeyringStore));
             app.manage(AccountState(tokio::sync::Mutex::new(account)));
             app.manage(sync::SyncState::default());
+            app.manage(bridge::BridgeState(Mutex::new(bridge::Bridge::new(Box::new(bridge::clients::KeyringClients)))));
+            // The browser extension: register nm-host with the browsers, then listen.
+            bridge::manifest::install(&dir);
+            let host = std::sync::Arc::new(bridge::commands::TauriHost { app: app.handle().clone() });
+            bridge::server::start(host, bridge::server::socket_path(&dir));
             spawn_auto_lock(app.handle().clone());
             Ok(())
         })
@@ -74,6 +80,10 @@ pub fn run() {
             sync::sync_browse_start,
             sync::sync_stop,
             sync::sync_join,
+            bridge::commands::bridge_clients,
+            bridge::commands::bridge_revoke,
+            bridge::commands::bridge_pair_decide,
+            bridge::commands::bridge_save_decide,
             ac::account_status,
             ac::account_bootstrap,
             ac::account_refresh_license,

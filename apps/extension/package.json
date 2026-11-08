@@ -1,0 +1,32 @@
+{
+  "name": "qasa-extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "bun",
+  "scripts": {
+    "dev": "bun scripts/build.ts --watch",
+    "build": "vue-tsc --noEmit -p tsconfig.json && bun scripts/build.ts",
+    "test": "vitest run",
+    "e2e": "bun run build && playwright test",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "vectors": "bun scripts/make-vectors.ts",
+    "e2e:real": "bun run build && playwright test -c playwright.real.config.ts"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^0.468.0",
+    "vue": "^3.5.41"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1",
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^22",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "happy-dom": "^15.11.7",
+    "typescript": "~5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^3.0.0",
+    "web-ext": "8.3.0"
+  }
+}

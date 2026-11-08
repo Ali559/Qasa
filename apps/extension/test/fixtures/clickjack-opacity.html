@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Clickjacking: opacity</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Form turns invisible once the menu opens</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+</form>
+<script>
+  // Any mousedown (the click on the Qasa icon) makes the form invisible a moment later.
+  document.addEventListener("mousedown", () => setTimeout(() => (document.getElementById("login").style.opacity = "0"), 100), true)
+</script>
+<pre id="result"></pre>
+</body>
+</html>

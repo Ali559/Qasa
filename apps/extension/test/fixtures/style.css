@@ -1,0 +1,5 @@
+body { font: 16px system-ui, sans-serif; margin: 24px; }
+form { display: flex; flex-direction: column; gap: 10px; width: 340px; }
+input { font: inherit; padding: 10px 12px; height: 44px; box-sizing: border-box; }
+button { font: inherit; padding: 10px; }
+pre { min-height: 1em; }

@@ -1,0 +1,21 @@
+[package]
+name = "qasa-nm-host"
+version = "0.1.0"
+description = "Native messaging host: relays the Qasa browser extension to the desktop app"
+edition = "2021"
+rust-version = "1.82"
+license-file = "../../../LICENSE.md"
+publish = false
+
+# Its own workspace, std only: it is spawned by the browser for every extension
+# connection, so it stays tiny and starts fast.
+[workspace]
+
+[dependencies]
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
+panic = "abort"

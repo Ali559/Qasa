@@ -1,0 +1,72 @@
+<script setup lang="ts">
+// A full-height message card for the states before the vault list: app not running, not
+// paired, locked, no vault. Same layout as the desktop's empty states: tinted icon disc,
+// title, body, then the actions in the slot.
+import type { Component } from 'vue'
+
+import CardContainer from '@/components/CardContainer.vue'
+
+defineProps<{ icon: Component; title: string; body: string; tone?: 'accent' | 'gold' | 'danger' }>()
+</script>
+
+<template>
+  <CardContainer :padding="21" class="state-card">
+    <span class="disc" :class="tone ?? 'accent'">
+      <component :is="icon" :size="26" aria-hidden="true" />
+    </span>
+    <h1 class="title">{{ title }}</h1>
+    <p class="body">{{ body }}</p>
+    <div class="actions"><slot /></div>
+  </CardContainer>
+</template>
+
+<style scoped>
+.state-card {
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.disc {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+.disc.accent {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.disc.gold {
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+  color: var(--gold-muted);
+}
+
+.disc.danger {
+  background: var(--danger-background);
+  color: var(--danger);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.body {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+</style>

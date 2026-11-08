@@ -105,6 +105,12 @@ impl Vault {
         Self { store, keys: None, last_activity: Instant::now(), bio }
     }
 
+    /// An in-memory vault with fake biometrics, for tests of other modules.
+    #[cfg(test)]
+    pub fn in_memory() -> Self {
+        Self::with_store(Store::in_memory(), Box::new(biometrics::tests::FakeBiometrics::default()))
+    }
+
     // MARK: session
 
     pub fn status(&self) -> CommandResult<VaultStatus> {

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Login with code</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Sign in with 2FA</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+  <input id="mfa" name="mfa_code" type="text" maxlength="6" placeholder="2FA code">
+  <button type="submit">Sign in</button>
+</form>
+<pre id="result"></pre>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Qasa",
+    "description": "Extension name in the browser and the store."
+  },
+  "extDescription": {
+    "message": "املأ بيانات تسجيل الدخول في قاصة واحفظها على المواقع. تعمل مع تطبيق قاصة على حاسوبك، ولا يُخزَّن شيء في المتصفح.",
+    "description": "Store description, at most 132 characters."
+  }
+}

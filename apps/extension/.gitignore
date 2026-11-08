@@ -1,0 +1,7 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.tsbuildinfo
+# The dev signing key that pins the unpacked Chrome id. Never commit it.
+.dev-key.pem

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Clickjacking: cover menu</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Page covers the Qasa menu with a decoy</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+</form>
+<script>
+  // A decoy that lets clicks through (pointer-events:none) laid over where the menu opens,
+  // appended after the extension host so it paints on top.
+  document.addEventListener("mousedown", () => setTimeout(() => {
+    const d = document.createElement("div")
+    d.id = "decoy"
+    d.textContent = "Click to win a prize!"
+    Object.assign(d.style, { position: "fixed", left: "0", top: "0", width: "100vw", height: "100vh", background: "gold", zIndex: "2147483647", pointerEvents: "none" })
+    document.documentElement.append(d)
+  }, 100), true)
+</script>
+<pre id="result"></pre>
+</body>
+</html>

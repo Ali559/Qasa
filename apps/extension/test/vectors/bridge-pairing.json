@@ -1,0 +1,18 @@
+{
+  "description": "Bridge pairing v1 (docs/desktop-extension-plan.md §8.2.1). Keys are P-256: priv = 32-byte scalar, pub = 65-byte uncompressed point. sharedSecret = ECDH x-coordinate. okm = HKDF-SHA256(sharedSecret, salt = extPub||deskPub, info = \"qasa-bridge-v1\", 36). key = okm[0..32]; code = u32be(okm[32..36]) % 1000000, 6 digits. aesGcm.ciphertext = ciphertext || 16-byte tag, aad = UTF-8 clientId.",
+  "extPriv": "j9zhzhdztFcIbO+2InB3jgM0vdNC8FR934FZdXWlpfE=",
+  "extPub": "BHx+/JYK5Bmc4m8RFYPMoz4NvVEn/tpSufc+Ph6jhmxAbAo6ZKZjSa/Yd1ktLUHVXJQ3eFVNa1CrebM/kGfL73w=",
+  "deskPriv": "Z6qO7AGuLYMZKZISaYx3vavHTrwJEA/Au8HsGMkY3ZM=",
+  "deskPub": "BLlLKLw5vXJ2wmOMpsx7IlwB6o39kZL1+sdFTjlnGT7cfb3H+OMPkEgqZ2mYGQfryDCep3MI6Q13jfset/GNKpY=",
+  "sharedSecret": "Ht1XJrQ3Jf2Jm2wiBf2+tSpRAsKXjZjNsnK07dAulVM=",
+  "okm": "nqzxFZbNkPUUI2eMQq6qQ0VbjdA4ZK09GOVmO4XnWHI5B+CA",
+  "key": "nqzxFZbNkPUUI2eMQq6qQ0VbjdA4ZK09GOVmO4XnWHI=",
+  "code": "817536",
+  "aesGcm": {
+    "key": "nqzxFZbNkPUUI2eMQq6qQ0VbjdA4ZK09GOVmO4XnWHI=",
+    "nonce": "AAECAwQFBgcICQoL",
+    "aad": "6f1c2a7e-0b4d-4c55-9a51-3f2e8d7c1b90",
+    "plaintext": "{\"id\":\"0123456789abcdef\",\"ts\":1767225600000,\"op\":\"status\"}",
+    "ciphertext": "KnwNgcVIWtMcTI+bfb048rAIInkykW4XzhNQr+GAU6+QEv+/0Nz2vdAlg51x1OvOaq7pzXooiaE5koIMSyAxcb5e1phxj5RjicI="
+  }
+}

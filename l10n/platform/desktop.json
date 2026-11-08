@@ -118,5 +118,285 @@
     "ar": "اختر عنصرًا لعرض تفاصيله.",
     "ckb": "بڕگەیەک هەڵبژێرە بۆ بینینی وردەکارییەکانی.",
     "en": "Choose an item to see its details."
+  },
+  "bridge.settingsRow": {
+    "ar": "إضافة المتصفح",
+    "ckb": "پێوەکراوی وێبگەڕ",
+    "en": "Browser extension"
+  },
+  "bridge.pageBody": {
+    "ar": "يمكن للمتصفحات التي تسمح لها ملء بيانات تسجيل الدخول في المواقع المطابقة. لا يُملأ شيء حتى تختار حساباً.",
+    "ckb": "ئەو وێبگەڕانەی ڕێگەیان پێدەدەیت دەتوانن چوونەژوورەوەکانت لە ماڵپەڕە گونجاوەکاندا پڕبکەنەوە. هیچ شتێک پڕناکرێتەوە تا چوونەژوورەوەیەک هەڵنەبژێریت.",
+    "en": "Browsers you allow can fill your logins on matching websites. Nothing is filled until you pick a login."
+  },
+  "bridge.noClients": {
+    "ar": "لا توجد متصفحات مسموح لها بعد. ثبّت إضافة قاصة وافتحها للاتصال.",
+    "ckb": "هێشتا هیچ وێبگەڕێک ڕێگەی پێنەدراوە. پێوەکراوی قاسە دابمەزرێنە و بیکەرەوە بۆ پەیوەستبوون.",
+    "en": "No browsers allowed yet. Install the Qasa extension and open it to connect."
+  },
+  "bridge.allowedBrowsers": {
+    "ar": "المتصفحات المسموح لها",
+    "ckb": "وێبگەڕە ڕێگەپێدراوەکان",
+    "en": "Allowed browsers"
+  },
+  "bridge.lastUsed": {
+    "ar": "آخر استخدام %@",
+    "ckb": "دوایین بەکارهێنان %@",
+    "en": "Last used %@"
+  },
+  "bridge.neverUsed": {
+    "ar": "لم يُستخدم بعد",
+    "ckb": "هێشتا بەکارنەهاتووە",
+    "en": "Not used yet"
+  },
+  "bridge.remove": {
+    "ar": "إزالة",
+    "ckb": "لابردن",
+    "en": "Remove"
+  },
+  "bridge.removeTitle": {
+    "ar": "إزالة %@؟",
+    "ckb": "%@ لاببرێت؟",
+    "en": "Remove %@?"
+  },
+  "bridge.removeMessage": {
+    "ar": "سيتعين السماح لهذا المتصفح مجدداً قبل أن يتمكن من ملء بيانات تسجيل الدخول.",
+    "ckb": "پێویستە دووبارە ڕێگە بەم وێبگەڕە بدرێتەوە پێش ئەوەی بتوانێت چوونەژوورەوەکانت پڕبکاتەوە.",
+    "en": "This browser will have to be allowed again before it can fill your logins."
+  },
+  "bridge.pairTitle": {
+    "ar": "السماح لـ %@ باستخدام قاصة؟",
+    "ckb": "ڕێگە بە %@ دەدەیت قاسە بەکاربهێنێت؟",
+    "en": "Allow %@ to use Qasa?"
+  },
+  "bridge.pairBody": {
+    "ar": "تأكد من أن المتصفح يعرض الرمز نفسه، ثم اسمح له.",
+    "ckb": "دڵنیابە کە وێبگەڕەکە هەمان کۆد پیشان دەدات، پاشان ڕێگەی پێبدە.",
+    "en": "Check that the browser shows the same code, then allow it."
+  },
+  "bridge.allow": {
+    "ar": "السماح",
+    "ckb": "ڕێگەدان",
+    "en": "Allow"
+  },
+  "bridge.deny": {
+    "ar": "عدم السماح",
+    "ckb": "ڕێگە مەدە",
+    "en": "Don't allow"
+  },
+  "bridge.saveTitle": {
+    "ar": "حفظ بيانات تسجيل الدخول هذه؟",
+    "ckb": "ئەم چوونەژوورەوەیە پاشەکەوت بکرێت؟",
+    "en": "Save this login?"
+  },
+  "bridge.updateTitle": {
+    "ar": "تحديث كلمة المرور المحفوظة؟",
+    "ckb": "وشەی نهێنیی پاشەکەوتکراو نوێ بکرێتەوە؟",
+    "en": "Update the saved password?"
+  },
+  "bridge.saveBody": {
+    "ar": "أرسل %@ هذا من نموذج تسجيل دخول.",
+    "ckb": "%@ ئەمەی لە فۆرمێکی چوونەژوورەوە ناردووە.",
+    "en": "%@ sent this from a sign-in form."
+  },
+  "bridge.website": {
+    "ar": "الموقع",
+    "ckb": "ماڵپەڕ",
+    "en": "Website"
+  },
+  "bridge.username": {
+    "ar": "اسم المستخدم",
+    "ckb": "ناوی بەکارهێنەر",
+    "en": "Username"
+  },
+  "bridge.save": {
+    "ar": "حفظ",
+    "ckb": "پاشەکەوتکردن",
+    "en": "Save"
+  },
+  "bridge.update": {
+    "ar": "تحديث",
+    "ckb": "نوێکردنەوە",
+    "en": "Update"
+  },
+  "bridge.notNow": {
+    "ar": "ليس الآن",
+    "ckb": "ئێستا نا",
+    "en": "Not now"
+  },
+  "bridge.saved": {
+    "ar": "تم حفظ بيانات تسجيل الدخول",
+    "ckb": "چوونەژوورەوە پاشەکەوت کرا",
+    "en": "Login saved"
+  },
+  "bridge.updated": {
+    "ar": "تم تحديث كلمة المرور",
+    "ckb": "وشەی نهێنی نوێکرایەوە",
+    "en": "Password updated"
+  },
+  "ext.appNotRunningTitle": {
+    "ar": "قاصة لا يعمل",
+    "ckb": "قاسە کار ناکات",
+    "en": "Qasa isn't running"
+  },
+  "ext.appNotRunningBody": {
+    "ar": "افتح قاصة على هذا الحاسوب لاستخدام بيانات تسجيل الدخول في هذا المتصفح.",
+    "ckb": "قاسە لەسەر ئەم کۆمپیوتەرە بکەرەوە بۆ بەکارهێنانی چوونەژوورەوەکانت لەم وێبگەڕەدا.",
+    "en": "Open Qasa on this computer to use your logins in this browser."
+  },
+  "ext.notInstalled": {
+    "ar": "لم تثبّت قاصة على هذا الحاسوب بعد؟",
+    "ckb": "هێشتا قاسەت لەسەر ئەم کۆمپیوتەرە نییە؟",
+    "en": "Don't have Qasa on this computer yet?"
+  },
+  "ext.download": {
+    "ar": "تنزيل قاصة",
+    "ckb": "داگرتنی قاسە",
+    "en": "Download Qasa"
+  },
+  "ext.tryAgain": {
+    "ar": "حاول مجدداً",
+    "ckb": "دووبارە هەوڵبدەرەوە",
+    "en": "Try again"
+  },
+  "ext.connectTitle": {
+    "ar": "الاتصال بقاصة",
+    "ckb": "پەیوەستبوون بە قاسە",
+    "en": "Connect to Qasa"
+  },
+  "ext.connectBody": {
+    "ar": "اسمح لهذا المتصفح بملء بيانات تسجيل الدخول المحفوظة في قاصة على هذا الحاسوب.",
+    "ckb": "ڕێگە بەم وێبگەڕە بدە چوونەژوورەوە پاشەکەوتکراوەکانی قاسە لەسەر ئەم کۆمپیوتەرە پڕبکاتەوە.",
+    "en": "Allow this browser to fill the logins saved in Qasa on this computer."
+  },
+  "ext.connect": {
+    "ar": "اتصال",
+    "ckb": "پەیوەستبوون",
+    "en": "Connect"
+  },
+  "ext.pairCodeHint": {
+    "ar": "تأكد من أن قاصة على حاسوبك يعرض الرمز نفسه.",
+    "ckb": "دڵنیابە کە قاسە لەسەر کۆمپیوتەرەکەت هەمان کۆد پیشان دەدات.",
+    "en": "Check that Qasa on your computer shows the same code."
+  },
+  "ext.pairWaiting": {
+    "ar": "بانتظار سماحك في قاصة…",
+    "ckb": "چاوەڕێی ڕێگەپێدانت لە قاسە…",
+    "en": "Waiting for you to allow it in Qasa…"
+  },
+  "ext.pairDenied": {
+    "ar": "لم يسمح قاصة لهذا المتصفح.",
+    "ckb": "قاسە ڕێگەی بەم وێبگەڕە نەدا.",
+    "en": "Qasa didn't allow this browser."
+  },
+  "ext.pairExpired": {
+    "ar": "انتهت مهلة الطلب. حاول مجدداً.",
+    "ckb": "کاتی داواکارییەکە بەسەرچوو. دووبارە هەوڵبدەرەوە.",
+    "en": "The request expired. Try again."
+  },
+  "ext.lockedTitle": {
+    "ar": "قاصة مقفل",
+    "ckb": "قاسە داخراوە",
+    "en": "Qasa is locked"
+  },
+  "ext.lockedBody": {
+    "ar": "افتح قفل قاصة على حاسوبك لملء بيانات تسجيل الدخول.",
+    "ckb": "قفڵی قاسە لەسەر کۆمپیوتەرەکەت بکەرەوە بۆ پڕکردنەوەی چوونەژوورەوەکانت.",
+    "en": "Unlock Qasa on your computer to fill your logins."
+  },
+  "ext.noVaultTitle": {
+    "ar": "أعدّ قاصة أولاً",
+    "ckb": "سەرەتا قاسە ڕێکبخە",
+    "en": "Set up Qasa first"
+  },
+  "ext.noVaultBody": {
+    "ar": "أنشئ خزنتك في تطبيق قاصة، ثم عد إلى هنا.",
+    "ckb": "گەنجینەکەت لە ئەپی قاسە دروست بکە، پاشان بگەڕێوە ئێرە.",
+    "en": "Create your vault in the Qasa app, then come back here."
+  },
+  "ext.openQasa": {
+    "ar": "فتح قاصة",
+    "ckb": "کردنەوەی قاسە",
+    "en": "Open Qasa"
+  },
+  "ext.thisSite": {
+    "ar": "على هذا الموقع",
+    "ckb": "لەم ماڵپەڕەدا",
+    "en": "On this site"
+  },
+  "ext.noMatchesHint": {
+    "ar": "لا توجد بيانات تسجيل دخول محفوظة لهذا الموقع. ابحث في كل كلمات مرورك أعلاه.",
+    "ckb": "هیچ چوونەژوورەوەیەکی پاشەکەوتکراو بۆ ئەم ماڵپەڕە نییە. لە سەرەوە لە هەموو وشە نهێنییەکانت بگەڕێ.",
+    "en": "No saved logins for this website. Search all your passwords above."
+  },
+  "ext.notWebPage": {
+    "ar": "افتح موقعاً لرؤية بيانات تسجيل الدخول الخاصة به هنا.",
+    "ckb": "ماڵپەڕێک بکەرەوە بۆ بینینی چوونەژوورەوەکانی لێرە.",
+    "en": "Open a website to see its logins here."
+  },
+  "ext.fill": {
+    "ar": "ملء",
+    "ckb": "پڕکردنەوە",
+    "en": "Fill"
+  },
+  "ext.fillFailed": {
+    "ar": "تعذّر العثور على نموذج تسجيل دخول في هذه الصفحة.",
+    "ckb": "هیچ فۆرمێکی چوونەژوورەوە لەم پەڕەیەدا نەدۆزرایەوە.",
+    "en": "Couldn't find a login form on this page."
+  },
+  "ext.tabLogins": {
+    "ar": "تسجيلات الدخول",
+    "ckb": "چوونەژوورەوەکان",
+    "en": "Logins"
+  },
+  "ext.tabGenerator": {
+    "ar": "المولّد",
+    "ckb": "دروستکەر",
+    "en": "Generator"
+  },
+  "ext.copiedClears": {
+    "ar": "تم النسخ. يمسحه قاصة خلال 30 ثانية.",
+    "ckb": "لەبەرگیرایەوە. قاسە دوای ٣٠ چرکە دەیسڕێتەوە.",
+    "en": "Copied. Qasa clears it in 30 seconds."
+  },
+  "ext.error": {
+    "ar": "حدث خطأ ما. حاول مجدداً.",
+    "ckb": "هەڵەیەک ڕوویدا. دووبارە هەوڵبدەرەوە.",
+    "en": "Something went wrong. Try again."
+  },
+  "ext.page.locked": {
+    "ar": "قاصة مقفل.",
+    "ckb": "قاسە داخراوە.",
+    "en": "Qasa is locked."
+  },
+  "ext.page.unlock": {
+    "ar": "افتح قفل قاصة",
+    "ckb": "قفڵی قاسە بکەرەوە",
+    "en": "Unlock Qasa"
+  },
+  "ext.page.appNotRunning": {
+    "ar": "افتح تطبيق قاصة على هذا الحاسوب لملء هذا النموذج.",
+    "ckb": "ئەپی قاسە لەسەر ئەم کۆمپیوتەرە بکەرەوە بۆ پڕکردنەوەی ئەم فۆرمە.",
+    "en": "Open the Qasa app on this computer to fill this form."
+  },
+  "ext.page.notPaired": {
+    "ar": "انقر زر قاصة في شريط أدوات المتصفح للاتصال.",
+    "ckb": "کلیک لە دوگمەی قاسە بکە لە تووڵباری وێبگەڕدا بۆ پەیوەستبوون.",
+    "en": "Click the Qasa button in the browser toolbar to connect."
+  },
+  "ext.page.noVault": {
+    "ar": "أعدّ قاصة على هذا الحاسوب أولاً.",
+    "ckb": "سەرەتا قاسە لەسەر ئەم کۆمپیوتەرە ڕێکبخە.",
+    "en": "Set up Qasa on this computer first."
+  },
+  "ext.page.noMatches": {
+    "ar": "لا توجد بيانات تسجيل دخول محفوظة لهذا الموقع.",
+    "ckb": "هیچ چوونەژوورەوەیەکی پاشەکەوتکراو بۆ ئەم ماڵپەڕە نییە.",
+    "en": "No saved logins for this website."
+  },
+  "ext.page.error": {
+    "ar": "حدث خطأ ما. حاول مجدداً.",
+    "ckb": "هەڵەیەک ڕوویدا. دووبارە هەوڵبدەرەوە.",
+    "en": "Something went wrong. Try again."
   }
 }
