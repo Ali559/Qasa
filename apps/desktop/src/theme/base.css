@@ -1,0 +1,87 @@
+/* Typography, motion and base rules. Colors come from tokens.css (generated). */
+
+@font-face {
+  font-family: 'Rubik';
+  src: url('../assets/fonts/Rubik-Variable.ttf') format('truetype');
+  font-weight: 300 900;
+  font-display: block;
+}
+
+/* Arabic and Kurdish, as on iOS (AppTypography): one regular face. */
+@font-face {
+  font-family: 'Rudaw';
+  src: url('../assets/fonts/rudawregular2.ttf') format('truetype');
+  font-weight: 400;
+  font-display: block;
+}
+
+:root {
+  --font-body: 'Rubik', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --label-tracking: 0;
+
+  /* Motion tokens (docs/design.md §8.1). */
+  --motion-fast: 180ms;
+  --motion-standard: 200ms;
+  --motion-page: 220ms;
+  --motion-press: 120ms;
+}
+
+/* Rudaw has one weight; let the browser synthesize bold rather than drop it (design.md
+   §3.1). Mono text falls back to the body face and tracking is zero: letter spacing
+   breaks cursive joining. */
+:root:lang(ar),
+:root:lang(ckb) {
+  --font-body: 'Rudaw', 'Rubik', system-ui, sans-serif;
+  --font-mono: var(--font-body);
+  font-synthesis: weight;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-standard: 0ms;
+    --motion-page: 0ms;
+    --motion-press: 0ms;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.3;
+  -webkit-font-smoothing: antialiased;
+  /* A desktop app, not a web page: no text selection or rubber-band scrolling by default. */
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Direction glyphs (arrows, chevrons) point the other way in RTL. */
+[dir='rtl'] .mirror-rtl {
+  transform: scaleX(-1);
+}

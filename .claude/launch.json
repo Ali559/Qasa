@@ -38,6 +38,15 @@
       "port": 5182
     },
     {
+      "name": "desktop-ui",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/desktop && bunx vite --port 1420 --strictPort"
+      ],
+      "port": 1420
+    },
+    {
       "name": "landing-preview",
       "runtimeExecutable": "bash",
       "runtimeArgs": [

@@ -11,10 +11,12 @@ SHELL := /bin/bash
 ROOT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 SERVER := $(ROOT)/server
 ANDROID := $(ROOT)/apps/android
+DESKTOP := $(ROOT)/apps/desktop
+CORE := $(ROOT)/core
 COMPOSE := docker compose -f $(SERVER)/docker/docker-compose.yml
 API_URL ?= http://127.0.0.1:8080
 
-.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean
+.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build core-test
 
 help:
 	@echo "Qasa local commands"
@@ -29,6 +31,9 @@ help:
 	@echo "  make smoke    Run server/scripts/smoke-api.sh"
 	@echo "  make worker   Run qasa-worker (needs QASA_ENV=prod)"
 	@echo "  make dash     Run admin dashboard (Vite)"
+	@echo "  make desktop  Run the desktop app (Tauri dev)"
+	@echo "  make desktop-build  Build the desktop app bundle"
+	@echo "  make core-test  Test core/ (vault crypto, golden vectors)"
 	@echo "  make clean    docker compose down -v (wipes DB volumes)"
 	@echo ""
 
@@ -80,6 +85,15 @@ worker: env
 
 dash:
 	cd $(ROOT)/apps/dashboard && bun run dev
+
+desktop:
+	cd $(DESKTOP) && bun install && bun run tauri dev
+
+desktop-build:
+	cd $(DESKTOP) && bun install && bun run tauri build
+
+core-test:
+	cd $(CORE) && cargo test
 
 clean:
 	$(COMPOSE) down -v

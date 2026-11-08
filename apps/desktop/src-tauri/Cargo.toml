@@ -1,0 +1,31 @@
+[package]
+name = "qasa-desktop"
+version = "0.1.0"
+description = "Qasa for macOS, Windows and Linux"
+edition = "2021"
+rust-version = "1.82"
+license-file = "../../../LICENSE.md"
+publish = false
+
+# Its own workspace: the desktop builds apart from server/ and core/.
+[workspace]
+
+[lib]
+name = "qasa_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = ["isolation"] }
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["isolation"] }
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
