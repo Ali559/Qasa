@@ -6,6 +6,7 @@ import { siteLogo } from '@/vault/present'
 import type { LoginMatch } from '@ext/shared/messages'
 import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
+import { RUBIK, RUDAW } from './fonts'
 import { ICON_INSET, ICON_SIZE, MENU_ARM_MS, MENU_GAP, MENU_HEADER, MENU_PADDING, MENU_WIDTH, ROW_HEIGHT } from './layout'
 
 export type MenuState =
@@ -18,9 +19,9 @@ const CSS = `
 * { box-sizing: border-box; }
 .icon, .menu {
   --accent: #7C6CF2; --card: #FFFFFF; --stroke: #EBE8F4; --text: #24213A; --text2: #6B6785; --muted: #F1EEFA;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: '${RUBIK}', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
-.menu:lang(ar), .menu:lang(ckb) { font-family: 'Noto Naskh Arabic', 'Geeza Pro', system-ui, sans-serif; }
+.menu:lang(ar), .menu:lang(ckb) { font-family: '${RUDAW}', '${RUBIK}', 'Noto Naskh Arabic', 'Geeza Pro', system-ui, sans-serif; }
 @media (prefers-color-scheme: dark) {
   .icon, .menu { --accent: #A79BFF; --card: #221F3A; --stroke: #332F4F; --text: #EEECF8; --text2: #B5B1CC; --muted: #2A2745; }
 }

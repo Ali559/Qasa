@@ -22,7 +22,7 @@ test('locked: Unlock Qasa brings the app forward, then the list shows', async ({
   const popup = await openPopup(env, page)
   await expect(popup.getByText('Qasa is locked')).toBeVisible()
   await popup.getByRole('button', { name: 'Unlock Qasa' }).click()
-  expect(env.fake.unlocks).toBeGreaterThan(0)
+  await expect.poll(() => env.fake.unlocks).toBeGreaterThan(0)
   await expect(popup.getByTestId('login-row')).toHaveCount(2)
 })
 

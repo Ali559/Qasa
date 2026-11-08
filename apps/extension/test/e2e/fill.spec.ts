@@ -18,6 +18,14 @@ test('simple login', async ({ env }) => {
   expect(env.fake.urlOps).toEqual(['matches 127.0.0.1', 'fill 127.0.0.1'])
 })
 
+test('the menu uses Rubik, loaded from the extension into the page', async ({ env }) => {
+  const page = await env.context.newPage()
+  await page.goto(`${env.servers.main}/login.html`)
+  await fillVia(page, page.locator('#username'), 0)
+  const faces = await page.evaluate(() => [...document.fonts].filter((f) => f.family.replace(/"/g, '').startsWith('qasa-')).map((f) => [f.family.replace(/"/g, '').split('-')[1], f.status]))
+  expect(faces.sort()).toEqual([['rubik', 'loaded'], ['rudaw', 'loaded']])
+})
+
 test('second row fills the second login', async ({ env }) => {
   const page = await env.context.newPage()
   await page.goto(`${env.servers.main}/login.html`)

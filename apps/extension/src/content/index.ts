@@ -11,6 +11,7 @@ import { loadLanguage } from '@ext/shared/language'
 import { isWebUrl } from '@ext/shared/protocol'
 import { detect, FRAME_MARK, groupOf, iconFields, isOtpField, type Detection, type FieldGroup } from './detect'
 import { setFieldValue } from './fill'
+import { loadFonts, type FontBytes } from './fonts'
 import { effectiveOpacity, isFieldVisible } from './guard'
 import type { ContentLanguage } from './i18n'
 import { Overlay } from './overlay'
@@ -108,6 +109,7 @@ function scheduleReposition(): void {
 
 function openMenuFor(field: HTMLInputElement): void {
   const overlay = overlayFor(field.ownerDocument)
+  void loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
   const otp = isOtpField(field)
   const group = groupOf(detection.groups, field)
   overlay.openMenu(field, {

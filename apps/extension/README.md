@@ -45,7 +45,7 @@ description are in `static/_locales/{en,ar}` (Chrome has no `ckb` locale).
 - **Chrome / Edge:** `chrome://extensions` → Developer mode → Load unpacked → `dist/chrome`.
   The id is always `fiamcbmecfeeofaadngagmdldkgncmmd` (pinned by the manifest `key`, see
   [`EXTENSION_IDS.md`](EXTENSION_IDS.md)).
-- **Firefox (128+):** `about:debugging#/runtime/this-firefox` → Load Temporary Add-on →
+- **Firefox (140+):** `about:debugging#/runtime/this-firefox` → Load Temporary Add-on →
   `dist/firefox/manifest.json`. Id `extension@qasa-app.com`.
 
 The desktop app installs the native host manifest (`com.qasa_app.desktop`) that lets the
@@ -122,7 +122,14 @@ into the frame it is switched to, so frame fields are clicked from inside their 
 
 - **Stored:** only the pairing, `{clientId, key}`, in `storage.local` (plus the popup's
   language choice). No vault data, nothing cached: secrets in a reply go straight to the
-  field and are dropped.
+  field and are dropped. The one exception is the username typed on step 1 of a multi-step
+  sign-in, kept per tab in `storage.session` (memory only, never on disk, gone when the
+  browser quits, unreadable by content scripts) for at most 10 minutes, so step 2 can save
+  it with the password even if the browser stopped the service worker in between.
+- **Fonts:** the in-page menu uses Rubik and Rudaw. The service worker reads the bundled
+  files and passes the bytes to the content script, which adds them as `FontFace`s with
+  per-page random names. No `web_accessible_resources`, so sites can't probe for Qasa by
+  URL.
 - **Trusted URL:** the URL sent with `matches`, `fill`, `totp` and `save` is always the
   browser's `sender.url` for the frame the content script runs in. The popup gets a tab's
   matches and fills through that tab's top-frame content script, so the same rule covers
