@@ -44,6 +44,10 @@ CREATE TABLE IF NOT EXISTS collections (
 pub const META_SALT: &str = "kdf_salt";
 pub const META_VERIFIER: &str = "password_verifier";
 pub const META_KDF_VERSION: &str = "kdf_version";
+/// `1` when the user turned on fingerprint / Hello unlock (sealed or waiting to be).
+pub const META_BIOMETRIC_ENABLED: &str = "biometric_enabled";
+/// The sealed root key (`qasa_biometric::Sealed` as JSON).
+pub const META_BIOMETRIC_SEALED: &str = "biometric_sealed";
 
 /// One encrypted item row.
 pub struct ItemRow {
@@ -107,6 +111,11 @@ impl Store {
              ON CONFLICT(key) DO UPDATE SET value = excluded.value",
             params![key, value],
         )?;
+        Ok(())
+    }
+
+    pub fn delete_meta(&self, key: &str) -> CommandResult<()> {
+        self.conn.execute("DELETE FROM vault_meta WHERE key = ?1", [key])?;
         Ok(())
     }
 

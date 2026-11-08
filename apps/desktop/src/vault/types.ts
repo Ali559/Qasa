@@ -131,6 +131,14 @@ export interface Collection {
   itemCount: number
 }
 
+/** Touch ID / Windows Hello state (src-tauri/src/vault/biometrics.rs). */
+export interface BiometricStatus {
+  kind: 'none' | 'touchId' | 'windowsHello'
+  enabled: boolean
+  /** Enabled but not sealed: sealed on the next main-password unlock (iOS wording). */
+  sealed: boolean
+}
+
 export interface VaultStatus {
   exists: boolean
   unlocked: boolean
@@ -150,6 +158,9 @@ export interface CommandError {
     | 'invalid'
     | 'storage'
     | 'corrupt'
+    | 'biometricInvalidated'
+    | 'cancelled'
+    | 'biometricUnavailable'
   message: string
 }
 

@@ -6,6 +6,7 @@ import { VARIANT_KIND } from './types'
 
 let password: string | null = null
 let unlocked = false
+let bioEnabled = false
 const items = new Map<string, { payload: VaultPayload; createdAt: number; updatedAt: number; lastUsedAt: number | null }>()
 const collections = new Map<string, { name: string; createdAt: number }>()
 
@@ -139,7 +140,21 @@ export const mockVaultApi = {
   async status(): Promise<VaultStatus> {
     return delay({ exists: password !== null, unlocked, unsupportedKdfVersion: null })
   },
-  async create(pw: string) {
+  async biometricStatus() {
+    return { kind: 'touchId' as const, enabled: bioEnabled, sealed: bioEnabled }
+  },
+  async setBiometric(enabled: boolean) {
+    bioEnabled = enabled
+    return { kind: 'touchId' as const, enabled, sealed: enabled }
+  },
+  async unlockBiometric() {
+    unlocked = true
+  },
+  async verifyBiometric() {
+    return true
+  },
+  async create(pw: string, biometrics = false) {
+    bioEnabled = biometrics
     if (password !== null) fail('vaultExists')
     if ([...pw].length < 8) fail('weakPassword')
     password = pw

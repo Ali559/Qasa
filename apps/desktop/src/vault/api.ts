@@ -1,11 +1,15 @@
 // Typed calls into the Rust core (src-tauri/src/vault/commands.rs).
 import { invoke } from '@tauri-apps/api/core'
 
-import type { Collection, ItemSummary, VaultPayload, VaultStatus } from './types'
+import type { BiometricStatus, Collection, ItemSummary, VaultPayload, VaultStatus } from './types'
 
 const tauriVaultApi = {
   status: () => invoke<VaultStatus>('vault_status'),
-  create: (password: string) => invoke<void>('vault_create', { password }),
+  create: (password: string, biometrics = false) => invoke<void>('vault_create', { password, biometrics }),
+  biometricStatus: () => invoke<BiometricStatus>('vault_biometric_status'),
+  setBiometric: (enabled: boolean) => invoke<BiometricStatus>('vault_set_biometric', { enabled }),
+  unlockBiometric: (reason: string) => invoke<void>('vault_unlock_biometric', { reason }),
+  verifyBiometric: (reason: string) => invoke<boolean>('vault_verify_biometric', { reason }),
   unlock: (password: string) => invoke<void>('vault_unlock', { password }),
   lock: () => invoke<void>('vault_lock'),
   verifyPassword: (password: string) => invoke<boolean>('vault_verify_password', { password }),

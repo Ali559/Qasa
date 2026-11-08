@@ -24,6 +24,14 @@ pub enum CommandError {
     Storage(String),
     #[error("vault data could not be decrypted")]
     Corrupt,
+    /// The fingerprint / Hello seal no longer opens the vault; use the main password.
+    #[error("biometric unlock needs the main password again")]
+    BiometricInvalidated,
+    /// The user dismissed the biometric prompt.
+    #[error("cancelled")]
+    Cancelled,
+    #[error("biometric unlock is not available")]
+    BiometricUnavailable,
 }
 
 impl CommandError {
@@ -39,6 +47,9 @@ impl CommandError {
             CommandError::Invalid(_) => "invalid",
             CommandError::Storage(_) => "storage",
             CommandError::Corrupt => "corrupt",
+            CommandError::BiometricInvalidated => "biometricInvalidated",
+            CommandError::Cancelled => "cancelled",
+            CommandError::BiometricUnavailable => "biometricUnavailable",
         }
     }
 }
