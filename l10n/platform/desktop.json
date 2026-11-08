@@ -19,15 +19,70 @@
     "ckb": "هەر وشەیەکی نهێنی لەسەر کۆمپیوتەرەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن.",
     "en": "Each password is hashed on your computer, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device."
   },
+  "error.offline": {
+    "ar": "تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت.",
+    "ckb": "ناتوانرێت بگەیتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە.",
+    "en": "Can't reach Qasa. Check your internet connection."
+  },
   "home.vpnDesktop": {
     "ar": "استخدم VPN من تطبيق قاصة على هاتفك",
     "ckb": "VPN لە قاسەی سەر مۆبایلەکەت بەکاربهێنە",
     "en": "Use the VPN from Qasa on your phone"
   },
+  "premium.checkAgain": {
+    "ar": "تحقق مرة أخرى",
+    "ckb": "دووبارە بپشکنە",
+    "en": "Check again"
+  },
+  "premium.opensWalletDesktop": {
+    "ar": "يفتح صفحة الدفع في متصفحك، أو رمزًا تمسحه بهاتفك. سنحدّث ترخيصك عند اكتمال الدفع.",
+    "ckb": "پەڕەی پارەدان لە وێبگەڕەکەت دەکاتەوە، یان کۆدێک بۆ سکانکردن بە مۆبایلەکەت. کاتێک پارەدان تەواو بوو مۆڵەتەکەت نوێ دەکەینەوە.",
+    "en": "Opens checkout in your browser, or a code to scan with your phone. We'll refresh your license when payment completes."
+  },
+  "premium.scanBody": {
+    "ar": "افتح كاميرا هاتفك وامسح هذا الرمز للدفع عبر {0}.",
+    "ckb": "کامێرای مۆبایلەکەت بکەرەوە و ئەم کۆدە سکان بکە بۆ پارەدان لە {0}.",
+    "en": "Open your phone camera and scan this code to pay in {0}."
+  },
+  "premium.scanTitle": {
+    "ar": "امسح الرمز بهاتفك",
+    "ckb": "بە مۆبایلەکەت سکانی بکە",
+    "en": "Scan with your phone"
+  },
+  "premium.timedOut": {
+    "ar": "انتهت مهلة الدفع. تحقق من محفظتك وحاول مرة أخرى.",
+    "ckb": "کاتی پارەدان تەواو بوو. جزدانەکەت بپشکنە و دووبارە هەوڵ بدەوە.",
+    "en": "Payment timed out. Check your wallet and try again."
+  },
   "protected.title": {
     "ar": "أدخل كلمة مرورك الرئيسية",
     "ckb": "وشەی نهێنی سەرەکیت بنووسە",
     "en": "Enter your main password"
+  },
+  "settings.deleteAccount": {
+    "ar": "حذف الحساب",
+    "ckb": "سڕینەوەی هەژمار",
+    "en": "Delete account"
+  },
+  "settings.deleteAccountFailed": {
+    "ar": "تعذّر حذف حسابك. تحقق من اتصالك وحاول مرة أخرى.",
+    "ckb": "نەتوانرا هەژمارەکەت بسڕدرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەوە.",
+    "en": "Couldn't delete your account. Check your connection and try again."
+  },
+  "settings.deleteAccountMessage": {
+    "ar": "يزيل هذا حسابك والأجهزة المرتبطة وصندوق الوارد من خوادم قاصة، ويمسح الخزنة على هذا الحاسوب. تبقى المدفوعات كسجلات مالية. لا يمكن التراجع عن ذلك.",
+    "ckb": "ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم کۆمپیوتەرە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە.",
+    "en": "This removes your account, linked devices and inbox from Qasa's servers and erases the vault on this computer. Payments are kept as financial records. This can't be undone."
+  },
+  "settings.deleteAccountTitle": {
+    "ar": "حذف حسابك في قاصة؟",
+    "ckb": "هەژماری قاسەکەت بسڕیتەوە؟",
+    "en": "Delete your Qasa account?"
+  },
+  "settings.thisComputer": {
+    "ar": "هذا الحاسوب",
+    "ckb": "ئەم کۆمپیوتەرە",
+    "en": "This computer"
   },
   "shell.lock": {
     "ar": "قفل",

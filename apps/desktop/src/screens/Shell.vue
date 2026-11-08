@@ -17,8 +17,12 @@ import Collections from './tools/Collections.vue'
 import Generator from './tools/Generator.vue'
 import PasswordHealth from './tools/PasswordHealth.vue'
 import Settings from './settings/Settings.vue'
+import LinkedDevices from './settings/LinkedDevices.vue'
+import Notifications from './tools/Notifications.vue'
+import PremiumUpgrade from './premium/PremiumUpgrade.vue'
+import ManageSubscription from './premium/ManageSubscription.vue'
 
-const emit = defineEmits<{ lock: [] }>()
+const emit = defineEmits<{ lock: []; logout: [] }>()
 const t = useT()
 
 const tabs = computed(() => [
@@ -80,6 +84,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <PasswordHealth v-else-if="nav.page === 'passwordHealth'" key="health" @back="back" />
         <Collections v-else-if="nav.page === 'collections'" key="collections" @back="back" />
         <Settings v-else-if="nav.page === 'settings'" key="settings" @back="back" @lock="emit('lock')" />
+        <Notifications v-else-if="nav.page === 'notifications'" key="notifications" @back="back" />
+        <PremiumUpgrade v-else-if="nav.page === 'premiumUpgrade'" key="premium" @back="back" />
+        <ManageSubscription v-else-if="nav.page === 'manageSubscription'" key="subscription" @back="back" />
+        <LinkedDevices v-else-if="nav.page === 'linkedDevices'" key="devices" @back="back" @logout="emit('logout')" />
         <Legal v-else-if="nav.page === 'terms'" key="terms" kind="terms" @back="back" />
         <Legal v-else-if="nav.page === 'privacy'" key="privacy" kind="privacy" @back="back" />
         <Home v-else-if="nav.tab === 'home'" key="home" />

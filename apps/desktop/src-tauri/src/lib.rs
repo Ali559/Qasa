@@ -1,6 +1,7 @@
 //! The Qasa desktop core process. The webview only draws screens: keys, the vault and
 //! every network call live here (docs/desktop-extension-plan.md §3).
 
+mod account;
 mod clipboard;
 mod prefs;
 mod vault;
@@ -12,6 +13,7 @@ use tauri::{Emitter, Manager};
 
 use vault::commands::{self as vc, VaultState};
 use vault::tools as vt;
+use account::commands::{self as ac, AccountState};
 use vault::Vault;
 
 /// How often the auto-lock timer checks for inactivity (iOS `AutoLockMonitor`: 15 s).
@@ -26,6 +28,9 @@ pub fn run() {
             std::fs::create_dir_all(&dir)?;
             let vault = Vault::open(&dir.join("vault.sqlite")).map_err(|e| e.to_string())?;
             app.manage(VaultState(Mutex::new(vault)));
+            let api = account::api::ApiClient::new(account::api::base_url());
+            let account = account::Account::new(api, Box::new(account::secrets::KeyringStore));
+            app.manage(AccountState(tokio::sync::Mutex::new(account)));
             spawn_auto_lock(app.handle().clone());
             Ok(())
         })
@@ -59,6 +64,28 @@ pub fn run() {
             vt::totp_from_image,
             vt::vault_export_csv,
             vt::vault_import_csv,
+            ac::account_status,
+            ac::account_bootstrap,
+            ac::account_refresh_license,
+            ac::account_sync_locale,
+            ac::devices_list,
+            ac::device_unlink,
+            ac::devices_unlink_others,
+            ac::account_clear_local,
+            ac::account_delete,
+            ac::pricing_get,
+            ac::payment_create_intent,
+            ac::payment_status,
+            ac::payment_simulate_stub,
+            ac::subscription_get,
+            ac::subscription_set_auto_renew,
+            ac::subscription_cancel,
+            ac::payment_method_remove,
+            ac::notifications_list,
+            ac::notifications_unread_count,
+            ac::notification_open,
+            ac::notifications_read_all,
+            ac::notification_delete,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Qasa");
@@ -89,6 +116,9 @@ fn spawn_auto_lock(app: tauri::AppHandle) {
             _ => false,
         };
         if locked {
+            if let Ok(mut a) = app.state::<AccountState>().0.try_lock() {
+                a.on_lock();
+            }
             let _ = app.emit("vault-locked", ());
         }
     });

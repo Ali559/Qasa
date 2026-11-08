@@ -46,11 +46,51 @@ pub struct HealthReport {
     pub breach_check_failed: bool,
 }
 
-/// The local password health report. The breach check is Premium (phase 2), so it is
-/// locked here and the score has no breach deduction, as on a Free phone.
+/// The password health report (iOS `PasswordHealthAnalyzer`). On Premium it also checks
+/// every password against Pwned Passwords (`account::breach_counts`); a failed check is
+/// reported as such, never as a partial "all clear". On Free the check never runs and
+/// the score has no breach deduction.
 #[tauri::command]
-pub fn vault_health(state: State<'_, VaultState>) -> CommandResult<HealthReport> {
-    let vault = lock_vault(&state)?;
+pub async fn vault_health(
+    state: State<'_, VaultState>,
+    account: State<'_, crate::account::commands::AccountState>,
+) -> CommandResult<HealthReport> {
+    let (entries, premium) = {
+        let premium = account.0.lock().await.is_premium();
+        (health_entries(&state)?, premium)
+    };
+    let mut failed = false;
+    let counts = if premium {
+        let passwords: Vec<String> = entries.iter().map(|e| e.password.clone()).collect();
+        match account.0.lock().await.breach_counts(&passwords).await {
+            Ok(c) => Some(c),
+            Err(_) => {
+                failed = true;
+                None
+            }
+        }
+    } else {
+        None
+    };
+    let mut r = health::analyze(&entries, counts.as_ref(), !premium);
+    r.breach_check_failed = failed;
+    Ok(HealthReport {
+        total_passwords: r.total_passwords,
+        reused_count: r.reused_count,
+        weak_count: r.weak_count,
+        breached_count: r.breached_count(),
+        score: r.score,
+        reused_ids: r.reused_ids,
+        weak_ids: r.weak_ids,
+        breached_ids: r.breached_ids,
+        breach_counts: r.breach_counts,
+        breach_locked: r.breach_locked,
+        breach_check_failed: r.breach_check_failed,
+    })
+}
+
+fn health_entries(state: &State<'_, VaultState>) -> CommandResult<Vec<health::HealthLogin>> {
+    let vault = lock_vault(state)?;
     let (items, _) = vault.list()?;
     let names: HashMap<String, String> = items.into_iter().map(|i| (i.id, i.display_name)).collect();
     let (payloads, _) = vault.all_payloads()?;
@@ -67,20 +107,7 @@ pub fn vault_health(state: State<'_, VaultState>) -> CommandResult<HealthReport>
             entry.display_name = name.clone();
         }
     }
-    let r = health::analyze(&entries, None, true);
-    Ok(HealthReport {
-        total_passwords: r.total_passwords,
-        reused_count: r.reused_count,
-        weak_count: r.weak_count,
-        breached_count: r.breached_count(),
-        score: r.score,
-        reused_ids: r.reused_ids,
-        weak_ids: r.weak_ids,
-        breached_ids: r.breached_ids,
-        breach_counts: r.breach_counts,
-        breach_locked: r.breach_locked,
-        breach_check_failed: r.breach_check_failed,
-    })
+    Ok(entries)
 }
 
 // MARK: generator
