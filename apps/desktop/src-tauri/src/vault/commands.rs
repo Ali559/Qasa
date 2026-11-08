@@ -52,7 +52,10 @@ pub async fn vault_verify_password(state: State<'_, VaultState>, password: Strin
 }
 
 #[tauri::command]
-pub fn vault_lock(state: State<'_, VaultState>) -> CommandResult<()> {
+pub fn vault_lock(state: State<'_, VaultState>, account: State<'_, crate::account::commands::AccountState>) -> CommandResult<()> {
+    if let Ok(mut a) = account.0.try_lock() {
+        a.on_lock();
+    }
     with(&state, |v| {
         v.lock();
         Ok(())

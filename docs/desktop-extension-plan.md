@@ -16,6 +16,33 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 2 built.**
+- Desktop core `src-tauri/src/account/`: account id, device fingerprint, license token and
+  the cached verifying key in the OS keychain (`keyring`); the API client (debug:
+  `QASA_API_URL` or `http://localhost:8080`; release: https only); Ed25519 license
+  verification that fails closed (bad signature, expiry, `alg: none`), and never lets a bad
+  token replace a good one; registration with the device-limit answer kept for the UI;
+  license refresh with a retry after key rotation; locale sync (also on a language
+  change); the Pwned Passwords check (5-character SHA-1 prefix, `Add-Padding`, cached per
+  unlock, cleared on lock); devices, inbox, pricing, payment intents and status (license
+  refreshed on success), subscription, payment method, clear local data (server unlink
+  first, best effort) and account deletion (server first, then the local wipe).
+- Bootstrap runs after unlock and after vault creation and never blocks the vault: offline
+  just means Free features until the next unlock.
+- The inbox has no push on desktop: the unread count is checked on unlock and every 5
+  minutes.
+- Screens: the You profile card with plan and Upgrade, the Home bell with an unread badge,
+  the breached card and Alerts tab on Premium (found / none / offline, "seen N times"),
+  Health's breach stat, Settings' profile card, Linked devices section and **Delete
+  account** (new; the phones only have it in their follow-up list), Premium upgrade,
+  Manage subscription, Linked devices, Notifications.
+- Payments on a computer: Wayl's https page opens in the browser; a wallet deep link
+  (`fib://…`) is shown as a QR code for the phone. Development builds can confirm stub
+  wallet payments, as iOS Debug does.
+- Checked against a local API (`live_account_flow` test, ignored by default): register,
+  verified license, devices, inbox count, stub FIB payment → Premium (5 devices, active
+  subscription), the real Pwned Passwords range API, account deletion → token rejected.
+
 **2026-11-08 — Phase 1 built (not yet checked by hand in the app window).**
 - `core/qasa-vault` gained the payload model (`payload.rs`: reads iOS's `{"login":{"_0":…}}`
   and Android's `{"type":…}` shapes, writes the iOS shape), the country list, 2FA codes

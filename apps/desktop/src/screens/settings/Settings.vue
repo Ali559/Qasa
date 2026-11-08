@@ -12,10 +12,14 @@ import PageFrame from '@/components/PageFrame.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import { LANGUAGE_NAMES } from '@/i18n'
 import { prefs, useT } from '@/prefs'
-import { vaultApi } from '@/vault/api'
+import { accountApi } from '@/account/api'
+import { forgetAccount } from '@/account/store'
 import { loadVault, session } from '@/vault/session'
 import { toolsApi } from '@/vault/tools'
 import { isCommandError } from '@/vault/types'
+import { Crown, Laptop, User, UserX } from 'lucide-vue-next'
+import { account } from '@/account/store'
+import { openSubPage } from '@/nav'
 import AppearanceSheet from './AppearanceSheet.vue'
 import AutoLockSheet from './AutoLockSheet.vue'
 import ChangeMasterPassword from './ChangeMasterPassword.vue'
@@ -28,6 +32,7 @@ const showAutoLock = ref(false)
 const appearanceSheet = ref<'language' | 'theme' | null>(null)
 const showClearDataAlert = ref(false)
 const showLogoutConfirm = ref(false)
+const showDeleteAccount = ref(false)
 /** The iOS status line, re-read on render so it follows a language change. */
 const statusMessage = ref<(() => string) | null>(null)
 const busy = ref(false)
@@ -93,10 +98,27 @@ async function performImport() {
 async function clearLocalData() {
   showClearDataAlert.value = false
   try {
-    await vaultApi.wipe()
+    // Unlinks this device on the server (best effort), forgets the account, wipes the vault.
+    await accountApi.clearLocal()
+    forgetAccount()
     emit('lock')
   } catch (e) {
     statusMessage.value = () => describe(e)
+  }
+}
+
+/** `DELETE /v1/account`, then the local wipe; the root then shows Create vault. */
+async function deleteAccount() {
+  showDeleteAccount.value = false
+  busy.value = true
+  try {
+    await accountApi.deleteAccount()
+    forgetAccount()
+    emit('lock')
+  } catch {
+    statusMessage.value = () => t('settings.deleteAccountFailed')
+  } finally {
+    busy.value = false
   }
 }
 
@@ -108,6 +130,28 @@ function logout() {
 
 <template>
   <PageFrame :title="t('settings.title')" back @back="emit('back')">
+    <!-- iOS profileCard: plan badge, then Upgrade or Manage Subscription. -->
+    <CardContainer>
+      <div class="profile">
+        <span class="avatar"><User :size="24" fill="currentColor" /></span>
+        <span class="who">
+          <span class="name">{{ t('session.qasaUser') }}</span>
+          <span class="plan" :class="{ premium: account.status?.isPremium }">
+            <Crown v-if="account.status?.isPremium" :size="11" />
+            <User v-else :size="11" />
+            {{ t(account.status?.isPremium ? 'settings.premiumAccount' : 'settings.freeAccount') }}
+          </span>
+        </span>
+      </div>
+      <button
+        type="button"
+        class="plan-button"
+        @click="openSubPage(account.status?.isPremium ? 'manageSubscription' : 'premiumUpgrade', 'settings')"
+      >
+        {{ t(account.status?.isPremium ? 'settings.manageSubscription' : 'settings.upgradePremium') }}
+      </button>
+    </CardContainer>
+
     <section class="group">
       <SectionLabel :text="t('settings.security')" />
       <CardContainer>
@@ -122,6 +166,23 @@ function logout() {
           :title="t('settings.autoLock')"
           :trailing-text="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
           @click="showAutoLock = true"
+        />
+      </CardContainer>
+    </section>
+
+    <!-- Pairing code and "Sync on this network" arrive with Wi‑Fi pairing (phase 4). -->
+    <section class="group">
+      <div class="label-row">
+        <SectionLabel :text="t('settings.linkedDevices')" />
+        <span class="active-count">{{ t('settings.activeCount', account.status?.devicesUsed ?? 1) }}</span>
+      </div>
+      <CardContainer>
+        <NavChevronRow
+          :icon="Laptop"
+          :title="t('settings.thisComputer')"
+          :subtitle="t('settings.thisDevice')"
+          icon-color="var(--accent)"
+          @click="openSubPage('linkedDevices', 'settings')"
         />
       </CardContainer>
     </section>
@@ -162,6 +223,14 @@ function logout() {
         />
         <hr class="divider" />
         <NavChevronRow :icon="LogOut" :title="t('settings.logout')" @click="showLogoutConfirm = true" />
+        <hr class="divider" />
+        <NavChevronRow
+          :icon="UserX"
+          :title="t('settings.deleteAccount')"
+          destructive
+          :disabled="busy || !account.status?.accountId"
+          @click="showDeleteAccount = true"
+        />
       </CardContainer>
     </section>
 
@@ -181,6 +250,15 @@ function logout() {
         @cancel="showClearDataAlert = false"
       />
       <ConfirmDialog
+        :open="showDeleteAccount"
+        :title="t('settings.deleteAccountTitle')"
+        :message="t('settings.deleteAccountMessage')"
+        :confirm-label="t('common.delete')"
+        destructive
+        @confirm="deleteAccount"
+        @cancel="showDeleteAccount = false"
+      />
+      <ConfirmDialog
         :open="showLogoutConfirm"
         :title="t('settings.lockAlertTitle')"
         :message="t('settings.lockAlertMessage')"
@@ -194,6 +272,75 @@ function logout() {
 </template>
 
 <style scoped>
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  color: var(--text-secondary);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.plan.premium {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.plan-button {
+  margin-top: 12px;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--card-background-light);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.active-count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
 .group {
   display: flex;
   flex-direction: column;

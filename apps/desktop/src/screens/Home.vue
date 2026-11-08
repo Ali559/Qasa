@@ -3,10 +3,11 @@
 // the health bar card, the VPN card and the breached-passwords card. The page wash turns
 // warm when nothing needs attention and cool when something does. On desktop the VPN card
 // points to the phone (no VPN in v1), and the notifications bell arrives with the inbox.
-import { CheckCircle2, KeyRound, Lightbulb, Lock, ShieldHalf } from 'lucide-vue-next'
+import { Bell, CheckCircle2, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import { account } from '@/account/store'
 import { selectTab, openPage } from '@/nav'
 import { useT } from '@/prefs'
 import { session } from '@/vault/session'
@@ -33,6 +34,9 @@ async function refresh() {
 
 onMounted(refresh)
 watch(() => session.items, refresh)
+watch(() => account.status?.isPremium, refresh)
+
+const premium = computed(() => account.status?.isPremium ?? false)
 
 const greetingKey = computed(() => {
   const hour = new Date().getHours()
@@ -77,9 +81,15 @@ const health = computed(() => {
 <template>
   <div class="home" :class="status === 'allGood' ? 'warm' : 'calm'">
     <div class="column">
-      <div class="greeting">
-        <span class="hello">{{ t(greetingKey) }}</span>
-        <span class="name">{{ t('session.qasaUser') }}</span>
+      <div class="greeting-row">
+        <div class="greeting">
+          <span class="hello">{{ t(greetingKey) }}</span>
+          <span class="name">{{ t('session.qasaUser') }}</span>
+        </div>
+        <button type="button" class="bell" :aria-label="t('nav.notifications')" :title="t('nav.notifications')" @click="openPage('notifications')">
+          <Bell :size="18" />
+          <span v-if="account.unread > 0" class="badge">{{ account.unread > 99 ? '99+' : account.unread }}</span>
+        </button>
       </div>
 
       <section class="hero">
@@ -121,14 +131,15 @@ const health = computed(() => {
         </div>
       </div>
 
-      <button type="button" class="home-card" @click="selectTab('alerts')">
+      <button type="button" class="home-card" @click="premium ? selectTab('alerts') : openPage('premiumUpgrade')">
         <div class="card-row">
-          <span class="tile"><Lock :size="18" /></span>
+          <span class="tile"><ShieldAlert v-if="premium" :size="18" /><Lock v-else :size="18" /></span>
           <span class="card-text">
-            <span class="card-title">{{ t('breached.lockedTitle') }}</span>
-            <span class="card-line">{{ t('breached.lockedBody') }}</span>
+            <span class="card-title">{{ t(premium ? 'nav.breachedPasswords' : 'breached.lockedTitle') }}</span>
+            <span class="card-line">{{ t(premium ? 'home.breachedBody' : 'breached.lockedBody') }}</span>
           </span>
         </div>
+        <span v-if="!premium" class="pill muted">{{ t('breached.unlock') }}</span>
       </button>
     </div>
   </div>
@@ -156,6 +167,40 @@ const health = computed(() => {
   max-width: 720px;
   margin-inline: auto;
   padding: 16px var(--screen-padding) 40px;
+}
+
+.greeting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card-background);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 4px;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
 }
 
 .greeting {

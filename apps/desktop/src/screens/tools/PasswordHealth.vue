@@ -2,17 +2,19 @@
 // iOS `PasswordHealthView` + `PasswordHealthIssuesView`: the half-circle score gauge
 // (animated 1.1 s, off with reduced motion), four stat cards, the locked breach card on
 // Free, "How scoring works", and the issue lists (Reused / Weak / Breached) one level in.
-import { ArrowLeftRight, Lock, ShieldCheck, TriangleAlert, ShieldAlert } from 'lucide-vue-next'
+import { ArrowLeftRight, Lock, ShieldCheck, TriangleAlert } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import FilterChip from '@/components/FilterChip.vue'
 import PageFrame from '@/components/PageFrame.vue'
-import { nav, selectTab } from '@/nav'
+import { nav, openPage, selectTab } from '@/nav'
 import { useT } from '@/prefs'
 import { session } from '@/vault/session'
 import { toolsApi, type HealthReport } from '@/vault/tools'
 import VaultRow from '../vault/VaultRow.vue'
+import BreachLockedCard from '../BreachLockedCard.vue'
+import { account } from '@/account/store'
 
 defineEmits<{ back: [] }>()
 const t = useT()
@@ -47,6 +49,7 @@ async function refresh() {
 
 onMounted(refresh)
 watch(() => session.items, refresh)
+watch(() => account.status?.isPremium, refresh)
 
 const breachLocked = computed(() => report.value?.breachLocked ?? true)
 const scoreColor = computed(() => (shownScore.value >= 80 ? 'var(--accent)' : shownScore.value >= 50 ? 'var(--gold)' : 'var(--danger)'))
@@ -90,12 +93,7 @@ function openItem(id: string) {
     <div class="chips">
       <FilterChip v-for="tab in ['reused', 'weak', 'breached'] as IssueTab[]" :key="tab" :title="t(`health.${tab}`)" :selected="issues === tab" @click="issues = tab" />
     </div>
-    <CardContainer v-if="issues === 'breached' && breachLocked" :padding="20">
-      <div class="stack">
-        <h2 class="locked"><ShieldAlert :size="20" />{{ t('breached.lockedTitle') }}</h2>
-        <p class="muted">{{ t('breached.lockedBody') }}</p>
-      </div>
-    </CardContainer>
+    <BreachLockedCard v-if="issues === 'breached' && breachLocked" />
     <div v-else-if="issueRows.length === 0" class="empty">
       <component :is="EMPTY[issues].icon" :size="40" />
       <strong>{{ t(EMPTY[issues].title) }}</strong>
@@ -142,7 +140,7 @@ function openItem(id: string) {
         <span class="value" style="color: var(--danger)">{{ report?.weakCount ?? 0 }}</span>
         <span class="title">{{ t('health.weak') }}</span>
       </button>
-      <button v-if="breachLocked" type="button" class="stat" @click="issues = 'breached'">
+      <button v-if="breachLocked" type="button" class="stat" @click="openPage('premiumUpgrade')">
         <span class="value lock"><Lock :size="24" /></span>
         <span class="title">{{ t('health.breached') }}</span>
       </button>
@@ -152,12 +150,8 @@ function openItem(id: string) {
       </button>
     </div>
 
-    <CardContainer v-if="breachLocked" :padding="20">
-      <div class="stack">
-        <h2 class="locked"><ShieldAlert :size="20" />{{ t('breached.lockedTitle') }}</h2>
-        <p class="muted">{{ t('breached.lockedBody') }}</p>
-      </div>
-    </CardContainer>
+    <BreachLockedCard v-if="breachLocked" />
+    <p v-else-if="report?.breachCheckFailed" class="muted">{{ t('breached.offline') }}</p>
 
     <CardContainer>
       <div class="stack">
