@@ -3,6 +3,8 @@ package alibarznji.qasa.vault
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 enum class VaultItemKind(val raw: String) {
     Login("login"),
@@ -259,12 +261,46 @@ object VaultJson {
     fun encodePayload(payload: VaultPayload): ByteArray =
         json.encodeToString(VaultPayload.serializer(), payload).toByteArray(Charsets.UTF_8)
 
-    fun decodePayload(bytes: ByteArray): VaultPayload =
-        json.decodeFromString(VaultPayload.serializer(), bytes.toString(Charsets.UTF_8))
+    /**
+     * Reads Android's `{"type": …}` shape and, through [PayloadShapes.toAndroid], every
+     * other shape — iOS's `{"login":{"_0":…}}` arrives as is over Wi‑Fi sync and stays
+     * stored that way (rows are applied as ciphertext, never re-encrypted).
+     */
+    fun decodePayload(bytes: ByteArray): VaultPayload {
+        val text = bytes.toString(Charsets.UTF_8)
+        val androidText = if (isAndroidShape(text)) {
+            text
+        } else {
+            PayloadShapes.toAndroid(bytes).toString(Charsets.UTF_8)
+        }
+        return json.decodeFromString(VaultPayload.serializer(), androidText)
+    }
+
+    /** Android's own shape: a JSON object whose `type` is the payload's kind. */
+    fun isAndroidShape(text: String): Boolean = try {
+        val type = (json.parseToJsonElement(text) as? JsonObject)?.get("type")
+        type is JsonPrimitive && type.isString
+    } catch (_: Exception) {
+        false
+    }
 
     fun encodeEnvelope(env: VaultEnvelope): ByteArray =
         json.encodeToString(VaultEnvelope.serializer(), env).toByteArray(Charsets.UTF_8)
 
     fun decodeEnvelope(bytes: ByteArray): VaultEnvelope =
         json.decodeFromString(VaultEnvelope.serializer(), bytes.toString(Charsets.UTF_8))
+}
+
+/**
+ * Payload JSON shape conversion, done by the shared Rust core (`qasa-ffi`). Swappable so
+ * JVM unit tests, where the Android native library can't load, can stand in for it.
+ */
+object PayloadShapes {
+    /** Any shape → Android's. */
+    @Volatile
+    var toAndroid: (ByteArray) -> ByteArray = { uniffi.qasa_ffi.payloadToAndroid(it) }
+
+    /** Any shape → the canonical (iOS) one that crosses the network. */
+    @Volatile
+    var toCanonical: (ByteArray) -> ByteArray = { uniffi.qasa_ffi.payloadToCanonical(it) }
 }

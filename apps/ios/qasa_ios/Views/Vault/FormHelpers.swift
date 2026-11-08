@@ -85,7 +85,7 @@ struct CountryMenuPicker: View {
 }
 
 struct CollectionPickerField: View {
-    @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
     @Binding var collectionId: UUID?
     @Environment(\.modelContext) private var modelContext
     @State private var newName = ""

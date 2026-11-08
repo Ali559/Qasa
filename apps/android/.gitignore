@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Built by `make android-ffi` from core/qasa-ffi.
+app/src/main/jniLibs/

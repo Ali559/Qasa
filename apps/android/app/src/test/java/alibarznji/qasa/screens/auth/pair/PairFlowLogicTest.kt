@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Expectations follow iOS `PairExistingVaultView.applyPairing` and `PairingSessionStore`. */
+/** Expectations follow iOS `PairExistingVaultView.applyPairing`. */
 class PairFlowLogicTest {
     private val id = "3F2504E0-4F89-11D3-9A0C-0305E82C3301"
 
@@ -17,25 +17,6 @@ class PairFlowLogicTest {
         assertEquals(id.lowercase(), parseAccountUuid("  $id \n"))
         assertNull(parseAccountUuid("1-2-3-4-5"))
         assertNull(parseAccountUuid("123456"))
-    }
-
-    @Test fun accountIdWinsOverCode() {
-        val store = PairingSessionStore()
-        val code = store.publish("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-        assertEquals(id.lowercase(), resolvePairTarget(id, code, store))
-        assertEquals("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", resolvePairTarget("not a uuid", " $code ", store))
-        assertNull(resolvePairTarget("", "000000x", store))
-    }
-
-    @Test fun codesExpireAfterTenMinutes() {
-        var now = 0L
-        val store = PairingSessionStore(now = { now })
-        val code = store.publish(id)
-        assertEquals(6, code.length)
-        assertEquals(code, store.currentPublishedCode(id))
-        now = 600_000L
-        assertNull(store.resolve(code))
-        assertNull(store.currentPublishedCode(id))
     }
 
     @Test fun linkCheckMapsToIosOutcomes() {
@@ -50,8 +31,9 @@ class PairFlowLogicTest {
 
     @Test fun backWalksStepsThenCancels() {
         assertNull(PairStep.Intro.previous())
-        assertEquals(PairStep.Intro, PairStep.EnterCode.previous())
-        assertEquals(PairStep.EnterCode, PairStep.NeedsPremium.previous())
+        assertEquals(PairStep.Intro, PairStep.AccountId.previous())
+        assertEquals(PairStep.AccountId, PairStep.NeedsPremium.previous())
         assertNull(PairStep.Success.previous())
+        assertNull(PairStep.Adopted.previous())
     }
 }

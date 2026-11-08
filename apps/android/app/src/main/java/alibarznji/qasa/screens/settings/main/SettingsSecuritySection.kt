@@ -1,7 +1,6 @@
 package alibarznji.qasa.screens.settings.main
 
 import alibarznji.qasa.R
-import alibarznji.qasa.screens.auth.pair.PairingSessionStore
 import alibarznji.qasa.screens.settings.SettingsViewModel
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.Password
@@ -40,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import java.util.UUID
 
 /**
  * Security card rows (`SettingsView.swift:35-78`): Change Master Password, Biometric Unlock,
@@ -102,7 +99,8 @@ internal fun SecurityRows(
 
 /**
  * Linked Devices section (`SettingsView.swift:80-125`): "N Active" header, this device,
- * Show pairing code, Sync on this network.
+ * Sync on this network. (The in-memory "Show pairing code" row is gone: a new device now
+ * joins over Wi‑Fi from Sync on this network.)
  */
 @Composable
 internal fun LinkedDevicesSection(
@@ -114,8 +112,6 @@ internal fun LinkedDevicesSection(
     val c = qasaColors
     val context = LocalContext.current
     var linkedDeviceCount by remember { mutableIntStateOf(0) }
-    // Like iOS, the code is only shown after a tap in this visit; it stays valid for 10 min.
-    var pairingCode by remember { mutableStateOf<String?>(null) }
 
     // iOS `.task { fetchDevices() }`: a failed fetch just leaves the count at 0.
     LaunchedEffect(Unit) {
@@ -138,18 +134,6 @@ internal fun LinkedDevicesSection(
             title = remember { deviceName(context) },
             subtitle = stringResource(R.string.settings_thisdevice),
             onClick = onDevices,
-        )
-        HorizontalDivider(color = c.stroke)
-        NavChevronRow(
-            icon = Icons.Filled.QrCode,
-            title = stringResource(R.string.settings_showpairingcode),
-            subtitle = pairingCode?.let { stringResource(R.string.settings_pairingcodefmt, it) }
-                ?: stringResource(R.string.settings_pairingsubtitle),
-            onClick = {
-                // iOS only publishes a well-formed UUID account id.
-                val id = vm.store.accountId?.takeIf { runCatching { UUID.fromString(it) }.isSuccess }
-                if (id != null) pairingCode = PairingSessionStore.shared.publish(id)
-            },
         )
         HorizontalDivider(color = c.stroke)
         NavChevronRow(

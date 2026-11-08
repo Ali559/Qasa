@@ -7,7 +7,7 @@ struct VaultItemDetailView: View {
     var onDeleted: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
     @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var payload: VaultPayload = .login(LoginFields())

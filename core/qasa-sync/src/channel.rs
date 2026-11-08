@@ -212,6 +212,9 @@ impl<S: Read + Write> Channel<S> {
             Role::Join => {
                 let got = read_frame(&mut stream)?;
                 if got.len() != theirs.len() || !bool::from(got.ct_eq(&theirs)) {
+                    // An empty confirm tells the host it was the code, not the network,
+                    // so it can show "wrong code, N tries left". It carries no secret.
+                    let _ = write_frame(&mut stream, &[]);
                     return Err(SyncError::WrongCode);
                 }
                 write_frame(&mut stream, &mine)?;
@@ -279,9 +282,8 @@ pub mod tests {
         let host = thread::spawn(move || Channel::open(a, Role::Host, "123456").err());
         let joined = Channel::open(b, Role::Join, "654321").err();
         assert_eq!(joined, Some(SyncError::WrongCode));
-        // The joiner hangs up without confirming, so the host sees a closed connection or
-        // a wrong code; either way no channel.
-        assert!(host.join().unwrap().is_some());
+        // The host is told it was the code, not a dropped connection.
+        assert_eq!(host.join().unwrap(), Some(SyncError::WrongCode));
     }
 
     #[test]

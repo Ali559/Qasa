@@ -1,20 +1,20 @@
 import SwiftUI
-import UniformTypeIdentifiers
+import SwiftData
 
+/// Settings → Sync on this network: show a code (this device has the vault) or find a
+/// device and type its code. Same behaviour as the desktop's sync screen.
 struct LANSyncView: View {
     var onUpgrade: () -> Void = {}
 
     @Environment(AppSession.self) private var session
     @Environment(AppPreferences.self) private var prefs
     @Environment(\.dismiss) private var dismiss
-    @State private var pairCode = ""
+    @Environment(\.modelContext) private var modelContext
+    @State private var sync = WiFiSyncController()
     @State private var mode: Mode = .host
-    @State private var exportedURL: URL?
-    @State private var validationMessage: String?
 
     enum Mode { case host, join }
 
-    private var sync: LANVaultSyncService { .shared }
     private var locale: Locale { prefs.locale }
 
     var body: some View {
@@ -46,6 +46,11 @@ struct LANSyncView: View {
                 }
             }
         }
+        .onChange(of: mode) { _, newMode in
+            sync.stop()
+            if newMode == .join { sync.startBrowsing() }
+        }
+        .onDisappear { sync.stop() }
     }
 
     private var premiumBody: some View {
@@ -56,6 +61,7 @@ struct LANSyncView: View {
             Text(L10n.tr("lan.secureBody", locale: locale))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
 
             Picker(L10n.tr("common.mode", locale: locale), selection: $mode) {
                 Text(L10n.tr("lan.hostMode", locale: locale)).tag(Mode.host)
@@ -63,49 +69,217 @@ struct LANSyncView: View {
             }
             .pickerStyle(.segmented)
 
-            ThemedTextField(icon: "number", placeholder: "6-digit code", text: $pairCode)
-
-            Text(validationMessage ?? sync.statusMessage)
-                .font(.qasaLabel(12))
-                .foregroundColor(Theme.accent)
-
-            PrimaryButton(
-                title: mode == .host
-                    ? L10n.tr("lan.startHost", locale: locale)
-                    : L10n.tr("lan.findHost", locale: locale),
-                icon: "wifi",
-                cornerRadius: 8
-            ) {
-                runSync()
+            switch mode {
+            case .host:
+                WiFiHostPanel(sync: sync, container: modelContext.container)
+            case .join:
+                WiFiJoinPanel(sync: sync, container: modelContext.container)
             }
 
-            Button(L10n.tr("lan.stop", locale: locale)) { sync.stop() }
-                .foregroundColor(Theme.danger)
+            SyncOutcomeView(stage: sync.stage)
+        }
+    }
+}
+
+/// Host side: the code, its countdown, status and Stop.
+struct WiFiHostPanel: View {
+    let sync: WiFiSyncController
+    let container: ModelContainer
+
+    @Environment(AppPreferences.self) private var prefs
+    private var locale: Locale { prefs.locale }
+
+    var body: some View {
+        CardContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.tr("sync.hostTitle", locale: locale))
+                    .font(.qasa(17, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+                Text(L10n.tr("sync.hostBody", locale: locale))
+                    .font(.qasa(14))
+                    .foregroundColor(Theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let code = sync.hostCode, let expiresAt = sync.hostExpiresAt {
+                    Text(Self.spaced(code))
+                        .font(.system(size: 44, weight: .bold, design: .monospaced))
+                        .foregroundColor(Theme.accent)
+                        .environment(\.layoutDirection, .leftToRight)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .accessibilityLabel(code.map(String.init).joined(separator: " "))
+
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        let left = max(0, Int(expiresAt.timeIntervalSince(context.date).rounded(.up)))
+                        Text(String(format: L10n.tr("sync.codeExpires", locale: locale), left))
+                            .font(.qasaLabel(12))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text(L10n.tr(sync.stage == .connecting ? "sync.connecting" : "sync.waiting", locale: locale))
+                            .font(.qasa(14))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+
+                    Button(L10n.tr("lan.stop", locale: locale)) { sync.stop() }
+                        .font(.qasa(16, weight: .semibold))
+                        .foregroundColor(Theme.danger)
+                } else {
+                    PrimaryButton(
+                        title: L10n.tr("lan.startHost", locale: locale),
+                        icon: "wifi",
+                        cornerRadius: 8
+                    ) {
+                        sync.startHost(container: container)
+                    }
+                }
+            }
         }
     }
 
-    private func runSync() {
-        guard session.isPremium else {
-            validationMessage = L10n.tr("lan.requiresPremium", locale: locale)
-            return
-        }
-        let code = pairCode.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard code.count >= 4 else {
-            validationMessage = L10n.tr("lan.enterCode", locale: locale)
-            return
-        }
-        validationMessage = nil
-        if mode == .host {
-            let blob = Data("qasa-vault-placeholder:\(VaultKeychainStore.accountId ?? "")".utf8)
-            sync.startHost(pairCode: code, vaultBlob: blob)
-        } else {
-            sync.startBrowse(pairCode: code) { data in
-                if let s = String(data: data, encoding: .utf8),
-                   s.hasPrefix("qasa-vault-placeholder:"),
-                   let id = s.split(separator: ":").last.map(String.init) {
-                    VaultKeychainStore.accountId = id
+    static func spaced(_ code: String) -> String {
+        guard code.count == 6 else { return code }
+        return "\(code.prefix(3)) \(code.suffix(3))"
+    }
+}
+
+/// Join side: the live list of devices showing a code, the code field and Sync.
+struct WiFiJoinPanel: View {
+    let sync: WiFiSyncController
+    let container: ModelContainer
+
+    @Environment(AppPreferences.self) private var prefs
+    @State private var selected: WiFiSyncController.Peer?
+    @State private var code = ""
+    private var locale: Locale { prefs.locale }
+
+    private var canSync: Bool {
+        selected != nil && code.filter(\.isNumber).count == 6 && !sync.isJoining
+    }
+
+    var body: some View {
+        CardContainer {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(L10n.tr("sync.joinTitle", locale: locale))
+                    .font(.qasa(17, weight: .semibold))
+                    .foregroundColor(Theme.textPrimary)
+
+                if sync.peers.isEmpty {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text(L10n.tr("sync.searching", locale: locale))
+                            .font(.qasa(14))
+                            .foregroundColor(Theme.textSecondary)
+                    }
+                    Text(L10n.tr("sync.noPeers", locale: locale))
+                        .font(.qasa(12))
+                        .foregroundColor(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(sync.peers) { peer in
+                            Button { selected = peer } label: { peerRow(peer) }
+                                .buttonStyle(.plain)
+                            if peer != sync.peers.last {
+                                Divider().background(Theme.stroke)
+                            }
+                        }
+                    }
                 }
+
+                SectionLabel(text: L10n.tr("pair.codeLabel", locale: locale))
+                ThemedTextField(
+                    icon: "number",
+                    placeholder: L10n.tr("pair.codePlaceholder", locale: locale),
+                    text: $code
+                )
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+                .onChange(of: code) { _, new in
+                    let digits = String(new.filter(\.isNumber).prefix(6))
+                    if digits != new { code = digits }
+                }
+
+                PrimaryButton(
+                    title: sync.isJoining
+                        ? L10n.tr("sync.connecting", locale: locale)
+                        : L10n.tr("sync.syncButton", locale: locale),
+                    icon: sync.isJoining ? nil : "arrow.triangle.2.circlepath",
+                    cornerRadius: 8
+                ) {
+                    guard canSync, let selected else { return }
+                    sync.join(peer: selected, code: code, container: container)
+                }
+                .disabled(!canSync)
+                .opacity(canSync ? 1 : 0.5)
             }
+        }
+        .onAppear { sync.startBrowsing() }
+        .onChange(of: sync.peers) { _, peers in
+            if let selected, !peers.contains(selected) { self.selected = nil }
+            if selected == nil, peers.count == 1 { selected = peers.first }
+        }
+    }
+
+    private func peerRow(_ peer: WiFiSyncController.Peer) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: Self.icon(for: peer.platform))
+                .foregroundColor(Theme.accent)
+                .frame(width: 24)
+            Text(peer.name)
+                .font(.qasa(15, weight: .medium))
+                .foregroundColor(Theme.textPrimary)
+                .lineLimit(1)
+            Spacer()
+            Image(systemName: selected == peer ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(selected == peer ? Theme.accent : Theme.textSecondary)
+        }
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+    }
+
+    private static func icon(for platform: String) -> String {
+        switch platform {
+        case "ios", "android": return "iphone"
+        case "macos": return "laptopcomputer"
+        default: return "desktopcomputer"
+        }
+    }
+}
+
+/// The success or failure line under either panel.
+struct SyncOutcomeView: View {
+    let stage: WiFiSyncController.Stage
+
+    @Environment(AppPreferences.self) private var prefs
+    private var locale: Locale { prefs.locale }
+
+    var body: some View {
+        switch stage {
+        case .done(let result):
+            VStack(alignment: .leading, spacing: 6) {
+                Text(String(
+                    format: L10n.tr(result.adopted ? "sync.adoptedTitle" : "sync.doneTitle", locale: locale),
+                    result.peerName
+                ))
+                .font(.qasa(18, weight: .bold))
+                .foregroundColor(Theme.accent)
+                Text(result.adopted
+                     ? String(format: L10n.tr("sync.adoptedBody", locale: locale), result.peerName)
+                     : String(format: L10n.tr("sync.doneBody", locale: locale), result.received, result.sent))
+                .font(.qasa(14))
+                .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+        case .failed(let failure):
+            Text(failure.message(locale: locale))
+                .font(.qasa(13, weight: .medium))
+                .foregroundColor(Theme.danger)
+                .fixedSize(horizontal: false, vertical: true)
+        default:
+            EmptyView()
         }
     }
 }

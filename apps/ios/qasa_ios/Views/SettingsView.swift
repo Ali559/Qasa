@@ -19,7 +19,6 @@ struct SettingsView: View {
     @State private var showChangeMasterPassword = false
     @State private var showAutoLock = false
     @State private var exportDocument: CSVDocument?
-    @State private var pairingCode: String?
     @State private var linkedDeviceCount = 0
     @State private var statusMessage: String?
 
@@ -107,21 +106,6 @@ struct SettingsView: View {
                                     title: UIDevice.current.name,
                                     subtitle: L10n.tr("settings.thisDevice", locale: locale),
                                     iconColor: Theme.accent
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            Divider().background(Theme.stroke)
-                            Button {
-                                if let id = VaultKeychainStore.accountId.flatMap(UUID.init(uuidString:)) {
-                                    pairingCode = PairingSessionStore.shared.publish(accountId: id)
-                                }
-                            } label: {
-                                NavChevronRow(
-                                    icon: "qrcode",
-                                    title: L10n.tr("settings.showPairingCode", locale: locale),
-                                    subtitle: pairingCode.map {
-                                        String(format: L10n.tr("settings.pairingCodeFmt", locale: locale), $0)
-                                    } ?? L10n.tr("settings.pairingSubtitle", locale: locale)
                                 )
                             }
                             .buttonStyle(.plain)

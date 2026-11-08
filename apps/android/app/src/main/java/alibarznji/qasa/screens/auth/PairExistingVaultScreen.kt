@@ -1,12 +1,14 @@
 package alibarznji.qasa.screens.auth
 
 import alibarznji.qasa.R
-import alibarznji.qasa.screens.auth.pair.PairEnterCodeBody
-import alibarznji.qasa.screens.auth.pair.PairIntroBody
+import alibarznji.qasa.screens.auth.pair.PairAccountIdBody
+import alibarznji.qasa.screens.auth.pair.PairAdoptedBody
 import alibarznji.qasa.screens.auth.pair.PairPremiumBody
 import alibarznji.qasa.screens.auth.pair.PairStep
 import alibarznji.qasa.screens.auth.pair.PairSuccessBody
 import alibarznji.qasa.screens.auth.pair.PairViewModel
+import alibarznji.qasa.screens.auth.pair.PairWifiBody
+import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.ScreenScaffold
@@ -15,35 +17,37 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 
 /**
- * Link Device — the iOS 4-step flow from `PairExistingVaultView.swift`:
- * intro → pairing code (or account id) → Premium required / Account linked.
+ * Link Device — "I already have Qasa on another device".
  *
- * Pairing only adopts the other device's account id into `VaultSecureStore.accountId`.
- * "Continue to vault" then returns to the normal Create screen, which creates the local
- * vault under that id (iOS `qasaApp.swift:146-153` does the same: `onPaired` just closes
- * the cover and leaves `CreateVaultView` showing).
+ * Main path: this device joins the other one over Wi‑Fi (it hosts from Settings → Linked
+ * Devices → Sync on this network). The vault's key material, every encrypted record and
+ * the account id arrive inside the code-authenticated channel — never from a pasted id
+ * alone — and "Continue to vault" leads to Unlock with the same master password.
+ *
+ * Advanced path (kept): paste the other device's account id, checked with the server;
+ * the vault is then created on the normal Create screen under that id.
  *
  * The Create screen shows this inline in place of itself, so it is full screen like the
  * iOS `fullScreenCover`. System back walks to the previous step and otherwise cancels;
  * this handler is registered after Create's, so it takes precedence.
  *
- * @param onDone closes the flow (Cancel, or "Continue to vault" after linking).
- * @param onCreated unused: a vault is never created here any more. Kept so the Create
- *   screen's existing call site still compiles; it can be dropped there.
+ * @param onDone closes the flow (Cancel, or "Continue to vault").
  */
 @Composable
 fun PairExistingVaultScreen(
     onDone: () -> Unit,
     vm: PairViewModel = hiltViewModel(),
+    sync: WifiSyncViewModel = hiltViewModel(),
 ) {
     val close = {
         vm.reset()
+        sync.resetModes()
         onDone()
     }
 
@@ -51,9 +55,16 @@ fun PairExistingVaultScreen(
         if (!vm.back()) close()
     }
 
-    // iOS hides the bottom bar on the Premium card (`PairExistingVaultView.swift:46`).
+    // A successful join on a device without a vault always adopts.
+    val joined = sync.joinResult
+    LaunchedEffect(joined) {
+        if (joined != null && vm.step == PairStep.Intro) vm.adopted(joined.peerName)
+    }
+
+    // iOS hides the bottom bar on the Premium card (`PairExistingVaultView.swift:46`); the
+    // Wi‑Fi step has its own Sync button.
     val bottomBar: (@Composable () -> Unit)? =
-        if (vm.step == PairStep.NeedsPremium) null else ({ PairBottomBar(vm, onFinish = close) })
+        if (vm.step == PairStep.NeedsPremium || vm.step == PairStep.Intro) null else ({ PairBottomBar(vm, onFinish = close) })
 
     ScreenScaffold(
         header = {
@@ -66,33 +77,24 @@ fun PairExistingVaultScreen(
         stickyBottom = bottomBar,
     ) {
         when (vm.step) {
-            PairStep.Intro -> PairIntroBody()
-            PairStep.EnterCode -> PairEnterCodeBody(
-                code = vm.code,
-                onCodeChange = vm::updateCode,
+            PairStep.Intro -> PairWifiBody(sync, onAdvanced = vm::showAccountId)
+            PairStep.AccountId -> PairAccountIdBody(
                 accountId = vm.accountIdText,
                 onAccountIdChange = vm::updateAccountId,
                 errorMessage = vm.errorMessage?.let { stringResource(it) },
             )
             PairStep.NeedsPremium -> PairPremiumBody()
             PairStep.Success -> PairSuccessBody()
+            PairStep.Adopted -> PairAdoptedBody(vm.adoptedFrom)
         }
     }
 }
 
-/** `bottomBar` (`PairExistingVaultView.swift:181`). */
 @Composable
 private fun PairBottomBar(vm: PairViewModel, onFinish: () -> Unit) {
     StickyBottomBar {
         when (vm.step) {
-            PairStep.Intro -> PrimaryButton(
-                title = stringResource(R.string.pair_entercode),
-                icon = Icons.Default.QrCode,
-                onClick = vm::showEnterCode,
-            )
-            // iOS calls `onPaired(id)` or, with no id, `onCancel()`; both just close the
-            // cover, and the id is already stored, so one close covers both.
-            PairStep.Success -> PrimaryButton(
+            PairStep.Success, PairStep.Adopted -> PrimaryButton(
                 title = stringResource(R.string.pair_done),
                 icon = Icons.Default.Check,
                 onClick = onFinish,

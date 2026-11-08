@@ -14,9 +14,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /**
- * State for the Link Device flow (`PairExistingVaultView.swift:8-14`). Pairing only adopts
- * the account id; the vault itself is created afterwards on the normal Create screen,
- * where `VaultSession.createVault` keeps an existing `store.accountId`.
+ * State for the Link Device flow (`PairExistingVaultView.swift:8-14`). The main path joins
+ * the other device over Wi‑Fi ([alibarznji.qasa.screens.sync.WifiSyncViewModel]), which
+ * copies its vault and account here; the step then moves to [PairStep.Adopted]. The
+ * advanced path only adopts a pasted account id; the vault is then created on the normal
+ * Create screen, where `VaultSession.createVault` keeps an existing `store.accountId`.
  */
 @HiltViewModel
 class PairViewModel @Inject constructor(
@@ -25,7 +27,8 @@ class PairViewModel @Inject constructor(
 ) : ViewModel() {
     var step by mutableStateOf(PairStep.Intro)
         private set
-    var code by mutableStateOf("")
+    /** The device the vault came from, on [PairStep.Adopted]. */
+    var adoptedFrom by mutableStateOf("")
         private set
     var accountIdText by mutableStateOf("")
         private set
@@ -36,17 +39,19 @@ class PairViewModel @Inject constructor(
     var isChecking by mutableStateOf(false)
         private set
 
-    fun updateCode(value: String) {
-        // iOS uses a number pad; keep the field to the six digits a code can have.
-        code = value.filter(Char::isDigit).take(6)
-    }
-
     fun updateAccountId(value: String) {
         accountIdText = value
     }
 
-    fun showEnterCode() {
-        step = PairStep.EnterCode
+    fun showAccountId() {
+        errorMessage = null
+        step = PairStep.AccountId
+    }
+
+    /** The Wi‑Fi join copied the other device's vault and account. */
+    fun adopted(peerName: String) {
+        adoptedFrom = peerName
+        step = PairStep.Adopted
     }
 
     /** System back. Returns false when the flow should close (Cancel). */
@@ -64,7 +69,7 @@ class PairViewModel @Inject constructor(
      */
     fun reset() {
         step = PairStep.Intro
-        code = ""
+        adoptedFrom = ""
         accountIdText = ""
         errorMessage = null
         isChecking = false
@@ -74,7 +79,7 @@ class PairViewModel @Inject constructor(
     fun applyPairing() {
         if (isChecking) return
         errorMessage = null
-        val accountId = resolvePairTarget(accountIdText, code, PairingSessionStore.shared)
+        val accountId = parseAccountUuid(accountIdText)
         if (accountId == null) {
             errorMessage = R.string.pair_invalidcode
             return

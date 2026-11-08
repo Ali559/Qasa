@@ -81,7 +81,7 @@ internal fun CollectionsListContent(
                 collections.forEach { col ->
                     CollectionCard(
                         collection = col,
-                        count = rows.count { it.collectionId == col.id },
+                        count = rows.count { it.collectionId.equals(col.id, ignoreCase = true) },
                         onOpen = { onOpen(col) },
                         onEdit = { renaming = col },
                         onDelete = { pendingDelete = col.id },

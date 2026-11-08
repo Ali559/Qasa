@@ -1,22 +1,27 @@
 import SwiftUI
+import SwiftData
 
-/// Pair with an existing Qasa install (adopt account_id) then optionally LAN-sync vault.
+/// A new device joins an existing vault. The main path is Wi‑Fi sync: the other device
+/// shows a code, this one (no vault yet) adopts its vault and account from inside the
+/// authenticated channel, then the user unlocks with the same main password. Pasting an
+/// account ID (advanced) only links the account; the user then creates a vault here.
 struct PairExistingVaultView: View {
-    var onPaired: (UUID) -> Void
+    var onPaired: () -> Void
     var onCancel: () -> Void
 
     @Environment(AppPreferences.self) private var prefs
-    @State private var code = ""
+    @Environment(\.modelContext) private var modelContext
+    @State private var sync = WiFiSyncController()
     @State private var accountIdText = ""
     @State private var errorMessage: String?
     @State private var isChecking = false
-    @State private var linkedAccountId: UUID?
+    @State private var adoptedFrom: String?
     @State private var step: Step = .intro
 
     private var locale: Locale { prefs.locale }
 
     enum Step {
-        case intro, enterCode, needsPremium, success
+        case intro, advanced, needsPremium, success, adopted
     }
 
     var body: some View {
@@ -28,12 +33,14 @@ struct PairExistingVaultView: View {
                     switch step {
                     case .intro:
                         introBody
-                    case .enterCode:
-                        enterCodeBody
+                    case .advanced:
+                        advancedBody
                     case .needsPremium:
                         premiumBody
                     case .success:
                         successBody
+                    case .adopted:
+                        adoptedBody
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -42,11 +49,18 @@ struct PairExistingVaultView: View {
                 .padding(.bottom, 24)
             }
 
-            if step != .needsPremium {
+            if step != .needsPremium && step != .intro {
                 bottomBar
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .onChange(of: sync.stage) { _, stage in
+            guard case .done(let result) = stage else { return }
+            sync.stop()
+            adoptedFrom = result.peerName
+            step = .adopted
+        }
+        .onDisappear { sync.stop() }
         .environment(\.layoutDirection, prefs.layoutDirection)
         .environment(\.locale, locale)
     }
@@ -82,7 +96,35 @@ struct PairExistingVaultView: View {
                 .font(.qasa(22, weight: .bold))
                 .foregroundColor(Theme.textPrimary)
                 .multilineTextAlignment(.leading)
-            Text(L10n.tr("pair.body", locale: locale))
+            Text(L10n.tr("pair.phoneBody", locale: locale))
+                .font(.qasa(14))
+                .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .multilineTextAlignment(.leading)
+
+            WiFiJoinPanel(sync: sync, container: modelContext.container)
+            SyncOutcomeView(stage: sync.stage)
+
+            Button {
+                sync.stop()
+                step = .advanced
+            } label: {
+                Text(L10n.tr("pair.accountHint", locale: locale))
+                    .font(.qasa(13, weight: .medium))
+                    .foregroundColor(Theme.accent)
+                    .multilineTextAlignment(.leading)
+            }
+            .padding(.top, 8)
+        }
+    }
+
+    private var adoptedBody: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(format: L10n.tr("sync.adoptedTitle", locale: locale), adoptedFrom ?? ""))
+                .font(.qasa(22, weight: .bold))
+                .foregroundColor(Theme.accent)
+                .multilineTextAlignment(.leading)
+            Text(String(format: L10n.tr("sync.adoptedBody", locale: locale), adoptedFrom ?? ""))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -90,17 +132,8 @@ struct PairExistingVaultView: View {
         }
     }
 
-    private var enterCodeBody: some View {
+    private var advancedBody: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(text: L10n.tr("pair.codeLabel", locale: locale))
-            ThemedTextField(
-                icon: "number",
-                placeholder: L10n.tr("pair.codePlaceholder", locale: locale),
-                text: $code
-            )
-            .keyboardType(.numberPad)
-            .textContentType(.oneTimeCode)
-
             Text(L10n.tr("pair.accountHint", locale: locale))
                 .font(.qasa(12))
                 .foregroundColor(Theme.textSecondary)
@@ -172,23 +205,12 @@ struct PairExistingVaultView: View {
         VStack(spacing: 0) {
             Divider().background(Theme.stroke)
             Group {
-                if step == .intro {
-                    PrimaryButton(
-                        title: L10n.tr("pair.enterCode", locale: locale),
-                        icon: "qrcode"
-                    ) {
-                        step = .enterCode
-                    }
-                } else if step == .success {
+                if step == .success || step == .adopted {
                     PrimaryButton(
                         title: L10n.tr("pair.done", locale: locale),
                         icon: "checkmark"
                     ) {
-                        if let linkedAccountId {
-                            onPaired(linkedAccountId)
-                        } else {
-                            onCancel()
-                        }
+                        onPaired()
                     }
                 } else {
                     PrimaryButton(
@@ -213,15 +235,7 @@ struct PairExistingVaultView: View {
     @MainActor
     private func applyPairing() async {
         errorMessage = nil
-        let accountId: UUID?
-        if let id = UUID(uuidString: accountIdText.trimmingCharacters(in: .whitespacesAndNewlines)) {
-            accountId = id
-        } else {
-            let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
-            accountId = PairingSessionStore.shared.resolve(code: trimmed)
-        }
-
-        guard let accountId else {
+        guard let accountId = UUID(uuidString: accountIdText.trimmingCharacters(in: .whitespacesAndNewlines)) else {
             errorMessage = L10n.tr("pair.invalidCode", locale: locale)
             return
         }
@@ -245,28 +259,6 @@ struct PairExistingVaultView: View {
         }
 
         VaultKeychainStore.accountId = accountId.uuidString.lowercased()
-        linkedAccountId = accountId
         step = .success
-    }
-}
-
-@Observable
-final class PairingSessionStore {
-    static let shared = PairingSessionStore()
-    private var codeToAccount: [String: (UUID, Date)] = [:]
-
-    func publish(accountId: UUID) -> String {
-        let code = String(format: "%06d", Int.random(in: 0...999_999))
-        codeToAccount[code] = (accountId, Date().addingTimeInterval(600))
-        return code
-    }
-
-    func resolve(code: String) -> UUID? {
-        guard let entry = codeToAccount[code], entry.1 > Date() else { return nil }
-        return entry.0
-    }
-
-    func currentPublishedCode(for accountId: UUID) -> String? {
-        codeToAccount.first(where: { $0.value.0 == accountId && $0.value.1 > Date() })?.key
     }
 }

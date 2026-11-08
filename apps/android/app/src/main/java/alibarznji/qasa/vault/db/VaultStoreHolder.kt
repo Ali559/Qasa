@@ -81,13 +81,11 @@ class VaultStoreHolder @Inject constructor(
     fun requireDao(): VaultDao = dao() ?: throw VaultStoreUnavailableException(_failure.value)
 
     private fun build(): VaultDatabase {
-        val builder = Room.databaseBuilder(context, VaultDatabase::class.java, DATABASE_NAME)
-        if (alibarznji.qasa.BuildConfig.DEBUG) {
-            // Debug convenience only: a missing migration wipes a developer's throwaway
-            // vault. Release builds must never take this path.
-            builder.fallbackToDestructiveMigration()
-        }
-        return builder.build()
+        // No destructive fallback, not even in debug: a missing migration must surface as
+        // `VaultStoreErrorView`, never as a silently emptied vault.
+        return Room.databaseBuilder(context, VaultDatabase::class.java, DATABASE_NAME)
+            .addMigrations(*VaultMigrations.ALL)
+            .build()
     }
 
     private companion object {

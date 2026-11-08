@@ -88,9 +88,13 @@ struct qasaApp: App {
         @State private var isBootstrapping = false
         @State private var createError: String? = nil
         @State private var isShielded = true
+        /// `VaultAuthStore.vaultExists` lives in the Keychain, which SwiftUI can't observe.
+        /// Bumped when pairing creates a vault, so the root re-reads it and shows Login.
+        @State private var vaultRevision = 0
 
         private var showLogin: Bool {
-            VaultAuthStore.vaultExists
+            _ = vaultRevision
+            return VaultAuthStore.vaultExists
         }
 
         private var showWelcome: Bool {
@@ -144,14 +148,19 @@ struct qasaApp: App {
             .id(prefs.language.rawValue)
             .fullScreenCover(isPresented: $showPairing) {
                 PairExistingVaultView(
-                    onPaired: { _ in
+                    // Wi‑Fi join: the vault now exists here, so the root shows Login and
+                    // the same main password opens it. Account-ID paste: the root still
+                    // shows Create vault, under the linked account.
+                    onPaired: {
                         showPairing = false
-                        // After adopting account_id, user still creates local vault keys
-                        // then registers as additional device under same account.
+                        vaultRevision += 1
                     },
                     onCancel: { showPairing = false }
                 )
+                .modelContext(modelContext)
                 .environment(prefs)
+                // A presented cover doesn't inherit the palette set on the root content.
+                .environment(\.themePalette, ThemePalette.resolved(for: effectiveScheme))
                 .appLocalization()
             }
             .overlay {

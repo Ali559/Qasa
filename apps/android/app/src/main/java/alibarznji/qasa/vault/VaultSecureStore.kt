@@ -59,6 +59,23 @@ class VaultSecureStore @Inject constructor(
             prefs.edit().putString(KEY_VERIFIER, value?.let { Base64.encodeToString(it, Base64.DEFAULT) }).apply()
         }
 
+    /**
+     * The KDF parameters version (iOS `VaultKeychainStore.kdfVersion`). Vaults made on
+     * Android predate the field and are version 1; a vault adopted over Wi‑Fi records
+     * the version it arrived with.
+     */
+    var kdfVersion: Int
+        get() = prefs.getInt(KEY_KDF_VERSION, 1)
+        set(value) = prefs.edit().putInt(KEY_KDF_VERSION, value).apply()
+
+    /**
+     * Rows arrived over Wi‑Fi while their search tokens could not be built (that needs the
+     * search key). The next unlock rebuilds them.
+     */
+    var searchReindexPending: Boolean
+        get() = prefs.getBoolean(KEY_REINDEX, false)
+        set(value) = prefs.edit().putBoolean(KEY_REINDEX, value).apply()
+
     var accountId: String?
         get() = prefs.getString(KEY_ACCOUNT_ID, null)
         set(value) = prefs.edit().putString(KEY_ACCOUNT_ID, value).apply()
@@ -210,6 +227,8 @@ class VaultSecureStore @Inject constructor(
     companion object {
         private const val KEY_VAULT_EXISTS = "vaultExists"
         private const val KEY_SALT = "kdfSalt"
+        private const val KEY_KDF_VERSION = "kdfVersion"
+        private const val KEY_REINDEX = "searchReindexPending"
         private const val KEY_VERIFIER = "passwordVerifier"
         private const val KEY_ACCOUNT_ID = "accountId"
         private const val KEY_DEVICE_FP = "deviceFingerprint"

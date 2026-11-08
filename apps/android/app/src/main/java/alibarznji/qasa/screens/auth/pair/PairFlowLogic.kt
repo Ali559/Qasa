@@ -4,21 +4,24 @@ import alibarznji.qasa.R
 import alibarznji.qasa.network.DeviceLinkCheckResponse
 import androidx.annotation.StringRes
 
-/** `PairExistingVaultView.Step` (`PairExistingVaultView.swift:18`). */
-enum class PairStep { Intro, EnterCode, NeedsPremium, Success }
+/**
+ * The Link Device flow. [Intro] is the main path for a new device: join the other device
+ * over Wi‑Fi, which copies its vault and account here ([Adopted]). [AccountId] is the
+ * advanced path that only adopts a pasted account id ([NeedsPremium] / [Success]).
+ */
+enum class PairStep { Intro, AccountId, NeedsPremium, Success, Adopted }
 
 /**
- * Where system back goes from each step; `null` means Cancel. iOS shows this flow as a
- * full-screen cover with only a Cancel button, so back never skips past the intro. From
- * Premium required we step back to the code field so another account can be tried, and
- * from Success there is nothing to undo (the account id is already adopted), so it
- * leaves like Cancel does on iOS.
+ * Where system back goes from each step; `null` means Cancel. From Premium required we
+ * step back to the account field so another account can be tried; from Success and
+ * Adopted there is nothing to undo, so back leaves like Cancel.
  */
 fun PairStep.previous(): PairStep? = when (this) {
     PairStep.Intro -> null
-    PairStep.EnterCode -> PairStep.Intro
-    PairStep.NeedsPremium -> PairStep.EnterCode
+    PairStep.AccountId -> PairStep.Intro
+    PairStep.NeedsPremium -> PairStep.AccountId
     PairStep.Success -> null
+    PairStep.Adopted -> null
 }
 
 /** Result of the server eligibility probe, mapped to what the flow shows. */
@@ -40,13 +43,6 @@ fun parseAccountUuid(text: String): String? {
     val trimmed = text.trim()
     return if (CanonicalUuid.matches(trimmed)) trimmed.lowercase() else null
 }
-
-/**
- * `applyPairing` (`PairExistingVaultView.swift:224-231`): a pasted account id wins over the
- * code; otherwise the code is looked up in the pairing session store.
- */
-fun resolvePairTarget(accountIdText: String, code: String, store: PairingSessionStore): String? =
-    parseAccountUuid(accountIdText) ?: store.resolve(code.trim())
 
 /**
  * `PairExistingVaultView.swift:241-249`. The server's `error` is a code, never display

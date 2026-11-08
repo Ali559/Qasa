@@ -16,6 +16,27 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 4, second half: the phones.**
+- `core/qasa-ffi`: UniFFI 0.28 bindings over `qasa-sync` (`SyncHost`, `sync_join`, a
+  `SyncStoreCallback` the app implements, typed `FfiSyncError`s) plus
+  `payload_to_canonical`/`payload_to_android`. `make ios-ffi` builds an XCFramework,
+  `make android-ffi` builds `jniLibs` with `cargo-ndk`; both outputs are gitignored.
+- Core fixes found on the way: item and collection IDs are uppercased on the wire (iOS
+  writes uppercase UUIDs, Android lowercase), and a joiner with a wrong code now sends an
+  empty confirm frame so the host reports a wrong code instead of a dropped connection.
+- iOS: `deletedAt`/`updatedAt` tombstones in SwiftData, `NWBrowser` discovery, host and
+  join panels in Linked Devices, real pairing on "I already have Qasa", the code no longer
+  in the Bonjour name, the old `LANVaultSyncService` removed.
+- Android: Room v1→v2 migration for tombstones, `NsdManager` discovery, `WifiSyncService`
+  and the same panels; IDs lowercased on the way in and compared case-insensitively.
+- Strings: 24 `sync.*`/`pair.*` keys promoted into `l10n/strings.json`.
+- Tests: core 77, desktop 17, Android 120, iOS 33 — all pass. End to end: a desktop-side
+  host synced its vault into a fresh iPhone simulator, which then unlocked with the same
+  password and showed every item in its folder.
+- **Not yet checked:** Android on a real device or emulator, and phone ⇄ desktop through
+  the desktop window itself (the host used was the core's demo binary). IPv6-only peers
+  are not supported.
+
 **2026-11-08 — Phase 4, first half: the protocol and the desktop (phones not yet).**
 - `core/qasa-sync`: the code is stretched with Argon2id (19 MiB, 2 passes, per-session salt)
   into SPAKE2; both sides confirm the key (HMAC over the transcript, constant-time check,

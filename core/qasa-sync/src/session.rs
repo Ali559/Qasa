@@ -93,6 +93,17 @@ fn refuse_reason(e: &SyncError) -> &'static str {
     }
 }
 
+fn normalize(mut s: Snapshot) -> Snapshot {
+    for i in &mut s.items {
+        i.id = i.id.to_uppercase();
+        i.collection_id = i.collection_id.as_ref().map(|c| c.to_uppercase());
+    }
+    for c in &mut s.collections {
+        c.id = c.id.to_uppercase();
+    }
+    s
+}
+
 /// Runs a whole session. `stream` is the connected socket; `code` the pairing code.
 pub fn run<S: Read + Write>(stream: S, role: Role, code: &str, store: &mut dyn SyncStore) -> Result<Outcome, SyncError> {
     let mut ch = Channel::open(stream, role, code)?;
@@ -152,6 +163,9 @@ pub fn run<S: Read + Write>(stream: S, role: Role, code: &str, store: &mut dyn S
         }
     };
 
+    // Ids are UUIDs whose letter case differs by platform (iOS uppercase, Android
+    // lowercase): compare and send them uppercase. Stores match ids case-insensitively.
+    let (local, remote) = (normalize(local), normalize(remote));
     let received = store.apply(&merge(&local, &remote, store.now_ms()))?;
 
     // Report and hear back how much each side took.
@@ -219,7 +233,9 @@ mod tests {
             Ok(())
         }
         fn apply(&mut self, plan: &MergePlan) -> Result<u32, SyncError> {
+            // Like the real stores: an id matches whatever its letter case.
             for i in &plan.items {
+                self.items.retain(|k, _| !k.eq_ignore_ascii_case(&i.id));
                 self.items.insert(i.id.clone(), i.clone());
             }
             for c in &plan.collections {
@@ -276,7 +292,7 @@ mod tests {
         assert_eq!((rj.received, rh.sent), (1, 1));
         assert_eq!(desktop.account.as_deref(), Some("acct"));
         assert_eq!(desktop.meta, Some(meta(1)));
-        assert_eq!(desktop.items["a"].payload, b"secret");
+        assert_eq!(desktop.items["A"].payload, b"secret");
     }
 
     #[test]
@@ -296,6 +312,23 @@ mod tests {
         assert_eq!(b.items["1"].payload, b"a-newer");
         assert!(b.items["3"].deleted_at.is_some(), "the delete reached B");
         assert_eq!(a.items.len(), b.items.len());
+    }
+
+    #[test]
+    fn ids_match_across_letter_case() {
+        let mut ios = Mem { name: "iPhone".into(), account: Some("x".into()), meta: Some(meta(1)), ..Default::default() };
+        let mut android = ios.clone();
+        android.name = "Pixel".into();
+        // The same item: lowercase on Android, uppercase on iOS; iOS has the newer edit.
+        android.items.insert("ab-c".into(), item("ab-c", 10, b"old", None));
+        ios.items.insert("AB-C".into(), item("AB-C", 20, b"new", None));
+        let (rh, ios, rj, android) = pair(ios, android, "555555", "555555");
+        rh.unwrap();
+        rj.unwrap();
+        // Android received the newer row (its store matches "AB-C" to "ab-c")…
+        assert_eq!(android.items["AB-C"].payload, b"new");
+        // …and iOS didn't take the older one back as a second item.
+        assert_eq!(ios.items.len(), 1);
     }
 
     #[test]

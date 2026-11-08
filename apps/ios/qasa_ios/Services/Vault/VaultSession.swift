@@ -87,6 +87,15 @@ final class VaultSession {
         return unlock(password: password) ? password : nil
     }
 
+    #if DEBUG
+    /// Unit tests: an unlocked session without touching the Keychain.
+    func installKeysForTesting(encKey: SymmetricKey, searchKey: SymmetricKey) {
+        self.encKey = encKey
+        self.searchKey = searchKey
+        isUnlocked = true
+    }
+    #endif
+
     func lock() {
         encKey = nil
         searchKey = nil

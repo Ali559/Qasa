@@ -1,6 +1,8 @@
 package alibarznji.qasa.screens.auth.pair
 
 import alibarznji.qasa.R
+import alibarznji.qasa.screens.sync.JoinPanel
+import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.SectionLabel
@@ -20,9 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,37 +36,36 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
-/** `introBody` (`PairExistingVaultView.swift:79`). */
+/**
+ * The main path for a new device (desktop `PairExisting.vue`): find the other device on
+ * this Wi‑Fi and type the code it shows. The vault and account arrive through the
+ * code-authenticated channel, still encrypted. The account-id paste stays as an
+ * advanced link underneath.
+ */
 @Composable
-internal fun PairIntroBody() {
+internal fun PairWifiBody(sync: WifiSyncViewModel, onAdvanced: () -> Unit) {
     val c = qasaColors
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
         Text(stringResource(R.string.pair_headline), color = c.textPrimary, style = qasaText.sectionHeadline)
-        Text(stringResource(R.string.pair_body), color = c.textSecondary, style = qasaText.bodyMedium)
+        Text(stringResource(R.string.pair_phonebody), color = c.textSecondary, style = qasaText.bodyMedium)
+        JoinPanel(sync)
+        TextButton(onClick = onAdvanced) {
+            Text(stringResource(R.string.pair_accounthint), color = c.accent, style = qasaText.bodySmallMedium)
+        }
     }
 }
 
-/** `enterCodeBody` (`PairExistingVaultView.swift:94`): code first, account id as the advanced path. */
+/** The advanced path: paste the other device's account id. */
 @Composable
-internal fun PairEnterCodeBody(
-    code: String,
-    onCodeChange: (String) -> Unit,
+internal fun PairAccountIdBody(
     accountId: String,
     onAccountIdChange: (String) -> Unit,
     errorMessage: String?,
 ) {
     val c = qasaColors
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
-        SectionLabel(stringResource(R.string.pair_codelabel))
-        ThemedTextField(
-            value = code,
-            onValueChange = onCodeChange,
-            placeholder = stringResource(R.string.pair_codeplaceholder),
-            label = stringResource(R.string.pair_codelabel),
-            leadingIcon = Icons.Default.Tag,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, autoCorrectEnabled = false),
-        )
-        Text(stringResource(R.string.pair_accounthint), color = c.textSecondary, style = qasaText.labelRegular)
+        Text(stringResource(R.string.pair_adoptbody), color = c.textSecondary, style = qasaText.bodyMedium)
+        SectionLabel(stringResource(R.string.pair_accountlabel))
         ThemedTextField(
             value = accountId,
             onValueChange = onAccountIdChange,
@@ -79,6 +81,30 @@ internal fun PairEnterCodeBody(
         if (errorMessage != null) {
             Text(errorMessage, color = c.danger, style = qasaText.bodySmallMedium)
         }
+    }
+}
+
+/** The vault arrived over Wi‑Fi: unlock it with the same master password. */
+@Composable
+internal fun PairAdoptedBody(peerName: String) {
+    val c = qasaColors
+    Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
+        Icon(
+            Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = c.success,
+            modifier = Modifier.size(48.dp),
+        )
+        Text(
+            stringResource(R.string.sync_adoptedtitle, peerName),
+            color = c.textPrimary,
+            style = qasaText.sectionHeadline,
+        )
+        Text(
+            stringResource(R.string.sync_adoptedbody, peerName),
+            color = c.textSecondary,
+            style = qasaText.bodyMedium,
+        )
     }
 }
 

@@ -61,7 +61,7 @@ internal fun CollectionDetailContent(
     val rows by vm.rows.collectAsState()
     // iOS `collectionItems`: filter by collection, `localizedCaseInsensitiveCompare` on name.
     val items = remember(rows, collectionId) {
-        rows.filter { it.collectionId == collectionId }
+        rows.filter { it.collectionId.equals(collectionId, ignoreCase = true) }
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.displayName })
     }
 

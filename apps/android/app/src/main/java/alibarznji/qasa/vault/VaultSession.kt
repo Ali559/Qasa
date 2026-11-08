@@ -28,6 +28,11 @@ class VaultSession @Inject constructor(
     private var encKey: ByteArray? = null
     private var searchKey: ByteArray? = null
 
+    private val _vaultExistsFlow = MutableStateFlow(store.vaultExists)
+
+    /** Observable [vaultExists], so the root screen moves to Unlock when a vault is adopted. */
+    val vaultExistsFlow: StateFlow<Boolean> = _vaultExistsFlow.asStateFlow()
+
     val vaultExists: Boolean get() = store.vaultExists
     val isUnlocked: Boolean get() = _unlocked.value
 
@@ -66,11 +71,41 @@ class VaultSession @Inject constructor(
 
         store.kdfSalt = salt
         store.passwordVerifier = verifier
+        store.kdfVersion = MasterKeyDeriver.KDF_VERSION
         store.vaultExists = true
+        _vaultExistsFlow.value = true
         store.biometricsEnabled = biometricsEnabled && sealed
         encKey = enc
         searchKey = search
         _unlocked.value = true
+    }
+
+    /**
+     * A new device took another device's vault over Wi‑Fi: keep its key material and
+     * account (both received inside the code-authenticated channel). Refuses when a vault
+     * already exists here, or when the vault uses KDF parameters this build doesn't know.
+     * The vault stays locked: the user unlocks with the same master password.
+     */
+    @Synchronized
+    fun adoptVault(salt: ByteArray, verifier: ByteArray, kdfVersion: Int, accountId: String?): Boolean {
+        if (store.vaultExists) return false
+        if (kdfVersion < 1 || kdfVersion > MasterKeyDeriver.KDF_VERSION) return false
+        if (salt.isEmpty() || verifier.isEmpty()) return false
+        if (store.deviceFingerprint == null) {
+            store.deviceFingerprint = UUID.randomUUID().toString().lowercase()
+        }
+        // Whatever was cached belonged to some earlier vault.
+        store.clearBiometricPassword()
+        store.biometricsEnabled = false
+        store.licenseToken = null
+        store.accountId = accountId ?: store.accountId ?: UUID.randomUUID().toString().lowercase()
+        store.kdfSalt = salt
+        store.passwordVerifier = verifier
+        store.kdfVersion = kdfVersion
+        store.searchReindexPending = true
+        store.vaultExists = true
+        _vaultExistsFlow.value = true
+        return true
     }
 
     fun unlock(password: String): Boolean {
@@ -177,6 +212,7 @@ class VaultSession @Inject constructor(
     fun wipeVault() {
         lock()
         store.resetVaultSecrets()
+        _vaultExistsFlow.value = false
     }
 
     fun derivePasswordChange(current: String, newPassword: String): PasswordChangeMaterial {

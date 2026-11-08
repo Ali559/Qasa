@@ -3517,5 +3517,120 @@
     "en": "The VPN session ended. Connect again to stay protected.",
     "ar": "انتهت جلسة VPN. اتصل مجددًا لتبقى محميًا.",
     "ckb": "دانیشتنی VPN کۆتایی هات. دووبارە پەیوەست ببە بۆ ئەوەی پارێزراو بیت."
+  },
+  "pair.phoneBody": {
+    "en": "On your other device, open Settings → Linked Devices → Sync on this network and start hosting. Then pick it below and type the code it shows. Your vault is copied here, still encrypted.",
+    "ar": "على جهازك الآخر، افتح الإعدادات ← الأجهزة المرتبطة ← المزامنة على هذه الشبكة وابدأ الاستضافة. ثم اختره أدناه واكتب الرمز الظاهر. تُنسخ خزنتك إلى هنا وهي مشفّرة.",
+    "ckb": "لەسەر ئامێرەکەی ترت، ڕێکخستنەکان ← ئامێرە بەستراوەکان ← هاوکاتکردن لەسەر ئەم تۆڕە بکەرەوە و میوانداری دەست پێبکە. پاشان لە خوارەوە هەڵیبژێرە و ئەو کۆدەی پیشانی دەدات بنووسە. گەنجینەکەت بە شێوەی شفرەکراو بۆ ئێرە کۆپی دەکرێت."
+  },
+  "sync.adoptedBody": {
+    "en": "Unlock it with the same main password you use on %@.",
+    "ar": "افتحها بكلمة المرور الرئيسية نفسها التي تستخدمها على %@.",
+    "ckb": "بە هەمان وشەی نهێنی سەرەکی کە لەسەر %@ بەکاری دەهێنیت بیکەرەوە."
+  },
+  "sync.adoptedTitle": {
+    "en": "Vault copied from %@",
+    "ar": "نُسخت الخزنة من %@",
+    "ckb": "گەنجینەکە لە %@ کۆپی کرا"
+  },
+  "sync.codeExpires": {
+    "en": "Code expires in %lld s",
+    "ar": "تنتهي صلاحية الرمز خلال %lld ث",
+    "ckb": "کۆدەکە لە %lld چرکەدا بەسەردەچێت"
+  },
+  "sync.connecting": {
+    "en": "Checking the code…",
+    "ar": "جارٍ التحقق من الرمز…",
+    "ckb": "پشکنینی کۆدەکە…"
+  },
+  "sync.differentVault": {
+    "en": "These devices have different vaults, so they can't sync. Only a new device can join an existing vault.",
+    "ar": "هذان الجهازان يحملان خزنتين مختلفتين، لذا لا يمكن مزامنتهما. يمكن لجهاز جديد فقط الانضمام إلى خزنة موجودة.",
+    "ckb": "ئەم ئامێرانە گەنجینەی جیاوازیان هەیە، بۆیە ناتوانن هاوکات بن. تەنها ئامێرێکی نوێ دەتوانێت بچێتە ناو گەنجینەیەکی هەبوو."
+  },
+  "sync.doneBody": {
+    "en": "%1$lld changes here, %2$lld on the other device.",
+    "ar": "%1$lld تغييرات هنا، و%2$lld على الجهاز الآخر.",
+    "ckb": "%1$lld گۆڕانکاری لێرە، %2$lld لەسەر ئامێرەکەی تر."
+  },
+  "sync.doneTitle": {
+    "en": "Synced with %@",
+    "ar": "تمت المزامنة مع %@",
+    "ckb": "لەگەڵ %@ هاوکات کرا"
+  },
+  "sync.expired": {
+    "en": "The code expired. Start again for a new one.",
+    "ar": "انتهت صلاحية الرمز. ابدأ من جديد للحصول على رمز جديد.",
+    "ckb": "کۆدەکە بەسەرچوو. دووبارە دەست پێبکەرەوە بۆ کۆدێکی نوێ."
+  },
+  "sync.failed": {
+    "en": "Sync didn't finish. Try again.",
+    "ar": "لم تكتمل المزامنة. حاول مرة أخرى.",
+    "ckb": "هاوکاتکردن تەواو نەبوو. دووبارە هەوڵ بدەوە."
+  },
+  "sync.hostBody": {
+    "en": "On your other device, open Sync on this network, pick this device and type the code.",
+    "ar": "على جهازك الآخر، افتح المزامنة على هذه الشبكة، واختر هذا الجهاز، واكتب الرمز.",
+    "ckb": "لەسەر ئامێرەکەی ترت، هاوکاتکردن لەسەر ئەم تۆڕە بکەرەوە، ئەم ئامێرە هەڵبژێرە و کۆدەکە بنووسە."
+  },
+  "sync.hostTitle": {
+    "en": "Show a code",
+    "ar": "اعرض رمزًا",
+    "ckb": "کۆدێک پیشان بدە"
+  },
+  "sync.io": {
+    "en": "The connection dropped. Check both devices are on the same Wi‑Fi.",
+    "ar": "انقطع الاتصال. تأكد أن الجهازين على شبكة Wi‑Fi نفسها.",
+    "ckb": "پەیوەندییەکە پچڕا. دڵنیابە هەردوو ئامێرەکە لەسەر هەمان Wi‑Fi‑ن."
+  },
+  "sync.joinBody": {
+    "en": "On the other device, open Sync on this network and show a code. Then pick it here and type the code.",
+    "ar": "على الجهاز الآخر، افتح المزامنة على هذه الشبكة واعرض رمزًا. ثم اختره هنا واكتب الرمز.",
+    "ckb": "لەسەر ئامێرەکەی تر، هاوکاتکردن لەسەر ئەم تۆڕە بکەرەوە و کۆدێک پیشان بدە. پاشان لێرە هەڵیبژێرە و کۆدەکە بنووسە."
+  },
+  "sync.joinTitle": {
+    "en": "Find a device",
+    "ar": "ابحث عن جهاز",
+    "ckb": "ئامێرێک بدۆزەرەوە"
+  },
+  "sync.noPeers": {
+    "en": "No devices found yet. Make sure the other device is showing a code on the same Wi‑Fi.",
+    "ar": "لم يُعثر على أجهزة بعد. تأكد أن الجهاز الآخر يعرض رمزًا على شبكة Wi‑Fi نفسها.",
+    "ckb": "هێشتا هیچ ئامێرێک نەدۆزرایەوە. دڵنیابە ئامێرەکەی تر کۆدێک پیشان دەدات لەسەر هەمان Wi‑Fi."
+  },
+  "sync.noVault": {
+    "en": "Neither device has a vault yet. Create one on one of them first.",
+    "ar": "لا يملك أي من الجهازين خزنة بعد. أنشئ واحدة على أحدهما أولاً.",
+    "ckb": "هیچ کام لە ئامێرەکان هێشتا گەنجینەیان نییە. سەرەتا لەسەر یەکێکیان دروستی بکە."
+  },
+  "sync.searching": {
+    "en": "Looking for devices on this Wi‑Fi…",
+    "ar": "جارٍ البحث عن أجهزة على شبكة Wi‑Fi هذه…",
+    "ckb": "گەڕان بۆ ئامێرەکان لەسەر ئەم Wi‑Fi‑یە…"
+  },
+  "sync.syncButton": {
+    "en": "Sync",
+    "ar": "مزامنة",
+    "ckb": "هاوکاتکردن"
+  },
+  "sync.version": {
+    "en": "Update Qasa on both devices, then try again.",
+    "ar": "حدّث قاصة على الجهازين، ثم حاول مرة أخرى.",
+    "ckb": "قاسە لەسەر هەردوو ئامێرەکە نوێ بکەرەوە، پاشان دووبارە هەوڵ بدەوە."
+  },
+  "sync.waiting": {
+    "en": "Waiting for the other device…",
+    "ar": "بانتظار الجهاز الآخر…",
+    "ckb": "چاوەڕێی ئامێرەکەی تر…"
+  },
+  "sync.wrongCode": {
+    "en": "That code didn't match. %lld tries left.",
+    "ar": "الرمز غير مطابق. تبقّت %lld محاولات.",
+    "ckb": "ئەو کۆدە یەکی نەگرتەوە. %lld هەوڵ ماوە."
+  },
+  "sync.wrongCodeFinal": {
+    "en": "That code didn't match. Start again for a new code.",
+    "ar": "الرمز غير مطابق. ابدأ من جديد للحصول على رمز جديد.",
+    "ckb": "ئەو کۆدە یەکی نەگرتەوە. دووبارە دەست پێبکەرەوە بۆ کۆدێکی نوێ."
   }
 }

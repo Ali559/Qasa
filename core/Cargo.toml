@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["qasa-vault", "qasa-sync"]
+members = ["qasa-vault", "qasa-sync", "qasa-ffi"]
 
 [workspace.package]
 edition = "2021"
@@ -12,3 +12,10 @@ publish = false
 # dependencies even in dev so the vector tests stay fast.
 [profile.dev.package."*"]
 opt-level = 3
+
+# The phones link qasa-ffi; keep it small.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = "debuginfo"

@@ -409,6 +409,7 @@
   "pair.headline": "Already have Qasa on another device?",
   "pair.invalidCode": "Invalid code. Ask the other device to show a fresh pairing code, or paste the account ID.",
   "pair.limitExceeded": "This account already has the maximum number of linked devices. Unlink one on the other device, then try again.",
+  "pair.phoneBody": "On your other device, open Settings → Linked Devices → Sync on this network and start hosting. Then pick it below and type the code it shows. Your vault is copied here, still encrypted.",
   "pair.premiumBody": "You need to unlock Premium for multi-device linking. Free accounts can keep the vault open on one device only.",
   "pair.premiumTitle": "Premium required",
   "pair.successBody": "Next: create a master password on this device. Then unlock or sync the vault over LAN from Settings → Sync on this network.",

@@ -16,7 +16,7 @@ CORE := $(ROOT)/core
 COMPOSE := docker compose -f $(SERVER)/docker/docker-compose.yml
 API_URL ?= http://127.0.0.1:8080
 
-.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build core-test
+.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build core-test ios-ffi android-ffi
 
 help:
 	@echo "Qasa local commands"
@@ -33,7 +33,9 @@ help:
 	@echo "  make dash     Run admin dashboard (Vite)"
 	@echo "  make desktop  Run the desktop app (Tauri dev)"
 	@echo "  make desktop-build  Build the desktop app bundle"
-	@echo "  make core-test  Test core/ (vault crypto, golden vectors)"
+	@echo "  make core-test  Test core/ (vault crypto, golden vectors, sync)"
+	@echo "  make ios-ffi  Build QasaFFI.xcframework + Swift bindings (Wi-Fi sync)"
+	@echo "  make android-ffi  Build libqasa_ffi.so + Kotlin bindings (Wi-Fi sync)"
 	@echo "  make clean    docker compose down -v (wipes DB volumes)"
 	@echo ""
 
@@ -93,7 +95,13 @@ desktop-build:
 	cd $(DESKTOP) && bun install && bun run tauri build
 
 core-test:
-	cd $(CORE) && cargo test
+	cd $(CORE) && CARGO_INCREMENTAL=0 cargo test
+
+ios-ffi:
+	$(CORE)/qasa-ffi/scripts/build-ios.sh
+
+android-ffi:
+	$(CORE)/qasa-ffi/scripts/build-android.sh
 
 clean:
 	$(COMPOSE) down -v

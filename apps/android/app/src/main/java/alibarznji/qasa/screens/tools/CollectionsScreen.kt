@@ -116,7 +116,7 @@ fun CollectionsScreen(
                 arguments = listOf(navArgument("collectionId") { type = NavType.StringType }),
             ) { entry ->
                 val collectionId = entry.arguments?.getString("collectionId").orEmpty()
-                val collection = collections.firstOrNull { it.id == collectionId }
+                val collection = collections.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }
                 // If the collection disappears while open (e.g. a vault reset), go back to the list.
                 var seen by remember { mutableStateOf(false) }
                 LaunchedEffect(collection) {

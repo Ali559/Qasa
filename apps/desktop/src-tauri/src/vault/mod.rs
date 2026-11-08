@@ -238,7 +238,8 @@ impl Vault {
             created_at: row.created_at,
             updated_at: row.updated_at,
             last_used_at: row.last_used_at,
-            collection_id: envelope.collection_id.or_else(|| row.collection_id.clone()),
+            // Folder ids arrive in either letter case from other platforms (sync §6).
+            collection_id: envelope.collection_id.or_else(|| row.collection_id.clone()).map(|c| c.to_uppercase()),
             has_primary_copy: has_primary_copy(&payload),
             has_totp: matches!(&payload, VaultPayload::Login(f) if f.totp.as_deref().is_some_and(|t| !t.is_empty())),
         })
@@ -262,7 +263,11 @@ impl Vault {
     pub fn get(&self, id: &str) -> CommandResult<VaultPayload> {
         self.keys()?;
         let row = self.store.item(id)?.ok_or(CommandError::NotFound)?;
-        self.decrypt_payload(&row)
+        let mut payload = self.decrypt_payload(&row)?;
+        // Same folder, whatever case another platform wrote it in.
+        let folder = payload.collection_id().map(|c| c.to_uppercase());
+        payload.set_collection_id(folder);
+        Ok(payload)
     }
 
     fn encrypt_row(&self, id: String, payload: &VaultPayload, existing: Option<&ItemRow>) -> CommandResult<(ItemRow, Vec<String>)> {
@@ -383,7 +388,7 @@ impl Vault {
         self.keys()?;
         let (payloads, _) = self.all_payloads()?;
         for (item_id, mut payload) in payloads {
-            if payload.collection_id().as_deref() == Some(id) {
+            if payload.collection_id().is_some_and(|c| c.eq_ignore_ascii_case(id)) {
                 payload.set_collection_id(None);
                 self.save(Some(&item_id), &payload)?;
             }

@@ -16,6 +16,9 @@ object MasterKeyDeriver {
     const val ROOT_KEY_LENGTH = 32
     const val PBKDF2_ITERATIONS = 310_000
 
+    /** The KDF parameters this build derives with (`qasa-vault` `KDF_VERSION`). */
+    const val KDF_VERSION = 1
+
     fun generateSalt(): ByteArray {
         val salt = ByteArray(SALT_LENGTH)
         SecureRandom().nextBytes(salt)

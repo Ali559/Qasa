@@ -145,7 +145,7 @@ fun CollectionPickerField(
     var showNew by remember { mutableStateOf(false) }
     FieldBlock(stringResource(R.string.vault_collection)) {
         MenuPicker(
-            selectedLabel = sorted.firstOrNull { it.id == collectionId }?.name ?: none,
+            selectedLabel = sorted.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name ?: none,
             options = listOf<VaultCollectionEntity?>(null) + sorted,
             optionLabel = { it?.name ?: none },
             onSelect = { onChange(it?.id) },
