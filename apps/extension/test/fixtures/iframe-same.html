@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Same-origin iframes</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Same-origin frames</h1>
+<iframe id="framed" src="login.html" width="420" height="300"></iframe>
+<iframe id="written" width="420" height="260"></iframe>
+<script>
+  // A frame filled in by script: no URL of its own, so it relies on the parent (or on
+  // match_about_blank) to be handled — and must still be handled exactly once.
+  const doc = document.getElementById("written").contentDocument
+  doc.open()
+  doc.write("<!doctype html><body style=\"font:16px system-ui;margin:8px\"><form id=login><input id=username name=email type=email autocomplete=username style=\"height:44px;width:300px\"><br><input id=password name=password type=password autocomplete=current-password style=\"height:44px;width:300px\"></form></body>")
+  doc.close()
+</script>
+<pre id="result"></pre>
+</body>
+</html>

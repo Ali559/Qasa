@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Clickjacking: overlay</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Transparent overlay over the password field</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+</form>
+<div id="cover" style="position:absolute;z-index:1000;opacity:0;background:red"></div>
+<script>
+  // The cover takes clicks (no pointer-events:none) and sits exactly over the password field.
+  const r = document.getElementById("password").getBoundingClientRect()
+  Object.assign(document.getElementById("cover").style, { left: r.left + scrollX + "px", top: r.top + scrollY + "px", width: r.width + "px", height: r.height + "px" })
+</script>
+<pre id="result"></pre>
+</body>
+</html>

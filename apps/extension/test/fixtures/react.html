@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Controlled inputs</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Controlled inputs (React-like)</h1>
+<form id="login">
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+</form>
+<pre id="state">{"email":"","password":""}</pre>
+<script>
+  // Mimics React: the instance gets its own `value` property that tracks the last value
+  // set through it, state changes only on an `input` event whose DOM value differs from
+  // the tracked one, and every render writes state back into the DOM.
+  const state = { email: "", password: "" }
+  const native = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")
+  for (const el of document.querySelectorAll("#login input")) {
+    let tracked = ""
+    Object.defineProperty(el, "value", {
+      configurable: true,
+      get() { return native.get.call(this) },
+      set(v) { tracked = String(v); native.set.call(this, v) },
+    })
+    el.addEventListener("input", () => {
+      const actual = native.get.call(el)
+      if (actual !== tracked) { tracked = actual; state[el.name] = actual }
+      render()
+    })
+  }
+  function render() {
+    for (const el of document.querySelectorAll("#login input")) el.value = state[el.name]
+    document.getElementById("state").textContent = JSON.stringify(state)
+  }
+</script>
+<pre id="result"></pre>
+</body>
+</html>

@@ -16,7 +16,7 @@ CORE := $(ROOT)/core
 COMPOSE := docker compose -f $(SERVER)/docker/docker-compose.yml
 API_URL ?= http://127.0.0.1:8080
 
-.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build core-test ios-ffi android-ffi
+.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build nm-host core-test ios-ffi android-ffi
 
 help:
 	@echo "Qasa local commands"
@@ -33,6 +33,8 @@ help:
 	@echo "  make dash     Run admin dashboard (Vite)"
 	@echo "  make desktop  Run the desktop app (Tauri dev)"
 	@echo "  make desktop-build  Build the desktop app bundle"
+	@echo "  make nm-host  Build the browser extension's native messaging host"
+	@echo "  make extension  Build the browser extension (dist/chrome, dist/firefox)"
 	@echo "  make core-test  Test core/ (vault crypto, golden vectors, sync)"
 	@echo "  make ios-ffi  Build QasaFFI.xcframework + Swift bindings (Wi-Fi sync)"
 	@echo "  make android-ffi  Build libqasa_ffi.so + Kotlin bindings (Wi-Fi sync)"
@@ -88,11 +90,14 @@ worker: env
 dash:
 	cd $(ROOT)/apps/dashboard && bun run dev
 
-desktop:
+desktop: nm-host
 	cd $(DESKTOP) && bun install && bun run tauri dev
 
 desktop-build:
 	cd $(DESKTOP) && bun install && bun run tauri build
+
+nm-host:
+	cd $(DESKTOP)/nm-host && CARGO_INCREMENTAL=0 cargo build
 
 core-test:
 	cd $(CORE) && CARGO_INCREMENTAL=0 cargo test
@@ -106,3 +111,8 @@ android-ffi:
 clean:
 	$(COMPOSE) down -v
 	@echo "Containers stopped and volumes removed."
+
+.PHONY: extension
+
+extension:
+	cd $(ROOT)/apps/extension && bun install && bun run build

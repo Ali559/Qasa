@@ -13,6 +13,7 @@ import {
   Laptop,
   LogOut,
   Moon,
+  Puzzle,
   ScanFace,
   Trash2,
   Upload,
@@ -244,6 +245,8 @@ function logout() {
           :subtitle="account.status?.isPremium ? t('settings.premiumLanSync') : t('settings.requiresPremium')"
           @click="openSubPage('wifiSync', 'settings')"
         />
+        <hr class="divider" />
+        <NavChevronRow :icon="Puzzle" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
       </CardContainer>
     </section>
 

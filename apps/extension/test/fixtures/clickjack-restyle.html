@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Clickjacking: restyle menu host</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Page restyles the Qasa host</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username">
+  <input id="password" name="password" type="password" autocomplete="current-password">
+</form>
+<style>html > div:last-of-type { opacity: 0 !important; filter: opacity(0) !important; }</style>
+<script>
+  // After a click, set every direct <html> child div (that is, the extension host) transparent.
+  document.addEventListener("mousedown", () => setTimeout(() => {
+    for (const el of document.documentElement.children) if (el.tagName === "DIV") el.style.setProperty("opacity", "0", "important")
+  }, 100), true)
+</script>
+<pre id="result"></pre>
+</body>
+</html>

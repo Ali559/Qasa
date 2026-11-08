@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Qasa",
+    "description": "Extension name in the browser and the store."
+  },
+  "extDescription": {
+    "message": "Fill and save your Qasa logins on websites. Works with the Qasa app on your computer; nothing is stored in the browser.",
+    "description": "Store description, at most 132 characters."
+  }
+}

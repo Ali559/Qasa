@@ -13,6 +13,7 @@ import Shell from '@/screens/Shell.vue'
 import Unlock from '@/screens/Unlock.vue'
 import WelcomePreferences from '@/screens/WelcomePreferences.vue'
 import PairExisting from '@/screens/sync/PairExisting.vue'
+import BridgePrompts from '@/screens/bridge/BridgePrompts.vue'
 import { protectedReason } from '@/vault/protectedGate'
 import { attachAutoLock, loadVault, lockVault, refreshStatus, session } from '@/vault/session'
 import { watchEffect } from 'vue'
@@ -91,6 +92,7 @@ defineExpose({ session })
   <PairExisting v-else-if="stage === 'pair'" @back="stage = 'create'" @paired="route" />
   <Unlock v-else-if="stage === 'unlock'" @unlocked="enterShell" />
   <Shell v-else @lock="lock" @logout="confirmLogout = true" />
+  <BridgePrompts />
   <ConfirmDialog
     :open="confirmLogout"
     :title="t('settings.clearAlertTitle')"

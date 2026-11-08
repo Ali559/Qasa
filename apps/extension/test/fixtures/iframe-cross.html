@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Cross-origin iframe</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Top page (127.0.0.1)</h1>
+<form id="login" data-record>
+  <input id="username" name="email" type="email" autocomplete="username" placeholder="Email">
+  <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password">
+</form>
+<iframe id="cross" src="{{OTHER_ORIGIN}}/login.html" width="420" height="300"></iframe>
+<pre id="result"></pre>
+</body>
+</html>

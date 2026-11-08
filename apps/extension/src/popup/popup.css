@@ -1,0 +1,7 @@
+/* The toolbar popup: a fixed phone-like card, like the desktop's capped content width. */
+html,
+body {
+  width: 360px;
+  height: 560px;
+  overflow: hidden;
+}

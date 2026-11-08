@@ -16,6 +16,52 @@ warnings before using `design.md` as a reference:
 
 ## Progress log
 
+**2026-11-08 — Phase 5: the browser extension.**
+- **Protocol:** written down in §8.2.1:
+  - P-256 pairing with a 6-digit code on both screens;
+  - AES-256-GCM requests bound to the client id;
+  - timestamp and replay checks;
+  - every fill checked by the desktop against the frame's own site (score ≥ 60).
+  Cross-checked by a shared vector that both the Rust and the WebCrypto code pass.
+- **`apps/desktop/nm-host`:** std-only relay, built by `make nm-host`.
+- **Desktop app:**
+  - Registers nm-host on every launch: user-level manifests for Chrome, Chromium, Edge,
+    Brave, Vivaldi and Firefox on macOS and Linux; on Windows, per-user registry keys
+    through `reg.exe`, which are untested.
+  - Listens on `bridge.sock` (0600) or the per-user named pipe.
+  - Matching uses the Public Suffix List, so `x.github.io` and `y.github.io` are different
+    sites, and IP addresses and `localhost` are their own sites.
+  - The pairing prompt and the save/update prompts appear over any screen.
+  - Settings → Browser extension lists the allowed browsers, with Remove.
+  - Pairings are kept in the keychain.
+- **`apps/extension`:**
+  - MV3 build for Chrome and Firefox.
+  - The popup reuses the desktop's tokens, components, fonts and i18n.
+  - The content script finds login, signup, change-password, multi-step and one-time-code
+    fields, including in shadow roots and frames.
+  - The in-page menu sits in a closed shadow root, with the clickjacking checks of §8.3.
+  - Save capture runs on submit.
+  - 33 `ext.*` strings, with drafted Arabic and Sorani for review.
+- **Tests:**
+  - Extension: unit 43; Chromium e2e 33 (real nm-host, fake desktop); one e2e against
+    the desktop's real Rust bridge (`bun run e2e:real`: pair, per-site fill, update, new
+    save).
+  - Desktop: 35, of which 18 are bridge tests.
+  - nm-host: 3.
+  - `web-ext lint`: 0 errors.
+- **Not yet checked:**
+  - Fixtures in Firefox. Its host manifests live outside the profile on macOS, so a test
+    run would touch the real user folder.
+  - Real Chrome or Edge (Chromium 131 only).
+  - The toolbar popup itself (tests open `popup.html` as a page).
+  - Windows registration.
+  - Dark-mode screenshots.
+- **Known gaps:**
+  - The in-page menu uses system fonts.
+  - The multi-step username lives only in the service worker's memory.
+  - The Chrome `key` field must be dropped for store builds, and nm-host must become a
+    bundled sidecar (`externalBin`); both are phase 6.
+
 **2026-11-08 — Phase 4, second half: the phones.**
 - `core/qasa-ffi`: UniFFI 0.28 bindings over `qasa-sync` (`SyncHost`, `sync_join`, a
   `SyncStoreCallback` the app implements, typed `FfiSyncError`s) plus
@@ -480,6 +526,67 @@ content script ⇄ service worker ⇄ (native messaging, stdio) nm-host ⇄ (Uni
 Ranking ports `AutofillContextMatcher.swift`: exact host +100, subdomain +80, same
 registrable domain +60 (Public Suffix List, bundled in the desktop), substring +30,
 title/subtitle +20, base 10, ties by title.
+
+### 8.2.1 Wire protocol (v1)
+
+**Framing.** Browser ⇄ nm-host uses the standard native messaging framing: a 4-byte
+length in native byte order, then UTF-8 JSON, at most 1 MiB. nm-host ⇄ desktop uses the
+same framing, little-endian. nm-host is a dumb pipe. It opens one socket connection per
+native port, and its first frame is `{"type":"hello","origin":"<argv[1]>"}`. While the
+app isn't running, it answers every frame with `{"type":"error","code":"appNotRunning"}`,
+and it retries the connection on the next frame.
+
+**Socket.** On macOS and Linux it is `<app data dir>/bridge.sock`, mode 0600:
+
+- macOS: `~/Library/Application Support/com.qasa-app.desktop/`.
+- Linux: `$XDG_DATA_HOME` or `~/.local/share`, then `com.qasa-app.desktop/`.
+
+On Windows it is `\\.\pipe\qasa-bridge-<USERNAME>`. `QASA_BRIDGE_SOCKET` overrides the
+path on every OS, for tests.
+
+**Pairing** (in the clear; the matching code stops a man in the middle):
+
+1. Extension → `{"type":"pair","client":"Chrome","pub":"<b64 raw P-256 public key, 65 bytes>"}`.
+2. Desktop → `{"type":"pairPending","pub":"<b64 desktop P-256 key>"}`. Both sides then
+   derive the same values:
+   - `okm = HKDF-SHA256(ikm = ECDH secret, salt = extPub ‖ deskPub, info = "qasa-bridge-v1", 36 bytes)`;
+   - `key = okm[0..32]`, used for AES-256-GCM;
+   - `code = big-endian u32(okm[32..36]) mod 1 000 000`, written as 6 digits with leading zeros.
+3. The desktop shows "Allow Chrome to use Qasa?" with the code, and the extension shows
+   the same code. One pairing can be pending at a time, for 2 minutes.
+4. Desktop → `{"type":"paired","clientId":"<uuid>"}`, or
+   `{"type":"pairDenied"}` / `{"type":"pairExpired"}`. The extension stores
+   `{clientId, key}` in `chrome.storage.local`. The desktop stores it in the OS keychain.
+
+**Requests:**
+
+- The extension sends `{"type":"req","clientId":…,"n":"<b64 12-byte nonce>","c":"<b64 ciphertext+tag>"}`.
+- The message is AES-256-GCM encrypted with `AAD = UTF-8 clientId`. The plaintext is
+  `{"id":"<16 random hex>","ts":<ms>,"op":"…",…args}`.
+- The desktop rejects:
+  - a `ts` more than 2 minutes off;
+  - an `id` it has seen in the last 5 minutes;
+  - an unknown client, with `{"type":"error","code":"notPaired"}` in the clear.
+- The reply is `{"type":"res","n":…,"c":…}` (same key and AAD). Its plaintext is
+  `{"id":…,"ok":true,…}` or `{"id":…,"ok":false,"error":"locked|noVault|notFound|noMatch|bad"}`.
+
+| `op` | Args | Reply |
+| --- | --- | --- |
+| `status` | — | `state`: `locked`, `unlocked` or `noVault`; `device` |
+| `unlock` | — | — (brings the window forward) |
+| `matches` | `url` | `items: [{id, title, username, hasTotp}]`: score ≥ 60 only, best first |
+| `fill` | `itemId, url` | `username, password, totp?` (current code). `noMatch` unless the item scores ≥ 60 for `url` |
+| `totp` | `itemId, url` | `code, period, remaining`. Same match rule |
+| `copy` | `itemId, field` (`username`, `password` or `totp`) | Copied by the desktop. It clears after 30 s, or for a 2FA code when the code expires |
+| `search` | `query` | `items: [{id, title, username, website, hasTotp}]`: logins only, 50 at most |
+| `generate` | — | `password` (the shared generator's defaults) |
+| `save` | `url, username, password` | `result`: `unchanged`, `prompted` or `locked`. The desktop then asks to save or update |
+
+- **Trusted origin.** The service worker takes `url` from `sender.url` (the frame's own
+  URL), never from what the content script claims.
+- **Popup only.** `copy` and `search` run only for requests from the popup.
+- **Clean URLs.** Only `http(s)` URLs are accepted, and the desktop removes the path and
+  query before matching.
 
 ### 8.3 Features
 
