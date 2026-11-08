@@ -18,6 +18,7 @@ import {
   Upload,
   User,
   UserX,
+  Wifi,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
@@ -223,7 +224,6 @@ function logout() {
       </CardContainer>
     </section>
 
-    <!-- Pairing code and "Sync on this network" arrive with Wi‑Fi pairing (phase 4). -->
     <section class="group">
       <div class="label-row">
         <SectionLabel :text="t('settings.linkedDevices')" />
@@ -236,6 +236,13 @@ function logout() {
           :subtitle="t('settings.thisDevice')"
           icon-color="var(--accent)"
           @click="openSubPage('linkedDevices', 'settings')"
+        />
+        <hr class="divider" />
+        <NavChevronRow
+          :icon="Wifi"
+          :title="t('settings.syncNetwork')"
+          :subtitle="account.status?.isPremium ? t('settings.premiumLanSync') : t('settings.requiresPremium')"
+          @click="openSubPage('wifiSync', 'settings')"
         />
       </CardContainer>
     </section>

@@ -4,6 +4,7 @@
 mod account;
 mod clipboard;
 mod prefs;
+mod sync;
 mod vault;
 
 use std::sync::Mutex;
@@ -31,6 +32,7 @@ pub fn run() {
             let api = account::api::ApiClient::new(account::api::base_url());
             let account = account::Account::new(api, Box::new(account::secrets::KeyringStore));
             app.manage(AccountState(tokio::sync::Mutex::new(account)));
+            app.manage(sync::SyncState::default());
             spawn_auto_lock(app.handle().clone());
             Ok(())
         })
@@ -68,6 +70,10 @@ pub fn run() {
             vt::totp_from_image,
             vt::vault_export_csv,
             vt::vault_import_csv,
+            sync::sync_host_start,
+            sync::sync_browse_start,
+            sync::sync_stop,
+            sync::sync_join,
             ac::account_status,
             ac::account_bootstrap,
             ac::account_refresh_license,

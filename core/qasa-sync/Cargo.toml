@@ -1,0 +1,23 @@
+[package]
+name = "qasa-sync"
+version = "0.1.0"
+description = "Qasa Wi-Fi vault sync: PAKE pairing over a short code, an encrypted channel, and a last-writer-wins merge of encrypted items."
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[dependencies]
+aes-gcm = "0.10"
+argon2 = "0.5"
+base64 = "0.22"
+hkdf = "0.12"
+hmac = "0.12"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+spake2 = "0.4"
+subtle = "2.5"
+thiserror = "2"
+zeroize = "1"

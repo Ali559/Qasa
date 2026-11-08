@@ -166,6 +166,14 @@ impl Account {
         }
     }
 
+    /// A new computer joining an existing vault takes that vault's account (only from
+    /// inside the authenticated sync channel) and starts with a fresh device fingerprint.
+    pub fn adopt_account(&mut self, account_id: &str) {
+        self.clear_identity();
+        self.secrets.set(Secret::AccountId, Some(account_id));
+        self.secrets.set(Secret::DeviceFingerprint, Some(&new_lower_uuid()));
+    }
+
     /// Forgets the account on this computer ("Clear local data", account deletion).
     pub fn clear_identity(&mut self) {
         for secret in Secret::ALL {
