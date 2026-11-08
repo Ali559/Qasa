@@ -3,7 +3,7 @@
 // Unlock screen, for pairing): "Allow Chrome to use Qasa?" with the matching code, and
 // "Save this login?" / "Update the saved password?" after a sign-in form was sent.
 // Saves queue up and are shown one at a time; nothing is written until Save is clicked.
-import { Globe, User } from 'lucide-vue-next'
+import { Globe, KeyRound, User } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 import Sheet from '@/components/Sheet.vue'
@@ -71,10 +71,15 @@ async function decideSave(accept: boolean) {
       <h2>{{ t(saves[0].kind === 'save' ? 'bridge.saveTitle' : 'bridge.updateTitle') }}</h2>
       <p>{{ t('bridge.saveBody', saves[0].client) }}</p>
       <dl class="fields">
+        <div v-if="saves[0].itemTitle" class="field">
+          <KeyRound :size="18" aria-hidden="true" />
+          <dt>{{ t('vault.type.login') }}</dt>
+          <dd>{{ saves[0].itemTitle }}</dd>
+        </div>
         <div class="field">
           <Globe :size="18" aria-hidden="true" />
           <dt>{{ t('bridge.website') }}</dt>
-          <dd dir="ltr">{{ saves[0].itemTitle ?? saves[0].website }}</dd>
+          <dd dir="ltr">{{ saves[0].website }}</dd>
         </div>
         <div v-if="saves[0].username" class="field">
           <User :size="18" aria-hidden="true" />

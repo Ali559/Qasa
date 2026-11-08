@@ -98,6 +98,8 @@ stores assign to the desktop's host manifest ([`EXTENSION_IDS.md`](EXTENSION_IDS
 ```sh
 bun run test         # Vitest: protocol, vector, bridge, detection, save, fill
 bun run e2e          # build, then Playwright (Chromium, unpacked extension)
+bun run e2e:real     # Chromium against the desktop's real Rust bridge
+bun run e2e:firefox  # real Firefox against the real bridge (FIREFOX_BIN, GECKODRIVER)
 bun run lint:firefox # web-ext lint on dist/firefox
 bun run vectors      # regenerate test/vectors/bridge-pairing.json (with Node's crypto)
 ```
@@ -108,6 +110,13 @@ profile with a user-level host manifest in `<profile>/NativeMessagingHosts/`, st
 `test/fake-desktop.ts` on a temp unix socket and points nm-host at it with
 `QASA_BRIDGE_SOCKET`. The in-page menu is in a closed shadow root, so tests click it by
 coordinates from `src/content/layout.ts`, with real mouse events.
+
+`e2e:firefox` (`test/firefox/firefox-e2e.ts`) drives Firefox over geckodriver's WebDriver
+API, because Playwright can't load extensions into Firefox. The add-on is installed as a
+temporary add-on, and the run needs Firefox and geckodriver binaries (any folder). Firefox
+reads native host registrations only from a per-user folder, not the profile, so run the
+desktop app once first: it registers nm-host there. geckodriver sends pointer actions only
+into the frame it is switched to, so frame fields are clicked from inside their frame.
 
 ## Security rules
 
