@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generate iOS .xcstrings and Android strings.xml from l10n/strings.json."""
+"""Generate iOS .xcstrings, Android strings.xml and the desktop/extension JSON catalogs
+from l10n/strings.json."""
 
 from __future__ import annotations
 
@@ -18,6 +19,8 @@ IOS_MAIN = ROOT / "apps/ios/qasa_ios/Resources/Localizable.xcstrings"
 IOS_CREDENTIAL = ROOT / "apps/ios/QasaCredentialProvider/Localizable.xcstrings"
 IOS_PAYMENT = ROOT / "apps/ios/QasaPaymentNotification/Localizable.xcstrings"
 ANDROID_RES = ROOT / "apps/android/app/src/main/res"
+# Desktop app catalogs; the browser extension imports the same files.
+WEB_DIR = ROOT / "apps/desktop/src/i18n"
 
 CREDENTIAL_KEYS = [
     "auth.unlock.placeholder",
@@ -125,6 +128,42 @@ def ios_to_android_placeholders(text: str) -> str:
     return _PLACEHOLDER_RE.sub(repl, text)
 
 
+def ios_to_web_placeholders(text: str) -> str:
+    """`%@` / `%lld` → `{0}`, `{1}`, … in argument order; `%2$@` → `{1}`."""
+    counter = 0
+
+    def repl(match: re.Match[str]) -> str:
+        nonlocal counter
+        pos = match.group("pos")
+        if pos:
+            index = int(pos[:-1]) - 1
+        else:
+            index = counter
+            counter += 1
+        return "{" + str(index) + "}"
+
+    return _PLACEHOLDER_RE.sub(repl, text)
+
+
+def web_paths(dest_root: Path | None) -> list[Path]:
+    base = WEB_DIR if dest_root is None else dest_root / WEB_DIR.relative_to(ROOT)
+    return [base / f"{lang}.json" for lang in LANGS]
+
+
+def write_web_json(table: dict[str, dict[str, str]], paths: list[Path]) -> None:
+    for lang, path in zip(LANGS, paths):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        catalog = {
+            key: ios_to_web_placeholders(row[lang])
+            for key, row in sorted(table.items())
+            if lang in row
+        }
+        path.write_text(
+            json.dumps(catalog, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+
 def escape_android_xml(text: str) -> str:
     text = text.replace("\\", "\\\\")
     text = text.replace("'", r"\'")
@@ -213,6 +252,7 @@ def generate_into(dest_root: Path | None = None) -> list[Path]:
     """Write all outputs. If dest_root is set, mirror under that root for --check."""
     shared = load_json(L10N / "strings.json")
     ios_overlay = load_json(L10N / "platform/ios.json")
+    desktop_overlay = load_json(L10N / "platform/desktop.json")
     android_overlay = load_json(L10N / "platform/android.json")
     ios_table = merge_tables(shared, ios_overlay)
 
@@ -245,6 +285,10 @@ def generate_into(dest_root: Path | None = None) -> list[Path]:
     for lang, directory in android_dirs.items():
         written.append(directory / "strings.xml")
 
+    paths = web_paths(dest_root)
+    write_web_json(merge_tables(shared, desktop_overlay), paths)
+    written.extend(paths)
+
     return written
 
 
@@ -263,6 +307,7 @@ def check_drift() -> int:
             IOS_CREDENTIAL,
             IOS_PAYMENT,
             *[d / "strings.xml" for d in ANDROID_DIR.values()],
+            *web_paths(None),
         ]
         stale = []
         for path in targets:

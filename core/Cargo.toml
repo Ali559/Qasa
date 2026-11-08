@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = ["qasa-vault"]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.82"
+license-file = "../LICENSE.md"
+publish = false
+
+# PBKDF2 at 310,000 iterations takes seconds in an unoptimized build. Optimize
+# dependencies even in dev so the vector tests stay fast.
+[profile.dev.package."*"]
+opt-level = 3

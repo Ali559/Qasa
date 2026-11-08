@@ -1,0 +1,26 @@
+[package]
+name = "qasa-vault"
+version = "0.1.0"
+description = "Qasa client vault: key derivation, item encryption and the blind search index. Byte-for-byte compatible with the iOS and Android apps."
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[dependencies]
+aes-gcm = "0.10"
+hkdf = "0.12"
+hmac = "0.12"
+pbkdf2 = { version = "0.12", default-features = false, features = ["hmac"] }
+rand = "0.8"
+sha2 = "0.10"
+subtle = "2.5"
+thiserror = "2"
+unicode-general-category = "1"
+unicode-segmentation = "1.12"
+zeroize = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

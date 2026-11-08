@@ -9,6 +9,8 @@ the server only meters devices and sells features.
 | [`server/`](server/) | Rust API, background worker, VPN node agent ([README](server/README.md)) |
 | [`apps/ios/`](apps/ios/) | iOS app and its AutoFill / notification extensions |
 | [`apps/android/`](apps/android/) | Android app |
+| [`apps/desktop/`](apps/desktop/) | Desktop app for macOS, Windows and Linux (Tauri), in progress ([README](apps/desktop/README.md), [plan](docs/desktop-extension-plan.md)) |
+| [`core/`](core/) | Rust vault core shared with the desktop: crypto, search index, golden vectors |
 | [`apps/dashboard/`](apps/dashboard/) | Admin console ([README](apps/dashboard/README.md)) |
 | [`l10n/`](l10n/) | Shared UI strings (en / ar / ckb) for both apps ([README](l10n/README.md)) |
 | [`docs/`](docs/) | Plans, design system, user flows |
