@@ -34,8 +34,12 @@ function build(target: string): string {
 mkdirSync(OUT, { recursive: true })
 const dest = join(OUT, `qasa-nm-host-${triple}${exe}`)
 if (triple === 'universal-apple-darwin') {
-  // One binary for Apple silicon and Intel, like the app itself.
-  const parts = ['aarch64-apple-darwin', 'x86_64-apple-darwin'].map(build)
+  // One binary for Apple silicon and Intel, like the app itself. Tauri compiles the app
+  // once per architecture, and each of those builds checks for its own sidecar, so the
+  // single-architecture copies are needed too.
+  const archs = ['aarch64-apple-darwin', 'x86_64-apple-darwin']
+  const parts = archs.map(build)
+  archs.forEach((arch, i) => copyFileSync(parts[i], join(OUT, `qasa-nm-host-${arch}`)))
   execFileSync('lipo', ['-create', '-output', dest, ...parts], { stdio: 'inherit' })
 } else {
   copyFileSync(build(triple), dest)
