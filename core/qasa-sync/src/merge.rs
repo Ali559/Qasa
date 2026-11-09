@@ -23,8 +23,8 @@ fn item_key(i: &WireItem) -> (i64, bool, [u8; 32]) {
     (i.updated_at, i.deleted_at.is_some(), Sha256::digest(&i.payload).into())
 }
 
-fn collection_key(c: &WireCollection) -> (i64, bool, String) {
-    (c.updated_at, c.deleted_at.is_some(), c.name.clone())
+fn collection_key(c: &WireCollection) -> (i64, bool, [u8; 32]) {
+    (c.updated_at, c.deleted_at.is_some(), Sha256::digest(&c.name_enc).into())
 }
 
 /// The remote rows that should replace or add to `local`. Tombstones older than
@@ -113,5 +113,21 @@ mod tests {
     fn old_tombstones_are_dropped() {
         let remote = snap(vec![item("a", 1, b"", Some(1))]);
         assert!(merge(&Snapshot::default(), &remote, 1 + TOMBSTONE_TTL_MS).items.is_empty());
+    }
+
+    /// Protocol 2: a folder's name is ciphertext on the wire, never readable text, and two
+    /// folders edited at the same moment still resolve the same way on both sides.
+    #[test]
+    fn folder_names_cross_encrypted() {
+        let folder = |name_enc: &[u8]| WireCollection { id: "F".into(), name_enc: name_enc.to_vec(), created_at: 1, updated_at: 5, deleted_at: None };
+        let json = serde_json::to_string(&folder(b"\x01\x02ciphertext")).unwrap();
+        assert!(json.contains("\"name_enc\""), "{json}");
+        assert!(!json.contains("\"name\""), "{json}");
+
+        let (a, b) = (folder(b"one"), folder(b"two"));
+        let ab = merge(&Snapshot { collections: vec![a.clone()], ..Default::default() }, &Snapshot { collections: vec![b.clone()], ..Default::default() }, 10);
+        let ba = merge(&Snapshot { collections: vec![b.clone()], ..Default::default() }, &Snapshot { collections: vec![a.clone()], ..Default::default() }, 10);
+        // Exactly one side takes the other's row, so both end up with the same one.
+        assert_eq!(ab.collections.len() + ba.collections.len(), 1);
     }
 }

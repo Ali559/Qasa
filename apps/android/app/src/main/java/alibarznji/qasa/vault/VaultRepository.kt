@@ -10,10 +10,13 @@ import alibarznji.qasa.vault.db.VaultDao
 import alibarznji.qasa.vault.db.VaultItemEntity
 import alibarznji.qasa.vault.db.VaultSearchTokenEntity
 import alibarznji.qasa.vault.db.VaultStoreHolder
+import alibarznji.qasa.vault.db.VaultStoreUnavailableException
+import androidx.room.withTransaction
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 data class VaultListRow(
@@ -108,16 +111,36 @@ class VaultRepository @Inject constructor(
         return getAllRows().filter { it.id in ids }
     }
 
-    fun observeCollections(): Flow<List<VaultCollectionEntity>> = dao.observeCollections()
+    private val database get() = store.open() ?: throw VaultStoreUnavailableException(store.failure.value)
 
+    /**
+     * Live collections with their names decrypted, sorted by name. Empty while locked;
+     * a name that doesn't decrypt is skipped, like an unreadable item.
+     */
+    fun observeCollections(): Flow<List<VaultCollection>> =
+        combine(dao.observeCollections(), session.unlocked) { rows, unlocked ->
+            if (!unlocked) {
+                emptyList()
+            } else {
+                try {
+                    CollectionNames.readableSorted(rows, session.requireEncKey())
+                } catch (_: VaultCryptoException.VaultLocked) {
+                    emptyList()
+                }
+            }
+        }
+
+    /** Creates (or overwrites) a collection; only the ciphertext of [name] is stored. */
     suspend fun saveCollection(id: String?, name: String): String {
+        val nameEnc = CollectionNames.encrypt(name, session.requireEncKey())
         val cid = id ?: UUID.randomUUID().toString().lowercase()
         val now = System.currentTimeMillis()
         val existing = id?.let { old -> dao.getCollections().firstOrNull { it.id == old } }
         dao.upsertCollection(
             VaultCollectionEntity(
                 id = cid,
-                name = name,
+                name = "",
+                nameEnc = nameEnc,
                 createdAt = existing?.createdAt ?: now,
                 updatedAt = now,
             ),
@@ -129,7 +152,23 @@ class VaultRepository @Inject constructor(
     suspend fun renameCollection(id: String, name: String) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
-        dao.renameCollection(id, trimmed, System.currentTimeMillis())
+        val nameEnc = CollectionNames.encrypt(trimmed, session.requireEncKey())
+        dao.renameCollection(id, nameEnc, System.currentTimeMillis())
+    }
+
+    /**
+     * Encrypts collection names saved before names were encrypted (schema < 3) and blanks
+     * the plaintext. Runs at every unlock; after the first one there is nothing to do.
+     * Not an edit: `updatedAt` is unchanged, so it never wins a sync merge by itself.
+     */
+    suspend fun encryptLegacyCollectionNames() {
+        if (!session.isUnlocked) return
+        val rows = dao.collectionsWithPlaintextNames()
+        if (rows.isEmpty()) return
+        val updates = CollectionNames.legacyUpdates(rows, session.requireEncKey())
+        database.withTransaction {
+            for ((id, nameEnc) in updates) dao.setCollectionNameEnc(id, nameEnc)
+        }
     }
 
     // On-device notifications (iOS `AppNotification` SwiftData model, `NotificationsView`).
@@ -158,25 +197,40 @@ class VaultRepository @Inject constructor(
         dao.tombstoneCollection(id, System.currentTimeMillis())
     }
 
+    /**
+     * Master password change: every item and every collection name re-encrypted under the
+     * new key, all or nothing. Everything is decrypted and re-encrypted in memory first, so
+     * an unreadable row refuses the change before anything is written; the writes then go
+     * in one transaction.
+     */
     suspend fun reencryptAll(oldEnc: ByteArray, newEnc: ByteArray, newSearch: ByteArray) {
-        val items = dao.getAllItems()
-        for (item in items) {
+        val now = System.currentTimeMillis()
+        val rekeyed = dao.getAllItems().map { item ->
             val payloadBytes = VaultCrypto.decrypt(item.encryptedPayload, oldEnc)
             val envelopeBytes = VaultCrypto.decrypt(item.encryptedEnvelope, oldEnc)
             val payload = VaultJson.decodePayload(payloadBytes)
-            dao.upsertItem(
-                item.copy(
-                    encryptedPayload = VaultCrypto.encrypt(payloadBytes, newEnc),
-                    encryptedEnvelope = VaultCrypto.encrypt(envelopeBytes, newEnc),
-                    updatedAt = System.currentTimeMillis(),
-                ),
+            val entity = item.copy(
+                encryptedPayload = VaultCrypto.encrypt(payloadBytes, newEnc),
+                encryptedEnvelope = VaultCrypto.encrypt(envelopeBytes, newEnc),
+                updatedAt = now,
             )
-            dao.deleteTokensForItem(item.id)
             val hashes = VaultSearchIndex.searchableStrings(payload)
                 .flatMap { VaultSearchIndex.tokenHashes(it, newSearch) }
                 .distinct()
                 .map { VaultSearchTokenEntity(itemId = item.id, tokenHash = it) }
-            if (hashes.isNotEmpty()) dao.insertTokens(hashes)
+            entity to hashes
+        }
+        // Encrypted names move to the new key; any plaintext name left is encrypted
+        // straight under it (and applied last, so it wins for that row).
+        val names = CollectionNames.rekey(dao.collectionsWithEncryptedNames(), oldEnc, newEnc) +
+            CollectionNames.legacyUpdates(dao.collectionsWithPlaintextNames(), newEnc)
+        database.withTransaction {
+            for ((entity, hashes) in rekeyed) {
+                dao.upsertItem(entity)
+                dao.deleteTokensForItem(entity.id)
+                if (hashes.isNotEmpty()) dao.insertTokens(hashes)
+            }
+            for ((id, nameEnc) in names) dao.setCollectionNameEnc(id, nameEnc)
         }
         rebuildAutofillIndex()
     }

@@ -46,13 +46,27 @@ data class VaultSearchTokenEntity(
 @Entity(tableName = "vault_collections")
 data class VaultCollectionEntity(
     @PrimaryKey val id: String,
-    val name: String,
+    /**
+     * Legacy plaintext name (schema 1–2). Blank once the name is in [nameEnc]: names are
+     * never stored or synced in plaintext (plan decision 5). A non-blank value is a
+     * collection saved before v3, encrypted at the next unlock.
+     */
+    val name: String = "",
     val createdAt: Long,
     /** Last create or rename; the sync merge keeps the newer side. */
     @ColumnInfo(defaultValue = "0") val updatedAt: Long = createdAt,
     /** Tombstone, as for items. */
     val deletedAt: Long? = null,
-)
+    /**
+     * Vault-key AES-GCM ciphertext of the UTF-8 name, the same blob format as an item's
+     * envelope ([alibarznji.qasa.vault.crypto.VaultCrypto]). Null for a legacy row not yet
+     * encrypted; empty for a tombstone.
+     */
+    val nameEnc: ByteArray? = null,
+) {
+    val isDeleted: Boolean get() = deletedAt != null
+}
+
 
 @Entity(tableName = "app_notifications")
 data class AppNotificationEntity(
@@ -117,8 +131,23 @@ interface VaultDao {
     suspend fun tombstoneCollection(id: String, at: Long)
 
     /** Rename only, so `createdAt` survives (iOS mutates `VaultCollection.name` in place). */
-    @Query("UPDATE vault_collections SET name = :name, updatedAt = :at WHERE id = :id AND deletedAt IS NULL")
-    suspend fun renameCollection(id: String, name: String, at: Long)
+    @Query(VaultSql.RENAME_COLLECTION)
+    suspend fun renameCollection(id: String, nameEnc: ByteArray, at: Long)
+
+    /** Every row with a plaintext name left (saved before names were encrypted). */
+    @Query(VaultSql.PLAINTEXT_COLLECTION_NAMES)
+    suspend fun collectionsWithPlaintextNames(): List<VaultCollectionEntity>
+
+    /** Every row that holds an encrypted name (master password change). */
+    @Query(VaultSql.ENCRYPTED_COLLECTION_NAMES)
+    suspend fun collectionsWithEncryptedNames(): List<VaultCollectionEntity>
+
+    /**
+     * Stores an encrypted name and blanks the plaintext one. Not an edit: `updatedAt`
+     * stays, so this never wins a sync merge on its own.
+     */
+    @Query(VaultSql.SET_COLLECTION_NAME_ENC)
+    suspend fun setCollectionNameEnc(id: String, nameEnc: ByteArray)
 
     // ---- Wi‑Fi sync (blocking: called from the Rust session's thread) ---------------
 
@@ -192,7 +221,7 @@ interface VaultDao {
         AppNotificationEntity::class,
         MonitoredEmailEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class VaultDatabase : RoomDatabase() {
@@ -203,12 +232,21 @@ abstract class VaultDatabase : RoomDatabase() {
 object VaultSql {
     const val LIVE_ITEMS = "SELECT * FROM vault_items WHERE deletedAt IS NULL ORDER BY updatedAt DESC"
     const val LIVE_ITEM = "SELECT * FROM vault_items WHERE id = :id AND deletedAt IS NULL LIMIT 1"
-    const val LIVE_COLLECTIONS = "SELECT * FROM vault_collections WHERE deletedAt IS NULL ORDER BY name ASC"
+    /** Names are ciphertext, so callers sort by the decrypted name. */
+    const val LIVE_COLLECTIONS = "SELECT * FROM vault_collections WHERE deletedAt IS NULL ORDER BY createdAt ASC"
     const val TOMBSTONE_ITEM =
         "UPDATE vault_items SET encryptedEnvelope = X'', encryptedPayload = X'', " +
             "deletedAt = :at, updatedAt = :at WHERE id = :id"
+    /** A tombstone keeps no name at all, plaintext or encrypted. */
     const val TOMBSTONE_COLLECTION =
-        "UPDATE vault_collections SET deletedAt = :at, updatedAt = :at WHERE id = :id"
+        "UPDATE vault_collections SET name = '', nameEnc = X'', deletedAt = :at, updatedAt = :at WHERE id = :id"
+    const val RENAME_COLLECTION =
+        "UPDATE vault_collections SET name = '', nameEnc = :nameEnc, updatedAt = :at WHERE id = :id AND deletedAt IS NULL"
+    const val PLAINTEXT_COLLECTION_NAMES = "SELECT * FROM vault_collections WHERE name <> ''"
+    const val ENCRYPTED_COLLECTION_NAMES =
+        "SELECT * FROM vault_collections WHERE nameEnc IS NOT NULL AND length(nameEnc) > 0"
+    const val SET_COLLECTION_NAME_ENC =
+        "UPDATE vault_collections SET name = '', nameEnc = :nameEnc WHERE id = :id"
 }
 
 /**
@@ -230,5 +268,22 @@ object VaultMigrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2)
+    /**
+     * v3: encrypted collection names (plan decision 5). The plaintext `name` column stays
+     * (Room can't drop it without a table rebuild) and is blanked as each name is
+     * encrypted at the next unlock, which needs the vault key this migration doesn't
+     * have. Tombstones keep no name, so theirs are blanked now.
+     */
+    val MIGRATION_2_3_SQL = listOf(
+        "ALTER TABLE vault_collections ADD COLUMN nameEnc BLOB",
+        "UPDATE vault_collections SET name = '', nameEnc = X'' WHERE deletedAt IS NOT NULL",
+    )
+
+    val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            MIGRATION_2_3_SQL.forEach(db::execSQL)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
 }

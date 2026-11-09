@@ -85,7 +85,11 @@ struct CountryMenuPicker: View {
 }
 
 struct CollectionPickerField: View {
-    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live, sort: \VaultCollection.createdAt) private var storedCollections: [VaultCollection]
+
+    /// Decrypted names, sorted; unreadable ones are skipped.
+    private var collections: [VaultRepository.NamedCollection] { VaultRepository.named(storedCollections) }
+
     @Binding var collectionId: UUID?
     @Environment(\.modelContext) private var modelContext
     @State private var newName = ""
@@ -97,7 +101,7 @@ struct CollectionPickerField: View {
             HStack {
                 Picker(L10n.tr("vault.collection", locale: AppLanguage.current.locale), selection: $collectionId) {
                     Text(L10n.tr("common.none", locale: AppLanguage.current.locale)).tag(UUID?.none)
-                    ForEach(collections, id: \.id) { c in
+                    ForEach(collections) { c in
                         Text(c.name).tag(Optional(c.id))
                     }
                 }
@@ -123,8 +127,7 @@ struct CollectionPickerField: View {
             Button(L10n.tr("common.create", locale: AppLanguage.current.locale)) {
                 let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return }
-                let c = VaultCollection(name: trimmed)
-                modelContext.insert(c)
+                guard let c = try? VaultRepository.makeCollection(name: trimmed, context: modelContext) else { return }
                 collectionId = c.id
                 newName = ""
             }

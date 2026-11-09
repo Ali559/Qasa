@@ -22,6 +22,9 @@ final class VaultRepository {
     func configure(context: ModelContext) async {
         self.context = context
         await migrateLegacyIfNeeded()
+        if let key = try? VaultSession.shared.requireEncKey() {
+            try? Self.encryptLegacyCollectionNames(context: context, key: key)
+        }
         await warmCache()
     }
 
@@ -99,12 +102,95 @@ final class VaultRepository {
         record.updatedAt = now
     }
 
-    /// Deletes a folder as a tombstone, like items.
+    // MARK: - Folders
+    //
+    // Folder names are vault-key ciphertext (`VaultCollection.nameEncrypted`, plan
+    // decision 5), in the same blob format as item envelopes, so Wi‑Fi sync carries them
+    // as stored. Every read goes through `collectionName(_:)`.
+
+    static func encryptCollectionName(_ name: String, key: SymmetricKey) throws -> Data {
+        try VaultCrypto.encrypt(Data(name.utf8), key: key)
+    }
+
+    static func decryptCollectionName(_ blob: Data, key: SymmetricKey) throws -> String {
+        guard let name = String(data: try VaultCrypto.decrypt(blob, key: key), encoding: .utf8) else {
+            throw VaultCryptoError.invalidCiphertext
+        }
+        return name
+    }
+
+    /// The folder's name, decrypted with the session key. `nil` while locked, for a
+    /// tombstone, or when the name doesn't decrypt (skipped like unreadable items).
+    static func collectionName(_ collection: VaultCollection) -> String? {
+        guard collection.deletedAt == nil else { return nil }
+        if let blob = collection.nameEncrypted, !blob.isEmpty {
+            guard let key = try? VaultSession.shared.requireEncKey() else { return nil }
+            return try? decryptCollectionName(blob, key: key)
+        }
+        // Saved before names were encrypted and not migrated yet (that runs at unlock).
+        return collection.name.isEmpty ? nil : collection.name
+    }
+
+    struct NamedCollection: Identifiable {
+        let collection: VaultCollection
+        let name: String
+        var id: UUID { collection.id }
+    }
+
+    /// Live folders with readable names, sorted by name (the store can't sort ciphertext).
+    static func named(_ collections: [VaultCollection]) -> [NamedCollection] {
+        collections
+            .compactMap { c in collectionName(c).map { NamedCollection(collection: c, name: $0) } }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// Inserts a new folder with its name encrypted under the session key. The caller saves.
+    @discardableResult
+    static func makeCollection(name: String, context: ModelContext) throws -> VaultCollection {
+        let key = try VaultSession.shared.requireEncKey()
+        let collection = VaultCollection(nameEncrypted: try encryptCollectionName(name, key: key))
+        context.insert(collection)
+        return collection
+    }
+
+    static func renameCollection(_ collection: VaultCollection, to name: String, context: ModelContext) throws {
+        let key = try VaultSession.shared.requireEncKey()
+        collection.nameEncrypted = try encryptCollectionName(name, key: key)
+        collection.name = ""
+        collection.updatedAt = Date()
+        try context.save()
+    }
+
+    /// Deletes a folder as a tombstone, like items. A tombstone keeps no name at all.
     static func deleteCollection(_ collection: VaultCollection, context: ModelContext) {
         let now = Date()
+        collection.name = ""
+        collection.nameEncrypted = nil
         collection.deletedAt = now
         collection.updatedAt = now
         try? context.save()
+    }
+
+    /// Encrypts folder names saved before names were encrypted and blanks the plaintext;
+    /// tombstones just lose theirs. Runs at every unlock; after the first one there is
+    /// nothing left to do. Not an edit: `updatedAt` stays, so this never wins a sync merge.
+    static func encryptLegacyCollectionNames(context: ModelContext, key: SymmetricKey) throws {
+        let legacy = try context.fetch(FetchDescriptor<VaultCollection>(predicate: #Predicate { $0.name != "" }))
+        guard !legacy.isEmpty else { return }
+        do {
+            for collection in legacy {
+                if collection.deletedAt == nil {
+                    collection.nameEncrypted = try encryptCollectionName(collection.name, key: key)
+                } else {
+                    collection.nameEncrypted = nil
+                }
+                collection.name = ""
+            }
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
     }
 
     func payload(for id: UUID) throws -> VaultPayload {
@@ -173,42 +259,85 @@ final class VaultRepository {
         context = nil
     }
 
-    /// Decrypt every item with `oldEnc` / re-encrypt with `newEnc`, and rebuild search tokens.
+    /// Decrypt every item and folder name with `oldEnc` / re-encrypt with `newEnc`, and
+    /// rebuild search tokens. All or nothing: anything unreadable under `oldEnc` throws
+    /// before a single row is saved.
     func rekeyAllItems(oldEnc: SymmetricKey, newEnc: SymmetricKey, newSearch: SymmetricKey) throws {
         guard let context else { throw VaultCryptoError.vaultLocked }
-        let descriptor = FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live)
-        let records = try context.fetch(descriptor)
+        do {
+            try rekeyRecords(oldEnc: oldEnc, newEnc: newEnc, newSearch: newSearch, context: context)
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
+        Task { await warmCache(); await syncAutofillIndex() }
+    }
 
+    /// Reads everything under `oldEnc` first and only then writes, so an unreadable item or
+    /// folder name throws before any row changes (a re-key never silently drops one).
+    private func rekeyRecords(oldEnc: SymmetricKey, newEnc: SymmetricKey, newSearch: SymmetricKey, context: ModelContext) throws {
+        let records = try context.fetch(FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live))
+        var decoded: [(VaultItemRecord, VaultPayload, VaultEnvelope)] = []
         for record in records {
-            let payload: VaultPayload
-            let envelope: VaultEnvelope
-
             if record.schemaVersion >= 1, !record.encryptedPayload.isEmpty {
                 let payloadData = try VaultCrypto.decrypt(record.encryptedPayload, key: oldEnc)
-                payload = try JSONDecoder().decode(VaultPayload.self, from: payloadData)
+                let payload = try JSONDecoder().decode(VaultPayload.self, from: payloadData)
+                let envelope: VaultEnvelope
                 if !record.encryptedEnvelope.isEmpty {
                     let envelopeData = try VaultCrypto.decrypt(record.encryptedEnvelope, key: oldEnc)
                     envelope = try JSONDecoder().decode(VaultEnvelope.self, from: envelopeData)
                 } else {
                     envelope = VaultEnvelope(from: payload)
                 }
+                decoded.append((record, payload, envelope))
             } else if let legacy = record.legacyPayloadData {
-                payload = try JSONDecoder().decode(VaultPayload.self, from: legacy)
-                envelope = VaultEnvelope(from: payload)
-            } else {
-                continue
+                let payload = try JSONDecoder().decode(VaultPayload.self, from: legacy)
+                decoded.append((record, payload, VaultEnvelope(from: payload)))
             }
-
-            record.encryptedEnvelope = try VaultCrypto.encrypt(try JSONEncoder().encode(envelope), key: newEnc)
-            record.encryptedPayload = try VaultCrypto.encrypt(try JSONEncoder().encode(payload), key: newEnc)
-            record.schemaVersion = 1
-            record.legacyPayloadData = nil
-            record.updatedAt = Date()
-            replaceSearchTokens(for: record.id, envelope: envelope, payload: payload, searchKey: newSearch)
         }
 
-        try context.save()
-        Task { await warmCache(); await syncAutofillIndex() }
+        // Folder names, like the desktop: `updatedAt` stays (a re-key is not a rename).
+        let collections = try context.fetch(FetchDescriptor<VaultCollection>())
+        var names: [(VaultCollection, String)] = []
+        for collection in collections where collection.deletedAt == nil {
+            if let blob = collection.nameEncrypted, !blob.isEmpty {
+                names.append((collection, try Self.decryptCollectionName(blob, key: oldEnc)))
+            } else if !collection.name.isEmpty {
+                names.append((collection, collection.name))
+            }
+        }
+
+        // Encrypt everything before touching a row.
+        var sealedItems: [(VaultItemRecord, Data, Data, VaultPayload, VaultEnvelope)] = []
+        for (record, payload, envelope) in decoded {
+            sealedItems.append((
+                record,
+                try VaultCrypto.encrypt(try JSONEncoder().encode(envelope), key: newEnc),
+                try VaultCrypto.encrypt(try JSONEncoder().encode(payload), key: newEnc),
+                payload,
+                envelope
+            ))
+        }
+        let sealedNames = try names.map { ($0.0, try Self.encryptCollectionName($0.1, key: newEnc)) }
+
+        let now = Date()
+        for (record, envelopeBlob, payloadBlob, payload, envelope) in sealedItems {
+            record.encryptedEnvelope = envelopeBlob
+            record.encryptedPayload = payloadBlob
+            record.schemaVersion = 1
+            record.legacyPayloadData = nil
+            record.updatedAt = now
+            replaceSearchTokens(for: record.id, envelope: envelope, payload: payload, searchKey: newSearch)
+        }
+        for (collection, blob) in sealedNames {
+            collection.nameEncrypted = blob
+            collection.name = ""
+        }
+        for collection in collections where collection.deletedAt != nil {
+            collection.name = ""
+            collection.nameEncrypted = nil
+        }
     }
 
     // MARK: - Private

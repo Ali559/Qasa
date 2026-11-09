@@ -7,7 +7,7 @@ import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultPayload
-import alibarznji.qasa.vault.db.VaultCollectionEntity
+import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
@@ -18,7 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 
 /** What the per-kind field lists need from the editor besides the payload itself. */
 class EditorEnv(
-    val collections: List<VaultCollectionEntity>,
+    val collections: List<VaultCollection>,
     /** `null` until the vault's Phone items have loaded. */
     val phones: List<PhoneOption>?,
     val onCreateCollection: (name: String, onCreated: (String) -> Unit) -> Unit,

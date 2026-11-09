@@ -5,7 +5,11 @@ struct CollectionsView: View {
     var onOpenMenu: (() -> Void)? = nil
 
     @Environment(\.modelContext) private var modelContext
-    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live, sort: \VaultCollection.createdAt) private var storedCollections: [VaultCollection]
+
+    /// Decrypted names, sorted; unreadable ones are skipped.
+    private var collections: [VaultRepository.NamedCollection] { VaultRepository.named(storedCollections) }
+
 
     @Bindable private var cache = VaultRepository.shared.cache
 
@@ -30,11 +34,11 @@ struct CollectionsView: View {
                             )
                             .padding(.top, 48)
                         } else {
-                            ForEach(collections, id: \.id) { collection in
+                            ForEach(collections) { entry in
                                 NavigationLink {
-                                    CollectionDetailView(collection: collection)
+                                    CollectionDetailView(collection: entry.collection)
                                 } label: {
-                                    collectionCard(collection)
+                                    collectionCard(entry.collection, name: entry.name)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -78,7 +82,7 @@ struct CollectionsView: View {
         }
     }
 
-    private func collectionCard(_ collection: VaultCollection) -> some View {
+    private func collectionCard(_ collection: VaultCollection, name: String) -> some View {
         let count = cache.rows.filter { $0.collectionId == collection.id }.count
         return HStack(spacing: 14) {
             Image(systemName: "folder.fill")
@@ -93,7 +97,7 @@ struct CollectionsView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(collection.name)
+                Text(name)
                     .font(.qasa(16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(String(
@@ -110,7 +114,7 @@ struct CollectionsView: View {
             Menu {
                 Button {
                     editing = collection
-                    editName = collection.name
+                    editName = name
                 } label: {
                     Label(L10n.tr("common.edit"), systemImage: "pencil")
                 }
@@ -138,7 +142,7 @@ struct CollectionsView: View {
     private func createCollection() {
         let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        modelContext.insert(VaultCollection(name: trimmed))
+        guard (try? VaultRepository.makeCollection(name: trimmed, context: modelContext)) != nil else { return }
         try? modelContext.save()
         newName = ""
     }
@@ -147,9 +151,7 @@ struct CollectionsView: View {
         guard let editing else { return }
         let trimmed = editName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        editing.name = trimmed
-        editing.updatedAt = Date()
-        try? modelContext.save()
+        try? VaultRepository.renameCollection(editing, to: trimmed, context: modelContext)
         self.editing = nil
     }
 
@@ -181,6 +183,8 @@ struct CollectionDetailView: View {
     @Bindable private var cache = VaultRepository.shared.cache
     @State private var editorMode: EditorPresentation?
 
+    private var name: String { VaultRepository.collectionName(collection) ?? "" }
+
     private struct EditorPresentation: Identifiable {
         let id = UUID()
         let mode: VaultItemEditor.Mode
@@ -201,7 +205,7 @@ struct CollectionDetailView: View {
                         systemImage: "tray",
                         description: Text(String(
                             format: L10n.tr("collections.assignHint"),
-                            collection.name
+                            name
                         ))
                     )
                     .padding(.top, 40)
@@ -224,7 +228,7 @@ struct CollectionDetailView: View {
             .padding(.bottom, 40)
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle(collection.name)
+        .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
         .sheet(item: $editorMode) { presentation in

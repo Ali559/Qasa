@@ -110,20 +110,134 @@ struct VaultTombstoneTests {
         let container = try await setUp()
         defer { tearDown() }
         let context = container.mainContext
-        let work = VaultCollection(name: "Work")
-        let home = VaultCollection(name: "Home")
-        context.insert(work)
-        context.insert(home)
+        let work = try VaultRepository.makeCollection(name: "Work", context: context)
+        try VaultRepository.makeCollection(name: "Home", context: context)
         try context.save()
 
         VaultRepository.deleteCollection(work, context: context)
 
         let live = try context.fetch(FetchDescriptor<VaultCollection>(predicate: VaultCollection.live))
-        #expect(live.map(\.name) == ["Home"])
+        #expect(VaultRepository.named(live).map(\.name) == ["Home"])
         let all = try context.fetch(FetchDescriptor<VaultCollection>())
         #expect(all.count == 2)
         #expect(work.deletedAt != nil)
         #expect(work.updatedAt == work.deletedAt)
+        // A tombstone keeps no name at all.
+        #expect(work.name.isEmpty)
+        #expect(work.nameEncrypted == nil)
+        #expect(VaultRepository.collectionName(work) == nil)
+    }
+
+    // MARK: Folder names (plan decision 5)
+
+    @Test func folderNamesAreEncryptedAtRest() async throws {
+        let container = try await setUp()
+        defer { tearDown() }
+        let key = try VaultSession.shared.requireEncKey()
+        let work = try VaultRepository.makeCollection(name: "Work stuff", context: container.mainContext)
+        try container.mainContext.save()
+        let id = work.id
+
+        // Read back through a fresh context: the stored row has no plaintext.
+        let stored = try #require(try ModelContext(container).fetch(FetchDescriptor<VaultCollection>(predicate: #Predicate { $0.id == id })).first)
+        #expect(stored.name.isEmpty)
+        let blob = try #require(stored.nameEncrypted)
+        #expect(blob.range(of: Data("Work stuff".utf8)) == nil)
+        #expect(try VaultRepository.decryptCollectionName(blob, key: key) == "Work stuff")
+        #expect(VaultRepository.collectionName(stored) == "Work stuff")
+
+        let created = try #require(stored.updatedAt)
+        try VaultRepository.renameCollection(work, to: "Office", context: container.mainContext)
+        #expect(work.name.isEmpty)
+        #expect(try VaultRepository.decryptCollectionName(try #require(work.nameEncrypted), key: key) == "Office")
+        #expect(try #require(work.updatedAt) >= created)
+
+        // Locked: no names. A name that doesn't decrypt is skipped, like unreadable items.
+        let garbage = VaultCollection(nameEncrypted: Data(repeating: 9, count: 40))
+        container.mainContext.insert(garbage)
+        #expect(VaultRepository.named([work, garbage]).map(\.name) == ["Office"])
+        VaultSession.shared.lock()
+        #expect(VaultRepository.collectionName(work) == nil)
+    }
+
+    @Test func unlockEncryptsLegacyFolderNames() async throws {
+        let container = try memoryContainer()
+        let context = container.mainContext
+        let legacy = VaultCollection(nameEncrypted: nil)
+        legacy.name = "Bank"
+        let stamp = Date(timeIntervalSince1970: 1_700_000_000)
+        legacy.updatedAt = stamp
+        let deadLegacy = VaultCollection(nameEncrypted: nil)
+        deadLegacy.name = "Old"
+        deadLegacy.deletedAt = stamp
+        context.insert(legacy)
+        context.insert(deadLegacy)
+        try context.save()
+
+        // Unlock (AppBootstrap.onVaultUnlocked → configure) runs the migration.
+        let key = SymmetricKey(size: .bits256)
+        VaultSession.shared.installKeysForTesting(encKey: key, searchKey: SymmetricKey(size: .bits256))
+        VaultRepository.shared.autofillSyncEnabled = false
+        await VaultRepository.shared.configure(context: context)
+        defer { tearDown() }
+
+        let rows = try ModelContext(container).fetch(FetchDescriptor<VaultCollection>())
+        #expect(rows.allSatisfy { $0.name.isEmpty })
+        let migrated = try #require(rows.first { $0.id == legacy.id })
+        #expect(try VaultRepository.decryptCollectionName(try #require(migrated.nameEncrypted), key: key) == "Bank")
+        // Not an edit: the timestamp stays, so it never wins a sync merge on its own.
+        #expect(migrated.updatedAt == stamp)
+        #expect(rows.first { $0.id == deadLegacy.id }?.nameEncrypted == nil)
+    }
+
+    @Test func passwordChangeReencryptsFolderNames() async throws {
+        let container = try await setUp()
+        defer { tearDown() }
+        let context = container.mainContext
+        let repo = VaultRepository.shared
+        let oldEnc = try VaultSession.shared.requireEncKey()
+        let work = try VaultRepository.makeCollection(name: "Work", context: context)
+        let legacy = VaultCollection(nameEncrypted: nil)
+        legacy.name = "Legacy"
+        context.insert(legacy)
+        try context.save()
+        _ = try repo.save(payload: .login(LoginFields(itemName: "GitHub", password: "p", collectionId: work.id)))
+
+        let newEnc = SymmetricKey(size: .bits256)
+        let newSearch = SymmetricKey(size: .bits256)
+        try repo.rekeyAllItems(oldEnc: oldEnc, newEnc: newEnc, newSearch: newSearch)
+        VaultSession.shared.installKeysForTesting(encKey: newEnc, searchKey: newSearch)
+
+        #expect(VaultRepository.collectionName(work) == "Work")
+        #expect(VaultRepository.collectionName(legacy) == "Legacy")
+        #expect(legacy.name.isEmpty)
+        let rekeyed = work.nameEncrypted ?? Data()
+        #expect(throws: (any Error).self) { try VaultRepository.decryptCollectionName(rekeyed, key: oldEnc) }
+    }
+
+    @Test func passwordChangeIsAllOrNothing() async throws {
+        let container = try await setUp()
+        defer { tearDown() }
+        let context = container.mainContext
+        let repo = VaultRepository.shared
+        let oldEnc = try VaultSession.shared.requireEncKey()
+        let work = try VaultRepository.makeCollection(name: "Work", context: context)
+        context.insert(VaultCollection(nameEncrypted: Data(repeating: 9, count: 40))) // unreadable
+        try context.save()
+        let row = try repo.save(payload: .login(LoginFields(itemName: "GitHub", password: "p")))
+        let itemId = row.id
+        let before = try #require(try context.fetch(FetchDescriptor<VaultItemRecord>(predicate: #Predicate { $0.id == itemId })).first?.encryptedPayload)
+        let nameBefore = work.nameEncrypted
+
+        #expect(throws: (any Error).self) {
+            try repo.rekeyAllItems(oldEnc: oldEnc, newEnc: SymmetricKey(size: .bits256), newSearch: SymmetricKey(size: .bits256))
+        }
+
+        let fresh = ModelContext(container)
+        #expect(try fresh.fetch(FetchDescriptor<VaultItemRecord>(predicate: #Predicate { $0.id == itemId })).first?.encryptedPayload == before)
+        let workId = work.id
+        #expect(try fresh.fetch(FetchDescriptor<VaultCollection>(predicate: #Predicate { $0.id == workId })).first?.nameEncrypted == nameBefore)
+        #expect(VaultRepository.collectionName(work) == "Work")
     }
 
     @Test func syncedItemsGetSearchTokensOnWarmCache() async throws {
@@ -185,8 +299,15 @@ struct VaultSyncStoreTests {
         live.lastUsedAt = Date(timeIntervalSince1970: 1_700_000_050)
         let dead = record(ctx, updated: Date(timeIntervalSince1970: 1_700_000_200), deleted: Date(timeIntervalSince1970: 1_700_000_200))
         _ = record(ctx, updated: Date(), schema: 0) // legacy: never sent
-        let folder = VaultCollection(name: "Work")
+        let key = SymmetricKey(size: .bits256)
+        let folder = VaultCollection(nameEncrypted: try VaultRepository.encryptCollectionName("Work", key: key))
         ctx.insert(folder)
+        let plain = VaultCollection(nameEncrypted: nil) // not migrated yet: never sent
+        plain.name = "Plain"
+        ctx.insert(plain)
+        let gone = VaultCollection(nameEncrypted: nil)
+        gone.deletedAt = Date(timeIntervalSince1970: 1_700_000_300)
+        ctx.insert(gone)
         try ctx.save()
 
         let source = store(a, MemoryVaultMeta.withVault())
@@ -197,11 +318,17 @@ struct VaultSyncStoreTests {
         let deadItem = try #require(items.first { $0.id == dead.id.uuidString })
         #expect(deadItem.deletedAtMs == 1_700_000_200_000)
         #expect(deadItem.payload.isEmpty)
-        #expect(folders.map(\.name) == ["Work"])
+        #expect(Set(folders.map(\.id)) == [folder.id.uuidString, gone.id.uuidString])
+        let wireFolder = try #require(folders.first { $0.id == folder.id.uuidString })
+        #expect(wireFolder.nameEnc == folder.nameEncrypted)
+        #expect(try VaultRepository.decryptCollectionName(wireFolder.nameEnc, key: key) == "Work")
+        let wireTomb = try #require(folders.first { $0.id == gone.id.uuidString })
+        #expect(wireTomb.nameEnc.isEmpty)
+        #expect(wireTomb.deletedAtMs == 1_700_000_300_000)
 
         let b = try memoryContainer()
         let target = store(b, MemoryVaultMeta.withVault())
-        #expect(target.apply(items: items, collections: folders) == 3)
+        #expect(target.apply(items: items, collections: folders) == 4)
 
         let readBack = ModelContext(b)
         let rows = try readBack.fetch(FetchDescriptor<VaultItemRecord>())
@@ -214,7 +341,15 @@ struct VaultSyncStoreTests {
         #expect(copy.lastUsedAt != nil)
         #expect(copy.deletedAt == nil)
         #expect(rows.first { $0.id == dead.id }?.deletedAt != nil)
-        #expect(try readBack.fetch(FetchDescriptor<VaultCollection>()).first?.id == folder.id)
+        let folderCopies = try readBack.fetch(FetchDescriptor<VaultCollection>())
+        #expect(folderCopies.count == 2)
+        let folderCopy = try #require(folderCopies.first { $0.id == folder.id })
+        #expect(folderCopy.name.isEmpty)
+        #expect(try VaultRepository.decryptCollectionName(try #require(folderCopy.nameEncrypted), key: key) == "Work")
+        let tombCopy = try #require(folderCopies.first { $0.id == gone.id })
+        #expect(tombCopy.deletedAt != nil)
+        #expect(tombCopy.nameEncrypted == nil)
+        #expect(tombCopy.name.isEmpty)
         // Snapshots of both sides now match.
         #expect(Set(target.snapshot().map(\.updatedAtMs)) == Set(items.map(\.updatedAtMs)))
     }
@@ -292,7 +427,7 @@ struct WiFiSyncSessionTests {
         item.encryptedEnvelope = Data([1])
         item.encryptedPayload = Data([2])
         ctx.insert(item)
-        ctx.insert(VaultCollection(name: "Work"))
+        ctx.insert(VaultCollection(nameEncrypted: try VaultRepository.encryptCollectionName("Work", key: SymmetricKey(size: .bits256))))
         try ctx.save()
         let hostMeta = MemoryVaultMeta.withVault(account: "acct-host")
         let hostStore = VaultSyncStore(container: hostContainer, deviceName: "Host", meta: hostMeta, onApplied: {})

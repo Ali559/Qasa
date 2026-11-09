@@ -492,8 +492,9 @@ with it, so **this phase covers all three clients.**
 
 - **Per item, last writer wins** on `updated_at`, ties broken by item id. Deletes are
   tombstones (`deleted_at`), kept for 90 days.
-- **Collections merge by id.** Collection names are stored in plaintext today
-  (`VaultCollection.name`); they should be encrypted in the same schema change (decision 5).
+- **Collections merge by id.** Their names are encrypted with the vault key, like item
+  envelopes, at rest and on the wire (`WireCollection::name_enc`, protocol 2; decision 5).
+  Names saved before that are encrypted at the next unlock, and a tombstone carries no name.
 - **Changing the master password** on one device changes the verifier. A peer with a
   different verifier refuses to merge and asks the user to re-sync as a new device.
 - **Premium:** sync is Premium on the phones (`LANSyncView`), so it stays Premium here.
@@ -737,6 +738,7 @@ before sync lands.
    drawer instead.
 4. **Sync conflicts.** **Recommend:** last writer wins per item. Alternative: keep the losing
    version as a "conflict copy" item, which is safer but noisier.
-5. **Encrypt collection names** in the phase 4 schema change. **Recommend:** yes, while the
-   migration is happening anyway.
+5. **Encrypt collection names** in the phase 4 schema change. **Done** (2026-11-09), as its own
+   change after phase 4: sync protocol 2, vault-key ciphertext at rest and on the wire on
+   every platform, migration at unlock.
 6. **Safari extension.** **Recommend:** after v1, wrapping the same extension code.

@@ -211,8 +211,8 @@ The Firefox manifest (`scripts/manifest.ts`) declares exactly that, with `strict
 ## 5. Still needed before submitting
 
 - **Privacy policy URL.** The Chrome Web Store and Edge require one for an extension that
-  handles passwords. The site has no privacy page yet (the policy lives in the apps). Publish
-  it at `https://qasa-app.com/privacy` (en/ar/ckb) and use that URL.
+  handles passwords. Use `https://qasa-app.com/privacy` (en; `/ar/privacy` for the Arabic
+  listing), which goes live with the next landing-page deploy.
 - **Support contact** email for the developer accounts.
 - **Store ids.** After the first upload, add the Chrome Web Store and Edge Add-ons ids to the
   desktop's native host manifest (see [`EXTENSION_IDS.md`](../EXTENSION_IDS.md)). Firefox

@@ -59,10 +59,14 @@ pub struct WireItem {
     pub deleted_at: Option<i64>,
 }
 
+/// A folder. Its name crosses encrypted, like an item's envelope: vault-key AES-GCM over the
+/// UTF-8 name (protocol 2; protocol 1 sent it in the clear).
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct WireCollection {
     pub id: String,
-    pub name: String,
+    /// Vault-key ciphertext of the name. Empty for a tombstone.
+    #[serde(with = "b64")]
+    pub name_enc: Vec<u8>,
     pub created_at: i64,
     pub updated_at: i64,
     pub deleted_at: Option<i64>,

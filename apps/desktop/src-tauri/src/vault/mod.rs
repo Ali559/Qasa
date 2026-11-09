@@ -177,6 +177,7 @@ impl Vault {
                 self.keys = Some(root.subkeys());
                 self.note_activity();
                 let _ = self.rebuild_missing_tokens();
+                let _ = self.encrypt_legacy_names();
                 // iOS: "Sealed on your next master password unlock".
                 if self.biometric_enabled()? && self.store.meta(META_BIOMETRIC_SEALED)?.is_none() {
                     self.seal(&root);
@@ -341,7 +342,7 @@ impl Vault {
             .iter()
             .map(|p| self.encrypt_row(new_id(), p, None))
             .collect::<CommandResult<Vec<_>>>()?;
-        self.store.put_items(&rows)?;
+        self.store.put_items(&rows, &[])?;
         Ok(rows.len())
     }
 
@@ -360,11 +361,37 @@ impl Vault {
             .store
             .collections()?
             .into_iter()
-            .map(|CollectionRow { id, name, created_at }| {
+            // A name that doesn't decrypt is skipped, as unreadable items are.
+            .filter_map(|CollectionRow { id, name_enc, legacy_name, created_at }| {
+                let name = match name_enc {
+                    Some(enc) => self.decrypt_name(&enc).ok()?,
+                    None => legacy_name,
+                };
                 let item_count = counts.get(&id).copied().unwrap_or(0);
-                Collection { id, name, created_at, item_count }
+                Some(Collection { id, name, created_at, item_count })
             })
             .collect())
+    }
+
+    /// A collection name as stored: vault-key AES-GCM over its UTF-8 (plan decision 5).
+    fn encrypt_name(&self, name: &str) -> CommandResult<Vec<u8>> {
+        Ok(qasa_vault::encrypt(name.as_bytes(), self.keys()?.enc()))
+    }
+
+    fn decrypt_name(&self, enc: &[u8]) -> CommandResult<String> {
+        let bytes = qasa_vault::decrypt(enc, self.keys()?.enc()).map_err(|_| CommandError::Corrupt)?;
+        String::from_utf8(bytes).map_err(|_| CommandError::Corrupt)
+    }
+
+    /// Encrypts collection names saved before names were encrypted. Runs at every unlock;
+    /// after the first one there is nothing left to do.
+    fn encrypt_legacy_names(&mut self) -> CommandResult<()> {
+        let plain = self.store.plaintext_collection_names()?;
+        if plain.is_empty() {
+            return Ok(());
+        }
+        let names = plain.iter().map(|(id, name)| Ok((id.clone(), self.encrypt_name(name)?))).collect::<CommandResult<Vec<_>>>()?;
+        self.store.set_collection_names_enc(&names)
     }
 
     pub fn create_collection(&mut self, name: &str) -> CommandResult<Collection> {
@@ -375,7 +402,7 @@ impl Vault {
         }
         let id = new_id();
         let created_at = now_ms();
-        self.store.put_collection(&id, name, created_at)?;
+        self.store.put_collection(&id, &self.encrypt_name(name)?, created_at)?;
         Ok(Collection { id, name: name.to_string(), created_at, item_count: 0 })
     }
 
@@ -386,7 +413,7 @@ impl Vault {
             return Err(CommandError::Invalid("empty collection name".into()));
         }
         let existing = self.store.collections()?.into_iter().find(|c| c.id == id).ok_or(CommandError::NotFound)?;
-        self.store.put_collection(id, name, existing.created_at)
+        self.store.put_collection(id, &self.encrypt_name(name)?, existing.created_at)
     }
 
     /// Deletes the collection and moves its items out of it, re-encrypting each.
@@ -427,6 +454,13 @@ impl Vault {
             let payload = self.decrypt_payload(row)?;
             decoded.push((row, payload));
         }
+        self.encrypt_legacy_names()?;
+        let names = self
+            .store
+            .collection_names_enc()?
+            .into_iter()
+            .map(|(id, enc)| Ok((id, self.decrypt_name(&enc)?)))
+            .collect::<CommandResult<Vec<_>>>()?;
 
         let new_salt = generate_salt();
         let new_root = derive_root_key(trimmed, &new_salt)?;
@@ -434,14 +468,15 @@ impl Vault {
         let old_keys = self.keys.replace(new_keys);
         let rekeyed: CommandResult<Vec<_>> =
             decoded.iter().map(|(row, payload)| self.encrypt_row(row.id.clone(), payload, Some(row))).collect();
-        let rekeyed = match rekeyed {
-            Ok(r) => r,
-            Err(e) => {
+        let renamed: CommandResult<Vec<_>> = names.iter().map(|(id, name)| Ok((id.clone(), self.encrypt_name(name)?))).collect();
+        let (rekeyed, renamed) = match (rekeyed, renamed) {
+            (Ok(r), Ok(n)) => (r, n),
+            (Err(e), _) | (_, Err(e)) => {
                 self.keys = old_keys;
                 return Err(e);
             }
         };
-        if let Err(e) = self.store.put_items(&rekeyed) {
+        if let Err(e) = self.store.put_items(&rekeyed, &renamed) {
             self.keys = old_keys;
             return Err(e);
         }
@@ -517,6 +552,7 @@ impl Vault {
         self.keys = Some(root.subkeys());
         self.note_activity();
         let _ = self.rebuild_missing_tokens();
+        let _ = self.encrypt_legacy_names();
         Ok(())
     }
 
@@ -773,5 +809,62 @@ mod tests {
         v.save(None, &login("A")).unwrap();
         v.wipe().unwrap();
         assert_eq!(v.status().unwrap(), VaultStatus { exists: false, unlocked: false, unsupported_kdf_version: None });
+    }
+
+    // MARK: encrypted collection names (plan decision 5)
+
+    #[test]
+    fn collection_names_never_reach_the_file_in_the_clear() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("vault.sqlite");
+        let mut v = Vault::with_store(Store::open(&path).unwrap(), Box::new(biometrics::tests::FakeBiometrics::default()));
+        v.create("password1", false).unwrap();
+        let c = v.create_collection("Tax Papers 2026").unwrap();
+        v.rename_collection(&c.id, "Medical Records").unwrap();
+        assert_eq!(v.collections().unwrap()[0].name, "Medical Records");
+        drop(v);
+        let mut raw = Vec::new();
+        for entry in std::fs::read_dir(dir.path()).unwrap() {
+            raw.extend(std::fs::read(entry.unwrap().path()).unwrap()); // the file, -wal and -shm
+        }
+        let found = |needle: &str| raw.windows(needle.len()).any(|w| w == needle.as_bytes());
+        assert!(!found("Tax Papers"), "the old name is still in the file");
+        assert!(!found("Medical Records"), "the name is in the file in the clear");
+    }
+
+    #[test]
+    fn names_from_before_encryption_are_encrypted_at_unlock() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        v.store.insert_legacy_collection("OLD", "Family");
+        // Readable while unlocked even before the migration has run.
+        assert_eq!(v.collections().unwrap()[0].name, "Family");
+        assert!(v.sync_snapshot().unwrap().collections.is_empty(), "plaintext never goes on the wire");
+        v.lock();
+        v.unlock("password1").unwrap();
+        assert!(v.store.plaintext_collection_names().unwrap().is_empty());
+        assert_eq!(v.collections().unwrap()[0].name, "Family");
+        let wire = v.sync_snapshot().unwrap().collections;
+        assert_eq!(wire.len(), 1);
+        assert_eq!(v.decrypt_name(&wire[0].name_enc).unwrap(), "Family");
+    }
+
+    #[test]
+    fn a_master_password_change_re_encrypts_collection_names() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        v.create_collection("Work").unwrap();
+        let before = v.store.collection_names_enc().unwrap()[0].1.clone();
+        v.change_password("password1", "password2").unwrap();
+        let after = v.store.collection_names_enc().unwrap()[0].1.clone();
+        assert_ne!(before, after);
+        v.lock();
+        v.unlock("password2").unwrap();
+        assert_eq!(v.collections().unwrap()[0].name, "Work");
+        // A deleted collection keeps no name at all, not even encrypted.
+        let id = v.collections().unwrap()[0].id.clone();
+        v.delete_collection(&id).unwrap();
+        let tomb = v.sync_snapshot().unwrap().collections;
+        assert!(tomb[0].deleted_at.is_some() && tomb[0].name_enc.is_empty());
     }
 }

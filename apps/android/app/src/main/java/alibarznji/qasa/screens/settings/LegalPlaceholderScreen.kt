@@ -20,8 +20,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** Placeholder publish date for legal copy until real docs ship (iOS `lastUpdated`). */
-private val LegalLastUpdated: LocalDate = LocalDate.of(2026, 8, 25)
+/** When each document last changed (iOS `termsUpdated` / `privacyUpdated`). The privacy
+ *  summary changed with the policy on qasa-app.com/privacy. */
+private val TermsLastUpdated: LocalDate = LocalDate.of(2026, 8, 25)
+private val PrivacyLastUpdated: LocalDate = LocalDate.of(2026, 11, 9)
 
 /**
  * Port of iOS `LegalPlaceholderView`: plain page (no card) with a 24 bold title, the
@@ -37,7 +39,8 @@ fun LegalPlaceholderScreen(
     val c = qasaColors
     val locale = LocalConfiguration.current.locales[0]
     // iOS `.abbreviated` date ≈ java MEDIUM ("Aug 25, 2026").
-    val formattedDate = LegalLastUpdated.format(
+    val lastUpdated = if (bodyRes == R.string.legal_privacybody) PrivacyLastUpdated else TermsLastUpdated
+    val formattedDate = lastUpdated.format(
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale),
     )
     ScreenScaffold(

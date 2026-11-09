@@ -105,7 +105,8 @@ struct AppShellView: View {
             LegalPlaceholderView(
                 title: L10n.tr("nav.privacy", locale: prefs.locale),
                 onOpenMenu: back,
-                bodyText: L10n.tr("legal.privacyBody", locale: prefs.locale)
+                bodyText: L10n.tr("legal.privacyBody", locale: prefs.locale),
+                lastUpdated: LegalPlaceholderView.privacyUpdated
             )
         case .premiumUpgrade:
             PremiumUpgradeView(onOpenMenu: back, embedded: true)

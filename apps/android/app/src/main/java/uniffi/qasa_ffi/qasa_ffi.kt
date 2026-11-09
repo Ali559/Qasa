@@ -2097,7 +2097,11 @@ public object FfiConverterTypeSyncStoreCallback: FfiConverter<SyncStoreCallback,
 
 data class FfiCollection (
     var `id`: kotlin.String, 
-    var `name`: kotlin.String, 
+    /**
+     * Vault-key AES-GCM ciphertext of the UTF-8 name (the apps' item format). Empty for a
+     * tombstone. The apps store it as is and decrypt it after unlock.
+     */
+    var `nameEnc`: kotlin.ByteArray, 
     var `createdAtMs`: kotlin.Long, 
     var `updatedAtMs`: kotlin.Long, 
     var `deletedAtMs`: kotlin.Long?
@@ -2113,7 +2117,7 @@ public object FfiConverterTypeFfiCollection: FfiConverterRustBuffer<FfiCollectio
     override fun read(buf: ByteBuffer): FfiCollection {
         return FfiCollection(
             FfiConverterString.read(buf),
-            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
             FfiConverterLong.read(buf),
             FfiConverterLong.read(buf),
             FfiConverterOptionalLong.read(buf),
@@ -2122,7 +2126,7 @@ public object FfiConverterTypeFfiCollection: FfiConverterRustBuffer<FfiCollectio
 
     override fun allocationSize(value: FfiCollection) = (
             FfiConverterString.allocationSize(value.`id`) +
-            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterByteArray.allocationSize(value.`nameEnc`) +
             FfiConverterLong.allocationSize(value.`createdAtMs`) +
             FfiConverterLong.allocationSize(value.`updatedAtMs`) +
             FfiConverterOptionalLong.allocationSize(value.`deletedAtMs`)
@@ -2130,7 +2134,7 @@ public object FfiConverterTypeFfiCollection: FfiConverterRustBuffer<FfiCollectio
 
     override fun write(value: FfiCollection, buf: ByteBuffer) {
             FfiConverterString.write(value.`id`, buf)
-            FfiConverterString.write(value.`name`, buf)
+            FfiConverterByteArray.write(value.`nameEnc`, buf)
             FfiConverterLong.write(value.`createdAtMs`, buf)
             FfiConverterLong.write(value.`updatedAtMs`, buf)
             FfiConverterOptionalLong.write(value.`deletedAtMs`, buf)

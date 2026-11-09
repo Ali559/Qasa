@@ -94,7 +94,7 @@ fn main() {
     let store = Arc::new(Demo {
         meta: FfiVaultMeta { salt: salt.to_vec(), kdf_version: 1, verifier: root.verifier().to_vec() },
         items: Mutex::new(items),
-        collections: Mutex::new(vec![FfiCollection { id: folder, name: "Work".into(), created_at_ms: now, updated_at_ms: now, deleted_at_ms: None }]),
+        collections: Mutex::new(vec![FfiCollection { id: folder, name_enc: qasa_vault::encrypt(b"Work", keys.enc()), created_at_ms: now, updated_at_ms: now, deleted_at_ms: None }]),
     });
 
     let host = SyncHost::new().unwrap();

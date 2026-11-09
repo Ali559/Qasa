@@ -12,7 +12,7 @@ import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultListRow
-import alibarznji.qasa.vault.db.VaultCollectionEntity
+import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -55,16 +55,16 @@ import androidx.compose.ui.res.stringResource
  */
 @Composable
 internal fun CollectionsListContent(
-    collections: List<VaultCollectionEntity>,
+    collections: List<VaultCollection>,
     rows: List<VaultListRow>,
     onOpenMenu: (() -> Unit)?,
-    onOpen: (VaultCollectionEntity) -> Unit,
+    onOpen: (VaultCollection) -> Unit,
     onCreate: (String) -> Unit,
     onRename: (String, String) -> Unit,
     onDelete: (String) -> Unit,
 ) {
     var showCreate by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf<VaultCollectionEntity?>(null) }
+    var renaming by remember { mutableStateOf<VaultCollection?>(null) }
     var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     Box(Modifier.fillMaxSize()) {
@@ -143,7 +143,7 @@ internal fun CollectionsListContent(
 /** iOS `collectionCard`: 48pt folder well, name, item count, rotated-ellipsis menu. */
 @Composable
 private fun CollectionCard(
-    collection: VaultCollectionEntity,
+    collection: VaultCollection,
     count: Int,
     onOpen: () -> Unit,
     onEdit: () -> Unit,

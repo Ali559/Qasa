@@ -1,7 +1,9 @@
 //! The SQLite vault file. Rows mirror iOS `VaultModels.swift` (`VaultItemRecord`,
 //! `VaultSearchToken`, `VaultCollection`); the key material iOS keeps in the Keychain
 //! (salt, verifier, kdfVersion) lives in `vault_meta`. Nothing here is plaintext vault
-//! content except collection names, which iOS also stores in the clear (plan decision 5).
+//! content: collection names are vault-key ciphertext in `name_enc` (plan decision 5). The
+//! old `name` column only holds names from before that change, until the next unlock
+//! encrypts them and blanks it.
 
 use std::path::Path;
 
@@ -35,7 +37,8 @@ CREATE TABLE IF NOT EXISTS search_tokens (
 CREATE INDEX IF NOT EXISTS search_tokens_hash ON search_tokens (token_hash);
 CREATE TABLE IF NOT EXISTS collections (
     id         TEXT PRIMARY KEY,
-    name       TEXT NOT NULL,
+    name       TEXT NOT NULL DEFAULT '',
+    name_enc   BLOB,
     created_at INTEGER NOT NULL,
     deleted_at INTEGER
 );
@@ -52,6 +55,19 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
             "ALTER TABLE collections ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0;
              UPDATE collections SET updated_at = created_at;",
         )?;
+    }
+    let has_name_enc: bool = conn.prepare("SELECT 1 FROM pragma_table_info('collections') WHERE name = 'name_enc'")?.exists([])?;
+    if !has_name_enc {
+        // Encrypted names (plan decision 5). Existing names are encrypted at the next unlock.
+        conn.execute_batch("ALTER TABLE collections ADD COLUMN name_enc BLOB;")?;
+    }
+    Ok(())
+}
+
+fn set_names(tx: &rusqlite::Transaction<'_>, names: &[(String, Vec<u8>)]) -> rusqlite::Result<()> {
+    let mut update = tx.prepare_cached("UPDATE collections SET name_enc = ?2, name = '' WHERE id = ?1")?;
+    for (id, enc) in names {
+        update.execute(params![id, enc])?;
     }
     Ok(())
 }
@@ -80,7 +96,10 @@ pub struct ItemRow {
 
 pub struct CollectionRow {
     pub id: String,
-    pub name: String,
+    /// Vault-key ciphertext of the name; `None` only for a name from before encryption.
+    pub name_enc: Option<Vec<u8>>,
+    /// A name from before encryption, until the next unlock encrypts it. Empty otherwise.
+    pub legacy_name: String,
     pub created_at: i64,
 }
 
@@ -99,6 +118,9 @@ impl Store {
     pub fn open(path: &Path) -> CommandResult<Self> {
         let conn = Connection::open(path)?;
         conn.pragma_update(None, "journal_mode", "WAL")?;
+        // Overwritten and deleted rows are zeroed, so a folder name blanked after encryption
+        // (or a deleted item) doesn't linger in free pages of the file.
+        conn.pragma_update(None, "secure_delete", "ON")?;
         conn.pragma_update(None, "foreign_keys", "ON")?;
         conn.execute_batch(SCHEMA)?;
         migrate(&conn)?;
@@ -217,9 +239,11 @@ impl Store {
         Ok(())
     }
 
-    /// Replaces every item at once (master password change, CSV import). All or nothing.
-    pub fn put_items(&mut self, rows: &[(ItemRow, Vec<String>)]) -> CommandResult<()> {
+    /// Replaces every item at once (master password change, CSV import), and, for a master
+    /// password change, every collection name re-encrypted. All or nothing.
+    pub fn put_items(&mut self, rows: &[(ItemRow, Vec<String>)], collection_names: &[(String, Vec<u8>)]) -> CommandResult<()> {
         let tx = self.conn.transaction()?;
+        set_names(&tx, collection_names)?;
         for (row, hashes) in rows {
             tx.execute(
                 "INSERT INTO items (id, kind, envelope, payload, schema_version, legacy_payload,
@@ -279,26 +303,56 @@ impl Store {
     // MARK: collections
 
     pub fn collections(&self) -> CommandResult<Vec<CollectionRow>> {
-        let mut stmt =
-            self.conn.prepare("SELECT id, name, created_at FROM collections WHERE deleted_at IS NULL ORDER BY created_at")?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT id, name_enc, name, created_at FROM collections WHERE deleted_at IS NULL ORDER BY created_at")?;
         let rows = stmt
-            .query_map([], |r| Ok(CollectionRow { id: r.get(0)?, name: r.get(1)?, created_at: r.get(2)? }))?
+            .query_map([], |r| Ok(CollectionRow { id: r.get(0)?, name_enc: r.get(1)?, legacy_name: r.get(2)?, created_at: r.get(3)? }))?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(rows)
     }
 
-    pub fn put_collection(&self, id: &str, name: &str, created_at: i64) -> CommandResult<()> {
+    /// Creates or renames a collection. `name_enc` is the vault-key ciphertext of the name.
+    pub fn put_collection(&self, id: &str, name_enc: &[u8], created_at: i64) -> CommandResult<()> {
         self.conn.execute(
-            "INSERT INTO collections (id, name, created_at, updated_at) VALUES (?1, ?2, ?3, ?4)
-             ON CONFLICT(id) DO UPDATE SET name = excluded.name, deleted_at = NULL, updated_at = excluded.updated_at",
-            params![id, name, created_at, now_ms()],
+            "INSERT INTO collections (id, name, name_enc, created_at, updated_at) VALUES (?1, '', ?2, ?3, ?4)
+             ON CONFLICT(id) DO UPDATE SET name = '', name_enc = excluded.name_enc, deleted_at = NULL,
+                updated_at = excluded.updated_at",
+            params![id, name_enc, created_at, now_ms()],
         )?;
+        Ok(())
+    }
+
+    /// Collections whose name is still plaintext (made before names were encrypted).
+    pub fn plaintext_collection_names(&self) -> CommandResult<Vec<(String, String)>> {
+        let mut stmt = self.conn.prepare("SELECT id, name FROM collections WHERE name <> ''")?;
+        let rows = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?.collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    /// Every encrypted collection name, tombstones aside (master password change).
+    pub fn collection_names_enc(&self) -> CommandResult<Vec<(String, Vec<u8>)>> {
+        let mut stmt = self.conn.prepare("SELECT id, name_enc FROM collections WHERE name_enc IS NOT NULL AND length(name_enc) > 0")?;
+        let rows = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?.collect::<Result<Vec<_>, _>>()?;
+        Ok(rows)
+    }
+
+    /// Stores encrypted names and blanks the plaintext ones, in one transaction. Not an edit:
+    /// `updated_at` stays, so this never wins a sync merge on its own.
+    pub fn set_collection_names_enc(&mut self, names: &[(String, Vec<u8>)]) -> CommandResult<()> {
+        let tx = self.conn.transaction()?;
+        set_names(&tx, names)?;
+        tx.commit()?;
         Ok(())
     }
 
     pub fn delete_collection(&self, id: &str) -> CommandResult<()> {
         let now = now_ms();
-        self.conn.execute("UPDATE collections SET deleted_at = ?2, updated_at = ?2 WHERE id = ?1", params![id, now])?;
+        // A tombstone carries no name, not even encrypted.
+        self.conn.execute(
+            "UPDATE collections SET deleted_at = ?2, updated_at = ?2, name = '', name_enc = x'' WHERE id = ?1",
+            params![id, now],
+        )?;
         Ok(())
     }
 
@@ -329,13 +383,18 @@ impl Store {
         Ok(rows)
     }
 
+    /// Every collection for a sync snapshot, as ciphertext. A name not yet encrypted (made
+    /// before names were, and no unlock since) is left out until it is.
     pub fn sync_collections(&self) -> CommandResult<Vec<qasa_sync::WireCollection>> {
-        let mut stmt = self.conn.prepare("SELECT id, name, created_at, updated_at, deleted_at FROM collections")?;
+        let mut stmt = self.conn.prepare(
+            "SELECT id, COALESCE(name_enc, x''), created_at, updated_at, deleted_at FROM collections
+             WHERE name_enc IS NOT NULL OR deleted_at IS NOT NULL",
+        )?;
         let rows = stmt
             .query_map([], |r| {
                 Ok(qasa_sync::WireCollection {
                     id: r.get(0)?,
-                    name: r.get(1)?,
+                    name_enc: r.get(1)?,
                     created_at: r.get(2)?,
                     updated_at: r.get(3)?,
                     deleted_at: r.get(4)?,
@@ -366,10 +425,10 @@ impl Store {
         }
         for c in &plan.collections {
             tx.execute(
-                "INSERT INTO collections (id, name, created_at, updated_at, deleted_at) VALUES (?1, ?2, ?3, ?4, ?5)
-                 ON CONFLICT(id) DO UPDATE SET name = excluded.name, created_at = excluded.created_at,
+                "INSERT INTO collections (id, name, name_enc, created_at, updated_at, deleted_at) VALUES (?1, '', ?2, ?3, ?4, ?5)
+                 ON CONFLICT(id) DO UPDATE SET name = '', name_enc = excluded.name_enc, created_at = excluded.created_at,
                     updated_at = excluded.updated_at, deleted_at = excluded.deleted_at",
-                params![c.id, c.name, c.created_at, c.updated_at, c.deleted_at],
+                params![c.id, c.name_enc, c.created_at, c.updated_at, c.deleted_at],
             )?;
         }
         tx.commit()?;
@@ -406,5 +465,13 @@ impl Store {
         tx.commit()?;
         self.conn.execute_batch("VACUUM;")?;
         Ok(())
+    }
+
+    /// A collection as builds before name encryption wrote it (tests of the migration).
+    #[cfg(test)]
+    pub fn insert_legacy_collection(&self, id: &str, name: &str) {
+        self.conn
+            .execute("INSERT INTO collections (id, name, created_at, updated_at) VALUES (?1, ?2, 1, 1)", params![id, name])
+            .unwrap();
     }
 }
