@@ -1069,16 +1069,24 @@ public func FfiConverterTypeSyncStoreCallback_lower(_ value: SyncStoreCallback) 
 
 public struct FfiCollection {
     public var id: String
-    public var name: String
+    /**
+     * Vault-key AES-GCM ciphertext of the UTF-8 name (the apps' item format). Empty for a
+     * tombstone. The apps store it as is and decrypt it after unlock.
+     */
+    public var nameEnc: Data
     public var createdAtMs: Int64
     public var updatedAtMs: Int64
     public var deletedAtMs: Int64?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(id: String, name: String, createdAtMs: Int64, updatedAtMs: Int64, deletedAtMs: Int64?) {
+    public init(id: String, 
+        /**
+         * Vault-key AES-GCM ciphertext of the UTF-8 name (the apps' item format). Empty for a
+         * tombstone. The apps store it as is and decrypt it after unlock.
+         */nameEnc: Data, createdAtMs: Int64, updatedAtMs: Int64, deletedAtMs: Int64?) {
         self.id = id
-        self.name = name
+        self.nameEnc = nameEnc
         self.createdAtMs = createdAtMs
         self.updatedAtMs = updatedAtMs
         self.deletedAtMs = deletedAtMs
@@ -1092,7 +1100,7 @@ extension FfiCollection: Equatable, Hashable {
         if lhs.id != rhs.id {
             return false
         }
-        if lhs.name != rhs.name {
+        if lhs.nameEnc != rhs.nameEnc {
             return false
         }
         if lhs.createdAtMs != rhs.createdAtMs {
@@ -1109,7 +1117,7 @@ extension FfiCollection: Equatable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
-        hasher.combine(name)
+        hasher.combine(nameEnc)
         hasher.combine(createdAtMs)
         hasher.combine(updatedAtMs)
         hasher.combine(deletedAtMs)
@@ -1125,7 +1133,7 @@ public struct FfiConverterTypeFfiCollection: FfiConverterRustBuffer {
         return
             try FfiCollection(
                 id: FfiConverterString.read(from: &buf), 
-                name: FfiConverterString.read(from: &buf), 
+                nameEnc: FfiConverterData.read(from: &buf), 
                 createdAtMs: FfiConverterInt64.read(from: &buf), 
                 updatedAtMs: FfiConverterInt64.read(from: &buf), 
                 deletedAtMs: FfiConverterOptionInt64.read(from: &buf)
@@ -1134,7 +1142,7 @@ public struct FfiConverterTypeFfiCollection: FfiConverterRustBuffer {
 
     public static func write(_ value: FfiCollection, into buf: inout [UInt8]) {
         FfiConverterString.write(value.id, into: &buf)
-        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterData.write(value.nameEnc, into: &buf)
         FfiConverterInt64.write(value.createdAtMs, into: &buf)
         FfiConverterInt64.write(value.updatedAtMs, into: &buf)
         FfiConverterOptionInt64.write(value.deletedAtMs, into: &buf)

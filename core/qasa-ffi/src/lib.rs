@@ -53,7 +53,9 @@ pub struct FfiItem {
 #[derive(uniffi::Record, Clone)]
 pub struct FfiCollection {
     pub id: String,
-    pub name: String,
+    /// Vault-key AES-GCM ciphertext of the UTF-8 name (the apps' item format). Empty for a
+    /// tombstone. The apps store it as is and decrypt it after unlock.
+    pub name_enc: Vec<u8>,
     pub created_at_ms: i64,
     pub updated_at_ms: i64,
     pub deleted_at_ms: Option<i64>,
@@ -160,11 +162,11 @@ fn item_out(i: &WireItem) -> FfiItem {
 }
 
 fn collection_in(c: FfiCollection) -> WireCollection {
-    WireCollection { id: c.id, name: c.name, created_at: c.created_at_ms, updated_at: c.updated_at_ms, deleted_at: c.deleted_at_ms }
+    WireCollection { id: c.id, name_enc: c.name_enc, created_at: c.created_at_ms, updated_at: c.updated_at_ms, deleted_at: c.deleted_at_ms }
 }
 
 fn collection_out(c: &WireCollection) -> FfiCollection {
-    FfiCollection { id: c.id.clone(), name: c.name.clone(), created_at_ms: c.created_at, updated_at_ms: c.updated_at, deleted_at_ms: c.deleted_at }
+    FfiCollection { id: c.id.clone(), name_enc: c.name_enc.clone(), created_at_ms: c.created_at, updated_at_ms: c.updated_at, deleted_at_ms: c.deleted_at }
 }
 
 impl SyncStore for Bridge {

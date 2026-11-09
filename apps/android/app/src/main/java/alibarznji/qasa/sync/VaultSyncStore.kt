@@ -65,7 +65,7 @@ class VaultSyncStore @Inject constructor(
     }
 
     override fun collections(): List<FfiCollection> = try {
-        holder.requireDao().allCollectionsForSync().map(::toWire)
+        holder.requireDao().allCollectionsForSync().mapNotNull(::toWire)
     } catch (e: Exception) {
         Log.w(TAG, "collections failed", e)
         emptyList()
@@ -144,16 +144,28 @@ class VaultSyncStore @Inject constructor(
         )
     }
 
-    private fun toWire(c: VaultCollectionEntity) = FfiCollection(
-        id = c.id,
-        name = c.name,
-        createdAtMs = c.createdAt,
-        updatedAtMs = c.updatedAt,
-        deletedAtMs = c.deletedAt,
-    )
-
     companion object {
         private const val TAG = "VaultSyncStore"
+
+        /**
+         * The stored ciphertext as is (no key needed). A live collection whose name isn't
+         * encrypted yet (saved before v3, before the next unlock) is skipped: no plaintext
+         * name ever goes on the wire. A tombstone carries an empty name.
+         */
+        fun toWire(c: VaultCollectionEntity): FfiCollection? {
+            val nameEnc = if (c.isDeleted) {
+                ByteArray(0)
+            } else {
+                c.nameEnc?.takeIf { it.isNotEmpty() } ?: return null
+            }
+            return FfiCollection(
+                id = c.id,
+                nameEnc = nameEnc,
+                createdAtMs = c.createdAt,
+                updatedAtMs = c.updatedAt,
+                deletedAtMs = c.deletedAt,
+            )
+        }
 
         /** Rows as received: ciphertext is never re-encrypted on apply. */
         // Android's own ids are lowercase; the wire is uppercase (sync §6). Lowercasing on
@@ -173,7 +185,8 @@ class VaultSyncStore @Inject constructor(
 
         fun fromWire(c: FfiCollection) = VaultCollectionEntity(
             id = c.id.lowercase(),
-            name = c.name,
+            name = "",
+            nameEnc = if (c.deletedAtMs != null) ByteArray(0) else c.nameEnc,
             createdAt = c.createdAtMs,
             updatedAt = c.updatedAtMs,
             deletedAt = c.deletedAtMs,

@@ -7,7 +7,7 @@ struct VaultItemDetailView: View {
     var onDeleted: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @Query(filter: VaultCollection.live, sort: \VaultCollection.name) private var collections: [VaultCollection]
+    @Query(filter: VaultCollection.live) private var collections: [VaultCollection]
     @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var payload: VaultPayload = .login(LoginFields())
@@ -23,7 +23,7 @@ struct VaultItemDetailView: View {
     private var collectionName: String? {
         let id = payload.organizationCollectionId ?? row?.collectionId
         guard let id else { return nil }
-        return collections.first { $0.id == id }?.name
+        return collections.first { $0.id == id }.flatMap(VaultRepository.collectionName)
     }
 
     var body: some View {

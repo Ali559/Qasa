@@ -14,9 +14,19 @@
       languages) pick them up. The desktop buttons already use the stable
       `/desktop/download/{macos,windows,linux-appimage,linux-deb}` links, which the server
       redirects to the latest GitHub release.
-- [ ] **Desktop wording.** The section says the desktop app pairs with the phone over Wi‑Fi.
-      If the Free plan's one-device limit stays (desktop plan, open decision 1), consider
-      saying that phone + computer together needs Premium.
+- [ ] **Privacy policy (`/privacy`, `src/privacy.ts`).** Before linking it from the stores:
+      - Confirm the contact address. `privacy@qasa-app.com` is a placeholder; set up the
+        mailbox (or forwarding) or change `EMAIL` in `src/privacy.ts` and the in-app summary
+        (`legal.privacyBody` in `l10n/strings.json`).
+      - Say who the operator is legally: the page names Ali Barznji. If there is a company,
+        a postal address or a governing jurisdiction to state, add it under "Who we are".
+      - Name the country the Contabo server is in (the page only says data may be processed
+        outside Iraq), and the VPN node hosts once nodes exist.
+      - The ckb and ar text is a draft: have native speakers review it.
+      - The page says account deletion is in the desktop app now and "coming to the phone
+        apps". Update it when the phones get Delete account.
+      - Keep it true: re-read it whenever the server stores something new (migrations),
+        when retention changes (backups, logs), or when email leak alerts ship.
 - [ ] **VPN.** Left off the page on purpose. `PROMO_SCRIPT.md` says not to show or mention it until
       the tunnel ships. When it does, add a feature tile and a Premium bullet in all three
       languages in `src/i18n.ts`.

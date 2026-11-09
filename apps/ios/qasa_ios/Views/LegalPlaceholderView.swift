@@ -4,14 +4,17 @@ struct LegalPlaceholderView: View {
     let title: String
     var onOpenMenu: (() -> Void)? = nil
     let bodyText: String
+    /// When this document last changed (the privacy summary: 2026-11-09, with the policy
+    /// on qasa-app.com/privacy).
+    var lastUpdated: Date = LegalPlaceholderView.termsUpdated
 
-    /// Placeholder publish date for legal copy until real docs ship.
-    private static let lastUpdated = Calendar.current.date(from: DateComponents(year: 2026, month: 8, day: 25))!
+    static let termsUpdated = Calendar.current.date(from: DateComponents(year: 2026, month: 8, day: 25))!
+    static let privacyUpdated = Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 9))!
 
     private var locale: Locale { AppLanguage.current.locale }
 
     private var lastUpdatedText: String {
-        let formatted = Self.lastUpdated.formatted(
+        let formatted = lastUpdated.formatted(
             Date.FormatStyle(date: .abbreviated, time: .omitted).locale(locale)
         )
         return String(format: L10n.tr("legal.lastUpdated", locale: locale), formatted)

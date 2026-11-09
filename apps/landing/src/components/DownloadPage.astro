@@ -6,7 +6,7 @@
 import "../styles/global.css";
 import Icon from "./Icon.astro";
 import DesktopDownloads from "./DesktopDownloads.astro";
-import { dictionaries, downloadHrefs, languages, type Lang } from "../i18n";
+import { dictionaries, downloadHrefs, languages, privacyHrefs, type Lang } from "../i18n";
 
 const { lang } = Astro.props as { lang: Lang };
 const t = dictionaries[lang];
@@ -54,7 +54,10 @@ const home = languages.find((l) => l.lang === lang)!.href;
     <footer class="footer">
       <div class="wrap footer-inner">
         <a href={home} class="brand small" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={15} /></span>Qasa</a>
-        <a href={home} class="phones"><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
+        <nav class="footer-links" aria-label="Footer">
+          <a href={home} class="phones"><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
+          <a href={privacyHrefs[lang]} class="phones">{t.legal.privacyPolicy}</a>
+        </nav>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
       </div>
     </footer>
@@ -85,6 +88,7 @@ const home = languages.find((l) => l.lang === lang)!.href;
 
   .footer { border-top: 1px solid var(--stroke); }
   .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-3); }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
   .phones { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-weight: 500; }
   .phones:hover { color: var(--text); }
 </style>

@@ -2,6 +2,8 @@ package alibarznji.qasa.vault.db
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -85,7 +87,20 @@ class VaultStoreHolder @Inject constructor(
         // `VaultStoreErrorView`, never as a silently emptied vault.
         return Room.databaseBuilder(context, VaultDatabase::class.java, DATABASE_NAME)
             .addMigrations(*VaultMigrations.ALL)
+            .addCallback(SecureDeleteCallback)
             .build()
+    }
+
+    /**
+     * `secure_delete` zeroes freed content instead of leaving it in free pages, so a name
+     * blanked after encryption (or a tombstoned item) doesn't linger in the file. The
+     * pragma is per connection, hence on every open. It returns a row, so it goes through
+     * `query`, not `execSQL`.
+     */
+    private object SecureDeleteCallback : RoomDatabase.Callback() {
+        override fun onOpen(db: SupportSQLiteDatabase) {
+            db.query("PRAGMA secure_delete = ON").use { it.moveToFirst() }
+        }
     }
 
     private companion object {

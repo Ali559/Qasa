@@ -16,7 +16,9 @@ Steps that need the account owner. The details for each are in
 - [ ] **Server.** Deploy the Caddyfile (`server/deploy/deploy.sh`), so the
       `qasa-app.com/desktop/…` download and update links work.
 - [ ] **First release.** Tag `desktop-v0.1.0` and push. Test the draft release on macOS,
-      Windows and Linux, then publish it.
+      Windows and Linux, then publish it. First delete the `desktop-v0.1.0-rc2` test draft
+      and its tag (`gh release delete desktop-v0.1.0-rc2 --cleanup-tag`); it is a working
+      unsigned build from the 2026-11-09 pipeline test, kept for trying on other computers.
 - [ ] **Extension stores.** Submit the extension to the Chrome Web Store, Edge Add-ons and
       Firefox AMO, using `apps/extension/store/listing.md`.
 - [ ] **Store ids.** Add the ids the stores assign to `CHROME_EXTENSION_IDS` in
@@ -25,15 +27,14 @@ Steps that need the account owner. The details for each are in
 
 ## Decisions
 
-- [ ] **Free plan and the desktop** (plan open decision 1). Free allows one device, so a
-      phone user on Free can't add the desktop. The download page says the desktop pairs
-      with your phone. Either let one desktop not count toward the limit, or change the
-      wording (and say that phone plus computer needs Premium).
-- [ ] **Encrypt folder names** (plan open decision 5). Folder (collection) names are
-      stored and synced in plain text on iOS, Android and the desktop. The plan meant to
-      encrypt them in the phase 4 schema change, but that was skipped. It now needs its
-      own migration on all three, plus a sync protocol version so older apps don't
-      receive names they can't read.
+- [x] **Free plan and the desktop** (plan open decision 1). Decided 2026-11-09: the desktop
+      counts as a device, so phone plus computer needs Premium; the download section's
+      wording now says so (Free: the desktop on its own; Premium: synced with your phone).
+- [x] **Encrypt folder names** (plan open decision 5). Done 2026-11-09: vault-key ciphertext
+      at rest and on the wire on iOS, Android and the desktop (sync protocol 2), plaintext
+      names encrypted at the next unlock. Unit tests pass on all three; still to do: a
+      Wi‑Fi sync between two real devices with the new build (the emulator run was cut short
+      by the Mac's load).
 - Settled, and followed in the code:
   - VPN on the desktop comes after v1 (decision 2).
   - No card autofill in the extension (decision 3).
@@ -42,7 +43,13 @@ Steps that need the account owner. The details for each are in
 
 ## Also open
 
-- [ ] **Privacy policy.** Publish one on qasa-app.com. The extension stores require it.
+- [ ] **Privacy policy.** Written (2026-11-09): `apps/landing` `/privacy` in en/ar/ckb, and
+      the in-app summary. Before it goes live: create `privacy@qasa-app.com` (or change the
+      address), add a company name/address/jurisdiction if any, name the server's country,
+      then deploy the landing page. Open points in `apps/landing/TODO.md`.
+- [ ] **Account deletion in the phone apps.** Only the desktop can delete the account
+      (`DELETE /v1/account`); App Store guideline 5.1.1(v) requires it in the iOS app too.
+      The privacy policy says it's coming to the phone apps.
 - [ ] **Translations.** Have a native speaker review the Arabic and Sorani text:
   - the bridge, extension and updater strings: `bridge.*`, `ext.*` and `update.*` in
     `l10n/platform/desktop.json`;

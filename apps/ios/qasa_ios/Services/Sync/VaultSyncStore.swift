@@ -46,8 +46,8 @@ nonisolated final class KeychainSyncVaultMeta: SyncVaultMetaStore, @unchecked Se
 /// it before returning, so nothing here touches the main actor's context. After rows are
 /// written, `onApplied` runs (by default it rebuilds the list cache on the main actor).
 ///
-/// Rows cross as stored: envelope and payload stay vault-key ciphertext, and iOS's payload
-/// JSON is already the canonical wire shape.
+/// Rows cross as stored: envelope, payload and folder names stay vault-key ciphertext, and
+/// iOS's payload JSON is already the canonical wire shape.
 nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
     private let container: ModelContainer
     private let meta: SyncVaultMetaStore
@@ -112,10 +112,21 @@ nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
     func collections() -> [FfiCollection] {
         let context = ModelContext(container)
         let rows = (try? context.fetch(FetchDescriptor<VaultCollection>())) ?? []
-        return rows.map { c in
-            FfiCollection(
+        return rows.compactMap { c in
+            // Names cross as stored ciphertext. A folder whose name is still plaintext
+            // (migrated at the next unlock) is skipped: no plaintext ever on the wire.
+            // A tombstone carries no name.
+            let nameEnc: Data
+            if c.deletedAt != nil {
+                nameEnc = Data()
+            } else if let blob = c.nameEncrypted, !blob.isEmpty {
+                nameEnc = blob
+            } else {
+                return nil
+            }
+            return FfiCollection(
                 id: c.id.uuidString,
-                name: c.name,
+                nameEnc: nameEnc,
                 createdAtMs: Self.ms(c.createdAt),
                 updatedAtMs: Self.ms(c.updatedAt ?? c.createdAt),
                 deletedAtMs: c.deletedAt.map(Self.ms)
@@ -177,15 +188,17 @@ nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
                 var descriptor = FetchDescriptor<VaultCollection>(predicate: #Predicate { $0.id == id })
                 descriptor.fetchLimit = 1
                 let collection = try context.fetch(descriptor).first ?? {
-                    let c = VaultCollection(name: incoming.name)
+                    let c = VaultCollection(nameEncrypted: nil)
                     c.id = id
                     context.insert(c)
                     return c
                 }()
-                collection.name = incoming.name
+                collection.name = ""
                 collection.createdAt = Self.date(incoming.createdAtMs)
                 collection.updatedAt = Self.date(incoming.updatedAtMs)
                 collection.deletedAt = incoming.deletedAtMs.map(Self.date)
+                // Stored as is (both devices share the vault key); a tombstone keeps none.
+                collection.nameEncrypted = collection.deletedAt == nil && !incoming.nameEnc.isEmpty ? incoming.nameEnc : nil
                 written += 1
             }
             try context.save()

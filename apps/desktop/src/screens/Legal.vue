@@ -8,12 +8,12 @@ const props = defineProps<{ kind: 'terms' | 'privacy' }>()
 defineEmits<{ back: [] }>()
 const t = useT()
 
-/** Placeholder publish date until the real documents ship (iOS uses the same). */
-const LAST_UPDATED = new Date(2026, 7, 25)
+/** When each document last changed (iOS `termsUpdated` / `privacyUpdated`). */
+const LAST_UPDATED = { terms: new Date(2026, 7, 25), privacy: new Date(2026, 10, 9) }
 
 const title = computed(() => t(props.kind === 'terms' ? 'nav.terms' : 'nav.privacy'))
 const updated = computed(() =>
-  t('legal.lastUpdated', LAST_UPDATED.toLocaleDateString(prefs.language, { year: 'numeric', month: 'short', day: 'numeric' })),
+  t('legal.lastUpdated', LAST_UPDATED[props.kind].toLocaleDateString(prefs.language, { year: 'numeric', month: 'short', day: 'numeric' })),
 )
 </script>
 

@@ -15,7 +15,7 @@ import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
-import alibarznji.qasa.vault.db.VaultCollectionEntity
+import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class EditorViewModel @Inject constructor(val repo: VaultRepository) : ViewModel() {
     /** iOS `CollectionPickerField`'s `@Query` over `VaultCollection`. */
-    val collections: StateFlow<List<VaultCollectionEntity>> =
+    val collections: StateFlow<List<VaultCollection>> =
         repo.observeCollections().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** iOS `AddressPhonePicker.phones`: every row whose decrypted payload is a Phone. */

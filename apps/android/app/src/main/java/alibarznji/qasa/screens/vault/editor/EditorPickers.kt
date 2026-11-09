@@ -7,7 +7,7 @@ import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.Country
-import alibarznji.qasa.vault.db.VaultCollectionEntity
+import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -135,7 +135,7 @@ fun CountryPickerField(countryCode: String, onChange: (String) -> Unit) {
 @Composable
 fun CollectionPickerField(
     collectionId: String?,
-    collections: List<VaultCollectionEntity>,
+    collections: List<VaultCollection>,
     onChange: (String?) -> Unit,
     onCreate: (name: String, onCreated: (String) -> Unit) -> Unit,
 ) {
@@ -146,7 +146,7 @@ fun CollectionPickerField(
     FieldBlock(stringResource(R.string.vault_collection)) {
         MenuPicker(
             selectedLabel = sorted.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name ?: none,
-            options = listOf<VaultCollectionEntity?>(null) + sorted,
+            options = listOf<VaultCollection?>(null) + sorted,
             optionLabel = { it?.name ?: none },
             onSelect = { onChange(it?.id) },
             trailing = {

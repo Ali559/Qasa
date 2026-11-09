@@ -22,6 +22,15 @@ class AppBootstrap @Inject constructor(
 ) {
 
     suspend fun onVaultUnlocked() {
+        // Folder names saved before they were encrypted (plan decision 5) are encrypted
+        // with the vault key now and the plaintext blanked. Never blocks the unlock: the
+        // screens show a legacy name as is, and the next unlock tries again.
+        try {
+            vault.encryptLegacyCollectionNames()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
         // Rows synced in while locked (a vault adopted over Wi‑Fi) need search tokens,
         // which only the unlocked search key can build. Never blocks the unlock.
         try {

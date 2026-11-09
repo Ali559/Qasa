@@ -14,6 +14,9 @@ export const languages: { lang: Lang; label: string; href: string }[] = [
 /** The standalone download page in each language (the extension popup links to /download). */
 export const downloadHrefs: Record<Lang, string> = { en: "/download", ckb: "/ckb/download", ar: "/ar/download" };
 
+/** The privacy policy in each language; every footer links here, and the store listings use /privacy. */
+export const privacyHrefs: Record<Lang, string> = { en: "/privacy", ckb: "/ckb/privacy", ar: "/ar/privacy" };
+
 const en = {
   meta: {
     title: "Qasa: your passwords, kept safe on your phone",
@@ -134,10 +137,11 @@ const en = {
     stores: "On the App Store and Google Play",
     pricing: "Free on one device. Premium is 5,000 IQD a month, paid in the app with FIB, FastPay or SuperQi.",
   },
+  legal: { privacyPolicy: "Privacy policy" },
   desktop: {
     kicker: "Desktop and browser",
     title: "Qasa on your computer",
-    lede: "The same vault on macOS, Windows and Linux, encrypted on your computer. Pair it with your phone and keep both in sync over your own Wi‑Fi.",
+    lede: "The same vault on macOS, Windows and Linux, encrypted on your computer. Free works on one device, so the desktop app can be your only one. To use your phone and computer together, synced over your own Wi‑Fi, get Premium.",
     downloadFor: "Download for",
     yourComputer: "Your computer",
     macReq: "macOS 11 or later, Apple silicon and Intel",
@@ -278,10 +282,11 @@ const ckb: Dict = {
     stores: "لە App Store و Google Play",
     pricing: "بە خۆڕایی لەسەر یەک ئامێر. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع دەبێت، لەناو ئەپەکەدا بە FIB، FastPay یان SuperQi دەدرێت.",
   },
+  legal: { privacyPolicy: "سیاسەتی تایبەتمەندی" },
   desktop: {
     kicker: "کۆمپیوتەر و وێبگەڕ",
     title: "قاسە لەسەر کۆمپیوتەرەکەت",
-    lede: "هەمان کۆگا لەسەر ⁨macOS⁩، ⁨Windows⁩ و ⁨Linux⁩، شفرەکراو لەسەر کۆمپیوتەرەکەت. بە مۆبایلەکەتەوە گرێی بدە و هەردووکیان لە ڕێگەی ⁨Wi‑Fi⁩ ـی خۆتەوە هاوکات بهێڵەوە.",
+    lede: "هەمان کۆگا لەسەر ⁨macOS⁩، ⁨Windows⁩ و ⁨Linux⁩، شفرەکراو لەسەر کۆمپیوتەرەکەت. پلانی خۆڕایی بۆ یەک ئامێرە، بۆیە ئەپی کۆمپیوتەر دەتوانێت تاکە ئامێرەکەت بێت. بۆ بەکارهێنانی مۆبایل و کۆمپیوتەرەکەت پێکەوە، هاوکاتکراو لە ڕێگەی ⁨Wi‑Fi⁩ ـی خۆتەوە، پریمیۆم وەربگرە.",
     downloadFor: "دابەزاندن بۆ",
     yourComputer: "کۆمپیوتەرەکەت",
     macReq: "⁨macOS 11⁩ یان نوێتر، ⁨Apple silicon⁩ و ⁨Intel⁩",
@@ -420,10 +425,11 @@ const ar: Dict = {
     stores: "على App Store و Google Play",
     pricing: "مجاني على جهاز واحد. بريميوم بـ 5,000 د.ع شهريًا، يُدفع داخل التطبيق عبر FIB أو FastPay أو SuperQi.",
   },
+  legal: { privacyPolicy: "سياسة الخصوصية" },
   desktop: {
     kicker: "الحاسوب والمتصفح",
     title: "قاصة على حاسوبك",
-    lede: "الخزنة نفسها على macOS وWindows وLinux، مشفّرة على حاسوبك. اربطها بهاتفك وأبقِهما متزامنين عبر شبكة Wi‑Fi الخاصة بك.",
+    lede: "الخزنة نفسها على macOS وWindows وLinux، مشفّرة على حاسوبك. الخطة المجانية لجهاز واحد، فيمكن أن يكون تطبيق الحاسوب جهازك الوحيد. ولاستخدام هاتفك وحاسوبك معًا، متزامنين عبر شبكة Wi‑Fi الخاصة بك، اشترك في بريميوم.",
     downloadFor: "تنزيل لنظام",
     yourComputer: "حاسوبك",
     macReq: "macOS 11 أو أحدث، معالجات Apple وIntel",

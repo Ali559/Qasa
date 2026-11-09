@@ -24,6 +24,7 @@ pub use session::{run, Adoption, Outcome, SyncStore};
 pub use wire::{Intro, Snapshot, VaultMeta, WireCollection, WireItem};
 
 /// Bumped for any incompatible protocol change; peers with a different version refuse.
-pub const PROTOCOL_VERSION: u32 = 1;
+/// 2: folder names cross encrypted (`WireCollection::name_enc`).
+pub const PROTOCOL_VERSION: u32 = 2;
 /// The Bonjour / mDNS service type.
 pub const SERVICE_TYPE: &str = "_qasa-sync._tcp";

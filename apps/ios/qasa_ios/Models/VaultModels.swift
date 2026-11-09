@@ -4,7 +4,15 @@ import SwiftData
 @Model
 final class VaultCollection {
     var id: UUID
+    /// Legacy plaintext name. Folder names are encrypted now (plan decision 5): this is
+    /// blank on every folder written or migrated since, and only read by the unlock-time
+    /// migration (`VaultRepository.encryptLegacyCollectionNames`).
     var name: String
+    /// Vault-key AES-GCM ciphertext of the UTF-8 name, in the item envelope format
+    /// (`VaultCrypto.encrypt`). `nil` on folders saved before names were encrypted (until
+    /// the next unlock migrates them) and on tombstones. Read it through
+    /// `VaultRepository.collectionName(_:)`.
+    var nameEncrypted: Data?
     var createdAt: Date
     /// Last rename (or create). `nil` on folders made before Wi‑Fi sync: read as `createdAt`.
     var updatedAt: Date?
@@ -12,9 +20,10 @@ final class VaultCollection {
     /// reaches other devices over Wi‑Fi sync (plan §6.3). Every read filters these out.
     var deletedAt: Date?
 
-    init(name: String) {
+    init(nameEncrypted: Data?) {
         self.id = UUID()
-        self.name = name
+        self.name = ""
+        self.nameEncrypted = nameEncrypted
         self.createdAt = Date()
         self.updatedAt = self.createdAt
         self.deletedAt = nil
@@ -153,10 +162,8 @@ enum VaultSeedData {
             return
         }
 
-        let work = VaultCollection(name: "Work")
-        let personal = VaultCollection(name: "Personal")
-        context.insert(work)
-        context.insert(personal)
+        guard let work = try? VaultRepository.makeCollection(name: "Work", context: context),
+              let personal = try? VaultRepository.makeCollection(name: "Personal", context: context) else { return }
         try? context.save()
 
         let samples: [VaultPayload] = [
@@ -187,10 +194,9 @@ enum VaultSeedData {
     /// Snapchat's is weak, and Gmail's is in Pwned Passwords, so Home, Password health and
     /// Alerts all have something to show.
     private static func seedScreenshotVault(context: ModelContext) {
-        let work = VaultCollection(name: "Work")
-        let personal = VaultCollection(name: "Personal")
-        let bank = VaultCollection(name: "Bank")
-        [work, personal, bank].forEach(context.insert)
+        guard let work = try? VaultRepository.makeCollection(name: "Work", context: context),
+              let personal = try? VaultRepository.makeCollection(name: "Personal", context: context),
+              let bank = try? VaultRepository.makeCollection(name: "Bank", context: context) else { return }
         try? context.save()
 
         let samples: [VaultPayload] = [

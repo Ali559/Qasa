@@ -1,6 +1,8 @@
 package alibarznji.qasa.sync
 
 import alibarznji.qasa.R
+import alibarznji.qasa.vault.CollectionNames
+import alibarznji.qasa.vault.db.VaultCollectionEntity
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -46,9 +48,45 @@ class WifiSyncLogicTest {
         assertEquals(5L, row.deletedAt)
     }
 
+    private val key = ByteArray(32) { it.toByte() }
+
     @Test fun collectionsMapBothWays() {
-        val c = VaultSyncStore.fromWire(FfiCollection("x", "Work", 1, 7, 9))
+        val c = VaultSyncStore.fromWire(FfiCollection("X", byteArrayOf(), 1, 7, 9))
+        assertEquals("x", c.id)
         assertEquals(7L, c.updatedAt)
         assertEquals(9L, c.deletedAt)
+        assertEquals(0, c.nameEnc!!.size)
+        assertEquals("", c.name)
+    }
+
+    @Test fun appliedCollectionNamesKeepTheirCiphertextAsIs() {
+        val blob = CollectionNames.encrypt("Work", key)
+        val c = VaultSyncStore.fromWire(FfiCollection("ABC", blob, 1, 7, null))
+        assertEquals("abc", c.id)
+        assertEquals("", c.name)
+        assertArrayEquals(blob, c.nameEnc)
+        assertEquals("Work", CollectionNames.readable(c, key)!!.name)
+    }
+
+    @Test fun snapshotCarriesTheNameCiphertext() {
+        val blob = CollectionNames.encrypt("Family", key)
+        val wire = VaultSyncStore.toWire(VaultCollectionEntity(id = "c1", createdAt = 1, updatedAt = 2, nameEnc = blob))!!
+        assertArrayEquals(blob, wire.nameEnc)
+        assertEquals("Family", CollectionNames.decrypt(wire.nameEnc, key))
+        assertEquals(2L, wire.updatedAtMs)
+        assertNull(wire.deletedAtMs)
+    }
+
+    @Test fun snapshotSkipsNamesNotEncryptedYet() {
+        assertNull(VaultSyncStore.toWire(VaultCollectionEntity(id = "c1", name = "Plain", createdAt = 1)))
+        assertNull(VaultSyncStore.toWire(VaultCollectionEntity(id = "c1", name = "Plain", createdAt = 1, nameEnc = ByteArray(0))))
+    }
+
+    @Test fun snapshotTombstoneHasAnEmptyName() {
+        val wire = VaultSyncStore.toWire(
+            VaultCollectionEntity(id = "c1", name = "Left", createdAt = 1, deletedAt = 5, nameEnc = CollectionNames.encrypt("x", key)),
+        )!!
+        assertEquals(0, wire.nameEnc.size)
+        assertEquals(5L, wire.deletedAtMs)
     }
 }
