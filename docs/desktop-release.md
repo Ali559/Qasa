@@ -39,7 +39,7 @@ Add these under the GitHub repository's Settings → Secrets and variables → A
 | Secret | What | Needed for |
 | --- | --- | --- |
 | `TAURI_SIGNING_PRIVATE_KEY` | Contents of `~/.tauri/qasa-desktop-updater.key` | Every release |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Empty (the key was generated without one) | Every release |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Don't add it: the key has no password, GitHub won't store an empty secret, and a missing secret reads as empty | — |
 | `APPLE_CERTIFICATE` | Base64 of the Developer ID Application `.p12` | macOS signing |
 | `APPLE_CERTIFICATE_PASSWORD` | The `.p12` export password | macOS signing |
 | `APPLE_SIGNING_IDENTITY` | `Developer ID Application: <Name> (<TEAMID>)` | macOS signing |

@@ -3,9 +3,9 @@
 Steps that need the account owner. The details for each are in
 [`docs/desktop-release.md`](../../docs/desktop-release.md).
 
-- [ ] **Updater key.** Back up `~/.tauri/qasa-desktop-updater.key` and add it as the
-      GitHub secret `TAURI_SIGNING_PRIVATE_KEY` (`TAURI_SIGNING_PRIVATE_KEY_PASSWORD` is
-      empty). If it is lost, installed apps can never update.
+- [x] **Updater key.** Backed up, and added as the GitHub secret
+      `TAURI_SIGNING_PRIVATE_KEY` (2026-11-09). The key has no password, so there is no
+      `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` secret: a missing secret reads as empty.
 - [ ] **macOS signing.** Create an Apple Developer ID Application certificate and an
       app-specific password for notarization. Add them as secrets: `APPLE_CERTIFICATE`,
       `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`,
