@@ -34,5 +34,3 @@ lcov.info
 flamegraph.svg
 perf.data*
 
-# Docker local overrides
-docker-compose.override.yml

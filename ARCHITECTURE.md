@@ -51,7 +51,6 @@ qasa/
 │   │                      qasa-breach, qasa-vpn, qasa-worker
 │   ├── migrations/        Postgres schema (sqlx, applied on start)
 │   ├── deploy/            production: Debian setup, systemd units, Caddyfile, deploy
-│   ├── docker/            dev Postgres (compose)
 │   └── scripts/           integration tests, API smoke test
 ├── apps/
 │   ├── ios/               Xcode project: app + AutoFill and notification extensions
@@ -83,7 +82,7 @@ flowchart LR
   end
   ADMIN["Admin dashboard<br/>(Vue, staff only)"]
 
-  subgraph Server["Server (one host, docker compose)"]
+  subgraph Server["Server (one Debian host, no Docker)"]
     CADDY["Caddy<br/>TLS :443"]
     API["qasa-api<br/>(Axum)"]
     WORKER["qasa-worker<br/>(interval jobs)"]
@@ -605,7 +604,7 @@ Premium features unlock (section 4.8).
 ## 12. Local development
 
 ```bash
-make up        # Postgres in Docker (localhost:5433)
+make db        # the qasa role and database on the local Postgres (localhost:5432)
 make env       # create server/.env from the example
 make api       # API on :8080 (dev seeds three VPN nodes and the admin user from .env)
 make worker    # background jobs (set QASA_ENV=prod or QASA_WORKER_ENABLE=1)
@@ -617,7 +616,7 @@ make smoke     # API smoke test
 - **iOS:** open `apps/ios/qasa.xcodeproj`. The simulator reaches the local API at
   `localhost:8080`.
 - **Server tests:** `cd server && ./scripts/test-integration.sh` runs the DB and router
-  tests in a throwaway Postgres. Set `QASA_POSTGRES_PORT=5544` if the dev database already
-  holds 5433.
+  tests against `qasa_test`, recreated on the local Postgres each run. Set `PGPORT` for a
+  Postgres on another port.
 - **Strings:** after editing `l10n/strings.json`, run `python3 l10n/generate.py` and
   commit the outputs.

@@ -1,9 +1,8 @@
 # Qasa local development helpers
 #
-#   make up        # start Postgres
+#   make db        # qasa role + database on the local Postgres (no Docker)
 #   make api       # run API locally (cargo)
-#   make dev       # up + api
-#   make down      # stop containers
+#   make dev       # db + api
 #   make smoke     # API smoke test
 #   make help
 
@@ -13,21 +12,18 @@ SERVER := $(ROOT)/server
 ANDROID := $(ROOT)/apps/android
 DESKTOP := $(ROOT)/apps/desktop
 CORE := $(ROOT)/core
-COMPOSE := docker compose -f $(SERVER)/docker/docker-compose.yml
 API_URL ?= http://127.0.0.1:8080
 
-.PHONY: help up down logs api android env wait-db migrate-hint smoke worker dash clean desktop desktop-build nm-host core-test ios-ffi android-ffi
+.PHONY: help db api android env smoke worker dash desktop desktop-build nm-host core-test ios-ffi android-ffi
 
 help:
 	@echo "Qasa local commands"
 	@echo ""
-	@echo "  make up       Start Postgres (Docker)"
-	@echo "  make down     Stop Docker services"
-	@echo "  make logs     Tail Docker logs"
+	@echo "  make db       Create the qasa role and database on the local Postgres"
 	@echo "  make env      Ensure server/.env exists (from .env.example)"
 	@echo "  make api      Run qasa-api locally on :8080"
 	@echo "  make android  Build & install debug APK (needs emulator/device)"
-	@echo "  make dev      Start Docker then run the API"
+	@echo "  make dev      Set up the database, then run the API"
 	@echo "  make smoke    Run server/scripts/smoke-api.sh"
 	@echo "  make worker   Run qasa-worker (needs QASA_ENV=prod)"
 	@echo "  make dash     Run admin dashboard (Vite)"
@@ -38,18 +34,17 @@ help:
 	@echo "  make core-test  Test core/ (vault crypto, golden vectors, sync)"
 	@echo "  make ios-ffi  Build QasaFFI.xcframework + Swift bindings (Wi-Fi sync)"
 	@echo "  make android-ffi  Build libqasa_ffi.so + Kotlin bindings (Wi-Fi sync)"
-	@echo "  make clean    docker compose down -v (wipes DB volumes)"
 	@echo ""
 
-up:
-	$(COMPOSE) up -d
-	@echo "Postgres → localhost:$${QASA_POSTGRES_PORT:-5433}"
-
-down:
-	$(COMPOSE) down
-
-logs:
-	$(COMPOSE) logs -f
+# The local Postgres (Homebrew: brew services start postgresql@18), no Docker. Creates the
+# `qasa` role and database if missing; the API applies migrations when it starts.
+db:
+	@pg_isready -q || { echo "Postgres is not running: brew services start postgresql@18" >&2; exit 1; }
+	@psql -d postgres -Atqc "SELECT 1 FROM pg_roles WHERE rolname = 'qasa'" | grep -q 1 \
+		|| psql -d postgres -qc "CREATE ROLE qasa LOGIN PASSWORD 'qasa'"
+	@psql -d postgres -Atqc "SELECT 1 FROM pg_database WHERE datname = 'qasa'" | grep -q 1 \
+		|| psql -d postgres -qc "CREATE DATABASE qasa OWNER qasa"
+	@echo "Postgres: postgres://qasa:qasa@localhost:5432/qasa"
 
 env:
 	@if [[ ! -f $(SERVER)/.env ]]; then \
@@ -59,18 +54,6 @@ env:
 		echo "server/.env already exists"; \
 	fi
 
-wait-db:
-	@echo "Waiting for Postgres…"
-	@for i in $$(seq 1 30); do \
-		if $(COMPOSE) exec -T postgres pg_isready -U qasa -d qasa >/dev/null 2>&1; then \
-			echo "Postgres is ready."; \
-			exit 0; \
-		fi; \
-		sleep 1; \
-	done; \
-	echo "Postgres did not become ready in time." >&2; \
-	exit 1
-
 api: env
 	cd $(SERVER) && cargo run -p qasa-api
 
@@ -79,7 +62,7 @@ android:
 		JAVA_HOME="$${JAVA_HOME:-/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home}" \
 		./gradlew :app:assembleDebug :app:installDebug
 
-dev: up wait-db api
+dev: db api
 
 smoke: env
 	QASA_API_URL=$(API_URL) $(SERVER)/scripts/smoke-api.sh
@@ -107,10 +90,6 @@ ios-ffi:
 
 android-ffi:
 	$(CORE)/qasa-ffi/scripts/build-android.sh
-
-clean:
-	$(COMPOSE) down -v
-	@echo "Containers stopped and volumes removed."
 
 .PHONY: extension
 

@@ -46,7 +46,7 @@ pub async fn test_pool() -> PgPool {
              \n    ./scripts/test-integration.sh\n\
              \n\
              or set {DB_URL_VAR} to a database dedicated to testing, e.g.\n\
-             \n    {DB_URL_VAR}=postgres://qasa:qasa@127.0.0.1:5433/qasa_test\n"
+             \n    {DB_URL_VAR}=postgres://qasa:qasa@127.0.0.1:5432/qasa_test\n"
         )
     });
 
@@ -58,7 +58,7 @@ pub async fn test_pool() -> PgPool {
         .unwrap_or_else(|e| {
             panic!(
                 "{DB_URL_VAR} is set to `{url}` but the database is unreachable: {e}\n\
-                 Start one with `docker compose -f docker/docker-compose.yml up -d`."
+                 Run ./scripts/test-integration.sh, which recreates qasa_test on the local Postgres."
             )
         });
 
