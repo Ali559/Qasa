@@ -71,14 +71,14 @@ impl AppConfig {
         let trusted_proxy_cidrs = parse_cidr_list("QASA_TRUSTED_PROXY_CIDRS", env, false);
         Self {
             env,
-            // The dev default matches docker/docker-compose.yml, which publishes Postgres on
-            // 5433 (5432 is usually taken by a local install). In prod there is no default:
-            // silently connecting to some localhost database is worse than not starting.
+            // The dev default is the local Postgres on its standard port (`make db` creates
+            // the role and database). In prod there is no default: silently connecting to
+            // some localhost database is worse than not starting.
             database_url: env::var("DATABASE_URL").unwrap_or_else(|_| {
                 if env.is_prod() {
                     panic!("DATABASE_URL must be set when QASA_ENV=prod");
                 }
-                "postgres://qasa:qasa@localhost:5433/qasa".into()
+                "postgres://qasa:qasa@localhost:5432/qasa".into()
             }),
             bind_addr: env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".into()),
             license_private_key_b64: env::var("QASA_LICENSE_PRIVATE_KEY").ok(),

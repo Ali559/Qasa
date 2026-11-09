@@ -5,28 +5,19 @@ Backend API for Qasa — device licensing, payments, breach monitoring, and VPN.
 ## Prerequisites
 
 - Rust 1.82+
-- Docker (for Postgres)
+- PostgreSQL 18 running locally (`brew install postgresql@18 && brew services start postgresql@18`).
+  No Docker: development, tests and production all use a native Postgres.
 
 ## Quick start
 
 ```bash
-# Start Postgres
-docker compose -f docker/docker-compose.yml up -d
-
-# Copy env and run API
+make db                      # from the repo root: creates the qasa role and database
 cp .env.example .env
-cargo run -p qasa-api
+cargo run -p qasa-api        # applies migrations as it starts
 ```
 
-API listens on `http://0.0.0.0:8080`.
-
-### Postgres port
-
-The dev compose maps Postgres to host port **5433**, not the default 5432. A Homebrew,
-APT, or Postgres.app install very often already owns 5432, and whichever process binds it
-first wins *silently* — so `localhost:5432` can resolve to a completely different server
-than the container you just started. Override with `QASA_POSTGRES_PORT` if you need a
-specific host port.
+API listens on `http://0.0.0.0:8080`. The database is
+`postgres://qasa:qasa@localhost:5432/qasa`.
 
 ## Tests
 
@@ -40,10 +31,10 @@ deliberate: a test that quietly returns when no database is available is reporte
 libtest as `ok`, so a skipped run is indistinguishable from a passing one. As ignored they
 show up as `N ignored` in the summary, which cannot be mistaken for a pass.
 
-`./scripts/test-integration.sh` starts a throwaway Postgres, recreates `qasa_test`,
+`./scripts/test-integration.sh` recreates `qasa_test` on the local Postgres,
 applies migrations, and runs both the `qasa-db` repository tests and the `qasa-api`
-router tests (real HTTP requests through the router: status codes, bodies, auth). If
-5433 is taken by the dev compose Postgres, use `QASA_POSTGRES_PORT=5544 ./scripts/test-integration.sh`. The tests **refuse to start** if
+router tests (real HTTP requests through the router: status codes, bodies, auth). Set
+`PGPORT` for a Postgres on another port. The tests **refuse to start** if
 `QASA_TEST_DATABASE_URL` is unset or does not name a database ending in `_test`, because
 they insert and delete rows and `reconcile_active_peers` rewrites `vpn_nodes.active_peers`
 for every node in the database. Set `QASA_TEST_ALLOW_ANY_DB=1` to override deliberately.

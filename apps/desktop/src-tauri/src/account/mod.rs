@@ -409,7 +409,7 @@ mod tests {
         assert!(status.account_id.is_some());
     }
 
-    /// End to end against a running dev API (`make up` + `qasa-api`):
+    /// End to end against a running dev API (`make db` + `qasa-api`):
     /// `QASA_LIVE_API=http://localhost:8099 cargo test live_account -- --ignored --nocapture`
     #[tokio::test]
     #[ignore]
