@@ -18,9 +18,6 @@ import FeatureRow from './FeatureRow.vue'
 import FilledCheck from './FilledCheck.vue'
 import { errorText, FALLBACK_PLANS, formatIqd, isYearly, pollUntilComplete, useTr } from './shared'
 import WalletQr from './WalletQr.vue'
-import fastpayLogo from './wallets/fastpay.png'
-import fibLogo from './wallets/fib.png'
-import superqiLogo from './wallets/superqi.png'
 
 defineEmits<{ back: [] }>()
 const t = useT()
@@ -31,21 +28,19 @@ interface PaymentMethod {
   name: string
   subtitle: string
   badgeText: string
-  logo: string
   gateway: string
 }
 
+// One option: Wayl's hosted page offers FIB, Qi Card and the other Iraqi wallets itself.
 const methods = computed<PaymentMethod[]>(() => [
-  { name: t('premium.fib'), subtitle: t('premium.fibSub'), badgeText: 'FIB', logo: fibLogo, gateway: 'fib' },
-  { name: t('premium.fastpay'), subtitle: t('premium.fastpaySub'), badgeText: 'FastPay', logo: fastpayLogo, gateway: 'fastpay' },
-  { name: t('premium.superqi'), subtitle: t('premium.superqiSub'), badgeText: 'SuperQi', logo: superqiLogo, gateway: 'superqi' },
+  { name: t('premium.wayl'), subtitle: t('premium.waylSub'), badgeText: 'Wayl', gateway: 'wayl' },
 ])
 
 const plans = ref<PricingPlan[]>(FALLBACK_PLANS)
 const autoRenewModes = ref<Record<string, string>>({})
 const selectedPlanId = ref('premium_monthly')
 const autoRenew = ref(true)
-const selectedGateway = ref('fib')
+const selectedGateway = ref('wayl')
 const isPaying = ref(false)
 const statusMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
@@ -294,7 +289,7 @@ async function simulateStub() {
               :disabled="isPaying"
               @click="selectedGateway = method.gateway"
             >
-              <img :src="method.logo" alt="" class="logo" aria-hidden="true" />
+              <span class="logo" aria-hidden="true">{{ method.badgeText.charAt(0) }}</span>
               <span class="method-text">
                 <span class="method-name">{{ method.name }}</span>
                 <span class="method-sub">{{ method.subtitle }}</span>
@@ -574,12 +569,20 @@ async function simulateStub() {
   cursor: default;
 }
 
+/* No wallet logo for Wayl: a text badge, the method's initial on an accent tint. */
 .logo {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   width: 36px;
   height: 36px;
   margin-inline-end: 16px;
   border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--chrome));
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .method-text {

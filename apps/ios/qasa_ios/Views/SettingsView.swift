@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 import LocalAuthentication
+import SwiftData
 
 struct SettingsView: View {
     var onOpenMenu: (() -> Void)? = nil
@@ -21,6 +22,11 @@ struct SettingsView: View {
     @State private var exportDocument: CSVDocument?
     @State private var linkedDeviceCount = 0
     @State private var statusMessage: String?
+    @State private var showDeleteAccountAlert = false
+    @State private var isDeletingAccount = false
+    /// The Keychain isn't observable; read when the screen appears.
+    @State private var canDeleteAccount = AccountDeletion.isAvailable
+    @Environment(\.modelContext) private var modelContext
 
     private var locale: Locale { prefs.locale }
 
@@ -203,6 +209,18 @@ struct SettingsView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        if canDeleteAccount {
+                            Divider().background(Theme.stroke)
+                            Button { showDeleteAccountAlert = true } label: {
+                                NavChevronRow(
+                                    icon: "person.crop.circle.badge.xmark",
+                                    title: L10n.tr("settings.deleteAccount", locale: locale),
+                                    destructive: true
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(isDeletingAccount)
+                        }
                     }
 
                     if let statusMessage {
@@ -231,6 +249,22 @@ struct SettingsView: View {
             }
         } message: {
             Text(L10n.tr("settings.lockAlertMessage", locale: locale))
+        }
+        .alert(L10n.tr("settings.deleteAccountTitle", locale: locale), isPresented: $showDeleteAccountAlert) {
+            Button(L10n.tr("common.cancel", locale: locale), role: .cancel) {}
+            Button(L10n.tr("settings.deleteAccount", locale: locale), role: .destructive) {
+                Task { await deleteAccount() }
+            }
+        } message: {
+            Text(L10n.tr("settings.deleteAccountMessage", locale: locale))
+        }
+        .overlay {
+            if isDeletingAccount {
+                ProgressView()
+                    .padding(24)
+                    .background(Theme.cardBackground)
+                    .cornerRadius(12)
+            }
         }
         .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView().appLocalization() }
         .sheet(isPresented: $showChangeMasterPassword) {
@@ -289,6 +323,7 @@ struct SettingsView: View {
             }
         }
         .task {
+            canDeleteAccount = AccountDeletion.isAvailable
             if let devices = try? await DeviceRegistrationService.shared.fetchDevices() {
                 linkedDeviceCount = devices.count
             }
@@ -367,6 +402,27 @@ struct SettingsView: View {
             guard let url = URL(string: raw), UIApplication.shared.canOpenURL(url) else { continue }
             UIApplication.shared.open(url)
             return
+        }
+    }
+
+    // MARK: - Account deletion
+
+    /// `DELETE /v1/account`, then the local erase and the logout path, so the root shows
+    /// Create vault. On failure nothing local changes and the status line says so.
+    private func deleteAccount() async {
+        guard let accountId = VaultKeychainStore.accountId else { return }
+        isDeletingAccount = true
+        statusMessage = nil
+        defer { isDeletingAccount = false }
+        do {
+            try await AccountDeletion.deleteAccount(
+                accountId: accountId,
+                reauthorize: { await DeviceRegistrationService.shared.registerIfNeeded() },
+                eraseLocal: { AccountDeletion.eraseThisDevice(context: modelContext) }
+            )
+            onLogout?()
+        } catch {
+            statusMessage = L10n.tr("settings.deleteAccountFailed", locale: locale)
         }
     }
 

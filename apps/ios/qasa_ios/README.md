@@ -72,7 +72,7 @@ qasa_ios/
 
 ### Premium / payments
 
-- [x] Upgrade → monthly/yearly carousel + auto-renew → FIB/FastPay/SuperQi.
+- [x] Upgrade → monthly/yearly carousel + auto-renew → Wayl (its page offers FIB, Qi Card and other wallets).
 - [x] After webhook/simulated payment, license refresh sets Premium.
 - [x] Settings → Manage Subscription (premium): details, auto-renew, cancel + reason.
 - [x] Breach Monitoring and VPN menu entries accessible when Premium.

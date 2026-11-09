@@ -12,7 +12,7 @@ const dir = lang === "en" ? "ltr" : "rtl";
 const APP_STORE_URL = "#download";
 const PLAY_STORE_URL = "#download";
 
-const typeIcons = ["key", "credit-card", "notes", "user", "id"];
+const typeIcons = ["key", "credit-card", "notes", "user", "id", "clock-shield"];
 const pointIcons = ["device-mobile", "key", "cloud-off"];
 ---
 <!doctype html>
@@ -130,7 +130,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
             <article class="row row-flip reveal">
               <div class="row-copy">
                 <span class="tile-icon"><Icon name="shield-exclamation" size={22} /></span>
-                <h3>{t.features.leaksTitle} <span class="pill pill-success">{t.pricing.free}</span></h3>
+                <h3>{t.features.leaksTitle} <span class="pill pill-gold">{t.pricing.premium}</span></h3>
                 <p>{t.features.leaksBody}</p>
               </div>
               <div class="row-art">

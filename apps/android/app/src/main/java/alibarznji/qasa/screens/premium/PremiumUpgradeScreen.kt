@@ -61,7 +61,7 @@ fun PremiumUpgradeScreen(
     val c = qasaColors
     // iOS starts from the fallback plans so the carousel never renders empty.
     var plans by remember { mutableStateOf(vm.pricing.plans.ifEmpty { PricingService.FALLBACK_PLANS }) }
-    var gateway by remember { mutableStateOf("fib") }
+    var gateway by remember { mutableStateOf("wayl") }
     var autoRenew by remember { mutableStateOf(true) }
     var autoRenewModes by remember { mutableStateOf(vm.pricing.autoRenewModes) }
     var status by remember { mutableStateOf<String?>(null) }

@@ -13,8 +13,9 @@ Steps that need the account owner. The details for each are in
 - [ ] **Windows signing.** Set up Azure Trusted Signing (about $10 a month) and add its
       secrets: `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`,
       `AZURE_SIGNING_ENDPOINT`, `AZURE_SIGNING_ACCOUNT`, `AZURE_SIGNING_PROFILE`.
-- [ ] **Server.** Deploy the Caddyfile (`server/deploy/deploy.sh`), so the
-      `qasa-app.com/desktop/…` download and update links work.
+- [x] **Server.** Deployed 2026-11-09: Caddyfile (the `/desktop/…` update and download
+      redirects), landing page (`/privacy`, `/download`), API and worker (30-day VPN session
+      cleanup). The redirects answer 404 until a release is published.
 - [ ] **First release.** Tag `desktop-v0.1.0` and push. Test the draft release on macOS,
       Windows and Linux, then publish it. First delete the `desktop-v0.1.0-rc2` test draft
       and its tag (`gh release delete desktop-v0.1.0-rc2 --cleanup-tag`); it is a working
@@ -55,10 +56,9 @@ Steps that need the account owner. The details for each are in
 
 ## Also open
 
-- [ ] **Privacy policy.** Written (2026-11-09): `apps/landing` `/privacy` in en/ar/ckb, and
-      the in-app summary. Before it goes live: create `privacy@qasa-app.com` (or change the
-      address), add a company name/address/jurisdiction if any, name the server's country,
-      then deploy the landing page. Open points in `apps/landing/TODO.md`.
+- [x] **Privacy policy.** Live at https://qasa-app.com/privacy (en/ar/ckb) since 2026-11-09:
+      operator Noovio (Sulaymaniyah, Iraq), server in Germany, contact
+      `privacy@qasa-app.com`. Update it when the phone apps get account deletion.
 - [x] **Privacy mailbox.** Done 2026-11-09 with Cloudflare Email Routing:
       `privacy@qasa-app.com` → `biz@alibarznji.dev`, catch-all off, Cloudflare MX and SPF,
       DMARC `p=reject`. No mail ports on the server. Setup in `docs/deploy.md` → Email.
@@ -67,13 +67,12 @@ Steps that need the account owner. The details for each are in
       `google-services.json` / APNs key in the apps. The privacy policy already says push
       goes through Firebase Cloud Messaging; set it up, or change that section, before
       the policy goes live.
-- [ ] **Wallet names in the apps.** The Premium screens on iOS, Android and the desktop
-      still list FIB, FastPay and SuperQi as separate payment options
-      (`premium.fastpay*`, `premium.superqi*`), while payment actually goes through Wayl.
-      The landing page and `ARCHITECTURE.md` now say Wayl.
-- [ ] **Account deletion in the phone apps.** Only the desktop can delete the account
-      (`DELETE /v1/account`); App Store guideline 5.1.1(v) requires it in the iOS app too.
-      The privacy policy says it's coming to the phone apps.
+- [x] **Wallet names in the apps.** Done 2026-11-09: one Wayl option on iOS, Android and the
+      desktop (`gateway: "wayl"`); the server lists `wayl` in `auto_renew` and sends an
+      unconfigured `wayl` checkout to the dev stubs.
+- [x] **Account deletion in the phone apps.** Done 2026-11-09: Settings → Delete account on
+      iOS and Android (`DELETE /v1/account`, then the local erase); the privacy policy says
+      so. Not yet tried on a device against the real server.
 - [ ] **Translations.** Have a native speaker review the Arabic and Sorani text:
   - the bridge, extension and updater strings: `bridge.*`, `ext.*` and `update.*` in
     `l10n/platform/desktop.json`;

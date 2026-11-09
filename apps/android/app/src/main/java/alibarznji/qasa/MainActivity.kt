@@ -78,6 +78,12 @@ class MainActivity : FragmentActivity() {
         handleOpenIntent(intent)
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Premium may have ended (or renewed) while the app was in the background.
+        bootstrap.onAppForeground()
+    }
+
     override fun onResume() {
         super.onResume()
         autoLock.onAppForeground()

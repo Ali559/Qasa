@@ -14,6 +14,9 @@ final class AppSession {
     /// fails the same way with an explanation instead of silently timing out.
     var configurationError: String?
 
+    /// The pending expiry check (see `PremiumRefreshPolicy`); re-armed on every sync.
+    @ObservationIgnored private var premiumCheckTask: Task<Void, Never>?
+
     init(
         username: String = "Qasa User",
         email: String = "",
@@ -49,6 +52,61 @@ final class AppSession {
         isPremium = license.isPremium
         tierLabel = license.tierLabel
         deviceLimit = license.deviceLimit
+        schedulePremiumCheck()
+    }
+
+    // MARK: - Premium re-sync
+
+    private var nextPremiumCheck: Date? {
+        let license = LicenseManager.shared
+        return PremiumRefreshPolicy.nextCheck(
+            isPremium: isPremium,
+            licenseExpiresAt: license.parsed?.expiresAt,
+            subscriptionExpiresAt: PremiumRefreshPolicy.parseDate(SubscriptionService.shared.current?.expires_at),
+            lastAttempt: license.lastRefreshAttempt,
+            now: Date()
+        )
+    }
+
+    /// While unlocked and Premium, re-syncs at the next known expiry so the locked
+    /// screens appear when Premium ends, not at the next unlock. Locked: cancels.
+    private func schedulePremiumCheck() {
+        premiumCheckTask?.cancel()
+        premiumCheckTask = nil
+        guard VaultSession.shared.isUnlocked, let at = nextPremiumCheck else { return }
+        let delay = max(0, at.timeIntervalSinceNow)
+        premiumCheckTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else { return }
+            await self?.refreshPremium()
+        }
+    }
+
+    /// One license refresh, then a sync. Offline-safe: a failed refresh keeps the stored
+    /// token, so a paid user stays Premium for as long as that token is valid.
+    func refreshPremium() async {
+        guard VaultSession.shared.isUnlocked else { return }
+        if VaultKeychainStore.licenseToken != nil {
+            _ = await LicenseManager.shared.refresh()
+        }
+        guard VaultSession.shared.isUnlocked else { return }
+        syncFromLicense()
+    }
+
+    /// Scene became active: refresh if a known expiry has passed or the last refresh is
+    /// older than the throttle; otherwise just re-read the local license (cheap) and
+    /// re-arm the timer, which does not fire while the app is suspended.
+    func handleForeground() {
+        guard VaultSession.shared.isUnlocked else { return }
+        if PremiumRefreshPolicy.shouldRefreshOnForeground(
+            now: Date(),
+            lastAttempt: LicenseManager.shared.lastRefreshAttempt,
+            nextCheck: nextPremiumCheck
+        ) {
+            Task { await refreshPremium() }
+        } else {
+            syncFromLicense()
+        }
     }
 }
 

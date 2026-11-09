@@ -7816,19 +7816,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and ask us to delete your account and everything our server holds about you.\n\nFull policy: qasa-app.com/privacy"
+            "value": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تطلب منا حذف حسابك وكل ما يحتفظ به خادمنا عنك.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩"
+            "value": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و داوامان لێ بکەیت هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی بسڕینەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
+            "value": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
           }
         }
       }
@@ -9439,28 +9439,6 @@
         }
       }
     },
-    "premium.fastpaySub": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mobile Wallet"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "محفظة جوال"
-          }
-        },
-        "ckb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جزدانی مۆبایل"
-          }
-        }
-      }
-    },
     "premium.featureBreach": {
       "localizations": {
         "en": {
@@ -9567,28 +9545,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "بانکی یەکەمی عێراق (FIB)"
-          }
-        }
-      }
-    },
-    "premium.fibSub": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Instant Transfer"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تحويل فوري"
-          }
-        },
-        "ckb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "گواستنەوەی خێرا"
           }
         }
       }
@@ -9857,28 +9813,6 @@
         }
       }
     },
-    "premium.superqiSub": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qi Card integration"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تكامل بطاقة Qi"
-          }
-        },
-        "ckb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "یەکخستنی کارتی Qi"
-          }
-        }
-      }
-    },
     "premium.title": {
       "localizations": {
         "en": {
@@ -9941,6 +9875,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "ئەپی جزدان دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو دەبێت."
+          }
+        }
+      }
+    },
+    "premium.wayl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wayl"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wayl"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wayl"
+          }
+        }
+      }
+    },
+    "premium.waylSub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay with FIB, Qi Card or another Iraqi wallet"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ادفع عبر FIB أو Qi Card أو أي محفظة عراقية أخرى"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بە FIB، Qi Card یان جزدانێکی عێراقیی تر پارە بدە"
           }
         }
       }
@@ -10535,6 +10513,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "داتا و هەژمار"
+          }
+        }
+      }
+    },
+    "settings.deleteAccount": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete account"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف الحساب"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سڕینەوەی هەژمار"
+          }
+        }
+      }
+    },
+    "settings.deleteAccountFailed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't delete your account. Check your connection and try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر حذف حسابك. تحقق من اتصالك وحاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا هەژمارەکەت بسڕدرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەوە."
+          }
+        }
+      }
+    },
+    "settings.deleteAccountMessage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes your account, linked devices and inbox from Qasa's servers and erases the vault on this phone. Payments are kept as financial records. This can't be undone."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يزيل هذا حسابك والأجهزة المرتبطة وصندوق الوارد من خوادم قاصة، ويمسح الخزنة على هذا الهاتف. تبقى المدفوعات كسجلات مالية. لا يمكن التراجع عن ذلك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم مۆبایلە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە."
+          }
+        }
+      }
+    },
+    "settings.deleteAccountTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete your Qasa account?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حذف حسابك في قاصة؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەژماری قاسەکەت بسڕیتەوە؟"
           }
         }
       }

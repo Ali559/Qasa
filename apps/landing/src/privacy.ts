@@ -31,7 +31,7 @@ export interface Policy {
 /** ISO date of the current text; shown localized in `updated`. */
 export const PRIVACY_UPDATED = "2026-11-09";
 
-/** Placeholder until the owner confirms the inbox (TODO.md). */
+/** Forwarded by Cloudflare Email Routing (docs/deploy.md → Email). */
 const EMAIL = "privacy@qasa-app.com";
 
 const FSI = "⁨";
@@ -59,7 +59,7 @@ const en: Policy = {
       id: "who",
       title: "Who we are",
       body: [
-        "Qasa is a password manager for iPhone, Android, macOS, Windows and Linux, with a browser extension for Chrome, Edge and Firefox. It is made and run by Ali Barznji, who is responsible for your data under this policy. Here, “Qasa”, “we” and “us” mean him and the Qasa service.",
+        "Qasa is a password manager for iPhone, Android, macOS, Windows and Linux, with a browser extension for Chrome, Edge and Firefox. It is made and run by Noovio, based in Sulaymaniyah, Iraq, which is responsible for your data under this policy. Here, “Qasa”, “we” and “us” mean Noovio and the Qasa service.",
         "This policy covers the Qasa apps, the browser extension, the Qasa server (api.qasa-app.com) and this website (qasa-app.com).",
       ],
     },
@@ -148,7 +148,7 @@ const en: Policy = {
       title: "Companies that help us run Qasa",
       body: [
         [
-          "<strong>Contabo</strong> hosts our server and its database.",
+          "<strong>Contabo</strong> hosts our server and its database, in Germany.",
           "<strong>Cloudflare</strong> delivers this website and our server's traffic, and protects them from attacks. Every request passes through Cloudflare, which sees your IP address.",
           "<strong>Wayl</strong> processes payments.",
           "<strong>Google Firebase Cloud Messaging</strong> delivers push notifications to Android, and to iPhone through Apple's push service. It receives your phone's push token and the text of each notice.",
@@ -156,7 +156,7 @@ const en: Policy = {
           "<strong>GitHub</strong> hosts the desktop app's downloads and updates.",
           "<strong>Apple, Google, Microsoft and Mozilla</strong> distribute the apps and the extension through their stores, under their own privacy policies.",
         ],
-        "Our server and these services may be outside Iraq, so your data may be processed in other countries.",
+        "Our server is in Germany, and some of these services run in other countries too, so your data is processed outside Iraq.",
       ],
     },
     {
@@ -193,7 +193,7 @@ const en: Policy = {
         [
           "<strong>See your data.</strong> The app shows your linked devices, plan, payments and notifications. For anything else we hold, email us.",
           "<strong>Export.</strong> Export your vault to a CSV file in Settings at any time.",
-          "<strong>Delete.</strong> Delete your account in Settings (in the desktop app now, and coming to the phone apps), or email us. This removes your devices (names, IDs, region labels and push tokens), your VPN records and your notifications from our server, and erases the vault on that device. Any paid time left ends. We keep the account ID, marked deleted so it can never be used again, and your payment records, linked only to that ID.",
+          "<strong>Delete.</strong> Delete your account in Settings in any Qasa app, on your phone or computer, or email us. This removes your devices (names, IDs, region labels and push tokens), your VPN records and your notifications from our server, and erases the vault on that device. Any paid time left ends. We keep the account ID, marked deleted so it can never be used again, and your payment records, linked only to that ID.",
           "<strong>Control.</strong> In the app you can unlink devices, turn off notifications, turn off auto-renew or cancel Premium.",
         ],
         "We know you only by your account ID, which your app holds, so when you write to us we may ask for it. You can also complain to the data-protection authority where you live.",
@@ -243,7 +243,7 @@ const ckb: Policy = {
       id: "who",
       title: "ئێمە کێین",
       body: [
-        `قاسە بەڕێوەبەری وشەی نهێنییە بۆ ${L("iPhone")}، ${L("Android")}، ${L("macOS")}، ${L("Windows")} و ${L("Linux")}، لەگەڵ زیادکراوێکی وێبگەڕ بۆ ${L("Chrome")}، ${L("Edge")} و ${L("Firefox")}. عەلی بەرزنجی دروستی کردووە و بەڕێوەی دەبات، و بەپێی ئەم سیاسەتە بەرپرسە لە داتاکانت. لێرەدا «قاسە» و «ئێمە» واتە ئەو و خزمەتگوزاریی قاسە.`,
+        `قاسە بەڕێوەبەری وشەی نهێنییە بۆ ${L("iPhone")}، ${L("Android")}، ${L("macOS")}، ${L("Windows")} و ${L("Linux")}، لەگەڵ زیادکراوێکی وێبگەڕ بۆ ${L("Chrome")}، ${L("Edge")} و ${L("Firefox")}. ${L("Noovio")} لە سلێمانی، عێراق دروستی کردووە و بەڕێوەی دەبات، و بەپێی ئەم سیاسەتە بەرپرسە لە داتاکانت. لێرەدا «قاسە» و «ئێمە» واتە ${L("Noovio")} و خزمەتگوزاریی قاسە.`,
         `ئەم سیاسەتە ئەپەکانی قاسە، زیادکراوی وێبگەڕ، سێرڤەری قاسە (${L("api.qasa-app.com")}) و ئەم ماڵپەڕە (${L("qasa-app.com")}) دەگرێتەوە.`,
       ],
     },
@@ -332,7 +332,7 @@ const ckb: Policy = {
       title: "ئەو کۆمپانیایانەی یارمەتیمان دەدەن قاسە بەڕێوە ببەین",
       body: [
         [
-          `<strong>${L("Contabo")}</strong> سێرڤەرەکەمان و بنکەدراوەکەی هەڵدەگرێت.`,
+          `<strong>${L("Contabo")}</strong> سێرڤەرەکەمان و بنکەدراوەکەی لە ئەڵمانیا هەڵدەگرێت.`,
           `<strong>${L("Cloudflare")}</strong> ئەم ماڵپەڕە و هاتوچۆی سێرڤەرەکەمان دەگەیەنێت و لە هێرش دەیانپارێزێت. هەموو داواکارییەک بە ${L("Cloudflare")} دا تێدەپەڕێت، کە ناونیشانی ${L("IP")} ـەکەت دەبینێت.`,
           `<strong>${L("Wayl")}</strong> پارەدانەکان جێبەجێ دەکات.`,
           `<strong>${L("Google Firebase Cloud Messaging")}</strong> ئاگاداریی پوش دەگەیەنێتە ${L("Android")}، و بە خزمەتگوزاریی پوشی ${L("Apple")} دا دەیگەیەنێتە ${L("iPhone")}. نیشانەی پوشی مۆبایلەکەت و دەقی هەر ئاگادارییەک وەردەگرێت.`,
@@ -340,7 +340,7 @@ const ckb: Policy = {
           `<strong>${L("GitHub")}</strong> دابەزاندن و نوێکردنەوەکانی ئەپی کۆمپیوتەر هەڵدەگرێت.`,
           `<strong>${L("Apple")}، ${L("Google")}، ${L("Microsoft")} و ${L("Mozilla")}</strong> ئەپەکان و زیادکراوەکە لە ڕێگەی فرۆشگاکانیانەوە بڵاو دەکەنەوە، بەپێی سیاسەتی تایبەتمەندیی خۆیان.`,
         ],
-        "لەوانەیە سێرڤەرەکەمان و ئەم خزمەتگوزارییانە لە دەرەوەی عێراق بن، بۆیە لەوانەیە داتاکانت لە وڵاتانی تردا مامەڵەیان لەگەڵ بکرێت.",
+        "سێرڤەرەکەمان لە ئەڵمانیایە، و هەندێک لەم خزمەتگوزارییانەش لە وڵاتانی تر کار دەکەن، بۆیە داتاکانت لە دەرەوەی عێراق مامەڵەیان لەگەڵ دەکرێت.",
       ],
     },
     {
@@ -377,7 +377,7 @@ const ckb: Policy = {
         [
           "<strong>بینینی داتاکانت.</strong> ئەپەکە ئامێرە بەستراوەکان، پلان، پارەدان و ئاگادارییەکانت پیشان دەدات. بۆ هەر شتێکی تر کە لامانە، ئیمەیڵمان بۆ بنێرە.",
           `<strong>هەناردەکردن.</strong> هەر کاتێک بتەوێت لە ڕێکخستنەکاندا کۆگاکەت بۆ فایلی ${L("CSV")} هەناردە بکە.`,
-          `<strong>سڕینەوە.</strong> لە ڕێکخستنەکاندا هەژمارەکەت بسڕەوە (ئێستا لە ئەپی کۆمپیوتەردا، و بەم زووانە لە ئەپەکانی مۆبایلدا)، یان ئیمەیڵمان بۆ بنێرە. ئەمە ئامێرەکانت (ناو، ناسنامە، ناوی ناوچە و نیشانەی پوش)، تۆمارەکانی ${L("VPN")} و ئاگادارییەکانت لە سێرڤەرەکەمان لادەبات، و کۆگای سەر ئەو ئامێرە دەسڕێتەوە. هەر ماوەیەکی پارەدراو کە مابێت کۆتایی دێت. ناسنامەی هەژمارەکە هەڵدەگرین، وەک سڕاوە نیشانکراو بۆ ئەوەی هەرگیز دووبارە بەکارنەهێنرێتەوە، لەگەڵ تۆماری پارەدانەکانت کە تەنها بەو ناسنامەیەوە بەستراون.`,
+          `<strong>سڕینەوە.</strong> لە ڕێکخستنەکاندا هەژمارەکەت بسڕەوە (لە هەر ئەپێکی قاسە، لەسەر مۆبایل یان کۆمپیوتەر)، یان ئیمەیڵمان بۆ بنێرە. ئەمە ئامێرەکانت (ناو، ناسنامە، ناوی ناوچە و نیشانەی پوش)، تۆمارەکانی ${L("VPN")} و ئاگادارییەکانت لە سێرڤەرەکەمان لادەبات، و کۆگای سەر ئەو ئامێرە دەسڕێتەوە. هەر ماوەیەکی پارەدراو کە مابێت کۆتایی دێت. ناسنامەی هەژمارەکە هەڵدەگرین، وەک سڕاوە نیشانکراو بۆ ئەوەی هەرگیز دووبارە بەکارنەهێنرێتەوە، لەگەڵ تۆماری پارەدانەکانت کە تەنها بەو ناسنامەیەوە بەستراون.`,
           "<strong>کۆنترۆڵ.</strong> لە ئەپەکەدا دەتوانیت ئامێرەکان لاببەیت، ئاگادارییەکان بکوژێنیتەوە، نوێبوونەوەی خۆکار ناچالاک بکەیت یان پریمیۆم هەڵبوەشێنیتەوە.",
         ],
         "تەنها بە ناسنامەی هەژمارەکەت دەتناسین، کە لە ئەپەکەتدایە، بۆیە کاتێک بۆمان دەنووسیت لەوانەیە داوای بکەین. هەروەها دەتوانیت سکاڵا بکەیتە لای دەسەڵاتی پاراستنی داتا لەو شوێنەی تێیدا دەژیت.",
@@ -427,7 +427,7 @@ const ar: Policy = {
       id: "who",
       title: "من نحن",
       body: [
-        `قاصة مدير كلمات مرور لأجهزة ${L("iPhone")} و${L("Android")} و${L("macOS")} و${L("Windows")} و${L("Linux")}، مع إضافة للمتصفح لـ ${L("Chrome")} و${L("Edge")} و${L("Firefox")}. صنعها ويديرها علي برزنجي، وهو المسؤول عن بياناتك بموجب هذه السياسة. وهنا تعني «قاصة» و«نحن» هو وخدمة قاصة.`,
+        `قاصة مدير كلمات مرور لأجهزة ${L("iPhone")} و${L("Android")} و${L("macOS")} و${L("Windows")} و${L("Linux")}، مع إضافة للمتصفح لـ ${L("Chrome")} و${L("Edge")} و${L("Firefox")}. صنعتها وتديرها ${L("Noovio")}، ومقرّها السليمانية في العراق، وهي المسؤولة عن بياناتك بموجب هذه السياسة. وهنا تعني «قاصة» و«نحن» ${L("Noovio")} وخدمة قاصة.`,
         `تشمل هذه السياسة تطبيقات قاصة وإضافة المتصفح وخادم قاصة (${L("api.qasa-app.com")}) وهذا الموقع (${L("qasa-app.com")}).`,
       ],
     },
@@ -516,7 +516,7 @@ const ar: Policy = {
       title: "الشركات التي تساعدنا في تشغيل قاصة",
       body: [
         [
-          `<strong>${L("Contabo")}</strong> تستضيف خادمنا وقاعدة بياناته.`,
+          `<strong>${L("Contabo")}</strong> تستضيف خادمنا وقاعدة بياناته في ألمانيا.`,
           `<strong>${L("Cloudflare")}</strong> توصل هذا الموقع وحركة خادمنا وتحميهما من الهجمات. يمرّ كل طلب عبر ${L("Cloudflare")}، التي ترى عنوان ${L("IP")} الخاص بك.`,
           `<strong>${L("Wayl")}</strong> تعالج المدفوعات.`,
           `<strong>${L("Google Firebase Cloud Messaging")}</strong> توصل الإشعارات إلى ${L("Android")}، وإلى ${L("iPhone")} عبر خدمة الإشعارات من ${L("Apple")}. وتستلم رمز الإشعارات الخاص بهاتفك ونص كل إشعار.`,
@@ -524,7 +524,7 @@ const ar: Policy = {
           `<strong>${L("GitHub")}</strong> يستضيف تنزيلات تطبيق سطح المكتب وتحديثاته.`,
           `<strong>${L("Apple")} و${L("Google")} و${L("Microsoft")} و${L("Mozilla")}</strong> توزّع التطبيقات والإضافة عبر متاجرها، وفق سياسات الخصوصية الخاصة بها.`,
         ],
-        "قد يكون خادمنا وهذه الخدمات خارج العراق، لذا قد تُعالَج بياناتك في بلدان أخرى.",
+        "يقع خادمنا في ألمانيا، وتعمل بعض هذه الخدمات في بلدان أخرى أيضًا، لذا تُعالَج بياناتك خارج العراق.",
       ],
     },
     {
@@ -561,7 +561,7 @@ const ar: Policy = {
         [
           "<strong>الاطلاع على بياناتك.</strong> يعرض التطبيق أجهزتك المرتبطة وخطتك ومدفوعاتك وإشعاراتك. ولأي شيء آخر نحتفظ به، راسلنا بالبريد الإلكتروني.",
           `<strong>التصدير.</strong> صدّر خزنتك إلى ملف ${L("CSV")} من الإعدادات في أي وقت.`,
-          `<strong>الحذف.</strong> احذف حسابك من الإعدادات (في تطبيق سطح المكتب الآن، وقريبًا في تطبيقات الهاتف)، أو راسلنا بالبريد الإلكتروني. يزيل هذا أجهزتك (الأسماء والمعرّفات وأسماء المناطق ورموز الإشعارات)، وسجلات ${L("VPN")}، وإشعاراتك من خادمنا، ويمسح الخزنة على ذلك الجهاز. وتنتهي أي مدة مدفوعة متبقية. نحتفظ بمعرّف الحساب، معلَّمًا بأنه محذوف كي لا يُستخدم مرة أخرى أبدًا، وبسجلات مدفوعاتك، مرتبطة بهذا المعرّف فقط.`,
+          `<strong>الحذف.</strong> احذف حسابك من الإعدادات (في أي تطبيق من تطبيقات قاصة، على الهاتف أو الحاسوب)، أو راسلنا بالبريد الإلكتروني. يزيل هذا أجهزتك (الأسماء والمعرّفات وأسماء المناطق ورموز الإشعارات)، وسجلات ${L("VPN")}، وإشعاراتك من خادمنا، ويمسح الخزنة على ذلك الجهاز. وتنتهي أي مدة مدفوعة متبقية. نحتفظ بمعرّف الحساب، معلَّمًا بأنه محذوف كي لا يُستخدم مرة أخرى أبدًا، وبسجلات مدفوعاتك، مرتبطة بهذا المعرّف فقط.`,
           "<strong>التحكم.</strong> يمكنك من التطبيق إلغاء ربط الأجهزة، وإيقاف الإشعارات، وإيقاف التجديد التلقائي، أو إلغاء بريميوم.",
         ],
         "لا نعرفك إلا بمعرّف حسابك، الموجود في تطبيقك، لذا قد نطلبه منك عندما تراسلنا. ويمكنك أيضًا تقديم شكوى إلى سلطة حماية البيانات في مكان إقامتك.",

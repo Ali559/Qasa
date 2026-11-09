@@ -15,9 +15,10 @@ pub async fn list_public(
     let plans = qasa_db::repos::plan::list_active(&state.pool).await?;
     // What leaving auto-renew on means for each wallet the apps offer, so the checkout
     // screen can say it truthfully: "charge" (we charge the saved wallet), "link" (we
-    // send a payment link before each period ends) or "none".
+    // send a payment link before each period ends) or "none". The apps offer only Wayl;
+    // the old wallet ids stay for older app versions.
     let auto_renew: serde_json::Map<String, serde_json::Value> =
-        [GatewayKind::Fib, GatewayKind::Fastpay, GatewayKind::Superqi]
+        [GatewayKind::Wayl, GatewayKind::Fib, GatewayKind::Fastpay, GatewayKind::Superqi]
             .into_iter()
             .map(|k| {
                 let mode = state.gateways.renewal_mode_for_checkout(k).as_str();

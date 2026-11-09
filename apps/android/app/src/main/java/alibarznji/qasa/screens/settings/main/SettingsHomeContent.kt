@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.settings.main
 
 import alibarznji.qasa.R
+import alibarznji.qasa.account.AccountDeletionResult
 import alibarznji.qasa.screens.settings.AutoLockSheet
 import alibarznji.qasa.screens.settings.SettingsViewModel
 import alibarznji.qasa.screens.settings.csv.CsvImportExportRows
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.PersonRemove
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +55,12 @@ fun SettingsHomeContent(
     val isPremium by vm.appSession.isPremium.collectAsState()
     var showClear by remember { mutableStateOf(false) }
     var showLockConfirm by remember { mutableStateOf(false) }
+    var showDeleteAccount by remember { mutableStateOf(false) }
+    var deletingAccount by remember { mutableStateOf(false) }
+    // Re-read when the license changes, so the row follows registration and Clear Local Data.
+    val parsedLicense by vm.license.parsed.collectAsState()
+    val accountRegistered = remember(parsedLicense) { vm.accountDeletion.isRegistered }
+    val deleteFailedMessage = stringResource(R.string.settings_deleteaccountfailed)
     var showAutoLock by remember { mutableStateOf(false) }
     // iOS `statusMessage`: the last import/export result, shown under the Data card.
     var statusMessage by rememberSaveable { mutableStateOf<String?>(null) }
@@ -89,6 +97,15 @@ fun SettingsHomeContent(
                 destructive = true,
                 onClick = { showClear = true },
             )
+            if (accountRegistered) {
+                HorizontalDivider(color = c.stroke)
+                NavChevronRow(
+                    icon = Icons.Outlined.PersonRemove,
+                    title = stringResource(R.string.settings_deleteaccount),
+                    destructive = true,
+                    onClick = { if (!deletingAccount) showDeleteAccount = true },
+                )
+            }
             HorizontalDivider(color = c.stroke)
             NavChevronRow(
                 icon = Icons.AutoMirrored.Filled.Logout,
@@ -114,19 +131,32 @@ fun SettingsHomeContent(
             confirmLabel = stringResource(R.string.settings_clear),
             onConfirm = {
                 scope.launch {
-                    // Tunnel off and the device's WireGuard key gone with the account.
-                    vm.vpn.forget()
-                    vm.repo.clearAll()
-                    vm.session.wipeVault()
-                    // Same scope as iOS `VaultAuthStore.resetVaultAuth`: the licence goes too,
-                    // so a cleared device does not keep premium attached to a deleted vault.
-                    vm.license.clear()
-                    vm.appSession.syncFromLicense(vm.license)
+                    vm.eraser.eraseAll()
                     showClear = false
                     onLock()
                 }
             },
             onDismiss = { showClear = false },
+        )
+    }
+
+    if (showDeleteAccount) {
+        QasaConfirmDialog(
+            title = stringResource(R.string.settings_deleteaccounttitle),
+            message = stringResource(R.string.settings_deleteaccountmessage),
+            confirmLabel = stringResource(R.string.settings_deleteaccount),
+            onConfirm = {
+                showDeleteAccount = false
+                deletingAccount = true
+                // Desktop `deleteAccount`: server first; the vault and identity are only
+                // erased once it confirmed, then the app returns to Create Vault.
+                vm.deleteAccount { result ->
+                    deletingAccount = false
+                    if (result == AccountDeletionResult.Deleted) onLock()
+                    else statusMessage = deleteFailedMessage
+                }
+            },
+            onDismiss = { showDeleteAccount = false },
         )
     }
 

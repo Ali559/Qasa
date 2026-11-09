@@ -358,7 +358,7 @@
     <string name="lan_stop">وەستان</string>
     <string name="lan_title">هاوکاتکردن لەسەر Wi‑Fi</string>
     <string name="legal_lastupdated">دوایین نوێکردنەوە: %s</string>
-    <string name="legal_privacybody">کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و داوامان لێ بکەیت هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی بسڕینەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩</string>
+    <string name="legal_privacybody">کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩</string>
     <string name="legal_termsbody">ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی قاسەن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت.</string>
     <string name="nav_breached_passwords">وشە نهێنییە دزراوەکان</string>
     <string name="nav_breachmonitoring">ئاگادارکردنەوەی دزەی ئیمەیڵ</string>
@@ -432,13 +432,11 @@
     <string name="premium_bestvalue">باشترین نرخ</string>
     <string name="premium_completeinwallet">پارەدان لە %s تەواو بکە…</string>
     <string name="premium_fastpay">FastPay</string>
-    <string name="premium_fastpaysub">جزدانی مۆبایل</string>
     <string name="premium_featurebreach">پشکنینی وشە نهێنییە دزراوەکان</string>
     <string name="premium_featuredevices">پاراستنی تا ٥ ئامێر</string>
     <string name="premium_featuresave">پاشەکەوت بەراورد بە مانگانە</string>
     <string name="premium_featurevpn">VPN</string>
     <string name="premium_fib">بانکی یەکەمی عێراق (FIB)</string>
-    <string name="premium_fibsub">گواستنەوەی خێرا</string>
     <string name="premium_installwalletapp">ئەپی %s دابەزێنە بۆ تەواوکردنی پارەدان، پاشان دووبارە هەوڵ بدە.</string>
     <string name="premium_licenserefreshfailed">پارەدان سەرکەوتوو بوو بەڵام نوێکردنەوەی مۆڵەت سەرنەکەوت. کۆگا قفڵ بکە و دووبارە بکەرەوە.</string>
     <string name="premium_openswallet">ئەپی جزدانەکەت دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو.</string>
@@ -451,10 +449,11 @@
     <string name="premium_selectpayment">شێوازی پارەدان هەڵبژێرە</string>
     <string name="premium_simulatingpayment">ئەپی %s بەردەست نییە — پارەدان خەیاڵی دەکرێت…</string>
     <string name="premium_superqi">SuperQi</string>
-    <string name="premium_superqisub">یەکخستنی کارتی Qi</string>
     <string name="premium_title">قاسە پریمیۆم</string>
     <string name="premium_upgradetopro">بەرزکردنەوە بۆ پرۆ</string>
     <string name="premium_wallethint">ئەپی جزدان دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو دەبێت.</string>
+    <string name="premium_wayl">Wayl</string>
+    <string name="premium_waylsub">بە FIB، Qi Card یان جزدانێکی عێراقیی تر پارە بدە</string>
     <string name="security_hidden">قاسە پشتێ کراوە</string>
     <string name="session_qasauser">بەکارهێنەری قاسە</string>
     <string name="settings_activecount">%d چالاک</string>
@@ -482,6 +481,10 @@
     <string name="settings_confirmmasterpassword">دڵنیابوونەوە لە وشەی نهێنی نوێ</string>
     <string name="settings_currentmasterpassword">وشەی نهێنی سەرەکی ئێستا</string>
     <string name="settings_dataaccount">داتا و هەژمار</string>
+    <string name="settings_deleteaccount">سڕینەوەی هەژمار</string>
+    <string name="settings_deleteaccountfailed">نەتوانرا هەژمارەکەت بسڕدرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەوە.</string>
+    <string name="settings_deleteaccountmessage">ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم مۆبایلە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە.</string>
+    <string name="settings_deleteaccounttitle">هەژماری قاسەکەت بسڕیتەوە؟</string>
     <string name="settings_done">تەواو</string>
     <string name="settings_exportcsv">هەناردەکردنی وشە نهێنییەکان (CSV)</string>
     <string name="settings_exportempty">هێشتا هیچ نییە بۆ هەناردەکردن.</string>

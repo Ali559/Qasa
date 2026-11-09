@@ -1,5 +1,8 @@
 package alibarznji.qasa.screens.settings
 
+import alibarznji.qasa.account.AccountDeletionResult
+import alibarznji.qasa.account.AccountDeletionService
+import alibarznji.qasa.services.LocalDataEraser
 import alibarznji.qasa.vpn.VPNService
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.prefs.AppPreferences
@@ -23,6 +26,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -39,7 +44,17 @@ class SettingsViewModel @Inject constructor(
     val devices: DeviceRegistrationService,
     val license: LicenseManager,
     val vpn: VPNService,
-) : ViewModel()
+    val eraser: LocalDataEraser,
+    val accountDeletion: AccountDeletionService,
+) : ViewModel() {
+    /**
+     * Runs on the view model's scope, not the screen's: leaving Settings mid-request must
+     * not cancel between the server deleting the account and this phone erasing it.
+     */
+    fun deleteAccount(onResult: (AccountDeletionResult) -> Unit) {
+        viewModelScope.launch { onResult(accountDeletion.delete()) }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

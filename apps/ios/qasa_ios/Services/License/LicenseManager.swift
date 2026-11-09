@@ -20,6 +20,9 @@ final class LicenseManager {
 
     private(set) var parsed: ParsedLicense?
     private(set) var lastError: String?
+    /// When `refresh()` last ran, successful or not. Throttles the foreground re-sync and
+    /// marks scheduled expiry checks as handled (see `PremiumRefreshPolicy`).
+    @ObservationIgnored private(set) var lastRefreshAttempt: Date?
 
     var isPremium: Bool { parsed?.isPremium ?? false }
     var deviceLimit: Int { parsed?.deviceLimit ?? 1 }
@@ -53,6 +56,7 @@ final class LicenseManager {
         VaultKeychainStore.licenseToken = nil
         parsed = nil
         lastError = nil
+        lastRefreshAttempt = nil
     }
 
     /// Ensures a verifying key is available, then re-parses any stored token.
@@ -71,6 +75,7 @@ final class LicenseManager {
 
     @discardableResult
     func refresh() async -> Bool {
+        lastRefreshAttempt = Date()
         guard VaultKeychainStore.licenseToken != nil else { return false }
 
         // A refresh that ran while the verifying key was unavailable would decode a

@@ -68,12 +68,12 @@ const mockAccountApi: typeof tauriAccountApi = {
       { id: 'premium_monthly', title: 'Premium Monthly', interval: 'monthly', amount_iqd: 5000, days: 30, vpn_quota_gb: 100, active: true, sort_order: 1, features_json: null },
       { id: 'premium_yearly', title: 'Premium Yearly', interval: 'yearly', amount_iqd: 50000, days: 365, vpn_quota_gb: 100, active: true, sort_order: 2, features_json: null },
     ],
-    auto_renew: { fib: 'link', fastpay: 'link', superqi: 'link' },
+    auto_renew: { fib: 'link', fastpay: 'link', superqi: 'link', wayl: 'link' },
   }),
   createIntent: async (gateway, planId, amount) => ({ payment_id: 'p1', gateway, gateway_order_id: 'o1', deep_link: 'https://example.invalid/pay', amount_iqd: amount, plan_id: planId, auto_renew: false, status: 'pending', kind: 'checkout' }),
   paymentStatus: async () => {
     mockPremium = true
-    return { payment_id: 'p1', status: 'success', gateway: 'fib', gateway_order_id: 'o1', amount_iqd: 5000, completed_at: new Date().toISOString() }
+    return { payment_id: 'p1', status: 'success', gateway: 'wayl', gateway_order_id: 'o1', amount_iqd: 5000, completed_at: new Date().toISOString() }
   },
   simulateStub: async () => {},
   subscription: async () => null,

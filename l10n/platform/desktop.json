@@ -64,25 +64,10 @@
     "ckb": "وشەی نهێنی سەرەکیت بنووسە",
     "en": "Enter your main password"
   },
-  "settings.deleteAccount": {
-    "ar": "حذف الحساب",
-    "ckb": "سڕینەوەی هەژمار",
-    "en": "Delete account"
-  },
-  "settings.deleteAccountFailed": {
-    "ar": "تعذّر حذف حسابك. تحقق من اتصالك وحاول مرة أخرى.",
-    "ckb": "نەتوانرا هەژمارەکەت بسڕدرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەوە.",
-    "en": "Couldn't delete your account. Check your connection and try again."
-  },
   "settings.deleteAccountMessage": {
     "ar": "يزيل هذا حسابك والأجهزة المرتبطة وصندوق الوارد من خوادم قاصة، ويمسح الخزنة على هذا الحاسوب. تبقى المدفوعات كسجلات مالية. لا يمكن التراجع عن ذلك.",
     "ckb": "ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم کۆمپیوتەرە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە.",
     "en": "This removes your account, linked devices and inbox from Qasa's servers and erases the vault on this computer. Payments are kept as financial records. This can't be undone."
-  },
-  "settings.deleteAccountTitle": {
-    "ar": "حذف حسابك في قاصة؟",
-    "ckb": "هەژماری قاسەکەت بسڕیتەوە؟",
-    "en": "Delete your Qasa account?"
   },
   "settings.thisComputer": {
     "ar": "هذا الحاسوب",

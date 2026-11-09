@@ -160,8 +160,9 @@ data class PricingPlanDTO(
 )
 
 /**
- * [auto_renew] maps a wallet id (`fib`, `fastpay`, `superqi`) to the renewal mode that
- * leaving auto-renew on gives it (`charge`, `link` or `none`). Older servers omit it.
+ * [auto_renew] maps a gateway id (`wayl`; older servers send `fib`, `fastpay`, `superqi`)
+ * to the renewal mode that leaving auto-renew on gives it (`charge`, `link` or `none`).
+ * It, or the entry, may be missing: the app then says renewal is by payment link.
  */
 @Serializable
 data class PricingResponse(

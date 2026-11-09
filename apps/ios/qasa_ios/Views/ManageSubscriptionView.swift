@@ -220,7 +220,7 @@ struct ManageSubscriptionView: View {
         case "fib": return L10n.tr("premium.fib", locale: locale)
         case "fastpay": return L10n.tr("premium.fastpay", locale: locale)
         case "superqi": return L10n.tr("premium.superqi", locale: locale)
-        case "wayl": return "Wayl"
+        case "wayl": return L10n.tr("premium.wayl", locale: locale)
         default: return gateway ?? "—"
         }
     }

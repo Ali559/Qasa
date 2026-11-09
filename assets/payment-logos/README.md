@@ -14,7 +14,8 @@ only to show which payment methods Qasa accepts. Don't recolour or redraw them.
 Copies used by the products (192 px icons):
 
 - Landing: `apps/landing/public/wallets/`
-- iOS: `apps/ios/qasa_ios/Assets.xcassets/Wallet*.imageset`
-- Android: `apps/android/app/src/main/res/drawable-nodpi/wallet_*.png`
+
+The apps no longer show these: they offer a single Wayl option, whose hosted page lists the
+wallets itself.
 
 If a wallet changes its branding, replace the file here first, then the copies.
