@@ -91,6 +91,13 @@ async fn main() -> anyhow::Result<()> {
         pool.clone(),
         push.clone(),
         Duration::from_secs(24 * 60 * 60),
+        "purge_ended_vpn_sessions",
+        jobs::purge_ended_vpn_sessions,
+    ));
+    tokio::spawn(run_interval(
+        pool.clone(),
+        push.clone(),
+        Duration::from_secs(24 * 60 * 60),
         "purge_license_revocations",
         jobs::purge_revocations,
     ));

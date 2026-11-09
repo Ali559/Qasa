@@ -52,7 +52,34 @@ Contabo panel and unban yourself. To exempt an address, add it to `ignoreip` in
 
 The domain's nameservers point at Cloudflare. `qasa-app.com`, `www` and `api` are proxied
 **CNAME** records to the tunnel (`<tunnel-id>.cfargotunnel.com`), created by
-`cloudflared tunnel route dns`. The MX and TXT records are Namecheap's email forwarding.
+`cloudflared tunnel route dns`. The MX and SPF records are Cloudflare Email Routing's (below), and `_dmarc` rejects mail
+that claims to be from the domain.
+
+## Email (Cloudflare Email Routing)
+
+Addresses on `qasa-app.com` (`privacy@`, which the privacy policy gives) are forwarded by
+Cloudflare Email Routing to the owner's own inbox. It's free, and the server keeps no mail
+ports open: no MX points at it, so its IP stays hidden behind the tunnel.
+
+1. Cloudflare dashboard → `qasa-app.com` → **Email → Email Routing → Get started**.
+2. **Destination addresses → Add**: the inbox that should receive the mail. Confirm it from
+   the verification email.
+3. **Routing rules → Create address**: `privacy` → that destination. Add `support` too if
+   it's wanted. Leave **Catch-all** off, so mail to made-up addresses is rejected instead
+   of piling up.
+4. When Cloudflare offers to fix the DNS records, accept. It replaces the Namecheap MX and
+   SPF records with its own (`route1/2/3.mx.cloudflare.net`, and
+   `v=spf1 include:_spf.mx.cloudflare.net ~all`). Delete any other MX records it lists.
+5. Add a DMARC record so nobody can send mail that pretends to be from `qasa-app.com`.
+   The domain sends no mail of its own, so reject everything that fails:
+   `TXT _dmarc  "v=DMARC1; p=reject; adkim=s; aspf=s"`.
+6. Test: mail `privacy@qasa-app.com` from another account; it should arrive at the
+   destination. **Email → Email Routing → Activity log** shows each message and why any
+   was dropped.
+
+Cloudflare filters spam and rate-limits on its side. Replies go from the destination inbox.
+Replying *as* `privacy@qasa-app.com` would need an outgoing mail service; if one is added
+later, include it in the SPF record and give it DKIM before tightening anything else.
 
 ## Deploying
 

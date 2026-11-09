@@ -66,6 +66,18 @@ pub async fn stale_vpn_sessions(pool: DbPool, _push: Arc<PushService>) -> anyhow
     Ok(())
 }
 
+/// Ended VPN sessions (device, node, tunnel address, times, bytes) are kept this long, then
+/// deleted. The privacy policy (qasa-app.com/privacy) promises it.
+const VPN_SESSION_RETENTION_DAYS: i32 = 30;
+
+pub async fn purge_ended_vpn_sessions(pool: DbPool, _push: Arc<PushService>) -> anyhow::Result<()> {
+    let n = qasa_db::repos::worker::purge_ended_vpn_sessions(&pool, VPN_SESSION_RETENTION_DAYS).await?;
+    if n > 0 {
+        tracing::info!(count = n, "deleted VPN sessions that ended over {VPN_SESSION_RETENTION_DAYS} days ago");
+    }
+    Ok(())
+}
+
 /// How long a checkout may stay `pending` before it counts as abandoned. Generous on
 /// purpose: wallet hand-offs can take a while, and a late confirmation still settles.
 const ABANDONED_PAYMENT_MINUTES: i32 = 60;

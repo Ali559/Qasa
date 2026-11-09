@@ -103,6 +103,24 @@ pub async fn purge_old_license_revocations(pool: &PgPool, days: i32) -> anyhow::
     Ok(result.rows_affected())
 }
 
+/// Deletes VPN sessions that ended more than `older_than_days` ago (the privacy policy's
+/// 30 days). A live session, with no `disconnected_at`, is never touched, however old.
+/// Returns how many were deleted.
+pub async fn purge_ended_vpn_sessions(pool: &PgPool, older_than_days: i32) -> anyhow::Result<u64> {
+    let n = sqlx::query(
+        r#"
+        DELETE FROM vpn_sessions
+        WHERE disconnected_at IS NOT NULL
+          AND disconnected_at < now() - make_interval(days => $1)
+        "#,
+    )
+    .bind(older_than_days)
+    .execute(pool)
+    .await?
+    .rows_affected();
+    Ok(n)
+}
+
 /// End sessions the node no longer sees: no WireGuard handshake for
 /// `handshake_minutes`, or none at all `grace_minutes` after connecting (the device took
 /// the config but never brought the tunnel up). WireGuard re-handshakes about every two
