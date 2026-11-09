@@ -21,7 +21,7 @@ const en = {
   meta: {
     title: "Qasa: your passwords, kept safe on your phone",
     description:
-      "Qasa remembers your passwords, cards and IDs, encrypted on your phone. In English, Kurdish and Arabic. Free to start; Premium paid with FIB, FastPay or SuperQi.",
+      "Qasa remembers your passwords, cards and IDs, encrypted on your phone. In English, Kurdish and Arabic. Free to start; Premium paid through Wayl.",
   },
   nav: { features: "Features", privacy: "Privacy", pricing: "Pricing", faq: "FAQ", cta: "Get Qasa", language: "Language" },
   hero: {
@@ -114,7 +114,7 @@ const en = {
       },
       {
         q: "How do I pay for Premium?",
-        a: "Right in the app, with FIB, FastPay or SuperQi. No international card needed. Premium is 5,000 IQD a month or 50,000 IQD a year.",
+        a: "Right in the app, through Wayl: pay with FIB, Qi Card or another Iraqi wallet. No international card needed. Premium is 5,000 IQD a month or 50,000 IQD a year.",
       },
       {
         q: "Does it work in Kurdish and Arabic?",
@@ -135,7 +135,7 @@ const en = {
     eyebrow: "Coming soon to iPhone and Android",
     badge: "Coming soon",
     stores: "On the App Store and Google Play",
-    pricing: "Free on one device. Premium is 5,000 IQD a month, paid in the app with FIB, FastPay or SuperQi.",
+    pricing: "Free on one device. Premium is 5,000 IQD a month, paid in the app through Wayl.",
   },
   legal: { privacyPolicy: "Privacy policy" },
   desktop: {
@@ -166,7 +166,7 @@ const ckb: Dict = {
   meta: {
     title: "قاسە: وشە نهێنییەکانت، بە سەلامەتی لەسەر مۆبایلەکەت",
     description:
-      "قاسە وشەی نهێنی، کارت و ناسنامەکانت بە شفرەکراوی لەسەر مۆبایلەکەت هەڵدەگرێت. بە ئینگلیزی، کوردی و عەرەبی. بە خۆڕایی دەست پێبکە؛ پارەی پریمیۆم بە FIB، FastPay یان SuperQi بدە.",
+      "قاسە وشەی نهێنی، کارت و ناسنامەکانت بە شفرەکراوی لەسەر مۆبایلەکەت هەڵدەگرێت. بە ئینگلیزی، کوردی و عەرەبی. بە خۆڕایی دەست پێبکە؛ پارەی پریمیۆم لە ڕێگەی Wayl بدە.",
   },
   nav: { features: "تایبەتمەندییەکان", privacy: "نهێنیپارێزی", pricing: "نرخەکان", faq: "پرسیارەکان", cta: "قاسە دابەزێنە", language: "زمان" },
   hero: {
@@ -259,7 +259,7 @@ const ckb: Dict = {
       },
       {
         q: "چۆن پارەی پریمیۆم بدەم؟",
-        a: "ڕاستەوخۆ لە ئەپەکەدا، بە FIB، FastPay یان SuperQi. پێویستت بە کارتی نێودەوڵەتی نییە. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع یان ساڵانە ٥٠٬٠٠٠ د.ع دەبێت.",
+        a: "ڕاستەوخۆ لە ئەپەکەدا، لە ڕێگەی Wayl: بە FIB، Qi Card یان جزدانێکی عێراقیی تر. پێویستت بە کارتی نێودەوڵەتی نییە. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع یان ساڵانە ٥٠٬٠٠٠ د.ع دەبێت.",
       },
       {
         q: "ئایا بە کوردی و عەرەبی کار دەکات؟",
@@ -280,7 +280,7 @@ const ckb: Dict = {
     eyebrow: "بەم زووانە لەسەر iPhone و Android",
     badge: "بەم زووانە",
     stores: "لە App Store و Google Play",
-    pricing: "بە خۆڕایی لەسەر یەک ئامێر. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع دەبێت، لەناو ئەپەکەدا بە FIB، FastPay یان SuperQi دەدرێت.",
+    pricing: "بە خۆڕایی لەسەر یەک ئامێر. نرخی پریمیۆم مانگانە ٥٬٠٠٠ د.ع دەبێت، لەناو ئەپەکەدا لە ڕێگەی Wayl دەدرێت.",
   },
   legal: { privacyPolicy: "سیاسەتی تایبەتمەندی" },
   desktop: {
@@ -309,7 +309,7 @@ const ar: Dict = {
   meta: {
     title: "قاصة: كلمات مرورك في أمان على هاتفك",
     description:
-      "تحفظ قاصة كلمات مرورك وبطاقاتك وهوياتك مشفّرة على هاتفك. بالإنجليزية والكردية والعربية. ابدأ مجانًا، وادفع اشتراك بريميوم عبر FIB أو FastPay أو SuperQi.",
+      "تحفظ قاصة كلمات مرورك وبطاقاتك وهوياتك مشفّرة على هاتفك. بالإنجليزية والكردية والعربية. ابدأ مجانًا، وادفع اشتراك بريميوم عبر Wayl.",
   },
   nav: { features: "الميزات", privacy: "الخصوصية", pricing: "الأسعار", faq: "الأسئلة", cta: "حمّل قاصة", language: "اللغة" },
   hero: {
@@ -402,7 +402,7 @@ const ar: Dict = {
       },
       {
         q: "كيف أدفع اشتراك بريميوم؟",
-        a: "من داخل التطبيق مباشرةً، عبر FIB أو FastPay أو SuperQi. لا حاجة إلى بطاقة دولية. سعر بريميوم 5,000 د.ع شهريًا أو 50,000 د.ع سنويًا.",
+        a: "من داخل التطبيق مباشرةً، عبر Wayl: ادفع بـ FIB أو Qi Card أو أي محفظة عراقية أخرى. لا حاجة إلى بطاقة دولية. سعر بريميوم 5,000 د.ع شهريًا أو 50,000 د.ع سنويًا.",
       },
       {
         q: "هل يعمل بالكردية والعربية؟",
@@ -423,7 +423,7 @@ const ar: Dict = {
     eyebrow: "قريبًا على iPhone و Android",
     badge: "قريبًا",
     stores: "على App Store و Google Play",
-    pricing: "مجاني على جهاز واحد. بريميوم بـ 5,000 د.ع شهريًا، يُدفع داخل التطبيق عبر FIB أو FastPay أو SuperQi.",
+    pricing: "مجاني على جهاز واحد. بريميوم بـ 5,000 د.ع شهريًا، يُدفع داخل التطبيق عبر Wayl.",
   },
   legal: { privacyPolicy: "سياسة الخصوصية" },
   desktop: {

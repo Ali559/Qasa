@@ -218,3 +218,43 @@ async fn silent_nodes_go_offline_and_come_back() {
 
     purge(&pool, &[], &[node]).await;
 }
+
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn ended_sessions_are_deleted_after_30_days_live_ones_never() {
+    let _g = serial().await;
+    let pool = test_pool().await;
+    let node = online_node(&pool).await;
+    let (account, live_dev) = device_on(&pool).await;
+    let other_dev = device::insert_device(&pool, account, &format!("fp-{}", Uuid::now_v7()), "P2", "ios", None).await.unwrap().id;
+    let octet = node.as_bytes()[15];
+    let insert = |dev: Uuid, n: u8, connected_days: i32, ended_days: Option<i32>| {
+        let pool = pool.clone();
+        async move {
+            let id = Uuid::now_v7();
+            sqlx::query(
+                "INSERT INTO vpn_sessions (id, account_id, device_id, node_id, client_public_key, assigned_ip, connected_at, disconnected_at)
+                 VALUES ($1, $2, $3, $4, $5, $6::inet, now() - make_interval(days => $7),
+                         CASE WHEN $8::int IS NULL THEN NULL ELSE now() - make_interval(days => $8) END)",
+            )
+            .bind(id).bind(account).bind(dev).bind(node).bind(key(n))
+            .bind(format!("10.201.{octet}.{}", 10 + n)).bind(connected_days).bind(ended_days)
+            .execute(&pool).await.unwrap();
+            id
+        }
+    };
+    // Connected 60 days ago and still up: kept, however old.
+    let live = insert(live_dev, 1, 60, None).await;
+    // Ended 40 days ago: deleted. Ended 5 days ago: kept until day 30.
+    let old = insert(other_dev, 2, 41, Some(40)).await;
+    let recent = insert(other_dev, 3, 6, Some(5)).await;
+
+    let deleted = worker::purge_ended_vpn_sessions(&pool, 30).await.unwrap();
+    assert!(deleted >= 1);
+    let left: Vec<Uuid> = sqlx::query_scalar("SELECT id FROM vpn_sessions WHERE node_id = $1")
+        .bind(node).fetch_all(&pool).await.unwrap();
+    assert!(left.contains(&live) && left.contains(&recent));
+    assert!(!left.contains(&old));
+
+    purge(&pool, &[account], &[node]).await;
+}

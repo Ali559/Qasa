@@ -19,11 +19,23 @@ Steps that need the account owner. The details for each are in
       Windows and Linux, then publish it. First delete the `desktop-v0.1.0-rc2` test draft
       and its tag (`gh release delete desktop-v0.1.0-rc2 --cleanup-tag`); it is a working
       unsigned build from the 2026-11-09 pipeline test, kept for trying on other computers.
-- [ ] **Extension stores.** Submit the extension to the Chrome Web Store, Edge Add-ons and
-      Firefox AMO, using `apps/extension/store/listing.md`.
-- [ ] **Store ids.** Add the ids the stores assign to `CHROME_EXTENSION_IDS` in
-      `src-tauri/src/bridge/manifest.rs`. Then release the desktop app **before** the
-      listings go live, or the store version can't connect to the app.
+- [ ] **Extension stores.** Getting the browser extension listed:
+  1. Accounts: Chrome Web Store developer account ($5 once), Microsoft Partner Center for
+     Edge (free), Firefox Add-ons account (free).
+  2. Packages: tag `extension-v<version>` and push; the Extension release workflow tests
+     the extension and attaches the store zips to the run (or `bun run package` in
+     `apps/extension`).
+  3. Uploads: `qasa-chrome-<ver>.zip` to Chrome and to Edge; `qasa-firefox-<ver>.zip` to
+     Firefox, with the source zip it asks for. Fill each store's form from
+     `apps/extension/store/listing.md` (descriptions, permission justifications, privacy
+     answers, screenshots at the sizes listed there) and give the privacy policy URL
+     `https://qasa-app.com/privacy`, so deploy the landing page first.
+  4. Review: usually a few days; Chrome often takes longer for password managers
+     (`nativeMessaging` and access to every site get a closer look).
+  5. Store ids: Chrome and Edge assign new extension ids. Add them to
+     `CHROME_EXTENSION_IDS` in `src-tauri/src/bridge/manifest.rs` and release the desktop
+     app **before** the listings go public, or the store version can't connect to the
+     app. Firefox keeps `extension@qasa-app.com`, so it needs no change.
 
 ## Decisions
 
@@ -47,6 +59,18 @@ Steps that need the account owner. The details for each are in
       the in-app summary. Before it goes live: create `privacy@qasa-app.com` (or change the
       address), add a company name/address/jurisdiction if any, name the server's country,
       then deploy the landing page. Open points in `apps/landing/TODO.md`.
+- [x] **Privacy mailbox.** Done 2026-11-09 with Cloudflare Email Routing:
+      `privacy@qasa-app.com` → `biz@alibarznji.dev`, catch-all off, Cloudflare MX and SPF,
+      DMARC `p=reject`. No mail ports on the server. Setup in `docs/deploy.md` → Email.
+      Delete the `qasa-email-setup` API token in Cloudflare.
+- [ ] **Push notifications (FCM).** Not set up yet: no Firebase project, no
+      `google-services.json` / APNs key in the apps. The privacy policy already says push
+      goes through Firebase Cloud Messaging; set it up, or change that section, before
+      the policy goes live.
+- [ ] **Wallet names in the apps.** The Premium screens on iOS, Android and the desktop
+      still list FIB, FastPay and SuperQi as separate payment options
+      (`premium.fastpay*`, `premium.superqi*`), while payment actually goes through Wayl.
+      The landing page and `ARCHITECTURE.md` now say Wayl.
 - [ ] **Account deletion in the phone apps.** Only the desktop can delete the account
       (`DELETE /v1/account`); App Store guideline 5.1.1(v) requires it in the iOS app too.
       The privacy policy says it's coming to the phone apps.

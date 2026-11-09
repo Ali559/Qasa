@@ -1,8 +1,8 @@
 # Qasa architecture
 
 Qasa is a local-first password manager for iOS and Android, sold with Premium extras
-(more devices, VPN, Wi‑Fi device sync) for 5,000 IQD a month or 50,000 IQD a year, and paid for through Iraqi wallets (FIB, FastPay,
-SuperQi). This document describes the whole system as it is in the code today: the Rust
+(more devices, VPN, Wi‑Fi device sync) for 5,000 IQD a month or 50,000 IQD a year, and paid for through Wayl
+(FIB, Qi Card and other Iraqi wallets). This document describes the whole system as it is in the code today: the Rust
 API and its worker, the node agent that runs on VPN servers, the two mobile apps and their
 extensions, the admin dashboard, and the shared localization.
 
@@ -92,7 +92,7 @@ flowchart LR
 
   NODE["VPN node<br/>WireGuard + qasa-vpn-agent"]
   FCM["Firebase Cloud Messaging<br/>(APNs + Android)"]
-  WALLET["FIB / FastPay / SuperQi<br/>(stubs today)"]
+  WALLET["Wayl<br/>(FIB, Qi Card, other wallets)"]
 
   IOS -- "HTTPS, license JWT" --> CADDY
   AND -- "HTTPS, license JWT" --> CADDY

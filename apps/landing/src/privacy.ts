@@ -131,7 +131,7 @@ const en: Policy = {
         "Where it's available, Premium includes a VPN on your phone. It uses WireGuard. The VPN key pair is made on your phone, and the private key never leaves it.",
         "When you connect, our server records which device connected and to which VPN server, the private address it got inside the tunnel, when the session started and ended, when the tunnel was last active, and how much data it used. We use this to run the connection, end stale sessions and apply the monthly data allowance.",
         "We don't record the websites you visit, the content of your traffic or your DNS lookups. Our server doesn't store the IP address you connect from; the VPN server uses it only while you're connected, to send your traffic back to you. While you're connected, your DNS lookups go to the public resolvers of Cloudflare (1.1.1.1) and Google (8.8.8.8).",
-        "Session records stay with your account until you delete it. Your data count starts again each month.",
+        "A session's record is deleted automatically 30 days after the session ends. A session that is still connected is kept while it lasts. Deleting your account removes them all at once. Your data count starts again each month.",
       ],
     },
     {
@@ -178,7 +178,8 @@ const en: Policy = {
       body: [
         [
           "<strong>Your vault:</strong> on your devices, until you delete it.",
-          "<strong>Account, device, notification and VPN records:</strong> while your account exists. An unlinked device stays on the list, marked unlinked and without its push token, until you delete the account.",
+          "<strong>VPN session records:</strong> 30 days after the session ends, then deleted automatically.",
+          "<strong>Account, device and notification records:</strong> while your account exists. An unlinked device stays on the list, marked unlinked and without its push token, until you delete the account.",
           "<strong>IP address counters:</strong> deleted within a day.",
           "<strong>Backups:</strong> the database is backed up every night, and each backup is kept for 14 days. Data you delete is gone from our backups within 14 days.",
           "<strong>Payment and subscription records:</strong> kept after you delete your account, as financial records, for as long as accounting and the law require.",
@@ -314,7 +315,7 @@ const ckb: Policy = {
         `لەو شوێنانەی بەردەستە، پریمیۆم ${L("VPN")} ـێک لەسەر مۆبایلەکەت لەخۆ دەگرێت. ${L("WireGuard")} بەکاردەهێنێت. جووتە کلیلی ${L("VPN")} لەسەر مۆبایلەکەت دروست دەکرێت، و کلیلە تایبەتەکە هەرگیز بەجێی ناهێڵێت.`,
         `کاتێک پەیوەندی دەکەیت، سێرڤەرەکەمان تۆمار دەکات کام ئامێر بە کام سێرڤەری ${L("VPN")} ـەوە پەیوەست بوو، ئەو ناونیشانە تایبەتەی لەناو تونێلەکەدا پێی درا، کاتی دەستپێک و کۆتاییی دانیشتنەکە، دوایین کاتی چالاکبوونی تونێلەکە، و چەند داتای بەکارهێنا. ئەمانە بۆ کارپێکردنی پەیوەندییەکە، کۆتاییهێنان بە دانیشتنە کۆنەکان و جێبەجێکردنی بڕی داتای مانگانە بەکاردەهێنین.`,
         `ئەو ماڵپەڕانەی سەردانیان دەکەیت، ناوەڕۆکی هاتوچۆکەت یان گەڕانەکانی ${L("DNS")} تۆمار ناکەین. سێرڤەرەکەمان ئەو ناونیشانی ${L("IP")} ـەی لێوەی پەیوەندی دەکەیت هەڵناگرێت؛ سێرڤەری ${L("VPN")} تەنها لە کاتی پەیوەستبووندا بەکاری دەهێنێت، بۆ ئەوەی هاتوچۆکەت بۆت بگەڕێنێتەوە. لە کاتی پەیوەستبووندا، گەڕانەکانی ${L("DNS")} ـت دەچن بۆ چارەسەرکەرە گشتییەکانی ${L("Cloudflare")} (${L("1.1.1.1")}) و ${L("Google")} (${L("8.8.8.8")}).`,
-        "تۆماری دانیشتنەکان لەگەڵ هەژمارەکەت دەمێننەوە تا دەیسڕیتەوە. ژمارەی داتاکەت هەموو مانگێک لە سەرەتاوە دەست پێدەکاتەوە.",
+        "تۆماری هەر دانیشتنێک ٣٠ ڕۆژ دوای کۆتاییهاتنی خۆکارانە دەسڕدرێتەوە. دانیشتنێک کە هێشتا پەیوەستە، تا بەردەوام بێت دەمێنێتەوە. سڕینەوەی هەژمارەکەت هەموویان یەکجار لادەبات. ژمارەی داتاکەت هەموو مانگێک لە سەرەتاوە دەست پێدەکاتەوە.",
       ],
     },
     {
@@ -361,7 +362,8 @@ const ckb: Policy = {
       body: [
         [
           "<strong>کۆگاکەت:</strong> لەسەر ئامێرەکانت، تا دەیسڕیتەوە.",
-          `<strong>تۆماری هەژمار، ئامێر، ئاگاداری و ${L("VPN")}:</strong> تا هەژمارەکەت هەبێت. ئامێرێکی لابراو لە لیستەکەدا دەمێنێتەوە، وەک لابراو و بێ نیشانەی پوش، تا هەژمارەکە دەسڕیتەوە.`,
+          `<strong>تۆماری دانیشتنەکانی ${L("VPN")}:</strong> ٣٠ ڕۆژ دوای کۆتاییهاتنی دانیشتنەکە، پاشان خۆکارانە دەسڕدرێتەوە.`,
+          `<strong>تۆماری هەژمار، ئامێر و ئاگاداری:</strong> تا هەژمارەکەت هەبێت. ئامێرێکی لابراو لە لیستەکەدا دەمێنێتەوە، وەک لابراو و بێ نیشانەی پوش، تا هەژمارەکە دەسڕیتەوە.`,
           `<strong>ژمێرەرەکانی ناونیشانی ${L("IP")}:</strong> لە ماوەی یەک ڕۆژدا دەسڕدرێنەوە.`,
           "<strong>یەدەگەکان:</strong> هەموو شەوێک یەدەگی بنکەدراوەکە دەگیرێت، و هەر یەدەگێک ١٤ ڕۆژ دەمێنێتەوە. ئەو داتایەی دەیسڕیتەوە لە ماوەی ١٤ ڕۆژدا لە یەدەگەکانیشمان نامێنێت.",
           "<strong>تۆماری پارەدان و بەشداربوون:</strong> دوای سڕینەوەی هەژمارەکەت وەک تۆماری دارایی دەمێننەوە، بۆ ئەو ماوەیەی ژمێریاری و یاسا داوای دەکەن.",
@@ -497,7 +499,7 @@ const ar: Policy = {
         `حيثما يتوفر، يتضمن بريميوم خدمة ${L("VPN")} على هاتفك. وهي تستخدم ${L("WireGuard")}. يُنشأ زوج مفاتيح ${L("VPN")} على هاتفك، ولا يغادره المفتاح الخاص أبدًا.`,
         `عند الاتصال، يسجّل خادمنا أي جهاز اتصل وبأي خادم ${L("VPN")}، والعنوان الخاص الذي حصل عليه داخل النفق، ووقت بدء الجلسة وانتهائها، وآخر وقت كان فيه النفق نشطًا، وكمية البيانات المستخدمة. نستخدم هذا لتشغيل الاتصال، وإنهاء الجلسات المتوقفة، وتطبيق حصة البيانات الشهرية.`,
         `لا نسجّل المواقع التي تزورها، ولا محتوى حركة بياناتك، ولا استعلامات ${L("DNS")}. لا يحفظ خادمنا عنوان ${L("IP")} الذي تتصل منه؛ ويستخدمه خادم ${L("VPN")} فقط أثناء اتصالك، ليعيد إليك حركة بياناتك. وأثناء الاتصال، تذهب استعلامات ${L("DNS")} إلى الخوادم العامة لـ ${L("Cloudflare")} (${L("1.1.1.1")}) و${L("Google")} (${L("8.8.8.8")}).`,
-        "تبقى سجلات الجلسات مع حسابك حتى تحذفه. ويبدأ عدّاد بياناتك من جديد كل شهر.",
+        "يُحذف سجل كل جلسة تلقائيًا بعد 30 يومًا من انتهائها. أما الجلسة التي لا تزال متصلة فتبقى ما دامت مستمرة. وحذف حسابك يزيلها كلها دفعة واحدة. ويبدأ عدّاد بياناتك من جديد كل شهر.",
       ],
     },
     {
@@ -544,7 +546,8 @@ const ar: Policy = {
       body: [
         [
           "<strong>خزنتك:</strong> على أجهزتك، حتى تحذفها.",
-          `<strong>سجلات الحساب والأجهزة والإشعارات و${L("VPN")}:</strong> ما دام حسابك موجودًا. يبقى الجهاز الذي أُلغي ربطه في القائمة، معلَّمًا بأنه غير مرتبط وبلا رمز إشعارات، حتى تحذف الحساب.`,
+          `<strong>سجلات جلسات ${L("VPN")}:</strong> 30 يومًا بعد انتهاء الجلسة، ثم تُحذف تلقائيًا.`,
+          `<strong>سجلات الحساب والأجهزة والإشعارات:</strong> ما دام حسابك موجودًا. يبقى الجهاز الذي أُلغي ربطه في القائمة، معلَّمًا بأنه غير مرتبط وبلا رمز إشعارات، حتى تحذف الحساب.`,
           `<strong>عدّادات عناوين ${L("IP")}:</strong> تُحذف خلال يوم.`,
           "<strong>النسخ الاحتياطية:</strong> تُنسخ قاعدة البيانات احتياطيًا كل ليلة، وتُحفظ كل نسخة 14 يومًا. والبيانات التي تحذفها تختفي من نسخنا الاحتياطية خلال 14 يومًا.",
           "<strong>سجلات الدفع والاشتراك:</strong> تبقى بعد حذف حسابك كسجلات مالية، للمدة التي تتطلبها المحاسبة والقانون.",
