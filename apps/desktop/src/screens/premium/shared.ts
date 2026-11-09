@@ -48,7 +48,7 @@ export const FALLBACK_PLANS: PricingPlan[] = [
   { id: 'premium_yearly', title: 'Premium Yearly', interval: 'yearly', amount_iqd: 50_000, days: 365, vpn_quota_gb: 100, active: true, sort_order: 2, features_json: null },
 ]
 
-/** iOS `ManageSubscriptionView.gatewayName`. */
+/** iOS `ManageSubscriptionView.gatewayName`. Old payments keep their wallet's name. */
 export function gatewayName(t: ReturnType<typeof useT>, gateway: string | null | undefined): string {
   switch (gateway?.toLowerCase()) {
     case 'fib':
@@ -58,7 +58,7 @@ export function gatewayName(t: ReturnType<typeof useT>, gateway: string | null |
     case 'superqi':
       return t('premium.superqi')
     case 'wayl':
-      return 'Wayl'
+      return t('premium.wayl')
     default:
       return gateway ?? '—'
   }

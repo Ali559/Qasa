@@ -10,35 +10,21 @@ struct PremiumUpgradeView: View {
     @State private var plans: [PricingPlanDTO] = PricingService.fallbackPlans
     @State private var selectedPlanId: String = "premium_monthly"
     @State private var autoRenew = true
-    @State private var selectedGateway: String = "fib"
+    @State private var selectedGateway: String = "wayl"
     @State private var isPaying = false
     @State private var statusMessage: String?
     @State private var errorMessage: String?
 
     private var locale: Locale { prefs.locale }
 
+    /// One option: Wayl's hosted page offers FIB, Qi Card and the other Iraqi wallets itself.
     private var methods: [PaymentMethod] {
         [
             PaymentMethod(
-                name: L10n.tr("premium.fib", locale: locale),
-                subtitle: L10n.tr("premium.fibSub", locale: locale),
-                badgeText: "FIB",
-                logoAsset: "WalletFIB",
-                gateway: "fib"
-            ),
-            PaymentMethod(
-                name: L10n.tr("premium.fastpay", locale: locale),
-                subtitle: L10n.tr("premium.fastpaySub", locale: locale),
-                badgeText: "FastPay",
-                logoAsset: "WalletFastPay",
-                gateway: "fastpay"
-            ),
-            PaymentMethod(
-                name: L10n.tr("premium.superqi", locale: locale),
-                subtitle: L10n.tr("premium.superqiSub", locale: locale),
-                badgeText: "SuperQi",
-                logoAsset: "WalletSuperQi",
-                gateway: "superqi"
+                name: L10n.tr("premium.wayl", locale: locale),
+                subtitle: L10n.tr("premium.waylSub", locale: locale),
+                badgeText: "Wayl",
+                gateway: "wayl"
             )
         ]
     }
@@ -92,7 +78,7 @@ struct PremiumUpgradeView: View {
                         : String(
                             format: L10n.tr("premium.payVia", locale: locale),
                             formattedAmount,
-                            selectedMethod?.badgeText ?? "FIB"
+                            selectedMethod?.badgeText ?? "Wayl"
                         ),
                     icon: "lock.fill",
                     cornerRadius: 8
@@ -316,12 +302,13 @@ struct PremiumUpgradeView: View {
         .buttonStyle(.plain)
     }
 
-    /// The wallet's own app icon, so people recognise the app they'll be sent to.
+    /// No wallet logo for Wayl: a text badge, the method's initial on an accent tint.
     private func paymentBadge(_ method: PaymentMethod) -> some View {
-        Image(method.logoAsset)
-            .resizable()
-            .scaledToFit()
+        Text(String(method.badgeText.prefix(1)))
+            .font(.qasa(16, weight: .bold))
+            .foregroundColor(Theme.accent)
             .frame(width: 36, height: 36)
+            .background(Theme.accent.opacity(0.12))
             .clipShape(RoundedRectangle(cornerRadius: 9))
             .accessibilityHidden(true)
     }

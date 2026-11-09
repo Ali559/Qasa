@@ -11,6 +11,9 @@ import javax.inject.Singleton
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class AutofillIndexEntry(
@@ -25,6 +28,7 @@ data class AutofillIndexEntry(
 
 @Serializable
 data class AutofillIndexFile(
+    /** Index format; see [AutofillIndexStore.CURRENT_FORMAT_VERSION]. */
     val version: Int = 1,
     val updatedAt: Long,
     val entries: List<AutofillIndexEntry>,
@@ -54,9 +58,26 @@ class AutofillIndexStore @Inject constructor(
     }
 
     fun write(entries: List<AutofillIndexEntry>) {
-        val payload = AutofillIndexFile(updatedAt = System.currentTimeMillis(), entries = entries)
+        val payload = AutofillIndexFile(
+            version = CURRENT_FORMAT_VERSION,
+            updatedAt = System.currentTimeMillis(),
+            entries = entries,
+        )
         file.writeText(json.encodeToString(payload))
     }
+
+    /** The format version the index on disk was written with; null when missing or unreadable. */
+    fun storedFormatVersion(): Int? {
+        if (!file.exists()) return null
+        return try {
+            formatVersionOf(file.readText())
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Whether the index on disk predates [CURRENT_FORMAT_VERSION] and must be rebuilt once. */
+    fun isOutdated(): Boolean = needsRebuild(storedFormatVersion())
 
     fun read(): List<AutofillIndexEntry> {
         if (!file.exists()) return emptyList()
@@ -142,5 +163,26 @@ class AutofillIndexStore @Inject constructor(
         } catch (_: Exception) {
             w.lowercase()
         }
+    }
+
+    companion object {
+        /**
+         * Bump whenever entries gain data an older index lacks. 2: logins carry their
+         * otpauth URI (`AutofillSecrets.totp`) so autofill can copy the 2FA code.
+         */
+        const val CURRENT_FORMAT_VERSION = 2
+
+        private val versionJson = Json { ignoreUnknownKeys = true }
+
+        /** The `version` field of an index file (every build wrote it; absent counts as 1), or null if unreadable. */
+        fun formatVersionOf(text: String): Int? = try {
+            versionJson.parseToJsonElement(text).jsonObject["version"]?.jsonPrimitive?.intOrNull ?: 1
+        } catch (_: Exception) {
+            null
+        }
+
+        /** A missing or unreadable index counts as outdated: rebuilding it is cheap and writes the version. */
+        fun needsRebuild(stored: Int?, current: Int = CURRENT_FORMAT_VERSION): Boolean =
+            stored == null || stored < current
     }
 }

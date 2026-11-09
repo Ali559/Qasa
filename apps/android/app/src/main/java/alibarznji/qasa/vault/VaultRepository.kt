@@ -294,6 +294,16 @@ class VaultRepository @Inject constructor(
         null
     }
 
+    /**
+     * Unlock: rebuilds the autofill index once when it was written in an older format
+     * (before logins carried their 2FA code). The rebuild stamps the current version, so
+     * later unlocks skip it.
+     */
+    suspend fun rebuildAutofillIndexIfOutdated() {
+        if (!session.isUnlocked || !autofillIndex.isOutdated()) return
+        rebuildAutofillIndex()
+    }
+
     private suspend fun rebuildAutofillIndex() {
         if (!session.isUnlocked) return
         try {

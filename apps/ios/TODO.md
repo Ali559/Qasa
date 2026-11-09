@@ -12,7 +12,9 @@
       60 seconds). Filling it straight into the code field needs `ASOneTimeCodeCredential`:
       the `ProvidesOneTimeCodes` capability in the extension's Info.plist, registering
       one-time-code identities with the identity store, and new extension entry points.
-- [ ] **Premium status refresh.** `AppSession.isPremium` re-syncs only on unlock, purchase,
-      logout or license refresh. If Premium expires mid-session, the breach check stops at
-      once (the analyzer also checks the live license), but the locked screens appear only
-      at the next re-sync.
+- [x] **Delete account in the app** (guideline 5.1.1(v)): Settings > Data & Account,
+      `DELETE /v1/account`, then the local erase (`Services/Account/AccountDeletion.swift`).
+- [ ] **Clear local data leaves the vault rows.** It deletes the keychain keys (salt, verifier,
+      account id…), so the rows can't be decrypted any more, but the encrypted rows stay in
+      the SwiftData store until a new vault replaces them. Delete account erases them; Clear
+      local data should too.

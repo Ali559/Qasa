@@ -8,9 +8,5 @@
 - [ ] **Scan a QR code on a real phone.** The scanner is Google's code scanner
       (`play-services-code-scanner`), which needs Google Play services and may download its
       module on first use; until then it falls back to manual entry. Check that on a device.
-- [ ] **Autofill index written before the update.** Logins carry their 2FA code into the
-      autofill index only once the index is rebuilt (on any save or delete). Until then,
-      autofill doesn't copy the code.
-- [ ] **Premium status refresh.** `AppSession.isPremium` re-syncs only on unlock, purchase
-      or cancel. If Premium expires mid-session, the breach check and its locked screens
-      only follow at the next sync.
+- [x] **Delete account in the app** (2026-11-09): Settings > Data & Account; not yet tried
+      on a device against a real server.

@@ -358,7 +358,7 @@
     <string name="lan_stop">Stop</string>
     <string name="lan_title">Sync on Wi‑Fi</string>
     <string name="legal_lastupdated">Last updated: %s</string>
-    <string name="legal_privacybody">Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa\'s server. We can\'t read it, and we can\'t reset your main password.\n\nThere\'s no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl\'s page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password\'s hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and ask us to delete your account and everything our server holds about you.\n\nFull policy: qasa-app.com/privacy</string>
+    <string name="legal_privacybody">Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa\'s server. We can\'t read it, and we can\'t reset your main password.\n\nThere\'s no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl\'s page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password\'s hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy</string>
     <string name="legal_termsbody">These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.</string>
     <string name="nav_breached_passwords">Breached passwords</string>
     <string name="nav_breachmonitoring">Email leak alerts</string>
@@ -432,13 +432,11 @@
     <string name="premium_bestvalue">BEST VALUE</string>
     <string name="premium_completeinwallet">Complete payment in %s…</string>
     <string name="premium_fastpay">FastPay</string>
-    <string name="premium_fastpaysub">Mobile Wallet</string>
     <string name="premium_featurebreach">Breached password check</string>
     <string name="premium_featuredevices">Protect up to 5 Devices</string>
     <string name="premium_featuresave">Save vs monthly</string>
     <string name="premium_featurevpn">VPN</string>
     <string name="premium_fib">First Iraqi Bank (FIB)</string>
-    <string name="premium_fibsub">Instant Transfer</string>
     <string name="premium_installwalletapp">Install the %s app to complete payment, then try again.</string>
     <string name="premium_licenserefreshfailed">Payment succeeded but license refresh failed. Lock and unlock the vault.</string>
     <string name="premium_openswallet">Opens your wallet app. We\'ll refresh your license when payment completes.</string>
@@ -451,10 +449,11 @@
     <string name="premium_selectpayment">Select Payment Method</string>
     <string name="premium_simulatingpayment">%s app not available — simulating payment…</string>
     <string name="premium_superqi">SuperQi</string>
-    <string name="premium_superqisub">Qi Card integration</string>
     <string name="premium_title">Qasa Premium</string>
     <string name="premium_upgradetopro">UPGRADE TO PRO</string>
     <string name="premium_wallethint">Opens your wallet app. We\'ll refresh your license when payment completes.</string>
+    <string name="premium_wayl">Wayl</string>
+    <string name="premium_waylsub">Pay with FIB, Qi Card or another Iraqi wallet</string>
     <string name="security_hidden">Qasa is hidden</string>
     <string name="session_qasauser">Qasa User</string>
     <string name="settings_activecount">%d Active</string>
@@ -482,6 +481,10 @@
     <string name="settings_confirmmasterpassword">Confirm new password</string>
     <string name="settings_currentmasterpassword">Current main password</string>
     <string name="settings_dataaccount">Data &amp; Account</string>
+    <string name="settings_deleteaccount">Delete account</string>
+    <string name="settings_deleteaccountfailed">Couldn\'t delete your account. Check your connection and try again.</string>
+    <string name="settings_deleteaccountmessage">This removes your account, linked devices and inbox from Qasa\'s servers and erases the vault on this phone. Payments are kept as financial records. This can\'t be undone.</string>
+    <string name="settings_deleteaccounttitle">Delete your Qasa account?</string>
     <string name="settings_done">Done</string>
     <string name="settings_exportcsv">Export passwords (CSV)</string>
     <string name="settings_exportempty">Nothing to export yet.</string>

@@ -218,6 +218,8 @@ struct qasaApp: App {
                 if phase == .active {
                     // Bell badge on foreground (silent without a license token).
                     Task { await NotificationService.shared.refreshUnreadCount() }
+                    // Premium may have ended (or been bought elsewhere) while away.
+                    if unlocked { session.handleForeground() }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.obscureNotification)) { _ in

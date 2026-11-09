@@ -14,8 +14,6 @@ struct PaymentMethod: Identifiable, Equatable {
     let name: String
     let subtitle: String
     let badgeText: String
-    /// Wallet logo in Assets.xcassets (from assets/payment-logos).
-    let logoAsset: String
     let gateway: String
 }
 

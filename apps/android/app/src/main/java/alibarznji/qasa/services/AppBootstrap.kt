@@ -19,6 +19,7 @@ class AppBootstrap @Inject constructor(
     private val pushTokenRegistrar: PushTokenRegistrar,
     private val appSession: AppSession,
     private val vault: VaultRepository,
+    private val premiumRefresher: PremiumStatusRefresher,
 ) {
 
     suspend fun onVaultUnlocked() {
@@ -40,6 +41,14 @@ class AppBootstrap @Inject constructor(
         } catch (_: Exception) {
             // Search falls back to no tokens for those items; the flag stays set to retry.
         }
+        // An index written by an older build (before logins carried their 2FA code) is
+        // rebuilt once; the stored format version keeps this off later unlocks.
+        try {
+            vault.rebuildAutofillIndexIfOutdated()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
         pushTokenRegistrar.refreshTokenIfAvailable()
         // The verifying key must exist before any token is trusted, and before the UI
         // reads `isPremium` — verification fails closed without one.
@@ -51,6 +60,8 @@ class AppBootstrap @Inject constructor(
             license.reloadFromStore()
         }
         appSession.syncFromLicense(license)
+        // Premium can end mid-session: re-sync at its known expiry and on return to the app.
+        premiumRefresher.onUnlockSynced()
         // Locale, FCM token and the real notifications-enabled state (no longer hardcoded true).
         devicePrefs.syncAll()
     }
@@ -73,7 +84,13 @@ class AppBootstrap @Inject constructor(
         devicePrefs.syncNotificationsEnabledIfChanged()
     }
 
+    /** Activity `onStart`: re-syncs Premium when due (throttled; no-op while locked). */
+    fun onAppForeground() {
+        premiumRefresher.onForeground()
+    }
+
     fun onLogout() {
+        premiumRefresher.stop()
         session.lock()
     }
 }

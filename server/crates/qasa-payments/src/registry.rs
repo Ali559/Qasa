@@ -60,9 +60,14 @@ impl Gateways {
     /// The gateway that takes a checkout for the wallet the customer picked. Wayl, once
     /// live, takes them all: its page offers the same wallets, and it is the only one of
     /// these that moves real money. Otherwise the picked one, live or not (the caller
-    /// refuses a gateway that is not).
+    /// refuses a gateway that is not). The apps now offer Wayl as the only choice, so a
+    /// `wayl` checkout without Wayl configured (development) goes to the first live
+    /// gateway instead, the dev stubs.
     pub fn for_checkout(&self, picked: GatewayKind) -> Option<&dyn PaymentGateway> {
-        self.live(GatewayKind::Wayl).or_else(|| self.get(picked))
+        self.live(GatewayKind::Wayl).or_else(|| match picked {
+            GatewayKind::Wayl => self.all.iter().map(|g| g.as_ref()).find(|g| g.is_live()).or_else(|| self.get(picked)),
+            _ => self.get(picked),
+        })
     }
 
     /// Gateways that can charge a saved method, as stored in `payment_methods.gateway`.
@@ -151,6 +156,19 @@ mod tests {
         assert_eq!(g.renewal_mode_for_checkout(GatewayKind::Fib), RenewalMode::Charge);
         assert_eq!(g.recurring().len(), 3);
         assert!(g.renewal_links().is_some());
+    }
+
+    #[test]
+    fn a_wayl_checkout_without_wayl_uses_the_dev_stubs() {
+        let g = Gateways::new(stubs(true));
+        assert!(g.for_checkout(GatewayKind::Wayl).unwrap().is_live());
+        // Production without Wayl: nothing live, so nothing to hand it to.
+        let g = Gateways::new(stubs(false));
+        assert!(g.for_checkout(GatewayKind::Wayl).is_none_or(|gw| !gw.is_live()));
+        // Wayl live: it takes it.
+        let mut all = stubs(false);
+        all.push(wayl());
+        assert_eq!(Gateways::new(all).for_checkout(GatewayKind::Wayl).unwrap().kind(), GatewayKind::Wayl);
     }
 
     #[test]

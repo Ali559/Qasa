@@ -1475,9 +1475,9 @@
     "ckb": "دوایین نوێکردنەوە: %@"
   },
   "legal.privacyBody": {
-    "en": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and ask us to delete your account and everything our server holds about you.\n\nFull policy: qasa-app.com/privacy",
-    "ar": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تطلب منا حذف حسابك وكل ما يحتفظ به خادمنا عنك.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩",
-    "ckb": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و داوامان لێ بکەیت هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی بسڕینەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
+    "en": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy",
+    "ar": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩",
+    "ckb": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
   },
   "legal.termsBody": {
     "en": "These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.",
@@ -1814,11 +1814,6 @@
     "ar": "FastPay",
     "ckb": "FastPay"
   },
-  "premium.fastpaySub": {
-    "en": "Mobile Wallet",
-    "ar": "محفظة جوال",
-    "ckb": "جزدانی مۆبایل"
-  },
   "premium.featureBreach": {
     "en": "Breached password check",
     "ar": "فحص كلمات المرور المسرّبة",
@@ -1843,11 +1838,6 @@
     "en": "First Iraqi Bank (FIB)",
     "ar": "بنك العراق الأول (FIB)",
     "ckb": "بانکی یەکەمی عێراق (FIB)"
-  },
-  "premium.fibSub": {
-    "en": "Instant Transfer",
-    "ar": "تحويل فوري",
-    "ckb": "گواستنەوەی خێرا"
   },
   "premium.installWalletApp": {
     "en": "Install the %@ app to complete payment, then try again.",
@@ -1909,11 +1899,6 @@
     "ar": "SuperQi",
     "ckb": "SuperQi"
   },
-  "premium.superqiSub": {
-    "en": "Qi Card integration",
-    "ar": "تكامل بطاقة Qi",
-    "ckb": "یەکخستنی کارتی Qi"
-  },
   "premium.title": {
     "en": "Qasa Premium",
     "ar": "قاصة بريميوم",
@@ -1923,6 +1908,16 @@
     "en": "UPGRADE TO PRO",
     "ar": "الترقية إلى برو",
     "ckb": "بەرزکردنەوە بۆ پرۆ"
+  },
+  "premium.wayl": {
+    "en": "Wayl",
+    "ar": "Wayl",
+    "ckb": "Wayl"
+  },
+  "premium.waylSub": {
+    "en": "Pay with FIB, Qi Card or another Iraqi wallet",
+    "ar": "ادفع عبر FIB أو Qi Card أو أي محفظة عراقية أخرى",
+    "ckb": "بە FIB، Qi Card یان جزدانێکی عێراقیی تر پارە بدە"
   },
   "premium.walletHint": {
     "en": "Opens your wallet app. We'll refresh your license when payment completes.",
@@ -3632,5 +3627,25 @@
     "en": "That code didn't match. Start again for a new code.",
     "ar": "الرمز غير مطابق. ابدأ من جديد للحصول على رمز جديد.",
     "ckb": "ئەو کۆدە یەکی نەگرتەوە. دووبارە دەست پێبکەرەوە بۆ کۆدێکی نوێ."
+  },
+  "settings.deleteAccount": {
+    "en": "Delete account",
+    "ar": "حذف الحساب",
+    "ckb": "سڕینەوەی هەژمار"
+  },
+  "settings.deleteAccountTitle": {
+    "en": "Delete your Qasa account?",
+    "ar": "حذف حسابك في قاصة؟",
+    "ckb": "هەژماری قاسەکەت بسڕیتەوە؟"
+  },
+  "settings.deleteAccountFailed": {
+    "en": "Couldn't delete your account. Check your connection and try again.",
+    "ar": "تعذّر حذف حسابك. تحقق من اتصالك وحاول مرة أخرى.",
+    "ckb": "نەتوانرا هەژمارەکەت بسڕدرێتەوە. پەیوەندییەکەت بپشکنە و دووبارە هەوڵ بدەوە."
+  },
+  "settings.deleteAccountMessage": {
+    "en": "This removes your account, linked devices and inbox from Qasa's servers and erases the vault on this phone. Payments are kept as financial records. This can't be undone.",
+    "ar": "يزيل هذا حسابك والأجهزة المرتبطة وصندوق الوارد من خوادم قاصة، ويمسح الخزنة على هذا الهاتف. تبقى المدفوعات كسجلات مالية. لا يمكن التراجع عن ذلك.",
+    "ckb": "ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم مۆبایلە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە."
   }
 }
