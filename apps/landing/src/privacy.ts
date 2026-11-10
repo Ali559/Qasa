@@ -29,7 +29,7 @@ export interface Policy {
 }
 
 /** ISO date of the current text; shown localized in `updated`. */
-export const PRIVACY_UPDATED = "2026-11-09";
+export const PRIVACY_UPDATED = "2026-11-10";
 
 /** Forwarded by Cloudflare Email Routing (docs/deploy.md → Email). */
 const EMAIL = "privacy@qasa-app.com";
@@ -52,7 +52,7 @@ const en: Policy = {
     "How Qasa handles your data: your vault stays encrypted on your devices, and our server keeps only what it needs to link devices, run Premium and send notices.",
   kicker: "Privacy policy",
   title: "Your vault is yours. Here is everything else.",
-  updated: "Last updated: 9 November 2026",
+  updated: "Last updated: 10 November 2026",
   contents: "On this page",
   sections: [
     {
@@ -73,6 +73,7 @@ const en: Policy = {
           "Our server keeps only what it needs to run your account: your linked devices, your plan and payments, and the notices we send you.",
           "You pay on Wayl's checkout page. We never see your card or wallet details.",
           "No ads, no analytics, no trackers. We never sell your data.",
+          "You can keep an encrypted backup of your vault wherever you choose, such as iCloud Drive or Google Drive. It goes there straight from your device, never through our server.",
           "You can delete your account, and what our server holds about you, at any time.",
         ],
       ],
@@ -84,8 +85,19 @@ const en: Policy = {
         "Everything you save in Qasa: logins, payment cards and bank accounts, secure notes, personal info, ID documents and 2FA codes. It is stored only on your phone or computer.",
         "Each item is encrypted with AES‑256‑GCM. The key is made from your main password on your device (PBKDF2‑HMAC‑SHA256, 310,000 rounds, with a random salt). Your main password is never stored or sent anywhere. The app keeps only a check value, so it knows when you've typed it correctly. Search also works on your device, with scrambled search tokens instead of readable text.",
         "Face ID, Touch ID, fingerprint and Windows Hello unlock are handled by your device's operating system. Qasa never receives your face or fingerprint data, only a yes or no.",
-        "Because we have no copy, we can't restore your vault or reset your main password. If you lose every device and have no export, the vault can't be recovered.",
+        "Because we have no copy, we can't restore your vault or reset your main password. If you lose every device and have no backup, the vault can't be recovered.",
         "When you export your vault to a CSV file, that file is not encrypted. Keep it somewhere safe, and delete it when you're done.",
+      ],
+    },
+    {
+      id: "backups",
+      title: "Your vault backups",
+      body: [
+        "In Settings, under Backups, you can save a backup of your vault: one file with everything in it, encrypted with AES‑256‑GCM under a key made from your main password. You choose where it goes, for example a folder in iCloud Drive or Google Drive, on your device or on a USB stick. Each device keeps one backup and replaces it every time a new one is made, whether by hand or on the schedule you pick (daily, weekly or monthly). Automatic backups run only while Qasa is open and unlocked.",
+        "The file goes from your device straight to the place you chose, and that service's own privacy policy applies to it (for example Apple's for iCloud Drive, or Google's for Google Drive). It never reaches our server, and we can't open it.",
+        "Inside the encryption are your items and folders, your vault's key check values and your account ID, so restoring a backup on a new device brings back your vault and your account. Readable without the password: only when the backup was made and the name and type of the device that made it.",
+        "Only your main password opens a backup, and only the main password your vault had when the backup was made. Anyone who gets hold of the file can try to guess it, so choose a strong main password and keep the file somewhere only you can reach.",
+        "<strong>Replacing a lost device.</strong> Each backup also holds a random restore key made by the device that made it. Before it puts a new key in a backup, the device sends our server a one-way fingerprint of it (SHA‑256), which can't be turned back into the key and can't open the backup. If you restore on a new device and your plan has no free place for it, the new device shows the key to our server, which can then unlink the device that made the backup, but only that device, and only after you tap “Unlink and continue”. Each key works once. All your devices get a notice when this happens. The server keeps a device's last two fingerprints, and deletes them when the device is unlinked.",
       ],
     },
     {
@@ -95,7 +107,7 @@ const en: Policy = {
         "The apps talk to our server to link your devices, check your plan, take payments and deliver notices. This is everything it keeps about you:",
         [
           "<strong>Your account:</strong> a random account ID made by your app, your plan (Free or Premium), and when the account was created. If we block an account for abuse, we also keep the reason.",
-          "<strong>Each linked device:</strong> its name as set on the device (for example “Ali's iPhone”), its type (iOS, Android, macOS, Windows or Linux), a random device ID made by the app, the app's language, and when it was linked and last used. The iPhone app also sends a region label taken from your phone's region setting (for example “Iraq”), shown in Linked Devices. It does not come from GPS or your IP address.",
+          "<strong>Each linked device:</strong> its name as set on the device (for example “Ali's iPhone”), its type (iOS, Android, macOS, Windows or Linux), a random device ID made by the app, the app's language, and when it was linked and last used. The iPhone app also sends a region label taken from your phone's region setting (for example “Iraq”), shown in Linked Devices. It does not come from GPS or your IP address. If you make backups, also a one-way fingerprint (SHA‑256) of the device's restore key; see <a href=\"#backups\">Your vault backups</a>.",
           "<strong>Notifications:</strong> if you allow them, a push token for that phone, and the notices in your Qasa notifications (such as renewal reminders and service news), with whether you've read or deleted them.",
           "<strong>Plan and payments:</strong> see <a href=\"#payments\">Payments</a>.",
           "<strong>VPN use</strong>, if you use it: see <a href=\"#vpn\">The VPN</a>.",
@@ -178,10 +190,11 @@ const en: Policy = {
       body: [
         [
           "<strong>Your vault:</strong> on your devices, until you delete it.",
+          "<strong>Your vault backups:</strong> wherever you keep them, until you delete them. Deleting Qasa or your account doesn't delete them.",
           "<strong>VPN session records:</strong> 30 days after the session ends, then deleted automatically.",
           "<strong>Account, device and notification records:</strong> while your account exists. An unlinked device stays on the list, marked unlinked and without its push token, until you delete the account.",
           "<strong>IP address counters:</strong> deleted within a day.",
-          "<strong>Backups:</strong> the database is backed up every night, and each backup is kept for 14 days. Data you delete is gone from our backups within 14 days.",
+          "<strong>Server backups:</strong> the database is backed up every night, and each backup is kept for 14 days. Data you delete is gone from our backups within 14 days.",
           "<strong>Payment and subscription records:</strong> kept after you delete your account, as financial records, for as long as accounting and the law require.",
         ],
       ],
@@ -192,8 +205,8 @@ const en: Policy = {
       body: [
         [
           "<strong>See your data.</strong> The app shows your linked devices, plan, payments and notifications. For anything else we hold, email us.",
-          "<strong>Export.</strong> Export your vault to a CSV file in Settings at any time.",
-          "<strong>Delete.</strong> Delete your account in Settings in any Qasa app, on your phone or computer, or email us. This removes your devices (names, IDs, region labels and push tokens), your VPN records and your notifications from our server, and erases the vault on that device. Any paid time left ends. We keep the account ID, marked deleted so it can never be used again, and your payment records, linked only to that ID.",
+          "<strong>Back up and export.</strong> Save an encrypted backup of your vault, or export it to a CSV file, in Settings at any time.",
+          "<strong>Delete.</strong> Delete your account in Settings in any Qasa app, on your phone or computer, or email us. This removes your devices (names, IDs, region labels and push tokens), your VPN records and your notifications from our server, and erases the vault on that device. Backup files you saved yourself are not touched; delete them where you keep them. Any paid time left ends. We keep the account ID, marked deleted so it can never be used again, and your payment records, linked only to that ID.",
           "<strong>Control.</strong> In the app you can unlink devices, turn off notifications, turn off auto-renew or cancel Premium.",
         ],
         "We know you only by your account ID, which your app holds, so when you write to us we may ask for it. You can also complain to the data-protection authority where you live.",
@@ -236,7 +249,7 @@ const ckb: Policy = {
     "قاسە چۆن مامەڵە لەگەڵ داتاکانت دەکات: کۆگاکەت لەسەر ئامێرەکانت شفرەکراو دەمێنێتەوە، و سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ بەستنەوەی ئامێر، پریمیۆم و ناردنی ئاگاداری پێویستە.",
   kicker: "سیاسەتی تایبەتمەندی",
   title: "کۆگاکەت هی خۆتە. ئەمەش هەموو شتەکانی ترە.",
-  updated: "دوایین نوێکردنەوە: ٩ی تشرینی دووەمی ٢٠٢٦",
+  updated: "دوایین نوێکردنەوە: ١٠ی تشرینی دووەمی ٢٠٢٦",
   contents: "لەم پەڕەیەدا",
   sections: [
     {
@@ -257,6 +270,7 @@ const ckb: Policy = {
           "سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ئامێرە بەستراوەکانت، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین.",
           `پارە لە پەڕەی پارەدانی ${L("Wayl")} دەدەیت. هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.`,
           "نە ڕیکلام، نە شیکاری، نە شوێنکەوتن. هەرگیز داتاکانت نافرۆشین.",
+          `دەتوانیت باکئەپێکی شفرەکراوی کۆگاکەت لە هەر شوێنێک بتەوێت هەڵبگریت، بۆ نموونە ${L("iCloud Drive")} یان ${L("Google Drive")}. ڕاستەوخۆ لە ئامێرەکەتەوە دەچێتە ئەوێ، هەرگیز بە سێرڤەرەکەماندا تێناپەڕێت.`,
           "هەر کاتێک بتەوێت دەتوانیت هەژمارەکەت و ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی بسڕیتەوە.",
         ],
       ],
@@ -268,8 +282,19 @@ const ckb: Policy = {
         `هەموو ئەوەی لە قاسەدا پاشەکەوتی دەکەیت: چوونەژوورەوەکان، کارتی بانکی و هەژماری بانکی، تێبینیی پارێزراو، زانیاری کەسی، ناسنامەکان و کۆدی ${L("2FA")}. تەنها لەسەر مۆبایل یان کۆمپیوتەرەکەت هەڵدەگیرێت.`,
         `هەر بڕگەیەک بە ${L("AES‑256‑GCM")} شفرە دەکرێت. کلیلەکە لەسەر ئامێرەکەت لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت (${L("PBKDF2‑HMAC‑SHA256")}، ٣١٠٬٠٠٠ جار، لەگەڵ خوێیەکی هەڕەمەکی). وشەی نهێنی سەرەکییەکەت هەرگیز هەڵناگیرێت و بۆ هیچ شوێنێک نانێردرێت. ئەپەکە تەنها بەهایەکی پشکنین هەڵدەگرێت، بۆ ئەوەی بزانێت کەی بە دروستی نووسیوتە. گەڕانیش لەسەر ئامێرەکەت دەکرێت، بە نیشانەی تێکدراو لە جیاتی دەقی خوێندراوە.`,
         `کردنەوە بە ${L("Face ID")}، ${L("Touch ID")}، پەنجەمۆر و ${L("Windows Hello")} لەلایەن سیستەمی ئامێرەکەتەوە دەکرێت. قاسە هەرگیز داتای ڕووخسار یان پەنجەمۆرت وەرناگرێت، تەنها بەڵێ یان نەخێر.`,
-        "لەبەر ئەوەی هیچ کۆپییەکمان لا نییە، ناتوانین کۆگاکەت بگەڕێنینەوە یان وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە. ئەگەر هەموو ئامێرەکانت لەدەست بدەیت و هەناردەت نەکردبێت، کۆگاکە ناگەڕێتەوە.",
+        "لەبەر ئەوەی هیچ کۆپییەکمان لا نییە، ناتوانین کۆگاکەت بگەڕێنینەوە یان وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە. ئەگەر هەموو ئامێرەکانت لەدەست بدەیت و باکئەپت نەبێت، کۆگاکە ناگەڕێتەوە.",
         `کاتێک کۆگاکەت بۆ فایلی ${L("CSV")} هەناردە دەکەیت، ئەو فایلە شفرەکراو نییە. لە شوێنێکی سەلامەت دایبنێ و کە تەواو بوویت بیسڕەوە.`,
+      ],
+    },
+    {
+      id: "backups",
+      title: "باکئەپی کۆگاکەت",
+      body: [
+        `لە ڕێکخستنەکاندا، لە بەشی باکئەپەکان، دەتوانیت باکئەپێکی کۆگاکەت پاشەکەوت بکەیت: یەک فایل کە هەموو شتێکی تێدایە، بە ${L("AES‑256‑GCM")} شفرە کراوە بە کلیلێک کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت. خۆت هەڵدەبژێریت بچێتە کوێ، بۆ نموونە بوخچەیەک لە ${L("iCloud Drive")} یان ${L("Google Drive")}، لەسەر ئامێرەکەت یان فلاشێکی ${L("USB")}. هەر ئامێرێک یەک باکئەپ هەڵدەگرێت و هەر جارێک باکئەپێکی نوێ دروست بکرێت جێگەی دەگرێتەوە، دەستی بێت یان بەو خشتەیەی هەڵیدەبژێریت (ڕۆژانە، هەفتانە یان مانگانە). باکئەپی خۆکار تەنها کاتێک دەکرێت کە قاسە کراوە بێت و قفڵ نەبێت.`,
+        `فایلەکە ڕاستەوخۆ لە ئامێرەکەتەوە دەچێتە ئەو شوێنەی هەڵتبژاردووە، و سیاسەتی تایبەتمەندیی ئەو خزمەتگوزارییە بەسەریدا جێبەجێ دەبێت (بۆ نموونە هی ${L("Apple")} بۆ ${L("iCloud Drive")}، یان هی ${L("Google")} بۆ ${L("Google Drive")}). هەرگیز ناگاتە سێرڤەرەکەمان، و ناتوانین بیکەینەوە.`,
+        "لەناو شفرەکەدا بابەت و بوخچەکانت، بەهاکانی پشکنینی کلیلی کۆگاکەت و ناسنامەی هەژمارەکەت هەن، بۆیە گەڕاندنەوەی باکئەپێک لەسەر ئامێرێکی نوێ کۆگا و هەژمارەکەت دەگەڕێنێتەوە. بێ وشەی نهێنی تەنها ئەمانە دەخوێندرێنەوە: کەی باکئەپەکە دروست کراوە، و ناو و جۆری ئەو ئامێرەی دروستی کردووە.",
+        "تەنها وشەی نهێنی سەرەکییەکەت باکئەپ دەکاتەوە، ئەویش ئەو وشە نهێنییەی کۆگاکەت لە کاتی دروستکردنی باکئەپەکەدا هەیبوو. هەر کەسێک فایلەکەی دەست بکەوێت دەتوانێت هەوڵی تاقیکردنەوەی بدات، بۆیە وشەیەکی نهێنی سەرەکیی بەهێز هەڵبژێرە و فایلەکە لە شوێنێک دابنێ کە تەنها خۆت دەستت پێی دەگات.",
+        `<strong>گۆڕینی ئامێرێکی ونبوو.</strong> هەر باکئەپێک هەروەها کلیلێکی گەڕاندنەوەی هەڕەمەکی تێدایە کە ئەو ئامێرەی دروستی کردووە دروستی دەکات. پێش ئەوەی کلیلێکی نوێ بخاتە باکئەپێکەوە، ئامێرەکە پەنجەمۆرێکی یەکلایەنەی (${L("SHA‑256")}) دەنێرێت بۆ سێرڤەرەکەمان، کە ناکرێت بگەڕێندرێتەوە بۆ کلیلەکە و ناتوانێت باکئەپەکە بکاتەوە. ئەگەر لەسەر ئامێرێکی نوێ بیگەڕێنیتەوە و پلانەکەت شوێنی بەتاڵی بۆی نەبێت، ئامێرە نوێیەکە کلیلەکە پیشانی سێرڤەرەکەمان دەدات، کە ئەو کاتە دەتوانێت ئەو ئامێرەی باکئەپەکەی دروست کردووە لاببات، تەنها ئەو ئامێرە، و تەنها دوای ئەوەی دەست لە «لابردن و بەردەوامبوون» دەدەیت. هەر کلیلێک یەک جار کار دەکات. هەموو ئامێرەکانت ئاگادارییەک وەردەگرن کاتێک ئەمە ڕوو دەدات. سێرڤەرەکە دوایین دوو پەنجەمۆری هەر ئامێرێک هەڵدەگرێت، و کاتێک ئامێرەکە لادەبرێت دەیانسڕێتەوە.`,
       ],
     },
     {
@@ -279,7 +304,7 @@ const ckb: Policy = {
         "ئەپەکان پەیوەندی بە سێرڤەرەکەمانەوە دەکەن بۆ بەستنەوەی ئامێرەکانت، پشکنینی پلانەکەت، وەرگرتنی پارە و گەیاندنی ئاگاداری. ئەمە هەموو ئەوەیە کە دەربارەت هەڵیدەگرێت:",
         [
           "<strong>هەژمارەکەت:</strong> ناسنامەیەکی هەڕەمەکیی هەژمار کە ئەپەکەت دروستی کردووە، پلانەکەت (خۆڕایی یان پریمیۆم)، و کاتی دروستکردنی هەژمارەکە. ئەگەر هەژمارێک بەهۆی خراپ بەکارهێنانەوە ڕابگرین، هۆکارەکەشی هەڵدەگرین.",
-          `<strong>هەر ئامێرێکی بەستراو:</strong> ناوەکەی وەک لەسەر ئامێرەکە دانراوە (بۆ نموونە «${L("Ali's iPhone")}»)، جۆرەکەی (${L("iOS")}، ${L("Android")}، ${L("macOS")}، ${L("Windows")} یان ${L("Linux")})، ناسنامەیەکی هەڕەمەکیی ئامێر کە ئەپەکە دروستی کردووە، زمانی ئەپەکە، و کاتی بەستنەوە و دوایین بەکارهێنان. ئەپی ${L("iPhone")} هەروەها ناوی ناوچەیەک دەنێرێت کە لە ڕێکخستنی ناوچەی مۆبایلەکەتەوە وەردەگیرێت (بۆ نموونە «عێراق»)، و لە ئامێرە بەستراوەکاندا پیشان دەدرێت. لە ${L("GPS")} یان ناونیشانی ${L("IP")} ـەکەتەوە نایەت.`,
+          `<strong>هەر ئامێرێکی بەستراو:</strong> ناوەکەی وەک لەسەر ئامێرەکە دانراوە (بۆ نموونە «${L("Ali's iPhone")}»)، جۆرەکەی (${L("iOS")}، ${L("Android")}، ${L("macOS")}، ${L("Windows")} یان ${L("Linux")})، ناسنامەیەکی هەڕەمەکیی ئامێر کە ئەپەکە دروستی کردووە، زمانی ئەپەکە، و کاتی بەستنەوە و دوایین بەکارهێنان. ئەپی ${L("iPhone")} هەروەها ناوی ناوچەیەک دەنێرێت کە لە ڕێکخستنی ناوچەی مۆبایلەکەتەوە وەردەگیرێت (بۆ نموونە «عێراق»)، و لە ئامێرە بەستراوەکاندا پیشان دەدرێت. لە ${L("GPS")} یان ناونیشانی ${L("IP")} ـەکەتەوە نایەت. ئەگەر باکئەپ دروست بکەیت، هەروەها پەنجەمۆرێکی یەکلایەنە (${L("SHA‑256")}) ی کلیلی گەڕاندنەوەی ئامێرەکە؛ بڕوانە <a href="#backups">باکئەپی کۆگاکەت</a>.`,
           "<strong>ئاگادارییەکان:</strong> ئەگەر ڕێگەت پێدابن، نیشانەیەکی پوش بۆ ئەو مۆبایلە، و ئەو ئاگادارییانەی لە بەشی ئاگادارییەکانی قاسەدان (وەک بیرخستنەوەی نوێکردنەوە و هەواڵی خزمەتگوزاری)، لەگەڵ ئەوەی خوێندووتنەتەوە یان سڕیوتنەتەوە.",
           "<strong>پلان و پارەدان:</strong> بڕوانە <a href=\"#payments\">پارەدان</a>.",
           "<strong>بەکارهێنانی ⁨VPN⁩</strong>، ئەگەر بەکاری بهێنیت: بڕوانە <a href=\"#vpn\">⁨VPN⁩</a>.",
@@ -362,10 +387,11 @@ const ckb: Policy = {
       body: [
         [
           "<strong>کۆگاکەت:</strong> لەسەر ئامێرەکانت، تا دەیسڕیتەوە.",
+          "<strong>باکئەپەکانی کۆگاکەت:</strong> لەو شوێنەی هەڵیاندەگریت، تا دەیانسڕیتەوە. سڕینەوەی قاسە یان هەژمارەکەت نایانسڕێتەوە.",
           `<strong>تۆماری دانیشتنەکانی ${L("VPN")}:</strong> ٣٠ ڕۆژ دوای کۆتاییهاتنی دانیشتنەکە، پاشان خۆکارانە دەسڕدرێتەوە.`,
           `<strong>تۆماری هەژمار، ئامێر و ئاگاداری:</strong> تا هەژمارەکەت هەبێت. ئامێرێکی لابراو لە لیستەکەدا دەمێنێتەوە، وەک لابراو و بێ نیشانەی پوش، تا هەژمارەکە دەسڕیتەوە.`,
           `<strong>ژمێرەرەکانی ناونیشانی ${L("IP")}:</strong> لە ماوەی یەک ڕۆژدا دەسڕدرێنەوە.`,
-          "<strong>یەدەگەکان:</strong> هەموو شەوێک یەدەگی بنکەدراوەکە دەگیرێت، و هەر یەدەگێک ١٤ ڕۆژ دەمێنێتەوە. ئەو داتایەی دەیسڕیتەوە لە ماوەی ١٤ ڕۆژدا لە یەدەگەکانیشمان نامێنێت.",
+          "<strong>یەدەگی سێرڤەر:</strong> هەموو شەوێک یەدەگی بنکەدراوەکە دەگیرێت، و هەر یەدەگێک ١٤ ڕۆژ دەمێنێتەوە. ئەو داتایەی دەیسڕیتەوە لە ماوەی ١٤ ڕۆژدا لە یەدەگەکانیشمان نامێنێت.",
           "<strong>تۆماری پارەدان و بەشداربوون:</strong> دوای سڕینەوەی هەژمارەکەت وەک تۆماری دارایی دەمێننەوە، بۆ ئەو ماوەیەی ژمێریاری و یاسا داوای دەکەن.",
         ],
       ],
@@ -376,8 +402,8 @@ const ckb: Policy = {
       body: [
         [
           "<strong>بینینی داتاکانت.</strong> ئەپەکە ئامێرە بەستراوەکان، پلان، پارەدان و ئاگادارییەکانت پیشان دەدات. بۆ هەر شتێکی تر کە لامانە، ئیمەیڵمان بۆ بنێرە.",
-          `<strong>هەناردەکردن.</strong> هەر کاتێک بتەوێت لە ڕێکخستنەکاندا کۆگاکەت بۆ فایلی ${L("CSV")} هەناردە بکە.`,
-          `<strong>سڕینەوە.</strong> لە ڕێکخستنەکاندا هەژمارەکەت بسڕەوە (لە هەر ئەپێکی قاسە، لەسەر مۆبایل یان کۆمپیوتەر)، یان ئیمەیڵمان بۆ بنێرە. ئەمە ئامێرەکانت (ناو، ناسنامە، ناوی ناوچە و نیشانەی پوش)، تۆمارەکانی ${L("VPN")} و ئاگادارییەکانت لە سێرڤەرەکەمان لادەبات، و کۆگای سەر ئەو ئامێرە دەسڕێتەوە. هەر ماوەیەکی پارەدراو کە مابێت کۆتایی دێت. ناسنامەی هەژمارەکە هەڵدەگرین، وەک سڕاوە نیشانکراو بۆ ئەوەی هەرگیز دووبارە بەکارنەهێنرێتەوە، لەگەڵ تۆماری پارەدانەکانت کە تەنها بەو ناسنامەیەوە بەستراون.`,
+          `<strong>باکئەپ و هەناردەکردن.</strong> هەر کاتێک بتەوێت لە ڕێکخستنەکاندا باکئەپێکی شفرەکراوی کۆگاکەت پاشەکەوت بکە، یان بۆ فایلی ${L("CSV")} هەناردەی بکە.`,
+          `<strong>سڕینەوە.</strong> لە ڕێکخستنەکاندا هەژمارەکەت بسڕەوە (لە هەر ئەپێکی قاسە، لەسەر مۆبایل یان کۆمپیوتەر)، یان ئیمەیڵمان بۆ بنێرە. ئەمە ئامێرەکانت (ناو، ناسنامە، ناوی ناوچە و نیشانەی پوش)، تۆمارەکانی ${L("VPN")} و ئاگادارییەکانت لە سێرڤەرەکەمان لادەبات، و کۆگای سەر ئەو ئامێرە دەسڕێتەوە. دەست لەو فایلە باکئەپانە نادات کە خۆت پاشەکەوتت کردوون؛ لەو شوێنەی هەڵیاندەگریت بیانسڕەوە. هەر ماوەیەکی پارەدراو کە مابێت کۆتایی دێت. ناسنامەی هەژمارەکە هەڵدەگرین، وەک سڕاوە نیشانکراو بۆ ئەوەی هەرگیز دووبارە بەکارنەهێنرێتەوە، لەگەڵ تۆماری پارەدانەکانت کە تەنها بەو ناسنامەیەوە بەستراون.`,
           "<strong>کۆنترۆڵ.</strong> لە ئەپەکەدا دەتوانیت ئامێرەکان لاببەیت، ئاگادارییەکان بکوژێنیتەوە، نوێبوونەوەی خۆکار ناچالاک بکەیت یان پریمیۆم هەڵبوەشێنیتەوە.",
         ],
         "تەنها بە ناسنامەی هەژمارەکەت دەتناسین، کە لە ئەپەکەتدایە، بۆیە کاتێک بۆمان دەنووسیت لەوانەیە داوای بکەین. هەروەها دەتوانیت سکاڵا بکەیتە لای دەسەڵاتی پاراستنی داتا لەو شوێنەی تێیدا دەژیت.",
@@ -420,7 +446,7 @@ const ar: Policy = {
     "كيف تتعامل قاصة مع بياناتك: تبقى خزنتك مشفّرة على أجهزتك، ولا يحتفظ خادمنا إلا بما يلزم لربط الأجهزة وتشغيل بريميوم وإرسال الإشعارات.",
   kicker: "سياسة الخصوصية",
   title: "خزنتك ملكك. وهذا كل ما عدا ذلك.",
-  updated: "آخر تحديث: 9 تشرين الثاني 2026",
+  updated: "آخر تحديث: 10 تشرين الثاني 2026",
   contents: "في هذه الصفحة",
   sections: [
     {
@@ -441,6 +467,7 @@ const ar: Policy = {
           "لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: أجهزتك المرتبطة، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك.",
           `تدفع في صفحة الدفع الخاصة بـ ${L("Wayl")}. لا نرى أبدًا تفاصيل بطاقتك أو محفظتك.`,
           "لا إعلانات، ولا تحليلات، ولا تتبّع. ولا نبيع بياناتك أبدًا.",
+          `يمكنك الاحتفاظ بنسخة احتياطية مشفّرة من خزنتك في أي مكان تختاره، مثل ${L("iCloud Drive")} أو ${L("Google Drive")}. تذهب إليه مباشرة من جهازك، ولا تمر أبدًا عبر خادمنا.`,
           "يمكنك حذف حسابك، وما يحتفظ به خادمنا عنك، في أي وقت.",
         ],
       ],
@@ -452,8 +479,19 @@ const ar: Policy = {
         `كل ما تحفظه في قاصة: تسجيلات الدخول، وبطاقات الدفع والحسابات المصرفية، والملاحظات الآمنة، والمعلومات الشخصية، والهويات، ورموز ${L("2FA")}. يُخزَّن على هاتفك أو حاسوبك فقط.`,
         `يُشفَّر كل عنصر بـ ${L("AES‑256‑GCM")}. ويُشتق المفتاح من كلمة مرورك الرئيسية على جهازك (${L("PBKDF2‑HMAC‑SHA256")}، بـ 310,000 دورة، مع ملح عشوائي). لا تُخزَّن كلمة مرورك الرئيسية ولا تُرسَل إلى أي مكان أبدًا. يحتفظ التطبيق بقيمة تحقق فقط، ليعرف متى كتبتها بشكل صحيح. ويعمل البحث على جهازك أيضًا، برموز بحث مموّهة بدل النص المقروء.`,
         `يتولى نظام تشغيل جهازك الفتح بـ ${L("Face ID")} و${L("Touch ID")} وبصمة الإصبع و${L("Windows Hello")}. لا تستلم قاصة أبدًا بيانات وجهك أو بصمتك، بل «نعم» أو «لا» فقط.`,
-        "لأنه لا توجد لدينا نسخة، لا يمكننا استعادة خزنتك أو إعادة تعيين كلمة مرورك الرئيسية. إذا فقدت كل أجهزتك ولم تكن لديك نسخة مُصدَّرة، فلا يمكن استرجاع الخزنة.",
+        "لأنه لا توجد لدينا نسخة، لا يمكننا استعادة خزنتك أو إعادة تعيين كلمة مرورك الرئيسية. إذا فقدت كل أجهزتك ولم تكن لديك نسخة احتياطية، فلا يمكن استرجاع الخزنة.",
         `عند تصدير خزنتك إلى ملف ${L("CSV")}، يكون هذا الملف غير مشفّر. احفظه في مكان آمن، واحذفه عند الانتهاء.`,
+      ],
+    },
+    {
+      id: "backups",
+      title: "النسخ الاحتياطية لخزنتك",
+      body: [
+        `من الإعدادات، في قسم النسخ الاحتياطية، يمكنك حفظ نسخة احتياطية من خزنتك: ملف واحد فيه كل شيء، مشفّر بـ ${L("AES‑256‑GCM")} بمفتاح مشتق من كلمة مرورك الرئيسية. أنت تختار مكانه، مثلًا مجلدًا في ${L("iCloud Drive")} أو ${L("Google Drive")}، أو على جهازك، أو على ذاكرة ${L("USB")}. يحتفظ كل جهاز بنسخة احتياطية واحدة، وتحل محلها كل نسخة جديدة، سواء أنشأتها يدويًا أو وفق الجدول الذي تختاره (يوميًا أو أسبوعيًا أو شهريًا). لا يعمل النسخ الاحتياطي التلقائي إلا عندما تكون قاصة مفتوحة وغير مقفلة.`,
+        `يذهب الملف من جهازك مباشرة إلى المكان الذي اخترته، وتسري عليه سياسة الخصوصية الخاصة بتلك الخدمة (مثل سياسة ${L("Apple")} لـ ${L("iCloud Drive")}، أو سياسة ${L("Google")} لـ ${L("Google Drive")}). لا يصل أبدًا إلى خادمنا، ولا نستطيع فتحه.`,
+        "داخل التشفير توجد عناصرك ومجلداتك، وقيم التحقق من مفاتيح خزنتك، ومعرّف حسابك، لذا فإن استعادة نسخة احتياطية على جهاز جديد تعيد خزنتك وحسابك معًا. ما يُقرأ دون كلمة المرور: وقت إنشاء النسخة، واسم الجهاز الذي أنشأها ونوعه فقط.",
+        "لا يفتح النسخة الاحتياطية إلا كلمة مرورك الرئيسية، وتحديدًا كلمة المرور التي كانت لخزنتك عند إنشاء النسخة. يمكن لمن يحصل على الملف أن يحاول تخمينها، لذا اختر كلمة مرور رئيسية قوية واحفظ الملف في مكان لا يصل إليه غيرك.",
+        `<strong>استبدال جهاز مفقود.</strong> تحتوي كل نسخة احتياطية أيضًا على مفتاح استعادة عشوائي أنشأه الجهاز الذي صنعها. قبل أن يضع الجهاز مفتاحًا جديدًا في نسخة احتياطية، يرسل إلى خادمنا بصمة أحادية الاتجاه له (${L("SHA‑256")})، لا يمكن تحويلها إلى المفتاح ولا تفتح النسخة الاحتياطية. إذا استعدت النسخة على جهاز جديد ولم يكن في خطتك مكان شاغر له، يقدّم الجهاز الجديد المفتاح لخادمنا، فيمكنه حينها إلغاء ربط الجهاز الذي أنشأ النسخة، وذلك الجهاز فقط، وبعد أن تضغط «إلغاء الربط والمتابعة» فقط. يعمل كل مفتاح مرة واحدة. وتتلقى كل أجهزتك إشعارًا عند حدوث ذلك. يحتفظ الخادم بآخر بصمتين لكل جهاز، ويحذفهما عند إلغاء ربط الجهاز.`,
       ],
     },
     {
@@ -463,7 +501,7 @@ const ar: Policy = {
         "تتصل التطبيقات بخادمنا لربط أجهزتك، والتحقق من خطتك، واستلام المدفوعات، وإيصال الإشعارات. وهذا كل ما يحفظه عنك:",
         [
           "<strong>حسابك:</strong> معرّف حساب عشوائي أنشأه تطبيقك، وخطتك (المجانية أو بريميوم)، وتاريخ إنشاء الحساب. إذا أوقفنا حسابًا بسبب إساءة الاستخدام، نحتفظ بالسبب أيضًا.",
-          `<strong>كل جهاز مرتبط:</strong> اسمه كما هو مضبوط على الجهاز (مثلًا «${L("Ali's iPhone")}»)، ونوعه (${L("iOS")} أو ${L("Android")} أو ${L("macOS")} أو ${L("Windows")} أو ${L("Linux")})، ومعرّف جهاز عشوائي أنشأه التطبيق، ولغة التطبيق، ووقت ربطه وآخر استخدام له. ويرسل تطبيق ${L("iPhone")} أيضًا اسم منطقة مأخوذًا من إعداد المنطقة في هاتفك (مثلًا «العراق»)، ويظهر في الأجهزة المرتبطة. وهو لا يأتي من ${L("GPS")} ولا من عنوان ${L("IP")} الخاص بك.`,
+          `<strong>كل جهاز مرتبط:</strong> اسمه كما هو مضبوط على الجهاز (مثلًا «${L("Ali's iPhone")}»)، ونوعه (${L("iOS")} أو ${L("Android")} أو ${L("macOS")} أو ${L("Windows")} أو ${L("Linux")})، ومعرّف جهاز عشوائي أنشأه التطبيق، ولغة التطبيق، ووقت ربطه وآخر استخدام له. ويرسل تطبيق ${L("iPhone")} أيضًا اسم منطقة مأخوذًا من إعداد المنطقة في هاتفك (مثلًا «العراق»)، ويظهر في الأجهزة المرتبطة. وهو لا يأتي من ${L("GPS")} ولا من عنوان ${L("IP")} الخاص بك. وإذا أنشأت نسخًا احتياطية، فبصمة أحادية الاتجاه (${L("SHA‑256")}) لمفتاح الاستعادة الخاص بالجهاز أيضًا؛ راجع <a href="#backups">النسخ الاحتياطية لخزنتك</a>.`,
           "<strong>الإشعارات:</strong> إذا سمحت بها، رمز إشعارات لذلك الهاتف، والإشعارات الموجودة في قسم الإشعارات في قاصة (مثل تذكيرات التجديد وأخبار الخدمة)، مع معرفة ما إذا كنت قد قرأتها أو حذفتها.",
           "<strong>الخطة والمدفوعات:</strong> انظر <a href=\"#payments\">الدفع</a>.",
           "<strong>استخدام ⁨VPN⁩</strong>، إن استخدمته: انظر <a href=\"#vpn\">⁨VPN⁩</a>.",
@@ -546,10 +584,11 @@ const ar: Policy = {
       body: [
         [
           "<strong>خزنتك:</strong> على أجهزتك، حتى تحذفها.",
+          "<strong>النسخ الاحتياطية لخزنتك:</strong> حيث تحتفظ بها، حتى تحذفها. حذف قاصة أو حسابك لا يحذفها.",
           `<strong>سجلات جلسات ${L("VPN")}:</strong> 30 يومًا بعد انتهاء الجلسة، ثم تُحذف تلقائيًا.`,
           `<strong>سجلات الحساب والأجهزة والإشعارات:</strong> ما دام حسابك موجودًا. يبقى الجهاز الذي أُلغي ربطه في القائمة، معلَّمًا بأنه غير مرتبط وبلا رمز إشعارات، حتى تحذف الحساب.`,
           `<strong>عدّادات عناوين ${L("IP")}:</strong> تُحذف خلال يوم.`,
-          "<strong>النسخ الاحتياطية:</strong> تُنسخ قاعدة البيانات احتياطيًا كل ليلة، وتُحفظ كل نسخة 14 يومًا. والبيانات التي تحذفها تختفي من نسخنا الاحتياطية خلال 14 يومًا.",
+          "<strong>النسخ الاحتياطية للخادم:</strong> تُنسخ قاعدة البيانات احتياطيًا كل ليلة، وتُحفظ كل نسخة 14 يومًا. والبيانات التي تحذفها تختفي من نسخنا الاحتياطية خلال 14 يومًا.",
           "<strong>سجلات الدفع والاشتراك:</strong> تبقى بعد حذف حسابك كسجلات مالية، للمدة التي تتطلبها المحاسبة والقانون.",
         ],
       ],
@@ -560,8 +599,8 @@ const ar: Policy = {
       body: [
         [
           "<strong>الاطلاع على بياناتك.</strong> يعرض التطبيق أجهزتك المرتبطة وخطتك ومدفوعاتك وإشعاراتك. ولأي شيء آخر نحتفظ به، راسلنا بالبريد الإلكتروني.",
-          `<strong>التصدير.</strong> صدّر خزنتك إلى ملف ${L("CSV")} من الإعدادات في أي وقت.`,
-          `<strong>الحذف.</strong> احذف حسابك من الإعدادات (في أي تطبيق من تطبيقات قاصة، على الهاتف أو الحاسوب)، أو راسلنا بالبريد الإلكتروني. يزيل هذا أجهزتك (الأسماء والمعرّفات وأسماء المناطق ورموز الإشعارات)، وسجلات ${L("VPN")}، وإشعاراتك من خادمنا، ويمسح الخزنة على ذلك الجهاز. وتنتهي أي مدة مدفوعة متبقية. نحتفظ بمعرّف الحساب، معلَّمًا بأنه محذوف كي لا يُستخدم مرة أخرى أبدًا، وبسجلات مدفوعاتك، مرتبطة بهذا المعرّف فقط.`,
+          `<strong>النسخ الاحتياطي والتصدير.</strong> احفظ نسخة احتياطية مشفّرة من خزنتك، أو صدّرها إلى ملف ${L("CSV")}، من الإعدادات في أي وقت.`,
+          `<strong>الحذف.</strong> احذف حسابك من الإعدادات (في أي تطبيق من تطبيقات قاصة، على الهاتف أو الحاسوب)، أو راسلنا بالبريد الإلكتروني. يزيل هذا أجهزتك (الأسماء والمعرّفات وأسماء المناطق ورموز الإشعارات)، وسجلات ${L("VPN")}، وإشعاراتك من خادمنا، ويمسح الخزنة على ذلك الجهاز. ولا يمس ملفات النسخ الاحتياطية التي حفظتها بنفسك؛ احذفها من حيث تحتفظ بها. وتنتهي أي مدة مدفوعة متبقية. نحتفظ بمعرّف الحساب، معلَّمًا بأنه محذوف كي لا يُستخدم مرة أخرى أبدًا، وبسجلات مدفوعاتك، مرتبطة بهذا المعرّف فقط.`,
           "<strong>التحكم.</strong> يمكنك من التطبيق إلغاء ربط الأجهزة، وإيقاف الإشعارات، وإيقاف التجديد التلقائي، أو إلغاء بريميوم.",
         ],
         "لا نعرفك إلا بمعرّف حسابك، الموجود في تطبيقك، لذا قد نطلبه منك عندما تراسلنا. ويمكنك أيضًا تقديم شكوى إلى سلطة حماية البيانات في مكان إقامتك.",

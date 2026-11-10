@@ -552,3 +552,72 @@ let (_, status_body) = api.call(Method::GET, "/v1/vpn/status", Some(&token), Non
     bad.extensions_mut().insert(ConnectInfo(SocketAddr::from(([127, 0, 0, 1], 1))));
     assert_eq!(api.router.clone().oneshot(bad).await.unwrap().status(), StatusCode::FORBIDDEN);
 }
+
+fn b64(bytes: &[u8]) -> String {
+    use base64::Engine;
+    base64::engine::general_purpose::STANDARD.encode(bytes)
+}
+
+fn key_hash(key: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    b64(&Sha256::digest(key))
+}
+
+/// A restored backup's key lets a new device take the place of the device that made the
+/// backup (and only when the user asks), once; an unknown key only gets the plain 403.
+#[tokio::test]
+#[ignore = "needs a disposable Postgres; run ./scripts/test-integration.sh"]
+async fn a_restore_key_replaces_the_device_that_made_the_backup() {
+    let api = Api::new().await;
+    let account = Uuid::now_v7();
+    let old_token = api.token(account, "lost-phone").await;
+    let (k1, k2) = ([1u8; 32], [2u8; 32]);
+    for k in [k1, k2] {
+        let (status, body) = api
+            .call(Method::PUT, "/v1/devices/me/restore-key", Some(&old_token), Some(json!({ "key_hash": key_hash(&k) })))
+            .await;
+        assert_eq!(status, StatusCode::NO_CONTENT, "{body}");
+    }
+    let (status, _) = api
+        .call(Method::PUT, "/v1/devices/me/restore-key", Some(&old_token), Some(json!({ "key_hash": "short" })))
+        .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+
+    let register = |key: Option<[u8; 32]>, replace: bool| {
+        let mut body = json!({ "account_id": account, "device_fingerprint": "new-phone", "device_name": "new-phone", "platform": "android" });
+        if let Some(k) = key {
+            body["restore_key"] = json!(b64(&k));
+        }
+        body["replace_device"] = json!(replace);
+        api.call(Method::POST, "/v1/devices/register", None, Some(body))
+    };
+
+    // No key, or a key no device holds: the plain 403, nothing changes.
+    let (status, body) = register(None, true).await;
+    assert_eq!((status, body["restore_key"].clone()), (StatusCode::FORBIDDEN, Value::Null));
+    let (status, body) = register(Some([9u8; 32]), true).await;
+    assert_eq!((status, body["restore_key"].as_str()), (StatusCode::FORBIDDEN, Some("unknown")));
+
+    // The previous key still names the device, but nothing happens until the user asks.
+    let (status, body) = register(Some(k1), false).await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+    assert_eq!(body["restore_key"], "replaceable");
+    assert_eq!(body["replaceable_device"]["device_name"], "lost-phone");
+    let (status, _) = api.call(Method::GET, "/v1/devices", Some(&old_token), None).await;
+    assert_eq!(status, StatusCode::OK, "still linked");
+
+    // The user taps "Unlink it and continue".
+    let (status, body) = register(Some(k2), true).await;
+    assert_eq!(status, StatusCode::CREATED, "{body}");
+    assert_eq!(body["replaced_device"]["device_name"], "lost-phone");
+    let new_token = body["license_token"].as_str().unwrap().to_string();
+    let (status, _) = api.call(Method::GET, "/v1/devices", Some(&old_token), None).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED, "the old device is unlinked");
+    let (_, inbox) = api.call(Method::GET, "/v1/notifications", Some(&new_token), None).await;
+    assert_eq!(inbox["notifications"][0]["title_en"], "🔁 A device was replaced", "{inbox}");
+
+    // Each key replaces once: the unlinked device's keys are gone.
+    let mut third = json!({ "account_id": account, "device_fingerprint": "third", "device_name": "third", "platform": "ios", "restore_key": b64(&k2), "replace_device": true });
+    let (status, body) = api.call(Method::POST, "/v1/devices/register", None, Some(third.take())).await;
+    assert_eq!((status, body["restore_key"].as_str()), (StatusCode::FORBIDDEN, Some("unknown")));
+}

@@ -17,6 +17,14 @@ struct VaultItemEditor: View {
     @State private var showPasswordGenerator = false
     @State private var loadError: String?
     @State private var saveError: String?
+    /// Rule messages for the current (normalized) payload, by field key.
+    @State private var issueMessages: [String: String] = [:]
+    /// Field keys the user has changed: their messages show live.
+    @State private var touched: Set<String> = []
+    /// After a Save attempt every field's message shows.
+    @State private var attemptedSave = false
+    /// The load of an edited item sets `payload` once without it counting as an edit.
+    @State private var ignoreNextChange = false
 
     init(mode: Mode, onDone: @escaping () -> Void) {
         self.mode = mode
@@ -59,15 +67,33 @@ struct VaultItemEditor: View {
     var body: some View {
         VaultFormChrome(
             title: title,
-            canSave: !payload.displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            // Always tappable: a Save with issues shows every field's message instead.
+            canSave: true,
             isEditing: isEditing,
             onCancel: onDone,
             onSave: save
         ) {
+            if attemptedSave, !issueMessages.isEmpty {
+                Text(L10n.tr("validation.fixToSave", locale: AppLanguage.current.locale))
+                    .font(.qasa(13, weight: .semibold))
+                    .foregroundColor(Theme.danger)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             formFields
         }
         .appLocalization()
-        .onAppear(perform: loadExistingIfNeeded)
+        .onAppear {
+            loadExistingIfNeeded()
+            revalidate()
+        }
+        .onChange(of: payload) { old, new in
+            if ignoreNextChange {
+                ignoreNextChange = false
+            } else {
+                touched.formUnion(Self.changedKeys(old, new))
+            }
+            revalidate()
+        }
         .alert(L10n.tr("vault.couldNotSave", locale: AppLanguage.current.locale), isPresented: Binding(
             get: { saveError != nil },
             set: { if !$0 { saveError = nil } }
@@ -122,13 +148,15 @@ struct VaultItemEditor: View {
 
     private var loginFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: loginBinding(\.itemName))
-            FormTextField(title: L10n.tr("field.email"), text: loginBinding(\.email))
-            FormTextField(title: L10n.tr("field.username"), text: loginBinding(\.username))
+            FormTextField(title: L10n.tr("field.itemName"), text: loginBinding(\.itemName), error: error("itemName"))
+            FormTextField(title: L10n.tr("field.email"), text: loginBinding(\.email), keyboard: .emailAddress, error: error("email"))
+            FormTextField(title: L10n.tr("field.username"), text: loginBinding(\.username), error: error("username"))
             passwordField
+            InlineFieldError(message: error("password"))
             TOTPEditorField(totp: loginTOTPBinding)
-            FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website))
-            FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note))
+            InlineFieldError(message: error("totp"))
+            FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website), keyboard: .URL, error: error("website"))
+            FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note), error: error("note"))
             CollectionPickerField(collectionId: loginCollectionBinding)
         }
     }
@@ -184,8 +212,8 @@ struct VaultItemEditor: View {
 
     private var secureNoteFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.title"), text: noteBinding(\.title))
-            FormTextField(title: L10n.tr("field.content"), text: noteBinding(\.content))
+            FormTextField(title: L10n.tr("field.title"), text: noteBinding(\.title), error: error("title"))
+            FormTextField(title: L10n.tr("field.content"), text: noteBinding(\.content), error: error("content"))
             NoteColorPicker(color: noteColorBinding)
             Toggle(isOn: noteProtectBinding) {
                 Text(L10n.tr("vault.protectItem"))
@@ -200,12 +228,19 @@ struct VaultItemEditor: View {
 
     private var cardFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: cardBinding(\.itemName))
-            FormTextField(title: L10n.tr("field.accountHolder"), text: cardBinding(\.accountHolder))
-            FormTextField(title: L10n.tr("field.number"), text: cardBinding(\.number))
-            FormTextField(title: L10n.tr("field.securityCode"), text: cardBinding(\.securityCode), isSecure: true)
-            ValidatedDateField(title: L10n.tr("field.expiryDate"), text: cardBinding(\.expiryDate))
-            FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note))
+            FormTextField(title: L10n.tr("field.itemName"), text: cardBinding(\.itemName), error: error("itemName"))
+            FormTextField(title: L10n.tr("field.accountHolder"), text: cardBinding(\.accountHolder), error: error("accountHolder"))
+            FormTextField(title: L10n.tr("field.number"), text: cardNumberBinding, keyboard: .numberPad, error: error("number"))
+            FormTextField(title: L10n.tr("field.securityCode"), text: cardSecurityCodeBinding, isSecure: true, keyboard: .numberPad, error: error("securityCode"))
+            // MM/YY, its own format (not a calendar date).
+            FormTextField(
+                title: L10n.tr("field.expiryDate"),
+                text: cardExpiryBinding,
+                placeholder: L10n.tr("field.expiryPlaceholder"),
+                keyboard: .numberPad,
+                error: error("expiryDate")
+            )
+            FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"))
             NoteColorPicker(color: cardColorBinding)
             Button {
                 // NFC stub — gated in UI only
@@ -231,12 +266,12 @@ struct VaultItemEditor: View {
 
     private var bankFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: bankBinding(\.itemName))
-            FormTextField(title: L10n.tr("field.accountHolder"), text: bankBinding(\.accountHolder))
-            FormTextField(title: L10n.tr("field.accountNumber"), text: bankBinding(\.accountNumber))
-            FormTextField(title: L10n.tr("field.routingNumber"), text: bankBinding(\.routingNumber))
-            CountryPickerField(countryCode: bankCountryBinding)
-            FormTextField(title: L10n.tr("field.bankName"), text: bankBinding(\.bankName))
+            FormTextField(title: L10n.tr("field.itemName"), text: bankBinding(\.itemName), error: error("itemName"))
+            FormTextField(title: L10n.tr("field.accountHolder"), text: bankBinding(\.accountHolder), error: error("accountHolder"))
+            FormTextField(title: L10n.tr("field.accountNumber"), text: bankBinding(\.accountNumber), error: error("accountNumber"))
+            FormTextField(title: L10n.tr("field.routingNumber"), text: bankBinding(\.routingNumber), error: error("routingNumber"))
+            CountryPickerField(countryCode: bankCountryBinding, error: error("countryCode"))
+            FormTextField(title: L10n.tr("field.bankName"), text: bankBinding(\.bankName), error: error("bankName"))
         }
     }
 
@@ -256,12 +291,12 @@ struct VaultItemEditor: View {
                 .background(Theme.cardBackground)
                 .cornerRadius(Theme.cornerRadius)
             }
-            FormTextField(title: L10n.tr("field.firstName"), text: nameBinding(\.firstName))
-            FormTextField(title: L10n.tr("field.middleName"), text: nameBinding(\.middleName))
-            FormTextField(title: L10n.tr("field.lastName"), text: nameBinding(\.lastName))
-            FormTextField(title: L10n.tr("field.defaultUsername"), text: nameBinding(\.defaultUsername))
-            ValidatedDateField(title: L10n.tr("field.birthDate"), text: nameBinding(\.birthDate))
-            FormTextField(title: L10n.tr("field.birthPlace"), text: nameBinding(\.birthPlace))
+            FormTextField(title: L10n.tr("field.firstName"), text: nameBinding(\.firstName), error: error("firstName"))
+            FormTextField(title: L10n.tr("field.middleName"), text: nameBinding(\.middleName), error: error("middleName"))
+            FormTextField(title: L10n.tr("field.lastName"), text: nameBinding(\.lastName), error: error("lastName"))
+            FormTextField(title: L10n.tr("field.defaultUsername"), text: nameBinding(\.defaultUsername), error: error("defaultUsername"))
+            ValidatedDateField(title: L10n.tr("field.birthDate"), text: nameBinding(\.birthDate), error: error("birthDate"))
+            FormTextField(title: L10n.tr("field.birthPlace"), text: nameBinding(\.birthPlace), error: error("birthPlace"))
         }
     }
 
@@ -269,7 +304,7 @@ struct VaultItemEditor: View {
 
     private var emailFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: emailBinding(\.itemName))
+            FormTextField(title: L10n.tr("field.itemName"), text: emailBinding(\.itemName), error: error("itemName"))
             VStack(alignment: .leading, spacing: 8) {
                 FormFieldLabel(text: L10n.tr("field.type"))
                 Picker(L10n.tr("field.type"), selection: emailKindBinding) {
@@ -281,7 +316,7 @@ struct VaultItemEditor: View {
                 .background(Theme.cardBackground)
                 .cornerRadius(Theme.cornerRadius)
             }
-            FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email))
+            FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email), keyboard: .emailAddress, error: error("email"))
         }
     }
 
@@ -289,7 +324,7 @@ struct VaultItemEditor: View {
 
     private var phoneFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: phoneBinding(\.itemName))
+            FormTextField(title: L10n.tr("field.itemName"), text: phoneBinding(\.itemName), error: error("itemName"))
 
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 8) {
@@ -319,8 +354,9 @@ struct VaultItemEditor: View {
                         .cornerRadius(Theme.cornerRadius)
                         .overlay(
                             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.stroke, lineWidth: 1)
+                                .stroke(error("countryCode") == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
                         )
+                    InlineFieldError(message: error("countryCode"))
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -352,9 +388,10 @@ struct VaultItemEditor: View {
                         .cornerRadius(Theme.cornerRadius)
                         .overlay(
                             RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.stroke, lineWidth: 1)
+                                .stroke(error("number") == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
                         )
                 }
+                InlineFieldError(message: error("number"))
             }
         }
     }
@@ -363,16 +400,16 @@ struct VaultItemEditor: View {
 
     private var addressFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: addressBinding(\.itemName))
-            FormTextField(title: L10n.tr("field.address"), text: addressBinding(\.address))
-            FormTextField(title: L10n.tr("field.city"), text: addressBinding(\.city))
-            FormTextField(title: L10n.tr("field.zipCode"), text: addressBinding(\.zipCode))
-            CountryPickerField(countryCode: addressCountryBinding)
-            FormTextField(title: L10n.tr("field.recipient"), text: addressBinding(\.recipient))
-            FormTextField(title: L10n.tr("field.building"), text: addressBinding(\.building))
-            FormTextField(title: L10n.tr("field.floor"), text: addressBinding(\.floor))
-            FormTextField(title: L10n.tr("field.apartment"), text: addressBinding(\.apartment))
-            FormTextField(title: L10n.tr("field.doorCode"), text: addressBinding(\.doorCode))
+            FormTextField(title: L10n.tr("field.itemName"), text: addressBinding(\.itemName), error: error("itemName"))
+            FormTextField(title: L10n.tr("field.address"), text: addressBinding(\.address), error: error("address"))
+            FormTextField(title: L10n.tr("field.city"), text: addressBinding(\.city), error: error("city"))
+            FormTextField(title: L10n.tr("field.zipCode"), text: addressBinding(\.zipCode), error: error("zipCode"))
+            CountryPickerField(countryCode: addressCountryBinding, error: error("countryCode"))
+            FormTextField(title: L10n.tr("field.recipient"), text: addressBinding(\.recipient), error: error("recipient"))
+            FormTextField(title: L10n.tr("field.building"), text: addressBinding(\.building), error: error("building"))
+            FormTextField(title: L10n.tr("field.floor"), text: addressBinding(\.floor), error: error("floor"))
+            FormTextField(title: L10n.tr("field.apartment"), text: addressBinding(\.apartment), error: error("apartment"))
+            FormTextField(title: L10n.tr("field.doorCode"), text: addressBinding(\.doorCode), error: error("doorCode"))
             AddressPhonePicker(phoneItemId: addressPhoneBinding)
         }
     }
@@ -381,29 +418,28 @@ struct VaultItemEditor: View {
 
     private var companyFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.companyName"), text: companyBinding(\.companyName))
-            FormTextField(title: L10n.tr("field.jobTitle"), text: companyBinding(\.jobTitle))
+            FormTextField(title: L10n.tr("field.companyName"), text: companyBinding(\.companyName), error: error("companyName"))
+            FormTextField(title: L10n.tr("field.jobTitle"), text: companyBinding(\.jobTitle), error: error("jobTitle"))
         }
     }
 
     private var websiteFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: websiteBinding(\.itemName))
-            FormTextField(title: L10n.tr("field.websiteURL"), text: websiteBinding(\.websiteURL))
+            FormTextField(title: L10n.tr("field.itemName"), text: websiteBinding(\.itemName), error: error("itemName"))
+            FormTextField(title: L10n.tr("field.websiteURL"), text: websiteBinding(\.websiteURL), keyboard: .URL, error: error("websiteURL"))
         }
     }
 
     private var idFields: some View {
         Group {
-            FormTextField(title: L10n.tr("field.name"), text: idBinding(\.name))
-            CountryPickerField(countryCode: idCountryBinding)
-            FormTextField(title: L10n.tr("field.number"), text: idBinding(\.number))
-            // Validated like card expiry and birth date (Android parity).
-            ValidatedDateField(title: L10n.tr("field.issueDate"), text: idBinding(\.issueDate))
+            FormTextField(title: L10n.tr("field.name"), text: idBinding(\.name), error: error("name"))
+            CountryPickerField(countryCode: idCountryBinding, error: error("countryCode"))
+            FormTextField(title: L10n.tr("field.number"), text: idBinding(\.number), error: error("number"))
+            ValidatedDateField(title: L10n.tr("field.issueDate"), text: idBinding(\.issueDate), error: error("issueDate"))
             if case .passport = payload {
-                FormTextField(title: L10n.tr("field.issuePlace"), text: idBinding(\.issuePlace))
+                FormTextField(title: L10n.tr("field.issuePlace"), text: idBinding(\.issuePlace), error: error("issuePlace"))
             }
-            ValidatedDateField(title: L10n.tr("field.expiryDate"), text: idBinding(\.expiryDate))
+            ValidatedDateField(title: L10n.tr("field.expiryDate"), text: idBinding(\.expiryDate), error: error("expiryDate"))
         }
     }
 
@@ -498,6 +534,24 @@ struct VaultItemEditor: View {
                 payload = .card(f)
             }
         )
+    }
+
+    /// Digits grouped for the brand as the user types (`formatCardNumber`).
+    private var cardNumberBinding: Binding<String> {
+        let base = cardBinding(\.number)
+        return Binding(get: { base.wrappedValue }, set: { base.wrappedValue = formatCardNumber(raw: $0) })
+    }
+
+    /// `MM/YY` as the user types (`formatCardExpiry`).
+    private var cardExpiryBinding: Binding<String> {
+        let base = cardBinding(\.expiryDate)
+        return Binding(get: { base.wrappedValue }, set: { base.wrappedValue = formatCardExpiry(raw: $0) })
+    }
+
+    /// Digits only, at most 4 (the longest security code).
+    private var cardSecurityCodeBinding: Binding<String> {
+        let base = cardBinding(\.securityCode)
+        return Binding(get: { base.wrappedValue }, set: { base.wrappedValue = String($0.filter(\.isNumber).prefix(4)) })
     }
 
     private var cardColorBinding: Binding<NoteColor> {
@@ -718,14 +772,57 @@ struct VaultItemEditor: View {
     private func loadExistingIfNeeded() {
         guard case .edit(let id) = mode else { return }
         do {
-            payload = try VaultRepository.shared.payload(for: id)
+            // Opened in stored canonical form (ISO dates, MM/YY…); what still has issues
+            // shows inline, and saving requires fixing it.
+            let loaded = VaultValidation.normalizedOrSame(try VaultRepository.shared.payload(for: id))
+            if loaded != payload {
+                ignoreNextChange = true
+                payload = loaded
+            }
         } catch {
             loadError = error.localizedDescription
         }
     }
 
+    // MARK: - Validation
+
+    private func revalidate() {
+        issueMessages = VaultValidation.messages(VaultValidation.issues(VaultValidation.normalizedOrSame(payload)))
+    }
+
+    /// The message for a field the user has edited, or for any field after a Save attempt.
+    private func error(_ key: String) -> String? {
+        guard attemptedSave || touched.contains(key) else { return nil }
+        return issueMessages[key]
+    }
+
+    /// Payload JSON keys whose values differ (same item type only).
+    static func changedKeys(_ old: VaultPayload, _ new: VaultPayload) -> Set<String> {
+        func fields(_ p: VaultPayload) -> (variant: String, values: [String: Any])? {
+            guard let data = try? VaultValidation.encode(p),
+                  let outer = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let first = outer.first,
+                  let inner = (first.value as? [String: Any])?["_0"] as? [String: Any] else { return nil }
+            return (first.key, inner)
+        }
+        guard let lhsFields = fields(old), let rhsFields = fields(new), lhsFields.variant == rhsFields.variant else { return [] }
+        let a = lhsFields.values, b = rhsFields.values
+        var changed = Set<String>()
+        for key in Set(a.keys).union(b.keys) {
+            let lhs = a[key].map { "\($0)" }
+            let rhs = b[key].map { "\($0)" }
+            if lhs != rhs { changed.insert(key) }
+        }
+        return changed
+    }
+
     private func save() {
         VaultRepository.shared.ensureConfigured(context: modelContext)
+        revalidate()
+        guard issueMessages.isEmpty else {
+            attemptedSave = true
+            return
+        }
         do {
             switch mode {
             case .create:
@@ -734,6 +831,9 @@ struct VaultItemEditor: View {
                 _ = try VaultRepository.shared.save(payload: payload, id: id)
             }
             onDone()
+        } catch let refused as VaultValidationError {
+            issueMessages = VaultValidation.messages(refused.issues)
+            attemptedSave = true
         } catch {
             saveError = error.localizedDescription
         }

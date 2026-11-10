@@ -76,11 +76,12 @@ Requires `curl` and `jq`.
 |--------|------|-------------|
 | GET | `/health` | Health check |
 | GET | `/.well-known/qasa-license-key` | Ed25519 public key |
-| POST | `/v1/devices/register` | Device handshake |
+| POST | `/v1/devices/register` | Device handshake. Optional `restore_key` (+ `replace_device`) from a restored backup lets it replace the device that made the backup when no slot is free |
 | POST | `/v1/devices/link-check` | Can this account add another device? (pairing) |
 | GET | `/v1/devices` | List devices (Bearer license JWT) |
 | DELETE | `/v1/devices/others` | Unlink all except primary (first linked) |
 | DELETE | `/v1/devices/me` | The calling device unlinks itself (logout / reset) |
+| PUT | `/v1/devices/me/restore-key` | The device's new backup restore key hash (SHA-256, base64); keeps the previous one |
 | DELETE | `/v1/devices/{id}` | Unlink device (ends its tokens, push token and VPN session) |
 | DELETE | `/v1/account` | Delete the account (`{confirm_account_id}`); personal data removed, payments kept |
 | GET | `/v1/license` | Refresh license JWT |

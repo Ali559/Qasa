@@ -31,6 +31,8 @@ struct HomeView: View {
     @Environment(AppPreferences.self) private var prefs
     @Bindable private var cache = VaultRepository.shared.cache
     @State private var report: PasswordHealthReport?
+    @Bindable private var backup = BackupPreferences.shared
+    @State private var showBackups = false
     @Query(filter: #Predicate<AppNotification> { $0.isRead == false }) private var unreadLocalNotes: [AppNotification]
 
     /// Bell badge: the server's `unread_count` (whole inbox) plus unread "On this device"
@@ -44,6 +46,12 @@ struct HomeView: View {
             VStack(spacing: 16) {
                 greeting
                 HomeStatusHero(status: status, onAddFirst: { onTab(.passwords) })
+                if backup.shouldRemind(itemCount: cache.rows.count, nowMs: BackupPreferences.nowMs()) {
+                    HomeBackupReminderCard(
+                        onSetUp: { showBackups = true },
+                        onDismiss: { backup.snoozeReminder(nowMs: BackupPreferences.nowMs()) }
+                    )
+                }
                 if status != .empty {
                     HomeHealthCard(report: report, onTap: { onOpen(.passwordHealth) })
                 }
@@ -69,6 +77,10 @@ struct HomeView: View {
             .ignoresSafeArea()
             .animation(.easeInOut(duration: 0.4), value: status)
         )
+        .sheet(isPresented: $showBackups) {
+            BackupsView()
+                .appLocalization()
+        }
         .onAppear(perform: refreshReport)
         .onChange(of: cache.rows) { _, _ in refreshReport() }
         .onChange(of: session.isPremium) { _, _ in refreshReport() }

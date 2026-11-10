@@ -36,6 +36,29 @@ nonisolated struct DeviceLimitErrorBody: Decodable, Sendable {
     let devices_used: Int?
     let device_limit: Int?
     let devices: [RemoteDevice]?
+    /// Only with a full account: `nil` when register sent no restore key, else
+    /// `unknown`, `not_enough` or `replaceable`.
+    var restore_key: String? = nil
+    /// The device the sent restore key may replace (`restore_key == "replaceable"`).
+    var replaceable_device: RestoreKeyDevice? = nil
+
+    var restoreKeyStatus: RestoreKeyStatus? {
+        restore_key.flatMap(RestoreKeyStatus.init(rawValue:))
+    }
+}
+
+/// What the server says about the restore key a limit-blocked registration sent.
+nonisolated enum RestoreKeyStatus: String, Sendable {
+    case unknown
+    case notEnough = "not_enough"
+    case replaceable
+}
+
+/// `replaceable_device` on a 403, `replaced_device` on a 201.
+nonisolated struct RestoreKeyDevice: Decodable, Hashable, Sendable {
+    let id: String
+    let device_name: String
+    let platform: String?
 }
 
 actor QasaAPIClient {
@@ -65,10 +88,12 @@ actor QasaAPIClient {
         _ url: URL,
         method: String = "GET",
         body: (any Encodable)? = nil,
-        authorized: Bool = true
+        authorized: Bool = true,
+        timeout: TimeInterval? = nil
     ) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = method
+        if let timeout { request.timeoutInterval = timeout }
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

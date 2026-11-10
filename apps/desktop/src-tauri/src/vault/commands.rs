@@ -167,7 +167,16 @@ pub async fn vault_change_password(
     with(&state, |v| v.change_password(&current, &new_password))
 }
 
+/// Local vault reset. Forgets the backup settings and backup restore keys too (never the
+/// backup file).
 #[tauri::command]
-pub fn vault_wipe(state: State<'_, VaultState>) -> CommandResult<()> {
-    with(&state, |v| v.wipe())
+pub async fn vault_wipe(
+    app: tauri::AppHandle,
+    state: State<'_, VaultState>,
+    account: State<'_, crate::account::commands::AccountState>,
+) -> CommandResult<()> {
+    with(&state, |v| v.wipe())?;
+    account.0.lock().await.clear_restore_keys();
+    crate::backup::forget(&app);
+    Ok(())
 }

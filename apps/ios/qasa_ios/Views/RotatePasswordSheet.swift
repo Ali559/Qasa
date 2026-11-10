@@ -214,11 +214,10 @@ struct RotatePasswordSheet: View {
         isSaving = true
         defer { isSaving = false }
         do {
-            guard case .login(var fields) = try VaultRepository.shared.payload(for: selected.id) else {
+            guard case .login = try VaultRepository.shared.payload(for: selected.id) else {
                 throw VaultCryptoError.itemNotFound
             }
-            fields.password = generator.password
-            _ = try VaultRepository.shared.save(payload: .login(fields), id: selected.id)
+            try VaultRepository.shared.rotatePassword(itemId: selected.id, to: generator.password)
             errorMessage = nil
             onSaved(selected.name)
             dismiss()

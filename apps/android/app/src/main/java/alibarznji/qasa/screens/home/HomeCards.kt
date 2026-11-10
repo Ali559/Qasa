@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.GppMaybe
 import androidx.compose.material.icons.outlined.TipsAndUpdates
@@ -36,6 +37,8 @@ import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -207,6 +210,39 @@ internal fun BreachedCard(locked: Boolean, onClick: () -> Unit, onUpgrade: () ->
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.nav_breached_passwords), color = c.textPrimary, style = qasaText.rowTitle)
                 Text(stringResource(R.string.home_breached_body), color = c.textSecondary, style = qasaText.bodySmall)
+            }
+        }
+    }
+}
+
+/**
+ * "Back up your vault": shown while the vault has items and no recent backup
+ * (`backupShouldRemind`). The card and its action open Backups; Not now snoozes it.
+ */
+@Composable
+internal fun BackupReminderCard(onOpen: () -> Unit, onDismiss: () -> Unit) {
+    val c = qasaColors
+    HomeCard(onClick = onOpen) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconTile(Icons.Outlined.Backup)
+            Spacer(Modifier.size(QasaDimens.gapSmall))
+            Text(
+                stringResource(R.string.backup_reminder_title),
+                color = c.textPrimary,
+                style = qasaText.rowTitle,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        Spacer(Modifier.height(QasaDimens.contentGap))
+        Text(stringResource(R.string.backup_reminder_body), color = c.textSecondary, style = qasaText.bodySmall)
+        Spacer(Modifier.height(QasaDimens.spaceSmall))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onOpen) {
+                Text(stringResource(R.string.backup_reminder_action), color = c.accent, fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.backup_reminder_dismiss), color = c.textSecondary)
             }
         }
     }

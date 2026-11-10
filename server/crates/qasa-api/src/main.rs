@@ -29,7 +29,7 @@ use std::net::SocketAddr;
 
 use axum::http::{header, Method};
 use axum::middleware::{from_fn, from_fn_with_state};
-use axum::routing::{delete, get, patch, post};
+use axum::routing::{delete, get, patch, post, put};
 use axum::Router;
 use qasa_core::{hash_password, AppConfig, LicenseKeyPair};
 use qasa_db::{connect, run_migrations};
@@ -155,6 +155,7 @@ fn build_router(state: AppState, config: &AppConfig) -> Router {
         .route("/v1/devices", get(devices::list))
         .route("/v1/devices/others", delete(devices::unlink_others))
         .route("/v1/devices/me", delete(devices::unlink_self))
+        .route("/v1/devices/me/restore-key", put(devices::set_restore_key))
         .route("/v1/devices/{device_id}", delete(devices::unlink))
         .route("/v1/license", get(license::refresh))
         .route("/v1/subscription", get(subscriptions::get_current))

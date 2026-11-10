@@ -438,5 +438,15 @@
     "ar": "جارٍ تنزيل التحديث…",
     "ckb": "نوێکردنەوە دادەبەزێت…",
     "en": "Downloading the update…"
+  },
+  "backup.intro": {
+    "en": "A backup is one encrypted file with everything in your vault. Keep it off this computer, for example in iCloud Drive, Google Drive or on a USB stick, so you can get your vault back if you lose the computer or delete Qasa. It opens only with your main password.",
+    "ar": "النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الحاسوب، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩ أو على ذاكرة ⁨USB⁩، لتستعيد خزنتك إذا فقدت الحاسوب أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.",
+    "ckb": "باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم کۆمپیوتەرە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩، ⁨Google Drive⁩ یان فلاشێکی ⁨USB⁩، تا ئەگەر کۆمپیوتەرەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە."
+  },
+  "backup.reminder.body": {
+    "en": "Your vault is only on this computer. If you lose it or delete Qasa, a backup is the only way to get your passwords back.",
+    "ar": "خزنتك موجودة على هذا الحاسوب فقط. إذا فقدته أو حذفت قاصة، فالنسخة الاحتياطية هي الطريقة الوحيدة لاستعادة كلمات مرورك.",
+    "ckb": "کۆگاکەت تەنها لەسەر ئەم کۆمپیوتەرەیە. ئەگەر ونی بکەیت یان قاسە بسڕیتەوە، باکئەپ تاکە ڕێگەیە بۆ گەڕاندنەوەی وشە نهێنییەکانت."
   }
 }

@@ -431,6 +431,22 @@ fileprivate struct FfiConverterUInt32: FfiConverterPrimitive {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterInt32: FfiConverterPrimitive {
+    typealias FfiType = Int32
+    typealias SwiftType = Int32
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int32, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterInt64: FfiConverterPrimitive {
     typealias FfiType = Int64
     typealias SwiftType = Int64
@@ -1067,6 +1083,83 @@ public func FfiConverterTypeSyncStoreCallback_lower(_ value: SyncStoreCallback) 
 }
 
 
+/**
+ * A backup's header, readable without the password.
+ */
+public struct FfiBackupInfo {
+    public var createdAtMs: Int64
+    public var deviceName: String
+    public var platform: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(createdAtMs: Int64, deviceName: String, platform: String) {
+        self.createdAtMs = createdAtMs
+        self.deviceName = deviceName
+        self.platform = platform
+    }
+}
+
+
+
+extension FfiBackupInfo: Equatable, Hashable {
+    public static func ==(lhs: FfiBackupInfo, rhs: FfiBackupInfo) -> Bool {
+        if lhs.createdAtMs != rhs.createdAtMs {
+            return false
+        }
+        if lhs.deviceName != rhs.deviceName {
+            return false
+        }
+        if lhs.platform != rhs.platform {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(createdAtMs)
+        hasher.combine(deviceName)
+        hasher.combine(platform)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiBackupInfo: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiBackupInfo {
+        return
+            try FfiBackupInfo(
+                createdAtMs: FfiConverterInt64.read(from: &buf), 
+                deviceName: FfiConverterString.read(from: &buf), 
+                platform: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: FfiBackupInfo, into buf: inout [UInt8]) {
+        FfiConverterInt64.write(value.createdAtMs, into: &buf)
+        FfiConverterString.write(value.deviceName, into: &buf)
+        FfiConverterString.write(value.platform, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiBackupInfo_lift(_ buf: RustBuffer) throws -> FfiBackupInfo {
+    return try FfiConverterTypeFfiBackupInfo.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiBackupInfo_lower(_ value: FfiBackupInfo) -> RustBuffer {
+    return FfiConverterTypeFfiBackupInfo.lower(value)
+}
+
+
 public struct FfiCollection {
     public var id: String
     /**
@@ -1162,6 +1255,165 @@ public func FfiConverterTypeFfiCollection_lift(_ buf: RustBuffer) throws -> FfiC
 #endif
 public func FfiConverterTypeFfiCollection_lower(_ value: FfiCollection) -> RustBuffer {
     return FfiConverterTypeFfiCollection.lower(value)
+}
+
+
+/**
+ * A calendar day. The phones pass their local "today".
+ */
+public struct FfiDate {
+    public var year: Int32
+    public var month: UInt32
+    public var day: UInt32
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(year: Int32, month: UInt32, day: UInt32) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
+}
+
+
+
+extension FfiDate: Equatable, Hashable {
+    public static func ==(lhs: FfiDate, rhs: FfiDate) -> Bool {
+        if lhs.year != rhs.year {
+            return false
+        }
+        if lhs.month != rhs.month {
+            return false
+        }
+        if lhs.day != rhs.day {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(year)
+        hasher.combine(month)
+        hasher.combine(day)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiDate: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiDate {
+        return
+            try FfiDate(
+                year: FfiConverterInt32.read(from: &buf), 
+                month: FfiConverterUInt32.read(from: &buf), 
+                day: FfiConverterUInt32.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: FfiDate, into buf: inout [UInt8]) {
+        FfiConverterInt32.write(value.year, into: &buf)
+        FfiConverterUInt32.write(value.month, into: &buf)
+        FfiConverterUInt32.write(value.day, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiDate_lift(_ buf: RustBuffer) throws -> FfiDate {
+    return try FfiConverterTypeFfiDate.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiDate_lower(_ value: FfiDate) -> RustBuffer {
+    return FfiConverterTypeFfiDate.lower(value)
+}
+
+
+public struct FfiFieldIssue {
+    public var field: FfiField
+    public var problem: FfiProblem
+    /**
+     * Stable `field:problem` id (`number:cardNumberChecksum`) for logs and the golden
+     * vector tests. The UI switches on `field` / `problem`.
+     */
+    public var code: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(field: FfiField, problem: FfiProblem, 
+        /**
+         * Stable `field:problem` id (`number:cardNumberChecksum`) for logs and the golden
+         * vector tests. The UI switches on `field` / `problem`.
+         */code: String) {
+        self.field = field
+        self.problem = problem
+        self.code = code
+    }
+}
+
+
+
+extension FfiFieldIssue: Equatable, Hashable {
+    public static func ==(lhs: FfiFieldIssue, rhs: FfiFieldIssue) -> Bool {
+        if lhs.field != rhs.field {
+            return false
+        }
+        if lhs.problem != rhs.problem {
+            return false
+        }
+        if lhs.code != rhs.code {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(field)
+        hasher.combine(problem)
+        hasher.combine(code)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiFieldIssue: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiFieldIssue {
+        return
+            try FfiFieldIssue(
+                field: FfiConverterTypeFfiField.read(from: &buf), 
+                problem: FfiConverterTypeFfiProblem.read(from: &buf), 
+                code: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: FfiFieldIssue, into buf: inout [UInt8]) {
+        FfiConverterTypeFfiField.write(value.field, into: &buf)
+        FfiConverterTypeFfiProblem.write(value.problem, into: &buf)
+        FfiConverterString.write(value.code, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiFieldIssue_lift(_ buf: RustBuffer) throws -> FfiFieldIssue {
+    return try FfiConverterTypeFfiFieldIssue.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiFieldIssue_lower(_ value: FfiFieldIssue) -> RustBuffer {
+    return FfiConverterTypeFfiFieldIssue.lower(value)
 }
 
 
@@ -1488,6 +1740,112 @@ public func FfiConverterTypeFfiOutcome_lower(_ value: FfiOutcome) -> RustBuffer 
 }
 
 
+public struct FfiRestoreOutcome {
+    /**
+     * This device had no vault and took the backup's vault and account. Unlock with the
+     * password just typed.
+     */
+    public var adopted: Bool
+    public var written: UInt32
+    public var itemsInBackup: UInt32
+    public var info: FfiBackupInfo
+    /**
+     * Send it when registering this device (`restore_key` on register), so it can take
+     * the place of the device that made the backup. `None` for a backup without one.
+     */
+    public var restoreKey: Data?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * This device had no vault and took the backup's vault and account. Unlock with the
+         * password just typed.
+         */adopted: Bool, written: UInt32, itemsInBackup: UInt32, info: FfiBackupInfo, 
+        /**
+         * Send it when registering this device (`restore_key` on register), so it can take
+         * the place of the device that made the backup. `None` for a backup without one.
+         */restoreKey: Data?) {
+        self.adopted = adopted
+        self.written = written
+        self.itemsInBackup = itemsInBackup
+        self.info = info
+        self.restoreKey = restoreKey
+    }
+}
+
+
+
+extension FfiRestoreOutcome: Equatable, Hashable {
+    public static func ==(lhs: FfiRestoreOutcome, rhs: FfiRestoreOutcome) -> Bool {
+        if lhs.adopted != rhs.adopted {
+            return false
+        }
+        if lhs.written != rhs.written {
+            return false
+        }
+        if lhs.itemsInBackup != rhs.itemsInBackup {
+            return false
+        }
+        if lhs.info != rhs.info {
+            return false
+        }
+        if lhs.restoreKey != rhs.restoreKey {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(adopted)
+        hasher.combine(written)
+        hasher.combine(itemsInBackup)
+        hasher.combine(info)
+        hasher.combine(restoreKey)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiRestoreOutcome: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiRestoreOutcome {
+        return
+            try FfiRestoreOutcome(
+                adopted: FfiConverterBool.read(from: &buf), 
+                written: FfiConverterUInt32.read(from: &buf), 
+                itemsInBackup: FfiConverterUInt32.read(from: &buf), 
+                info: FfiConverterTypeFfiBackupInfo.read(from: &buf), 
+                restoreKey: FfiConverterOptionData.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: FfiRestoreOutcome, into buf: inout [UInt8]) {
+        FfiConverterBool.write(value.adopted, into: &buf)
+        FfiConverterUInt32.write(value.written, into: &buf)
+        FfiConverterUInt32.write(value.itemsInBackup, into: &buf)
+        FfiConverterTypeFfiBackupInfo.write(value.info, into: &buf)
+        FfiConverterOptionData.write(value.restoreKey, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiRestoreOutcome_lift(_ buf: RustBuffer) throws -> FfiRestoreOutcome {
+    return try FfiConverterTypeFfiRestoreOutcome.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiRestoreOutcome_lower(_ value: FfiRestoreOutcome) -> RustBuffer {
+    return FfiConverterTypeFfiRestoreOutcome.lower(value)
+}
+
+
 public struct FfiVaultMeta {
     public var salt: Data
     public var kdfVersion: UInt32
@@ -1562,6 +1920,529 @@ public func FfiConverterTypeFfiVaultMeta_lower(_ value: FfiVaultMeta) -> RustBuf
 }
 
 
+/**
+ * Names avoid `message` and `Protocol`, as for [`FfiSyncError`].
+ */
+public enum FfiBackupError {
+
+    
+    
+    case NotABackup
+    case NewerVersion
+    case WrongPassword
+    case DifferentVault
+    case NoVault
+    case Store(detail: String
+    )
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiBackupError: FfiConverterRustBuffer {
+    typealias SwiftType = FfiBackupError
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiBackupError {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+
+        
+
+        
+        case 1: return .NotABackup
+        case 2: return .NewerVersion
+        case 3: return .WrongPassword
+        case 4: return .DifferentVault
+        case 5: return .NoVault
+        case 6: return .Store(
+            detail: try FfiConverterString.read(from: &buf)
+            )
+
+         default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: FfiBackupError, into buf: inout [UInt8]) {
+        switch value {
+
+        
+
+        
+        
+        case .NotABackup:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .NewerVersion:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .WrongPassword:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .DifferentVault:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .NoVault:
+            writeInt(&buf, Int32(5))
+        
+        
+        case let .Store(detail):
+            writeInt(&buf, Int32(6))
+            FfiConverterString.write(detail, into: &buf)
+            
+        }
+    }
+}
+
+
+extension FfiBackupError: Equatable, Hashable {}
+
+extension FfiBackupError: Foundation.LocalizedError {
+    public var errorDescription: String? {
+        String(reflecting: self)
+    }
+}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * `qasa_vault::validate::CardBrand`.
+ */
+
+public enum FfiCardBrand {
+    
+    case visa
+    case mastercard
+    case amex
+    case discover
+    case dinersClub
+    case jcb
+    case unionPay
+    case maestro
+    case mir
+    case unknown
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiCardBrand: FfiConverterRustBuffer {
+    typealias SwiftType = FfiCardBrand
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiCardBrand {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .visa
+        
+        case 2: return .mastercard
+        
+        case 3: return .amex
+        
+        case 4: return .discover
+        
+        case 5: return .dinersClub
+        
+        case 6: return .jcb
+        
+        case 7: return .unionPay
+        
+        case 8: return .maestro
+        
+        case 9: return .mir
+        
+        case 10: return .unknown
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: FfiCardBrand, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .visa:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .mastercard:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .amex:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .discover:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .dinersClub:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .jcb:
+            writeInt(&buf, Int32(6))
+        
+        
+        case .unionPay:
+            writeInt(&buf, Int32(7))
+        
+        
+        case .maestro:
+            writeInt(&buf, Int32(8))
+        
+        
+        case .mir:
+            writeInt(&buf, Int32(9))
+        
+        
+        case .unknown:
+            writeInt(&buf, Int32(10))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiCardBrand_lift(_ buf: RustBuffer) throws -> FfiCardBrand {
+    return try FfiConverterTypeFfiCardBrand.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiCardBrand_lower(_ value: FfiCardBrand) -> RustBuffer {
+    return FfiConverterTypeFfiCardBrand.lower(value)
+}
+
+
+
+extension FfiCardBrand: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * The payload field an issue belongs to. `qasa_vault::validate::Field`.
+ */
+
+public enum FfiField {
+    
+    case itemName
+    case email
+    case username
+    case password
+    case website
+    case note
+    case totp
+    case title
+    case content
+    case accountHolder
+    case number
+    case securityCode
+    case expiryDate
+    case accountNumber
+    case routingNumber
+    case countryCode
+    case bankName
+    case firstName
+    case middleName
+    case lastName
+    case defaultUsername
+    case birthDate
+    case birthPlace
+    case address
+    case city
+    case zipCode
+    case recipient
+    case building
+    case floor
+    case apartment
+    case doorCode
+    case companyName
+    case jobTitle
+    case websiteUrl
+    case name
+    case issueDate
+    case issuePlace
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiField: FfiConverterRustBuffer {
+    typealias SwiftType = FfiField
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiField {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .itemName
+        
+        case 2: return .email
+        
+        case 3: return .username
+        
+        case 4: return .password
+        
+        case 5: return .website
+        
+        case 6: return .note
+        
+        case 7: return .totp
+        
+        case 8: return .title
+        
+        case 9: return .content
+        
+        case 10: return .accountHolder
+        
+        case 11: return .number
+        
+        case 12: return .securityCode
+        
+        case 13: return .expiryDate
+        
+        case 14: return .accountNumber
+        
+        case 15: return .routingNumber
+        
+        case 16: return .countryCode
+        
+        case 17: return .bankName
+        
+        case 18: return .firstName
+        
+        case 19: return .middleName
+        
+        case 20: return .lastName
+        
+        case 21: return .defaultUsername
+        
+        case 22: return .birthDate
+        
+        case 23: return .birthPlace
+        
+        case 24: return .address
+        
+        case 25: return .city
+        
+        case 26: return .zipCode
+        
+        case 27: return .recipient
+        
+        case 28: return .building
+        
+        case 29: return .floor
+        
+        case 30: return .apartment
+        
+        case 31: return .doorCode
+        
+        case 32: return .companyName
+        
+        case 33: return .jobTitle
+        
+        case 34: return .websiteUrl
+        
+        case 35: return .name
+        
+        case 36: return .issueDate
+        
+        case 37: return .issuePlace
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: FfiField, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .itemName:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .email:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .username:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .password:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .website:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .note:
+            writeInt(&buf, Int32(6))
+        
+        
+        case .totp:
+            writeInt(&buf, Int32(7))
+        
+        
+        case .title:
+            writeInt(&buf, Int32(8))
+        
+        
+        case .content:
+            writeInt(&buf, Int32(9))
+        
+        
+        case .accountHolder:
+            writeInt(&buf, Int32(10))
+        
+        
+        case .number:
+            writeInt(&buf, Int32(11))
+        
+        
+        case .securityCode:
+            writeInt(&buf, Int32(12))
+        
+        
+        case .expiryDate:
+            writeInt(&buf, Int32(13))
+        
+        
+        case .accountNumber:
+            writeInt(&buf, Int32(14))
+        
+        
+        case .routingNumber:
+            writeInt(&buf, Int32(15))
+        
+        
+        case .countryCode:
+            writeInt(&buf, Int32(16))
+        
+        
+        case .bankName:
+            writeInt(&buf, Int32(17))
+        
+        
+        case .firstName:
+            writeInt(&buf, Int32(18))
+        
+        
+        case .middleName:
+            writeInt(&buf, Int32(19))
+        
+        
+        case .lastName:
+            writeInt(&buf, Int32(20))
+        
+        
+        case .defaultUsername:
+            writeInt(&buf, Int32(21))
+        
+        
+        case .birthDate:
+            writeInt(&buf, Int32(22))
+        
+        
+        case .birthPlace:
+            writeInt(&buf, Int32(23))
+        
+        
+        case .address:
+            writeInt(&buf, Int32(24))
+        
+        
+        case .city:
+            writeInt(&buf, Int32(25))
+        
+        
+        case .zipCode:
+            writeInt(&buf, Int32(26))
+        
+        
+        case .recipient:
+            writeInt(&buf, Int32(27))
+        
+        
+        case .building:
+            writeInt(&buf, Int32(28))
+        
+        
+        case .floor:
+            writeInt(&buf, Int32(29))
+        
+        
+        case .apartment:
+            writeInt(&buf, Int32(30))
+        
+        
+        case .doorCode:
+            writeInt(&buf, Int32(31))
+        
+        
+        case .companyName:
+            writeInt(&buf, Int32(32))
+        
+        
+        case .jobTitle:
+            writeInt(&buf, Int32(33))
+        
+        
+        case .websiteUrl:
+            writeInt(&buf, Int32(34))
+        
+        
+        case .name:
+            writeInt(&buf, Int32(35))
+        
+        
+        case .issueDate:
+            writeInt(&buf, Int32(36))
+        
+        
+        case .issuePlace:
+            writeInt(&buf, Int32(37))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiField_lift(_ buf: RustBuffer) throws -> FfiField {
+    return try FfiConverterTypeFfiField.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiField_lower(_ value: FfiField) -> RustBuffer {
+    return FfiConverterTypeFfiField.lower(value)
+}
+
+
+
+extension FfiField: Equatable, Hashable {}
+
+
+
+
 public enum FfiPayloadError {
 
     
@@ -1611,6 +2492,244 @@ extension FfiPayloadError: Foundation.LocalizedError {
         String(reflecting: self)
     }
 }
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * What is wrong with a field. `qasa_vault::validate::Problem`; the apps localize it.
+ */
+
+public enum FfiProblem {
+    
+    case required
+    case tooLong(max: UInt32
+    )
+    case digitsOnly
+    case lettersDigitsOnly
+    case cardNumberLength
+    case cardNumberChecksum
+    case securityCodeLength(min: UInt32, max: UInt32
+    )
+    case expiryFormat
+    case expiryMonth
+    case expiryTooFar(maxYears: UInt32
+    )
+    case dateInvalid
+    case dateInFuture
+    case dateTooOld
+    case dateBeforeIssue
+    case dateTooFar(maxYears: UInt32
+    )
+    case emailInvalid
+    case urlInvalid
+    case phoneLength(min: UInt32, max: UInt32
+    )
+    case phoneCountryMismatch
+    case ibanInvalid
+    case ibanChecksum
+    case routingInvalid
+    case countryInvalid
+    case totpInvalid
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeFfiProblem: FfiConverterRustBuffer {
+    typealias SwiftType = FfiProblem
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> FfiProblem {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .required
+        
+        case 2: return .tooLong(max: try FfiConverterUInt32.read(from: &buf)
+        )
+        
+        case 3: return .digitsOnly
+        
+        case 4: return .lettersDigitsOnly
+        
+        case 5: return .cardNumberLength
+        
+        case 6: return .cardNumberChecksum
+        
+        case 7: return .securityCodeLength(min: try FfiConverterUInt32.read(from: &buf), max: try FfiConverterUInt32.read(from: &buf)
+        )
+        
+        case 8: return .expiryFormat
+        
+        case 9: return .expiryMonth
+        
+        case 10: return .expiryTooFar(maxYears: try FfiConverterUInt32.read(from: &buf)
+        )
+        
+        case 11: return .dateInvalid
+        
+        case 12: return .dateInFuture
+        
+        case 13: return .dateTooOld
+        
+        case 14: return .dateBeforeIssue
+        
+        case 15: return .dateTooFar(maxYears: try FfiConverterUInt32.read(from: &buf)
+        )
+        
+        case 16: return .emailInvalid
+        
+        case 17: return .urlInvalid
+        
+        case 18: return .phoneLength(min: try FfiConverterUInt32.read(from: &buf), max: try FfiConverterUInt32.read(from: &buf)
+        )
+        
+        case 19: return .phoneCountryMismatch
+        
+        case 20: return .ibanInvalid
+        
+        case 21: return .ibanChecksum
+        
+        case 22: return .routingInvalid
+        
+        case 23: return .countryInvalid
+        
+        case 24: return .totpInvalid
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: FfiProblem, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .required:
+            writeInt(&buf, Int32(1))
+        
+        
+        case let .tooLong(max):
+            writeInt(&buf, Int32(2))
+            FfiConverterUInt32.write(max, into: &buf)
+            
+        
+        case .digitsOnly:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .lettersDigitsOnly:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .cardNumberLength:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .cardNumberChecksum:
+            writeInt(&buf, Int32(6))
+        
+        
+        case let .securityCodeLength(min,max):
+            writeInt(&buf, Int32(7))
+            FfiConverterUInt32.write(min, into: &buf)
+            FfiConverterUInt32.write(max, into: &buf)
+            
+        
+        case .expiryFormat:
+            writeInt(&buf, Int32(8))
+        
+        
+        case .expiryMonth:
+            writeInt(&buf, Int32(9))
+        
+        
+        case let .expiryTooFar(maxYears):
+            writeInt(&buf, Int32(10))
+            FfiConverterUInt32.write(maxYears, into: &buf)
+            
+        
+        case .dateInvalid:
+            writeInt(&buf, Int32(11))
+        
+        
+        case .dateInFuture:
+            writeInt(&buf, Int32(12))
+        
+        
+        case .dateTooOld:
+            writeInt(&buf, Int32(13))
+        
+        
+        case .dateBeforeIssue:
+            writeInt(&buf, Int32(14))
+        
+        
+        case let .dateTooFar(maxYears):
+            writeInt(&buf, Int32(15))
+            FfiConverterUInt32.write(maxYears, into: &buf)
+            
+        
+        case .emailInvalid:
+            writeInt(&buf, Int32(16))
+        
+        
+        case .urlInvalid:
+            writeInt(&buf, Int32(17))
+        
+        
+        case let .phoneLength(min,max):
+            writeInt(&buf, Int32(18))
+            FfiConverterUInt32.write(min, into: &buf)
+            FfiConverterUInt32.write(max, into: &buf)
+            
+        
+        case .phoneCountryMismatch:
+            writeInt(&buf, Int32(19))
+        
+        
+        case .ibanInvalid:
+            writeInt(&buf, Int32(20))
+        
+        
+        case .ibanChecksum:
+            writeInt(&buf, Int32(21))
+        
+        
+        case .routingInvalid:
+            writeInt(&buf, Int32(22))
+        
+        
+        case .countryInvalid:
+            writeInt(&buf, Int32(23))
+        
+        
+        case .totpInvalid:
+            writeInt(&buf, Int32(24))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiProblem_lift(_ buf: RustBuffer) throws -> FfiProblem {
+    return try FfiConverterTypeFfiProblem.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeFfiProblem_lower(_ value: FfiProblem) -> RustBuffer {
+    return FfiConverterTypeFfiProblem.lower(value)
+}
+
+
+
+extension FfiProblem: Equatable, Hashable {}
+
+
 
 
 /**
@@ -1780,6 +2899,54 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionData: FfiConverterRustBuffer {
+    typealias SwiftType = Data?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterData.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterData.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeFfiDate: FfiConverterRustBuffer {
+    typealias SwiftType = FfiDate?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeFfiDate.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeFfiDate.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypeFfiVaultMeta: FfiConverterRustBuffer {
     typealias SwiftType = FfiVaultMeta?
 
@@ -1798,6 +2965,31 @@ fileprivate struct FfiConverterOptionTypeFfiVaultMeta: FfiConverterRustBuffer {
         case 1: return try FfiConverterTypeFfiVaultMeta.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceUInt32: FfiConverterRustBuffer {
+    typealias SwiftType = [UInt32]
+
+    public static func write(_ value: [UInt32], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterUInt32.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [UInt32] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [UInt32]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterUInt32.read(from: &buf))
+        }
+        return seq
     }
 }
 
@@ -1829,6 +3021,31 @@ fileprivate struct FfiConverterSequenceTypeFfiCollection: FfiConverterRustBuffer
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeFfiFieldIssue: FfiConverterRustBuffer {
+    typealias SwiftType = [FfiFieldIssue]
+
+    public static func write(_ value: [FfiFieldIssue], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeFfiFieldIssue.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [FfiFieldIssue] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [FfiFieldIssue]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeFfiFieldIssue.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeFfiItem: FfiConverterRustBuffer {
     typealias SwiftType = [FfiItem]
 
@@ -1849,6 +3066,169 @@ fileprivate struct FfiConverterSequenceTypeFfiItem: FfiConverterRustBuffer {
         }
         return seq
     }
+}
+/**
+ * The whole backup file of this device's vault. `enc_key` is the unlocked vault's 32-byte
+ * data key; `restore_key` is this device's restore key once the server confirmed its hash
+ * (else `None`). Write the bytes over the device's previous backup.
+ */
+public func backupCreate(encKey: Data, restoreKey: Data?, store: SyncStoreCallback)throws  -> Data {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeFfiBackupError.lift) {
+    uniffi_qasa_ffi_fn_func_backup_create(
+        FfiConverterData.lower(encKey),
+        FfiConverterOptionData.lower(restoreKey),
+        FfiConverterTypeSyncStoreCallback.lower(store),$0
+    )
+})
+}
+/**
+ * The fixed file name of this device's backup: `Qasa backup - <device>.qasabackup`.
+ */
+public func backupFileName(deviceName: String) -> String {
+    return try!  FfiConverterString.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_file_name(
+        FfiConverterString.lower(deviceName),$0
+    )
+})
+}
+/**
+ * The header of a picked file: when, and from which device. Fails on anything that isn't
+ * a backup this build can read.
+ */
+public func backupInfo(file: Data)throws  -> FfiBackupInfo {
+    return try  FfiConverterTypeFfiBackupInfo.lift(try rustCallWithError(FfiConverterTypeFfiBackupError.lift) {
+    uniffi_qasa_ffi_fn_func_backup_info(
+        FfiConverterData.lower(file),$0
+    )
+})
+}
+/**
+ * Whether an automatic backup is due. `frequency`: `off`, `daily`, `weekly`, `monthly`.
+ */
+public func backupIsDue(frequency: String, lastBackupMs: Int64?, nowMs: Int64) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_is_due(
+        FfiConverterString.lower(frequency),
+        FfiConverterOptionInt64.lower(lastBackupMs),
+        FfiConverterInt64.lower(nowMs),$0
+    )
+})
+}
+/**
+ * A fresh random 32-byte restore key. Keep it in the Keychain / Keystore.
+ */
+public func backupNewRestoreKey() -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_new_restore_key($0
+    )
+})
+}
+/**
+ * How long a dismissed reminder stays away, in ms.
+ */
+public func backupReminderSnoozeMs() -> Int64 {
+    return try!  FfiConverterInt64.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_reminder_snooze_ms($0
+    )
+})
+}
+/**
+ * Restores a backup with its master password (slow: PBKDF2). A device without a vault
+ * takes the backup's vault and account; the same vault merges; a different one refuses.
+ */
+public func backupRestore(file: Data, password: String, store: SyncStoreCallback)throws  -> FfiRestoreOutcome {
+    return try  FfiConverterTypeFfiRestoreOutcome.lift(try rustCallWithError(FfiConverterTypeFfiBackupError.lift) {
+    uniffi_qasa_ffi_fn_func_backup_restore(
+        FfiConverterData.lower(file),
+        FfiConverterString.lower(password),
+        FfiConverterTypeSyncStoreCallback.lower(store),$0
+    )
+})
+}
+/**
+ * SHA-256 of a restore key: what `PUT /v1/devices/me/restore-key` sends.
+ */
+public func backupRestoreKeyHash(key: Data) -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_restore_key_hash(
+        FfiConverterData.lower(key),$0
+    )
+})
+}
+/**
+ * Whether to show the "back up your vault" reminder.
+ */
+public func backupShouldRemind(lastBackupMs: Int64?, itemCount: UInt32, snoozedUntilMs: Int64?, nowMs: Int64) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_backup_should_remind(
+        FfiConverterOptionInt64.lower(lastBackupMs),
+        FfiConverterUInt32.lower(itemCount),
+        FfiConverterOptionInt64.lower(snoozedUntilMs),
+        FfiConverterInt64.lower(nowMs),$0
+    )
+})
+}
+/**
+ * The card brand from the leading digits.
+ */
+public func cardBrand(number: String) -> FfiCardBrand {
+    return try!  FfiConverterTypeFfiCardBrand.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_card_brand(
+        FfiConverterString.lower(number),$0
+    )
+})
+}
+/**
+ * `(min, max)` security-code digits for a card number's brand, as `[min, max]`.
+ */
+public func cardSecurityCodeDigits(number: String) -> [UInt32] {
+    return try!  FfiConverterSequenceUInt32.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_card_security_code_digits(
+        FfiConverterString.lower(number),$0
+    )
+})
+}
+/**
+ * Card expiry as the user types it: `MM/YY`.
+ */
+public func formatCardExpiry(raw: String) -> String {
+    return try!  FfiConverterString.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_format_card_expiry(
+        FfiConverterString.lower(raw),$0
+    )
+})
+}
+/**
+ * Card number as the user types it: digits only, grouped for the brand.
+ */
+public func formatCardNumber(raw: String) -> String {
+    return try!  FfiConverterString.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_format_card_number(
+        FfiConverterString.lower(raw),$0
+    )
+})
+}
+/**
+ * The canonical stored form of a payload (dates `YYYY-MM-DD`, expiry `MM/YY`, grouped card
+ * numbers, ASCII digits…), in the same JSON shape it came in (iOS or Android).
+ */
+public func normalizePayload(json: Data)throws  -> Data {
+    return try  FfiConverterData.lift(try rustCallWithError(FfiConverterTypeFfiPayloadError.lift) {
+    uniffi_qasa_ffi_fn_func_normalize_payload(
+        FfiConverterData.lower(json),$0
+    )
+})
+}
+/**
+ * Reads a stored date (`YYYY-MM-DD`, or the forms older versions stored) so the UI can
+ * show it localized. `None` when it isn't a date.
+ */
+public func parseVaultDate(raw: String) -> FfiDate? {
+    return try!  FfiConverterOptionTypeFfiDate.lift(try! rustCall() {
+    uniffi_qasa_ffi_fn_func_parse_vault_date(
+        FfiConverterString.lower(raw),$0
+    )
+})
 }
 /**
  * Any payload JSON → Android's shape. Android calls this on every payload it receives.
@@ -1884,6 +3264,18 @@ public func syncJoin(host: String, port: UInt16, code: String, store: SyncStoreC
     )
 })
 }
+/**
+ * Every problem with a payload (iOS or Android JSON), at most one per field, in form
+ * order. Empty means it may be saved. Run it on the output of [`normalize_payload`].
+ */
+public func validatePayload(json: Data, today: FfiDate)throws  -> [FfiFieldIssue] {
+    return try  FfiConverterSequenceTypeFfiFieldIssue.lift(try rustCallWithError(FfiConverterTypeFfiPayloadError.lift) {
+    uniffi_qasa_ffi_fn_func_validate_payload(
+        FfiConverterData.lower(json),
+        FfiConverterTypeFfiDate.lower(today),$0
+    )
+})
+}
 
 private enum InitializationResult {
     case ok
@@ -1900,6 +3292,51 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
+    if (uniffi_qasa_ffi_checksum_func_backup_create() != 14301) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_file_name() != 62386) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_info() != 44990) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_is_due() != 46040) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_new_restore_key() != 47742) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_reminder_snooze_ms() != 28556) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_restore() != 9743) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_restore_key_hash() != 47671) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_backup_should_remind() != 37740) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_card_brand() != 39906) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_card_security_code_digits() != 36829) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_format_card_expiry() != 17697) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_format_card_number() != 18430) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_normalize_payload() != 50973) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_parse_vault_date() != 9174) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_qasa_ffi_checksum_func_payload_to_android() != 38264) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1907,6 +3344,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_qasa_ffi_checksum_func_sync_join() != 41150) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_qasa_ffi_checksum_func_validate_payload() != 24795) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_qasa_ffi_checksum_method_synchost_code() != 58819) {

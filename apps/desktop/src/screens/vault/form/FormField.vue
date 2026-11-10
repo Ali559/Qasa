@@ -1,18 +1,43 @@
 <script setup lang="ts">
-// iOS `FormTextField`: section label over a 14pt-padded card field.
+// iOS `FormTextField`: section label over a 14pt-padded card field, with the field-rule
+// message (if any) underneath.
 import { ref } from 'vue'
 
-defineProps<{ label: string; secure?: boolean; multiline?: boolean; mono?: boolean; inputmode?: 'text' | 'tel' | 'email' | 'url' | 'numeric' }>()
+import FieldError from './FieldError.vue'
+
+defineProps<{
+  label: string
+  secure?: boolean
+  multiline?: boolean
+  mono?: boolean
+  inputmode?: 'text' | 'tel' | 'email' | 'url' | 'numeric'
+  placeholder?: string
+  maxlength?: number
+  /** A localized field-rule message; shown under the field and marks it invalid. */
+  error?: string | null
+}>()
 const model = defineModel<string>({ required: true })
 const id = `f-${Math.random().toString(36).slice(2, 9)}`
+const errorId = `${id}-error`
 const focused = ref(false)
 </script>
 
 <template>
   <div class="form-field">
     <label :for="id" class="label">{{ label }}</label>
-    <div class="box" :class="{ focused }">
-      <textarea v-if="multiline" :id="id" v-model="model" rows="3" @focus="focused = true" @blur="focused = false" />
+    <div class="box" :class="{ focused, invalid: !!error }">
+      <textarea
+        v-if="multiline"
+        :id="id"
+        v-model="model"
+        rows="3"
+        :placeholder="placeholder"
+        :maxlength="maxlength"
+        :aria-invalid="!!error"
+        :aria-describedby="error ? errorId : undefined"
+        @focus="focused = true"
+        @blur="focused = false"
+      />
       <input
         v-else
         :id="id"
@@ -20,6 +45,10 @@ const focused = ref(false)
         :type="secure ? 'password' : 'text'"
         :inputmode="inputmode"
         :class="{ mono }"
+        :placeholder="placeholder"
+        :maxlength="maxlength"
+        :aria-invalid="!!error"
+        :aria-describedby="error ? errorId : undefined"
         autocomplete="off"
         spellcheck="false"
         @focus="focused = true"
@@ -27,6 +56,7 @@ const focused = ref(false)
       />
       <slot name="trailing" />
     </div>
+    <FieldError :id="errorId" :message="error" />
     <slot name="below" />
   </div>
 </template>
@@ -63,6 +93,15 @@ const focused = ref(false)
 
 .box.focused {
   border-color: var(--accent);
+}
+
+.box.invalid {
+  border-color: var(--danger);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary);
 }
 
 input,

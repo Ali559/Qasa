@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.SecondaryButton
@@ -55,13 +56,13 @@ fun EditorFields(payload: VaultPayload, env: EditorEnv, onChange: (VaultPayload)
 
 @Composable
 private fun LoginFields(p: VaultPayload.Login, env: EditorEnv, onChange: (VaultPayload) -> Unit) {
-    FormTextField(R.string.field_itemname, p.itemName) { onChange(p.copy(itemName = it)) }
-    FormTextField(R.string.field_email, p.email, keyboardType = KeyboardType.Email) { onChange(p.copy(email = it)) }
-    FormTextField(R.string.field_username, p.username) { onChange(p.copy(username = it)) }
+    FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
+    FormTextField(R.string.field_email, p.email, FfiField.EMAIL, keyboardType = KeyboardType.Email) { onChange(p.copy(email = it)) }
+    FormTextField(R.string.field_username, p.username, FfiField.USERNAME) { onChange(p.copy(username = it)) }
     PasswordFormField(p.password, { onChange(p.copy(password = it)) }, env.onGeneratePassword)
     TotpFormField(p.totp) { onChange(p.copy(totp = it)) }
-    FormTextField(R.string.field_website, p.website, keyboardType = KeyboardType.Uri) { onChange(p.copy(website = it)) }
-    FormTextField(R.string.field_note, p.note) { onChange(p.copy(note = it)) }
+    FormTextField(R.string.field_website, p.website, FfiField.WEBSITE, keyboardType = KeyboardType.Uri) { onChange(p.copy(website = it)) }
+    FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
     CollectionPickerField(p.collectionId, env.collections, { onChange(p.copy(collectionId = it)) }, env.onCreateCollection)
 }
 
@@ -69,8 +70,8 @@ private fun LoginFields(p: VaultPayload.Login, env: EditorEnv, onChange: (VaultP
 
 @Composable
 private fun SecureNoteFields(p: VaultPayload.SecureNote, env: EditorEnv, onChange: (VaultPayload) -> Unit) {
-    FormTextField(R.string.field_title, p.title) { onChange(p.copy(title = it)) }
-    FormTextField(R.string.field_content, p.content) { onChange(p.copy(content = it)) }
+    FormTextField(R.string.field_title, p.title, FfiField.TITLE) { onChange(p.copy(title = it)) }
+    FormTextField(R.string.field_content, p.content, FfiField.CONTENT) { onChange(p.copy(content = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Mint)) { onChange(p.copy(color = it.raw)) }
     ToggleRow(
         title = stringResource(R.string.vault_protectitem),
@@ -86,14 +87,19 @@ private fun SecureNoteFields(p: VaultPayload.SecureNote, env: EditorEnv, onChang
 @Composable
 private fun CardFields(p: VaultPayload.Card, onChange: (VaultPayload) -> Unit) {
     val c = qasaColors
-    FormTextField(R.string.field_itemname, p.itemName) { onChange(p.copy(itemName = it)) }
-    FormTextField(R.string.field_accountholder, p.accountHolder) { onChange(p.copy(accountHolder = it)) }
-    FormTextField(R.string.field_number, p.number, keyboardType = KeyboardType.Number) { onChange(p.copy(number = it)) }
-    FormTextField(R.string.field_securitycode, p.securityCode, secure = true, keyboardType = KeyboardType.NumberPassword) {
-        onChange(p.copy(securityCode = it))
-    }
-    FormDateField(R.string.field_expirydate, p.expiryDate) { onChange(p.copy(expiryDate = it)) }
-    FormTextField(R.string.field_note, p.note) { onChange(p.copy(note = it)) }
+    FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
+    FormTextField(R.string.field_accountholder, p.accountHolder, FfiField.ACCOUNT_HOLDER) { onChange(p.copy(accountHolder = it)) }
+    CardNumberField(p.number) { onChange(p.copy(number = it)) }
+    // Digits only, at most 4 (American Express); the rule message says how many this brand uses.
+    FormTextField(
+        R.string.field_securitycode,
+        p.securityCode,
+        FfiField.SECURITY_CODE,
+        secure = true,
+        keyboardType = KeyboardType.NumberPassword,
+    ) { onChange(p.copy(securityCode = it.filter(Char::isDigit).take(4))) }
+    CardExpiryField(p.expiryDate) { onChange(p.copy(expiryDate = it)) }
+    FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Blue)) { onChange(p.copy(color = it.raw)) }
     // NFC stub — gated in UI only, as on iOS.
     SecondaryButton(title = stringResource(R.string.vault_scannfc), onClick = { })
@@ -106,12 +112,13 @@ private fun CardFields(p: VaultPayload.Card, onChange: (VaultPayload) -> Unit) {
 
 @Composable
 private fun BankFields(p: VaultPayload.BankAccount, onChange: (VaultPayload) -> Unit) {
-    FormTextField(R.string.field_itemname, p.itemName) { onChange(p.copy(itemName = it)) }
-    FormTextField(R.string.field_accountholder, p.accountHolder) { onChange(p.copy(accountHolder = it)) }
-    FormTextField(R.string.field_accountnumber, p.accountNumber, keyboardType = KeyboardType.Number) {
+    FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
+    FormTextField(R.string.field_accountholder, p.accountHolder, FfiField.ACCOUNT_HOLDER) { onChange(p.copy(accountHolder = it)) }
+    // Text keyboard: an IBAN has letters.
+    FormTextField(R.string.field_accountnumber, p.accountNumber, FfiField.ACCOUNT_NUMBER) {
         onChange(p.copy(accountNumber = it))
     }
-    FormTextField(R.string.field_routingnumber, p.routingNumber) { onChange(p.copy(routingNumber = it)) }
+    FormTextField(R.string.field_routingnumber, p.routingNumber, FfiField.ROUTING_NUMBER) { onChange(p.copy(routingNumber = it)) }
     CountryPickerField(p.countryCode) { onChange(p.copy(countryCode = it)) }
-    FormTextField(R.string.field_bankname, p.bankName) { onChange(p.copy(bankName = it)) }
+    FormTextField(R.string.field_bankname, p.bankName, FfiField.BANK_NAME) { onChange(p.copy(bankName = it)) }
 }

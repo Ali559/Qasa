@@ -30,6 +30,7 @@ import alibarznji.qasa.screens.home.HomeScreen
 import alibarznji.qasa.screens.premium.PremiumUpgradeScreen
 import alibarznji.qasa.screens.settings.LegalPlaceholderScreen
 import alibarznji.qasa.screens.settings.SettingsScreen
+import alibarznji.qasa.screens.settings.backup.BackupsScreen
 import alibarznji.qasa.screens.tools.CollectionsScreen
 import alibarznji.qasa.screens.tools.GenerateScreen
 import alibarznji.qasa.screens.tools.NotificationsScreen
@@ -131,6 +132,7 @@ private fun PageContent(
         AppPage.Vpn -> VPNScreen(onOpenMenu = back, onUpgrade = upgrade)
         AppPage.Collections -> CollectionsScreen(onOpenMenu = back)
         AppPage.Settings -> SettingsScreen(onOpenMenu = back, onLock = onLock, onUpgrade = upgrade)
+        AppPage.Backups -> BackupsScreen(onDone = back, inSheet = false)
         AppPage.Terms -> LegalPlaceholderScreen(
             stringResource(R.string.nav_terms),
             bodyRes = R.string.legal_termsbody,

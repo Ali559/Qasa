@@ -55,7 +55,8 @@ const tauriTools = {
   totpPreview: (uri: string) => invoke<TotpCode>('totp_preview', { uri }),
   totpFromImage: () => invoke<TotpSetup | null>('totp_from_image'),
   exportCsv: () => invoke<{ cancelled: boolean; exported: number; failures: number }>('vault_export_csv'),
-  importCsv: () => invoke<{ cancelled: boolean; imported: number; skipped: number }>('vault_import_csv'),
+  /** `flagged`: imported items that still have field issues (shown as needing attention). */
+  importCsv: () => invoke<{ cancelled: boolean; imported: number; skipped: number; flagged: number }>('vault_import_csv'),
 }
 
 // Browser-only stand-ins for design work (see vault/mock.ts). Not cryptographic.
@@ -95,7 +96,7 @@ const mockTools: typeof tauriTools = {
     return { cancelled: false, exported: 10, failures: 0 }
   },
   async importCsv() {
-    return { cancelled: true, imported: 0, skipped: 0 }
+    return { cancelled: true, imported: 0, skipped: 0, flagged: 0 }
   },
 }
 

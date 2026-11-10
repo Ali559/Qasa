@@ -1,6 +1,8 @@
 package alibarznji.qasa.screens.home
 
 import alibarznji.qasa.R
+import alibarznji.qasa.backup.BackupService
+import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.notifications.NotificationBadgeViewModel
 import alibarznji.qasa.screens.AppPage
 import alibarznji.qasa.screens.PasswordHealthReport
@@ -40,7 +42,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
+import javax.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
+
+/** Whether Home shows the backup reminder card. */
+@HiltViewModel
+class BackupReminderViewModel @Inject constructor(
+    private val backups: BackupService,
+    repo: VaultRepository,
+) : ViewModel() {
+    private val liveCount = flow { emitAll(repo.observeLiveCount()) }.catch { emit(0) }
+
+    val show: StateFlow<Boolean> = combine(backups.settings, liveCount) { settings, count ->
+        backups.shouldRemind(settings, count, System.currentTimeMillis())
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun dismiss() = backups.snoozeReminder()
+}
 
 /** What the big status on Home says. Only facts the app actually knows. */
 enum class HomeStatus { Loading, Empty, AllGood, NeedsAttention }
@@ -67,6 +95,7 @@ fun HomeScreen(
     health: HealthViewModel = hiltViewModel(),
     vpnVm: VpnViewModel = hiltViewModel(),
     badge: NotificationBadgeViewModel = hiltViewModel(),
+    backupReminder: BackupReminderViewModel = hiltViewModel(),
 ) {
     val c = qasaColors
     val report by health.report.collectAsState()
@@ -77,6 +106,7 @@ fun HomeScreen(
     )
 
     val unread by badge.count.collectAsState()
+    val remindBackup by backupReminder.show.collectAsState()
 
     LaunchedEffect(isPremium) { if (isPremium) vpnVm.vpn.refreshStatus() }
     LaunchedEffect(Unit) { badge.refresh() }
@@ -97,6 +127,9 @@ fun HomeScreen(
         ) {
             GreetingRow(displayName = displayName, unread = unread, onNotifications = { onOpen(AppPage.Notifications) })
             StatusHero(status = status, onAddFirst = { onTab(ShellTab.Passwords) })
+            if (remindBackup) {
+                BackupReminderCard(onOpen = { onOpen(AppPage.Backups) }, onDismiss = backupReminder::dismiss)
+            }
             if (status != HomeStatus.Empty) {
                 HealthCard(report = report, onClick = { onOpen(AppPage.PasswordHealth) })
             }

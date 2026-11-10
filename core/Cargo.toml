@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["qasa-vault", "qasa-sync", "qasa-ffi"]
+members = ["qasa-vault", "qasa-sync", "qasa-backup", "qasa-ffi"]
 
 [workspace.package]
 edition = "2021"

@@ -21,6 +21,7 @@ import alibarznji.qasa.vault.VaultListRow
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultSession
+import alibarznji.qasa.vault.VaultValidation
 import alibarznji.qasa.vault.totp.TotpClipboard
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -31,6 +32,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +45,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -201,8 +208,14 @@ fun VaultItemDetailScreen(
         ) {
             HeroIcon(p)
             Text(name, color = c.textPrimary, style = qasaText.sectionHeadline, textAlign = TextAlign.Center)
+            // Stored before the shared field rules (or synced in): editing will ask for fixes.
+            val needsAttention = remember(p) {
+                runCatching { VaultValidation.issuesAfterNormalize(p).isNotEmpty() }.getOrDefault(false)
+            }
+            if (needsAttention) NeedsAttentionBanner()
+            val locale = LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
             DetailsCard(
-                fields = p.detailFields(context::getString),
+                fields = p.detailFields(context::getString) { VaultDates.display(it, locale) },
                 totp = (p as? VaultPayload.Login)?.totp?.ifEmpty { null },
                 onCopyTotp = ::copyTotp,
                 unlocked = unlocked,
@@ -302,5 +315,24 @@ private fun DetailsCard(
                 HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
             }
         }
+    }
+}
+
+/** `validation.needsAttention`: the stored item has fields the shared rules flag. */
+@Composable
+private fun NeedsAttentionBanner() {
+    val c = qasaColors
+    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(c.gold.copy(alpha = 0.1f), shape)
+            .border(QasaDimens.stroke, c.gold.copy(alpha = 0.3f), shape)
+            .padding(QasaDimens.gap),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Outlined.WarningAmber, contentDescription = null, tint = c.gold, modifier = Modifier.size(QasaIconSize.lg))
+        Spacer(Modifier.width(QasaDimens.contentGap))
+        Text(stringResource(R.string.validation_needsattention), color = c.textPrimary, style = qasaText.bodyMedium)
     }
 }

@@ -2,6 +2,7 @@
 //! every network call live here (docs/desktop-extension-plan.md §3).
 
 mod account;
+mod backup;
 mod bridge;
 mod clipboard;
 mod prefs;
@@ -15,6 +16,7 @@ use tauri::{Emitter, Manager};
 
 use vault::commands::{self as vc, VaultState};
 use vault::tools as vt;
+use vault::fields as vf;
 use account::commands::{self as ac, AccountState};
 use vault::Vault;
 
@@ -36,12 +38,14 @@ pub fn run() {
             let account = account::Account::new(api, Box::new(account::secrets::KeyringStore));
             app.manage(AccountState(tokio::sync::Mutex::new(account)));
             app.manage(sync::SyncState::default());
+            app.manage(backup::BackupState::default());
             app.manage(bridge::BridgeState(Mutex::new(bridge::Bridge::new(Box::new(bridge::clients::KeyringClients)))));
             // The browser extension: register nm-host with the browsers, then listen.
             bridge::manifest::install(&dir);
             let host = std::sync::Arc::new(bridge::commands::TauriHost { app: app.handle().clone() });
             bridge::server::start(host, bridge::server::socket_path(&dir));
             spawn_auto_lock(app.handle().clone());
+            backup::spawn_timer(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -78,10 +82,26 @@ pub fn run() {
             vt::totp_from_image,
             vt::vault_export_csv,
             vt::vault_import_csv,
+            vf::validate_item,
+            vf::normalize_item,
+            vf::format_card_number,
+            vf::format_card_expiry,
+            vf::card_brand,
+            vf::parse_vault_date,
+            vf::parse_vault_dates,
             sync::sync_host_start,
             sync::sync_browse_start,
             sync::sync_stop,
             sync::sync_join,
+            backup::backup_status,
+            backup::backup_check_due,
+            backup::backup_choose_location,
+            backup::backup_now,
+            backup::backup_set_frequency,
+            backup::backup_snooze_reminder,
+            backup::backup_pick_restore,
+            backup::backup_restore,
+            backup::backup_cancel_restore,
             bridge::commands::bridge_clients,
             bridge::commands::bridge_revoke,
             bridge::commands::bridge_pair_decide,
@@ -89,6 +109,7 @@ pub fn run() {
             ac::account_status,
             ac::account_bootstrap,
             ac::account_refresh_license,
+            ac::account_replace_device,
             ac::account_sync_locale,
             ac::devices_list,
             ac::device_unlink,

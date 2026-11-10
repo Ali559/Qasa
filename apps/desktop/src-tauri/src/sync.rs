@@ -16,7 +16,7 @@ use std::time::{Duration, Instant};
 use mdns_sd::{ServiceDaemon, ServiceEvent, ServiceInfo};
 use qasa_sync::{Adoption, Intro, MergePlan, Outcome, Role, Snapshot, SyncError, SyncStore, PROTOCOL_VERSION};
 use serde::Serialize;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, Runtime, State, Wry};
 
 use crate::account::commands::AccountState;
 use crate::vault::commands::VaultState;
@@ -25,7 +25,7 @@ const MDNS_TYPE: &str = "_qasa-sync._tcp.local.";
 const CODE_LIFETIME: Duration = Duration::from_secs(120);
 const MAX_ATTEMPTS: u32 = 3;
 
-fn platform() -> &'static str {
+pub(crate) fn platform() -> &'static str {
     match std::env::consts::OS {
         "macos" => "macos",
         "windows" => "windows",
@@ -33,16 +33,24 @@ fn platform() -> &'static str {
     }
 }
 
-/// The vault and account, locked per call so a slow network never holds them.
-struct DesktopStore {
-    app: AppHandle,
+/// The vault and account, locked per call so a slow network never holds them. Also the
+/// store encrypted backups read and restore through (`crate::backup`). Call it off the
+/// async runtime (a plain or `spawn_blocking` thread): it waits on the account's mutex.
+pub(crate) struct DesktopStore<R: Runtime = Wry> {
+    app: AppHandle<R>,
+}
+
+impl<R: Runtime> DesktopStore<R> {
+    pub(crate) fn new(app: AppHandle<R>) -> Self {
+        Self { app }
+    }
 }
 
 fn store_err(e: impl std::fmt::Display) -> SyncError {
     SyncError::Store(e.to_string())
 }
 
-impl SyncStore for DesktopStore {
+impl<R: Runtime> SyncStore for DesktopStore<R> {
     fn intro(&self) -> Result<Intro, SyncError> {
         let vault = self.app.state::<VaultState>();
         let meta = vault.0.lock().map_err(store_err)?.sync_meta().map_err(store_err)?;

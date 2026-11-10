@@ -81,3 +81,25 @@ pub const VPN_THROTTLED: LocalizedNotice = LocalizedNotice {
     body_ckb: Cow::Borrowed("داتای VPN ی ئەم مانگەت تەواو بوو، بۆیە خێرایی تا یەکی مانگ بە ٥ مێگابیت سنووردار کراوە."),
     body_ar: Cow::Borrowed("استهلكت بيانات VPN لهذا الشهر، لذا السرعة محدودة بـ 5 ميغابت حتى أول الشهر."),
 };
+
+/// A device restored a backup and took the place of the device that made it
+/// (`POST /v1/devices/register` with a restore key). Sent to the whole account before the
+/// old device is unlinked, so the old phone gets the push too. ckb/ar await native review
+/// (2026-11-10 strings).
+pub fn device_replaced(old_device: &str, new_device: &str) -> LocalizedNotice {
+    LocalizedNotice {
+        kind: Cow::Borrowed("device_replaced"),
+        title_en: Cow::Borrowed("🔁 A device was replaced"),
+        title_ckb: Cow::Borrowed("🔁 ئامێرێک گۆڕدرا"),
+        title_ar: Cow::Borrowed("🔁 تم استبدال جهاز"),
+        body_en: Cow::Owned(format!(
+            "“{new_device}” restored a Qasa backup and took the place of “{old_device}”, which is now signed out. If this wasn't you, change your main password on a device you trust and contact us."
+        )),
+        body_ckb: Cow::Owned(format!(
+            "«{new_device}» باکئەپێکی قاسەی گەڕاندەوە و جێگەی «{old_device}»ی گرتەوە، کە ئێستا دەرچووە. ئەگەر تۆ نەبوویت، لەسەر ئامێرێک کە متمانەت پێیەتی وشەی نهێنی سەرەکییەکەت بگۆڕە و پەیوەندیمان پێوە بکە."
+        )),
+        body_ar: Cow::Owned(format!(
+            "استعاد «{new_device}» نسخة احتياطية من قاصة وحلّ محل «{old_device}»، الذي سُجّل خروجه الآن. إذا لم تكن أنت، فغيّر كلمة مرورك الرئيسية من جهاز تثق به وتواصل معنا."
+        )),
+    }
+}

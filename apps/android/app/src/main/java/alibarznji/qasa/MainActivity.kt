@@ -88,6 +88,8 @@ class MainActivity : FragmentActivity() {
         super.onResume()
         autoLock.onAppForeground()
         autoLock.noteActivity()
+        // After the auto-lock check, so a vault that just locked is not backed up.
+        bootstrap.onAppResumed()
         // Unread badge on foreground (silent without a license token).
         lifecycleScope.launch { notifications.refreshUnreadCount() }
         // Back from system settings (or the permission prompt) the OS switch may differ.

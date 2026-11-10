@@ -237,7 +237,9 @@ pub fn plan_save(vault: &Vault, args: &Value) -> Result<Option<PendingSave>, OpE
     }))
 }
 
-/// Writes a save the user confirmed in the desktop.
+/// Writes a save the user confirmed in the desktop. A capture is never lost to a field
+/// rule: it is normalized and stored, and an item with issues is flagged in the detail
+/// view (`Vault::save_flagged`) for the user to fix in the editor.
 pub fn apply_save(vault: &mut Vault, save: &PendingSave) -> Result<(), OpError> {
     match &save.kind {
         SaveKind::New => {
@@ -251,12 +253,12 @@ pub fn apply_save(vault: &mut Vault, save: &PendingSave) -> Result<(), OpError> 
                 website: save.origin.clone(),
                 ..Default::default()
             };
-            vault.save(None, &VaultPayload::Login(fields)).map_err(OpError::from)?;
+            vault.save_flagged(None, &VaultPayload::Login(fields)).map_err(OpError::from)?;
         }
         SaveKind::Update { item_id, .. } => {
             let VaultPayload::Login(mut f) = vault.get(item_id)? else { return Err(OpError::NotFound) };
             f.password = save.password.clone();
-            vault.save(Some(item_id), &VaultPayload::Login(f)).map_err(OpError::from)?;
+            vault.save_flagged(Some(item_id), &VaultPayload::Login(f)).map_err(OpError::from)?;
         }
     }
     Ok(())

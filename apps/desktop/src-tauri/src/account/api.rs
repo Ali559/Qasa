@@ -71,6 +71,18 @@ impl ApiClient {
     }
 
     pub async fn send_raw(&self, method: Method, path: &str, token: Option<&str>, body: Option<&Value>) -> ApiResult<Value> {
+        self.send_raw_within(method, path, token, body, None).await
+    }
+
+    /// `send_raw` with a shorter timeout than the client's 20 seconds.
+    pub async fn send_raw_within(
+        &self,
+        method: Method,
+        path: &str,
+        token: Option<&str>,
+        body: Option<&Value>,
+        timeout: Option<Duration>,
+    ) -> ApiResult<Value> {
         if !base_url_is_valid(&self.base) {
             return Err(ApiError::Misconfigured);
         }
@@ -80,6 +92,9 @@ impl ApiClient {
         }
         if let Some(body) = body {
             req = req.json(body);
+        }
+        if let Some(timeout) = timeout {
+            req = req.timeout(timeout);
         }
         let resp = req.send().await.map_err(|_| ApiError::Offline)?;
         let status = resp.status();

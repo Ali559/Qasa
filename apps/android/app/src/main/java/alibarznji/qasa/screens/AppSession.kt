@@ -22,6 +22,8 @@ enum class AppPage(
     Vpn(R.string.nav_vpn),
     Collections(R.string.nav_collections),
     Settings(R.string.nav_settings),
+    /** Opened from the Home backup reminder; in Settings it is a sheet of its own. */
+    Backups(R.string.backup_title),
     Terms(R.string.nav_terms),
     Privacy(R.string.nav_privacy),
     PremiumUpgrade(R.string.nav_upgrade);

@@ -173,7 +173,7 @@ enum VaultSeedData {
             .login(LoginFields(itemName: "AWS Root Account", email: "ops@qasa.io", username: "root", password: "aws-weak", website: "https://aws.amazon.com")),
             .login(LoginFields(itemName: "Apple ID", email: "me@icloud.com", username: "me", password: "apple-id", website: "https://appleid.apple.com")),
             .secureNote(SecureNoteFields(title: "Wifi Password", content: "Home-Net // qasa-wifi-2026", color: .mint, protectItem: false)),
-            .card(CardFields(itemName: "FIB Corporate Card", accountHolder: "Jane Doe", number: "4111111111114921", securityCode: "123", expiryDate: "08/28", note: "Corp", color: .blue)),
+            .card(CardFields(itemName: "FIB Corporate Card", accountHolder: "Jane Doe", number: "4111111111111111", securityCode: "123", expiryDate: "08/28", note: "Corp", color: .blue)),
         ]
 
         for payload in samples {

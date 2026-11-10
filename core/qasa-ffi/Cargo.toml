@@ -1,7 +1,7 @@
 [package]
 name = "qasa-ffi"
 version = "0.1.0"
-description = "UniFFI bindings of the Qasa core for the iOS and Android apps: Wi-Fi sync and payload conversion."
+description = "UniFFI bindings of the Qasa core for the iOS and Android apps: Wi-Fi sync, backups and payload conversion."
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -18,6 +18,7 @@ name = "uniffi-bindgen"
 path = "src/bin/uniffi-bindgen.rs"
 
 [dependencies]
+qasa-backup = { path = "../qasa-backup" }
 qasa-sync = { path = "../qasa-sync" }
 qasa-vault = { path = "../qasa-vault" }
 thiserror = "2"

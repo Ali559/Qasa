@@ -158,19 +158,7 @@ struct CollectionsView: View {
     private func confirmDelete() {
         guard let deleting else { return }
         for row in cache.rows where row.collectionId == deleting.id {
-            if var payload = try? VaultRepository.shared.payload(for: row.id) {
-                switch payload {
-                case .login(var f):
-                    f.collectionId = nil
-                    payload = .login(f)
-                case .secureNote(var f):
-                    f.collectionId = nil
-                    payload = .secureNote(f)
-                default:
-                    break
-                }
-                _ = try? VaultRepository.shared.save(payload: payload, id: row.id)
-            }
+            try? VaultRepository.shared.removeFromCollection(itemId: row.id)
         }
         VaultRepository.deleteCollection(deleting, context: modelContext)
         self.deleting = nil

@@ -9,6 +9,7 @@ struct CreateVaultView: View {
     @State private var errorMessage: String?
     var onVaultCreated: (String, Bool) -> Void
     var onPairExisting: (() -> Void)? = nil
+    var onRestoreBackup: (() -> Void)? = nil
     var onLogin: (() -> Void)? = nil
 
     private var locale: Locale { prefs.locale }
@@ -50,6 +51,20 @@ struct CreateVaultView: View {
                                 Text(L10n.tr("auth.create.pairExisting", locale: locale))
                                     .font(.qasa(14, weight: .semibold))
                                     .foregroundColor(Theme.accent)
+                            }
+                            .padding(.top, 4)
+                        }
+                        if let onRestoreBackup {
+                            Button(action: onRestoreBackup) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(L10n.tr("backup.restore", locale: locale))
+                                        .font(.qasa(14, weight: .semibold))
+                                        .foregroundColor(Theme.accent)
+                                    Text(L10n.tr("backup.restoreSubtitle", locale: locale))
+                                        .font(.qasaLabel(12))
+                                        .foregroundColor(Theme.textSecondary)
+                                        .multilineTextAlignment(.leading)
+                                }
                             }
                             .padding(.top, 4)
                         }

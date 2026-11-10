@@ -5,7 +5,8 @@ import alibarznji.qasa.screens.vault.editor.EditorEnv
 import alibarznji.qasa.screens.vault.editor.EditorFields
 import alibarznji.qasa.screens.vault.editor.PasswordGeneratorSheet
 import alibarznji.qasa.screens.vault.editor.PhoneOption
-import alibarznji.qasa.screens.vault.editor.canSave
+import alibarznji.qasa.screens.vault.editor.EditorValidation
+import alibarznji.qasa.screens.vault.editor.LocalEditorValidation
 import alibarznji.qasa.screens.vault.editor.typeLabelRes
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
@@ -16,6 +17,14 @@ import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultCollection
+import alibarznji.qasa.vault.VaultValidation
+import alibarznji.qasa.vault.VaultValidationException
+import alibarznji.qasa.theme.qasaColors
+import alibarznji.qasa.theme.qasaText
+import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.text.style.TextAlign
+import uniffi.qasa_ffi.FfiField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -78,7 +87,24 @@ fun VaultItemEditorSheetContent(
     onDone: () -> Unit,
     vm: EditorViewModel = hiltViewModel(),
 ) {
-    var payload by remember(initial) { mutableStateOf(initial) }
+    val isEditing = existingId != null
+    // An edit opens with normalize applied (legacy dates → ISO, card numbers grouped…), so
+    // only what normalize can't fix shows as an issue.
+    var payload by remember(initial) {
+        mutableStateOf(if (isEditing) VaultValidation.normalizeOrSelf(initial) else initial)
+    }
+    var touched by remember(initial) { mutableStateOf(setOf<FfiField>()) }
+    var saveAttempted by remember(initial) { mutableStateOf(false) }
+    // Live: the issues of the payload as a save would store it.
+    val issues = remember(payload) {
+        runCatching { VaultValidation.byField(VaultValidation.issuesAfterNormalize(payload)) }.getOrDefault(emptyMap())
+    }
+    val validation = EditorValidation(
+        issues = issues,
+        touched = touched,
+        showAll = saveAttempted,
+        onTouch = { field -> if (field !in touched) touched = touched + field },
+    )
     var saving by remember { mutableStateOf(false) }
     var saveError by remember { mutableStateOf<String?>(null) }
     var showGenerator by remember { mutableStateOf(false) }
@@ -86,7 +112,6 @@ fun VaultItemEditorSheetContent(
     val collections by vm.collections.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
-    val isEditing = existingId != null
 
     // Only the address form links a phone; skip decrypting the vault for other kinds.
     val needsPhones = payload is VaultPayload.Address
@@ -118,14 +143,28 @@ fun VaultItemEditorSheetContent(
                 .padding(horizontal = QasaDimens.screenPadding)
                 .padding(top = QasaDimens.contentGap, bottom = QasaDimens.gap),
         ) {
-            EditorFields(payload = payload, env = env, onChange = { payload = it })
+            CompositionLocalProvider(LocalEditorValidation provides validation) {
+                EditorFields(payload = payload, env = env, onChange = { payload = it })
+            }
         }
-        StickyBottomBar {
+        StickyBottomBar { Column(Modifier.fillMaxWidth()) {
+            if (saveAttempted && issues.isNotEmpty()) {
+                Text(
+                    stringResource(R.string.validation_fixtosave),
+                    color = qasaColors.danger,
+                    style = qasaText.errorDetail,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = QasaDimens.contentGap),
+                )
+            }
             PrimaryButton(
                 title = stringResource(if (isEditing) R.string.common_update else R.string.common_save),
-                // iOS: `.disabled(!canSave)` where canSave = non-blank displayName.
-                enabled = payload.canSave() && !saving,
+                // Always tappable: a Save with issues shows every field's message (a required
+                // name included) instead of a silently disabled button.
+                enabled = !saving,
                 onClick = {
+                    saveAttempted = true
+                    if (issues.isNotEmpty()) return@PrimaryButton
                     saving = true
                     scope.launch {
                         try {
@@ -133,6 +172,8 @@ fun VaultItemEditorSheetContent(
                             onDone()
                         } catch (e: CancellationException) {
                             throw e
+                        } catch (_: VaultValidationException) {
+                            // The repository's own check (same rules): the messages show inline.
                         } catch (e: Exception) {
                             saveError = e.localizedMessage ?: e.toString()
                         } finally {
@@ -141,7 +182,7 @@ fun VaultItemEditorSheetContent(
                     }
                 },
             )
-        }
+        } }
     }
 
     if (showGenerator) {

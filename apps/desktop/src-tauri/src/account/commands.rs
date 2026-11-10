@@ -38,6 +38,14 @@ pub async fn account_bootstrap(state: State<'_, AccountState>, locale: String) -
     Ok(state.0.lock().await.bootstrap(&device_name(), platform(), None, &locale).await)
 }
 
+/// Device limit after restoring a backup → "Unlink and continue": the server unlinks the
+/// device that made the backup and registers this one in its place. The restore key
+/// stays in Rust; the UI only sends the request.
+#[tauri::command]
+pub async fn account_replace_device(state: State<'_, AccountState>, locale: String) -> Res<AccountStatus> {
+    state.0.lock().await.replace_device(&device_name(), platform(), None, &locale).await
+}
+
 #[tauri::command]
 pub async fn account_refresh_license(state: State<'_, AccountState>) -> Res<AccountStatus> {
     let mut account = state.0.lock().await;
@@ -78,13 +86,15 @@ pub async fn devices_unlink_others(state: State<'_, AccountState>) -> Res<Value>
 /// "Clear local data": unlink this device on the server (best effort, so an offline
 /// computer can still be cleared), forget the account, and wipe the vault.
 #[tauri::command]
-pub async fn account_clear_local(state: State<'_, AccountState>, vault: State<'_, VaultState>) -> Res<()> {
+pub async fn account_clear_local(app: tauri::AppHandle, state: State<'_, AccountState>, vault: State<'_, VaultState>) -> Res<()> {
     let mut account = state.0.lock().await;
     if account.token().is_some() {
         let _ = account.call(Method::DELETE, "/v1/devices/me", None).await;
     }
     account.clear_identity();
     drop(account);
+    // Backup settings go too; the backup file itself stays where the user put it.
+    crate::backup::forget(&app);
     let mut v = vault.0.lock().map_err(|_| ApiError::Decode)?;
     v.wipe().map_err(|_| ApiError::Decode)
 }
@@ -92,12 +102,13 @@ pub async fn account_clear_local(state: State<'_, AccountState>, vault: State<'_
 /// `DELETE /v1/account`, then the same local wipe. The server must confirm first: an
 /// offline delete fails rather than leaving a live account behind.
 #[tauri::command]
-pub async fn account_delete(state: State<'_, AccountState>, vault: State<'_, VaultState>) -> Res<Value> {
+pub async fn account_delete(app: tauri::AppHandle, state: State<'_, AccountState>, vault: State<'_, VaultState>) -> Res<Value> {
     let mut account = state.0.lock().await;
     let account_id = account.account_id().ok_or(ApiError::Unauthorized)?;
     let removed = account.call(Method::DELETE, "/v1/account", Some(&json!({ "confirm_account_id": account_id }))).await?;
     account.clear_identity();
     drop(account);
+    crate::backup::forget(&app);
     let mut v = vault.0.lock().map_err(|_| ApiError::Decode)?;
     v.wipe().map_err(|_| ApiError::Decode)?;
     Ok(removed)

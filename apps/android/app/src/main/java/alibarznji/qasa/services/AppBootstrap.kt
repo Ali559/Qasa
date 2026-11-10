@@ -1,5 +1,6 @@
 package alibarznji.qasa.services
 
+import alibarznji.qasa.backup.BackupService
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.push.DevicePrefsSync
@@ -20,6 +21,7 @@ class AppBootstrap @Inject constructor(
     private val appSession: AppSession,
     private val vault: VaultRepository,
     private val premiumRefresher: PremiumStatusRefresher,
+    private val backups: BackupService,
 ) {
 
     suspend fun onVaultUnlocked() {
@@ -54,6 +56,13 @@ class AppBootstrap @Inject constructor(
         // reads `isPremium` — verification fails closed without one.
         license.bootstrapVerifyingKey()
         devices.registerIfNeeded()
+        afterRegistration()
+        // An automatic backup that came due while locked runs now, in the background.
+        backups.runIfDue()
+    }
+
+    /** License, session and device prefs follow a registration, normal or replacing. */
+    private suspend fun afterRegistration() {
         if (license.refresh()) {
             // refreshed
         } else {
@@ -64,6 +73,17 @@ class AppBootstrap @Inject constructor(
         premiumRefresher.onUnlockSynced()
         // Locale, FCM token and the real notifications-enabled state (no longer hardcoded true).
         devicePrefs.syncAll()
+    }
+
+    /**
+     * "Replace your old device?" confirmed: registers with the restored backup's key and
+     * `replace_device`, then continues exactly like a normal successful registration.
+     * False when the server refused or could not be reached.
+     */
+    suspend fun replaceOldDevice(): Boolean {
+        if (!devices.replaceOldDevice()) return false
+        afterRegistration()
+        return true
     }
 
     /**
@@ -87,6 +107,14 @@ class AppBootstrap @Inject constructor(
     /** Activity `onStart`: re-syncs Premium when due (throttled; no-op while locked). */
     fun onAppForeground() {
         premiumRefresher.onForeground()
+    }
+
+    /**
+     * Activity `onResume`, after the auto-lock check: an automatic backup runs when due.
+     * No-op while locked.
+     */
+    fun onAppResumed() {
+        backups.runIfDue()
     }
 
     fun onLogout() {

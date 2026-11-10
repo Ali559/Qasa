@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoFixHigh
+import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.MonitorHeart
@@ -95,6 +96,7 @@ private val AppPage.youIcon: ImageVector
         AppPage.Vpn -> Icons.Outlined.VpnLock
         AppPage.Collections -> Icons.Outlined.Folder
         AppPage.Settings -> Icons.Outlined.Settings
+        AppPage.Backups -> Icons.Outlined.Backup
         AppPage.Terms -> Icons.Outlined.Description
         AppPage.Privacy -> Icons.Outlined.PanTool
         AppPage.PremiumUpgrade -> Icons.Outlined.WorkspacePremium

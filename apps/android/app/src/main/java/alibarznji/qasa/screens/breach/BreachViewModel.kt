@@ -4,6 +4,7 @@ import alibarznji.qasa.breach.BreachCheckResult
 import alibarznji.qasa.breach.BreachMonitorService
 import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.vault.VaultItemKind
+import alibarznji.qasa.vault.SaveOrigin
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.db.MonitoredEmailEntity
@@ -145,7 +146,9 @@ class BreachViewModel @Inject constructor(
         try {
             val login = vault.getPayload(candidate.id) as? VaultPayload.Login
                 ?: error("Login not found")
-            vault.save(candidate.id, login.copy(password = newPassword))
+            // Only the password changes; the item's other fields stay as stored (a legacy
+            // field that breaks a rule must not block rotating a breached password).
+            vault.save(candidate.id, login.copy(password = newPassword), SaveOrigin.Internal)
             _statusMessage.value = savedMessage
             null
         } catch (e: CancellationException) {

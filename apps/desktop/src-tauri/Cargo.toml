@@ -19,6 +19,8 @@ tauri-build = { version = "2", features = ["isolation"] }
 
 [dependencies]
 base64 = "0.22"
+# Already in the tree (tauri): the local calendar day for field validation ("not in the future").
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
 ed25519-dalek = "2"
 keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
@@ -29,6 +31,7 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg",
 qasa-biometric = { path = "../biometric" }
 qasa-vault = { path = "../../../core/qasa-vault" }
 qasa-sync = { path = "../../../core/qasa-sync" }
+qasa-backup = { path = "../../../core/qasa-backup" }
 mdns-sd = "0.13"
 rqrr = "0.9"
 rusqlite = { version = "0.32", features = ["bundled"] }
@@ -50,9 +53,13 @@ interprocess = "2.4.8"
 url = "2.5.8"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+# Already in the tree through qasa-vault: zeroes the copy of the data key a backup uses.
+zeroize = "1"
 
 [dev-dependencies]
 tempfile = "3"
+# `tauri::test::mock_app` for the backup round trip through the real DesktopStore.
+tauri = { version = "2", features = ["isolation", "test"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 [profile.dev.package."*"]

@@ -6,6 +6,7 @@
 import {
   Clock,
   Crown,
+  DatabaseBackup,
   Download,
   Ellipsis,
   Fingerprint,
@@ -26,6 +27,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
 import { account, forgetAccount } from '@/account/store'
+import { forgetBackup } from '@/backup/store'
 import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import NavChevronRow from '@/components/NavChevronRow.vue'
@@ -137,12 +139,14 @@ async function performImport() {
   try {
     const result = await toolsApi.importCsv()
     if (result.cancelled) return
+    // Items with fields to check are imported anyway; say how many (core `insert_many`).
+    const flagged = () => (result.flagged > 0 ? ` ${t('validation.importFlaggedFmt', result.flagged)}` : '')
     if (result.imported === 0 && result.skipped === 0) {
       statusMessage.value = () => t('settings.importNothing')
     } else if (result.skipped > 0) {
-      statusMessage.value = () => t('settings.importSkipped', result.imported, result.skipped)
+      statusMessage.value = () => t('settings.importSkipped', result.imported, result.skipped) + flagged()
     } else {
-      statusMessage.value = () => t('settings.parsedCsv', result.imported)
+      statusMessage.value = () => t('settings.parsedCsv', result.imported) + flagged()
     }
     if (result.imported > 0) await loadVault().catch((e) => console.error('Could not reload the vault', e))
   } catch (e) {
@@ -166,6 +170,7 @@ async function clearLocalData() {
     // Unlinks this device on the server (best effort), forgets the account, wipes the vault.
     await accountApi.clearLocal()
     forgetAccount()
+    forgetBackup()
     emit('lock')
   } catch (e) {
     statusMessage.value = () => describe(e)
@@ -179,6 +184,7 @@ async function deleteAccount() {
   try {
     await accountApi.deleteAccount()
     forgetAccount()
+    forgetBackup()
     emit('lock')
   } catch {
     statusMessage.value = () => t('settings.deleteAccountFailed')
@@ -298,6 +304,13 @@ function logout() {
     <section class="group">
       <SectionLabel :text="t('settings.dataAccount')" />
       <CardContainer>
+        <NavChevronRow
+          :icon="DatabaseBackup"
+          :title="t('backup.title')"
+          :subtitle="t('backup.subtitle')"
+          @click="openSubPage('backups', 'settings')"
+        />
+        <hr class="divider" />
         <NavChevronRow :icon="Download" :title="t('settings.importCsv')" :disabled="busy" @click="performImport" />
         <hr class="divider" />
         <NavChevronRow :icon="Upload" :title="t('settings.exportCsv')" :disabled="busy" @click="performExport" />

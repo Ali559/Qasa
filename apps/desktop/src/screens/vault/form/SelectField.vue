@@ -2,7 +2,9 @@
 // iOS menu `Picker` in a card: label above, native select styled like a field.
 import { ChevronDown } from 'lucide-vue-next'
 
-defineProps<{ label: string; options: Array<{ value: V; label: string }> }>()
+import FieldError from './FieldError.vue'
+
+defineProps<{ label: string; options: Array<{ value: V; label: string }>; error?: string | null }>()
 const model = defineModel<V>({ required: true })
 const id = `s-${Math.random().toString(36).slice(2, 9)}`
 </script>
@@ -10,13 +12,14 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
 <template>
   <div class="select-field">
     <label :for="id" class="label">{{ label }}</label>
-    <div class="box">
-      <select :id="id" v-model="model">
+    <div class="box" :class="{ invalid: !!error }">
+      <select :id="id" v-model="model" :aria-invalid="!!error">
         <option v-for="o in options" :key="String(o.value)" :value="o.value">{{ o.label }}</option>
       </select>
       <ChevronDown :size="16" class="chevron" aria-hidden="true" />
       <slot name="trailing" />
     </div>
+    <FieldError :message="error" />
   </div>
 </template>
 
@@ -48,6 +51,10 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
 
 .box:focus-within {
   border-color: var(--accent);
+}
+
+.box.invalid {
+  border-color: var(--danger);
 }
 
 select {

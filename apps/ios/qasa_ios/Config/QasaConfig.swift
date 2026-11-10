@@ -43,6 +43,7 @@ enum QasaConfig {
     static var devicesLinkCheckURL: URL { apiBaseURL.appending(path: "/v1/devices/link-check") }
     static var devicesURL: URL { apiBaseURL.appending(path: "/v1/devices") }
     static var devicesOthersURL: URL { apiBaseURL.appending(path: "/v1/devices/others") }
+    static var restoreKeyURL: URL { apiBaseURL.appending(path: "/v1/devices/me/restore-key") }
     static var licenseRefreshURL: URL { apiBaseURL.appending(path: "/v1/license") }
     static var accountURL: URL { apiBaseURL.appending(path: "/v1/account") }
     static var licenseKeyURL: URL { apiBaseURL.appending(path: "/.well-known/qasa-license-key") }

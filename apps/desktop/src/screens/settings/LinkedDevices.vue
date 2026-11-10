@@ -6,13 +6,13 @@
 // Signing out or unlinking THIS computer is "Clear local data" on desktop (server unlink
 // + local wipe), so it is handed to the parent as `logout` instead of done here.
 import { Info, Link2Off, Star } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import { accountApi } from '@/account/api'
-import { account, isPremium, refreshAccount } from '@/account/store'
+import { account, isPremium, offerReplace, refreshAccount } from '@/account/store'
 import { isApiError, type RemoteDevice } from '@/account/types'
 import { openPage } from '@/nav'
 import { useT } from '@/prefs'
@@ -33,6 +33,8 @@ const showUnlinkAllConfirm = ref(false)
 const premium = computed(() => isPremium())
 const currentDeviceId = computed(() => account.status?.deviceId ?? null)
 const limitError = computed(() => account.status?.deviceLimitError ?? null)
+/** A restored backup's key: replace its device, or why it can't (`null`: no key sent). */
+const restoreKeyStatus = computed(() => (limitError.value ? (account.status?.restoreKeyStatus ?? null) : null))
 
 /** iOS `tierLabel`: "Free: 1/1 Used", with the tier capitalized as `LicenseManager.tierLabel`. */
 const tierLabel = computed(() => {
@@ -82,6 +84,11 @@ async function loadDevices() {
 }
 
 onMounted(loadDevices)
+
+// "Unlink and continue" registered this computer: show the new device list.
+watch(limitError, (now, before) => {
+  if (before && !now) loadDevices()
+})
 
 function requestUnlink(d: RemoteDevice) {
   if (d.id === currentDeviceId.value) emit('logout')
@@ -146,6 +153,17 @@ function upgrade() {
     <div v-if="limitError" class="limit-banner" role="alert">
       <strong>{{ t('devices.limitReached') }}</strong>
       <span v-if="limitError.message">{{ limitError.message }}</span>
+      <span v-if="restoreKeyStatus === 'unknown'">{{ t('backup.replace.unknown') }}</span>
+      <span v-else-if="restoreKeyStatus === 'not_enough'">{{ t('backup.replace.notEnough') }}</span>
+      <button
+        v-else-if="restoreKeyStatus === 'replaceable'"
+        type="button"
+        class="replace"
+        :disabled="isActing || account.replace.busy"
+        @click="offerReplace"
+      >
+        {{ t('backup.replace.button') }}
+      </button>
     </div>
 
     <section class="devices">
@@ -268,6 +286,23 @@ function upgrade() {
   border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
   border-radius: var(--corner-radius);
   background: color-mix(in srgb, var(--danger-background) 20%, transparent);
+}
+
+.replace {
+  align-self: flex-start;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.replace:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .limit-banner strong {

@@ -6,6 +6,7 @@ import alibarznji.qasa.vault.VaultSession
 import alibarznji.qasa.vault.crypto.VaultCrypto
 import alibarznji.qasa.vault.db.VaultCollectionEntity
 import alibarznji.qasa.vault.db.VaultItemEntity
+import alibarznji.qasa.vault.db.VaultRowRules
 import alibarznji.qasa.vault.db.VaultStoreHolder
 import android.content.Context
 import android.os.Build
@@ -98,17 +99,22 @@ class VaultSyncStore @Inject constructor(
     override fun apply(items: List<FfiItem>, collections: List<FfiCollection>): Long = try {
         val db = holder.open() ?: throw IllegalStateException("vault store unavailable")
         val dao = db.vaultDao()
+        // Ciphertext is stored as received (never decrypted or rewritten here), so only the
+        // structural rules apply; a row breaking them is skipped rather than aborting the
+        // whole apply on the store's trigger.
+        val (rows, rejected) = guardRows(items)
+        if (rejected > 0) Log.w(TAG, "skipped $rejected structurally invalid item(s)")
         db.runInTransaction {
-            if (items.isNotEmpty()) {
-                dao.upsertItemsForSync(items.map(::fromWire))
+            if (rows.isNotEmpty()) {
+                dao.upsertItemsForSync(rows)
                 // Tokens were built from the old contents (or don't exist yet); rebuilt
                 // with the search key after the session, or at the next unlock.
-                dao.deleteTokensForItemsBlocking(items.map { it.id })
+                dao.deleteTokensForItemsBlocking(rows.map { it.id })
             }
             if (collections.isNotEmpty()) dao.upsertCollectionsForSync(collections.map(::fromWire))
         }
-        if (items.any { it.deletedAtMs == null }) secure.searchReindexPending = true
-        (items.size + collections.size).toLong()
+        if (rows.any { !it.isDeleted }) secure.searchReindexPending = true
+        (rows.size + collections.size).toLong()
     } catch (e: Exception) {
         Log.w(TAG, "apply failed", e)
         -1L
@@ -165,6 +171,16 @@ class VaultSyncStore @Inject constructor(
                 updatedAtMs = c.updatedAt,
                 deletedAtMs = c.deletedAt,
             )
+        }
+
+        /**
+         * Wi‑Fi sync and backup restore: the received rows that pass [VaultRowRules]
+         * (kind, non-empty contents unless a tombstone, schema version), and how many didn't.
+         */
+        fun guardRows(items: List<FfiItem>): Pair<List<VaultItemEntity>, Int> {
+            val rows = items.map(::fromWire)
+            val valid = rows.filter(VaultRowRules::isValid)
+            return valid to rows.size - valid.size
         }
 
         /** Rows as received: ciphertext is never re-encrypted on apply. */

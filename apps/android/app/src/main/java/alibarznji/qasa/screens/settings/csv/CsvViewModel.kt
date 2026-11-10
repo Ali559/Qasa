@@ -16,8 +16,9 @@ sealed interface CsvStatus {
     data class ExportFailed(val reason: String) : CsvStatus
     data object ImportNothing : CsvStatus
     data class ImportBadHeader(val missing: String) : CsvStatus
-    data class Imported(val count: Int) : CsvStatus
-    data class ImportSkipped(val added: Int, val skipped: Int) : CsvStatus
+    /** [flagged]: imported items that still break a field rule (stored anyway). */
+    data class Imported(val count: Int, val flagged: Int = 0) : CsvStatus
+    data class ImportSkipped(val added: Int, val skipped: Int, val flagged: Int = 0) : CsvStatus
     data class ImportFailed(val reason: String) : CsvStatus
     data object ImportNotUtf8 : CsvStatus
 
@@ -81,6 +82,7 @@ class CsvViewModel @Inject constructor(
         val existingPrints = allPayloads().first.map(VaultCsv::fingerprint).toSet()
         var added = 0
         var skipped = 0
+        var flagged = 0
         var firstError: Exception? = null
         for (payload in candidates) {
             if (VaultCsv.fingerprint(payload) in existingPrints) {
@@ -88,7 +90,8 @@ class CsvViewModel @Inject constructor(
                 continue
             }
             try {
-                repo.save(null, payload)
+                // Normalized and stored even with issues; the count is shown after.
+                if (repo.import(payload)) flagged++
                 added++
             } catch (e: Exception) {
                 if (firstError == null) firstError = e
@@ -97,8 +100,8 @@ class CsvViewModel @Inject constructor(
         return when {
             firstError != null && added == 0 ->
                 CsvStatus.ImportFailed(firstError.message ?: firstError.javaClass.simpleName)
-            skipped > 0 -> CsvStatus.ImportSkipped(added, skipped)
-            else -> CsvStatus.Imported(added)
+            skipped > 0 -> CsvStatus.ImportSkipped(added, skipped, flagged)
+            else -> CsvStatus.Imported(added, flagged)
         }
     }
 }

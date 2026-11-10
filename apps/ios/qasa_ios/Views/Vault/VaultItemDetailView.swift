@@ -15,6 +15,8 @@ struct VaultItemDetailView: View {
     @State private var revealedSecrets: Set<String> = []
     @State private var unlockedProtected = false
     @State private var toast: String?
+    /// The stored payload fails a shared field rule (imported, or saved before the rules).
+    @State private var needsAttention = false
 
     private var row: VaultListRow? {
         cache.row(for: itemId)
@@ -37,6 +39,9 @@ struct VaultItemDetailView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Theme.screenPadding)
 
+                if needsAttention {
+                    attentionBanner
+                }
                 detailsSection
                 organizationSection
                 historySection
@@ -108,7 +113,28 @@ struct VaultItemDetailView: View {
     private func loadItem() {
         if let loaded = try? VaultRepository.shared.payload(for: itemId) {
             payload = loaded
+            needsAttention = !VaultValidation.issues(loaded).isEmpty
         }
+    }
+
+    private var attentionBanner: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(Theme.danger)
+                .accessibilityHidden(true)
+            Text(L10n.tr("validation.needsAttention"))
+                .font(.qasa(13, weight: .medium))
+                .foregroundColor(Theme.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(14)
+        .background(Theme.danger.opacity(0.12))
+        .cornerRadius(Theme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(Theme.danger.opacity(0.4), lineWidth: 1)
+        )
+        .padding(.horizontal, Theme.screenPadding)
     }
 
     private func unlockProtectedIfNeeded() {

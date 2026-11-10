@@ -2,7 +2,9 @@
 // iOS `VaultItemDetailView`, as the Passwords detail pane: hero tile, name, Details
 // (tap a row to copy, eye to reveal secrets, 2FA code), Organization and History, with
 // Edit and Delete in the header. Protected note content needs the main password first.
-import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-vue-next'
+// Stored dates show in the UI language; an item that breaks a field rule (made by an
+// older version, an import or a browser capture) gets the "needs attention" banner.
+import { CircleAlert, Eye, EyeOff, Pencil, Trash2 } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -10,7 +12,16 @@ import { copySecret, PAYMENT_CLIPBOARD_MS } from '@/clipboard'
 import { prefs, useT } from '@/prefs'
 import { showToast } from '@/toast'
 import { vaultApi } from '@/vault/api'
-import { detailFields, displayDate, isProtectedNote, NOTE_COLOR_VALUE, organizationColor, type DetailField } from '@/vault/present'
+import { fieldsApi, formatCivilDate, type CivilDate } from '@/vault/fields'
+import {
+  detailFields,
+  displayDate,
+  isProtectedNote,
+  NOTE_COLOR_VALUE,
+  organizationColor,
+  vaultDates,
+  type DetailField,
+} from '@/vault/present'
 import { protectedGate, requestProtectedAccess } from '@/vault/protectedGate'
 import { removeItem, session } from '@/vault/session'
 import type { VaultPayload } from '@/vault/types'
@@ -24,9 +35,16 @@ const t = useT()
 const payload = ref<VaultPayload | null>(null)
 const revealed = ref(new Set<string>())
 const confirmDelete = ref(false)
+/** Stored date → the day it means (core `parse_date`), for showing it localized. */
+const dates = ref(new Map<string, CivilDate | null>())
+const needsAttention = ref(false)
 
 const row = computed(() => session.items.find((i) => i.id === props.itemId) ?? null)
-const fields = computed(() => (payload.value ? detailFields(payload.value, t) : []))
+function showDate(raw: string): string {
+  const d = dates.value.get(raw)
+  return d ? formatCivilDate(d, prefs.language) : raw
+}
+const fields = computed(() => (payload.value ? detailFields(payload.value, t, showDate) : []))
 const isProtected = computed(() => !!payload.value && isProtectedNote(payload.value))
 const unlocked = computed(() => !isProtected.value || protectedGate.confirmed)
 const color = computed(() => (payload.value ? organizationColor(payload.value) : null))
@@ -39,11 +57,26 @@ async function load() {
   revealed.value = new Set()
   try {
     payload.value = await vaultApi.get(props.itemId)
+    await inspect(payload.value)
     await vaultApi.markUsed(props.itemId)
     if (isProtected.value) await requestProtectedAccess()
   } catch (e) {
     console.error('Could not open the item', e)
     payload.value = null
+  }
+}
+
+/** Reads the item's dates and field rules in two calls; a failure only skips the extras. */
+async function inspect(p: VaultPayload) {
+  try {
+    const raws = vaultDates(p)
+    const [parsed, issues] = await Promise.all([raws.length ? fieldsApi.parseDates(raws) : [], fieldsApi.validate(p)])
+    dates.value = new Map(raws.map((raw, i) => [raw, parsed[i] ?? null]))
+    needsAttention.value = issues.length > 0
+  } catch (e) {
+    console.error('Could not check the item', e)
+    dates.value = new Map()
+    needsAttention.value = false
   }
 }
 
@@ -103,6 +136,11 @@ const COLOR_KEY = (c: string) => `color.${c}`
           <ItemTile :variant="payload.variant" :name="row?.displayName ?? ''" :size="88" />
           <h1 class="name">{{ row?.displayName ?? t('vault.untitled') }}</h1>
         </div>
+
+        <p v-if="needsAttention" class="attention" role="status">
+          <CircleAlert :size="18" aria-hidden="true" />
+          <span>{{ t('validation.needsAttention') }}</span>
+        </p>
 
         <section class="section">
           <h2 class="section-title">{{ t('vault.details') }}</h2>
@@ -255,6 +293,24 @@ const COLOR_KEY = (c: string) => `color.${c}`
   font-weight: 700;
   text-align: center;
   user-select: text;
+}
+
+.attention {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--corner-radius);
+  background: var(--danger-background);
+  color: var(--danger-text);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.attention :deep(svg) {
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .section {

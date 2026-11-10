@@ -1,44 +1,63 @@
 <script setup lang="ts">
-// iOS `ValidatedDateField`: a typed date ("Nov 6 2000", "2000-11-06", "06/11/2000"…)
-// validated strictly, plus "Pick date" for a calendar that writes the localized form.
+// A vault date (birth, issue, ID expiry), stored as ISO `YYYY-MM-DD` (core `validate.rs`).
+// Type it, or "Pick date" for a calendar that writes ISO. Underneath: the date as Qasa
+// reads it, in the UI language, or the field-rule message. Reading is the core's
+// `parse_date`, so a legacy stored form ("Nov 6, 2000") shows its date too until the
+// next save rewrites it.
 import { Calendar } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 
 import { prefs, useT } from '@/prefs'
-import { parseDate } from '@/vault/dates'
+import { fieldsApi, formatCivilDate, isoDate, type CivilDate } from '@/vault/fields'
 import FormField from './FormField.vue'
 
-defineProps<{ label: string }>()
+defineProps<{ label: string; error?: string | null }>()
 const model = defineModel<string>({ required: true })
 const t = useT()
 const picking = ref(false)
 const picked = ref('')
+const parsed = ref<CivilDate | null>(null)
+let timer: ReturnType<typeof setTimeout> | undefined
+let seq = 0
 
-const error = computed(() => (model.value.trim() && !parseDate(model.value) ? t('date.invalidFormat') : null))
+async function read(raw: string) {
+  const mine = ++seq
+  const date = raw.trim() ? await fieldsApi.parseDate(raw).catch(() => null) : null
+  if (mine === seq) parsed.value = date
+}
+
+// Debounced: one IPC call once typing pauses.
+watch(
+  model,
+  (raw) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => read(raw), 150)
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => clearTimeout(timer))
 
 function openPicker() {
-  const d = parseDate(model.value) ?? new Date()
-  picked.value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const now = new Date()
+  picked.value = isoDate(parsed.value ?? { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() })
   picking.value = true
 }
 
 function onPick() {
-  const [y, m, d] = picked.value.split('-').map(Number)
-  if (!y) return
-  // The localized medium form, as iOS's "MMMdyyyy" template writes it.
-  model.value = new Date(y, m - 1, d).toLocaleDateString(prefs.language, { month: 'short', day: 'numeric', year: 'numeric' })
+  // `<input type="date">` already gives `YYYY-MM-DD`, the stored form.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(picked.value)) model.value = picked.value
 }
 </script>
 
 <template>
-  <FormField v-model="model" :label="label">
+  <FormField v-model="model" :label="label" :placeholder="t('field.datePlaceholder')" :error="error">
     <template #below>
       <div class="below">
         <button type="button" class="pick" @click="picking ? (picking = false) : openPicker()">
           <Calendar :size="14" />
           {{ picking ? t('date.done') : t('date.pick') }}
         </button>
-        <span v-if="error" class="error">{{ error }}</span>
+        <span v-if="parsed && !error" class="reading">{{ formatCivilDate(parsed, prefs.language) }}</span>
       </div>
       <input v-if="picking" v-model="picked" type="date" class="calendar" :aria-label="t('date.pick')" @change="onPick" />
     </template>
@@ -66,9 +85,9 @@ function onPick() {
   cursor: pointer;
 }
 
-.error {
-  font-size: 11px;
-  color: var(--danger);
+.reading {
+  font-size: 12px;
+  color: var(--text-secondary);
   text-align: end;
 }
 

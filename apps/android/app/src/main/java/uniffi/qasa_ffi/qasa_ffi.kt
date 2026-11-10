@@ -794,6 +794,38 @@ internal open class UniffiVTableCallbackInterfaceSyncStoreCallback(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -846,11 +878,43 @@ internal interface UniffiLib : Library {
     ): Long
     fun uniffi_qasa_ffi_fn_method_syncstorecallback_now_ms(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
+    fun uniffi_qasa_ffi_fn_func_backup_create(`encKey`: RustBuffer.ByValue,`restoreKey`: RustBuffer.ByValue,`store`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_file_name(`deviceName`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_info(`file`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_is_due(`frequency`: RustBuffer.ByValue,`lastBackupMs`: RustBuffer.ByValue,`nowMs`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    fun uniffi_qasa_ffi_fn_func_backup_new_restore_key(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_reminder_snooze_ms(uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    fun uniffi_qasa_ffi_fn_func_backup_restore(`file`: RustBuffer.ByValue,`password`: RustBuffer.ByValue,`store`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_restore_key_hash(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_backup_should_remind(`lastBackupMs`: RustBuffer.ByValue,`itemCount`: Int,`snoozedUntilMs`: RustBuffer.ByValue,`nowMs`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    fun uniffi_qasa_ffi_fn_func_card_brand(`number`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_card_security_code_digits(`number`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_format_card_expiry(`raw`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_format_card_number(`raw`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_normalize_payload(`json`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_parse_vault_date(`raw`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_qasa_ffi_fn_func_payload_to_android(`json`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_qasa_ffi_fn_func_payload_to_canonical(`json`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_qasa_ffi_fn_func_sync_join(`host`: RustBuffer.ByValue,`port`: Short,`code`: RustBuffer.ByValue,`store`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_qasa_ffi_fn_func_validate_payload(`json`: RustBuffer.ByValue,`today`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_qasa_ffi_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -964,11 +1028,43 @@ internal interface UniffiLib : Library {
     ): Unit
     fun ffi_qasa_ffi_rust_future_complete_void(`handle`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_qasa_ffi_checksum_func_backup_create(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_file_name(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_info(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_is_due(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_new_restore_key(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_reminder_snooze_ms(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_restore(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_restore_key_hash(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_backup_should_remind(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_card_brand(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_card_security_code_digits(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_format_card_expiry(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_format_card_number(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_normalize_payload(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_parse_vault_date(
+    ): Short
     fun uniffi_qasa_ffi_checksum_func_payload_to_android(
     ): Short
     fun uniffi_qasa_ffi_checksum_func_payload_to_canonical(
     ): Short
     fun uniffi_qasa_ffi_checksum_func_sync_join(
+    ): Short
+    fun uniffi_qasa_ffi_checksum_func_validate_payload(
     ): Short
     fun uniffi_qasa_ffi_checksum_method_synchost_code(
     ): Short
@@ -1009,6 +1105,51 @@ private fun uniffiCheckContractApiVersion(lib: UniffiLib) {
 
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: UniffiLib) {
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_create() != 14301.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_file_name() != 62386.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_info() != 44990.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_is_due() != 46040.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_new_restore_key() != 47742.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_reminder_snooze_ms() != 28556.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_restore() != 9743.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_restore_key_hash() != 47671.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_backup_should_remind() != 37740.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_card_brand() != 39906.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_card_security_code_digits() != 36829.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_format_card_expiry() != 17697.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_format_card_number() != 18430.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_normalize_payload() != 50973.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_parse_vault_date() != 9174.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_qasa_ffi_checksum_func_payload_to_android() != 38264.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1016,6 +1157,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_qasa_ffi_checksum_func_sync_join() != 41150.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_qasa_ffi_checksum_func_validate_payload() != 24795.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_qasa_ffi_checksum_method_synchost_code() != 58819.toShort()) {
@@ -1141,6 +1285,29 @@ public object FfiConverterUInt: FfiConverter<UInt, Int> {
 
     override fun write(value: UInt, buf: ByteBuffer) {
         buf.putInt(value.toInt())
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterInt: FfiConverter<Int, Int> {
+    override fun lift(value: Int): Int {
+        return value
+    }
+
+    override fun read(buf: ByteBuffer): Int {
+        return buf.getInt()
+    }
+
+    override fun lower(value: Int): Int {
+        return value
+    }
+
+    override fun allocationSize(value: Int) = 4UL
+
+    override fun write(value: Int, buf: ByteBuffer) {
+        buf.putInt(value)
     }
 }
 
@@ -2095,6 +2262,45 @@ public object FfiConverterTypeSyncStoreCallback: FfiConverter<SyncStoreCallback,
 
 
 
+/**
+ * A backup's header, readable without the password.
+ */
+data class FfiBackupInfo (
+    var `createdAtMs`: kotlin.Long, 
+    var `deviceName`: kotlin.String, 
+    var `platform`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiBackupInfo: FfiConverterRustBuffer<FfiBackupInfo> {
+    override fun read(buf: ByteBuffer): FfiBackupInfo {
+        return FfiBackupInfo(
+            FfiConverterLong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FfiBackupInfo) = (
+            FfiConverterLong.allocationSize(value.`createdAtMs`) +
+            FfiConverterString.allocationSize(value.`deviceName`) +
+            FfiConverterString.allocationSize(value.`platform`)
+    )
+
+    override fun write(value: FfiBackupInfo, buf: ByteBuffer) {
+            FfiConverterLong.write(value.`createdAtMs`, buf)
+            FfiConverterString.write(value.`deviceName`, buf)
+            FfiConverterString.write(value.`platform`, buf)
+    }
+}
+
+
+
 data class FfiCollection (
     var `id`: kotlin.String, 
     /**
@@ -2138,6 +2344,85 @@ public object FfiConverterTypeFfiCollection: FfiConverterRustBuffer<FfiCollectio
             FfiConverterLong.write(value.`createdAtMs`, buf)
             FfiConverterLong.write(value.`updatedAtMs`, buf)
             FfiConverterOptionalLong.write(value.`deletedAtMs`, buf)
+    }
+}
+
+
+
+/**
+ * A calendar day. The phones pass their local "today".
+ */
+data class FfiDate (
+    var `year`: kotlin.Int, 
+    var `month`: kotlin.UInt, 
+    var `day`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiDate: FfiConverterRustBuffer<FfiDate> {
+    override fun read(buf: ByteBuffer): FfiDate {
+        return FfiDate(
+            FfiConverterInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FfiDate) = (
+            FfiConverterInt.allocationSize(value.`year`) +
+            FfiConverterUInt.allocationSize(value.`month`) +
+            FfiConverterUInt.allocationSize(value.`day`)
+    )
+
+    override fun write(value: FfiDate, buf: ByteBuffer) {
+            FfiConverterInt.write(value.`year`, buf)
+            FfiConverterUInt.write(value.`month`, buf)
+            FfiConverterUInt.write(value.`day`, buf)
+    }
+}
+
+
+
+data class FfiFieldIssue (
+    var `field`: FfiField, 
+    var `problem`: FfiProblem, 
+    /**
+     * Stable `field:problem` id (`number:cardNumberChecksum`) for logs and the golden
+     * vector tests. The UI switches on `field` / `problem`.
+     */
+    var `code`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiFieldIssue: FfiConverterRustBuffer<FfiFieldIssue> {
+    override fun read(buf: ByteBuffer): FfiFieldIssue {
+        return FfiFieldIssue(
+            FfiConverterTypeFfiField.read(buf),
+            FfiConverterTypeFfiProblem.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FfiFieldIssue) = (
+            FfiConverterTypeFfiField.allocationSize(value.`field`) +
+            FfiConverterTypeFfiProblem.allocationSize(value.`problem`) +
+            FfiConverterString.allocationSize(value.`code`)
+    )
+
+    override fun write(value: FfiFieldIssue, buf: ByteBuffer) {
+            FfiConverterTypeFfiField.write(value.`field`, buf)
+            FfiConverterTypeFfiProblem.write(value.`problem`, buf)
+            FfiConverterString.write(value.`code`, buf)
     }
 }
 
@@ -2303,6 +2588,58 @@ public object FfiConverterTypeFfiOutcome: FfiConverterRustBuffer<FfiOutcome> {
 
 
 
+data class FfiRestoreOutcome (
+    /**
+     * This device had no vault and took the backup's vault and account. Unlock with the
+     * password just typed.
+     */
+    var `adopted`: kotlin.Boolean, 
+    var `written`: kotlin.UInt, 
+    var `itemsInBackup`: kotlin.UInt, 
+    var `info`: FfiBackupInfo, 
+    /**
+     * Send it when registering this device (`restore_key` on register), so it can take
+     * the place of the device that made the backup. `None` for a backup without one.
+     */
+    var `restoreKey`: kotlin.ByteArray?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiRestoreOutcome: FfiConverterRustBuffer<FfiRestoreOutcome> {
+    override fun read(buf: ByteBuffer): FfiRestoreOutcome {
+        return FfiRestoreOutcome(
+            FfiConverterBoolean.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterTypeFfiBackupInfo.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FfiRestoreOutcome) = (
+            FfiConverterBoolean.allocationSize(value.`adopted`) +
+            FfiConverterUInt.allocationSize(value.`written`) +
+            FfiConverterUInt.allocationSize(value.`itemsInBackup`) +
+            FfiConverterTypeFfiBackupInfo.allocationSize(value.`info`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`restoreKey`)
+    )
+
+    override fun write(value: FfiRestoreOutcome, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`adopted`, buf)
+            FfiConverterUInt.write(value.`written`, buf)
+            FfiConverterUInt.write(value.`itemsInBackup`, buf)
+            FfiConverterTypeFfiBackupInfo.write(value.`info`, buf)
+            FfiConverterOptionalByteArray.write(value.`restoreKey`, buf)
+    }
+}
+
+
+
 data class FfiVaultMeta (
     var `salt`: kotlin.ByteArray, 
     var `kdfVersion`: kotlin.UInt, 
@@ -2336,6 +2673,252 @@ public object FfiConverterTypeFfiVaultMeta: FfiConverterRustBuffer<FfiVaultMeta>
             FfiConverterByteArray.write(value.`verifier`, buf)
     }
 }
+
+
+
+
+
+/**
+ * Names avoid `message` and `Protocol`, as for [`FfiSyncError`].
+ */
+sealed class FfiBackupException: kotlin.Exception() {
+    
+    class NotABackup(
+        ) : FfiBackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class NewerVersion(
+        ) : FfiBackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class WrongPassword(
+        ) : FfiBackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class DifferentVault(
+        ) : FfiBackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class NoVault(
+        ) : FfiBackupException() {
+        override val message
+            get() = ""
+    }
+    
+    class Store(
+        
+        val `detail`: kotlin.String
+        ) : FfiBackupException() {
+        override val message
+            get() = "detail=${ `detail` }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<FfiBackupException> {
+        override fun lift(error_buf: RustBuffer.ByValue): FfiBackupException = FfiConverterTypeFfiBackupError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiBackupError : FfiConverterRustBuffer<FfiBackupException> {
+    override fun read(buf: ByteBuffer): FfiBackupException {
+        
+
+        return when(buf.getInt()) {
+            1 -> FfiBackupException.NotABackup()
+            2 -> FfiBackupException.NewerVersion()
+            3 -> FfiBackupException.WrongPassword()
+            4 -> FfiBackupException.DifferentVault()
+            5 -> FfiBackupException.NoVault()
+            6 -> FfiBackupException.Store(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: FfiBackupException): ULong {
+        return when(value) {
+            is FfiBackupException.NotABackup -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is FfiBackupException.NewerVersion -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is FfiBackupException.WrongPassword -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is FfiBackupException.DifferentVault -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is FfiBackupException.NoVault -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is FfiBackupException.Store -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`detail`)
+            )
+        }
+    }
+
+    override fun write(value: FfiBackupException, buf: ByteBuffer) {
+        when(value) {
+            is FfiBackupException.NotABackup -> {
+                buf.putInt(1)
+                Unit
+            }
+            is FfiBackupException.NewerVersion -> {
+                buf.putInt(2)
+                Unit
+            }
+            is FfiBackupException.WrongPassword -> {
+                buf.putInt(3)
+                Unit
+            }
+            is FfiBackupException.DifferentVault -> {
+                buf.putInt(4)
+                Unit
+            }
+            is FfiBackupException.NoVault -> {
+                buf.putInt(5)
+                Unit
+            }
+            is FfiBackupException.Store -> {
+                buf.putInt(6)
+                FfiConverterString.write(value.`detail`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+/**
+ * `qasa_vault::validate::CardBrand`.
+ */
+
+enum class FfiCardBrand {
+    
+    VISA,
+    MASTERCARD,
+    AMEX,
+    DISCOVER,
+    DINERS_CLUB,
+    JCB,
+    UNION_PAY,
+    MAESTRO,
+    MIR,
+    UNKNOWN;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiCardBrand: FfiConverterRustBuffer<FfiCardBrand> {
+    override fun read(buf: ByteBuffer) = try {
+        FfiCardBrand.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: FfiCardBrand) = 4UL
+
+    override fun write(value: FfiCardBrand, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * The payload field an issue belongs to. `qasa_vault::validate::Field`.
+ */
+
+enum class FfiField {
+    
+    ITEM_NAME,
+    EMAIL,
+    USERNAME,
+    PASSWORD,
+    WEBSITE,
+    NOTE,
+    TOTP,
+    TITLE,
+    CONTENT,
+    ACCOUNT_HOLDER,
+    NUMBER,
+    SECURITY_CODE,
+    EXPIRY_DATE,
+    ACCOUNT_NUMBER,
+    ROUTING_NUMBER,
+    COUNTRY_CODE,
+    BANK_NAME,
+    FIRST_NAME,
+    MIDDLE_NAME,
+    LAST_NAME,
+    DEFAULT_USERNAME,
+    BIRTH_DATE,
+    BIRTH_PLACE,
+    ADDRESS,
+    CITY,
+    ZIP_CODE,
+    RECIPIENT,
+    BUILDING,
+    FLOOR,
+    APARTMENT,
+    DOOR_CODE,
+    COMPANY_NAME,
+    JOB_TITLE,
+    WEBSITE_URL,
+    NAME,
+    ISSUE_DATE,
+    ISSUE_PLACE;
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiField: FfiConverterRustBuffer<FfiField> {
+    override fun read(buf: ByteBuffer) = try {
+        FfiField.values()[buf.getInt() - 1]
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: FfiField) = 4UL
+
+    override fun write(value: FfiField, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
 
 
 
@@ -2389,6 +2972,413 @@ public object FfiConverterTypeFfiPayloadError : FfiConverterRustBuffer<FfiPayloa
     }
 
 }
+
+
+
+/**
+ * What is wrong with a field. `qasa_vault::validate::Problem`; the apps localize it.
+ */
+sealed class FfiProblem {
+    
+    object Required : FfiProblem()
+    
+    
+    data class TooLong(
+        val `max`: kotlin.UInt) : FfiProblem() {
+        companion object
+    }
+    
+    object DigitsOnly : FfiProblem()
+    
+    
+    object LettersDigitsOnly : FfiProblem()
+    
+    
+    object CardNumberLength : FfiProblem()
+    
+    
+    object CardNumberChecksum : FfiProblem()
+    
+    
+    data class SecurityCodeLength(
+        val `min`: kotlin.UInt, 
+        val `max`: kotlin.UInt) : FfiProblem() {
+        companion object
+    }
+    
+    object ExpiryFormat : FfiProblem()
+    
+    
+    object ExpiryMonth : FfiProblem()
+    
+    
+    data class ExpiryTooFar(
+        val `maxYears`: kotlin.UInt) : FfiProblem() {
+        companion object
+    }
+    
+    object DateInvalid : FfiProblem()
+    
+    
+    object DateInFuture : FfiProblem()
+    
+    
+    object DateTooOld : FfiProblem()
+    
+    
+    object DateBeforeIssue : FfiProblem()
+    
+    
+    data class DateTooFar(
+        val `maxYears`: kotlin.UInt) : FfiProblem() {
+        companion object
+    }
+    
+    object EmailInvalid : FfiProblem()
+    
+    
+    object UrlInvalid : FfiProblem()
+    
+    
+    data class PhoneLength(
+        val `min`: kotlin.UInt, 
+        val `max`: kotlin.UInt) : FfiProblem() {
+        companion object
+    }
+    
+    object PhoneCountryMismatch : FfiProblem()
+    
+    
+    object IbanInvalid : FfiProblem()
+    
+    
+    object IbanChecksum : FfiProblem()
+    
+    
+    object RoutingInvalid : FfiProblem()
+    
+    
+    object CountryInvalid : FfiProblem()
+    
+    
+    object TotpInvalid : FfiProblem()
+    
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFfiProblem : FfiConverterRustBuffer<FfiProblem>{
+    override fun read(buf: ByteBuffer): FfiProblem {
+        return when(buf.getInt()) {
+            1 -> FfiProblem.Required
+            2 -> FfiProblem.TooLong(
+                FfiConverterUInt.read(buf),
+                )
+            3 -> FfiProblem.DigitsOnly
+            4 -> FfiProblem.LettersDigitsOnly
+            5 -> FfiProblem.CardNumberLength
+            6 -> FfiProblem.CardNumberChecksum
+            7 -> FfiProblem.SecurityCodeLength(
+                FfiConverterUInt.read(buf),
+                FfiConverterUInt.read(buf),
+                )
+            8 -> FfiProblem.ExpiryFormat
+            9 -> FfiProblem.ExpiryMonth
+            10 -> FfiProblem.ExpiryTooFar(
+                FfiConverterUInt.read(buf),
+                )
+            11 -> FfiProblem.DateInvalid
+            12 -> FfiProblem.DateInFuture
+            13 -> FfiProblem.DateTooOld
+            14 -> FfiProblem.DateBeforeIssue
+            15 -> FfiProblem.DateTooFar(
+                FfiConverterUInt.read(buf),
+                )
+            16 -> FfiProblem.EmailInvalid
+            17 -> FfiProblem.UrlInvalid
+            18 -> FfiProblem.PhoneLength(
+                FfiConverterUInt.read(buf),
+                FfiConverterUInt.read(buf),
+                )
+            19 -> FfiProblem.PhoneCountryMismatch
+            20 -> FfiProblem.IbanInvalid
+            21 -> FfiProblem.IbanChecksum
+            22 -> FfiProblem.RoutingInvalid
+            23 -> FfiProblem.CountryInvalid
+            24 -> FfiProblem.TotpInvalid
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: FfiProblem) = when(value) {
+        is FfiProblem.Required -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.TooLong -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterUInt.allocationSize(value.`max`)
+            )
+        }
+        is FfiProblem.DigitsOnly -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.LettersDigitsOnly -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.CardNumberLength -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.CardNumberChecksum -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.SecurityCodeLength -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterUInt.allocationSize(value.`min`)
+                + FfiConverterUInt.allocationSize(value.`max`)
+            )
+        }
+        is FfiProblem.ExpiryFormat -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.ExpiryMonth -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.ExpiryTooFar -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterUInt.allocationSize(value.`maxYears`)
+            )
+        }
+        is FfiProblem.DateInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.DateInFuture -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.DateTooOld -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.DateBeforeIssue -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.DateTooFar -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterUInt.allocationSize(value.`maxYears`)
+            )
+        }
+        is FfiProblem.EmailInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.UrlInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.PhoneLength -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterUInt.allocationSize(value.`min`)
+                + FfiConverterUInt.allocationSize(value.`max`)
+            )
+        }
+        is FfiProblem.PhoneCountryMismatch -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.IbanInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.IbanChecksum -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.RoutingInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.CountryInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is FfiProblem.TotpInvalid -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+    }
+
+    override fun write(value: FfiProblem, buf: ByteBuffer) {
+        when(value) {
+            is FfiProblem.Required -> {
+                buf.putInt(1)
+                Unit
+            }
+            is FfiProblem.TooLong -> {
+                buf.putInt(2)
+                FfiConverterUInt.write(value.`max`, buf)
+                Unit
+            }
+            is FfiProblem.DigitsOnly -> {
+                buf.putInt(3)
+                Unit
+            }
+            is FfiProblem.LettersDigitsOnly -> {
+                buf.putInt(4)
+                Unit
+            }
+            is FfiProblem.CardNumberLength -> {
+                buf.putInt(5)
+                Unit
+            }
+            is FfiProblem.CardNumberChecksum -> {
+                buf.putInt(6)
+                Unit
+            }
+            is FfiProblem.SecurityCodeLength -> {
+                buf.putInt(7)
+                FfiConverterUInt.write(value.`min`, buf)
+                FfiConverterUInt.write(value.`max`, buf)
+                Unit
+            }
+            is FfiProblem.ExpiryFormat -> {
+                buf.putInt(8)
+                Unit
+            }
+            is FfiProblem.ExpiryMonth -> {
+                buf.putInt(9)
+                Unit
+            }
+            is FfiProblem.ExpiryTooFar -> {
+                buf.putInt(10)
+                FfiConverterUInt.write(value.`maxYears`, buf)
+                Unit
+            }
+            is FfiProblem.DateInvalid -> {
+                buf.putInt(11)
+                Unit
+            }
+            is FfiProblem.DateInFuture -> {
+                buf.putInt(12)
+                Unit
+            }
+            is FfiProblem.DateTooOld -> {
+                buf.putInt(13)
+                Unit
+            }
+            is FfiProblem.DateBeforeIssue -> {
+                buf.putInt(14)
+                Unit
+            }
+            is FfiProblem.DateTooFar -> {
+                buf.putInt(15)
+                FfiConverterUInt.write(value.`maxYears`, buf)
+                Unit
+            }
+            is FfiProblem.EmailInvalid -> {
+                buf.putInt(16)
+                Unit
+            }
+            is FfiProblem.UrlInvalid -> {
+                buf.putInt(17)
+                Unit
+            }
+            is FfiProblem.PhoneLength -> {
+                buf.putInt(18)
+                FfiConverterUInt.write(value.`min`, buf)
+                FfiConverterUInt.write(value.`max`, buf)
+                Unit
+            }
+            is FfiProblem.PhoneCountryMismatch -> {
+                buf.putInt(19)
+                Unit
+            }
+            is FfiProblem.IbanInvalid -> {
+                buf.putInt(20)
+                Unit
+            }
+            is FfiProblem.IbanChecksum -> {
+                buf.putInt(21)
+                Unit
+            }
+            is FfiProblem.RoutingInvalid -> {
+                buf.putInt(22)
+                Unit
+            }
+            is FfiProblem.CountryInvalid -> {
+                buf.putInt(23)
+                Unit
+            }
+            is FfiProblem.TotpInvalid -> {
+                buf.putInt(24)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
 
 
 
@@ -2657,6 +3647,70 @@ public object FfiConverterOptionalString: FfiConverterRustBuffer<kotlin.String?>
 /**
  * @suppress
  */
+public object FfiConverterOptionalByteArray: FfiConverterRustBuffer<kotlin.ByteArray?> {
+    override fun read(buf: ByteBuffer): kotlin.ByteArray? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterByteArray.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.ByteArray?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterByteArray.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.ByteArray?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterByteArray.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeFfiDate: FfiConverterRustBuffer<FfiDate?> {
+    override fun read(buf: ByteBuffer): FfiDate? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeFfiDate.read(buf)
+    }
+
+    override fun allocationSize(value: FfiDate?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeFfiDate.allocationSize(value)
+        }
+    }
+
+    override fun write(value: FfiDate?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeFfiDate.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeFfiVaultMeta: FfiConverterRustBuffer<FfiVaultMeta?> {
     override fun read(buf: ByteBuffer): FfiVaultMeta? {
         if (buf.get().toInt() == 0) {
@@ -2679,6 +3733,34 @@ public object FfiConverterOptionalTypeFfiVaultMeta: FfiConverterRustBuffer<FfiVa
         } else {
             buf.put(1)
             FfiConverterTypeFfiVaultMeta.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
+    override fun read(buf: ByteBuffer): List<kotlin.UInt> {
+        val len = buf.getInt()
+        return List<kotlin.UInt>(len) {
+            FfiConverterUInt.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<kotlin.UInt>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterUInt.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<kotlin.UInt>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterUInt.write(it, buf)
         }
     }
 }
@@ -2717,6 +3799,34 @@ public object FfiConverterSequenceTypeFfiCollection: FfiConverterRustBuffer<List
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeFfiFieldIssue: FfiConverterRustBuffer<List<FfiFieldIssue>> {
+    override fun read(buf: ByteBuffer): List<FfiFieldIssue> {
+        val len = buf.getInt()
+        return List<FfiFieldIssue>(len) {
+            FfiConverterTypeFfiFieldIssue.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FfiFieldIssue>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFfiFieldIssue.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FfiFieldIssue>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFfiFieldIssue.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeFfiItem: FfiConverterRustBuffer<List<FfiItem>> {
     override fun read(buf: ByteBuffer): List<FfiItem> {
         val len = buf.getInt()
@@ -2738,6 +3848,196 @@ public object FfiConverterSequenceTypeFfiItem: FfiConverterRustBuffer<List<FfiIt
         }
     }
 }
+        /**
+         * The whole backup file of this device's vault. `enc_key` is the unlocked vault's 32-byte
+         * data key; `restore_key` is this device's restore key once the server confirmed its hash
+         * (else `None`). Write the bytes over the device's previous backup.
+         */
+    @Throws(FfiBackupException::class) fun `backupCreate`(`encKey`: kotlin.ByteArray, `restoreKey`: kotlin.ByteArray?, `store`: SyncStoreCallback): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(FfiBackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_create(
+        FfiConverterByteArray.lower(`encKey`),FfiConverterOptionalByteArray.lower(`restoreKey`),FfiConverterTypeSyncStoreCallback.lower(`store`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The fixed file name of this device's backup: `Qasa backup - <device>.qasabackup`.
+         */ fun `backupFileName`(`deviceName`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_file_name(
+        FfiConverterString.lower(`deviceName`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The header of a picked file: when, and from which device. Fails on anything that isn't
+         * a backup this build can read.
+         */
+    @Throws(FfiBackupException::class) fun `backupInfo`(`file`: kotlin.ByteArray): FfiBackupInfo {
+            return FfiConverterTypeFfiBackupInfo.lift(
+    uniffiRustCallWithError(FfiBackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_info(
+        FfiConverterByteArray.lower(`file`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Whether an automatic backup is due. `frequency`: `off`, `daily`, `weekly`, `monthly`.
+         */ fun `backupIsDue`(`frequency`: kotlin.String, `lastBackupMs`: kotlin.Long?, `nowMs`: kotlin.Long): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_is_due(
+        FfiConverterString.lower(`frequency`),FfiConverterOptionalLong.lower(`lastBackupMs`),FfiConverterLong.lower(`nowMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * A fresh random 32-byte restore key. Keep it in the Keychain / Keystore.
+         */ fun `backupNewRestoreKey`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_new_restore_key(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * How long a dismissed reminder stays away, in ms.
+         */ fun `backupReminderSnoozeMs`(): kotlin.Long {
+            return FfiConverterLong.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_reminder_snooze_ms(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Restores a backup with its master password (slow: PBKDF2). A device without a vault
+         * takes the backup's vault and account; the same vault merges; a different one refuses.
+         */
+    @Throws(FfiBackupException::class) fun `backupRestore`(`file`: kotlin.ByteArray, `password`: kotlin.String, `store`: SyncStoreCallback): FfiRestoreOutcome {
+            return FfiConverterTypeFfiRestoreOutcome.lift(
+    uniffiRustCallWithError(FfiBackupException) { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_restore(
+        FfiConverterByteArray.lower(`file`),FfiConverterString.lower(`password`),FfiConverterTypeSyncStoreCallback.lower(`store`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * SHA-256 of a restore key: what `PUT /v1/devices/me/restore-key` sends.
+         */ fun `backupRestoreKeyHash`(`key`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_restore_key_hash(
+        FfiConverterByteArray.lower(`key`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Whether to show the "back up your vault" reminder.
+         */ fun `backupShouldRemind`(`lastBackupMs`: kotlin.Long?, `itemCount`: kotlin.UInt, `snoozedUntilMs`: kotlin.Long?, `nowMs`: kotlin.Long): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_backup_should_remind(
+        FfiConverterOptionalLong.lower(`lastBackupMs`),FfiConverterUInt.lower(`itemCount`),FfiConverterOptionalLong.lower(`snoozedUntilMs`),FfiConverterLong.lower(`nowMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The card brand from the leading digits.
+         */ fun `cardBrand`(`number`: kotlin.String): FfiCardBrand {
+            return FfiConverterTypeFfiCardBrand.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_card_brand(
+        FfiConverterString.lower(`number`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * `(min, max)` security-code digits for a card number's brand, as `[min, max]`.
+         */ fun `cardSecurityCodeDigits`(`number`: kotlin.String): List<kotlin.UInt> {
+            return FfiConverterSequenceUInt.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_card_security_code_digits(
+        FfiConverterString.lower(`number`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Card expiry as the user types it: `MM/YY`.
+         */ fun `formatCardExpiry`(`raw`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_format_card_expiry(
+        FfiConverterString.lower(`raw`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Card number as the user types it: digits only, grouped for the brand.
+         */ fun `formatCardNumber`(`raw`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_format_card_number(
+        FfiConverterString.lower(`raw`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The canonical stored form of a payload (dates `YYYY-MM-DD`, expiry `MM/YY`, grouped card
+         * numbers, ASCII digits…), in the same JSON shape it came in (iOS or Android).
+         */
+    @Throws(FfiPayloadException::class) fun `normalizePayload`(`json`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(FfiPayloadException) { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_normalize_payload(
+        FfiConverterByteArray.lower(`json`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Reads a stored date (`YYYY-MM-DD`, or the forms older versions stored) so the UI can
+         * show it localized. `None` when it isn't a date.
+         */ fun `parseVaultDate`(`raw`: kotlin.String): FfiDate? {
+            return FfiConverterOptionalTypeFfiDate.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_parse_vault_date(
+        FfiConverterString.lower(`raw`),_status)
+}
+    )
+    }
+    
+
         /**
          * Any payload JSON → Android's shape. Android calls this on every payload it receives.
          */
@@ -2773,6 +4073,20 @@ public object FfiConverterSequenceTypeFfiItem: FfiConverterRustBuffer<List<FfiIt
     uniffiRustCallWithError(FfiSyncException) { _status ->
     UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_sync_join(
         FfiConverterString.lower(`host`),FfiConverterUShort.lower(`port`),FfiConverterString.lower(`code`),FfiConverterTypeSyncStoreCallback.lower(`store`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Every problem with a payload (iOS or Android JSON), at most one per field, in form
+         * order. Empty means it may be saved. Run it on the output of [`normalize_payload`].
+         */
+    @Throws(FfiPayloadException::class) fun `validatePayload`(`json`: kotlin.ByteArray, `today`: FfiDate): List<FfiFieldIssue> {
+            return FfiConverterSequenceTypeFfiFieldIssue.lift(
+    uniffiRustCallWithError(FfiPayloadException) { _status ->
+    UniffiLib.INSTANCE.uniffi_qasa_ffi_fn_func_validate_payload(
+        FfiConverterByteArray.lower(`json`),FfiConverterTypeFfiDate.lower(`today`),_status)
 }
     )
     }

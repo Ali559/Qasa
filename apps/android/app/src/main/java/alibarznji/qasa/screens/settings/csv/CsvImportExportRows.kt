@@ -124,9 +124,13 @@ private fun CsvStatus.message(ctx: Context): String = when (this) {
     // Wrapped in importFailed exactly like iOS (`VaultCSVError` → `settings.importFailed`).
     is CsvStatus.ImportBadHeader ->
         ctx.getString(R.string.settings_importfailed, ctx.getString(R.string.settings_importbadheader, missing))
-    is CsvStatus.Imported -> ctx.getString(R.string.settings_parsedcsv, count)
-    is CsvStatus.ImportSkipped -> ctx.getString(R.string.settings_importskipped, added, skipped)
+    is CsvStatus.Imported -> ctx.getString(R.string.settings_parsedcsv, count).withFlagged(ctx, flagged)
+    is CsvStatus.ImportSkipped -> ctx.getString(R.string.settings_importskipped, added, skipped).withFlagged(ctx, flagged)
     is CsvStatus.ImportFailed -> ctx.getString(R.string.settings_importfailed, reason)
     CsvStatus.ImportNotUtf8 ->
         ctx.getString(R.string.settings_importfailed, ctx.getString(R.string.error_decoding))
 }
+
+/** Appends `validation.importFlaggedFmt` when imported items still have fields to check. */
+private fun String.withFlagged(ctx: Context, flagged: Int): String =
+    if (flagged > 0) this + "\n" + ctx.getString(R.string.validation_importflaggedfmt, flagged) else this

@@ -186,6 +186,47 @@ pub async fn revoke_device(pool: &PgPool, account_id: Uuid, device_id: Uuid) -> 
     Ok(revoked > 0)
 }
 
+/// Records a new restore key hash for a linked device: the current hash becomes the
+/// previous one, so backups holding either still work. Sending the current hash again
+/// changes nothing. False when the device is not linked.
+pub async fn set_restore_key_hash(pool: &PgPool, device_id: Uuid, hash: &[u8]) -> anyhow::Result<bool> {
+    let done = sqlx::query(
+        r#"
+        UPDATE devices
+        SET restore_key_prev_hash = CASE
+                WHEN restore_key_hash IS DISTINCT FROM $2 THEN restore_key_hash
+                ELSE restore_key_prev_hash
+            END,
+            restore_key_hash = $2
+        WHERE id = $1 AND revoked_at IS NULL
+        "#,
+    )
+    .bind(device_id)
+    .bind(hash)
+    .execute(pool)
+    .await?;
+    Ok(done.rows_affected() > 0)
+}
+
+/// The account's linked device whose current or previous restore key hash is `hash`.
+pub async fn find_by_restore_key(pool: &PgPool, account_id: Uuid, hash: &[u8]) -> anyhow::Result<Option<DeviceRow>> {
+    let row = sqlx::query_as::<_, DeviceRow>(&format!(
+        r#"
+        SELECT {DEVICE_COLS}
+        FROM devices
+        WHERE account_id = $1
+          AND revoked_at IS NULL
+          AND (restore_key_hash = $2 OR restore_key_prev_hash = $2)
+        LIMIT 1
+        "#
+    ))
+    .bind(account_id)
+    .bind(hash)
+    .fetch_optional(pool)
+    .await?;
+    Ok(row)
+}
+
 /// Revoke every active device except the oldest (primary / first linked).
 /// Returns the count of devices revoked.
 pub async fn revoke_all_except_primary(pool: &PgPool, account_id: Uuid) -> anyhow::Result<u64> {
@@ -225,7 +266,9 @@ async fn revoke_where(
         SET revoked_at = now(),
             tokens_valid_after = now(),
             push_token = NULL,
-            notifications_enabled = false
+            notifications_enabled = false,
+            restore_key_hash = NULL,
+            restore_key_prev_hash = NULL
         WHERE account_id = $1
           AND revoked_at IS NULL
           AND {filter}

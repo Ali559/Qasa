@@ -8,6 +8,7 @@ import alibarznji.qasa.vault.db.AppNotificationEntity
 import alibarznji.qasa.vault.db.VaultCollectionEntity
 import alibarznji.qasa.vault.db.VaultDao
 import alibarznji.qasa.vault.db.VaultItemEntity
+import alibarznji.qasa.vault.db.VaultRowRules
 import alibarznji.qasa.vault.db.VaultSearchTokenEntity
 import alibarznji.qasa.vault.db.VaultStoreHolder
 import alibarznji.qasa.vault.db.VaultStoreUnavailableException
@@ -30,6 +31,22 @@ data class VaultListRow(
     val lastUsedAt: Long?,
 )
 
+/** Who is writing an item, which decides the field-rule policy (ARCHITECTURE.md §5). */
+enum class SaveOrigin {
+    /** The add/edit form: normalize, validate, refuse while any issue remains. */
+    User,
+
+    /** CSV import: normalize, store even with issues (counted, never dropped). */
+    Import,
+
+    /**
+     * A change the app makes to an existing item on the user's behalf that isn't an edit
+     * of its fields (un-filing it from a deleted folder, rotating a breached password):
+     * written as is, so a legacy item stays untouched rather than refused.
+     */
+    Internal,
+}
+
 @Singleton
 class VaultRepository @Inject constructor(
     private val store: VaultStoreHolder,
@@ -46,6 +63,9 @@ class VaultRepository @Inject constructor(
     fun observeRows(): Flow<List<VaultListRow>> =
         dao.observeItems().map { items -> items.mapNotNull { decryptRow(it) } }
 
+    /** How many live items the vault holds (no decryption), e.g. for the backup reminder. */
+    fun observeLiveCount(): Flow<Int> = dao.observeItems().map { it.size }
+
     suspend fun getAllRows(): List<VaultListRow> =
         dao.getAllItems().mapNotNull { decryptRow(it) }
 
@@ -55,7 +75,26 @@ class VaultRepository @Inject constructor(
         return VaultJson.decodePayload(VaultCrypto.decrypt(item.encryptedPayload, enc))
     }
 
-    suspend fun save(id: String?, payload: VaultPayload): String {
+    /**
+     * The single write path for an item's contents. A user save (the add/edit form) is
+     * normalized, then validated: any remaining issue throws [VaultValidationException]
+     * and nothing is written. See [SaveOrigin] for the other origins.
+     */
+    suspend fun save(id: String?, payload: VaultPayload, origin: SaveOrigin = SaveOrigin.User): String =
+        write(id, payload, origin).id
+
+    /**
+     * CSV import: stored normalized even when fields still break a rule (an import never
+     * drops data). Returns whether the stored item still has issues, for
+     * `validation.importFlaggedFmt`.
+     */
+    suspend fun import(payload: VaultPayload): Boolean = write(null, payload, SaveOrigin.Import).issues.isNotEmpty()
+
+    private class Written(val id: String, val issues: List<uniffi.qasa_ffi.FfiFieldIssue>)
+
+    private suspend fun write(id: String?, input: VaultPayload, origin: SaveOrigin): Written {
+        // Throws VaultValidationException for a user save with issues, before anything is written.
+        val (payload, issues) = VaultValidation.prepareForWrite(input, origin)
         val enc = session.requireEncKey()
         val search = session.requireSearchKey()
         val itemId = id ?: UUID.randomUUID().toString().lowercase()
@@ -77,6 +116,7 @@ class VaultRepository @Inject constructor(
             lastUsedAt = existing?.lastUsedAt,
             collectionId = payload.collectionId(),
         )
+        check(VaultRowRules.isValid(entity)) { "refusing a structurally invalid row" }
         dao.upsertItem(entity)
         dao.deleteTokensForItem(itemId)
         val hashes = VaultSearchIndex.searchableStrings(payload)
@@ -85,7 +125,7 @@ class VaultRepository @Inject constructor(
             .map { VaultSearchTokenEntity(itemId = itemId, tokenHash = it) }
         if (hashes.isNotEmpty()) dao.insertTokens(hashes)
         rebuildAutofillIndex()
-        return itemId
+        return Written(itemId, issues)
     }
 
     /** iOS `markUsed`: copying or opening a secret stamps "last used" (and updated, as iOS does). */
@@ -192,7 +232,8 @@ class VaultRepository @Inject constructor(
                 is VaultPayload.SecureNote -> payload.copy(collectionId = null)
                 else -> continue
             }
-            save(item.id, cleared)
+            // Not the user's edit: the item's other fields are written back untouched.
+            save(item.id, cleared, SaveOrigin.Internal)
         }
         dao.tombstoneCollection(id, System.currentTimeMillis())
     }

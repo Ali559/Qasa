@@ -1,6 +1,7 @@
 package alibarznji.qasa.vault
 
 
+import alibarznji.qasa.backup.RestoreKeySecrets
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
@@ -21,7 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class VaultSecureStore @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : RestoreKeySecrets {
     private val prefs: SharedPreferences
 
     init {
@@ -95,6 +96,37 @@ class VaultSecureStore @Inject constructor(
     var licenseVerifyingKey: String?
         get() = prefs.getString(KEY_LICENSE_KEY, null)
         set(value) = prefs.edit().putString(KEY_LICENSE_KEY, value).apply()
+
+    // ---- Backup restore key (see `backup/RestoreKeyRotation.kt`) ---------------------
+    //
+    // Raw 32-byte secrets: they let a device holding a backup replace this one, so they
+    // live only here, next to the license token, and never in plain prefs or logs.
+
+    /** This device's current restore key; only set once the server confirmed its hash. */
+    override var restoreKey: ByteArray?
+        get() = prefs.getString(KEY_RESTORE_KEY, null)?.let { Base64.decode(it, Base64.NO_WRAP) }
+        set(value) = putBytes(KEY_RESTORE_KEY, value)
+
+    /** Whether a backup file holding [restoreKey] was written successfully. */
+    override var restoreKeyWritten: Boolean
+        get() = prefs.getBoolean(KEY_RESTORE_KEY_WRITTEN, false)
+        set(value) = prefs.edit().putBoolean(KEY_RESTORE_KEY_WRITTEN, value).apply()
+
+    /** The key from a backup this device restored, until a registration uses it. */
+    override var pendingRestoreKey: ByteArray?
+        get() = prefs.getString(KEY_PENDING_RESTORE_KEY, null)?.let { Base64.decode(it, Base64.NO_WRAP) }
+        set(value) = putBytes(KEY_PENDING_RESTORE_KEY, value)
+
+    /** This device lost its slot: the server already forgot the hashes of its key. */
+    fun clearOwnRestoreKey() {
+        prefs.edit().remove(KEY_RESTORE_KEY).remove(KEY_RESTORE_KEY_WRITTEN).apply()
+    }
+
+    private fun putBytes(key: String, value: ByteArray?) {
+        val edit = prefs.edit()
+        if (value == null) edit.remove(key) else edit.putString(key, Base64.encodeToString(value, Base64.NO_WRAP))
+        edit.apply()
+    }
 
     var biometricsEnabled: Boolean
         get() = prefs.getBoolean(KEY_BIOMETRICS, false)
@@ -176,6 +208,7 @@ class VaultSecureStore @Inject constructor(
             .apply()
     }
 
+    /** Everything, the restore key secrets included. */
     fun resetVaultSecrets() {
         prefs.edit().clear().apply()
     }
@@ -235,6 +268,9 @@ class VaultSecureStore @Inject constructor(
         private const val KEY_LICENSE = "licenseToken"
         private const val KEY_LICENSE_KEY = "licenseVerifyingKey"
         private const val KEY_BIOMETRICS = "biometricsEnabled"
+        private const val KEY_RESTORE_KEY = "restoreKey"
+        private const val KEY_RESTORE_KEY_WRITTEN = "restoreKeyWritten"
+        private const val KEY_PENDING_RESTORE_KEY = "pendingRestoreKey"
         private const val KEY_BIO_PASSWORD = "biometricPassword"
         private const val KEY_BIO_SECRET = "biometricSecret"
         private const val KEY_BIO_IV = "biometricSecretIv"

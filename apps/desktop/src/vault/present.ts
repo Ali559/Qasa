@@ -194,8 +194,24 @@ export interface DetailField {
   multiline?: boolean
 }
 
-/** iOS `VaultPayload.detailFields`; empty values are dropped. */
-export function detailFields(p: VaultPayload, t: T): DetailField[] {
+/** The stored dates of an item that the detail view shows localized (ISO `YYYY-MM-DD`,
+ * or a legacy form until the next save). Card expiry is `MM/YY` and shown as is. */
+export function vaultDates(p: VaultPayload): string[] {
+  switch (p.variant) {
+    case 'name':
+      return [p.fields.birthDate].filter(Boolean)
+    case 'idCard':
+    case 'passport':
+    case 'driverLicense':
+      return [p.fields.issueDate, p.fields.expiryDate].filter(Boolean)
+    default:
+      return []
+  }
+}
+
+/** iOS `VaultPayload.detailFields`; empty values are dropped. `date` shows a stored date
+ * (see `vaultDates`) in the UI language; without it dates show as stored. */
+export function detailFields(p: VaultPayload, t: T, date: (raw: string) => string = (raw) => raw): DetailField[] {
   let fields: DetailField[]
   switch (p.variant) {
     case 'login': {
@@ -251,7 +267,7 @@ export function detailFields(p: VaultPayload, t: T): DetailField[] {
         { label: t('field.middleName'), value: f.middleName },
         { label: t('field.lastName'), value: f.lastName },
         { label: t('field.defaultUsername'), value: f.defaultUsername },
-        { label: t('field.birthDate'), value: f.birthDate },
+        { label: t('field.birthDate'), value: f.birthDate && date(f.birthDate) },
         { label: t('field.birthPlace'), value: f.birthPlace },
       ]
       break
@@ -309,8 +325,8 @@ export function detailFields(p: VaultPayload, t: T): DetailField[] {
         { label: t('field.name'), value: f.name },
         { label: t('vault.country'), value: countryName(f.countryCode) },
         { label: t('field.number'), value: f.number },
-        { label: t('field.issueDate'), value: f.issueDate },
-        { label: t('field.expiryDate'), value: f.expiryDate },
+        { label: t('field.issueDate'), value: f.issueDate && date(f.issueDate) },
+        { label: t('field.expiryDate'), value: f.expiryDate && date(f.expiryDate) },
       ]
       if (p.variant === 'passport' && f.issuePlace) fields.push({ label: t('field.issuePlace'), value: f.issuePlace })
     }

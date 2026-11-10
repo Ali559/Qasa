@@ -1,7 +1,7 @@
 use serde::Serialize;
 
 /// Errors a vault command returns to the UI. Serialized as `{"code": …, "message": …}`
-/// so screens switch on `code` and never show raw text.
+/// (plus `issues` for `invalidFields`) so screens switch on `code` and never show raw text.
 #[derive(Debug, thiserror::Error)]
 pub enum CommandError {
     #[error("the vault is locked")]
@@ -20,6 +20,10 @@ pub enum CommandError {
     NotFound,
     #[error("invalid input: {0}")]
     Invalid(String),
+    /// A user save that breaks the field rules (`qasa_vault::validate`). Nothing was
+    /// written; `issues` says which fields to fix.
+    #[error("some fields need fixing")]
+    InvalidFields(Vec<qasa_vault::validate::FieldIssue>),
     #[error("storage error: {0}")]
     Storage(String),
     #[error("vault data could not be decrypted")]
@@ -45,6 +49,7 @@ impl CommandError {
             CommandError::UnsupportedKdf => "unsupportedKdf",
             CommandError::NotFound => "notFound",
             CommandError::Invalid(_) => "invalid",
+            CommandError::InvalidFields(_) => "invalidFields",
             CommandError::Storage(_) => "storage",
             CommandError::Corrupt => "corrupt",
             CommandError::BiometricInvalidated => "biometricInvalidated",
@@ -57,9 +62,16 @@ impl CommandError {
 impl Serialize for CommandError {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         use serde::ser::SerializeStruct;
-        let mut s = serializer.serialize_struct("CommandError", 2)?;
+        let issues = match self {
+            CommandError::InvalidFields(issues) => Some(issues),
+            _ => None,
+        };
+        let mut s = serializer.serialize_struct("CommandError", 2 + usize::from(issues.is_some()))?;
         s.serialize_field("code", self.code())?;
         s.serialize_field("message", &self.to_string())?;
+        if let Some(issues) = issues {
+            s.serialize_field("issues", issues)?;
+        }
         s.end()
     }
 }

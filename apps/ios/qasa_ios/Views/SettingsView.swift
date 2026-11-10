@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var showLogoutConfirm = false
     @State private var showLANSync = false
     @State private var showImport = false
+    @State private var showBackups = false
     @State private var showChangeMasterPassword = false
     @State private var showAutoLock = false
     @State private var exportDocument: CSVDocument?
@@ -158,6 +159,15 @@ struct SettingsView: View {
                     }
 
                     settingsSection(title: L10n.tr("settings.dataAccount", locale: locale)) {
+                        Button { showBackups = true } label: {
+                            NavChevronRow(
+                                icon: "externaldrive.badge.checkmark",
+                                title: L10n.tr("backup.title", locale: locale),
+                                subtitle: L10n.tr("backup.subtitle", locale: locale)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        Divider().background(Theme.stroke)
                         Button { showImport = true } label: {
                             NavChevronRow(
                                 icon: "square.and.arrow.down",
@@ -285,6 +295,10 @@ struct SettingsView: View {
             }
             .environment(session)
             .appLocalization()
+        }
+        .sheet(isPresented: $showBackups) {
+            BackupsView()
+                .appLocalization()
         }
         .sheet(isPresented: $showLANSync) {
             LANSyncView(onUpgrade: {
@@ -466,14 +480,18 @@ struct SettingsView: View {
 
             var added = 0
             var skipped = 0
+            var flagged = 0
             var firstError: Error?
-            for payload in candidates {
+            for candidate in candidates {
+                // Compared in stored (normalized) form, so a repeated import stays a no-op.
+                let payload = VaultValidation.normalizedOrSame(candidate)
                 guard !existingPrints.contains(VaultCSV.fingerprint(payload)) else {
                     skipped += 1
                     continue
                 }
                 do {
-                    _ = try VaultRepository.shared.save(payload: payload)
+                    // Stored even with field issues; counted so the user knows to check them.
+                    if try VaultRepository.shared.importItem(payload).flagged { flagged += 1 }
                     added += 1
                 } catch {
                     firstError = firstError ?? error
@@ -497,6 +515,13 @@ struct SettingsView: View {
                 statusMessage = String(
                     format: L10n.tr("settings.parsedCsv", locale: locale),
                     added
+                )
+            }
+            if flagged > 0, let message = statusMessage {
+                statusMessage = message + "\n" + String(
+                    format: L10n.tr("validation.importFlaggedFmt", locale: locale),
+                    locale: locale,
+                    flagged
                 )
             }
         } catch {

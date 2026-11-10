@@ -88,6 +88,7 @@ class VaultStoreHolder @Inject constructor(
         return Room.databaseBuilder(context, VaultDatabase::class.java, DATABASE_NAME)
             .addMigrations(*VaultMigrations.ALL)
             .addCallback(SecureDeleteCallback)
+            .addCallback(VaultMigrations.CreateTriggersCallback)
             .build()
     }
 

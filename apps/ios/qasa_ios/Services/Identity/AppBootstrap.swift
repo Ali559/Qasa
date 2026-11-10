@@ -25,6 +25,16 @@ enum AppBootstrap {
         await AppPreferences.shared.syncLocaleToServer()
     }
 
+    /// After this device took the place of the one a restored backup came from: the same
+    /// steps that follow a successful registration on unlock (license, Premium state,
+    /// push token, language).
+    @MainActor
+    static func onDeviceReplaced(session: AppSession) async {
+        await session.refreshPremium()
+        await PushNotificationService.shared.requestAuthorizationAndRegister()
+        await AppPreferences.shared.syncLocaleToServer()
+    }
+
     @MainActor
     static func onLogout() {
         VaultSession.shared.lock()
