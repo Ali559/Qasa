@@ -126,6 +126,7 @@ struct BackupRestoreView: View {
                     placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
                     text: $password,
                     isSecure: !passwordVisible,
+                            isPassword: true,
                     trailing: AnyView(
                         FieldIconButton(
                             systemImage: passwordVisible ? "eye.slash" : "eye",
