@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -153,12 +154,20 @@ class VaultSecureStore @Inject constructor(
         get() = gateKey() != null
 
     /** A cipher for `BiometricPrompt.CryptoObject`, so the write needs authorization too. */
-    fun biometricEncryptCipher(): Cipher? = try {
-        Cipher.getInstance(TRANSFORMATION).apply {
+    fun biometricEncryptCipher(): Cipher? {
+        fun make(): Cipher? = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, gateKey() ?: return null)
         }
-    } catch (_: Exception) {
-        null
+        return try {
+            make()
+        } catch (_: KeyPermanentlyInvalidatedException) {
+            // Nothing sealed with the old key can be opened any more: start over with a new one.
+            clearBiometricPassword()
+            dropGateKey()
+            runCatching { make() }.getOrNull()
+        } catch (_: Exception) {
+            null
+        }
     }
 
     /** Encrypts the master password with a cipher the prompt has already authorized. */
@@ -183,9 +192,13 @@ class VaultSecureStore @Inject constructor(
             Cipher.getInstance(TRANSFORMATION).apply {
                 init(Cipher.DECRYPT_MODE, gateKey() ?: return null, GCMParameterSpec(128, iv))
             }
+        } catch (_: KeyPermanentlyInvalidatedException) {
+            // Screen lock removed or reset: the sealed password is gone for good. The next
+            // password unlock seals it again under a new key.
+            clearBiometricPassword()
+            dropGateKey()
+            null
         } catch (_: Exception) {
-            // A permanently invalidated key (enrolment change on a biometric-only
-            // device) lands here: drop the secret instead of looping forever.
             clearBiometricPassword()
             null
         }
@@ -213,10 +226,34 @@ class VaultSecureStore @Inject constructor(
         prefs.edit().clear().apply()
     }
 
-    private fun gateKey(): SecretKey? = gateKeyLazy.value
+    private var cachedGateKey: SecretKey? = null
 
-    private val gateKeyLazy: Lazy<SecretKey?> = lazy {
+    /**
+     * The key that seals the master password. It must survive app restarts, so an existing
+     * one is reused: generating under the same alias replaced it on every process start,
+     * and after a restart the sealed password no longer decrypted, was dropped, and
+     * fingerprint unlock silently stopped working.
+     */
+    @Synchronized
+    private fun gateKey(): SecretKey? {
+        cachedGateKey?.let { return it }
+        val key = existingGateKey() ?: generateGateKey()
+        cachedGateKey = key
+        return key
+    }
+
+    /** Android invalidated the key (screen lock removed): forget it so a new one is made. */
+    @Synchronized
+    private fun dropGateKey() {
+        cachedGateKey = null
         try {
+            KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }.deleteEntry(GATE_KEY_ALIAS)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun generateGateKey(): SecretKey? {
+        return try {
             val generator = KeyGenerator.getInstance(
                 KeyProperties.KEY_ALGORITHM_AES,
                 ANDROID_KEYSTORE,
@@ -255,6 +292,14 @@ class VaultSecureStore @Inject constructor(
             // unavailable and the master password is the only way in.
             null
         }
+    }
+
+    private fun existingGateKey(): SecretKey? = try {
+        val store = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
+        store.getKey(GATE_KEY_ALIAS, null) as? SecretKey
+    } catch (_: Exception) {
+        // Unreadable (e.g. invalidated when the screen lock was removed): make a new one.
+        null
     }
 
     companion object {
