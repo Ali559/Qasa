@@ -21,7 +21,7 @@ struct SiteLogo: Equatable {
     ]
 
     /// Soft, readable-with-white colours for sites we do not recognise.
-    private static let fallbackColors = ["7C6CF2", "E07A5F", "3FA7C9", "2F9E6C", "D4537E", "B7791F", "5B7CF0"]
+    private static let fallbackColors = ["722F99", "E07A5F", "3FA7C9", "2F9E6C", "D4537E", "B7791F", "5B7CF0"]
 
     init(name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)

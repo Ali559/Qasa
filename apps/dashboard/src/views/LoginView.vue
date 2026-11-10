@@ -51,7 +51,7 @@ async function authenticate() {
   <div class="grid min-h-svh lg:grid-cols-[1.1fr_1fr]">
     <aside class="slab bg-primary text-primary-foreground relative isolate hidden overflow-hidden p-10 lg:flex lg:flex-col">
       <div class="flex items-center gap-3">
-        <span class="bg-sun text-sun-ink font-heading grid size-11 -rotate-6 place-items-center rounded-2xl text-2xl font-extrabold shadow-[0_4px_0_#b8861a]">q</span>
+        <img src="/favicon.svg" alt="" class="size-11 -rotate-6 rounded-2xl shadow-[0_4px_0_var(--sun-lip)]" />
         <span class="font-heading text-xl font-bold">Qasa</span>
       </div>
 
@@ -82,7 +82,7 @@ async function authenticate() {
     <main class="flex items-center justify-center p-6 sm:p-10">
       <div class="w-full max-w-sm">
         <div class="mb-8 flex items-center gap-3 lg:hidden">
-          <span class="bg-sun text-sun-ink font-heading grid size-10 -rotate-6 place-items-center rounded-2xl text-xl font-extrabold shadow-[0_3px_0_#b8861a]">q</span>
+          <img src="/favicon.svg" alt="" class="size-10 -rotate-6 rounded-2xl shadow-[0_3px_0_var(--sun-lip)]" />
           <span class="font-heading text-lg font-bold">Qasa</span>
         </div>
 

@@ -86,7 +86,7 @@ async function openQasa(): Promise<void> {
   try {
     await ask({ kind: 'unlock' })
   } catch {
-    showToast(t('ext.error'))
+    showToast(t('ext.error'), { tone: 'error' })
   }
 }
 
@@ -112,7 +112,7 @@ async function copy(item: LoginMatch, field: CopyField): Promise<void> {
     await ask({ kind: 'copy', itemId: item.id, field })
     showToast(field === 'totp' ? t('totp.copied') : t('ext.copiedClears'))
   } catch {
-    showToast(t('ext.error'))
+    showToast(t('ext.error'), { tone: 'error' })
   }
 }
 
@@ -125,7 +125,7 @@ async function fill(item: LoginMatch): Promise<void> {
   } catch {
     filled = false
   }
-  if (!filled) showToast(t('ext.fillFailed'))
+  if (!filled) showToast(t('ext.fillFailed'), { tone: 'error' })
   else if (!isDetached()) window.close()
 }
 
@@ -169,6 +169,16 @@ onBeforeUnmount(() => clearInterval(poll))
       <StateCard v-else-if="status.state === 'pairing'" :icon="Link2" :title="t('ext.connectTitle')" :body="t('ext.pairCodeHint')">
         <output class="code" dir="ltr" data-testid="pair-code">{{ status.code.slice(0, 3) }} {{ status.code.slice(3) }}</output>
         <p class="hint">{{ t('ext.pairWaiting') }}</p>
+      </StateCard>
+
+      <!-- The main password is due: only the desktop app can take it, so say so and open it. -->
+      <StateCard
+        v-else-if="status.state === 'locked' && status.passwordDueDays"
+        :icon="Lock"
+        :title="t('ext.lockedTitle')"
+        :body="t('auth.unlock.masterPasswordDueFmt', status.passwordDueDays)"
+      >
+        <PrimaryButton :title="t('ext.openQasa')" @click="openQasa" />
       </StateCard>
 
       <StateCard v-else-if="state === 'locked'" :icon="Lock" :title="t('ext.lockedTitle')" :body="t('ext.lockedBody')">
@@ -286,9 +296,10 @@ onBeforeUnmount(() => clearInterval(poll))
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border-radius: var(--button-radius);
   background: var(--card-background-light);
   color: var(--accent-dark);
   font-weight: 600;

@@ -126,8 +126,8 @@ struct qasaApp: App {
                         )
                 } else if showLogin {
                     LoginView(
-                        onUnlocked: { password in
-                            Task { await handleUnlock(password: password) }
+                        onUnlocked: { password, viaBiometrics in
+                            Task { await handleUnlock(password: password, typedByUser: !viaBiometrics) }
                         },
                         onCreateVault: {}
                     )
@@ -148,6 +148,9 @@ struct qasaApp: App {
             .environment(\.locale, prefs.locale)
             .environment(\.layoutDirection, prefs.layoutDirection)
             .font(.qasa(16))
+            // Save confirmations from the item editor. Hosted here, not in the editor's sheet,
+            // so the toast outlives the sheet; below the privacy shield so it's covered too.
+            .toastHost()
             // Cover the vault before the system takes an app-switcher/Control Centre
             // snapshot. Without this, whatever is on screen lands in that snapshot.
             .privacyShield(!isShielded)
@@ -192,12 +195,12 @@ struct qasaApp: App {
                     ProgressView()
                         .padding(24)
                         .background(Theme.cardBackground)
-                        .cornerRadius(12)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
                 } else if isBootstrapping {
                     ProgressView(L10n.tr("auth.securingVault", locale: prefs.locale))
                         .padding(24)
                         .background(Theme.cardBackground)
-                        .cornerRadius(12)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
                 }
             }
             .safeAreaInset(edge: .top, spacing: 0) {
@@ -241,41 +244,42 @@ struct qasaApp: App {
             // Right after a setup restore hit the device limit: offer to take the place of
             // the device the backup came from. "Not now" leaves the same button on Linked
             // Devices.
-            .alert(
-                L10n.tr("backup.replace.title", locale: prefs.locale),
+            .confirmSheet(
                 isPresented: Binding(
                     get: { unlocked && registration.replacePrompt != nil },
                     set: { if !$0 { registration.replacePrompt = nil } }
                 ),
-                presenting: registration.replacePrompt
-            ) { _ in
-                Button(L10n.tr("backup.replace.button", locale: prefs.locale)) {
-                    Task { await replaceOldDevice() }
-                }
-                Button(L10n.tr("backup.reminder.dismiss", locale: prefs.locale), role: .cancel) {}
-            } message: { device in
-                Text(String(format: L10n.tr("backup.replace.bodyFmt", locale: prefs.locale), device.device_name))
-            }
-            .alert(
-                L10n.tr("backup.replace.title", locale: prefs.locale),
-                isPresented: $replaceFailed
+                title: L10n.tr("backup.replace.title", locale: prefs.locale),
+                message: registration.replacePrompt.map {
+                    String(format: L10n.tr("backup.replace.bodyFmt", locale: prefs.locale), $0.device_name)
+                },
+                icon: "arrow.triangle.2.circlepath",
+                confirmTitle: L10n.tr("backup.replace.button", locale: prefs.locale),
+                cancelTitle: L10n.tr("backup.reminder.dismiss", locale: prefs.locale)
             ) {
-                Button(L10n.tr("common.ok", locale: prefs.locale), role: .cancel) {}
-            } message: {
-                Text(L10n.tr("backup.replace.failed", locale: prefs.locale))
+                Task { await replaceOldDevice() }
             }
-            .alert(
-                L10n.tr("error.vaultCreateTitle", locale: prefs.locale),
+            .confirmSheet(
+                isPresented: $replaceFailed,
+                title: L10n.tr("backup.replace.title", locale: prefs.locale),
+                message: L10n.tr("backup.replace.failed", locale: prefs.locale),
+                icon: "exclamationmark.triangle",
+                confirmTitle: L10n.tr("common.ok", locale: prefs.locale)
+            ) {}
+            .confirmSheet(
                 isPresented: Binding(
                     get: { createError != nil },
                     set: { if !$0 { createError = nil } }
                 ),
-                presenting: createError
-            ) { _ in
-                Button(L10n.tr("common.ok", locale: prefs.locale), role: .cancel) { createError = nil }
-            } message: { detail in
-                Text(detail)
+                title: L10n.tr("error.vaultCreateTitle", locale: prefs.locale),
+                message: createError,
+                icon: "exclamationmark.triangle",
+                confirmTitle: L10n.tr("common.ok", locale: prefs.locale)
+            ) {
+                createError = nil
             }
+            // The sheets above sit outside the content's palette environment.
+            .environment(\.themePalette, ThemePalette.resolved(for: effectiveScheme))
             .task {
                 // `onChange` never fires for the initial value, so an app that launches
                 // straight into `.active` would keep the shield stuck on.
@@ -324,8 +328,10 @@ struct qasaApp: App {
         }
 
         @MainActor
-        private func handleUnlock(password: String) async {
-            guard VaultAuthStore.verifyMasterPassword(password) else { return }
+        /// `typedByUser` is false when Face ID / Touch ID released the password: that unlock
+        /// must not restart the master-password interval (`BiometricPolicy`).
+        private func handleUnlock(password: String, typedByUser: Bool = true) async {
+            guard VaultAuthStore.verifyMasterPassword(password, typedByUser: typedByUser) else { return }
             isBootstrapping = true
             defer { isBootstrapping = false }
             await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)

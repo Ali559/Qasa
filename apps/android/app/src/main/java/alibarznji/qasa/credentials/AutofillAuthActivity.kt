@@ -13,6 +13,9 @@ import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
+import alibarznji.qasa.vault.BiometricPolicy
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import alibarznji.qasa.vault.VaultSession
 import alibarznji.qasa.vault.totp.Totp
 import alibarznji.qasa.vault.totp.TotpClipboard
@@ -303,8 +306,16 @@ internal fun ColumnScope.AutofillUnlockPane(
     var visible by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     // Biometrics start on their own, like the iOS sheet; the password stays below. A
-    // non-null cipher is one prompt in flight.
-    var cipher by remember { mutableStateOf(session.biometricUnlockCipher()) }
+    // non-null cipher is one prompt in flight. Only once per sheet: `autoPrompted` is
+    // saveable, so a rotation does not prompt again. When the master password is due
+    // (BiometricPolicy) there is no cipher, so no prompt and no biometric button.
+    var autoPrompted by rememberSaveable { mutableStateOf(false) }
+    var cipher by remember {
+        mutableStateOf(if (autoPrompted) null else session.biometricUnlockCipher())
+    }
+    SideEffect { autoPrompted = true }
+    var biometricAllowed by remember { mutableStateOf(session.biometricUnlockAllowed()) }
+    val showMasterPasswordDue = remember { session.biometricsEnabled && session.masterPasswordDue }
     val wrong = stringResource(R.string.autofill_wrongpassword)
     val failed = stringResource(R.string.autofill_biometricfailed)
     // The key derivation takes a moment: off the main thread.
@@ -332,7 +343,10 @@ internal fun ColumnScope.AutofillUnlockPane(
         cipher = cipher,
         onAuthenticated = { authorized ->
             cipher = null
-            runUnlock({ authorized != null && session.unlockWithBiometricCipher(authorized) }) { error = failed }
+            runUnlock({ authorized != null && session.unlockWithBiometricCipher(authorized) }) {
+                error = failed
+                biometricAllowed = session.biometricUnlockAllowed()
+            }
         },
         onDismissed = { cipher = null },
     )
@@ -361,6 +375,14 @@ internal fun ColumnScope.AutofillUnlockPane(
         Spacer(Modifier.height(QasaDimens.contentGap))
         Text(it, color = c.danger, style = qasaText.bodySmallMedium)
     }
+    if (showMasterPasswordDue) {
+        Spacer(Modifier.height(QasaDimens.contentGap))
+        Text(
+            stringResource(R.string.auth_unlock_masterpasswordduefmt, BiometricPolicy.MASTER_PASSWORD_INTERVAL_DAYS),
+            color = c.textSecondary,
+            style = qasaText.bodyMedium,
+        )
+    }
     Spacer(Modifier.height(QasaDimens.gap))
     PrimaryButton(
         title = stringResource(R.string.autofill_unlock),
@@ -369,7 +391,7 @@ internal fun ColumnScope.AutofillUnlockPane(
         onClick = ::submit,
         modifier = Modifier.fillMaxWidth(),
     )
-    if (session.biometricUnlockAvailable()) {
+    if (biometricAllowed) {
         Spacer(Modifier.height(QasaDimens.contentGap))
         SecondaryButton(
             title = stringResource(R.string.auth_unlock_biometrics),

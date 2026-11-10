@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // A shell page or tab root: `AppMenuHeader` over a scrolling column. On desktop the
-// column is capped (720px) so cards keep phone proportions instead of stretching.
+// column is capped (720px) so cards keep phone proportions instead of stretching. The
+// `actions` slot is the page's primary action, pinned under the scroll (BottomActionBar).
 import AppMenuHeader from './AppMenuHeader.vue'
+import BottomActionBar from './BottomActionBar.vue'
 
 withDefaults(defineProps<{ title: string; back?: boolean; maxWidth?: number; gap?: number }>(), {
   maxWidth: 720,
@@ -20,6 +22,9 @@ defineEmits<{ back: [] }>()
         <slot />
       </div>
     </div>
+    <BottomActionBar v-if="$slots.actions" :max-width="maxWidth - 40">
+      <slot name="actions" />
+    </BottomActionBar>
     <slot name="overlay" />
   </div>
 </template>

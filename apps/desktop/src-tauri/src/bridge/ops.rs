@@ -121,6 +121,12 @@ fn row(id: &str, f: &LoginFields) -> Value {
     })
 }
 
+/// Locked with Touch ID / Hello set up, but the master password is due: the extension
+/// can't offer the fingerprint and points to the desktop's password field instead.
+pub fn password_due(vault: &Vault) -> bool {
+    vault.biometric_status().is_ok_and(|b| b.enabled && b.sealed && b.master_password_due)
+}
+
 pub fn status(vault: &Vault, host: &dyn Host) -> OpResult {
     let s = vault.status().map_err(OpError::from)?;
     let state = if s.unlocked {
@@ -130,7 +136,12 @@ pub fn status(vault: &Vault, host: &dyn Host) -> OpResult {
     } else {
         "noVault"
     };
-    Ok(json!({ "state": state, "device": host.device_name() }))
+    let mut reply = json!({ "state": state, "device": host.device_name() });
+    if state == "locked" && password_due(vault) {
+        reply["passwordDue"] = json!(true);
+        reply["passwordIntervalDays"] = json!(crate::vault::MASTER_PASSWORD_INTERVAL_DAYS);
+    }
+    Ok(reply)
 }
 
 pub fn matches(vault: &Vault, args: &Value) -> OpResult {

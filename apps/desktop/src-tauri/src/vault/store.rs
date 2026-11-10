@@ -122,6 +122,9 @@ pub const META_KDF_VERSION: &str = "kdf_version";
 pub const META_BIOMETRIC_ENABLED: &str = "biometric_enabled";
 /// The sealed root key (`qasa_biometric::Sealed` as JSON).
 pub const META_BIOMETRIC_SEALED: &str = "biometric_sealed";
+/// When the master password last opened (or created, or changed) this vault: Unix ms as
+/// decimal text. Touch ID / Hello unlocks never touch it (`Vault::master_password_due`).
+pub const META_LAST_MASTER_PASSWORD_UNLOCK: &str = "last_master_password_unlock";
 
 /// One encrypted item row.
 pub struct ItemRow {

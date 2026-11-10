@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.home
 
 import alibarznji.qasa.R
+import androidx.compose.ui.res.painterResource
 import alibarznji.qasa.credentials.AutofillSettings
 import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.theme.PrimaryButton
@@ -92,7 +93,7 @@ internal fun AutofillPromptCard(onNotNow: () -> Unit) {
                 Modifier.size(QasaIconSize.x6l).clip(CircleShape).background(c.accent),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.VerifiedUser, contentDescription = null, tint = Color.White, modifier = Modifier.size(QasaIconSize.xl))
+                Icon(painterResource(R.drawable.ic_qasa_mark), contentDescription = null, tint = c.onAccent, modifier = Modifier.size(QasaIconSize.xl))
             }
             Spacer(Modifier.width(QasaDimens.gapSmall))
             Text(

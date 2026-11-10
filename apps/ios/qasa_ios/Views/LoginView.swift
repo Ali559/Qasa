@@ -1,13 +1,29 @@
 import SwiftUI
 
 struct LoginView: View {
-    var onUnlocked: (String) -> Void
+    /// The unlocked password, and whether Face ID / Touch ID released it (`true`) or it
+    /// was typed (`false`): only a typed one restarts the master-password interval.
+    var onUnlocked: (_ password: String, _ viaBiometrics: Bool) -> Void
     var onCreateVault: () -> Void
 
     @Environment(AppPreferences.self) private var prefs
+    @Environment(\.scenePhase) private var scenePhase
     @State private var password = ""
     @State private var passwordVisible = false
     @State private var errorMessage: String?
+    /// Biometrics are on for this vault (Keychain, so not observable: refreshed on appear
+    /// and on every return to the foreground).
+    @State private var biometricsEnabled = VaultKeychainStore.biometricsEnabled
+    /// The 14-day master-password unlock is due: no biometric button, no auto prompt.
+    @State private var masterPasswordDue = BiometricPolicy.isMasterPasswordDue
+    /// One automatic Face ID / Touch ID prompt per appearance. Armed on appear and when the
+    /// app goes to the background; consumed by the prompt. The system prompt itself only
+    /// moves the scene to `.inactive`, never `.background`, so cancelling it can't re-arm
+    /// it and loop.
+    @State private var autoPromptArmed = true
+    @State private var isAuthenticating = false
+
+    private var showsBiometricButton: Bool { biometricsEnabled && !masterPasswordDue }
 
     private var locale: Locale { prefs.locale }
 
@@ -41,11 +57,13 @@ struct LoginView: View {
                             text: $password,
                             isSecure: !passwordVisible,
                             trailing: AnyView(
-                                Button {
+                                FieldIconButton(
+                                    systemImage: passwordVisible ? "eye.slash" : "eye",
+                                    accessibilityLabel: passwordVisible
+                                        ? L10n.tr("vault.hidePassword", locale: locale)
+                                        : L10n.tr("vault.showPassword", locale: locale)
+                                ) {
                                     passwordVisible.toggle()
-                                } label: {
-                                    Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                                        .foregroundColor(Theme.textSecondary)
                                 }
                             )
                         )
@@ -55,36 +73,44 @@ struct LoginView: View {
                                 .font(.qasa(13, weight: .medium))
                                 .foregroundColor(Theme.danger)
                         }
+
+                        if biometricsEnabled && masterPasswordDue {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "key.fill")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(Theme.accent)
+                                    .accessibilityHidden(true)
+                                Text(
+                                    String(
+                                        format: L10n.tr("auth.unlock.masterPasswordDueFmt", locale: locale),
+                                        locale: locale,
+                                        BiometricPolicy.masterPasswordIntervalDays
+                                    )
+                                )
+                                .font(.qasa(13))
+                                .foregroundColor(Theme.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .padding(.top, 2)
+                            .accessibilityElement(children: .combine)
+                        }
                     }
 
                     // Only offered when biometrics were enabled for this vault (Android parity);
                     // tapping a row that can only answer "enable biometrics first" was a dead end.
-                    if VaultKeychainStore.biometricsEnabled {
+                    // Hidden while the 14-day master-password unlock is due (`BiometricPolicy`).
+                    if showsBiometricButton {
                         Button {
-                            unlockWithBiometrics()
+                            Task { await unlockWithBiometrics(automatic: false) }
                         } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "touchid")
-                                    .font(.qasa(22))
-                                    .foregroundColor(Theme.accent)
-                                    .frame(width: 40, height: 40)
-                                    .background(Theme.cardBackgroundLight)
-                                    .clipShape(Circle())
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(L10n.tr("auth.unlock.biometrics", locale: locale))
-                                        .font(.qasa(16, weight: .semibold))
-                                        .foregroundColor(Theme.textPrimary)
-                                    Text(L10n.tr("auth.unlock.biometricsHint", locale: locale))
-                                        .font(.qasaLabel(12))
-                                        .foregroundColor(Theme.textSecondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.forward")
-                                    .font(.qasa(13, weight: .semibold))
-                                    .foregroundColor(Theme.textTertiary)
+                            SettingsRow(
+                                icon: "touchid",
+                                title: L10n.tr("auth.unlock.biometrics", locale: locale),
+                                subtitle: L10n.tr("auth.unlock.biometricsHint", locale: locale)
+                            ) {
+                                RowChevron()
                             }
-                            .padding(16)
+                            .padding(.horizontal, 14)
                             .background(Theme.cardBackground)
                             .cornerRadius(Theme.cornerRadius)
                             .overlay(
@@ -92,7 +118,8 @@ struct LoginView: View {
                                     .stroke(Theme.stroke, lineWidth: 1)
                             )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
+                        .disabled(isAuthenticating)
                         .padding(.top, 4)
                     }
 
@@ -112,27 +139,60 @@ struct LoginView: View {
                         }
                     }
                     .padding(.top, 8)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 24)
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 24)
             }
-
-            VStack(spacing: 0) {
-                Divider().background(Theme.stroke)
-                PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: "lock.open.fill") {
-                    attemptUnlock()
-                }
-                .opacity(canUnlock ? 1 : 0.5)
-                .disabled(!canUnlock)
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 17)
-                .padding(.bottom, 32)
-            }
-            .background(Theme.chrome.opacity(0.92))
+            .scrollDismissesKeyboard(.interactively)
         }
         .background(Theme.background.ignoresSafeArea())
+        .bottomActionBar {
+            PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: "lock.open.fill") {
+                attemptUnlock()
+            }
+            .disabled(!canUnlock)
+        }
         .environment(prefs)
+        .onAppear {
+            autoPromptArmed = true
+            refreshBiometricState()
+            autoPromptIfNeeded()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background:
+                autoPromptArmed = true
+            case .active:
+                refreshBiometricState()
+                autoPromptIfNeeded()
+            default:
+                break
+            }
+        }
+    }
+
+    private func refreshBiometricState() {
+        biometricsEnabled = VaultKeychainStore.biometricsEnabled
+        masterPasswordDue = BiometricPolicy.isMasterPasswordDue
+    }
+
+    /// Starts Face ID / Touch ID on its own when it's allowed, at most once per arming.
+    private func autoPromptIfNeeded() {
+        guard autoPromptArmed, scenePhase == .active, !isAuthenticating else { return }
+        guard VaultSession.shared.canOfferBiometricUnlock,
+              VaultKeychainStore.biometricPasswordStored else { return }
+        autoPromptArmed = false
+        Task {
+            // Let the window settle first: at launch and right after returning to the
+            // foreground, a Face ID request can be cancelled by the system before it shows.
+            try? await Task.sleep(nanoseconds: 450_000_000)
+            guard scenePhase == .active, !isAuthenticating else {
+                autoPromptArmed = true
+                return
+            }
+            await unlockWithBiometrics(automatic: true)
+        }
     }
 
     private func attemptUnlock() {
@@ -155,7 +215,7 @@ struct LoginView: View {
         for candidate in [password, trimmed] where !candidate.isEmpty {
             if VaultAuthStore.verifyMasterPassword(candidate) {
                 errorMessage = nil
-                onUnlocked(candidate)
+                onUnlocked(candidate, false)
                 return
             }
             if candidate == trimmed { break }
@@ -163,21 +223,30 @@ struct LoginView: View {
         errorMessage = L10n.tr("auth.unlock.wrongPassword", locale: locale)
     }
 
-    private func unlockWithBiometrics() {
+    /// `automatic`: the prompt started on its own. A cancel or failure then stays quiet;
+    /// the biometric button and the password field are both still there to retry.
+    private func unlockWithBiometrics(automatic: Bool) async {
+        guard !isAuthenticating else { return }
         guard VaultKeychainStore.biometricsEnabled else {
             errorMessage = L10n.tr("auth.unlock.enableBiometricsHint", locale: locale)
             return
         }
-        if let unlockedPassword = VaultSession.shared.unlockWithBiometrics() {
+        isAuthenticating = true
+        defer { isAuthenticating = false }
+        if let unlockedPassword = await VaultSession.shared.unlockWithBiometrics() {
             errorMessage = nil
-            onUnlocked(unlockedPassword)
+            onUnlocked(unlockedPassword, true)
         } else {
-            errorMessage = L10n.tr("auth.unlock.biometricsFailed", locale: locale)
+            // The interval may have run out since the screen appeared.
+            refreshBiometricState()
+            if !automatic {
+                errorMessage = L10n.tr("auth.unlock.biometricsFailed", locale: locale)
+            }
         }
     }
 }
 
 #Preview {
-    LoginView(onUnlocked: { _ in }, onCreateVault: {})
+    LoginView(onUnlocked: { _, _ in }, onCreateVault: {})
         .environment(AppPreferences.shared)
 }

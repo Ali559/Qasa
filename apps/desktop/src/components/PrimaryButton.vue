@@ -35,12 +35,13 @@ defineEmits<{ click: [] }>()
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 16px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: var(--corner-radius);
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
   cursor: pointer;

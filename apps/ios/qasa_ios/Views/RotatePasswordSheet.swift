@@ -39,13 +39,16 @@ struct RotatePasswordSheet: View {
             .navigationTitle(L10n.tr("breach.rotateTitle"))
             .navigationBarTitleDisplayMode(.inline)
         }
-        .alert(L10n.tr("breach.rotateConfirmTitle"), isPresented: $showConfirm) {
-            Button(L10n.tr("common.cancel"), role: .cancel) {}
-            Button(L10n.tr("breach.rotateReplace"), role: .destructive) { save() }
-        } message: {
-            if let selected {
-                Text(String(format: L10n.tr("breach.rotateConfirmMessage"), selected.name))
-            }
+        .confirmSheet(
+            isPresented: $showConfirm,
+            title: L10n.tr("breach.rotateConfirmTitle"),
+            message: selected.map { String(format: L10n.tr("breach.rotateConfirmMessage"), $0.name) },
+            icon: "key",
+            confirmTitle: L10n.tr("breach.rotateReplace"),
+            cancelTitle: L10n.tr("common.cancel"),
+            destructive: true
+        ) {
+            save()
         }
         .onAppear(perform: load)
     }
@@ -57,11 +60,14 @@ struct RotatePasswordSheet: View {
             Text(L10n.tr("breach.rotateNoLogins"))
                 .font(.qasa(15))
                 .foregroundColor(Theme.textSecondary)
-            PrimaryButton(title: L10n.tr("common.close"), cornerRadius: 8) { dismiss() }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .bottomActionBar {
+            PrimaryButton(title: L10n.tr("common.close")) { dismiss() }
+        }
     }
 
     private var content: some View {
@@ -81,15 +87,16 @@ struct RotatePasswordSheet: View {
                         .font(.qasa(13))
                         .foregroundColor(Theme.danger)
                 }
-                PrimaryButton(title: L10n.tr("breach.rotateSave"), icon: "key.fill", cornerRadius: 8) {
-                    showConfirm = true
-                }
-                .opacity(selected == nil || isSaving ? 0.5 : 1)
-                .disabled(selected == nil || isSaving)
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 20)
-            .padding(.bottom, 32)
+            .padding(.bottom, 24)
+        }
+        .bottomActionBar {
+            PrimaryButton(title: L10n.tr("breach.rotateSave"), icon: "key.fill") {
+                showConfirm = true
+            }
+            .disabled(selected == nil || isSaving)
         }
     }
 
@@ -123,19 +130,20 @@ struct RotatePasswordSheet: View {
                     .foregroundColor(Theme.accent)
             }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, minHeight: Theme.rowMinHeight, alignment: .leading)
         .background(isSelected ? Theme.accent.opacity(0.12) : Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(isSelected ? Theme.accent : Theme.stroke, lineWidth: 1)
         )
 
         return Group {
             if selectable {
                 Button { selectedId = login.id } label: { row }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PressableStyle())
             } else {
                 row
             }
@@ -169,22 +177,9 @@ struct RotatePasswordSheet: View {
 
     private func actionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                Text(title)
-            }
-            .font(.qasa(14))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 11)
-            .background(Theme.accentDark.opacity(0.2))
-            .foregroundColor(Theme.accent)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
-            )
+            QasaButtonLabel(title: title, icon: icon)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.qasaSecondary)
     }
 
     // MARK: - Data

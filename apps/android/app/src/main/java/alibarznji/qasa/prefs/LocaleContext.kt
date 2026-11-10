@@ -16,7 +16,8 @@ object LocaleContext {
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
         config.setLocale(locale)
-        config.setLayoutDirection(locale)
+        // Not `setLayoutDirection(locale)`: older ICU data resolves bare `ckb` as LTR.
+        config.setLayoutDirection(if (language.isRtl) Locale("ar") else Locale.ENGLISH)
         return base.createConfigurationContext(config)
     }
 }

@@ -86,18 +86,21 @@ struct VaultItemDetailView: View {
                 }
             }
         }
-        .alert(L10n.tr("vault.deleteItemTitle"), isPresented: $showDeleteConfirm) {
-            Button(L10n.tr("common.cancel"), role: .cancel) {}
-            Button(L10n.tr("common.delete"), role: .destructive) {
-                try? VaultRepository.shared.delete(id: itemId)
-                onDeleted()
-                dismiss()
-            }
-        } message: {
-            Text(String(
+        .confirmSheet(
+            isPresented: $showDeleteConfirm,
+            title: L10n.tr("vault.deleteItemTitle"),
+            message: String(
                 format: L10n.tr("vault.deleteItemMessage"),
                 row?.displayName ?? L10n.tr("vault.thisItem")
-            ))
+            ),
+            icon: "trash",
+            confirmTitle: L10n.tr("common.delete"),
+            cancelTitle: L10n.tr("common.cancel"),
+            destructive: true
+        ) {
+            try? VaultRepository.shared.delete(id: itemId)
+            onDeleted()
+            dismiss()
         }
         .onAppear {
             loadItem()

@@ -83,7 +83,7 @@ onMounted(load)
           <TableBody>
             <TableRow v-if="!rows.length" class="hover:bg-transparent">
               <TableCell colspan="6" class="py-14 text-center">
-                <span class="bg-chart-4 mx-auto mb-3 grid size-12 -rotate-6 place-items-center rounded-2xl text-[#1c1b33] shadow-[0_3px_0_color-mix(in_oklch,var(--chart-4)_60%,black)]">
+                <span class="bg-chart-4 mx-auto mb-3 grid size-12 -rotate-6 place-items-center rounded-2xl text-ink shadow-[0_3px_0_color-mix(in_oklch,var(--chart-4)_60%,black)]">
                   <MessageSquareWarning class="size-5" />
                 </span>
                 <p class="font-heading text-lg font-bold">No cancellations yet</p>

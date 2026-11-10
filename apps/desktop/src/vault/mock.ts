@@ -136,6 +136,19 @@ function seed() {
   })
 }
 
+/** The last main-password unlock (Rust `last_master_password_unlock`). `?mockBioDue` in
+ *  the URL makes it 15 days old, to preview the "password is due" unlock screen. */
+const INTERVAL_DAYS = 14
+let lastPasswordUnlock: number | null = null
+function bioDue(): boolean {
+  if (new URLSearchParams(location.search).has('mockBioDue')) return true
+  const now = Date.now()
+  return lastPasswordUnlock === null || lastPasswordUnlock > now || now - lastPasswordUnlock >= INTERVAL_DAYS * 86_400_000
+}
+function bioStatus() {
+  return { kind: 'touchId' as const, enabled: bioEnabled, sealed: bioEnabled, masterPasswordDue: bioDue(), masterPasswordIntervalDays: INTERVAL_DAYS }
+}
+
 const delay = <T>(value: T) => new Promise<T>((resolve) => setTimeout(() => resolve(value), 120))
 
 export const mockVaultApi = {
@@ -143,13 +156,18 @@ export const mockVaultApi = {
     return delay({ exists: password !== null, unlocked, unsupportedKdfVersion: null })
   },
   async biometricStatus() {
-    return { kind: 'touchId' as const, enabled: bioEnabled, sealed: bioEnabled }
+    return bioStatus()
   },
   async setBiometric(enabled: boolean) {
     bioEnabled = enabled
-    return { kind: 'touchId' as const, enabled, sealed: enabled }
+    return bioStatus()
   },
   async unlockBiometric() {
+    if (password === null) fail('noVault')
+    if (bioDue()) fail('masterPasswordDue')
+    // Like the real prompt, which takes a moment; `?mockBio=cancel` dismisses it.
+    await new Promise((r) => setTimeout(r, 600))
+    if (new URLSearchParams(location.search).get('mockBio') === 'cancel') fail('cancelled')
     unlocked = true
   },
   async verifyBiometric() {
@@ -161,6 +179,7 @@ export const mockVaultApi = {
     if ([...pw].length < 8) fail('weakPassword')
     password = pw
     unlocked = true
+    lastPasswordUnlock = Date.now()
     seed()
     await delay(undefined)
   },
@@ -168,6 +187,7 @@ export const mockVaultApi = {
     if (password === null) fail('noVault')
     if (pw !== password && pw.trim() !== password) fail('wrongPassword')
     unlocked = true
+    lastPasswordUnlock = Date.now()
     await delay(undefined)
   },
   async verifyPassword(pw: string) {
@@ -207,6 +227,7 @@ export const mockVaultApi = {
     if (current !== password) fail('wrongPassword')
     if ([...next.trim()].length < 8) fail('weakPassword')
     password = next.trim()
+    lastPasswordUnlock = Date.now()
     await delay(undefined)
   },
   async wipe() {

@@ -10,8 +10,10 @@ enum VaultAuthStore {
         try VaultSession.shared.createVault(password: masterPassword, biometricsEnabled: biometricsEnabled)
     }
 
-    static func verifyMasterPassword(_ password: String) -> Bool {
-        VaultSession.shared.unlock(password: password)
+    /// `typedByUser: false` for a password released by Face ID / Touch ID, so the
+    /// biometric interval (`BiometricPolicy`) isn't restarted by a biometric unlock.
+    static func verifyMasterPassword(_ password: String, typedByUser: Bool = true) -> Bool {
+        VaultSession.shared.unlock(password: password, recordsMasterPasswordUse: typedByUser)
     }
 
     static func resetVaultAuth() {

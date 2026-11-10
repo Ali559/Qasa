@@ -79,11 +79,13 @@ struct CreateVaultView: View {
                             text: $password,
                             isSecure: !passwordVisible,
                             trailing: AnyView(
-                                Button {
+                                FieldIconButton(
+                                    systemImage: passwordVisible ? "eye.slash" : "eye",
+                                    accessibilityLabel: passwordVisible
+                                        ? L10n.tr("vault.hidePassword", locale: locale)
+                                        : L10n.tr("vault.showPassword", locale: locale)
+                                ) {
                                     passwordVisible.toggle()
-                                } label: {
-                                    Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                                        .foregroundColor(Theme.textSecondary)
                                 }
                             )
                         )
@@ -122,28 +124,14 @@ struct CreateVaultView: View {
                             .foregroundColor(Theme.danger)
                     }
 
-                    CardContainer {
-                        HStack {
-                            ZStack {
-                                Circle()
-                                    .fill(Theme.cardBackgroundLight)
-                                    .frame(width: 40, height: 40)
-                                Image(systemName: "touchid")
-                                    .foregroundColor(Theme.accent)
-                            }
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text(L10n.tr("auth.create.enableBiometrics", locale: locale))
-                                    .font(.qasa(16))
-                                    .foregroundColor(Theme.textPrimary)
-                                Text(L10n.tr("auth.create.biometricsHint", locale: locale))
-                                    .font(.qasaLabel(12))
-                                    .foregroundColor(Theme.textSecondary)
-                            }
-                            Spacer()
-                            Toggle("", isOn: $biometricsEnabled)
-                                .labelsHidden()
-                                .tint(Theme.accent)
-                        }
+                    SettingsSection {
+                        ToggleRow(
+                            icon: "touchid",
+                            iconColor: Theme.accent,
+                            title: L10n.tr("auth.create.enableBiometrics", locale: locale),
+                            subtitle: L10n.tr("auth.create.biometricsHint", locale: locale),
+                            isOn: $biometricsEnabled
+                        )
                     }
                     .padding(.top, 12)
 
@@ -177,35 +165,24 @@ struct CreateVaultView: View {
                     .padding(.top, 12)
 
                     if let onLogin {
-                        Button(action: onLogin) {
-                            Text(L10n.tr("auth.create.alreadyHave", locale: locale))
-                                .font(.qasa(14, weight: .semibold))
-                                .foregroundColor(Theme.accent)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .padding(.top, 8)
+                        Button(L10n.tr("auth.create.alreadyHave", locale: locale), action: onLogin)
+                            .buttonStyle(.qasaPlain)
+                            .padding(.top, 4)
                     }
-
-                    Color.clear.frame(height: 100)
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 24)
+                .padding(.bottom, 24)
             }
-
-            VStack(spacing: 0) {
-                Divider().background(Theme.stroke)
-                PrimaryButton(title: L10n.tr("auth.create.buttonLocal", locale: locale), icon: "key.fill") {
-                    createVault()
-                }
-                .opacity(canCreate ? 1 : 0.5)
-                .disabled(!canCreate)
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 17)
-                .padding(.bottom, 32)
-            }
-            .background(Theme.chrome.opacity(0.92))
+            .scrollDismissesKeyboard(.interactively)
         }
         .background(Theme.background.ignoresSafeArea())
+        .bottomActionBar {
+            PrimaryButton(title: L10n.tr("auth.create.buttonLocal", locale: locale), icon: "key.fill") {
+                createVault()
+            }
+            .disabled(!canCreate)
+        }
         .environment(prefs)
     }
 

@@ -110,7 +110,7 @@ function openKey() {
     </div>
     <span v-if="error" class="error" role="alert">{{ error }}</span>
 
-    <Sheet :open="showKey" :label="t('totp.enterKey')" :width="420" @close="showKey = false">
+    <Sheet :open="showKey" :label="t('totp.enterKey')" :width="420" placement="bottom" @close="showKey = false">
       <div class="key-sheet">
         <h2>{{ t('totp.enterKey') }}</h2>
         <p>{{ t('totp.hint') }}</p>
@@ -147,12 +147,13 @@ function openKey() {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 14px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: var(--corner-radius);
+  border-radius: var(--button-radius);
   background: var(--card-background);
   color: var(--accent);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -168,7 +169,7 @@ function openKey() {
   border: 1px solid var(--stroke-chrome);
   border-radius: 14px;
   background: var(--chrome);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  box-shadow: 0 12px 32px var(--shadow-color);
 }
 
 .menu button {
@@ -274,12 +275,13 @@ function openKey() {
 
 .actions button {
   flex: 1;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: var(--button-radius);
   background: var(--card-background);
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

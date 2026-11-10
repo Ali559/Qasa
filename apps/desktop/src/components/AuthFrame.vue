@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // The shape shared by Welcome, Create vault and Unlock on iOS: brand header, a scrolling
-// column, and a sticky bottom bar (stroke on top, chrome at 92%) holding the main button.
-// On desktop the column is centered and capped so it keeps phone proportions.
+// column, and the bottom action bar holding the main button. On desktop the column is
+// centered and capped so it keeps phone proportions.
+import BottomActionBar from './BottomActionBar.vue'
 import BrandHeader from './BrandHeader.vue'
 
 defineProps<{ wash?: boolean }>()
@@ -17,11 +18,9 @@ defineProps<{ wash?: boolean }>()
         <slot />
       </div>
     </main>
-    <footer class="sticky-bar">
-      <div class="column">
-        <slot name="footer" />
-      </div>
-    </footer>
+    <BottomActionBar v-if="$slots.footer" stack :max-width="520">
+      <slot name="footer" />
+    </BottomActionBar>
   </div>
 </template>
 
@@ -54,23 +53,9 @@ defineProps<{ wash?: boolean }>()
   max-width: 560px;
   margin-inline: auto;
   padding-inline: var(--screen-padding);
-}
-
-.scroll .column {
   display: flex;
   flex-direction: column;
   padding-top: 24px;
   padding-bottom: 40px;
-}
-
-.sticky-bar {
-  flex-shrink: 0;
-  border-top: 1px solid var(--stroke);
-  background: color-mix(in srgb, var(--chrome) 92%, transparent);
-}
-
-.sticky-bar .column {
-  padding-top: 17px;
-  padding-bottom: 32px;
 }
 </style>

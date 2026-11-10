@@ -136,7 +136,7 @@ diff -r /tmp/qasa-submitted apps/extension/release/unpacked/firefox
 - \`popup.html\` and \`assets/popup-*.js|css\`: the toolbar popup (\`src/popup/\`, Vue 3).
 - \`background.js\`: the background script (\`src/background/\`).
 - \`content.js\`: the content script (\`src/content/\`).
-- \`assets/*.ttf\`: the Rubik and Rudaw fonts (\`apps/desktop/src/assets/fonts/\`).
+- \`fonts/*.ttf\`: the IBM Plex Sans Arabic fonts, four weights (\`apps/desktop/src/assets/fonts/\`).
 - \`_locales/\`, \`icons/\`: copied from \`apps/extension/static/\` unchanged.
 
 Third-party code in the bundles: \`vue\` and \`lucide-vue-next\` (versions in \`bun.lock\`).

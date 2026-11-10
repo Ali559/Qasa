@@ -6,6 +6,7 @@ import alibarznji.qasa.network.RenewalLinkDTO
 import alibarznji.qasa.screens.premium.gatewayDisplayName
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -85,7 +86,7 @@ internal fun SubscriptionDetailsCard(sub: SubscriptionDTO, isCancelled: Boolean)
             Text(
                 stringResource(if (isCancelled) R.string.sub_cancelling else R.string.sub_active),
                 color = pillColor,
-                style = if (qasaText.usesRudaw) qasaText.detailSemibold else qasaText.detailMono,
+                style = if (qasaText.arabicScript) qasaText.detailSemibold else qasaText.detailMono,
                 modifier = Modifier
                     .border(QasaDimens.stroke, pillColor, RoundedCornerShape(50))
                     .padding(horizontal = QasaDimens.contentGap, vertical = QasaDimens.spaceSmall),
@@ -212,22 +213,13 @@ internal fun RenewalLinkCard(link: RenewalLinkDTO, isConfirming: Boolean, onPay:
     }
 }
 
-/** iOS `cancelButton` (ManageSubscriptionView.swift:209): danger-tinted outlined bar. */
+/** iOS `cancelButton` (ManageSubscriptionView.swift:209): the shared destructive secondary button. */
 @Composable
 internal fun CancelSubscriptionButton(enabled: Boolean, onClick: () -> Unit) {
-    val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.radiusSmall)
-    Text(
-        stringResource(R.string.sub_cancelsubscription),
-        color = c.danger,
-        style = qasaText.bodySemibold15,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(c.danger.copy(alpha = 0.08f))
-            .border(QasaDimens.stroke, c.danger.copy(alpha = 0.35f), shape)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(vertical = QasaDimens.padTight),
+    SecondaryButton(
+        title = stringResource(R.string.sub_cancelsubscription),
+        onClick = onClick,
+        enabled = enabled,
+        destructive = true,
     )
 }

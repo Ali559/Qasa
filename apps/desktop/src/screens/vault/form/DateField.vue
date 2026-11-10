@@ -93,12 +93,16 @@ function onPick() {
 
 .calendar {
   align-self: flex-start;
-  padding: 10px 12px;
+  height: var(--field-height);
+  margin: 0;
+  padding-block: 0;
+  padding-inline: var(--field-padding-inline);
   border: 1px solid var(--stroke);
-  border-radius: 12px;
+  border-radius: var(--field-radius);
   background: var(--card-background);
   color: var(--text-primary);
   font: inherit;
+  font-size: var(--field-font-size);
   accent-color: var(--accent);
 }
 </style>

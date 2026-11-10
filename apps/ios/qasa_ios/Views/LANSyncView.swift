@@ -23,21 +23,26 @@ struct LANSyncView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     if !session.isPremium {
                         Text(L10n.tr("lan.requiresPremium", locale: locale))
+                            .font(.qasa(15))
                             .foregroundColor(Theme.textSecondary)
-                        PrimaryButton(
-                            title: L10n.tr("nav.upgrade", locale: locale),
-                            icon: "crown.fill",
-                            cornerRadius: 8
-                        ) {
-                            onUpgrade()
-                        }
+                            .fixedSize(horizontal: false, vertical: true)
                     } else {
                         premiumBody
                     }
                 }
                 .padding(Theme.screenPadding)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !session.isPremium {
+                    BottomActionBar {
+                        PrimaryButton(title: L10n.tr("nav.upgrade", locale: locale), icon: "crown.fill") {
+                            onUpgrade()
+                        }
+                    }
+                }
+            }
             .navigationTitle(L10n.tr("lan.title", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -102,7 +107,7 @@ struct WiFiHostPanel: View {
 
                 if let code = sync.hostCode, let expiresAt = sync.hostExpiresAt {
                     Text(Self.spaced(code))
-                        .font(.system(size: 44, weight: .bold, design: .monospaced))
+                        .font(.kasoMono(44, weight: .bold))
                         .foregroundColor(Theme.accent)
                         .environment(\.layoutDirection, .leftToRight)
                         .frame(maxWidth: .infinity)
@@ -124,13 +129,11 @@ struct WiFiHostPanel: View {
                     }
 
                     Button(L10n.tr("lan.stop", locale: locale)) { sync.stop() }
-                        .font(.qasa(16, weight: .semibold))
-                        .foregroundColor(Theme.danger)
+                        .buttonStyle(.qasaSecondary)
                 } else {
                     PrimaryButton(
                         title: L10n.tr("lan.startHost", locale: locale),
-                        icon: "wifi",
-                        cornerRadius: 8
+                        icon: "wifi"
                     ) {
                         sync.startHost(container: container)
                     }
@@ -181,9 +184,9 @@ struct WiFiJoinPanel: View {
                     VStack(spacing: 0) {
                         ForEach(sync.peers) { peer in
                             Button { selected = peer } label: { peerRow(peer) }
-                                .buttonStyle(.plain)
+                                .buttonStyle(.qasaRow)
                             if peer != sync.peers.last {
-                                Divider().background(Theme.stroke)
+                                RowDivider()
                             }
                         }
                     }
@@ -206,14 +209,12 @@ struct WiFiJoinPanel: View {
                     title: sync.isJoining
                         ? L10n.tr("sync.connecting", locale: locale)
                         : L10n.tr("sync.syncButton", locale: locale),
-                    icon: sync.isJoining ? nil : "arrow.triangle.2.circlepath",
-                    cornerRadius: 8
+                    icon: sync.isJoining ? nil : "arrow.triangle.2.circlepath"
                 ) {
                     guard canSync, let selected else { return }
                     sync.join(peer: selected, code: code, container: container)
                 }
                 .disabled(!canSync)
-                .opacity(canSync ? 1 : 0.5)
             }
         }
         .onAppear { sync.startBrowsing() }
@@ -224,20 +225,11 @@ struct WiFiJoinPanel: View {
     }
 
     private func peerRow(_ peer: WiFiSyncController.Peer) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: Self.icon(for: peer.platform))
-                .foregroundColor(Theme.accent)
-                .frame(width: 24)
-            Text(peer.name)
-                .font(.qasa(15, weight: .medium))
-                .foregroundColor(Theme.textPrimary)
-                .lineLimit(1)
-            Spacer()
+        SettingsRow(icon: Self.icon(for: peer.platform), title: peer.name) {
             Image(systemName: selected == peer ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(selected == peer ? Theme.accent : Theme.textSecondary)
+                .font(.system(size: 20))
+                .foregroundColor(selected == peer ? Theme.accent : Theme.textTertiary)
         }
-        .padding(.vertical, 10)
-        .contentShape(Rectangle())
     }
 
     private static func icon(for platform: String) -> String {

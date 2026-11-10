@@ -11,6 +11,7 @@ import SectionLabel from '@/components/SectionLabel.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import StrengthBar from '@/components/StrengthBar.vue'
 import TextField from '@/components/TextField.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
@@ -118,18 +119,16 @@ async function create() {
 
       <p v-if="error" class="error" role="alert">{{ error }}</p>
 
-      <CardContainer v-if="bio && bio.kind !== 'none'" class="biometric">
-        <div class="bio-row">
-          <span class="bio-icon">
-            <ScanFace v-if="bio.kind === 'windowsHello'" :size="20" />
-            <Fingerprint v-else :size="20" />
-          </span>
-          <span class="bio-text">
-            <span class="bio-title">{{ t('auth.create.enableBiometrics') }}</span>
-            <span class="bio-hint">{{ t('auth.create.biometricsHint') }}</span>
-          </span>
-          <ToggleSwitch v-model="biometrics" :label="t('auth.create.enableBiometrics')" />
-        </div>
+      <CardContainer v-if="bio && bio.kind !== 'none'" :padding="0" class="biometric settings-list">
+        <SettingsRow
+          :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
+          :title="t('auth.create.enableBiometrics')"
+          :subtitle="t('auth.create.biometricsHint')"
+        >
+          <template #trailing>
+            <ToggleSwitch v-model="biometrics" :label="t('auth.create.enableBiometrics')" />
+          </template>
+        </SettingsRow>
       </CardContainer>
 
       <CardContainer muted class="zero-knowledge">
@@ -246,38 +245,10 @@ async function create() {
   margin-top: 12px;
 }
 
-.bio-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
-.bio-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--card-background-light);
-  color: var(--accent);
-}
 
-.bio-text {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
 
-.bio-title {
-  font-size: 16px;
-}
 
-.bio-hint {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
 
 .zero-knowledge {
   position: relative;

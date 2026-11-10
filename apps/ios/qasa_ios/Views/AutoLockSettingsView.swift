@@ -10,48 +10,63 @@ struct AutoLockSettingsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Stepper(value: Binding(
-                        get: { prefs.autoLockMinutes },
-                        set: { prefs.autoLockMinutes = min(60, max(1, $0)) }
-                    ), in: 1...60) {
-                        Text(
-                            String(
-                                format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
-                                prefs.autoLockMinutes
-                            )
-                        )
-                        .font(.qasa(16))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        SettingsSection {
+                            SettingsRow(
+                                icon: "clock",
+                                title: String(
+                                    format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
+                                    prefs.autoLockMinutes
+                                )
+                            ) {
+                                Stepper(
+                                    "",
+                                    value: Binding(
+                                        get: { prefs.autoLockMinutes },
+                                        set: { prefs.autoLockMinutes = min(60, max(1, $0)) }
+                                    ),
+                                    in: 1...60
+                                )
+                                .labelsHidden()
+                            }
+                        }
+                        Text(L10n.tr("settings.autoLockHelp", locale: locale))
+                            .font(.qasa(12))
+                            .foregroundColor(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, 4)
                     }
-                } footer: {
-                    Text(L10n.tr("settings.autoLockHelp", locale: locale))
-                        .font(.qasa(13))
-                }
 
-                Section(L10n.tr("settings.autoLockPresets", locale: locale)) {
-                    ForEach(presets, id: \.self) { minutes in
-                        Button {
-                            prefs.autoLockMinutes = minutes
-                        } label: {
-                            HStack {
-                                Text(
-                                    String(
+                    SettingsSection(title: L10n.tr("settings.autoLockPresets", locale: locale)) {
+                        ForEach(Array(presets.enumerated()), id: \.element) { index, minutes in
+                            if index > 0 { RowDivider() }
+                            Button {
+                                prefs.autoLockMinutes = minutes
+                            } label: {
+                                SettingsRow(
+                                    icon: "timer",
+                                    title: String(
                                         format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
                                         minutes
-                                    )
-                                )
-                                .foregroundColor(Theme.textPrimary)
-                                Spacer()
-                                if prefs.autoLockMinutes == minutes {
+                                    ),
+                                    iconColor: prefs.autoLockMinutes == minutes ? Theme.accent : Theme.textSecondary
+                                ) {
                                     Image(systemName: "checkmark")
+                                        .font(.system(size: 15, weight: .bold))
                                         .foregroundColor(Theme.accent)
+                                        .opacity(prefs.autoLockMinutes == minutes ? 1 : 0)
                                 }
                             }
+                            .buttonStyle(.qasaRow)
+                            .accessibilityAddTraits(prefs.autoLockMinutes == minutes ? .isSelected : [])
                         }
                     }
                 }
+                .padding(Theme.screenPadding)
             }
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle(L10n.tr("settings.autoLock", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -140,6 +140,10 @@ export interface BiometricStatus {
   enabled: boolean
   /** Enabled but not sealed: sealed on the next main-password unlock (iOS wording). */
   sealed: boolean
+  /** The main password is due again: biometric unlock is refused until it is typed. */
+  masterPasswordDue: boolean
+  /** Days between required main-password unlocks (Rust `MASTER_PASSWORD_INTERVAL_DAYS`). */
+  masterPasswordIntervalDays: number
 }
 
 export interface VaultStatus {
@@ -165,6 +169,7 @@ export interface CommandError {
     | 'biometricInvalidated'
     | 'cancelled'
     | 'biometricUnavailable'
+    | 'masterPasswordDue'
   message: string
   /** With `invalidFields`: what to fix (nothing was saved). */
   issues?: FieldIssue[]

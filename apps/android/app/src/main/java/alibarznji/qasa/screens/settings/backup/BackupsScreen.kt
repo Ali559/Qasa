@@ -15,6 +15,7 @@ import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import android.net.Uri
@@ -199,22 +200,25 @@ fun BackupsScreen(
                 AppMenuHeader(title = stringResource(R.string.backup_title), onMenu = onDone, applyStatusBars = false)
             }
         },
+        stickyBottom = {
+            StickyBottomBar {
+                PrimaryButton(
+                    title = stringResource(if (running) R.string.backup_backingup else R.string.backup_backupnow),
+                    icon = if (running) null else Icons.Filled.Backup,
+                    enabled = !running,
+                    onClick = {
+                        if (settings.locationUri == null) {
+                            vm.pendingBackup = true
+                            pickLocation()
+                        } else {
+                            vm.backUpNow()
+                        }
+                    },
+                )
+            }
+        },
     ) {
         Text(stringResource(R.string.backup_intro), color = c.textSecondary, style = qasaText.bodyMedium)
-        Spacer(Modifier.height(QasaDimens.gap))
-        PrimaryButton(
-            title = stringResource(if (running) R.string.backup_backingup else R.string.backup_backupnow),
-            icon = if (running) null else Icons.Filled.Backup,
-            enabled = !running,
-            onClick = {
-                if (settings.locationUri == null) {
-                    vm.pendingBackup = true
-                    pickLocation()
-                } else {
-                    vm.backUpNow()
-                }
-            },
-        )
         Spacer(Modifier.height(QasaDimens.contentGap))
         Text(
             settings.lastBackupMs?.let { stringResource(R.string.backup_lastbackupfmt, formatBackupDate(it, locale)) }

@@ -55,26 +55,23 @@ struct ChangeMasterPasswordView: View {
                             .font(.qasa(13))
                             .foregroundColor(Theme.success)
                     }
-
-                    Button {
-                        Task { await save() }
-                    } label: {
-                        HStack {
-                            if isSaving { ProgressView().tint(Theme.onAccentChip) }
-                            Text(L10n.tr("settings.saveMasterPassword", locale: locale))
-                                .font(.qasa(16, weight: .semibold))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .foregroundColor(Theme.onAccentChip)
-                        .background(canSave ? Theme.accent : Theme.accent.opacity(0.35))
-                        .cornerRadius(10)
-                    }
-                    .disabled(!canSave)
                 }
                 .padding(Theme.screenPadding)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
+            .bottomActionBar {
+                Button {
+                    Task { await save() }
+                } label: {
+                    HStack(spacing: 8) {
+                        if isSaving { ProgressView().tint(Theme.onAccent) }
+                        Text(L10n.tr("settings.saveMasterPassword", locale: locale))
+                    }
+                }
+                .buttonStyle(.qasaPrimary)
+                .disabled(!canSave)
+            }
             .navigationTitle(L10n.tr("settings.changeMasterPassword", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -86,7 +83,7 @@ struct ChangeMasterPasswordView: View {
     }
 
     private func field(title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
             SectionLabel(text: title)
             ThemedTextField(
                 icon: "lock.fill",
@@ -94,11 +91,13 @@ struct ChangeMasterPasswordView: View {
                 text: text,
                 isSecure: !passwordVisible,
                 trailing: AnyView(
-                    Button {
+                    FieldIconButton(
+                        systemImage: passwordVisible ? "eye.slash" : "eye",
+                        accessibilityLabel: passwordVisible
+                            ? L10n.tr("vault.hidePassword", locale: locale)
+                            : L10n.tr("vault.showPassword", locale: locale)
+                    ) {
                         passwordVisible.toggle()
-                    } label: {
-                        Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                            .foregroundColor(Theme.textSecondary)
                     }
                 )
             )

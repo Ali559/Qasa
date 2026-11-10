@@ -1,20 +1,49 @@
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
-
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn-vue/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* IBM Plex Sans Arabic, bundled (src/assets/fonts, OFL), same face as the apps. */
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("./assets/fonts/IBMPlexSansArabic-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("./assets/fonts/IBMPlexSansArabic-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("./assets/fonts/IBMPlexSansArabic-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("./assets/fonts/IBMPlexSansArabic-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
-  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-heading: "Bricolage Grotesque", var(--font-sans);
+  --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-heading: var(--font-sans);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
   --color-sun: var(--sun);
   --color-sun-ink: var(--sun-ink);
+  --color-ink: var(--ink);
   --color-lip: var(--lip);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -53,85 +82,95 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Qasa "toybox" palette: periwinkle canvas, ink, cobalt, sunflower. */
+/*
+ * Colours: copied from the generated app tokens, apps/desktop/src/theme/tokens.css
+ * (itself generated from apps/ios/qasa_ios/Theme/Theme.swift). Not imported: that file's
+ * --accent/--background names clash with shadcn's, and it switches on data-theme / the OS
+ * while this app switches on the .dark class (useTheme.ts). Comments name the source token;
+ * re-copy when tokens.css changes.
+ */
 :root {
-  --background: #e9ebf7;
-  --foreground: #1c1b33;
-  --card: #ffffff;
-  --card-foreground: #1c1b33;
-  --popover: #ffffff;
-  --popover-foreground: #1c1b33;
-  --primary: #3d4bf5;
-  --primary-foreground: #ffffff;
-  --secondary: #dfe2f3;
-  --secondary-foreground: #1c1b33;
-  --muted: #e1e4f3;
-  --muted-foreground: #5e5f80;
-  --accent: #e3e5ff;
-  --accent-foreground: #2a33b8;
-  --destructive: #e5395f;
-  --border: #d6d9ec;
-  --input: #d0d4ea;
-  --ring: #3d4bf5;
-  --chart-1: #3d4bf5;
-  --chart-2: #ff5c8a;
-  --chart-3: #ffc53d;
-  --chart-4: #2bcb8f;
-  --chart-5: #8b5cf6;
+  --background: #FBF6F0; /* background */
+  --foreground: #2A1F33; /* text-primary */
+  --card: #FFFFFF; /* card-background */
+  --card-foreground: #2A1F33;
+  --popover: #FFFFFF;
+  --popover-foreground: #2A1F33;
+  --primary: #722F99; /* accent */
+  --primary-foreground: #FFFFFF; /* on-accent */
+  --secondary: #F3EAF7; /* card-muted */
+  --secondary-foreground: #4A1A66; /* on-accent-chip */
+  --muted: #EDE9E9; /* calm */
+  --muted-foreground: #6E6475; /* text-secondary */
+  --accent: #F3EAF7; /* card-muted */
+  --accent-foreground: #4A1A66; /* on-accent-chip */
+  --destructive: #C8323C; /* danger */
+  --border: #E6E1E1; /* stroke */
+  --input: #DCD7D7; /* stroke-chrome */
+  --ring: #722F99; /* accent */
+  /* Chart fills carry dark --ink text, so they use the lighter token shades. */
+  --chart-1: #722F99; /* accent */
+  --chart-2: #FF9292; /* cyan (dark) = brand peach */
+  --chart-3: #F0C48C; /* gold-muted (dark) */
+  --chart-4: #5CCB97; /* success (dark) */
+  --chart-5: #B67FDB; /* accent (dark) */
   --radius: 0.9rem;
-  --ok: #10915f;
-  --warn: #b77700;
-  --bad: #d92f55;
-  --sun: #ffc53d;
-  --sun-ink: #3a2a00;
-  --lip: #c6cbe6;
+  --ok: #2D6B55; /* success, darkened toward text-primary for AA on its 14% wash */
+  --warn: #84501E; /* gold-muted, darkened for AA on its 16% wash */
+  --bad: #9E2F35; /* danger-text */
+  --sun: #FEE7C8; /* warm = brand beige */
+  --sun-ink: #4A1A66; /* on-accent-chip */
+  --sun-lip: color-mix(in srgb, #FEE7C8 55%, #B7701E); /* warm over gold */
+  --ink: #2A1F33; /* text-primary (light): dark text on chart-coloured fills */
+  --lip: #DCD7D7; /* stroke-chrome */
   --sheen: rgb(255 255 255 / 0.9);
-  --edge: rgb(28 27 51 / 0.07);
-  --drop: rgb(40 44 110 / 0.35);
-  --sidebar: #1c1b33;
-  --sidebar-foreground: #e9ebf7;
-  --sidebar-primary: #ffc53d;
-  --sidebar-primary-foreground: #3a2a00;
-  --sidebar-accent: #2b2a4a;
-  --sidebar-accent-foreground: #ffffff;
+  --edge: rgb(42 31 51 / 0.07); /* text-primary */
+  --drop: rgb(74 26 102 / 0.3); /* on-accent-chip */
+  --dock-lip: #0E0A11; /* background (dark), 40% toward black */
+  --sidebar: #2A1F33; /* text-primary: the always-dark dock */
+  --sidebar-foreground: #FBF6F0; /* background */
+  --sidebar-primary: #FEE7C8; /* warm */
+  --sidebar-primary-foreground: #4A1A66; /* on-accent-chip */
+  --sidebar-accent: #3E3346; /* text-on-chrome */
+  --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgb(255 255 255 / 0.08);
-  --sidebar-ring: #ffc53d;
+  --sidebar-ring: #FEE7C8; /* warm */
 }
 
 .dark {
-  --background: #13122a;
-  --foreground: #ecedfb;
-  --card: #1f1e3d;
-  --card-foreground: #ecedfb;
-  --popover: #1f1e3d;
-  --popover-foreground: #ecedfb;
-  --primary: #7e88ff;
-  --primary-foreground: #10102a;
-  --secondary: #2a2950;
-  --secondary-foreground: #ecedfb;
-  --muted: #2a2950;
-  --muted-foreground: #a3a5cc;
-  --accent: #2c2d5e;
-  --accent-foreground: #c7cbff;
-  --destructive: #ff6f8f;
-  --border: rgb(255 255 255 / 0.08);
-  --input: rgb(255 255 255 / 0.12);
-  --ring: #7e88ff;
-  --chart-1: #7e88ff;
-  --chart-2: #ff7aa2;
-  --chart-3: #ffc53d;
-  --chart-4: #4be0a8;
-  --chart-5: #b18cff;
-  --ok: #4be0a8;
-  --warn: #ffc53d;
-  --bad: #ff6f8f;
-  --lip: #0a0920;
+  --background: #17111D; /* background */
+  --foreground: #F2EDF4; /* text-primary */
+  --card: #231A2B; /* card-background */
+  --card-foreground: #F2EDF4;
+  --popover: #231A2B;
+  --popover-foreground: #F2EDF4;
+  --primary: #B67FDB; /* accent */
+  --primary-foreground: #22102F; /* on-accent */
+  --secondary: #33243F; /* card-muted */
+  --secondary-foreground: #F1E3FA; /* on-accent-chip */
+  --muted: #2A2430; /* calm */
+  --muted-foreground: #C5C1C1; /* text-secondary = brand grey */
+  --accent: #33243F; /* card-muted */
+  --accent-foreground: #F1E3FA; /* on-accent-chip */
+  --destructive: #FF6B6B; /* danger */
+  --border: #352B3D; /* stroke */
+  --input: #3F3448; /* stroke-chrome */
+  --ring: #B67FDB; /* accent */
+  --chart-1: #B67FDB; /* accent */
+  --chart-2: #FF9292; /* cyan */
+  --chart-3: #FEE7C8; /* gold */
+  --chart-4: #5CCB97; /* success */
+  --chart-5: #C9A3E6; /* info */
+  --ok: #5CCB97; /* success */
+  --warn: #F0C48C; /* gold-muted */
+  --bad: #FF6B6B; /* danger */
+  --lip: #0E0A11; /* background, 40% toward black */
   --sheen: rgb(255 255 255 / 0.06);
   --edge: rgb(255 255 255 / 0.06);
   --drop: rgb(0 0 0 / 0.6);
-  --sidebar: #0d0c20;
-  --sidebar-foreground: #ecedfb;
-  --sidebar-accent: #22214a;
+  --sidebar: #100C14; /* background, 30% toward black */
+  --sidebar-foreground: #F2EDF4; /* text-primary */
+  --sidebar-accent: #231A2B; /* card-background */
 }
 
 /*

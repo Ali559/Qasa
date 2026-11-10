@@ -1,6 +1,7 @@
 package alibarznji.qasa.theme
 
 import alibarznji.qasa.R
+import androidx.compose.ui.res.painterResource
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
@@ -28,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -86,25 +86,25 @@ private fun HeaderChrome(
 }
 
 /**
- * Shield 16 semibold + wordmark at `titleSize` heavy, both `accent`. iOS sets the
- * wordmark in the system face (`.system(size:weight: .heavy)`), so it stays sans
- * ExtraBold (W800) in ckb/ar too instead of picking up Rudaw. [gap] is 12 in
+ * Shield 16 semibold + wordmark at `titleSize` heavy, both `accent`, in the app face
+ * like every other string. [gap] is 12 in
  * `KasoBrandHeader` and 10 in `BrandMenuHeader`.
  */
 @Composable
 private fun BrandLockup(titleSize: Int, gap: Dp) {
     val c = qasaColors
+    // The Qaf Keyhole mark (res/drawable/ic_qasa_mark.xml, from assets/brand/generate.py).
     Icon(
-        Icons.Default.Shield,
+        painterResource(R.drawable.ic_qasa_mark),
         contentDescription = null,
         tint = c.accent,
-        modifier = Modifier.size(QasaIconSize.md),
+        modifier = Modifier.size(QasaIconSize.lg),
     )
     Spacer(Modifier.width(gap))
     Text(
         stringResource(R.string.brand_name),
         color = c.accent,
-        style = qasaText.styleForSize(titleSize, FontWeight.ExtraBold).copy(fontFamily = FontFamily.SansSerif),
+        style = qasaText.styleForSize(titleSize, FontWeight.Bold),
         maxLines = 1,
     )
 }

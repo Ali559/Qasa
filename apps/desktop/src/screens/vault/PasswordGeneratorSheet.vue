@@ -13,7 +13,7 @@ const password = ref('')
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('gen.title')" :width="480" @close="emit('close')">
+  <Sheet :open="open" :label="t('gen.title')" :width="480" placement="bottom" @close="emit('close')">
     <div class="scroll">
       <GeneratorContent v-if="open" v-model="password" />
     </div>
@@ -38,12 +38,13 @@ const password = ref('')
 
 .use {
   width: 100%;
-  padding: 16px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: var(--corner-radius);
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

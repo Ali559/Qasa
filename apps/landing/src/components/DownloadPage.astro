@@ -20,22 +20,22 @@ const home = languages.find((l) => l.lang === lang)!.href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{t.desktop.pageTitle}</title>
     <meta name="description" content={t.desktop.pageDescription} />
-    <meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#17152a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#FBF6F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17111D" media="(prefers-color-scheme: dark)" />
     <meta property="og:title" content={t.desktop.pageTitle} />
     <meta property="og:description" content={t.desktop.pageDescription} />
     <meta property="og:locale" content={{ en: "en_US", ckb: "ckb_IQ", ar: "ar_IQ" }[lang]} />
     {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={downloadHrefs[l.lang]} />)}
     <link rel="alternate" hreflang="x-default" href={downloadHrefs.en} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/Rubik-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    {dir === "rtl" && <link rel="preload" href="/fonts/rudawregular2.ttf" as="font" type="font/ttf" crossorigin />}
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/IBMPlexSansArabic-Regular.ttf" as="font" type="font/ttf" crossorigin />
   </head>
   <body>
     <header class="nav">
       <div class="wrap nav-inner">
         <a href={home} class="brand" lang="en" aria-label="Qasa">
-          <span class="brand-mark"><Icon name="shield-check" filled size={18} /></span>
+          <img class="brand-mark" src="/favicon.svg" alt="" width="34" height="34" />
           Qasa
         </a>
         <nav class="lang-switch" aria-label={t.nav.language}>
@@ -53,7 +53,7 @@ const home = languages.find((l) => l.lang === lang)!.href;
 
     <footer class="footer">
       <div class="wrap footer-inner">
-        <a href={home} class="brand small" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={15} /></span>Qasa</a>
+        <a href={home} class="brand small" lang="en"><img class="brand-mark" src="/favicon.svg" alt="" width="34" height="34" />Qasa</a>
         <nav class="footer-links" aria-label="Footer">
           <a href={home} class="phones"><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
           <a href={privacyHrefs[lang]} class="phones">{t.legal.privacyPolicy}</a>
@@ -75,9 +75,9 @@ const home = languages.find((l) => l.lang === lang)!.href;
   .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 68px; }
   /* The logo lockup is artwork: same order and font in every language. */
   .brand { direction: ltr; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; color: var(--accent); letter-spacing: -0.01em; }
-  .brand-mark { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+  .brand-mark { width: 34px; height: 34px; display: block; flex: none; }
   .brand.small { font-size: 16px; gap: 8px; }
-  .brand.small .brand-mark { width: 26px; height: 26px; border-radius: 8px; }
+  .brand.small .brand-mark { width: 26px; height: 26px; }
 
   .lang-switch {
     display: flex; gap: 2px; padding: 3px; border-radius: 12px;
@@ -88,7 +88,7 @@ const home = languages.find((l) => l.lang === lang)!.href;
   .lang-switch a[aria-current="page"] { background: var(--card-muted); color: var(--on-accent-chip); }
 
   .footer { border-top: 1px solid var(--stroke); }
-  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-3); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-2); }
   .footer-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
   .phones { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-weight: 500; }
   .phones:hover { color: var(--text); }

@@ -168,7 +168,7 @@ System back / predictive back, Material bottom sheets and AlertDialogs vs iOS sh
   - `settings.importBadHeader` no longer starts with "Import failed:" (iOS wrapped it twice), and its ckb text no longer says the import *succeeded*.
   - `settings.exportPrepared` no longer says "to the clipboard".
   - `settings.exportSaved` was removed; Android uses `exportPrepared` and wraps the bad-header error in `importFailed` like iOS.
-- **Rudaw:** both apps render Kurdish/Arabic at regular weight; only `rudaw_regular` is bundled. The Android comment that claimed synthesized bold was wrong and is fixed. Bold titles need a Rudaw Bold font on both apps.
+- **Font:** resolved. Both apps now bundle IBM Plex Sans Arabic in four real weights for every language (design.md §3.1), so Kurdish/Arabic titles render bold.
 - iOS build succeeded on the iPhone 17 Pro simulator. There is no iOS test target.
 
 **2026-11-01 — Product decisions applied.**
@@ -202,7 +202,7 @@ Today, choosing ckb/ar on Android only swaps the font (`A/MainActivity.kt` passe
 
 - Use `AppCompatDelegate.setApplicationLocales(...)` when `prefs.language` changes (activity → `AppCompatActivity`), add `res/xml/locales_config.xml` + `android:localeConfig`.
 - Make sure `LocalLayoutDirection` is RTL for ckb/ar (the drawer in `A/screens/shell/AppShellScreen.kt` already reads it).
-- `A/theme/QasaTheme.kt`: build the M3 `Typography` from the selected language instead of `forLanguage(AppLanguage.EN)`, so dialogs use Rudaw.
+- `A/theme/QasaTheme.kt`: build the M3 `Typography` from the selected language instead of `forLanguage(AppLanguage.EN)`, so dialogs use the Arabic-script rules (zero tracking, no mono).
 - `A/prefs/AppPreferences.kt`: default language from the device locale (iOS `inferredLanguage`), and PATCH locale to the server like iOS `syncLocaleToServer`.
 
 **Exit:** Switching to Arabic in Welcome or Settings flips the whole app to Arabic + RTL without a restart, on an English phone.
@@ -320,7 +320,7 @@ The Android payload model (`A/vault/VaultPayload.kt`) already stores every iOS f
 | ID issue/expiry use `ValidatedDateField` | Only card/birth dates are validated today |
 | "No matches for this search" hint on empty search | Android has it; iOS shows a generic empty state |
 | Delete unused SwiftData template `I/ContentView.swift` (+ `Item.swift` if unused) | Dead code |
-| Rudaw: bundle a real Bold weight on both, or make Android regular-only | iOS titles are regular, Android synthesizes faux bold |
+| ~~Bundle a real Bold weight for Kurdish/Arabic~~ Done: IBM Plex Sans Arabic, four weights | Resolved |
 
 ---
 

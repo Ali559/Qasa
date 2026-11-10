@@ -30,7 +30,7 @@ import { account, forgetAccount } from '@/account/store'
 import { forgetBackup } from '@/backup/store'
 import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import NavChevronRow from '@/components/NavChevronRow.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
@@ -225,28 +225,24 @@ function logout() {
 
     <section class="group">
       <SectionLabel :text="t('settings.security')" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="Ellipsis"
           :title="t('settings.changeMasterPassword')"
           @click="showChangeMasterPassword = true"
         />
         <template v-if="bio && (bio.kind !== 'none' || bio.enabled)">
-          <hr class="divider" />
-          <div class="toggle-row">
-            <span class="toggle-icon">
-              <ScanFace v-if="bio.kind === 'windowsHello'" :size="18" />
-              <Fingerprint v-else :size="18" />
-            </span>
-            <span class="toggle-text">
-              <span class="toggle-title">{{ t('settings.biometricUnlock') }}</span>
-              <span v-if="bioSubtitle" class="toggle-subtitle">{{ bioSubtitle }}</span>
-            </span>
-            <ToggleSwitch v-model="bioOn" :label="t('settings.biometricUnlock')" :disabled="bio.kind === 'none' && !bio.enabled" />
-          </div>
+          <SettingsRow
+            :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
+            :title="t('settings.biometricUnlock')"
+            :subtitle="bioSubtitle || undefined"
+          >
+            <template #trailing>
+              <ToggleSwitch v-model="bioOn" :label="t('settings.biometricUnlock')" :disabled="bio.kind === 'none' && !bio.enabled" />
+            </template>
+          </SettingsRow>
         </template>
-        <hr class="divider" />
-        <NavChevronRow
+        <SettingsRow
           :icon="Clock"
           :title="t('settings.autoLock')"
           :trailing-text="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
@@ -260,38 +256,35 @@ function logout() {
         <SectionLabel :text="t('settings.linkedDevices')" />
         <span class="active-count">{{ t('settings.activeCount', account.status?.devicesUsed ?? 1) }}</span>
       </div>
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="Laptop"
           :title="t('settings.thisComputer')"
           :subtitle="t('settings.thisDevice')"
           icon-color="var(--accent)"
           @click="openSubPage('linkedDevices', 'settings')"
         />
-        <hr class="divider" />
-        <NavChevronRow
+        <SettingsRow
           :icon="Wifi"
           :title="t('settings.syncNetwork')"
           :subtitle="account.status?.isPremium ? t('settings.premiumLanSync') : t('settings.requiresPremium')"
           @click="openSubPage('wifiSync', 'settings')"
         />
-        <hr class="divider" />
-        <NavChevronRow :icon="Puzzle" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
+        <SettingsRow :icon="Puzzle" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
       </CardContainer>
     </section>
 
     <section class="group">
       <SectionLabel :text="t('settings.appearance')" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="Globe"
           :title="t('settings.language')"
           :trailing-text="LANGUAGE_NAMES[prefs.language]"
           aria-haspopup="dialog"
           @click="appearanceSheet = 'language'"
         />
-        <hr class="divider" />
-        <NavChevronRow
+        <SettingsRow
           :icon="Moon"
           :title="t('settings.theme')"
           :trailing-text="t(`settings.theme.${prefs.theme}`)"
@@ -303,28 +296,23 @@ function logout() {
 
     <section class="group">
       <SectionLabel :text="t('settings.dataAccount')" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="DatabaseBackup"
           :title="t('backup.title')"
           :subtitle="t('backup.subtitle')"
           @click="openSubPage('backups', 'settings')"
         />
-        <hr class="divider" />
-        <NavChevronRow :icon="Download" :title="t('settings.importCsv')" :disabled="busy" @click="performImport" />
-        <hr class="divider" />
-        <NavChevronRow :icon="Upload" :title="t('settings.exportCsv')" :disabled="busy" @click="performExport" />
-        <hr class="divider" />
-        <NavChevronRow
+        <SettingsRow :icon="Download" :title="t('settings.importCsv')" :disabled="busy" @click="performImport" />
+        <SettingsRow :icon="Upload" :title="t('settings.exportCsv')" :disabled="busy" @click="performExport" />
+        <SettingsRow
           :icon="Trash2"
           :title="t('settings.clearLocalData')"
           destructive
           @click="showClearDataAlert = true"
         />
-        <hr class="divider" />
-        <NavChevronRow :icon="LogOut" :title="t('settings.logout')" @click="showLogoutConfirm = true" />
-        <hr class="divider" />
-        <NavChevronRow
+        <SettingsRow :icon="LogOut" :title="t('settings.logout')" @click="showLogoutConfirm = true" />
+        <SettingsRow
           :icon="UserX"
           :title="t('settings.deleteAccount')"
           destructive
@@ -336,8 +324,8 @@ function logout() {
 
     <section class="group">
       <SectionLabel :text="t('update.section')" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="RefreshCw"
           :title="t('update.check')"
           :subtitle="updateStatus"
@@ -433,9 +421,10 @@ function logout() {
 
 .plan-button {
   margin-top: 12px;
-  padding: 10px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   background: var(--card-background-light);
   color: var(--text-primary);
   font-size: 14px;
@@ -443,39 +432,10 @@ function logout() {
   cursor: pointer;
 }
 
-.toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
 
-.toggle-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  color: var(--accent);
-}
 
-.toggle-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
 
-.toggle-title {
-  font-size: 16px;
-}
 
-.toggle-subtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
 
 .label-row {
   display: flex;
@@ -495,11 +455,6 @@ function logout() {
   gap: 8px;
 }
 
-.divider {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--stroke);
-}
 
 .status {
   margin: 0;

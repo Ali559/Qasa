@@ -23,60 +23,32 @@ struct WelcomePreferencesView: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        SectionLabel(text: L10n.tr("onboarding.language", locale: locale))
-                        VStack(spacing: 0) {
-                            ForEach(Array(AppLanguage.allCases.enumerated()), id: \.element) { index, language in
-                                if index > 0 {
-                                    Divider().background(Theme.stroke)
-                                }
-                                languageRow(language)
-                            }
+                    SettingsSection(title: L10n.tr("onboarding.language", locale: locale)) {
+                        ForEach(Array(AppLanguage.allCases.enumerated()), id: \.element) { index, language in
+                            if index > 0 { RowDivider() }
+                            languageRow(language)
                         }
-                        .background(Theme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.stroke, lineWidth: 1)
-                        )
                     }
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        SectionLabel(text: L10n.tr("onboarding.theme", locale: locale))
-                        VStack(spacing: 0) {
-                            ForEach(Array(AppThemePreference.allCases.enumerated()), id: \.element) { index, theme in
-                                if index > 0 {
-                                    Divider().background(Theme.stroke)
-                                }
-                                themeRow(theme)
-                            }
+                    SettingsSection(title: L10n.tr("onboarding.theme", locale: locale)) {
+                        ForEach(Array(AppThemePreference.allCases.enumerated()), id: \.element) { index, theme in
+                            if index > 0 { RowDivider() }
+                            themeRow(theme)
                         }
-                        .background(Theme.cardBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.stroke, lineWidth: 1)
-                        )
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 28)
                 .padding(.bottom, 24)
             }
-
-            VStack(spacing: 0) {
-                Divider().background(Theme.stroke)
-                PrimaryButton(title: L10n.tr("onboarding.continue", locale: locale), icon: "arrow.forward") {
-                    prefs.markWelcomeCompleted()
-                    onContinue()
-                }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 17)
-                .padding(.bottom, 32)
-            }
-            .background(Theme.chrome.opacity(0.92))
         }
         .background(welcomeBackground.ignoresSafeArea())
+        .bottomActionBar {
+            PrimaryButton(title: L10n.tr("onboarding.continue", locale: locale), icon: "arrow.forward") {
+                prefs.markWelcomeCompleted()
+                onContinue()
+            }
+        }
     }
 
     private var welcomeBackground: some View {
@@ -99,25 +71,16 @@ struct WelcomePreferencesView: View {
                 prefs.language = language
             }
         } label: {
-            HStack(spacing: 14) {
-                Text(language.displayName)
-                    .font(.qasa(17, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                    .environment(\.layoutDirection, language.layoutDirection)
-                Spacer(minLength: 8)
-                if selected {
-                    Image(systemName: "checkmark")
-                        .font(.qasa(15, weight: .bold))
-                        .foregroundColor(Theme.accent)
-                        .transition(.scale.combined(with: .opacity))
-                }
+            SettingsRow(
+                icon: "character.bubble",
+                title: language.displayName,
+                iconColor: selected ? Theme.accent : Theme.textSecondary
+            ) {
+                selectionMark(selected)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-            .background(selected ? Theme.accent.opacity(0.08) : Color.clear)
-            .contentShape(Rectangle())
+            .environment(\.layoutDirection, prefs.layoutDirection)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.qasaRow)
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
@@ -128,29 +91,26 @@ struct WelcomePreferencesView: View {
                 prefs.theme = theme
             }
         } label: {
-            HStack(spacing: 14) {
-                Image(systemName: themeIcon(theme))
-                    .font(.qasa(18, weight: .semibold))
-                    .foregroundColor(selected ? Theme.accent : Theme.textSecondary)
-                    .frame(width: 28)
-                Text(L10n.tr(theme.displayNameKey, locale: locale))
-                    .font(.qasa(17, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                Spacer(minLength: 8)
-                if selected {
-                    Image(systemName: "checkmark")
-                        .font(.qasa(15, weight: .bold))
-                        .foregroundColor(Theme.accent)
-                        .transition(.scale.combined(with: .opacity))
-                }
+            SettingsRow(
+                icon: themeIcon(theme),
+                title: L10n.tr(theme.displayNameKey, locale: locale),
+                iconColor: selected ? Theme.accent : Theme.textSecondary
+            ) {
+                selectionMark(selected)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 16)
-            .background(selected ? Theme.accent.opacity(0.08) : Color.clear)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.qasaRow)
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    /// Trailing check for the selected option (space kept so titles never shift).
+    private func selectionMark(_ selected: Bool) -> some View {
+        Image(systemName: "checkmark")
+            .font(.system(size: 15, weight: .bold))
+            .foregroundColor(Theme.accent)
+            .opacity(selected ? 1 : 0)
+            .scaleEffect(selected ? 1 : 0.6)
+            .accessibilityHidden(true)
     }
 
     private func themeIcon(_ theme: AppThemePreference) -> String {

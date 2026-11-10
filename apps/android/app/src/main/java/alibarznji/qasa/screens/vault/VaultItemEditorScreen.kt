@@ -13,7 +13,9 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.LocalQasaToast
 import alibarznji.qasa.theme.StickyBottomBar
+import androidx.compose.ui.platform.LocalContext
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
@@ -113,6 +115,8 @@ fun VaultItemEditorSheetContent(
     val collections by vm.collections.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val maxHeight = qasaSheetMaxHeight()
+    val toast = LocalQasaToast.current
+    val context = LocalContext.current
 
     // Only the address form links a phone; skip decrypting the vault for other kinds.
     val needsPhones = payload is VaultPayload.Address
@@ -169,7 +173,10 @@ fun VaultItemEditorSheetContent(
                     saving = true
                     scope.launch {
                         try {
-                            vm.repo.save(existingId, payload)
+                            val saved = payload
+                            vm.repo.save(existingId, saved)
+                            // Root-owned toast, so it stays up once this sheet has closed.
+                            toast.show(context.savedToastText(saved, isEditing))
                             onDone()
                         } catch (e: CancellationException) {
                             throw e
@@ -209,3 +216,23 @@ fun VaultItemEditorSheetContent(
         )
     }
 }
+
+/** "Gmail added" / "Gmail updated", or the untitled forms when the item has no name. */
+private fun android.content.Context.savedToastText(payload: VaultPayload, isEditing: Boolean): String {
+    val title = payload.toastTitle()
+    return when {
+        isEditing && title != null -> getString(R.string.toast_itemupdatedfmt, title)
+        isEditing -> getString(R.string.toast_itemupdated)
+        title != null -> getString(R.string.toast_itemcreatedfmt, title)
+        else -> getString(R.string.toast_itemcreated)
+    }
+}
+
+/**
+ * The name the user gave the item, or null. `displayName()` falls back to a literal
+ * "Untitled" for list rows; a toast says "Item added" instead.
+ */
+private fun VaultPayload.toastTitle(): String? =
+    displayName().trim().takeIf { it.isNotEmpty() && it != UNTITLED_FALLBACK }
+
+private const val UNTITLED_FALLBACK = "Untitled"

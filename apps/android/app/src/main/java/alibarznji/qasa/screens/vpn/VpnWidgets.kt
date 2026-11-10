@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -121,8 +120,7 @@ internal fun VpnSecurityFeaturesCard(
                 onCheckedChange = onAutoConnect,
                 icon = Icons.Default.Sync,
                 iconColor = c.cyan,
-                // iOS hard-codes Color(hex: "001B21") here.
-                iconBackground = Color(0xFF001B21),
+                iconBackground = c.cyan.copy(alpha = 0.15f),
             )
         }
     }

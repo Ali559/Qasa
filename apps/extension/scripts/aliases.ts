@@ -17,7 +17,11 @@ export const aliases = [
   { find: /^@ext\//, replacement: here('../src/') },
 ]
 
-/** `virtual:qasa-content-strings`: the `ext.page.*` keys and `brand.name` per language. */
+/** Keys the in-page menu needs besides `ext.page.*`: the main-password-due note and its
+ *  "Open Qasa" button (the same strings as the desktop's unlock screen and the popup). */
+const CONTENT_EXTRA_KEYS = new Set(['brand.name', 'auth.unlock.masterPasswordDueFmt', 'ext.openQasa'])
+
+/** `virtual:qasa-content-strings`: the `ext.page.*` keys and `CONTENT_EXTRA_KEYS` per language. */
 export function contentStrings(): Plugin {
   const id = 'virtual:qasa-content-strings'
   return {
@@ -30,7 +34,7 @@ export function contentStrings(): Plugin {
         const file = `${CATALOGS}${lang}.json`
         this.addWatchFile(file)
         const all = JSON.parse(readFileSync(file, 'utf8')) as Record<string, string>
-        out[lang] = Object.fromEntries(Object.entries(all).filter(([k]) => k.startsWith('ext.page.') || k === 'brand.name'))
+        out[lang] = Object.fromEntries(Object.entries(all).filter(([k]) => k.startsWith('ext.page.') || CONTENT_EXTRA_KEYS.has(k)))
       }
       return `export default ${JSON.stringify(out)}`
     },

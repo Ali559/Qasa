@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// iOS `SectionLabel`: sentence case, 13 medium (12 semibold in Rudaw), secondary text.
+// iOS `SectionLabel`: sentence case, 13 medium (12 semibold in Arabic and Kurdish), secondary text.
 defineProps<{ text: string }>()
 </script>
 

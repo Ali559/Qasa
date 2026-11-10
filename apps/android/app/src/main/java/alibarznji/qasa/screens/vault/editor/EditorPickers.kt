@@ -4,7 +4,7 @@ import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
-import alibarznji.qasa.theme.ThemedTextField
+import alibarznji.qasa.theme.QasaTextInputSheet
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.Country
@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,13 +25,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -72,11 +72,12 @@ fun <T> MenuPicker(
         Row(
             Modifier
                 .fillMaxWidth()
-                .heightIn(min = 50.dp)
+                .height(QasaDimens.fieldHeight)
+                .clip(shape)
                 .background(c.cardBackground, shape)
                 .border(QasaDimens.stroke, c.stroke, shape)
                 .clickable(role = Role.DropdownList) { expanded = true }
-                .padding(start = QasaDimens.gapSmall, end = QasaDimens.spaceSmall),
+                .padding(start = QasaDimens.gap, end = QasaDimens.spaceSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -152,7 +153,7 @@ fun CollectionPickerField(
             optionLabel = { it?.name ?: none },
             onSelect = { onChange(it?.id) },
             trailing = {
-                IconButton(onClick = { showNew = true }) {
+                IconButton(onClick = { showNew = true }, modifier = Modifier.size(QasaDimens.fieldIconButton)) {
                     Icon(
                         Icons.Default.CreateNewFolder,
                         contentDescription = stringResource(R.string.vault_newcollection),
@@ -176,25 +177,14 @@ fun CollectionPickerField(
 
 @Composable
 private fun NewCollectionDialog(onDismiss: () -> Unit, onCreate: (String) -> Unit) {
-    val c = qasaColors
-    var name by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = c.cardBackground,
-        titleContentColor = c.textPrimary,
-        title = { Text(stringResource(R.string.vault_newcollection)) },
-        text = {
-            ThemedTextField(value = name, onValueChange = { name = it }, placeholder = stringResource(R.string.common_name))
-        },
-        confirmButton = {
-            // iOS ignores Create with a blank name (FormHelpers.swift:124).
-            TextButton(onClick = { name.trim().takeIf { it.isNotEmpty() }?.let(onCreate) }) {
-                Text(stringResource(R.string.common_create), color = c.accent)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel), color = c.accent) }
-        },
+    // iOS ignores Create with a blank name (FormHelpers.swift:124): the button stays disabled.
+    QasaTextInputSheet(
+        title = stringResource(R.string.vault_newcollection),
+        initial = "",
+        placeholder = stringResource(R.string.common_name),
+        confirmLabel = stringResource(R.string.common_create),
+        onConfirm = onCreate,
+        onDismiss = onDismiss,
     )
 }
 

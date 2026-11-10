@@ -295,7 +295,7 @@ async function confirmCancel(reason: string) {
       @confirm="removePaymentMethod"
     />
 
-    <Sheet :open="showCancelReason" :label="t('sub.cancelReasonTitle')" :width="520" @close="showCancelReason = false">
+    <Sheet :open="showCancelReason" :label="t('sub.cancelReasonTitle')" :width="520" placement="bottom" @close="showCancelReason = false">
       <SheetHeader :title="t('sub.cancelReasonTitle')" :cancel-label="t('sub.skip')" @cancel="confirmCancel('')" />
       <div class="reason">
         <p class="prompt">{{ t('sub.cancelReasonPrompt') }}</p>
@@ -510,9 +510,10 @@ async function confirmCancel(reason: string) {
 
 .cancel-button {
   width: 100%;
-  padding: 14px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   background: color-mix(in srgb, var(--danger) 8%, transparent);
   color: var(--danger);
   font-size: 15px;

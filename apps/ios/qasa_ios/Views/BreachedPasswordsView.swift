@@ -125,7 +125,7 @@ struct BreachedPasswordsView: View {
                 .font(.qasa(14, weight: .semibold))
                 .foregroundColor(Theme.accent)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
         .disabled(isChecking)
     }
 
@@ -198,7 +198,6 @@ struct BreachLockedCard: View {
                 PrimaryButton(
                     title: L10n.tr("breached.unlock"),
                     icon: "crown.fill",
-                    cornerRadius: 8,
                     action: onUpgrade
                 )
                 .padding(.top, 6)

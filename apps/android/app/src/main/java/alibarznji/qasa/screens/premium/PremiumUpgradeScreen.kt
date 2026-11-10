@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import alibarznji.qasa.theme.QasaConfirmDialog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -68,6 +69,7 @@ fun PremiumUpgradeScreen(
     var isError by remember { mutableStateOf(false) }
     // A second tap while an intent is in flight used to create a second order.
     var isPaying by remember { mutableStateOf(false) }
+    var showComingSoon by remember { mutableStateOf(false) }
     val isPremium by vm.appSession.isPremium.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -109,6 +111,12 @@ fun PremiumUpgradeScreen(
                         icon = Icons.Filled.Lock,
                         enabled = !isPaying && !isPremium && selected != null,
                                 onClick = {
+                                    // Wallet payments aren't open yet: show "Coming soon" and
+                                    // send nothing to the server. Flip PAYMENTS_OPEN to go live.
+                                    if (!PAYMENTS_OPEN) {
+                                        showComingSoon = true
+                                        return@PrimaryButton
+                                    }
                                     val plan = selected ?: return@PrimaryButton
                                     if (isPaying || isPremium) return@PrimaryButton
                                     isPaying = true
@@ -202,4 +210,19 @@ fun PremiumUpgradeScreen(
             }
         }
     }
+
+    if (showComingSoon) {
+        QasaConfirmDialog(
+            title = stringResource(R.string.premium_comingsoontitle),
+            message = stringResource(R.string.premium_comingsoonbody),
+            confirmLabel = stringResource(R.string.common_ok),
+            onConfirm = { showComingSoon = false },
+            onDismiss = { showComingSoon = false },
+            dismissLabel = null,
+            destructive = false,
+        )
+    }
 }
+
+/** Wallet payments are not live yet; while false, Pay shows "Coming soon" and calls nothing. */
+private const val PAYMENTS_OPEN = false

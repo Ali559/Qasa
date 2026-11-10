@@ -167,7 +167,7 @@ const failure = computed(() => {
   background: var(--card-background);
   color: var(--text-primary);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .code-card {

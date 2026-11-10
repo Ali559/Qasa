@@ -74,7 +74,7 @@ const model = defineModel<boolean>({ required: true })
 .track.on .knob {
   transform: translateX(24px);
   background: var(--accent-dark);
-  color: #fff;
+  color: var(--knob);
 }
 
 :root[dir='rtl'] .track.on .knob {

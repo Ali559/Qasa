@@ -58,43 +58,50 @@ struct CollectionsView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .alert(L10n.tr("collections.createTitle"), isPresented: $showCreate) {
-            TextField(L10n.tr("common.name"), text: $newName)
-            Button(L10n.tr("common.cancel"), role: .cancel) {}
-            Button(L10n.tr("common.create")) { createCollection() }
+        .textPromptSheet(
+            isPresented: $showCreate,
+            title: L10n.tr("collections.createTitle"),
+            placeholder: L10n.tr("common.name"),
+            text: $newName,
+            confirmTitle: L10n.tr("common.create"),
+            cancelTitle: L10n.tr("common.cancel")
+        ) {
+            createCollection()
         }
-        .alert(L10n.tr("collections.rename"), isPresented: Binding(
-            get: { editing != nil },
-            set: { if !$0 { editing = nil } }
-        )) {
-            TextField(L10n.tr("common.name"), text: $editName)
-            Button(L10n.tr("common.cancel"), role: .cancel) { editing = nil }
-            Button(L10n.tr("common.save")) { saveRename() }
+        // Dismissal clears the target on the next turn, so the confirm action still sees it.
+        .textPromptSheet(
+            isPresented: Binding(
+                get: { editing != nil },
+                set: { if !$0 { DispatchQueue.main.async { editing = nil } } }
+            ),
+            title: L10n.tr("collections.rename"),
+            placeholder: L10n.tr("common.name"),
+            text: $editName,
+            confirmTitle: L10n.tr("common.save"),
+            cancelTitle: L10n.tr("common.cancel")
+        ) {
+            saveRename()
         }
-        .alert(L10n.tr("collections.deleteTitle"), isPresented: Binding(
-            get: { deleting != nil },
-            set: { if !$0 { deleting = nil } }
-        )) {
-            Button(L10n.tr("common.cancel"), role: .cancel) { deleting = nil }
-            Button(L10n.tr("common.delete"), role: .destructive) { confirmDelete() }
-        } message: {
-            Text(L10n.tr("collections.deleteMessage"))
+        .confirmSheet(
+            isPresented: Binding(
+                get: { deleting != nil },
+                set: { if !$0 { DispatchQueue.main.async { deleting = nil } } }
+            ),
+            title: L10n.tr("collections.deleteTitle"),
+            message: L10n.tr("collections.deleteMessage"),
+            icon: "trash",
+            confirmTitle: L10n.tr("common.delete"),
+            cancelTitle: L10n.tr("common.cancel"),
+            destructive: true
+        ) {
+            confirmDelete()
         }
     }
 
     private func collectionCard(_ collection: VaultCollection, name: String) -> some View {
         let count = cache.rows.filter { $0.collectionId == collection.id }.count
         return HStack(spacing: 14) {
-            Image(systemName: "folder.fill")
-                .font(.qasa(18))
-                .foregroundColor(Theme.accent)
-                .frame(width: 48, height: 48)
-                .background(Theme.chrome)
-                .cornerRadius(10)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Theme.strokeChrome, lineWidth: 1)
-                )
+            IconBadge(systemImage: "folder.fill")
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
@@ -130,11 +137,13 @@ struct CollectionsView: View {
                     .frame(width: 36, height: 36)
             }
         }
-        .padding(16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(minHeight: Theme.rowMinHeight)
         .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
     }

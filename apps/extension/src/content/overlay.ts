@@ -2,29 +2,46 @@
 // drawn in a CLOSED shadow root on one host element attached to <html>, so the page can't
 // read or script them; guard.ts checks the host was not restyled or covered before a menu
 // click is acted on.
+import { QASA_MARK_SHAPES, QASA_MARK_TRANSFORM, QASA_MARK_VIEWBOX } from '@/brand/qasaMark'
 import { siteLogo } from '@/vault/present'
 import { siteIconPath } from '@/vault/siteIcon'
 import type { LoginMatch } from '@ext/shared/messages'
 import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
-import { RUBIK, RUDAW } from './fonts'
+import { PLEX } from './fonts'
+import TOKENS from '@/theme/tokens.css?raw'
 import { ICON_INSET, ICON_SIZE, MENU_ARM_MS, MENU_GAP, MENU_HEADER, MENU_PADDING, MENU_WIDTH, ROW_HEIGHT } from './layout'
 
 export type MenuState =
   | { kind: 'loading' }
   | { kind: 'items'; items: LoginMatch[] }
-  | { kind: 'message'; key: string; action?: { key: string; run: () => void } }
+  | { kind: 'message'; key: string; args?: Array<string | number>; action?: { key: string; run: () => void } }
+
+/** The app's colour tokens (tokens.css, generated from iOS) as declarations for the shadow
+ *  root, so the in-page menu follows the same palette in light and dark. */
+function tokenBlock(selector: string): string {
+  const start = TOKENS.indexOf(`${selector} {`)
+  if (start < 0) return ''
+  const body = TOKENS.slice(TOKENS.indexOf('{', start) + 1, TOKENS.indexOf('}', start))
+  return body
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('--'))
+    .join(' ')
+}
+const LIGHT = tokenBlock(':root[data-theme="light"]')
+const DARK = tokenBlock(':root[data-theme="dark"]')
 
 const CSS = `
 :host { all: initial; }
 * { box-sizing: border-box; }
 .icon, .menu {
-  --accent: #7C6CF2; --card: #FFFFFF; --stroke: #EBE8F4; --text: #24213A; --text2: #6B6785; --muted: #F1EEFA;
-  font-family: '${RUBIK}', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  ${LIGHT}
+  --shadow: rgb(0 0 0 / 0.18);
+  font-family: '${PLEX}', system-ui, -apple-system, 'Segoe UI', 'Noto Naskh Arabic', 'Geeza Pro', sans-serif;
 }
-.menu:lang(ar), .menu:lang(ckb) { font-family: '${RUDAW}', '${RUBIK}', 'Noto Naskh Arabic', 'Geeza Pro', system-ui, sans-serif; }
 @media (prefers-color-scheme: dark) {
-  .icon, .menu { --accent: #A79BFF; --card: #221F3A; --stroke: #332F4F; --text: #EEECF8; --text2: #B5B1CC; --muted: #2A2745; }
+  .icon, .menu { ${DARK} --shadow: rgb(0 0 0 / 0.45); }
 }
 .icon {
   position: fixed; width: ${ICON_SIZE}px; height: ${ICON_SIZE}px; padding: 0; margin: 0;
@@ -35,8 +52,8 @@ const CSS = `
 .icon svg { width: 16px; height: 18px; }
 .menu {
   position: fixed; width: ${MENU_WIDTH}px; padding: ${MENU_PADDING}px; margin: 0;
-  background: var(--card); color: var(--text); border: 1px solid var(--stroke); border-radius: 16px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18); pointer-events: auto; font-size: 14px; line-height: 1.3;
+  background: var(--card-background); color: var(--text-primary); border: 1px solid var(--stroke); border-radius: 16px;
+  box-shadow: 0 10px 30px var(--shadow); pointer-events: auto; font-size: 14px; line-height: 1.3;
 }
 .head { height: ${MENU_HEADER}px; display: flex; align-items: center; gap: 8px; padding-inline: 10px; color: var(--accent); font-weight: 700; font-size: 15px; }
 .head svg { width: 14px; height: 16px; }
@@ -44,16 +61,20 @@ const CSS = `
   height: ${ROW_HEIGHT}px; width: 100%; display: flex; align-items: center; gap: 12px; padding: 0 10px;
   border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; text-align: start; cursor: pointer;
 }
-.row:hover, .row:focus-visible { background: var(--muted); outline: none; }
+.row:hover { background: var(--card-muted); }
+.row:focus-visible { background: var(--card-muted); outline: 2px solid var(--accent); outline-offset: -2px; }
+.row:active { background: color-mix(in srgb, var(--accent) 14%, var(--card-muted)); }
 .tile { width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; }
-.tile.site { background: var(--muted); color: var(--text); }
+.tile.site { background: var(--card-muted); color: var(--text-primary); }
 .tile.site svg { width: 16px; height: 16px; }
 .text { display: flex; flex-direction: column; min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title { font-weight: 600; }
-.sub { color: var(--text2); font-size: 13px; }
-.msg { padding: 8px 10px 10px; color: var(--text2); }
-.action { margin: 0 10px 8px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.sub { color: var(--text-secondary); font-size: 13px; }
+.msg { padding: 8px 10px 10px; color: var(--text-secondary); }
+.action { margin: 0 10px 8px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 600; cursor: pointer; }
+.action:hover { filter: brightness(1.05); }
+.action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 `
 
 /** A filled 24×24 icon from one path. Built with DOM calls (no innerHTML), so pages with
@@ -70,12 +91,21 @@ function glyph(doc: Document, d: string): SVGSVGElement {
   return svg
 }
 
-/** Lucide `shield`, filled, as in the desktop's BrandHeader. */
-function shield(doc: Document): SVGSVGElement {
-  return glyph(
-    doc,
-    'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z',
-  )
+/** The Qasa mark (Qaf Keyhole), as in the desktop's BrandHeader. DOM calls, no innerHTML. */
+function qasaMark(doc: Document): SVGSVGElement {
+  const ns = 'http://www.w3.org/2000/svg'
+  const svg = doc.createElementNS(ns, 'svg')
+  svg.setAttribute('viewBox', QASA_MARK_VIEWBOX)
+  svg.setAttribute('aria-hidden', 'true')
+  const g = doc.createElementNS(ns, 'g')
+  g.setAttribute('transform', QASA_MARK_TRANSFORM)
+  for (const shape of QASA_MARK_SHAPES) {
+    const el = doc.createElementNS(ns, shape.tag)
+    for (const [k, v] of Object.entries(shape.attrs)) el.setAttribute(k, v)
+    g.append(el)
+  }
+  svg.append(g)
+  return svg
 }
 
 export interface MenuHandlers {
@@ -145,7 +175,7 @@ export class Overlay {
       icon.type = 'button'
       icon.className = 'icon'
       icon.tabIndex = -1
-      icon.append(shield(this.doc))
+      icon.append(qasaMark(this.doc))
       // Keep focus in the page's field.
       icon.addEventListener('mousedown', (e) => e.preventDefault())
       icon.addEventListener('click', (e) => {
@@ -231,12 +261,12 @@ export class Overlay {
     menu.el.replaceChildren()
     const head = this.doc.createElement('div')
     head.className = 'head'
-    head.append(shield(this.doc), ct(lang, 'brand.name'))
+    head.append(qasaMark(this.doc), ct(lang, 'brand.name'))
     menu.el.append(head)
     if (state.kind === 'loading') {
       menu.el.append(this.message('…'))
     } else if (state.kind === 'message') {
-      menu.el.append(this.message(ct(lang, state.key)))
+      menu.el.append(this.message(ct(lang, state.key, ...(state.args ?? []))))
       if (state.action) {
         const b = this.doc.createElement('button')
         b.className = 'action'

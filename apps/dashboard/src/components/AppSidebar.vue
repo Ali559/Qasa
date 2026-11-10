@@ -37,22 +37,23 @@ const emit = defineEmits<{ signOut: [] }>()
 
 // Active item reads as a raised sunflower key sitting on the ink dock.
 const itemClass =
-  'h-10 rounded-xl px-3 text-[0.9rem] text-sidebar-foreground/75 transition-[translate,background-color,color] data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold data-active:shadow-[0_3px_0_#b8861a,inset_0_1px_0_rgb(255_255_255/0.5)] data-active:-translate-y-px'
+  'h-10 rounded-xl px-3 text-[0.9rem] text-sidebar-foreground/75 transition-[translate,background-color,color] data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold data-active:shadow-[0_3px_0_var(--sun-lip),inset_0_1px_0_rgb(255_255_255/0.5)] data-active:-translate-y-px'
 
 const itemsIn = (group: string) => navItems.filter((item) => item.group === group)
 </script>
 
 <template>
-  <Sidebar collapsible="icon" variant="floating" class="[&>[data-slot=sidebar-inner]]:rounded-[1.6rem] [&>[data-slot=sidebar-inner]]:shadow-[0_6px_0_#08071a]">
+  <Sidebar collapsible="icon" variant="floating" class="[&>[data-slot=sidebar-inner]]:rounded-[1.6rem] [&>[data-slot=sidebar-inner]]:shadow-[0_6px_0_var(--dock-lip)]">
     <SidebarHeader class="px-3 pt-4">
       <RouterLink
         to="/"
         class="flex items-center gap-3 rounded-xl p-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
       >
-        <span
-          class="bg-sidebar-primary text-sidebar-primary-foreground font-heading grid size-9 shrink-0 -rotate-6 place-items-center rounded-xl text-xl font-extrabold shadow-[0_3px_0_#b8861a]"
-          aria-hidden="true"
-        >q</span>
+        <img
+          src="/favicon.svg"
+          alt=""
+          class="size-9 shrink-0 -rotate-6 rounded-xl shadow-[0_3px_0_var(--sun-lip)]"
+        />
         <span class="grid leading-tight group-data-[collapsible=icon]:hidden">
           <span class="font-heading text-lg font-bold">Qasa</span>
           <span class="text-sidebar-foreground/60 text-xs">Admin console</span>

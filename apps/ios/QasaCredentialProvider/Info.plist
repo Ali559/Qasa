@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>IBMPlexSansArabic-Regular.ttf</string>
+		<string>IBMPlexSansArabic-Medium.ttf</string>
+		<string>IBMPlexSansArabic-SemiBold.ttf</string>
+		<string>IBMPlexSansArabic-Bold.ttf</string>
+	</array>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>

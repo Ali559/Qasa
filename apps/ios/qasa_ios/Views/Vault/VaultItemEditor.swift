@@ -94,13 +94,17 @@ struct VaultItemEditor: View {
             }
             revalidate()
         }
-        .alert(L10n.tr("vault.couldNotSave", locale: AppLanguage.current.locale), isPresented: Binding(
-            get: { saveError != nil },
-            set: { if !$0 { saveError = nil } }
-        )) {
-            Button(L10n.tr("common.ok", locale: AppLanguage.current.locale), role: .cancel) { saveError = nil }
-        } message: {
-            Text(saveError ?? "")
+        .confirmSheet(
+            isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            ),
+            title: L10n.tr("vault.couldNotSave", locale: AppLanguage.current.locale),
+            message: saveError,
+            icon: "exclamationmark.triangle",
+            confirmTitle: L10n.tr("common.ok", locale: AppLanguage.current.locale)
+        ) {
+            saveError = nil
         }
         .sheet(isPresented: $showPasswordGenerator) {
             PasswordGeneratorModal { generated in
@@ -156,55 +160,43 @@ struct VaultItemEditor: View {
             TOTPEditorField(totp: loginTOTPBinding)
             InlineFieldError(message: error("totp"))
             FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website), keyboard: .URL, error: error("website"))
-            FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note), error: error("note"))
+            FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note), error: error("note"), multiline: true)
             CollectionPickerField(collectionId: loginCollectionBinding)
         }
     }
 
     private var passwordField: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
             FormFieldLabel(text: L10n.tr("field.password"))
-            HStack(spacing: 10) {
+            HStack(spacing: 4) {
                 Group {
                     if passwordVisible {
                         TextField(L10n.tr("field.password"), text: loginBinding(\.password))
+                            .font(.kasoMono(16, weight: .regular))
                     } else {
                         SecureField(L10n.tr("field.password"), text: loginBinding(\.password))
                     }
                 }
-                .font(.qasa(16))
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 .multilineTextAlignment(.leading)
-                .foregroundColor(Theme.textPrimary)
-                .tint(Theme.accent)
 
-                Button {
+                FieldIconButton(
+                    systemImage: "wand.and.stars",
+                    tint: Theme.accent,
+                    accessibilityLabel: L10n.tr("vault.generatePassword")
+                ) {
                     showPasswordGenerator = true
-                } label: {
-                    Image(systemName: "wand.and.stars")
-                        .font(.qasa(16, weight: .semibold))
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 28, height: 28)
                 }
-                .accessibilityLabel(L10n.tr("vault.generatePassword"))
 
-                Button {
+                FieldIconButton(
+                    systemImage: passwordVisible ? "eye.slash" : "eye",
+                    accessibilityLabel: passwordVisible ? L10n.tr("vault.hidePassword") : L10n.tr("vault.showPassword")
+                ) {
                     passwordVisible.toggle()
-                } label: {
-                    Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                        .font(.qasa(16, weight: .medium))
-                        .foregroundColor(Theme.textSecondary)
-                        .frame(width: 28, height: 28)
                 }
-                .accessibilityLabel(passwordVisible ? L10n.tr("vault.hidePassword") : L10n.tr("vault.showPassword"))
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .background(Theme.cardBackground)
-            .cornerRadius(Theme.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                    .stroke(Theme.stroke, lineWidth: 1)
-            )
+            .qasaField(isError: error("password") != nil, horizontalPadding: Theme.fieldHorizontalPadding - 4)
         }
     }
 
@@ -213,10 +205,11 @@ struct VaultItemEditor: View {
     private var secureNoteFields: some View {
         Group {
             FormTextField(title: L10n.tr("field.title"), text: noteBinding(\.title), error: error("title"))
-            FormTextField(title: L10n.tr("field.content"), text: noteBinding(\.content), error: error("content"))
+            FormTextField(title: L10n.tr("field.content"), text: noteBinding(\.content), error: error("content"), multiline: true)
             NoteColorPicker(color: noteColorBinding)
             Toggle(isOn: noteProtectBinding) {
                 Text(L10n.tr("vault.protectItem"))
+                    .font(.qasa(15, weight: .medium))
                     .foregroundColor(Theme.textPrimary)
             }
             .tint(Theme.accent)
@@ -246,7 +239,7 @@ struct VaultItemEditor: View {
                 FormTextField(title: L10n.tr("field.securityCode"), text: cardSecurityCodeBinding, isSecure: true, keyboard: .numberPad, error: error("securityCode"))
                     .frame(minWidth: 96, maxWidth: 150)
             }
-            FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"))
+            FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"), multiline: true)
             NoteColorPicker(color: cardColorBinding)
         }
     }
@@ -268,17 +261,10 @@ struct VaultItemEditor: View {
 
     private var nameFields: some View {
         Group {
-            VStack(alignment: .leading, spacing: 8) {
-                FormFieldLabel(text: L10n.tr("field.type"))
+            FormPickerField(title: L10n.tr("field.type")) {
                 Picker(L10n.tr("field.type"), selection: nameHonorificBinding) {
                     ForEach(Honorific.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-                .pickerStyle(.menu)
-                .tint(Theme.accent)
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.cardBackground)
-                .cornerRadius(Theme.cornerRadius)
             }
             FormTextField(title: L10n.tr("field.firstName"), text: nameBinding(\.firstName), error: error("firstName"))
             FormTextField(title: L10n.tr("field.middleName"), text: nameBinding(\.middleName), error: error("middleName"))
@@ -294,16 +280,10 @@ struct VaultItemEditor: View {
     private var emailFields: some View {
         Group {
             FormTextField(title: L10n.tr("field.itemName"), text: emailBinding(\.itemName), error: error("itemName"))
-            VStack(alignment: .leading, spacing: 8) {
-                FormFieldLabel(text: L10n.tr("field.type"))
+            FormPickerField(title: L10n.tr("field.type")) {
                 Picker(L10n.tr("field.type"), selection: emailKindBinding) {
                     ForEach(EmailKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-                .tint(Theme.accent)
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.cardBackground)
-                .cornerRadius(Theme.cornerRadius)
             }
             FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email), keyboard: .emailAddress, error: error("email"))
         }
@@ -316,69 +296,33 @@ struct VaultItemEditor: View {
             FormTextField(title: L10n.tr("field.itemName"), text: phoneBinding(\.itemName), error: error("itemName"))
 
             HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 8) {
-                    FormFieldLabel(text: L10n.tr("field.type"))
+                FormPickerField(title: L10n.tr("field.type")) {
                     Picker(L10n.tr("field.type"), selection: phoneKindBinding) {
                         ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                     }
-                    .labelsHidden()
-                    .tint(Theme.accent)
-                    .padding(.horizontal, 12)
-                    .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                    .background(Theme.cardBackground)
-                    .cornerRadius(Theme.cornerRadius)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                            .stroke(Theme.stroke, lineWidth: 1)
-                    )
                 }
                 .frame(maxWidth: .infinity)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    FormFieldLabel(text: L10n.tr("vault.country"))
+                FormPickerField(title: L10n.tr("vault.country"), error: error("countryCode")) {
                     CountryMenuPicker(countryCode: phoneCountryBinding, showsDialCode: true)
-                        .padding(.horizontal, 12)
-                        .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
-                        .background(Theme.cardBackground)
-                        .cornerRadius(Theme.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(error("countryCode") == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
-                        )
-                    InlineFieldError(message: error("countryCode"))
                 }
                 .frame(maxWidth: .infinity)
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
                 FormFieldLabel(text: L10n.tr("field.phoneNumber"))
                 HStack(alignment: .center, spacing: 8) {
                     Text(Country.dialCode(for: phoneCountryBinding.wrappedValue))
                         .font(.qasa(16, weight: .semibold))
                         .foregroundColor(Theme.accent)
-                        .frame(minWidth: 64)
-                        .frame(height: 50)
-                        .padding(.horizontal, 12)
-                        .background(Theme.cardBackground)
-                        .cornerRadius(Theme.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(Theme.stroke, lineWidth: 1)
-                        )
+                        .frame(minWidth: 56)
+                        .qasaField()
+                        .fixedSize(horizontal: true, vertical: false)
 
                     TextField(L10n.tr("field.phoneNumber"), text: phoneBinding(\.number))
                         .keyboardType(.phonePad)
-                        .foregroundColor(Theme.textPrimary)
-                        .tint(Theme.accent)
-                        .padding(.horizontal, 14)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(Theme.cardBackground)
-                        .cornerRadius(Theme.cornerRadius)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                .stroke(error("number") == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
-                        )
+                        .multilineTextAlignment(.leading)
+                        .qasaField(isError: error("number") != nil)
                 }
                 InlineFieldError(message: error("number"))
             }
@@ -805,6 +749,17 @@ struct VaultItemEditor: View {
         return changed
     }
 
+    /// "Gmail added" / "Gmail updated", or the generic line when the item has no title.
+    private var savedToastMessage: String {
+        let locale = AppLanguage.current.locale
+        let name = payload.displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.isEmpty {
+            return L10n.tr(isEditing ? "toast.itemUpdated" : "toast.itemCreated", locale: locale)
+        }
+        let fmt = L10n.tr(isEditing ? "toast.itemUpdatedFmt" : "toast.itemCreatedFmt", locale: locale)
+        return String(format: fmt, locale: locale, arguments: [name])
+    }
+
     private func save() {
         VaultRepository.shared.ensureConfigured(context: modelContext)
         revalidate()
@@ -819,6 +774,7 @@ struct VaultItemEditor: View {
             case .edit(let id):
                 _ = try VaultRepository.shared.save(payload: payload, id: id)
             }
+            ToastCenter.shared.show(savedToastMessage)
             onDone()
         } catch let refused as VaultValidationError {
             issueMessages = VaultValidation.messages(refused.issues)
@@ -840,19 +796,13 @@ struct AddressPhonePicker: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: L10n.tr("field.phoneNumber"))
+        FormPickerField(title: L10n.tr("field.phoneNumber")) {
             Picker(L10n.tr("field.phoneNumber"), selection: $phoneItemId) {
                 Text(L10n.tr("common.none")).tag(Optional<UUID>.none)
                 ForEach(phones) { row in
                     Text(row.displayName).tag(Optional(row.id))
                 }
             }
-            .tint(Theme.accent)
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.cardBackground)
-            .cornerRadius(Theme.cornerRadius)
         }
         .onAppear {
             if let id = phoneItemId, !phones.contains(where: { $0.id == id }) {

@@ -47,7 +47,7 @@ fun VaultStoreErrorView(
 ) {
     val c = qasaColors
     // iOS uses `.system(size: 12, design: .monospaced)` in every language, so a path keeps
-    // its fixed-width shape even when the body font is Rudaw.
+    // its fixed-width shape in ckb/ar too.
     val mono = qasaText.labelRegular.copy(fontFamily = FontFamily.Monospace)
     Box(
         modifier = modifier

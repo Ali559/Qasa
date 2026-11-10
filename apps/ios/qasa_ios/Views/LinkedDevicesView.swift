@@ -40,6 +40,10 @@ struct LinkedDevicesView: View {
     }
 
     var body: some View {
+        // Captured now: closing a confirm sheet clears its pending device before the
+        // confirm action runs.
+        let unlinkTarget = pendingUnlink
+        let logoutTarget = pendingLogout
         VStack(spacing: 0) {
             header
 
@@ -91,19 +95,12 @@ struct LinkedDevicesView: View {
                             Button {
                                 showUnlinkAllConfirm = true
                             } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "link.badge.minus")
-                                    Text(L10n.tr("devices.unlinkAllOthers", locale: locale))
-                                }
-                                .font(.qasa(14, weight: .semibold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .foregroundColor(Theme.danger)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Theme.danger.opacity(0.45), lineWidth: 1)
+                                QasaButtonLabel(
+                                    title: L10n.tr("devices.unlinkAllOthers", locale: locale),
+                                    icon: "link.badge.minus"
                                 )
                             }
+                            .buttonStyle(.qasaDestructive)
                             .disabled(isActing)
                         }
                     }
@@ -121,77 +118,67 @@ struct LinkedDevicesView: View {
                 .environment(session)
                 .appLocalization()
         }
-        .alert(
-            L10n.tr("devices.unlinkTitle", locale: locale),
+        .confirmSheet(
             isPresented: Binding(
                 get: { pendingUnlink != nil },
                 set: { if !$0 { pendingUnlink = nil } }
-            )
+            ),
+            title: L10n.tr("devices.unlinkTitle", locale: locale),
+            message: unlinkTarget.map {
+                String(format: L10n.tr("devices.unlinkMessage", locale: locale), $0.device_name)
+            },
+            icon: "link",
+            confirmTitle: L10n.tr("devices.unlink", locale: locale),
+            cancelTitle: L10n.tr("settings.cancel", locale: locale),
+            destructive: true
         ) {
-            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) { pendingUnlink = nil }
-            Button(L10n.tr("devices.unlink", locale: locale), role: .destructive) {
-                if let pendingUnlink {
-                    Task { await unlink(pendingUnlink) }
-                }
-            }
-        } message: {
-            if let pendingUnlink {
-                Text(
-                    String(
-                        format: L10n.tr("devices.unlinkMessage", locale: locale),
-                        pendingUnlink.device_name
-                    )
-                )
+            if let unlinkTarget {
+                Task { await unlink(unlinkTarget) }
             }
         }
-        .alert(
-            L10n.tr("devices.logoutTitle", locale: locale),
+        .confirmSheet(
             isPresented: Binding(
                 get: { pendingLogout != nil },
                 set: { if !$0 { pendingLogout = nil } }
-            )
+            ),
+            title: L10n.tr("devices.logoutTitle", locale: locale),
+            message: logoutTarget.map {
+                String(format: L10n.tr("devices.logoutMessage", locale: locale), $0.device_name)
+            },
+            icon: "rectangle.portrait.and.arrow.right",
+            confirmTitle: L10n.tr("devices.logout", locale: locale),
+            cancelTitle: L10n.tr("settings.cancel", locale: locale),
+            destructive: true
         ) {
-            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) { pendingLogout = nil }
-            Button(L10n.tr("devices.logout", locale: locale), role: .destructive) {
-                if let pendingLogout {
-                    Task { await logoutDevice(pendingLogout) }
-                }
-            }
-        } message: {
-            if let pendingLogout {
-                Text(
-                    String(
-                        format: L10n.tr("devices.logoutMessage", locale: locale),
-                        pendingLogout.device_name
-                    )
-                )
+            if let logoutTarget {
+                Task { await logoutDevice(logoutTarget) }
             }
         }
-        .alert(
-            L10n.tr("backup.replace.title", locale: locale),
+        .confirmSheet(
             isPresented: Binding(
                 get: { pendingReplace != nil },
                 set: { if !$0 { pendingReplace = nil } }
             ),
-            presenting: pendingReplace
-        ) { _ in
-            Button(L10n.tr("backup.replace.button", locale: locale)) {
-                Task { await replaceOldDevice() }
-            }
-            Button(L10n.tr("backup.reminder.dismiss", locale: locale), role: .cancel) {}
-        } message: { device in
-            Text(String(format: L10n.tr("backup.replace.bodyFmt", locale: locale), device.device_name))
-        }
-        .alert(
-            L10n.tr("devices.unlinkAllTitle", locale: locale),
-            isPresented: $showUnlinkAllConfirm
+            title: L10n.tr("backup.replace.title", locale: locale),
+            message: pendingReplace.map {
+                String(format: L10n.tr("backup.replace.bodyFmt", locale: locale), $0.device_name)
+            },
+            icon: "arrow.triangle.2.circlepath",
+            confirmTitle: L10n.tr("backup.replace.button", locale: locale),
+            cancelTitle: L10n.tr("backup.reminder.dismiss", locale: locale)
         ) {
-            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) {}
-            Button(L10n.tr("devices.unlinkAllOthers", locale: locale), role: .destructive) {
-                Task { await unlinkOthers() }
-            }
-        } message: {
-            Text(L10n.tr("devices.unlinkAllMessage", locale: locale))
+            Task { await replaceOldDevice() }
+        }
+        .confirmSheet(
+            isPresented: $showUnlinkAllConfirm,
+            title: L10n.tr("devices.unlinkAllTitle", locale: locale),
+            message: L10n.tr("devices.unlinkAllMessage", locale: locale),
+            icon: "link.badge.minus",
+            confirmTitle: L10n.tr("devices.unlinkAllOthers", locale: locale),
+            cancelTitle: L10n.tr("settings.cancel", locale: locale),
+            destructive: true
+        ) {
+            Task { await unlinkOthers() }
         }
     }
 
@@ -199,7 +186,7 @@ struct LinkedDevicesView: View {
         HStack(spacing: 16) {
             Button { dismiss() } label: {
                 Image(systemName: "chevron.backward")
-                    .font(.qasa(16, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .frame(width: 32, height: 32)
             }
@@ -211,7 +198,7 @@ struct LinkedDevicesView: View {
                 text: tierLabel,
                 dotColor: session.isPremium ? Theme.success : Theme.goldMuted,
                 textColor: Theme.textSecondary,
-                background: Color(hex: "2A2A2B")
+                background: Theme.cardBackgroundLight
             )
         }
         .padding(.horizontal, 16)
@@ -318,10 +305,7 @@ struct LinkedDevicesView: View {
                 }
             } label: {
                 HStack(alignment: .top, spacing: 16) {
-                    Image(systemName: platformIcon(device.platform))
-                        .font(.qasa(28))
-                        .foregroundColor(Theme.accent)
-                        .frame(width: 40)
+                    IconBadge(systemImage: platformIcon(device.platform))
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
@@ -408,19 +392,9 @@ struct LinkedDevicesView: View {
                 Button {
                     pendingUnlink = device
                 } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "link")
-                        Text(L10n.tr("devices.unlink", locale: locale))
-                    }
-                    .font(.qasa(14))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 9)
-                    .foregroundColor(Theme.textSecondary)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.strokeChrome, lineWidth: 1)
-                    )
+                    QasaButtonLabel(title: L10n.tr("devices.unlink", locale: locale), icon: "link")
                 }
+                .buttonStyle(.qasaSecondary)
             }
         }
         .padding(21)
@@ -453,26 +427,28 @@ struct LinkedDevicesView: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 6) {
-                Image(systemName: systemImage)
-                Text(title)
-            }
-            .font(.qasa(13, weight: .medium))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 9)
-            .foregroundColor(
-                disabled
-                    ? Theme.textTertiary
-                    : (destructive ? Theme.danger : Theme.textSecondary)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(
-                        destructive ? Theme.danger.opacity(0.35) : Theme.strokeChrome,
-                        lineWidth: 1
-                    )
-            )
+            QasaButtonLabel(title: title, icon: systemImage)
+                .font(.qasa(14, weight: .semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: Theme.buttonHeight)
+                .foregroundColor(
+                    disabled
+                        ? Theme.textTertiary
+                        : (destructive ? Theme.danger : Theme.textPrimary)
+                )
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
+                        .stroke(
+                            destructive ? Theme.danger.opacity(0.35) : Theme.stroke,
+                            lineWidth: 1
+                        )
+                )
         }
+        .buttonStyle(PressableStyle())
         .disabled(disabled || isActing)
     }
 
@@ -527,19 +503,12 @@ struct LinkedDevicesView: View {
                 Button {
                     pendingReplace = device
                 } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                        Text(L10n.tr("backup.replace.button", locale: locale))
-                    }
-                    .font(.qasa(14, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .foregroundColor(Theme.accent)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.accent.opacity(0.45), lineWidth: 1)
+                    QasaButtonLabel(
+                        title: L10n.tr("backup.replace.button", locale: locale),
+                        icon: "arrow.triangle.2.circlepath"
                     )
                 }
+                .buttonStyle(.qasaSecondary)
                 .disabled(isActing || registration.isReplacing)
                 .padding(.top, 4)
             }
@@ -563,13 +532,7 @@ struct LinkedDevicesView: View {
         Button { showPremium = true } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 16) {
-                    ZStack {
-                        Circle()
-                            .fill(Theme.gold.opacity(0.2))
-                            .frame(width: 44, height: 44)
-                        Image(systemName: "star.fill")
-                            .foregroundColor(Theme.gold)
-                    }
+                    IconBadge(systemImage: "star.fill", tint: Theme.gold, background: Theme.gold.opacity(0.2))
                     VStack(alignment: .leading, spacing: 4) {
                         Text(L10n.tr("devices.needMore", locale: locale))
                             .font(.qasa(16, weight: .bold))
@@ -597,14 +560,14 @@ struct LinkedDevicesView: View {
                     .stroke(Theme.gold.opacity(0.2), lineWidth: 1)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
     }
 
     private var infoNote: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: "info.circle.fill")
                 .foregroundColor(Theme.info)
-                .font(.qasa(18))
+                .font(.system(size: 18))
             Text(L10n.tr("devices.infoNote", locale: locale))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
@@ -613,9 +576,9 @@ struct LinkedDevicesView: View {
         }
         .padding(17)
         .background(Theme.cardMuted)
-        .cornerRadius(8)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
                 .stroke(Theme.strokeChrome, lineWidth: 1)
         )
         .padding(.top, 8)

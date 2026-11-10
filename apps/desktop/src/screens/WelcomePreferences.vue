@@ -77,7 +77,7 @@ function finish() {
 .headline {
   margin: 0;
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-primary);
 }
 

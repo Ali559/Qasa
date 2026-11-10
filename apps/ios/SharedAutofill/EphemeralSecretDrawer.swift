@@ -179,15 +179,11 @@ enum AutofillL10n {
 struct EphemeralSecretDrawer: View {
     @ObservedObject var session: EphemeralPasteboardSession
 
-    private let mint = Color(red: 0.35, green: 0.85, blue: 0.72)
-    private let cardBg = Color(uiColor: UIColor { t in
-        t.userInterfaceStyle == .dark
-            ? UIColor(red: 0.12, green: 0.14, blue: 0.18, alpha: 1)
-            : UIColor(red: 0.96, green: 0.97, blue: 0.98, alpha: 1)
-    })
-    private let textPrimary = Color(uiColor: .label)
-    private let textSecondary = Color(uiColor: .secondaryLabel)
-    private let danger = Color.red
+    private let mint = QasaSharedPalette.accent
+    private let cardBg = QasaSharedPalette.card
+    private let textPrimary = QasaSharedPalette.textPrimary
+    private let textSecondary = QasaSharedPalette.textSecondary
+    private let danger = QasaSharedPalette.danger
 
     var body: some View {
         if session.isPresented {
@@ -207,23 +203,23 @@ struct EphemeralSecretDrawer: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(session.title)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(QasaFontFace.font(size: 16, weight: .semibold))
                         .foregroundColor(textPrimary)
                     if !session.subtitle.isEmpty {
                         Text(session.subtitle)
-                            .font(.system(size: 13))
+                            .font(QasaFontFace.font(size: 13))
                             .foregroundColor(textSecondary)
                     }
                 }
                 Spacer()
                 Text(AutofillL10n.format("autofill.expiresIn", "Expires in %ds", session.secondsRemaining))
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(QasaFontFace.font(size: 12, weight: .semibold))
                     .foregroundColor(session.secondsRemaining <= 5 ? danger : mint)
                 Button {
                     session.dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(QasaFontFace.font(size: 12, weight: .bold))
                         .foregroundColor(textSecondary)
                         .frame(width: 28, height: 28)
                         .background(Color(uiColor: .tertiarySystemFill))
@@ -236,7 +232,7 @@ struct EphemeralSecretDrawer: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(field.label)
-                            .font(.system(size: 11))
+                            .font(QasaFontFace.font(size: 11))
                             .foregroundColor(textSecondary)
                         Text(displayValue(for: field))
                             .font(.system(size: 14, design: .monospaced))
@@ -252,7 +248,7 @@ struct EphemeralSecretDrawer: View {
                                 ? AutofillL10n.tr("autofill.copied", "Copied")
                                 : AutofillL10n.tr("autofill.copy", "Copy")
                         )
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(QasaFontFace.font(size: 13, weight: .semibold))
                         .foregroundColor(mint)
                     }
                     .buttonStyle(.plain)

@@ -43,14 +43,6 @@ struct BackupRestoreView: View {
                     } else {
                         if let info {
                             passwordCard(info)
-                        } else {
-                            PrimaryButton(
-                                title: L10n.tr("backup.restore", locale: locale),
-                                icon: "doc.badge.arrow.up",
-                                cornerRadius: 8
-                            ) {
-                                showPicker = true
-                            }
                         }
                         if let errorKey {
                             Text(L10n.tr(errorKey, locale: locale))
@@ -63,7 +55,9 @@ struct BackupRestoreView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(Theme.screenPadding)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
+            .bottomActionBar { bottomAction }
             .navigationTitle(L10n.tr("backup.restore.title", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -77,6 +71,35 @@ struct BackupRestoreView: View {
         .fileImporter(isPresented: $showPicker, allowedContentTypes: [.item], allowsMultipleSelection: false) { result in
             guard case .success(let urls) = result, let url = urls.first else { return }
             load(url)
+        }
+    }
+
+    /// The step's one main action: pick a file, restore, or finish.
+    @ViewBuilder
+    private var bottomAction: some View {
+        if let outcome {
+            PrimaryButton(title: L10n.tr("pair.done", locale: locale), icon: "checkmark") {
+                if mode == .setup, outcome.adopted {
+                    onAdopted(password)
+                } else {
+                    dismiss()
+                }
+            }
+        } else if info != nil {
+            PrimaryButton(
+                title: L10n.tr(isWorking ? "backup.restore.working" : "backup.restore.button", locale: locale),
+                icon: isWorking ? nil : "arrow.counterclockwise"
+            ) {
+                restore()
+            }
+            .disabled(!canRestore)
+        } else {
+            PrimaryButton(
+                title: L10n.tr("backup.restore", locale: locale),
+                icon: "doc.badge.arrow.up"
+            ) {
+                showPicker = true
+            }
         }
     }
 
@@ -104,27 +127,19 @@ struct BackupRestoreView: View {
                     text: $password,
                     isSecure: !passwordVisible,
                     trailing: AnyView(
-                        Button {
+                        FieldIconButton(
+                            systemImage: passwordVisible ? "eye.slash" : "eye",
+                            accessibilityLabel: passwordVisible
+                                ? L10n.tr("vault.hidePassword", locale: locale)
+                                : L10n.tr("vault.showPassword", locale: locale)
+                        ) {
                             passwordVisible.toggle()
-                        } label: {
-                            Image(systemName: passwordVisible ? "eye.slash" : "eye")
-                                .foregroundColor(Theme.textSecondary)
                         }
                     )
                 )
                 .textContentType(.password)
                 .submitLabel(.go)
                 .onSubmit(restore)
-
-                PrimaryButton(
-                    title: L10n.tr(isWorking ? "backup.restore.working" : "backup.restore.button", locale: locale),
-                    icon: isWorking ? nil : "arrow.counterclockwise",
-                    cornerRadius: 8
-                ) {
-                    restore()
-                }
-                .disabled(!canRestore)
-                .opacity(canRestore ? 1 : 0.5)
 
                 if isWorking {
                     HStack(spacing: 8) {
@@ -135,27 +150,17 @@ struct BackupRestoreView: View {
                     }
                 } else {
                     Button(L10n.tr("backup.restore", locale: locale)) { showPicker = true }
-                        .font(.qasa(14, weight: .semibold))
-                        .foregroundColor(Theme.accent)
+                        .buttonStyle(.qasaSecondary)
                 }
             }
         }
     }
 
     private func doneBody(_ outcome: FfiRestoreOutcome) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(doneMessage(outcome))
-                .font(.qasa(18, weight: .bold))
-                .foregroundColor(Theme.accent)
-                .fixedSize(horizontal: false, vertical: true)
-            PrimaryButton(title: L10n.tr("pair.done", locale: locale), icon: "checkmark", cornerRadius: 8) {
-                if mode == .setup, outcome.adopted {
-                    onAdopted(password)
-                } else {
-                    dismiss()
-                }
-            }
-        }
+        Text(doneMessage(outcome))
+            .font(.qasa(18, weight: .bold))
+            .foregroundColor(Theme.accent)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func doneMessage(_ outcome: FfiRestoreOutcome) -> String {

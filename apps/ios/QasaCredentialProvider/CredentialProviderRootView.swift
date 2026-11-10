@@ -20,6 +20,9 @@ struct CredentialProviderRootView: View {
     @State private var isUnlocking = false
     @State private var query = ""
     @State private var showedPaymentDrawer = false
+    /// Read when the unlock sheet appears (Keychain, not observable).
+    @State private var masterPasswordDue = false
+    @State private var showsBiometricButton = false
 
     private var filtered: [AutofillCandidate] {
         let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -47,10 +50,10 @@ struct CredentialProviderRootView: View {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(item.title)
-                                            .font(.system(size: 16, weight: .semibold))
+                                            .font(QasaFontFace.font(size: 16, weight: .semibold))
                                             .foregroundStyle(.primary)
                                         Text(rowSubtitle(item))
-                                            .font(.system(size: 13))
+                                            .font(QasaFontFace.font(size: 13))
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer()
@@ -89,13 +92,22 @@ struct CredentialProviderRootView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 SecureField(AutofillL10n.tr("auth.unlock.placeholder", "Master password"), text: $password)
-                    .textFieldStyle(.roundedBorder)
+                    .qasaExtensionField()
                     .padding(.horizontal)
 
                 if let unlockError {
                     Text(unlockError)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
+                        .font(QasaFontFace.font(size: 13))
+                        .foregroundStyle(QasaSharedPalette.danger)
+                }
+
+                if masterPasswordDue {
+                    Text(AutofillBiometricGate.dueHint)
+                        .font(QasaFontFace.font(size: 13))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal)
                 }
 
                 Button {
@@ -104,15 +116,15 @@ struct CredentialProviderRootView: View {
                     Text(isUnlocking
                           ? AutofillL10n.tr("autofill.unlocking", "Unlocking…")
                           : AutofillL10n.tr("autofill.unlock", "Unlock"))
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(QasaExtensionPrimaryButtonStyle())
                 .disabled(password.isEmpty || isUnlocking)
                 .padding(.horizontal)
 
-                if SharedVaultKeychain.biometricsEnabled {
+                // Hidden while the 14-day master-password unlock is due (`BiometricPolicy`).
+                if showsBiometricButton {
                     Button {
-                        Task { await unlockWithBiometrics() }
+                        Task { await unlockWithBiometrics(automatic: false) }
                     } label: {
                         Label(
                             AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID"),
@@ -136,9 +148,12 @@ struct CredentialProviderRootView: View {
                     }
                 }
             }
+            // Once per presentation of the sheet; a cancelled prompt leaves the button.
             .onAppear {
-                if SharedVaultKeychain.biometricsEnabled {
-                    Task { await unlockWithBiometrics() }
+                masterPasswordDue = AutofillBiometricGate.masterPasswordDue
+                showsBiometricButton = AutofillBiometricGate.showsBiometricButton
+                if AutofillUnlock.canOfferBiometricUnlock {
+                    Task { await unlockWithBiometrics(automatic: true) }
                 }
             }
         }
@@ -193,11 +208,16 @@ struct CredentialProviderRootView: View {
         password = ""
     }
 
-    private func unlockWithBiometrics() async {
+    private func unlockWithBiometrics(automatic: Bool) async {
+        guard !isUnlocking else { return }
         isUnlocking = true
         defer { isUnlocking = false }
         guard let session = AutofillUnlock.unlockWithBiometrics() else {
-            unlockError = AutofillL10n.tr("autofill.biometricFailed", "Biometric unlock failed.")
+            masterPasswordDue = AutofillBiometricGate.masterPasswordDue
+            showsBiometricButton = AutofillBiometricGate.showsBiometricButton
+            if !automatic {
+                unlockError = AutofillL10n.tr("autofill.biometricFailed", "Biometric unlock failed.")
+            }
             return
         }
         await complete(with: session)

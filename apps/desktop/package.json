@@ -9,6 +9,7 @@
     "build": "vue-tsc -b && vite build",
     "tauri": "tauri",
     "tokens": "python3 scripts/tokens.py",
+    "icons": "python3 scripts/app-icon.py && tauri icon src-tauri/icons/app-icon.png && rm -rf src-tauri/icons/android src-tauri/icons/ios",
     "tokens:check": "python3 scripts/tokens.py --check"
   },
   "dependencies": {

@@ -6,7 +6,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
-import NavChevronRow from '@/components/NavChevronRow.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
@@ -76,12 +76,6 @@ const frequency = computed<BackupFrequency>({
   <PageFrame :title="t('backup.title')" back :gap="16" @back="$emit('back')">
     <p class="muted">{{ t('backup.intro') }}</p>
 
-    <PrimaryButton
-      :title="running ? t('backup.backingUp') : t('backup.backUpNow')"
-      :icon="DatabaseBackup"
-      :disabled="running"
-      @click="backUpNow"
-    />
     <div class="state">
       <span class="last">{{ lastLine }}</span>
       <span v-if="result" :class="result.ok ? 'ok' : 'error'" :role="result.ok ? 'status' : 'alert'">{{ t(result.key) }}</span>
@@ -90,8 +84,8 @@ const frequency = computed<BackupFrequency>({
 
     <section class="group">
       <SectionLabel :text="t('backup.locationTitle')" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           :icon="Folder"
           :title="status?.locationName ?? t('backup.locationNone')"
           :trailing-text="status?.location ? t('backup.changeLocation') : t('backup.chooseLocation')"
@@ -110,11 +104,20 @@ const frequency = computed<BackupFrequency>({
     </section>
 
     <section class="group">
-      <CardContainer>
-        <NavChevronRow :icon="ArchiveRestore" :title="t('backup.restore')" aria-haspopup="dialog" @click="showRestore = true" />
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow :icon="ArchiveRestore" :title="t('backup.restore')" aria-haspopup="dialog" @click="showRestore = true" />
       </CardContainer>
       <p class="footer">{{ t('backup.restoreHelp') }}</p>
     </section>
+
+    <template #actions>
+      <PrimaryButton
+        :title="running ? t('backup.backingUp') : t('backup.backUpNow')"
+        :icon="DatabaseBackup"
+        :disabled="running"
+        @click="backUpNow"
+      />
+    </template>
 
     <template #overlay>
       <RestoreBackupSheet :open="showRestore" @close="showRestore = false" />

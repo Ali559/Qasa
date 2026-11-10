@@ -245,7 +245,7 @@ warnings before using `design.md` as a reference:
   saved or the master password changes; there is no reindex-on-unlock yet.
 - `apps/desktop`: Tauri 2 + Vue scaffold with the isolation pattern and a strict CSP;
   prefs saved by the Rust core; tokens generated from `Theme.swift`
-  (`bun run tokens`, `--check`); Rubik and Rudaw bundled; RTL root; the Welcome screen as
+  (`bun run tokens`, `--check`); IBM Plex Sans Arabic bundled; RTL root; the Welcome screen as
   the first iOS screen ported.
 - `l10n/generate.py` writes `apps/desktop/src/i18n/{en,ar,ckb}.json`
   (`%@` → `{0}`), covered by `--check`. Desktop-only strings go in
@@ -379,8 +379,8 @@ checked by iOS and Android tests too, so all three cannot drift apart.
 - **A generator script** (`apps/desktop/scripts/tokens.py`) reads `Theme.swift` and writes
   `src/theme/tokens.css` with light and dark values as CSS variables, so the palette cannot
   drift. Same three spacing tokens (12 / 16 / 20) plus the derived ones from design.md §4.1.
-- **Fonts:** bundle `Rubik-Variable.ttf` (English) and `rudawregular2.ttf` (Arabic and
-  Kurdish) from `apps/ios/qasa_ios/Resources/`. Follow the same rules as iOS: in ar/ckb, mono
+- **Fonts:** bundle IBM Plex Sans Arabic (400/500/600/700) for every language, in
+  `src/assets/fonts/` (design.md §3.1). Follow the same rules as iOS: in ar/ckb, mono
   text falls back to the body font, letter spacing is zero, and nothing is uppercased.
 - **Type scale:** the table in design.md §3.2, as named CSS classes. No raw sizes in
   components.

@@ -18,7 +18,7 @@ async function regenerate() {
   try {
     password.value = await ask<string>({ kind: 'generate' })
   } catch {
-    showToast(t('ext.error'))
+    showToast(t('ext.error'), { tone: 'error' })
   }
 }
 
@@ -83,7 +83,7 @@ onMounted(regenerate)
 .password {
   display: block;
   margin: 16px 0 20px;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 20px;
   font-weight: 600;
   word-break: break-all;
@@ -95,12 +95,13 @@ onMounted(regenerate)
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: var(--corner-radius);
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

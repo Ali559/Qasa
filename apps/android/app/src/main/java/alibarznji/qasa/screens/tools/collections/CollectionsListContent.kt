@@ -8,7 +8,7 @@ import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.ThemedTextField
+import alibarznji.qasa.theme.QasaTextInputSheet
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultListRow
@@ -32,13 +32,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -224,29 +222,12 @@ private fun CollectionNameDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val c = qasaColors
-    var name by remember { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title, color = c.textPrimary) },
-        text = {
-            ThemedTextField(
-                value = name,
-                onValueChange = { name = it },
-                placeholder = stringResource(R.string.common_name),
-            )
-        },
-        confirmButton = {
-            // iOS alert buttons always dismiss; a blank name is simply not saved (`guard !trimmed.isEmpty`).
-            TextButton(onClick = { if (name.isNotBlank()) onConfirm(name.trim()) else onDismiss() }) {
-                Text(confirmLabel, color = c.accent)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.common_cancel), color = c.textSecondary)
-            }
-        },
-        containerColor = c.cardBackground,
+    QasaTextInputSheet(
+        title = title,
+        initial = initial,
+        placeholder = stringResource(R.string.common_name),
+        confirmLabel = confirmLabel,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
 }

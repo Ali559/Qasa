@@ -5,7 +5,7 @@ import UIKit
 /// The AutoFill extension (docs/autofill-plan.md §3.4). Every request needs the user:
 /// nothing is ever returned without the unlock sheet (Face ID or the master password).
 ///   - Passwords: the QuickType bar and the AutoFill sheet.
-///   - One-time codes (iOS 18): the current 2FA code of a login.
+///   - One-time codes (iOS 18+; skipped on iOS 17): the current 2FA code of a login.
 ///   - Text to insert (iOS 18): "AutoFill → Qasa" in any text field: one value of any item.
 final class CredentialProviderViewController: ASCredentialProviderViewController {
     private var hostingController: UIViewController?
@@ -32,18 +32,21 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
     /// `replaceCredentialIdentityEntries`: a password or a one-time code.
     override func prepareInterfaceToProvideCredential(for credentialRequest: any ASCredentialRequest) {
         let identity = credentialRequest.credentialIdentity
-        let mode: CredentialProviderRootView.Mode = credentialRequest.type == .oneTimeCode ? .oneTimeCode : .password
+        var mode: CredentialProviderRootView.Mode = .password
+        if #available(iOS 18.0, *), credentialRequest.type == .oneTimeCode { mode = .oneTimeCode }
         showRoot(mode: mode, serviceIdentifiers: [identity.serviceIdentifier], preferredRecordId: identity.recordIdentifier)
     }
 
     // MARK: one-time codes
 
+    @available(iOS 18.0, *)
     override func prepareOneTimeCodeCredentialList(for serviceIdentifiers: [ASCredentialServiceIdentifier]) {
         showRoot(mode: .oneTimeCode, serviceIdentifiers: serviceIdentifiers, preferredRecordId: nil)
     }
 
     // MARK: text insertion
 
+    @available(iOS 18.0, *)
     override func prepareInterfaceForUserChoosingTextToInsert() {
         let root = TextInsertionView(
             onCancel: { [weak self] in self?.cancel() },
@@ -81,7 +84,10 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
                 )
             },
             onProvideCode: { [weak self] code in
-                self?.extensionContext.completeOneTimeCodeRequest(using: ASOneTimeCodeCredential(code: code))
+                // Code mode is only ever entered on iOS 18+, where these APIs exist.
+                if #available(iOS 18.0, *) {
+                    self?.extensionContext.completeOneTimeCodeRequest(using: ASOneTimeCodeCredential(code: code))
+                }
             }
         )
         host(UIHostingController(rootView: root))
@@ -94,6 +100,8 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
             old.removeFromParent()
         }
         addChild(controller)
+        // Brand accent for SwiftUI controls and bar buttons.
+        controller.view.tintColor = UIColor(QasaSharedPalette.accent)
         controller.view.frame = view.bounds
         controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(controller.view)

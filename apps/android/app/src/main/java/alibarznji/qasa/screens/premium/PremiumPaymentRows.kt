@@ -132,6 +132,7 @@ private fun PaymentRow(option: GatewayOption, selected: Boolean, onClick: () -> 
             Text(stringResource(option.title), color = c.textPrimary, style = qasaText.bodyMediumSemibold)
             Text(stringResource(option.subtitle), color = c.textSecondary, style = qasaText.sectionLabel)
         }
+        Spacer(Modifier.width(QasaDimens.gapSmall))
         Icon(
             if (selected) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
             contentDescription = null,

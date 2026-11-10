@@ -573,3 +573,28 @@ fn unlock_prompts_touch_id_when_sealed_else_the_window() {
     // Locked: no identities.
     assert_eq!(ext.call(&host, "identities", json!({}))["error"], "locked");
 }
+
+#[test]
+fn unlock_skips_touch_id_when_the_master_password_is_due() {
+    let (mut host, _, _) = host();
+    let ext = Ext::pair(&host);
+    host.biometric = true;
+    host.vault.lock().unwrap().set_biometric_enabled(true).unwrap();
+    {
+        // The next password unlock seals; then lock again.
+        let mut v = host.vault.lock().unwrap();
+        v.lock();
+        v.unlock("password1").unwrap();
+        v.lock();
+    }
+    assert!(ext.call(&host, "status", json!({})).get("passwordDue").is_none());
+    host.vault.lock().unwrap().set_last_master_password_unlock(None);
+    let status = ext.call(&host, "status", json!({}));
+    assert_eq!(status["state"], "locked");
+    assert_eq!(status["passwordDue"], true);
+    assert_eq!(status["passwordIntervalDays"], 14);
+    let reply = ext.call(&host, "unlock", json!({ "prompt": true }));
+    assert_eq!(reply["method"], "window");
+    assert_eq!(reply["passwordDue"], true);
+    assert!(host.seen.lock().unwrap().biometrics.is_empty());
+}

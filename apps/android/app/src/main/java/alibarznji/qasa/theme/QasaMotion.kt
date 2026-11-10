@@ -38,6 +38,9 @@ object QasaMotion {
 
     const val PRESS_SCALE = 0.97f
 
+    /** 2500ms — how long a [QasaToast] stays up. */
+    const val TOAST_VISIBLE = 2500L
+
     fun toggleSpring() = spring<Float>(Spring.DampingRatioNoBouncy, TOGGLE_RESPONSE, TOGGLE_DAMPING)
 
     fun fastTween() = tween<Float>(FAST)

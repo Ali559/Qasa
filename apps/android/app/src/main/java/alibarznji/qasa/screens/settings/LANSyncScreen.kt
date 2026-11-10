@@ -12,6 +12,7 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -74,16 +75,22 @@ fun LANSyncScreen(
                 dismissLabel = stringResource(R.string.common_close),
             )
         },
+        stickyBottom = if (isPremium) {
+            null
+        } else {
+            {
+                StickyBottomBar {
+                    PrimaryButton(
+                        title = stringResource(R.string.nav_upgrade),
+                        icon = Icons.Filled.WorkspacePremium,
+                        onClick = onUpgrade,
+                    )
+                }
+            }
+        },
     ) {
         if (!isPremium) {
-            Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
-                Text(stringResource(R.string.lan_requirespremium), color = c.textSecondary, style = qasaText.bodyLarge)
-                PrimaryButton(
-                    title = stringResource(R.string.nav_upgrade),
-                    icon = Icons.Filled.WorkspacePremium,
-                    onClick = onUpgrade,
-                )
-            }
+            Text(stringResource(R.string.lan_requirespremium), color = c.textSecondary, style = qasaText.bodyLarge)
         } else {
             PremiumLanBody(sync)
         }

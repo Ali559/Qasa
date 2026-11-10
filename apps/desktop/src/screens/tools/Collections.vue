@@ -103,7 +103,7 @@ function openItem(id: string) {
 
     <template #overlay>
       <div class="fab"><Fab :icon="Plus" :label="t('collections.createTitle')" @click="startCreate" /></div>
-      <Sheet :open="!!nameSheet" :label="t('collections.createTitle')" :width="400" @close="nameSheet = null">
+      <Sheet :open="!!nameSheet" :label="t('collections.createTitle')" :width="400" placement="bottom" @close="nameSheet = null">
         <div class="name-sheet">
           <h2>{{ nameSheet?.mode === 'rename' ? t('collections.rename') : t('collections.createTitle') }}</h2>
           <TextField v-model="name" :placeholder="t('common.name')" autofocus @submit="submitName" />
@@ -215,12 +215,13 @@ function openItem(id: string) {
 
 .actions button {
   flex: 1;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: var(--button-radius);
   background: var(--card-background);
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

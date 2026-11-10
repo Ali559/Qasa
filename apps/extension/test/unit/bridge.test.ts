@@ -39,8 +39,8 @@ function memoryStore(initial: StoredPairing | null = null): PairingStore & { val
   }
 }
 
-/** A desktop that pairs, then answers `status` with `state`. */
-function pairingDesktop(state: string, opts: { deny?: boolean } = {}) {
+/** A desktop that pairs, then answers `status` with `state` (plus `extra` fields). */
+function pairingDesktop(state: string, opts: { deny?: boolean; extra?: Record<string, unknown> } = {}) {
   const clients = new Map<string, CryptoKey>()
   const seen: Record<string, unknown>[] = []
   const desktop: Desktop = async (frame, reply) => {
@@ -59,13 +59,22 @@ function pairingDesktop(state: string, opts: { deny?: boolean } = {}) {
     if (!key) return reply({ type: 'error', code: 'notPaired' })
     const body = JSON.parse(new TextDecoder().decode(await open(key, req.clientId, req.n, req.c)))
     seen.push(body)
-    const answer = body.op === 'status' ? { id: body.id, ok: true, state } : { id: body.id, ok: false, error: 'locked' }
+    const answer = body.op === 'status' ? { id: body.id, ok: true, state, ...opts.extra } : { id: body.id, ok: false, error: 'locked' }
     reply({ type: 'res', ...(await seal(key, req.clientId, new TextEncoder().encode(JSON.stringify(answer)))) })
   }
   return { desktop, clients, seen }
 }
 
 describe('Bridge', () => {
+  it('passes on that the main password is due, with its interval', async () => {
+    const d = pairingDesktop('locked', { extra: { passwordDue: true, passwordIntervalDays: 14 } })
+    const store = memoryStore()
+    const bridge = new Bridge(() => fakePort(d.desktop), store, 'Chrome')
+    await bridge.pair()
+    await vi.waitFor(() => expect(store.value?.clientId).toBe('client-1'))
+    expect(await bridge.status()).toEqual({ state: 'locked', passwordDueDays: 14 })
+  })
+
   it('reports notPaired from the unpaired probe, pairs, then reads the status', async () => {
     const d = pairingDesktop('unlocked')
     const store = memoryStore()

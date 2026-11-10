@@ -58,7 +58,7 @@ const theme = computed<ThemePreference>({
 </script>
 
 <template>
-  <Sheet :open="kind !== null" :label="title" :width="420" @close="emit('close')">
+  <Sheet :open="kind !== null" :label="title" :width="420" placement="bottom" @close="emit('close')">
     <SheetHeader :title="title" :done-label="t('settings.done')" @done="emit('close')" />
     <div class="body">
       <ChoiceList v-if="shown === 'language'" v-model="language" :choices="languageChoices" :label="title" />

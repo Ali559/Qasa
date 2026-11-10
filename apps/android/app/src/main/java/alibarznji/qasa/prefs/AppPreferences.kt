@@ -11,6 +11,13 @@ import kotlinx.coroutines.flow.asStateFlow
 
 enum class AppLanguage(val code: String) {
     EN("en"), CKB("ckb"), AR("ar");
+
+    /**
+     * Whether the language is written right to left. Decided here, not from
+     * `TextUtils.getLayoutDirectionFromLocale`: on Android 12 and older the bundled ICU
+     * may not know the bare `ckb` tag's script and reports Sorani as left to right.
+     */
+    val isRtl: Boolean get() = this != EN
     companion object {
         fun fromCode(code: String) = entries.find { it.code == code } ?: EN
     }

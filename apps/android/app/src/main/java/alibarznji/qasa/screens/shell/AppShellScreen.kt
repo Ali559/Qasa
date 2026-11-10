@@ -37,6 +37,7 @@ import alibarznji.qasa.screens.tools.PasswordHealthScreen
 import alibarznji.qasa.screens.vault.VaultListScreen
 import alibarznji.qasa.screens.vpn.VPNScreen
 import alibarznji.qasa.theme.qasaColors
+import alibarznji.qasa.vault.VaultPayload
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -104,7 +105,16 @@ fun AppShellScreen(
         Box(Modifier.weight(1f).fillMaxWidth().then(bodyInsets)) {
             val current = page
             if (current != null) {
-                PageContent(current, back = back, onLock = onLock, onOpen = ::open)
+                PageContent(
+                    current,
+                    back = back,
+                    onLock = onLock,
+                    onOpen = ::open,
+                    // Picked up by the effect above: Passwords tab, new-login form, password filled.
+                    onSaveGeneratedPassword = { password ->
+                        vm.appSession.requestSaveLogin(VaultPayload.Login(password = password))
+                    },
+                )
             } else {
                 when (tab) {
                     ShellTab.Home -> HomeScreen(
@@ -131,11 +141,12 @@ private fun PageContent(
     back: () -> Unit,
     onLock: () -> Unit,
     onOpen: (AppPage) -> Unit,
+    onSaveGeneratedPassword: (String) -> Unit,
 ) {
     val upgrade = { onOpen(AppPage.PremiumUpgrade) }
     when (page) {
         AppPage.Notifications -> NotificationsScreen(onOpenMenu = back)
-        AppPage.Generator -> GenerateScreen(onOpenMenu = back)
+        AppPage.Generator -> GenerateScreen(onOpenMenu = back, onSaveToPasswords = onSaveGeneratedPassword)
         AppPage.PasswordHealth -> PasswordHealthScreen(onOpenMenu = back, onUpgrade = upgrade)
         AppPage.Vpn -> VPNScreen(onOpenMenu = back, onUpgrade = upgrade)
         AppPage.Collections -> CollectionsScreen(onOpenMenu = back)

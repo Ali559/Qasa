@@ -1,9 +1,10 @@
 import SwiftUI
 import UIKit
 
-/// Semantic color palette for light and dark appearance. The calm + personal redesign
-/// (`docs/design/mobile-redesign-mockup.html`): misty lilac base, lavender for actions,
-/// a warm peach wash for "all good". Byte-identical to Android `QasaColors`.
+/// Semantic color palette for light and dark appearance, built from the brand palette
+/// #722F99 (purple: actions), #C5C1C1 (grey: strokes, secondary text), #FEE7C8 (beige:
+/// canvas, warm wash, gold) and #FF9292 (peach: VPN accent, danger in dark).
+/// Byte-identical to Android `QasaColors` and the generated web `tokens.css`.
 struct ThemePalette: Equatable {
     let background: Color
     let chrome: Color
@@ -43,63 +44,63 @@ struct ThemePalette: Equatable {
     let calm: Color
 
     static let dark = ThemePalette(
-        background: Color(hex: "17152A"),
-        chrome: Color(hex: "17152A"),
-        cardBackground: Color(hex: "221F3A"),
-        cardBackgroundLight: Color(hex: "2A2745"),
-        cardMuted: Color(hex: "2F2B52"),
-        stroke: Color(hex: "332F4F"),
-        strokeChrome: Color(hex: "3A3658"),
-        accent: Color(hex: "A79BFF"),
-        accentDark: Color(hex: "7C6CF2"),
-        onAccent: Color(hex: "1B1640"),
-        onAccentChip: Color(hex: "E8E4FF"),
-        gold: Color(hex: "F5B84A"),
-        goldMuted: Color(hex: "E09A2B"),
-        cyan: Color(hex: "6CC6E3"),
-        info: Color(hex: "8FA6FF"),
+        background: Color(hex: "17111D"),
+        chrome: Color(hex: "17111D"),
+        cardBackground: Color(hex: "231A2B"),
+        cardBackgroundLight: Color(hex: "2B2134"),
+        cardMuted: Color(hex: "33243F"),
+        stroke: Color(hex: "352B3D"),
+        strokeChrome: Color(hex: "3F3448"),
+        accent: Color(hex: "B67FDB"),
+        accentDark: Color(hex: "722F99"),
+        onAccent: Color(hex: "22102F"),
+        onAccentChip: Color(hex: "F1E3FA"),
+        gold: Color(hex: "FEE7C8"),
+        goldMuted: Color(hex: "F0C48C"),
+        cyan: Color(hex: "FF9292"),
+        info: Color(hex: "C9A3E6"),
         success: Color(hex: "5CCB97"),
-        danger: Color(hex: "F27F7F"),
-        dangerBackground: Color(hex: "4A2030"),
-        dangerText: Color(hex: "FFB8B8"),
-        dangerTextMuted: Color(hex: "FFD3D3"),
-        textPrimary: Color(hex: "EEECF8"),
-        textSecondary: Color(hex: "B5B1CC"),
-        textTertiary: Color(hex: "7D7998"),
-        textPlaceholder: Color(hex: "7D7998"),
-        textOnChrome: Color(hex: "CFCBE6"),
-        warm: Color(hex: "3D2B3B"),
-        calm: Color(hex: "26233F")
+        danger: Color(hex: "FF6B6B"),
+        dangerBackground: Color(hex: "4A1F28"),
+        dangerText: Color(hex: "FFC0C0"),
+        dangerTextMuted: Color(hex: "FFD9D9"),
+        textPrimary: Color(hex: "F2EDF4"),
+        textSecondary: Color(hex: "C5C1C1"),
+        textTertiary: Color(hex: "8A8290"),
+        textPlaceholder: Color(hex: "8A8290"),
+        textOnChrome: Color(hex: "D9D3DD"),
+        warm: Color(hex: "3E2B2F"),
+        calm: Color(hex: "2A2430")
     )
 
     static let light = ThemePalette(
-        background: Color(hex: "F6F4FB"),
-        chrome: Color(hex: "F6F4FB"),
+        background: Color(hex: "FBF6F0"),
+        chrome: Color(hex: "FBF6F0"),
         cardBackground: Color(hex: "FFFFFF"),
-        cardBackgroundLight: Color(hex: "F1EEFA"),
-        cardMuted: Color(hex: "ECE8FD"),
-        stroke: Color(hex: "EBE8F4"),
-        strokeChrome: Color(hex: "E4E0F0"),
-        accent: Color(hex: "7C6CF2"),
-        accentDark: Color(hex: "6656E0"),
+        cardBackgroundLight: Color(hex: "FFF3E3"),
+        cardMuted: Color(hex: "F3EAF7"),
+        stroke: Color(hex: "E6E1E1"),
+        strokeChrome: Color(hex: "DCD7D7"),
+        accent: Color(hex: "722F99"),
+        accentDark: Color(hex: "5C2580"),
         onAccent: Color(hex: "FFFFFF"),
-        onAccentChip: Color(hex: "3A2FA0"),
-        gold: Color(hex: "E09A2B"),
-        goldMuted: Color(hex: "B7791F"),
-        cyan: Color(hex: "3FA7C9"),
-        info: Color(hex: "5B7CF0"),
+        onAccentChip: Color(hex: "4A1A66"),
+        gold: Color(hex: "B7701E"),
+        goldMuted: Color(hex: "94591A"),
+        cyan: Color(hex: "E2707A"),
+        info: Color(hex: "8A4FB3"),
         success: Color(hex: "2F9E6C"),
-        danger: Color(hex: "E45D5D"),
-        dangerBackground: Color(hex: "FDEAEA"),
-        dangerText: Color(hex: "9E2F2F"),
-        dangerTextMuted: Color(hex: "B23C3C"),
-        textPrimary: Color(hex: "24213A"),
-        textSecondary: Color(hex: "6B6785"),
-        textTertiary: Color(hex: "A19DB8"),
-        textPlaceholder: Color(hex: "A19DB8"),
-        textOnChrome: Color(hex: "3A3654"),
-        warm: Color(hex: "FFD9C7"),
-        calm: Color(hex: "E6E3F2")
+        danger: Color(hex: "C8323C"),
+        dangerBackground: Color(hex: "FFE6E6"),
+        dangerText: Color(hex: "9E2F35"),
+        dangerTextMuted: Color(hex: "B83C44"),
+        textPrimary: Color(hex: "2A1F33"),
+        textSecondary: Color(hex: "6E6475"),
+        textTertiary: Color(hex: "A39DA3"),
+        textPlaceholder: Color(hex: "A39DA3"),
+        textOnChrome: Color(hex: "3E3346"),
+        warm: Color(hex: "FEE7C8"),
+        calm: Color(hex: "EDE9E9")
     )
 
     static func resolved(for scheme: ColorScheme) -> ThemePalette {
@@ -174,6 +175,27 @@ enum Theme {
     static let cornerRadius: CGFloat = 20
     static let cornerRadiusLarge: CGFloat = 24
     static let screenPadding: CGFloat = 20
+
+    // MARK: Control sizes (one height for every field and every full-width action button).
+    /// Every single-line input: text, secure, search, date and picker-styled fields.
+    static let fieldHeight: CGFloat = QasaMetrics.fieldHeight
+    /// Every full-width primary / secondary / destructive action button.
+    static let buttonHeight: CGFloat = QasaMetrics.buttonHeight
+    /// Corner radius shared by fields and action buttons.
+    static let controlCornerRadius: CGFloat = QasaMetrics.controlCornerRadius
+    /// Horizontal inset of text inside a field.
+    static let fieldHorizontalPadding: CGFloat = 14
+    /// Minimum height of a multi-line notes area (exempt from `fieldHeight`).
+    static let notesMinHeight: CGFloat = 112
+    /// Gap between a field's label and its box, and between stacked form fields.
+    static let fieldLabelSpacing: CGFloat = 8
+    static let formSpacing: CGFloat = 16
+
+    // MARK: Settings / list rows.
+    static let rowMinHeight: CGFloat = 60
+    static let iconBadgeSize: CGFloat = 36
+    static let iconBadgeCornerRadius: CGFloat = 10
+    static let iconBadgeGlyphSize: CGFloat = 16
 }
 
 extension Color {
@@ -207,7 +229,7 @@ extension Font {
         AppTypography.font(size: size + 1, weight: .medium)
     }
 
-    /// Body / UI text — Rudaw for ckb/ar, Rubik otherwise.
+    /// Body / UI text — IBM Plex Sans Arabic for every language.
     static func qasa(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         AppTypography.font(size: size, weight: weight)
     }

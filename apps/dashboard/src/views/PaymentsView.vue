@@ -310,11 +310,11 @@ function exportLogs() {
                 <div class="flex flex-wrap items-center gap-2 px-5 pt-4 text-xs">
                   <span class="tabular-nums opacity-70">{{ fmtTime(w.received_at) }}</span>
                   <span
-                    class="rounded-md px-2 py-0.5 font-semibold text-[#1c1b33]"
+                    class="rounded-md px-2 py-0.5 font-semibold text-ink"
                     :style="{ background: w.signature_valid ? 'var(--ink-ok)' : 'var(--ink-bad)' }"
                   >{{ w.signature_valid ? 'signature ok' : 'bad signature' }}</span>
                   <span
-                    class="rounded-md px-2 py-0.5 font-semibold text-[#1c1b33]"
+                    class="rounded-md px-2 py-0.5 font-semibold text-ink"
                     :style="{ background: w.error_message ? 'var(--ink-bad)' : w.processed ? 'var(--ink-info)' : 'var(--ink-warn)' }"
                   >{{ w.error_message ? 'rejected' : w.processed ? 'processed' : 'not processed' }}</span>
                   <Button variant="secondary" size="sm" class="ml-auto" @click="copyPayload(w.payload)">

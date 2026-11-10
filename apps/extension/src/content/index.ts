@@ -145,6 +145,17 @@ function openMenuFor(field: HTMLInputElement): void {
 async function loadMenu(overlay: Overlay, context: MenuContext): Promise<void> {
   try {
     const status = await ask<BridgeStatus>({ kind: 'status' })
+    if (status.state === 'locked' && status.passwordDueDays) {
+      // No Touch ID / Hello until the main password is typed in the app: Unlock just
+      // brings its window forward, and the menu waits as usual.
+      overlay.setMenu({
+        kind: 'message',
+        key: 'auth.unlock.masterPasswordDueFmt',
+        args: [status.passwordDueDays],
+        action: { key: 'ext.openQasa', run: () => void unlock(overlay, context) },
+      })
+      return
+    }
     if (status.state === 'locked') {
       overlay.setMenu({ kind: 'message', key: 'ext.page.locked', action: { key: 'ext.page.unlock', run: () => void unlock(overlay, context) } })
       return

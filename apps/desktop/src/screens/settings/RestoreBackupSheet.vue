@@ -29,7 +29,7 @@ async function restored(outcome: RestoreOutcome) {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('backup.restore.title')" :width="520" @close="emit('close')">
+  <Sheet :open="open" :label="t('backup.restore.title')" :width="520" placement="bottom" @close="emit('close')">
     <SheetHeader
       :title="t('backup.restore.title')"
       :cancel-label="result ? undefined : t('common.cancel')"

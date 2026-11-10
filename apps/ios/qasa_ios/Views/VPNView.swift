@@ -129,11 +129,12 @@ struct VPNView: View {
                         ProgressView()
                     } else {
                         Image(systemName: "power")
-                            .font(.qasa(36, weight: .medium))
+                            .font(.system(size: 36, weight: .medium))
                             .foregroundColor(vpn.connected ? Theme.accent : Theme.textSecondary)
                     }
                 }
             }
+            .buttonStyle(PressableStyle())
             .disabled(vpn.isBusy)
 
             VStack(spacing: 8) {
@@ -143,7 +144,7 @@ struct VPNView: View {
                     .font(.qasa(20, weight: .semibold))
                     .foregroundColor(vpn.connected ? Theme.success : Theme.textSecondary)
                 Text(L10n.tr("vpn.sessionOnly", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(12) : .qasaLabel(12))
+                    .font(.qasa(12))
                     .foregroundColor(Theme.textSecondary)
                     .multilineTextAlignment(.center)
             }
@@ -179,7 +180,7 @@ struct VPNView: View {
                     title: L10n.tr("vpn.autoConnect", locale: locale),
                     subtitle: L10n.tr("vpn.autoConnectSub", locale: locale),
                     isOn: $autoConnect,
-                    iconBackground: Color(hex: "001B21")
+                    iconBackground: Theme.cyan.opacity(0.12)
                 )
             }
         }
@@ -197,18 +198,18 @@ struct VPNView: View {
             Image(systemName: icon)
                 .foregroundColor(Theme.accent)
             Text(label)
-                .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
+                .font(.qasa(12, weight: .semibold))
                 .foregroundColor(Theme.textSecondary)
             Text(value)
-                .font(.system(size: 16, design: .monospaced))
+                .font(.kasoMono(16, weight: .regular))
                 .foregroundColor(Theme.textPrimary)
         }
         .frame(maxWidth: .infinity)
         .padding(17)
         .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(highlighted ? Theme.accent : Theme.stroke, lineWidth: highlighted ? 1.5 : 1)
         )
     }

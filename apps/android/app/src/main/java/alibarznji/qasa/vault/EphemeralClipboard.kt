@@ -82,7 +82,14 @@ class EphemeralClipboard @Inject constructor(
             // A readable clipboard is a verdict: either we still own it and wipe, or the
             // user replaced it and we must not touch it.
             if (ClipboardOwnership.shouldWipe(owned, current)) {
-                runCatching { manager.clearPrimaryClip() }
+                runCatching {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        manager.clearPrimaryClip()
+                    } else {
+                        // clearPrimaryClip is API 28; on Android 8 overwrite with an empty clip.
+                        manager.setPrimaryClip(ClipData.newPlainText("", ""))
+                    }
+                }
             }
             release()
         } else {

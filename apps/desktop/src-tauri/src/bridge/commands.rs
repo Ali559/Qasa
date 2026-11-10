@@ -77,7 +77,13 @@ impl Host for TauriHost {
 
     fn start_biometric(&self, auth: Auth) -> bool {
         use crate::vault::biometrics::{Biometrics, PlatformBiometrics};
-        let sealed = self.vault().lock().ok().and_then(|v| v.sealed().ok().flatten());
+        // An unlock obeys the master password interval like the window's (`sealed_for_unlock`).
+        let for_unlock = matches!(auth, Auth::Unlock);
+        let sealed = self
+            .vault()
+            .lock()
+            .ok()
+            .and_then(|v| if for_unlock { v.sealed_for_unlock() } else { v.sealed() }.ok().flatten());
         let Some(sealed) = sealed else { return false };
         let (unlock_reason, confirm_reason) = self.reasons();
         let app = self.app.clone();

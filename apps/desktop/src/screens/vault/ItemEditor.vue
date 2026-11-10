@@ -7,9 +7,12 @@
 import { Eye, EyeOff, WandSparkles } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import BottomActionBar from '@/components/BottomActionBar.vue'
+import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { useT } from '@/prefs'
+import { showToast } from '@/toast'
 import { vaultApi } from '@/vault/api'
 import { fieldsApi, issueMessage, issuesByField, type FieldIssue } from '@/vault/fields'
 import {
@@ -149,9 +152,13 @@ async function save() {
   try {
     clearTimeout(validateTimer)
     if ((await runValidation()).length > 0) return
+    const creating = !props.itemId
     const row = await vaultApi.save(payload.value, props.itemId)
     upsertItem(row)
     await reloadCollections()
+    const title = row.displayName.trim()
+    if (creating) showToast(title ? t('toast.itemCreatedFmt', title) : t('toast.itemCreated'))
+    else showToast(title ? t('toast.itemUpdatedFmt', title) : t('toast.itemUpdated'))
     emit('saved', row)
   } catch (e) {
     // The core checks again and refuses with the same issues: show them inline.
@@ -185,9 +192,7 @@ function onKey(e: KeyboardEvent) {
       <header class="head">
         <button type="button" class="link" @click="emit('close')">{{ t('common.cancel') }}</button>
         <h2>{{ title }}</h2>
-        <button type="button" class="link strong" :disabled="!canSave" @click="save">
-          {{ itemId ? t('common.update') : t('common.save') }}
-        </button>
+        <span aria-hidden="true" />
       </header>
 
       <div v-if="payload" class="scroll">
@@ -349,11 +354,15 @@ function onKey(e: KeyboardEvent) {
           </template>
         </div>
       </div>
+
+      <BottomActionBar v-if="payload">
+        <PrimaryButton :title="itemId ? t('common.update') : t('common.save')" :disabled="!canSave" @click="save" />
+      </BottomActionBar>
     </div>
 
     <PasswordGeneratorSheet :open="showGenerator" @use="usePassword" @close="showGenerator = false" />
 
-    <Sheet :open="!!saveError" :label="t('vault.couldNotSave')" :width="380" @close="saveError = null">
+    <Sheet :open="!!saveError" :label="t('vault.couldNotSave')" :width="380" placement="bottom" @close="saveError = null">
       <div class="alert">
         <h3>{{ t('vault.couldNotSave') }}</h3>
         <p>{{ saveError }}</p>
@@ -397,17 +406,14 @@ function onKey(e: KeyboardEvent) {
   cursor: pointer;
 }
 
-.link.strong {
-  justify-self: end;
-  font-weight: 600;
-}
-
 .link:disabled {
   color: var(--text-tertiary);
   cursor: default;
 }
 
 .scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   background: var(--background);
 }
@@ -493,12 +499,13 @@ function onKey(e: KeyboardEvent) {
 
 .alert button {
   margin-top: 8px;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

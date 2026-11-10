@@ -6,7 +6,14 @@ enum AutofillUnlock {
         let encKey: SymmetricKey
     }
 
+    /// A typed master password: restarts the biometric interval (`BiometricPolicy`).
     static func unlock(password: String) -> Session? {
+        guard let session = deriveSession(password: password) else { return nil }
+        BiometricPolicy.recordMasterPasswordUnlock()
+        return session
+    }
+
+    private static func deriveSession(password: String) -> Session? {
         guard SharedVaultKeychain.vaultExists,
               let salt = SharedVaultKeychain.kdfSalt,
               let expected = SharedVaultKeychain.passwordVerifier else {
@@ -27,9 +34,19 @@ enum AutofillUnlock {
         return Session(encKey: subkeys.encKey)
     }
 
+    /// Whether Face ID / Touch ID may be offered now: on, usable, and the master password
+    /// isn't due (`BiometricPolicy`, shared with the app).
+    static var canOfferBiometricUnlock: Bool {
+        SharedVaultKeychain.biometricsEnabled
+            && !BiometricPolicy.isMasterPasswordDue
+            && BiometricPolicy.isBiometryAvailable
+    }
+
+    /// Refused once the master password is due; never restarts the interval.
     static func unlockWithBiometrics() -> Session? {
-        guard let password = SharedVaultKeychain.loadBiometricPassword() else { return nil }
-        return unlock(password: password)
+        guard !BiometricPolicy.isMasterPasswordDue,
+              let password = SharedVaultKeychain.loadBiometricPassword() else { return nil }
+        return deriveSession(password: password)
     }
 
     static func decryptSecrets(_ entry: AutofillIndexEntry, session: Session) throws -> AutofillSecrets {

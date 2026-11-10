@@ -859,6 +859,28 @@
         }
       }
     },
+    "auth.unlock.masterPasswordDueFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's been %lld days, so enter your main password to keep it fresh in your mind. Face or fingerprint unlock works again after this."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرّ %lld يومًا، لذا أدخل كلمة مرورك الرئيسية حتى تبقى في ذاكرتك. سيعمل الفتح بالوجه أو البصمة مجددًا بعد ذلك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە تاوەکو لەبیرت بمێنێت. دوای ئەوە کردنەوە بە ڕوخسار یان پەنجەمۆر دووبارە کار دەکات."
+          }
+        }
+      }
+    },
     "auth.unlock.placeholder": {
       "localizations": {
         "en": {
@@ -10891,6 +10913,50 @@
         }
       }
     },
+    "premium.comingSoonBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paying with Iraqi wallets is almost ready. Premium will open up here as soon as it is."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الدفع عبر المحافظ العراقية على وشك الجاهزية. سيُتاح الاشتراك المميز من هنا فور جاهزيته."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پارەدان بە جزدانە عێراقییەکان خەریکە ئامادە دەبێت. هەر کە ئامادە بوو، پرێمیەم لێرەوە بەردەست دەبێت."
+          }
+        }
+      }
+    },
+    "premium.comingSoonTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coming soon"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قريبًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەم زووانە"
+          }
+        }
+      }
+    },
     "premium.completeInWallet": {
       "localizations": {
         "en": {
@@ -14759,6 +14825,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "تۆ"
+          }
+        }
+      }
+    },
+    "toast.itemCreated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item added"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمت إضافة العنصر"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بابەتەکە زیادکرا"
+          }
+        }
+      }
+    },
+    "toast.itemCreatedFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ added"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمت إضافة %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ زیادکرا"
+          }
+        }
+      }
+    },
+    "toast.itemUpdated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes saved"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم حفظ التغييرات"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گۆڕانکارییەکان پاشەکەوتکران"
+          }
+        }
+      }
+    },
+    "toast.itemUpdatedFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ updated"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم تحديث %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ نوێکرایەوە"
           }
         }
       }

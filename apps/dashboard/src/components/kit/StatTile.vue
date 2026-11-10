@@ -18,7 +18,7 @@ defineProps<{
   <Card class="h-full justify-between gap-5 px-5 py-5">
     <div class="flex items-center gap-3">
       <span
-        class="grid size-10 shrink-0 -rotate-6 place-items-center rounded-xl text-[#1c1b33]"
+        class="grid size-10 shrink-0 -rotate-6 place-items-center rounded-xl text-ink"
         :style="{ background: accent, boxShadow: `0 3px 0 color-mix(in oklch, ${accent} 60%, black)` }"
         aria-hidden="true"
       >

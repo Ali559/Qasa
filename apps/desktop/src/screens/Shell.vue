@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // iOS `AppShellView` on desktop: the four bottom tabs become a sidebar with the same
 // entries, icons and order (on the right in RTL). Pages open in the content area with a
-// back button, and the sidebar stays.
-import { CircleUser, House, KeyRound, Lock, Shield, ShieldAlert } from 'lucide-vue-next'
+// back button, and the sidebar stays. Tab icons are outlines, filled on the selected tab.
+import { CircleUser, House, KeyRound, Lock, ShieldAlert } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 
 import ToastHost from '@/components/ToastHost.vue'
+import QasaMark from '@/components/QasaMark.vue'
+import { CircleUserFilled, HouseFilled, KeyRoundFilled, ShieldAlertFilled } from '@/icons'
 import { back, nav, openPage, selectTab, type ShellTab } from '@/nav'
 import { useT } from '@/prefs'
 import Home from './Home.vue'
@@ -28,10 +30,10 @@ const emit = defineEmits<{ lock: []; logout: [] }>()
 const t = useT()
 
 const tabs = computed(() => [
-  { id: 'home' as ShellTab, label: t('tab.home'), icon: House },
-  { id: 'passwords' as ShellTab, label: t('tab.passwords'), icon: KeyRound },
-  { id: 'alerts' as ShellTab, label: t('tab.alerts'), icon: ShieldAlert },
-  { id: 'you' as ShellTab, label: t('tab.you'), icon: CircleUser },
+  { id: 'home' as ShellTab, label: t('tab.home'), icon: House, activeIcon: HouseFilled },
+  { id: 'passwords' as ShellTab, label: t('tab.passwords'), icon: KeyRound, activeIcon: KeyRoundFilled },
+  { id: 'alerts' as ShellTab, label: t('tab.alerts'), icon: ShieldAlert, activeIcon: ShieldAlertFilled },
+  { id: 'you' as ShellTab, label: t('tab.you'), icon: CircleUser, activeIcon: CircleUserFilled },
 ])
 
 // Desktop shortcuts (plan §5.2): ⌘/Ctrl+L lock, ⌘/Ctrl+G generator, ⌘/Ctrl+1…4 tabs.
@@ -58,7 +60,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   <div class="shell">
     <nav class="sidebar" :aria-label="t('nav.openMenu')">
       <div class="brand">
-        <Shield :size="16" fill="currentColor" aria-hidden="true" />
+        <QasaMark :size="20" />
         <span>{{ t('brand.name') }}</span>
       </div>
       <button
@@ -70,7 +72,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :aria-current="nav.tab === tab.id ? 'page' : undefined"
         @click="selectTab(tab.id)"
       >
-        <component :is="tab.icon" :size="20" aria-hidden="true" />
+        <component :is="nav.tab === tab.id && !nav.page ? tab.activeIcon : tab.icon" :size="20" aria-hidden="true" />
         <span>{{ tab.label }}</span>
       </button>
       <span class="grow" />
@@ -127,9 +129,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   height: 64px;
   padding-inline: 8px;
   color: var(--accent);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .tab {

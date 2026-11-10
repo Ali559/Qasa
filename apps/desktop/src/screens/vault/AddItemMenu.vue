@@ -39,7 +39,7 @@ const rows = computed(() => {
 </script>
 
 <template>
-  <Sheet :open="open" :label="title" :width="460" @close="emit('close')">
+  <Sheet :open="open" :label="title" :width="460" placement="bottom" @close="emit('close')">
     <header class="sheet-head">
       <button v-if="drilled" type="button" class="nav" :aria-label="t('common.back')" @click="drilled = null">
         <ChevronLeft class="mirror-rtl" :size="20" />

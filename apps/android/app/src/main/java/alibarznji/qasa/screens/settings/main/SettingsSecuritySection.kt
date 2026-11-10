@@ -63,7 +63,6 @@ internal fun SecurityRows(
     HorizontalDivider(color = c.stroke)
     ToggleRow(
         icon = Icons.Filled.Fingerprint,
-        iconColor = c.textPrimary,
         title = stringResource(R.string.settings_biometricunlock),
         // Seal-state subtitle, shown on both apps (iOS `SettingsView.biometricSubtitle`).
         // The toggle is the preference; the sealed copy behind the hardware gate is
@@ -93,7 +92,6 @@ internal fun SecurityRows(
     val confirmEveryFill by vm.prefs.autofillConfirmEveryFill.collectAsState()
     ToggleRow(
         icon = Icons.Filled.VerifiedUser,
-        iconColor = c.textPrimary,
         title = stringResource(R.string.settings_autofillconfirm),
         subtitle = stringResource(R.string.settings_autofillconfirmsubtitle),
         checked = confirmEveryFill,

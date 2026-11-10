@@ -48,8 +48,8 @@ const model = defineModel<boolean>({ required: true })
   width: 27px;
   height: 27px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 0.2);
+  background: var(--knob);
+  box-shadow: 0 2px 4px var(--shadow-color);
   transition: transform var(--motion-standard) ease-in-out;
 }
 

@@ -36,6 +36,10 @@ pub enum CommandError {
     Cancelled,
     #[error("biometric unlock is not available")]
     BiometricUnavailable,
+    /// Touch ID / Hello is refused: the master password is due again
+    /// (`MASTER_PASSWORD_INTERVAL_DAYS` since it last opened the vault).
+    #[error("the master password is due")]
+    MasterPasswordDue,
 }
 
 impl CommandError {
@@ -55,6 +59,7 @@ impl CommandError {
             CommandError::BiometricInvalidated => "biometricInvalidated",
             CommandError::Cancelled => "cancelled",
             CommandError::BiometricUnavailable => "biometricUnavailable",
+            CommandError::MasterPasswordDue => "masterPasswordDue",
         }
     }
 }

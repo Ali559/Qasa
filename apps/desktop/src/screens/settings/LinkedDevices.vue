@@ -294,7 +294,7 @@ function upgrade() {
   border: 0;
   border-radius: 8px;
   background: var(--danger);
-  color: #fff;
+  color: var(--on-danger);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -350,9 +350,10 @@ function upgrade() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   background: transparent;
   color: var(--danger);
   font-size: 14px;

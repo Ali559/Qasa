@@ -22,7 +22,7 @@ defineEmits<{ click: [] }>()
   border-radius: var(--corner-radius-large);
   background: var(--accent);
   color: var(--on-accent);
-  box-shadow: 0 4px 8px rgb(0 0 0 / 0.2);
+  box-shadow: 0 4px 8px var(--shadow-color);
   cursor: pointer;
   transition: transform var(--motion-press) ease-out;
 }

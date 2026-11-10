@@ -22,12 +22,8 @@ function saveToVault() {
 <template>
   <PageFrame :title="t('nav.generator')" back @back="$emit('back')">
     <GeneratorContent v-model="password" :compact="false" />
-    <PrimaryButton class="save" :title="t('gen.saveToVault')" :disabled="!password" @click="saveToVault" />
+    <template #actions>
+      <PrimaryButton :title="t('gen.saveToVault')" :disabled="!password" @click="saveToVault" />
+    </template>
   </PageFrame>
 </template>
-
-<style scoped>
-.save {
-  margin-top: 16px;
-}
-</style>

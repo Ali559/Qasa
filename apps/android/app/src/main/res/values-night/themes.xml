@@ -2,5 +2,6 @@
 <resources>
     <style name="Theme.Qasa" parent="android:Theme.Material.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowBackground">@color/qasa_background</item>
     </style>
 </resources>

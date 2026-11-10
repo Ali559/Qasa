@@ -112,7 +112,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocDown))
   border: 1px solid var(--stroke-chrome);
   border-radius: 14px;
   background: var(--chrome);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  box-shadow: 0 12px 32px var(--shadow-color);
 }
 
 .item {
