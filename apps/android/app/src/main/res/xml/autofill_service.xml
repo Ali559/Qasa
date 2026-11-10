@@ -1,3 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Inline suggestions show in the keyboard strip on Android 11+. The compatibility packages
+  are browsers that don't speak the autofill API natively; the framework then reports their
+  page structure (and web domain) through accessibility. Chrome 135+ fills natively once
+  "Autofill using another service" is on in its settings.
+-->
 <autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="alibarznji.qasa.MainActivity" />
+    android:settingsActivity="alibarznji.qasa.MainActivity"
+    android:supportsInlineSuggestions="true">
+    <compatibility-package android:name="com.android.chrome" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.chrome.beta" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.chrome.dev" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.brave.browser" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.microsoft.emmx" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.sec.android.app.sbrowser" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.opera.browser" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.vivaldi.browser" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.duckduckgo.mobile.android" android:maxLongVersionCode="10000000000" />
+    <compatibility-package android:name="com.kiwibrowser.browser" android:maxLongVersionCode="10000000000" />
+</autofill-service>

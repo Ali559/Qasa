@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Schedule
@@ -87,6 +88,16 @@ internal fun SecurityRows(
         // Passwords"); on Android the row opens the system autofill picker instead.
         subtitle = stringResource(R.string.settings_autofillsubtitleandroid),
         onClick = { openAutofillSettings(context) },
+    )
+    HorizontalDivider(color = c.stroke)
+    val confirmEveryFill by vm.prefs.autofillConfirmEveryFill.collectAsState()
+    ToggleRow(
+        icon = Icons.Filled.VerifiedUser,
+        iconColor = c.textPrimary,
+        title = stringResource(R.string.settings_autofillconfirm),
+        subtitle = stringResource(R.string.settings_autofillconfirmsubtitle),
+        checked = confirmEveryFill,
+        onCheckedChange = vm.prefs::setAutofillConfirmEveryFill,
     )
     HorizontalDivider(color = c.stroke)
     NavChevronRow(

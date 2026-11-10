@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +61,19 @@ class RootViewModel @Inject constructor(
     /** iOS `isBootstrapping`: true while post-unlock bootstrap (licence, devices) runs. */
     val bootstrapping: StateFlow<Boolean> = _bootstrapping.asStateFlow()
 
+    /** Whether [onUnlocked] ran for the current unlock. */
+    private var started = false
+
+    /**
+     * The vault was unlocked outside this screen (autofill's unlock sheet, while the app
+     * was in the background): run the post-unlock work and the auto-lock now.
+     */
+    fun ensureStarted() {
+        if (!started && session.isUnlocked) onUnlocked()
+    }
+
     fun onUnlocked() {
+        started = true
         viewModelScope.launch {
             // iOS `handleCreate` / `handleUnlock` show "Securing vault…" around
             // `AppBootstrap.onVaultUnlocked`; this is the same span on Android.
@@ -75,6 +88,7 @@ class RootViewModel @Inject constructor(
     }
 
     fun onLocked() {
+        started = false
         bootstrap.onLogout()
         autoLock.stop()
     }
@@ -92,6 +106,7 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
     var pairOpen by remember { mutableStateOf(false) }
 
     val bootstrapping by vm.bootstrapping.collectAsState()
+    LaunchedEffect(unlocked) { if (unlocked) vm.ensureStarted() }
     val configurationError = remember { QasaConfig.configurationError }
 
     Box(Modifier.fillMaxSize()) {

@@ -87,6 +87,23 @@ class AutoLockMonitor @Inject constructor(
         _shielded.value = true
     }
 
+    /**
+     * Autofill runs while the app is in the background, where the poll above never locks.
+     * Before a fill trusts an unlocked vault, the background time counts against the
+     * timeout as it would on return to the app; a vault unlocked from autofill alone starts
+     * that clock now.
+     */
+    fun lockIfExpiredInBackground() {
+        if (_isForeground.value || !session.isUnlocked) return
+        val bg = backgroundedAtMs
+        if (bg == null) {
+            backgroundedAtMs = System.currentTimeMillis()
+        } else if (System.currentTimeMillis() - bg >= timeoutMs) {
+            backgroundedAtMs = null
+            fireLock()
+        }
+    }
+
     /** The shield's OK affordance: clears the overlay once the window is interactive again. */
     fun dismissShield() {
         if (_isForeground.value) _shielded.value = false

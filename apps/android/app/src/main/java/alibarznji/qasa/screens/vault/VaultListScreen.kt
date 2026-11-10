@@ -12,6 +12,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -50,6 +52,7 @@ class VaultListViewModel @Inject constructor(
     val clipboard: EphemeralClipboard,
     val session: VaultSession,
     autofillIndex: AutofillIndexStore,
+    val appSession: alibarznji.qasa.screens.AppSession,
 ) : ViewModel() {
     val rows = repo.observeRows().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -94,6 +97,15 @@ fun VaultListScreen(
 
     BackHandler(enabled = sheet != null) {
         dismissSheet()
+    }
+
+    // A login autofill offered to save: open the new-login form with it.
+    val pendingSave by vm.appSession.pendingLoginSave.collectAsState()
+    LaunchedEffect(pendingSave) {
+        vm.appSession.consumeLoginSave()?.let { login ->
+            editorHolder.beginCreate(login)
+            sheet = VaultSheet.Edit
+        }
     }
 
     Box(Modifier.fillMaxSize()) {

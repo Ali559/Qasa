@@ -4037,5 +4037,30 @@
     "en": "YYYY-MM-DD",
     "ar": "سنة-شهر-يوم",
     "ckb": "ساڵ-مانگ-ڕۆژ"
+  },
+  "autofill.searchQasa": {
+    "en": "Search Qasa",
+    "ar": "البحث في قاصة",
+    "ckb": "لە قاسە بگەڕێ"
+  },
+  "autofill.fillInto": {
+    "en": "Fill into %@",
+    "ar": "التعبئة في %@",
+    "ckb": "پڕکردنەوە لە %@"
+  },
+  "settings.autofillConfirm": {
+    "en": "Confirm every fill",
+    "ar": "التأكيد قبل كل تعبئة",
+    "ckb": "پێش هەر پڕکردنەوەیەک دڵنیابەرەوە"
+  },
+  "settings.autofillConfirmSubtitle": {
+    "en": "Ask for your fingerprint, face or master password before filling logins and personal info. Cards always ask.",
+    "ar": "اطلب البصمة أو الوجه أو كلمة المرور الرئيسية قبل تعبئة تسجيلات الدخول والمعلومات الشخصية. البطاقات تطلب ذلك دائمًا.",
+    "ckb": "پێش پڕکردنەوەی چوونەژوورەوە و زانیاریی کەسی، پەنجەمۆر، ڕوخسار یان وشەی نهێنیی سەرەکی داوا بکە. کارتەکان هەمیشە داوا دەکەن."
+  },
+  "autofill.confirmTitle": {
+    "en": "Confirm it's you",
+    "ar": "أكّد هويتك",
+    "ckb": "دڵنیابکەرەوە کە خۆتی"
   }
 }

@@ -57,4 +57,19 @@ class AppSession @Inject constructor() {
     fun consumeOpenNotifications() {
         _openNotifications.value = false
     }
+
+    /**
+     * A login another app or site just submitted (autofill save): the Passwords tab opens
+     * the new-login form with it, after the unlock if the vault is locked. Kept in memory
+     * only, never written anywhere.
+     */
+    private val _pendingLoginSave = MutableStateFlow<alibarznji.qasa.vault.VaultPayload.Login?>(null)
+    val pendingLoginSave = _pendingLoginSave.asStateFlow()
+
+    fun requestSaveLogin(login: alibarznji.qasa.vault.VaultPayload.Login) {
+        _pendingLoginSave.value = login
+    }
+
+    fun consumeLoginSave(): alibarznji.qasa.vault.VaultPayload.Login? =
+        _pendingLoginSave.value.also { _pendingLoginSave.value = null }
 }
