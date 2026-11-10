@@ -133,7 +133,12 @@ const COLOR_KEY = (c: string) => `color.${c}`
     <div v-if="payload" class="scroll">
       <div class="column">
         <div class="hero">
-          <ItemTile :variant="payload.variant" :name="row?.displayName ?? ''" :size="88" />
+          <ItemTile
+            :variant="payload.variant"
+            :name="row?.displayName ?? ''"
+            :website="payload.variant === 'login' ? payload.fields.website : null"
+            :size="88"
+          />
           <h1 class="name">{{ row?.displayName ?? t('vault.untitled') }}</h1>
         </div>
 

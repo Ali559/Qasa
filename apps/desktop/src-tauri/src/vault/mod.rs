@@ -58,6 +58,9 @@ pub struct ItemSummary {
     pub has_primary_copy: bool,
     /// Logins with a 2FA code.
     pub has_totp: bool,
+    /// A login's website host (`matcher::host_of`), which picks its bundled site icon in
+    /// the UI (`siteIcon.ts`); None for other kinds and logins without a web address.
+    pub site_host: Option<String>,
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
@@ -267,6 +270,10 @@ impl Vault {
             collection_id: envelope.collection_id.or_else(|| row.collection_id.clone()).map(|c| c.to_uppercase()),
             has_primary_copy: has_primary_copy(&payload),
             has_totp: matches!(&payload, VaultPayload::Login(f) if f.totp.as_deref().is_some_and(|t| !t.is_empty())),
+            site_host: match &payload {
+                VaultPayload::Login(f) => crate::bridge::matcher::host_of(&f.website),
+                _ => None,
+            },
         })
     }
 

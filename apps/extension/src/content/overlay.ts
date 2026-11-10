@@ -3,6 +3,7 @@
 // read or script them; guard.ts checks the host was not restyled or covered before a menu
 // click is acted on.
 import { siteLogo } from '@/vault/present'
+import { siteIconPath } from '@/vault/siteIcon'
 import type { LoginMatch } from '@ext/shared/messages'
 import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
@@ -45,6 +46,8 @@ const CSS = `
 }
 .row:hover, .row:focus-visible { background: var(--muted); outline: none; }
 .tile { width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; }
+.tile.site { background: var(--muted); color: var(--text); }
+.tile.site svg { width: 16px; height: 16px; }
 .text { display: flex; flex-direction: column; min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title { font-weight: 600; }
@@ -53,21 +56,26 @@ const CSS = `
 .action { margin: 0 10px 8px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--accent); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
 `
 
-/** Lucide `shield`, filled, as in the desktop's BrandHeader. Built with DOM calls (no
- *  innerHTML), so pages with Trusted Types don't interfere. */
-function shield(doc: Document): SVGSVGElement {
+/** A filled 24×24 icon from one path. Built with DOM calls (no innerHTML), so pages with
+ *  Trusted Types don't interfere. */
+function glyph(doc: Document, d: string): SVGSVGElement {
   const ns = 'http://www.w3.org/2000/svg'
   const svg = doc.createElementNS(ns, 'svg')
   svg.setAttribute('viewBox', '0 0 24 24')
   svg.setAttribute('fill', 'currentColor')
   svg.setAttribute('aria-hidden', 'true')
   const path = doc.createElementNS(ns, 'path')
-  path.setAttribute(
-    'd',
-    'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z',
-  )
+  path.setAttribute('d', d)
   svg.append(path)
   return svg
+}
+
+/** Lucide `shield`, filled, as in the desktop's BrandHeader. */
+function shield(doc: Document): SVGSVGElement {
+  return glyph(
+    doc,
+    'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z',
+  )
 }
 
 export interface MenuHandlers {
@@ -247,9 +255,15 @@ export class Overlay {
         row.setAttribute('role', 'menuitem')
         const tile = this.doc.createElement('span')
         tile.className = 'tile'
-        const logo = siteLogo(item.title)
-        tile.style.background = logo.color
-        tile.textContent = logo.letter
+        const iconPath = siteIconPath(item.website)
+        if (iconPath) {
+          tile.classList.add('site')
+          tile.append(glyph(this.doc, iconPath))
+        } else {
+          const logo = siteLogo(item.title)
+          tile.style.background = logo.color
+          tile.textContent = logo.letter
+        }
         const text = this.doc.createElement('span')
         text.className = 'text'
         const title = this.doc.createElement('span')

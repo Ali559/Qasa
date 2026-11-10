@@ -11,6 +11,7 @@ import alibarznji.qasa.screens.vault.websiteUrl
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.VaultItemRow
 import alibarznji.qasa.theme.siteLogoFor
 import alibarznji.qasa.vault.VaultItemKind
@@ -80,6 +81,7 @@ internal fun VaultListItemRow(
         subtitle = row.subtitle.ifBlank { subtitleFallback },
         icon = payload?.subtypeIcon ?: row.kind.icon,
         logo = if (row.kind == VaultItemKind.Login) siteLogoFor(row.displayName) else null,
+        siteIcon = (payload as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) },
         onClick = onOpen,
         // iOS gates even the title copy of a protected note (`VaultItemRow.swift:145`).
         onCopy = primary?.let { p -> { onCopy(p, payload?.isProtectedNote == true) } },

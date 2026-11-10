@@ -216,7 +216,7 @@ export class FakeDesktop {
       case 'matches': {
         const host = this.cleanHost(body.url)
         if (!host) return { ok: false, error: 'bad' }
-        const items = LOGINS.filter((l) => new URL(l.website).hostname === host).map((l) => ({ id: l.id, title: l.title, username: l.username, hasTotp: !!l.totpSecret }))
+        const items = LOGINS.filter((l) => new URL(l.website).hostname === host).map((l) => ({ id: l.id, title: l.title, username: l.username, website: l.website, hasTotp: !!l.totpSecret }))
         return { ok: true, items }
       }
       case 'fill':

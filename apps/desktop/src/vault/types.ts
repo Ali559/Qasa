@@ -123,6 +123,8 @@ export interface ItemSummary {
   collectionId: string | null
   hasPrimaryCopy: boolean
   hasTotp: boolean
+  /** A login's website host (bridge `host_of`), for its bundled site icon; else null. */
+  siteHost: string | null
 }
 
 export interface Collection {

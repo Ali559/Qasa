@@ -3,6 +3,7 @@
 // real commands are always used. Seeded like the iOS `-screenshotVault` launch argument.
 import type { Collection, CommandError, ItemSummary, VaultPayload, VaultStatus } from './types'
 import { VARIANT_KIND } from './types'
+import { hostOf } from './siteIcon'
 
 let password: string | null = null
 let unlocked = false
@@ -96,6 +97,7 @@ function summary(id: string): ItemSummary {
     collectionId,
     hasPrimaryCopy: true,
     hasTotp: p.variant === 'login' && !!p.fields.totp,
+    siteHost: p.variant === 'login' ? hostOf(p.fields.website) : null,
   }
 }
 

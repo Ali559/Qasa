@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// A login row like the desktop's `VaultRow` (iOS `VaultItemRow`): letter tile, title and
+// A login row like the desktop's `VaultRow` (iOS `VaultItemRow`): site icon or letter tile, title and
 // username, then the copy actions. The desktop does the copying and clears the clipboard;
 // the popup never holds the secret.
 import { KeyRound, ShieldCheck, User } from 'lucide-vue-next'
@@ -15,7 +15,7 @@ const t = useT()
 
 <template>
   <div class="row" data-testid="login-row">
-    <ItemTile variant="login" :name="item.title" :size="40" />
+    <ItemTile variant="login" :name="item.title" :website="item.website" :size="40" />
     <span class="text">
       <span class="name" dir="auto">{{ item.title }}</span>
       <span class="subtitle" dir="auto">{{ item.username }}</span>

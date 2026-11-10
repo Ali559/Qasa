@@ -9708,19 +9708,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hold it flat against the back of your phone, near the top."
+            "value": "Hold it flat against the back of your phone. If nothing happens, slide it slowly: the reader's spot differs by phone."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ضعها مسطّحة على ظهر هاتفك، قرب الأعلى."
+            "value": "ضعها مسطّحة على ظهر هاتفك. إن لم يحدث شيء، حرّكها ببطء، فمكان القارئ يختلف من هاتف لآخر."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+            "value": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت. ئەگەر هیچ ڕووی نەدا، هێواش بیجووڵێنە، شوێنی خوێنەرەکە لە مۆبایلێکەوە بۆ یەکێکی تر جیاوازە."
           }
         }
       }
@@ -9818,19 +9818,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The card moved away. Hold it still and try again."
+            "value": "Lost contact with the card. Hold it against the phone again and keep still."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ابتعدت البطاقة. أمسكها ثابتة وحاول مرة أخرى."
+            "value": "انقطع الاتصال بالبطاقة. ضعها على الهاتف مرة أخرى ولا تحرّكها."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کارتەکە دوورکەوتەوە. جێگیری بکە و دووبارە هەوڵ بدەرەوە."
+            "value": "پەیوەندی لەگەڵ کارتەکە پچڕا. دووبارە بیخەرە سەر مۆبایلەکە و مەیجووڵێنە."
           }
         }
       }
@@ -9972,19 +9972,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hold the card flat against the back of your phone, near the top."
+            "value": "Hold the card flat against the back of your phone. If nothing happens, slide it slowly: the reader's spot differs by phone."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "ضع البطاقة مسطّحة على ظهر هاتفك، قرب الأعلى."
+            "value": "ضع البطاقة مسطّحة على ظهر هاتفك. إن لم يحدث شيء، حرّكها ببطء، فمكان القارئ يختلف من هاتف لآخر."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+            "value": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت. ئەگەر هیچ ڕووی نەدا، هێواش بیجووڵێنە، شوێنی خوێنەرەکە لە مۆبایلێکەوە بۆ یەکێکی تر جیاوازە."
           }
         }
       }

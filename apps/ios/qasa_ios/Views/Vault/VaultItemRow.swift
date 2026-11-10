@@ -10,10 +10,22 @@ struct VaultItemRow: View {
     @State private var toast: String?
     @State private var payload: VaultPayload?
 
-    /// Logins show the site's letter on its brand colour; other kinds keep their symbol.
+    /// Logins show a bundled site icon when their website has one (`SiteIcon`), else the
+    /// site's letter on its brand colour; other kinds keep their symbol.
     @ViewBuilder
     private var tile: some View {
-        if row.kind == .login {
+        if case .login(let login) = payload, let asset = SiteIcon.assetName(forWebsite: login.website) {
+            Image(asset)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .foregroundColor(Theme.textPrimary)
+                .frame(width: 48, height: 48)
+                .background(Theme.cardMuted)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .accessibilityHidden(true)
+        } else if row.kind == .login {
             let logo = SiteLogo(name: row.displayName)
             Text(logo.letter)
                 .font(.qasa(18, weight: .bold))

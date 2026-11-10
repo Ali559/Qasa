@@ -617,7 +617,7 @@ path on every OS, for tests.
 | --- | --- | --- |
 | `status` | — | `state`: `locked`, `unlocked` or `noVault`; `device` |
 | `unlock` | — | — (brings the window forward) |
-| `matches` | `url` | `items: [{id, title, username, hasTotp}]`: score ≥ 60 only, best first |
+| `matches` | `url` | `items: [{id, title, username, website, hasTotp}]`: score ≥ 60 only, best first (`website` picks the row's bundled site icon) |
 | `fill` | `itemId, url` | `username, password, totp?` (current code). `noMatch` unless the item scores ≥ 60 for `url` |
 | `totp` | `itemId, url` | `code, period, remaining`. Same match rule |
 | `copy` | `itemId, field` (`username`, `password` or `totp`) | Copied by the desktop. It clears after 30 s, or for a 2FA code when the code expires |

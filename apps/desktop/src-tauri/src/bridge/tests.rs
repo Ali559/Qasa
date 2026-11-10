@@ -217,7 +217,7 @@ fn matches_and_fills_only_on_the_items_own_site() {
     let m = ext.call(&host, "matches", json!({ "url": "https://github.com/login?return=/x" }));
     let items = m["items"].as_array().unwrap();
     assert_eq!(items.len(), 1);
-    assert_eq!(items[0], json!({ "id": gh, "title": "GitHub", "username": "octo", "hasTotp": true }));
+    assert_eq!(items[0], json!({ "id": gh, "title": "GitHub", "username": "octo", "hasTotp": true, "website": "https://github.com" }));
     assert_eq!(ext.call(&host, "matches", json!({ "url": "https://mail.google.com" }))["items"][0]["id"], google);
     assert!(ext.call(&host, "matches", json!({ "url": "https://github.com.evil.io" }))["items"].as_array().unwrap().is_empty());
 
