@@ -15,6 +15,7 @@ struct VaultItemEditor: View {
     @State private var payload: VaultPayload
     @State private var passwordVisible = false
     @State private var showPasswordGenerator = false
+    @State private var showNFCScan = false
     @State private var loadError: String?
     @State private var saveError: String?
     /// Rule messages for the current (normalized) payload, by field key.
@@ -248,23 +249,7 @@ struct VaultItemEditor: View {
             }
             FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"))
             NoteColorPicker(color: cardColorBinding)
-            Button {
-                // NFC stub — gated in UI only
-            } label: {
-                Label(L10n.tr("vault.scanNFC"), systemImage: "wave.3.right")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Theme.cardBackground)
-                    .foregroundColor(Theme.accent)
-                    .cornerRadius(Theme.cornerRadius)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                            .stroke(Theme.accent.opacity(0.4), lineWidth: 1)
-                    )
-            }
-            Text(L10n.tr("vault.nfcHint"))
-                .font(.qasa(12))
-                .foregroundColor(Theme.textSecondary)
+            // No NFC here: iOS doesn't let third-party apps read payment cards over NFC.
         }
     }
 
@@ -446,6 +431,75 @@ struct VaultItemEditor: View {
                 FormTextField(title: L10n.tr("field.issuePlace"), text: idBinding(\.issuePlace), error: error("issuePlace"))
             }
             ValidatedDateField(title: L10n.tr("field.expiryDate"), text: idBinding(\.expiryDate), error: error("expiryDate"))
+            if let kind = nfcDocumentKind {
+                nfcScanButton(kind)
+            }
+        }
+    }
+
+    /// ID cards and passports carry an ICAO chip; driving licences don't.
+    private var nfcDocumentKind: NFCDocumentKind? {
+        switch payload {
+        case .idCard: return .idCard
+        case .passport: return .passport
+        default: return nil
+        }
+    }
+
+    private func nfcScanButton(_ kind: NFCDocumentKind) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                showNFCScan = true
+            } label: {
+                Label(L10n.tr("vault.scanNFC"), systemImage: "wave.3.right")
+                    .font(.qasa(15, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Theme.cardBackground)
+                    .foregroundColor(Theme.accent)
+                    .cornerRadius(Theme.cornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                            .stroke(Theme.accent.opacity(0.4), lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
+            Text(L10n.tr("vault.nfcHint"))
+                .font(.qasa(12))
+                .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .sheet(isPresented: $showNFCScan) {
+            NFCDocumentScanSheet(
+                kind: kind,
+                documentNumber: idBinding(\.number).wrappedValue,
+                expiryDate: idBinding(\.expiryDate).wrappedValue,
+                onRead: applyNFCScan
+            )
+            .appLocalization()
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(20)
+        }
+    }
+
+    /// Fills the ID fields from the chip in one change.
+    private func applyNFCScan(_ document: MRZDocument) {
+        func fill(_ f: inout IDDocumentFields) {
+            if !document.fullName.isEmpty { f.name = document.fullName }
+            if !document.documentNumber.isEmpty { f.number = document.documentNumber }
+            if let country = document.issuingCountryISO2 { f.countryCode = country }
+            if let expiry = document.expiryISO { f.expiryDate = expiry }
+        }
+        switch payload {
+        case .idCard(var f):
+            fill(&f)
+            payload = .idCard(f)
+        case .passport(var f):
+            fill(&f)
+            payload = .passport(f)
+        default:
+            break
         }
     }
 
