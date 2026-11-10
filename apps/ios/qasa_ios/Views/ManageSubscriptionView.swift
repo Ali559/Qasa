@@ -42,7 +42,7 @@ struct ManageSubscriptionView: View {
                 HStack {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark")
-                            .font(.qasa(14, weight: .semibold))
+                            .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(Theme.textPrimary)
                             .frame(width: 32, height: 32)
                     }
@@ -104,25 +104,34 @@ struct ManageSubscriptionView: View {
         .background(Theme.chrome.ignoresSafeArea())
         .appLocalization()
         .task { await load() }
-        .alert(L10n.tr("sub.cancelConfirmTitle", locale: locale), isPresented: $showCancelConfirm) {
-            Button(L10n.tr("sub.keepPremium", locale: locale), role: .cancel) {}
-            Button(L10n.tr("sub.continue", locale: locale), role: .destructive) {
-                cancelReason = ""
-                showCancelReason = true
-            }
-        } message: {
-            Text(String(
+        .confirmSheet(
+            isPresented: $showCancelConfirm,
+            title: L10n.tr("sub.cancelConfirmTitle", locale: locale),
+            message: String(
                 format: L10n.tr("sub.cancelConfirmMessage", locale: locale),
                 formattedDate(subscription?.expires_at)
-            ))
-        }
-        .alert(L10n.tr("sub.removePaymentMethod", locale: locale), isPresented: $showRemovePaymentConfirm) {
-            Button(L10n.tr("common.cancel", locale: locale), role: .cancel) {}
-            Button(L10n.tr("sub.removePaymentMethod", locale: locale), role: .destructive) {
-                Task { await removePaymentMethod() }
+            ),
+            icon: "xmark.circle",
+            confirmTitle: L10n.tr("sub.continue", locale: locale),
+            cancelTitle: L10n.tr("sub.keepPremium", locale: locale),
+            destructive: true
+        ) {
+            cancelReason = ""
+            // Let the confirmation sheet finish dismissing before the next one presents.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                showCancelReason = true
             }
-        } message: {
-            Text(L10n.tr("sub.removePaymentMethodConfirm", locale: locale))
+        }
+        .confirmSheet(
+            isPresented: $showRemovePaymentConfirm,
+            title: L10n.tr("sub.removePaymentMethod", locale: locale),
+            message: L10n.tr("sub.removePaymentMethodConfirm", locale: locale),
+            icon: "creditcard",
+            confirmTitle: L10n.tr("sub.removePaymentMethod", locale: locale),
+            cancelTitle: L10n.tr("common.cancel", locale: locale),
+            destructive: true
+        ) {
+            Task { await removePaymentMethod() }
         }
         .sheet(isPresented: $showCancelReason) {
             cancelReasonSheet
@@ -138,7 +147,7 @@ struct ManageSubscriptionView: View {
                     .foregroundColor(Theme.textPrimary)
                 Spacer()
                 Text(isCancelled ? L10n.tr("sub.cancelling", locale: locale) : L10n.tr("sub.active", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .qasaLabel(11))
+                    .font(.qasa(11, weight: .semibold))
                     .foregroundColor(isCancelled ? Theme.gold : Theme.accent)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -261,15 +270,15 @@ struct ManageSubscriptionView: View {
                         .font(.qasa(13, weight: .semibold))
                         .foregroundColor(Theme.danger)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableStyle())
                 .disabled(isRemovingPaymentMethod)
             }
         }
         .padding(16)
-        .background(Theme.chrome)
-        .cornerRadius(8)
+        .background(Theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
     }
@@ -289,19 +298,17 @@ struct ManageSubscriptionView: View {
                 title: isPayingRenewal
                     ? L10n.tr("premium.processing", locale: locale)
                     : L10n.tr("sub.payRenewal", locale: locale),
-                icon: "lock.fill",
-                cornerRadius: 8
+                icon: "lock.fill"
             ) {
                 Task { await payRenewal(link) }
             }
-            .opacity(isPayingRenewal ? 0.6 : 1)
             .disabled(isPayingRenewal)
         }
         .padding(16)
-        .background(Theme.chrome)
-        .cornerRadius(8)
+        .background(Theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(Theme.accent, lineWidth: 1)
         )
     }
@@ -311,18 +318,9 @@ struct ManageSubscriptionView: View {
             showCancelConfirm = true
         } label: {
             Text(L10n.tr("sub.cancelSubscription", locale: locale))
-                .font(.qasa(15, weight: .semibold))
                 .foregroundColor(Theme.danger)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Theme.danger.opacity(0.08))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Theme.danger.opacity(0.35), lineWidth: 1)
-                )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.qasaSecondary)
         .disabled(isCancelling)
     }
 
@@ -334,38 +332,30 @@ struct ManageSubscriptionView: View {
                     .foregroundColor(Theme.textSecondary)
 
                 TextEditor(text: $cancelReason)
-                    .scrollContentBackground(.hidden)
-                    .padding(12)
-                    .frame(minHeight: 140)
-                    .background(Theme.cardBackgroundLight)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.stroke, lineWidth: 1)
-                    )
-                    .foregroundColor(Theme.textPrimary)
-                    .font(.qasa(15))
+                    .qasaNotesField()
 
                 Text(L10n.tr("sub.cancelReasonOptional", locale: locale))
-                    .font(AppTypography.usesRudaw ? .qasa(11) : .qasaLabel(11))
+                    .font(.qasa(11))
                     .foregroundColor(Theme.textSecondary)
 
                 Spacer()
-
-                PrimaryButton(
-                    title: isCancelling
-                        ? L10n.tr("sub.cancellingProgress", locale: locale)
-                        : L10n.tr("sub.confirmCancel", locale: locale),
-                    icon: "xmark.circle",
-                    cornerRadius: 8
-                ) {
-                    Task { await confirmCancel() }
-                }
-                .disabled(isCancelling)
-                .opacity(isCancelling ? 0.6 : 1)
             }
             .padding(Theme.screenPadding)
             .background(Theme.chrome.ignoresSafeArea())
+            .bottomActionBar {
+                Button {
+                    Task { await confirmCancel() }
+                } label: {
+                    QasaButtonLabel(
+                        title: isCancelling
+                            ? L10n.tr("sub.cancellingProgress", locale: locale)
+                            : L10n.tr("sub.confirmCancel", locale: locale),
+                        icon: "xmark.circle"
+                    )
+                }
+                .buttonStyle(.qasaDestructive)
+                .disabled(isCancelling)
+            }
             .navigationTitle(L10n.tr("sub.cancelReasonTitle", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

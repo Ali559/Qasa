@@ -39,24 +39,24 @@ struct PasswordHealthView: View {
                         NavigationLink(value: PasswordIssueTab.reused) {
                             statCard(title: L10n.tr("health.passwords"), value: "\(report.totalPasswords)", accent: Theme.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
 
                         NavigationLink(value: PasswordIssueTab.reused) {
                             statCard(title: L10n.tr("health.reused"), value: "\(report.reusedCount)", accent: Theme.gold)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
 
                         NavigationLink(value: PasswordIssueTab.weak) {
                             statCard(title: L10n.tr("health.weak"), value: "\(report.weakCount)", accent: Theme.danger)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
 
                         if breachLocked {
                             // Premium-only: no count on Free, the card opens the upgrade page.
                             Button(action: onUpgrade) {
                                 statCard(title: L10n.tr("health.breached"), systemImage: "lock.fill", accent: Theme.textSecondary)
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PressableStyle())
                         } else {
                             NavigationLink(value: PasswordIssueTab.breached) {
                                 statCard(
@@ -65,7 +65,7 @@ struct PasswordHealthView: View {
                                     accent: Theme.danger
                                 )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PressableStyle())
                         }
                     }
 
@@ -196,7 +196,7 @@ struct PasswordHealthView: View {
         VStack(spacing: 8) {
             if let systemImage {
                 Image(systemName: systemImage)
-                    .font(.qasa(24, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(accent)
                     .frame(height: 34)
             } else {
@@ -295,7 +295,7 @@ struct PasswordHealthIssuesView: View {
                                     Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
                                 )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
@@ -325,7 +325,7 @@ struct PasswordHealthIssuesView: View {
                                     editorMode = EditorPresentation(mode: .edit(row.id))
                                 } onDeleted: {}
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(PressableStyle())
                         }
                     }
                 }

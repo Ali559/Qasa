@@ -2,7 +2,7 @@ import AuthenticationServices
 import Foundation
 
 /// What iOS shows in the QuickType bar: a password identity per login, and a one-time-code
-/// identity per login with 2FA (iOS 18, docs/autofill-plan.md §3.4). Profile items are not
+/// identity per login with 2FA (iOS 18+ only, docs/autofill-plan.md §3.4). Profile items are not
 /// registered: they are inserted as text, which needs no identity.
 enum AutofillIdentitySync {
     static func identities(for entries: [AutofillIndexEntry]) -> [any ASCredentialIdentity] {
@@ -12,7 +12,7 @@ enum AutofillIdentitySync {
             let user = entry.subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
             let label = user.isEmpty ? entry.title : user
             out.append(ASPasswordCredentialIdentity(serviceIdentifier: service, user: label, recordIdentifier: entry.id.uuidString))
-            if entry.hasTOTP == true {
+            if #available(iOS 18.0, *), entry.hasTOTP == true {
                 out.append(ASOneTimeCodeCredentialIdentity(serviceIdentifier: service, label: label, recordIdentifier: entry.id.uuidString))
             }
         }

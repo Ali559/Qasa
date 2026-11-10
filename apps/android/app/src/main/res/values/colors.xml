@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mint">#00A572</color>
-    <color name="mint_dark">#4EDEA3</color>
-    <color name="ic_launcher_background">#0F172A</color>
+    <!-- Window background before Compose draws: QasaColors.background (light). -->
+    <color name="qasa_background">#FBF6F0</color>
+    <color name="ic_launcher_background">#722F99</color>
 </resources>

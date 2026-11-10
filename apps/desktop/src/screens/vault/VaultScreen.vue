@@ -232,10 +232,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .search {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 10px;
+  height: var(--field-height);
+  padding-block: 0;
+  padding-inline: var(--field-padding-inline);
   border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border-radius: var(--field-radius);
   background: var(--card-background);
   color: var(--text-secondary);
 }
@@ -247,14 +249,21 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .search input {
   flex: 1;
   min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--text-primary);
   font: inherit;
-  font-size: 16px;
+  font-size: var(--field-font-size);
   caret-color: var(--accent);
   user-select: text;
+}
+
+.search input::-webkit-search-decoration {
+  appearance: none;
 }
 
 .search input::placeholder {

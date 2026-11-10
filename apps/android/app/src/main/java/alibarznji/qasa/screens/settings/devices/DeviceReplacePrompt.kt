@@ -3,17 +3,15 @@ package alibarznji.qasa.screens.settings.devices
 import alibarznji.qasa.R
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.services.AppBootstrap
+import alibarznji.qasa.theme.QasaConfirmSheet
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -86,32 +83,20 @@ fun DeviceReplaceHost(vm: DeviceReplaceViewModel = hiltViewModel()) {
 
     val old = prompt ?: return
     val c = qasaColors
-    AlertDialog(
-        onDismissRequest = vm::dismiss,
-        containerColor = c.cardBackground,
-        titleContentColor = c.textPrimary,
-        textContentColor = c.textSecondary,
-        confirmButton = {
-            TextButton(onClick = vm::confirm, enabled = !vm.working) {
-                Text(stringResource(R.string.backup_replace_button), color = c.danger)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = vm::dismiss, enabled = !vm.working) {
-                Text(stringResource(R.string.backup_reminder_dismiss), color = c.accent)
-            }
-        },
-        title = { Text(stringResource(R.string.backup_replace_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
-                Text(stringResource(R.string.backup_replace_bodyfmt, old.device_name))
-                if (vm.working) {
-                    CircularProgressIndicator(Modifier.size(20.dp), color = c.accent, strokeWidth = 2.dp)
-                }
-                if (vm.failed) {
-                    Text(stringResource(R.string.backup_replace_failed), color = c.danger, style = qasaText.bodySmallMedium)
-                }
-            }
-        },
-    )
+    QasaConfirmSheet(
+        title = stringResource(R.string.backup_replace_title),
+        message = stringResource(R.string.backup_replace_bodyfmt, old.device_name),
+        confirmLabel = stringResource(R.string.backup_replace_button),
+        onConfirm = vm::confirm,
+        onDismiss = vm::dismiss,
+        dismissLabel = stringResource(R.string.backup_reminder_dismiss),
+        enabled = !vm.working,
+    ) {
+        if (vm.working) {
+            CircularProgressIndicator(Modifier.size(QasaIconSize.xl), color = c.accent, strokeWidth = QasaDimens.ringStroke)
+        }
+        if (vm.failed) {
+            Text(stringResource(R.string.backup_replace_failed), color = c.danger, style = qasaText.bodySmallMedium)
+        }
+    }
 }

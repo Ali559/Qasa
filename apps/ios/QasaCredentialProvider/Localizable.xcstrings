@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "auth.unlock.masterPasswordDueFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It's been %lld days, so enter your main password to keep it fresh in your mind. Face or fingerprint unlock works again after this."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرّ %lld يومًا، لذا أدخل كلمة مرورك الرئيسية حتى تبقى في ذاكرتك. سيعمل الفتح بالوجه أو البصمة مجددًا بعد ذلك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە تاوەکو لەبیرت بمێنێت. دوای ئەوە کردنەوە بە ڕوخسار یان پەنجەمۆر دووبارە کار دەکات."
+          }
+        }
+      }
+    },
     "auth.unlock.placeholder": {
       "localizations": {
         "en": {

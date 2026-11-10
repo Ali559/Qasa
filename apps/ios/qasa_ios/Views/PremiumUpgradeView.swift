@@ -14,6 +14,10 @@ struct PremiumUpgradeView: View {
     @State private var isPaying = false
     @State private var statusMessage: String?
     @State private var errorMessage: String?
+    /// Wallet payments aren't live yet: Pay shows "Coming soon" and sends nothing.
+    @State private var showComingSoon = false
+    /// The plan page the carousel is showing; kept in step with `selectedPlanId`.
+    @State private var visiblePlanId: String?
 
     private var locale: Locale { prefs.locale }
 
@@ -68,50 +72,50 @@ struct PremiumUpgradeView: View {
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 20)
-                .padding(.bottom, 140)
+                .padding(.bottom, 24)
             }
-
-            VStack(spacing: 12) {
-                PrimaryButton(
-                    title: isPaying
-                        ? L10n.tr("premium.processing", locale: locale)
-                        : String(
-                            format: L10n.tr("premium.payVia", locale: locale),
-                            formattedAmount,
-                            selectedMethod?.badgeText ?? "Wayl"
-                        ),
-                    icon: "lock.fill",
-                    cornerRadius: 8
-                ) {
-                    Task { await startPayment() }
-                }
-                .opacity(isPaying ? 0.6 : 1)
-                .disabled(isPaying || session.isPremium)
-
-                if session.isPremium {
-                    Text(L10n.tr("premium.alreadyPremium", locale: locale))
-                        .font(.qasaLabel(12))
-                        .foregroundColor(Theme.success)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text(L10n.tr("premium.opensWallet", locale: locale))
-                        .font(.qasaLabel(12))
-                        .foregroundColor(Theme.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-                }
+        }
+        .bottomActionBar {
+            PrimaryButton(
+                title: isPaying
+                    ? L10n.tr("premium.processing", locale: locale)
+                    : String(
+                        format: L10n.tr("premium.payVia", locale: locale),
+                        formattedAmount,
+                        selectedMethod?.badgeText ?? "Wayl"
+                    ),
+                icon: "lock.fill"
+            ) {
+                // Payments are not open yet: no request goes to the server.
+                // `startPayment()` stays for when they are.
+                showComingSoon = true
             }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 21)
-            .padding(.bottom, 20)
-            .background(Theme.cardMuted.opacity(0.95))
-            .overlay(alignment: .top) {
-                Rectangle().fill(Theme.stroke).frame(height: 1)
+            .disabled(isPaying || session.isPremium)
+
+            if session.isPremium {
+                Text(L10n.tr("premium.alreadyPremium", locale: locale))
+                    .font(.qasaLabel(12))
+                    .foregroundColor(Theme.success)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Text(L10n.tr("premium.opensWallet", locale: locale))
+                    .font(.qasaLabel(12))
+                    .foregroundColor(Theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
         }
         .background(Theme.chrome.ignoresSafeArea())
         .appLocalization()
+        .confirmSheet(
+            isPresented: $showComingSoon,
+            title: L10n.tr("premium.comingSoonTitle", locale: locale),
+            message: L10n.tr("premium.comingSoonBody", locale: locale),
+            icon: "clock",
+            confirmTitle: L10n.tr("common.ok", locale: locale),
+            onConfirm: {}
+        )
         .task {
             let fetched = await PricingService.shared.fetchPlans()
             if !fetched.isEmpty {
@@ -127,7 +131,7 @@ struct PremiumUpgradeView: View {
         HStack {
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
-                    .font(.qasa(14, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                     .frame(width: 32, height: 32)
             }
@@ -147,17 +151,35 @@ struct PremiumUpgradeView: View {
         }
     }
 
+    /// Paged horizontal scroll rather than a `.page` TabView: inside this screen's vertical
+    /// ScrollView the TabView never paged forward. This also mirrors in RTL and takes the
+    /// height of the tallest card without measuring.
     private var planCarousel: some View {
         VStack(spacing: 12) {
-            TabView(selection: $selectedPlanId) {
-                ForEach(plans) { plan in
-                    planCard(plan)
-                        .tag(plan.id)
-                        .padding(.horizontal, 2)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ForEach(plans) { plan in
+                        planCard(plan)
+                            .frame(maxHeight: .infinity, alignment: .top)
+                            // Room for the 1pt border at the page edges.
+                            .padding(2)
+                            .containerRelativeFrame(.horizontal)
+                            .id(plan.id)
+                    }
                 }
+                // Equal-height cards: every page stretches to the tallest one.
+                .fixedSize(horizontal: false, vertical: true)
+                .scrollTargetLayout()
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .frame(height: 240)
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $visiblePlanId)
+            .onChange(of: visiblePlanId) { _, id in
+                if let id, id != selectedPlanId { selectedPlanId = id }
+            }
+            .onChange(of: selectedPlanId) { _, id in
+                if visiblePlanId != id { visiblePlanId = id }
+            }
+            .onAppear { visiblePlanId = selectedPlanId }
 
             HStack(spacing: 8) {
                 ForEach(plans) { plan in
@@ -168,6 +190,7 @@ struct PremiumUpgradeView: View {
                 }
             }
             .frame(maxWidth: .infinity)
+            .accessibilityHidden(true)
         }
     }
 
@@ -197,7 +220,7 @@ struct PremiumUpgradeView: View {
                             .padding(.bottom, 4)
                     }
                     Text(plan.localizedTitle)
-                        .font(AppTypography.usesRudaw ? .qasa(11, weight: .semibold) : .qasaLabel(11))
+                        .font(.qasa(11, weight: .semibold))
                         .foregroundColor(Theme.accent)
                 }
 
@@ -210,14 +233,14 @@ struct PremiumUpgradeView: View {
             }
             .padding(25)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, alignment: .top)
         .background(Theme.cardBackgroundLight)
-        .cornerRadius(Theme.cornerRadius)
+        // Clip the glow to the card shape, then draw the border on top so it stays whole.
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(plan.id == selectedPlanId ? Theme.accent : Theme.stroke, lineWidth: 1)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+                .strokeBorder(plan.id == selectedPlanId ? Theme.accent : Theme.stroke, lineWidth: 1)
         )
-        .clipped()
     }
 
     /// Only wallets the server can charge get the "we'll charge it" wording; unknown means pay-by-link.
@@ -228,28 +251,18 @@ struct PremiumUpgradeView: View {
     }
 
     private var autoRenewRow: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "arrow.triangle.2.circlepath")
-                .foregroundColor(Theme.accent)
-                .font(.qasa(18))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L10n.tr("premium.autoRenew", locale: locale))
-                    .font(.qasa(15, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                Text(autoRenewDetail)
-                    .font(.qasa(12))
-                    .foregroundColor(Theme.textSecondary)
-            }
-            Spacer()
-            Toggle("", isOn: $autoRenew)
-                .labelsHidden()
-                .tint(Theme.accent)
-        }
-        .padding(16)
-        .background(Theme.chrome)
-        .cornerRadius(8)
+        ToggleRow(
+            icon: "arrow.triangle.2.circlepath",
+            iconColor: Theme.accent,
+            title: L10n.tr("premium.autoRenew", locale: locale),
+            subtitle: autoRenewDetail,
+            isOn: $autoRenew
+        )
+        .padding(.horizontal, 14)
+        .background(Theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
     }
@@ -275,7 +288,7 @@ struct PremiumUpgradeView: View {
         } label: {
             HStack(spacing: 0) {
                 paymentBadge(method)
-                    .padding(.trailing, 16)
+                    .padding(.trailing, 14)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(method.name)
@@ -285,21 +298,23 @@ struct PremiumUpgradeView: View {
                         .font(.qasaLabel(12))
                         .foregroundColor(Theme.textSecondary)
                 }
-                Spacer()
+                Spacer(minLength: 12)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(selected ? Theme.accent : Theme.stroke)
-                    .font(.qasa(20))
+                    .foregroundColor(selected ? Theme.accent : Theme.textTertiary)
+                    .font(.system(size: 22))
             }
-            .padding(17)
-            .background(selected ? Theme.accent.opacity(0.05) : Theme.chrome)
-            .cornerRadius(8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .frame(minHeight: Theme.rowMinHeight)
+            .background(selected ? Theme.accent.opacity(0.06) : Theme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                     .stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1)
             )
             .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
     }
 
     /// No wallet logo for Wayl: a text badge, the method's initial on an accent tint.
@@ -307,9 +322,9 @@ struct PremiumUpgradeView: View {
         Text(String(method.badgeText.prefix(1)))
             .font(.qasa(16, weight: .bold))
             .foregroundColor(Theme.accent)
-            .frame(width: 36, height: 36)
+            .frame(width: Theme.iconBadgeSize, height: Theme.iconBadgeSize)
             .background(Theme.accent.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: 9))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.iconBadgeCornerRadius, style: .continuous))
             .accessibilityHidden(true)
     }
 
@@ -392,7 +407,7 @@ struct FeatureRow: View {
         HStack(spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(Theme.accent)
-                .font(.qasa(18))
+                .font(.system(size: 18))
             Text(text)
                 .font(.qasa(14))
                 .foregroundColor(Theme.textPrimary)

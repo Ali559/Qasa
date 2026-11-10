@@ -14,6 +14,11 @@ pub struct BiometricStatus {
     /// A seal exists. Enabled but not sealed is iOS's "Sealed on your next master password
     /// unlock".
     pub sealed: bool,
+    /// The master password is due ([`crate::vault::MASTER_PASSWORD_INTERVAL_DAYS`]):
+    /// Touch ID / Hello unlock is refused until it is typed again.
+    pub master_password_due: bool,
+    /// [`crate::vault::MASTER_PASSWORD_INTERVAL_DAYS`], for the UI's "It's been N days".
+    pub master_password_interval_days: u32,
 }
 
 pub trait Biometrics: Send {

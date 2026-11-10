@@ -7,7 +7,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -16,38 +15,16 @@ import alibarznji.qasa.prefs.AppLanguage
 import kotlin.math.roundToInt
 
 /**
- * Single bundled Rudaw face (regular only), registered at every weight the scale asks
- * for. Because each request matches a font declared at that exact weight, Compose does
- * not synthesize bold, so Kurdish/Arabic text renders at regular weight — the same as iOS,
- * where `AppTypography.font` ignores `weight` for Rudaw. Bold titles on both apps need a
- * real Rudaw Bold file bundled on each platform.
+ * IBM Plex Sans Arabic (SIL OFL — `licenses/IBMPlexSansArabic-OFL.txt`) for every
+ * language: its Latin and Arabic-script glyphs share one design, so en, ar and ckb read
+ * as the same app. Four static files, one per weight the scale uses; ExtraBold and Black
+ * requests resolve to Bold, the nearest bundled weight.
  */
-private val RudawFontFamily = FontFamily(
-    Font(R.font.rudaw_regular, FontWeight.Normal),
-    Font(R.font.rudaw_regular, FontWeight.Medium),
-    Font(R.font.rudaw_regular, FontWeight.SemiBold),
-    Font(R.font.rudaw_regular, FontWeight.Bold),
-    Font(R.font.rudaw_regular, FontWeight.Black),
-)
-
-/**
- * Rubik (variable, SIL OFL — `licenses/Rubik-OFL.txt`) for English: rounded and friendly,
- * which is the point of the calm + personal redesign. One variable file serves every weight.
- */
-@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
-private fun rubik(weight: FontWeight) = Font(
-    R.font.rubik_variable,
-    weight,
-    variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight)),
-)
-
-private val RubikFontFamily = FontFamily(
-    rubik(FontWeight.Normal),
-    rubik(FontWeight.Medium),
-    rubik(FontWeight.SemiBold),
-    rubik(FontWeight.Bold),
-    rubik(FontWeight.ExtraBold),
-    rubik(FontWeight.Black),
+private val PlexSansArabic = FontFamily(
+    Font(R.font.ibm_plex_sans_arabic_regular, FontWeight.Normal),
+    Font(R.font.ibm_plex_sans_arabic_medium, FontWeight.Medium),
+    Font(R.font.ibm_plex_sans_arabic_semibold, FontWeight.SemiBold),
+    Font(R.font.ibm_plex_sans_arabic_bold, FontWeight.Bold),
 )
 
 /** Letter-spacing tokens. `docs/design.md` §3.3. */
@@ -80,7 +57,8 @@ object QasaTracking {
 class QasaText internal constructor(
     private val body: FontFamily,
     private val mono: FontFamily,
-    val usesRudaw: Boolean,
+    /** ar/ckb: Arabic script, which must not be letter-spaced or set in Latin monospace. */
+    val arabicScript: Boolean,
 ) {
     private fun style(
         size: Int,
@@ -94,7 +72,7 @@ class QasaText internal constructor(
         fontSize = size.sp,
         lineHeight = lineHeight.sp,
         // Letter spacing breaks cursive joining in Arabic script, so ckb/ar gets zero.
-        letterSpacing = if (usesRudaw) 0.sp else tracking,
+        letterSpacing = if (arabicScript) 0.sp else tracking,
     )
 
     /**
@@ -173,6 +151,9 @@ class QasaText internal constructor(
 
     /** 16 semibold — row titles, toggle titles. */
     val rowTitle get() = style(16, FontWeight.SemiBold)
+
+    /** 16 medium — settings / navigation row titles ([QasaRow]). */
+    val rowTitleMedium get() = style(16, FontWeight.Medium)
 
     /** 15 regular — legal body, shield text. */
     val bodyLegal get() = style(15)
@@ -277,12 +258,10 @@ class QasaText internal constructor(
         const val LEGAL_LINE_HEIGHT = 4
 
         fun forLanguage(language: AppLanguage): QasaText {
-            val rudaw = language == AppLanguage.CKB || language == AppLanguage.AR
-            return if (rudaw) {
-                QasaText(body = RudawFontFamily, mono = RudawFontFamily, usesRudaw = true)
-            } else {
-                QasaText(body = RubikFontFamily, mono = FontFamily.Monospace, usesRudaw = false)
-            }
+            val arabicScript = language == AppLanguage.CKB || language == AppLanguage.AR
+            // Latin monospace has no Arabic glyphs worth showing, so ckb/ar keep the body face.
+            val mono = if (arabicScript) PlexSansArabic else FontFamily.Monospace
+            return QasaText(body = PlexSansArabic, mono = mono, arabicScript = arabicScript)
         }
     }
 }

@@ -3,9 +3,13 @@ import SwiftData
 
 struct VaultListView: View {
     var onOpenMenu: (() -> Void)? = nil
+    /// A generated password handed over from the Generator: opens the new-login editor
+    /// with it prefilled, then clears.
+    @Binding var pendingPassword: String?
 
-    init(onOpenMenu: (() -> Void)? = nil) {
+    init(onOpenMenu: (() -> Void)? = nil, pendingPassword: Binding<String?> = .constant(nil)) {
         self.onOpenMenu = onOpenMenu
+        self._pendingPassword = pendingPassword
     }
 
     @Environment(AppPreferences.self) private var prefs
@@ -118,6 +122,8 @@ struct VaultListView: View {
             .appLocalization()
             .presentationDetents([.medium, .large])
         }
+        .onAppear(perform: consumePendingPassword)
+        .onChange(of: pendingPassword) { _, _ in consumePendingPassword() }
         .sheet(item: $editorMode) { presentation in
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
@@ -127,23 +133,23 @@ struct VaultListView: View {
     }
 
     private var searchField: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Theme.textSecondary)
             TextField(L10n.tr("vault.searchPlaceholder", locale: prefs.locale), text: $searchText)
-                .font(.qasa(16))
                 .multilineTextAlignment(.leading)
-                .foregroundColor(Theme.textPrimary)
-                .tint(Theme.accent)
+                .submitLabel(.search)
+            if !searchText.isEmpty {
+                FieldIconButton(
+                    systemImage: "xmark.circle.fill",
+                    tint: Theme.textTertiary,
+                    accessibilityLabel: L10n.tr("common.cancel", locale: prefs.locale)
+                ) {
+                    searchText = ""
+                }
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(Theme.stroke, lineWidth: 1)
-        )
+        .qasaField()
     }
 
     private var tabChips: some View {
@@ -180,6 +186,13 @@ struct VaultListView: View {
             } onDeleted: {}
         }
         .buttonStyle(.plain)
+    }
+
+    private func consumePendingPassword() {
+        guard let password = pendingPassword, !password.isEmpty else { return }
+        pendingPassword = nil
+        showAddMenu = false
+        editorMode = EditorPresentation(mode: .create(.login(LoginFields(password: password))))
     }
 
     private func handleAddTapped() {

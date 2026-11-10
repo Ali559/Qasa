@@ -24,11 +24,17 @@ use biometrics::{Biometrics, BiometricStatus, PlatformBiometrics};
 use qasa_biometric::Sealed;
 use qasa_vault::RootKey;
 use store::{
-    now_ms, CollectionRow, ItemRow, Store, META_BIOMETRIC_ENABLED, META_BIOMETRIC_SEALED, META_KDF_VERSION, META_SALT, META_VERIFIER,
+    now_ms, CollectionRow, ItemRow, Store, META_BIOMETRIC_ENABLED, META_BIOMETRIC_SEALED, META_KDF_VERSION, META_LAST_MASTER_PASSWORD_UNLOCK,
+    META_SALT, META_VERIFIER,
 };
 
 /// Minimum master password length, counted in characters (iOS `password.count >= 8`).
 pub const MIN_PASSWORD_CHARS: usize = 8;
+
+/// With Touch ID / Hello on, the master password is still asked for once this many days
+/// have passed since it last opened the vault (the one place this interval is defined).
+pub const MASTER_PASSWORD_INTERVAL_DAYS: u32 = 14;
+const MASTER_PASSWORD_INTERVAL_MS: i64 = MASTER_PASSWORD_INTERVAL_DAYS as i64 * 24 * 60 * 60 * 1000;
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -173,6 +179,7 @@ impl Vault {
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &root.verifier())?;
         self.keys = Some(root.subkeys());
+        self.note_master_password()?;
         if biometrics && self.bio.available() {
             self.store.set_meta(META_BIOMETRIC_ENABLED, b"1")?;
             self.seal(&root);
@@ -197,6 +204,7 @@ impl Vault {
             if root.matches_verifier(&verifier) {
                 self.keys = Some(root.subkeys());
                 self.note_activity();
+                self.note_master_password()?;
                 let _ = self.rebuild_missing_tokens();
                 let _ = self.encrypt_legacy_names();
                 // iOS: "Sealed on your next master password unlock".
@@ -553,6 +561,7 @@ impl Vault {
         self.store.set_meta(META_SALT, &new_salt)?;
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &new_root.verifier())?;
+        self.note_master_password()?;
         // The old seal holds the old root key: replace it.
         self.store.delete_meta(META_BIOMETRIC_SEALED)?;
         if self.biometric_enabled()? {
@@ -585,7 +594,45 @@ impl Vault {
             kind: self.bio.kind(),
             enabled: self.biometric_enabled()?,
             sealed: self.store.meta(META_BIOMETRIC_SEALED)?.is_some(),
+            master_password_due: self.master_password_due()?,
+            master_password_interval_days: MASTER_PASSWORD_INTERVAL_DAYS,
         })
+    }
+
+    /// Records a master password unlock (also create and change password). Touch ID /
+    /// Hello unlocks never call this, so they can't push the next password prompt back.
+    fn note_master_password(&self) -> CommandResult<()> {
+        self.store.set_meta(META_LAST_MASTER_PASSWORD_UNLOCK, now_ms().to_string().as_bytes())
+    }
+
+    /// Whether Touch ID / Hello must give way to the master password now.
+    pub fn master_password_due(&self) -> CommandResult<bool> {
+        self.master_password_due_at(now_ms())
+    }
+
+    /// [`Self::master_password_due`] at `now` (Unix ms). Due when the last password unlock
+    /// is unknown or unreadable, at least [`MASTER_PASSWORD_INTERVAL_DAYS`] old, or in the
+    /// future (the clock was set back: never trust it to extend the interval).
+    pub fn master_password_due_at(&self, now: i64) -> CommandResult<bool> {
+        let last = self
+            .store
+            .meta(META_LAST_MASTER_PASSWORD_UNLOCK)?
+            .and_then(|b| String::from_utf8(b).ok())
+            .and_then(|s| s.trim().parse::<i64>().ok());
+        Ok(match last {
+            None => true,
+            Some(last) if last > now => true,
+            Some(last) => now - last >= MASTER_PASSWORD_INTERVAL_MS,
+        })
+    }
+
+    /// The seal to open for an unlock: refused with `MasterPasswordDue` when the password
+    /// is due, so no Touch ID / Hello prompt even appears.
+    pub fn sealed_for_unlock(&self) -> CommandResult<Option<Sealed>> {
+        if self.master_password_due()? {
+            return Err(CommandError::MasterPasswordDue);
+        }
+        self.sealed()
     }
 
     /// iOS toggle: on means "seal at the next password unlock"; off forgets the seal.
@@ -613,7 +660,12 @@ impl Vault {
 
     /// Unlocks with a root key the platform unsealed. Checked against the stored verifier,
     /// so a wrong or stale seal can never open the vault.
+    /// Refused when the master password is due (checked again here: the prompt may have
+    /// stayed up across the deadline).
     pub fn unlock_with_root(&mut self, root: RootKey) -> CommandResult<()> {
+        if self.master_password_due()? {
+            return Err(CommandError::MasterPasswordDue);
+        }
         let verifier = self.store.meta(META_VERIFIER)?.ok_or(CommandError::NoVault)?;
         if !root.matches_verifier(&verifier) {
             self.store.delete_meta(META_BIOMETRIC_SEALED)?;
@@ -641,6 +693,15 @@ impl Vault {
     #[cfg(test)]
     pub fn biometrics(&self) -> &dyn Biometrics {
         self.bio.as_ref()
+    }
+
+    /// Moves (or clears) the last master password unlock, for tests of the interval.
+    #[cfg(test)]
+    pub fn set_last_master_password_unlock(&self, ms: Option<i64>) {
+        match ms {
+            Some(ms) => self.store.set_meta(META_LAST_MASTER_PASSWORD_UNLOCK, ms.to_string().as_bytes()).unwrap(),
+            None => self.store.delete_meta(META_LAST_MASTER_PASSWORD_UNLOCK).unwrap(),
+        }
     }
 
     // MARK: Wi‑Fi sync
@@ -941,6 +1002,57 @@ mod tests {
         // Turning it off forgets the seal.
         v.set_biometric_enabled(false).unwrap();
         assert_eq!(v.sealed().unwrap(), None);
+    }
+
+    #[test]
+    fn master_password_interval_gates_biometric_unlock() {
+        const DAY: i64 = 24 * 60 * 60 * 1000;
+        let mut v = vault();
+        v.create("password1", true).unwrap();
+        let now = now_ms();
+        // Creating the vault counts as a master password unlock.
+        assert!(!v.master_password_due_at(now).unwrap());
+        assert!(!v.biometric_status().unwrap().master_password_due);
+        assert_eq!(v.biometric_status().unwrap().master_password_interval_days, 14);
+
+        // Just inside the interval, then at it.
+        v.set_last_master_password_unlock(Some(now - 14 * DAY + 60_000));
+        assert!(!v.master_password_due_at(now).unwrap());
+        v.set_last_master_password_unlock(Some(now - 14 * DAY));
+        assert!(v.master_password_due_at(now).unwrap());
+
+        // Due: no seal is handed out and an unsealed root is refused.
+        v.lock();
+        assert!(matches!(v.sealed_for_unlock(), Err(CommandError::MasterPasswordDue)));
+        let sealed = v.sealed().unwrap().unwrap();
+        let root = v.biometrics().unseal(&sealed, "test").unwrap();
+        assert!(matches!(v.unlock_with_root(RootKey::from_bytes(root)), Err(CommandError::MasterPasswordDue)));
+        assert!(!v.is_unlocked());
+        // The seal survives: the password unlock resets the clock and biometrics works again.
+        v.unlock("password1").unwrap();
+        assert!(!v.master_password_due().unwrap());
+        v.lock();
+        let sealed = v.sealed_for_unlock().unwrap().unwrap();
+        let root = v.biometrics().unseal(&sealed, "test").unwrap();
+
+        // A biometric unlock does not reset it.
+        let old = now_ms() - 10 * DAY;
+        v.set_last_master_password_unlock(Some(old));
+        v.unlock_with_root(RootKey::from_bytes(root)).unwrap();
+        assert_eq!(v.store.meta(META_LAST_MASTER_PASSWORD_UNLOCK).unwrap(), Some(old.to_string().into_bytes()));
+
+        // Missing, unreadable, or in the future (clock rolled back): due.
+        v.set_last_master_password_unlock(None);
+        assert!(v.master_password_due().unwrap());
+        v.store.set_meta(META_LAST_MASTER_PASSWORD_UNLOCK, b"soon").unwrap();
+        assert!(v.master_password_due().unwrap());
+        v.set_last_master_password_unlock(Some(now_ms() + DAY));
+        assert!(v.master_password_due().unwrap());
+
+        // Changing the password counts too.
+        v.set_last_master_password_unlock(None);
+        v.change_password("password1", "password2").unwrap();
+        assert!(!v.master_password_due().unwrap());
     }
 
     #[test]

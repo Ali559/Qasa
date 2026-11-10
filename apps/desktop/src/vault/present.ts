@@ -471,7 +471,7 @@ const KNOWN_BRANDS: Array<[string, string]> = [
   ['github', '#24292F'], ['fib', '#0E7A5A'], ['fastpay', '#E2136E'], ['superqi', '#F57C20'],
   ['zain', '#6B2C91'], ['asiacell', '#E30613'], ['korek', '#00843D'],
 ]
-const FALLBACK_COLORS = ['#7C6CF2', '#E07A5F', '#3FA7C9', '#2F9E6C', '#D4537E', '#B7791F', '#5B7CF0']
+const FALLBACK_COLORS = ['#722F99', '#E07A5F', '#3FA7C9', '#2F9E6C', '#D4537E', '#B7791F', '#5B7CF0']
 
 /** iOS `SiteLogo`: first letter on the brand colour, with the same hash as Android. */
 export function siteLogo(name: string): { letter: string; color: string } {

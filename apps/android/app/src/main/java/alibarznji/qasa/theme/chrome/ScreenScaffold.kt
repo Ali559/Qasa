@@ -2,6 +2,7 @@ package alibarznji.qasa.theme
 
 import alibarznji.qasa.theme.QasaDimens
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -31,7 +32,7 @@ private val NoInsets = WindowInsets(0, 0, 0, 0)
  *     ScrollView { Column(spacing 16|24) { ... }
  *         .padding(horizontal = screenPadding)
  *         .padding(top = 24, bottom = scrollTail) }
- *     StickyBottomBar?                  // chrome @ 92%, 1dp stroke top divider
+ *     StickyBottomBar?                  // chrome, 1dp strokeChrome top hairline
  * }
  * .background(background)
  * ```
@@ -78,28 +79,33 @@ fun ScreenScaffold(
 }
 
 /**
- * `chrome @ 92%`, 1pt `stroke` top divider, 17pt padding, `navigationBarsPadding()`.
- *
- * `imePadding()` is applied too: with `enableEdgeToEdge()` the keyboard previously
- * covered the primary action in Unlock, Create, ChangeMasterPassword and Pair (§6.1).
+ * The one bottom action bar: every page's primary submit / save / continue sits here,
+ * fixed below the scrolling body. Solid `chrome` fill, 1dp `strokeChrome` hairline on
+ * top, `screenPadding` sides, and the navigation-bar + IME insets so the action stays
+ * above the gesture bar and the keyboard. Stacked buttons (primary, then secondary) are
+ * spaced by `contentGap`; each is [QasaDimens.buttonHeight] tall.
  */
 @Composable
-fun StickyBottomBar(content: @Composable () -> Unit) {
+fun StickyBottomBar(content: @Composable ColumnScope.() -> Unit) {
     val c = qasaColors
     Column(
         Modifier
-            .background(c.chrome.copy(alpha = 0.92f))
+            .fillMaxWidth()
+            .background(c.chrome)
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
-        Box(
-            Modifier.padding(
-                horizontal = QasaDimens.screenPadding,
-                vertical = QasaDimens.cardPadding,
-            ),
-        ) {
-            content()
-        }
+        HorizontalDivider(color = c.strokeChrome, thickness = QasaDimens.stroke)
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.gapSmall),
+            verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
+            content = content,
+        )
     }
 }
+
+/** [StickyBottomBar] under its descriptive name. */
+@Composable
+fun BottomActionBar(content: @Composable ColumnScope.() -> Unit) = StickyBottomBar(content)

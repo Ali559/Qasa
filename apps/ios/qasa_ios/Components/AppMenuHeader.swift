@@ -45,11 +45,10 @@ struct BrandMenuHeader: View {
             }
 
             HStack(spacing: 10) {
-                Image(systemName: "shield.fill")
-                    .font(.qasa(16, weight: .semibold))
+                QasaMark(size: 22)
                     .foregroundColor(theme.accent)
                 Text(L10n.tr("brand.name", locale: prefs.locale))
-                    .font(.system(size: titleSize, weight: .heavy))
+                    .font(.qasa(titleSize, weight: .bold))
                     .foregroundColor(theme.accent)
             }
 

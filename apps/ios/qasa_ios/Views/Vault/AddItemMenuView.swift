@@ -13,52 +13,43 @@ struct AddItemMenuView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            List {
-                switch tab {
-                case .all:
-                    ForEach(VaultItemKind.allCases) { kind in
-                        if kind.subtypes != nil {
-                            Button {
-                                path.append(.subtypes(kind))
-                            } label: {
-                                Label(kind.addTitle, systemImage: kind.systemImage)
-                                    .foregroundColor(Theme.textPrimary)
-                            }
-                        } else {
-                            Button {
-                                onSelect(defaultPayload(for: kind))
-                            } label: {
-                                Label(kind.addTitle, systemImage: kind.systemImage)
-                                    .foregroundColor(Theme.textPrimary)
+            ScrollView {
+                SettingsSection {
+                    switch tab {
+                    case .all:
+                        ForEach(Array(VaultItemKind.allCases.enumerated()), id: \.element.id) { index, kind in
+                            if index > 0 { RowDivider() }
+                            if kind.subtypes != nil {
+                                row(kind.addTitle, icon: kind.systemImage, chevron: true) {
+                                    path.append(.subtypes(kind))
+                                }
+                            } else {
+                                row(kind.addTitle, icon: kind.systemImage) {
+                                    onSelect(defaultPayload(for: kind))
+                                }
                             }
                         }
-                    }
-                case .login:
-                    Button { onSelect(.login(LoginFields())) } label: {
-                        Label(
+                    case .login:
+                        row(
                             L10n.tr("vault.type.login", locale: AppPreferences.shared.locale),
-                            systemImage: "person.badge.key.fill"
-                        )
-                        .foregroundColor(Theme.textPrimary)
-                    }
-                case .secureNote:
-                    Button { onSelect(.secureNote(SecureNoteFields())) } label: {
-                        Label(
+                            icon: "person.badge.key.fill"
+                        ) { onSelect(.login(LoginFields())) }
+                    case .secureNote:
+                        row(
                             L10n.tr("vault.type.secureNote", locale: AppPreferences.shared.locale),
-                            systemImage: "note.text"
-                        )
-                        .foregroundColor(Theme.textPrimary)
+                            icon: "note.text"
+                        ) { onSelect(.secureNote(SecureNoteFields())) }
+                    case .payment:
+                        subtypeButtons(for: .payment)
+                    case .personalInfo:
+                        subtypeButtons(for: .personalInfo)
+                    case .idDocument:
+                        subtypeButtons(for: .idDocument)
                     }
-                case .payment:
-                    subtypeButtons(for: .payment)
-                case .personalInfo:
-                    subtypeButtons(for: .personalInfo)
-                case .idDocument:
-                    subtypeButtons(for: .idDocument)
                 }
+                .padding(Theme.screenPadding)
             }
-            .scrollContentBackground(.hidden)
-            .background(Theme.background)
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle(L10n.tr("vault.addNew", locale: AppPreferences.shared.locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -69,11 +60,13 @@ struct AddItemMenuView: View {
             .navigationDestination(for: AddRoute.self) { route in
                 switch route {
                 case .subtypes(let kind):
-                    List {
-                        subtypeButtons(for: kind)
+                    ScrollView {
+                        SettingsSection {
+                            subtypeButtons(for: kind)
+                        }
+                        .padding(Theme.screenPadding)
                     }
-                    .scrollContentBackground(.hidden)
-                    .background(Theme.background)
+                    .background(Theme.background.ignoresSafeArea())
                     .navigationTitle(kind.addTitle)
                 }
             }
@@ -81,15 +74,22 @@ struct AddItemMenuView: View {
         .tint(Theme.accent)
     }
 
+    private func row(_ title: String, icon: String, chevron: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            SettingsRow(icon: icon, title: title) {
+                if chevron { RowChevron() }
+            }
+        }
+        .buttonStyle(.qasaRow)
+    }
+
     @ViewBuilder
     private func subtypeButtons(for kind: VaultItemKind) -> some View {
         if let subtypes = kind.subtypes {
-            ForEach(subtypes) { subtype in
-                Button {
+            ForEach(Array(subtypes.enumerated()), id: \.element.id) { index, subtype in
+                if index > 0 { RowDivider() }
+                row(subtype.title, icon: payload(for: subtype).systemImage) {
                     onSelect(payload(for: subtype))
-                } label: {
-                    Text(subtype.title)
-                        .foregroundColor(Theme.textPrimary)
                 }
             }
         }

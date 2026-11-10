@@ -114,6 +114,7 @@ struct PairExistingVaultView: View {
                     .foregroundColor(Theme.accent)
                     .multilineTextAlignment(.leading)
             }
+            .buttonStyle(PressableStyle())
             .padding(.top, 8)
         }
     }
@@ -202,8 +203,7 @@ struct PairExistingVaultView: View {
     }
 
     private var bottomBar: some View {
-        VStack(spacing: 0) {
-            Divider().background(Theme.stroke)
+        BottomActionBar {
             Group {
                 if step == .success || step == .adopted {
                     PrimaryButton(
@@ -222,14 +222,9 @@ struct PairExistingVaultView: View {
                         Task { await applyPairing() }
                     }
                     .disabled(isChecking)
-                    .opacity(isChecking ? 0.7 : 1)
                 }
             }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 17)
-            .padding(.bottom, 32)
         }
-        .background(Theme.chrome.opacity(0.92))
     }
 
     @MainActor

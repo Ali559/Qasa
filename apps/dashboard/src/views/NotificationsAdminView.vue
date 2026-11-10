@@ -163,7 +163,7 @@ function formatDate(value: string) {
         </div>
         <p class="font-heading text-center text-5xl font-bold opacity-90">9:41</p>
         <div
-          class="bg-card text-card-foreground mt-6 flex gap-3 rounded-2xl p-3.5 shadow-[0_4px_0_#08071a]"
+          class="bg-card text-card-foreground mt-6 flex gap-3 rounded-2xl p-3.5 shadow-[0_4px_0_var(--dock-lip)]"
           :dir="preview.rtl ? 'rtl' : 'ltr'"
         >
           <span class="bg-sun text-sun-ink font-heading grid size-9 shrink-0 place-items-center rounded-xl font-extrabold">q</span>
@@ -200,7 +200,7 @@ function formatDate(value: string) {
 .phone {
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.08),
-    0 6px 0 #08071a;
+    0 6px 0 var(--dock-lip);
   background-image: radial-gradient(circle at 50% 0%, color-mix(in oklch, var(--primary) 45%, transparent), transparent 70%);
 }
 </style>

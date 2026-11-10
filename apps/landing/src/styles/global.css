@@ -1,51 +1,77 @@
-/* Tokens mirror apps/ios/qasa_ios/Theme/Theme.swift (the calm + personal palette). */
+/*
+ * Colours come from the generated app tokens (light + dark, following the OS):
+ * apps/desktop/src/theme/tokens.css, itself generated from apps/ios/qasa_ios/Theme/Theme.swift.
+ * Imported by relative path so the site stays in sync; Vite inlines it at build time.
+ * Below, the site's own short names are aliased onto those tokens.
+ */
+@import "../../../desktop/src/theme/tokens.css";
 
+/* IBM Plex Sans Arabic for every language (en, ar, ckb), bundled in public/fonts (OFL). */
 @font-face {
-  font-family: "Rubik";
-  src: url("/fonts/Rubik-Variable.ttf") format("truetype");
-  font-weight: 300 900;
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
   font-display: swap;
 }
-
 @font-face {
-  font-family: "Rudaw";
-  src: url("/fonts/rudawregular2.ttf") format("truetype");
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/IBMPlexSansArabic-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
 :root {
-  --background: #f6f4fb;
-  --card: #ffffff;
-  --card-light: #f1eefa;
-  --card-muted: #ece8fd;
-  --stroke: #ebe8f4;
-  --stroke-chrome: #e4e0f0;
-  --accent: #7c6cf2;
-  --accent-dark: #6656e0;
-  --on-accent: #ffffff;
-  --on-accent-chip: #3a2fa0;
-  --gold: #e09a2b;
-  --success: #2f9e6c;
-  --success-wash: #e2f5ec;
-  --danger: #e45d5d;
-  --danger-bg: #fdeaea;
-  --danger-text: #9e2f2f;
-  --text: #24213a;
-  --text-2: #6b6785;
-  --text-3: #a19db8;
-  --warm: #ffd9c7;
-  --calm: #e6e3f2;
+  /* Aliases onto tokens.css (they follow light/dark automatically). */
+  --card: var(--card-background);
+  --card-light: var(--card-background-light);
+  --danger-bg: var(--danger-background);
+  --text: var(--text-primary);
+  --text-2: var(--text-secondary);
 
-  /* Always-dark band (privacy section, phone bezel) regardless of scheme. */
-  --night: #17152a;
-  --night-card: #221f3a;
-  --night-stroke: #332f4f;
-  --night-text: #eeecf8;
-  --night-text-2: #b5b1cc;
-  --night-accent: #a79bff;
+  /* Derived, light scheme. */
+  --success-wash: color-mix(in srgb, var(--success) 14%, var(--card-background));
+  /* tokens' success (#2F9E6C) is 3.3:1 on white; darkened toward text-primary for AA text. */
+  --success-text: color-mix(in srgb, var(--success) 70%, var(--text-primary));
+  --gold-text: var(--gold-muted);
+  --badge: var(--gold-muted);
+  --on-badge: var(--on-accent);
 
-  --shadow-soft: 0 24px 60px -30px rgba(76, 61, 184, 0.35);
-  --shadow-chip: 0 14px 30px -16px rgba(36, 33, 58, 0.35);
+  /*
+   * Always-dark band (privacy section, phone bezel) regardless of scheme.
+   * Values copied from the dark block of apps/desktop/src/theme/tokens.css.
+   */
+  --night: #17111D;          /* background */
+  --night-card: #231A2B;     /* card-background */
+  --night-card-hi: #33243F;  /* card-muted */
+  --night-stroke: #352B3D;   /* stroke */
+  --night-stroke-hi: #3F3448; /* stroke-chrome */
+  --night-text: #F2EDF4;     /* text-primary */
+  --night-text-2: #C5C1C1;   /* text-secondary */
+  --night-accent: #B67FDB;   /* accent */
+  --night-danger: #FF6B6B;   /* danger */
+  --night-danger-bg: #4A1F28; /* danger-background */
+  --night-danger-text: #FFC0C0; /* danger-text */
+  --night-glow: rgb(182 127 219 / 0.24); /* accent, translucent */
+
+  --brand-glow: rgb(114 47 153 / 0.45); /* #722F99 */
+  --shadow-soft: 0 24px 60px -30px rgb(114 47 153 / 0.35);
+  --shadow-chip: 0 14px 30px -16px rgb(42 31 51 / 0.35);
 
   --radius: 20px;
   --radius-lg: 24px;
@@ -53,37 +79,18 @@
   --gutter: clamp(16px, 4vw, 32px);
   --max: 1160px;
 
-  --font: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-arabic: "Rudaw", "Rubik", system-ui, sans-serif;
-
-  color-scheme: light dark;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #17152a;
-    --card: #221f3a;
-    --card-light: #2a2745;
-    --card-muted: #2f2b52;
-    --stroke: #332f4f;
-    --stroke-chrome: #3a3658;
-    --accent: #a79bff;
-    --accent-dark: #7c6cf2;
-    --on-accent: #1b1640;
-    --on-accent-chip: #e8e4ff;
-    --gold: #f5b84a;
-    --success: #5ccb97;
-    --success-wash: #1f3a33;
-    --danger: #f27f7f;
-    --danger-bg: #4a2030;
-    --danger-text: #ffb8b8;
-    --text: #eeecf8;
-    --text-2: #b5b1cc;
-    --text-3: #7d7998;
-    --warm: #3d2b3b;
-    --calm: #26233f;
-    --night: #0f0d1f;
-    --night-card: #1b1832;
+    --success-text: var(--success);
+    --gold-text: var(--gold);
+    --badge: var(--gold);
+    --on-badge: var(--background);
+    /* The band sits a step below the (already dark) page. */
+    --night: color-mix(in srgb, #17111D 70%, #000);
+    --night-card: #17111D;
     --shadow-soft: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
     --shadow-chip: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
   }
@@ -104,11 +111,9 @@ h1, h2, h3, h4, p { margin: 0; }
 a { color: inherit; text-decoration: none; }
 img, svg { display: block; }
 .icon { flex-shrink: 0; }
-/* Arabic script: Rudaw face, and no tracking or case changes (they break cursive joining).
-   :lang() also matches descendants, so a whole ckb/ar page is covered and lang="en" opts out. */
-:lang(ar), :lang(ckb) { font-family: var(--font-arabic); letter-spacing: 0 !important; text-transform: none !important; }
-/* English islands inside a ckb/ar page (logo, store names, emails) would otherwise inherit Rudaw. */
-[lang="en"] { font-family: var(--font); }
+/* Arabic script: no tracking or case changes (they break cursive joining).
+   :lang() also matches descendants, so a whole ckb/ar page is covered. */
+:lang(ar), :lang(ckb) { letter-spacing: 0 !important; text-transform: none !important; }
 
 .wrap { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
 
@@ -143,7 +148,7 @@ img, svg { display: block; }
 .btn:hover { transform: translateY(-1px); }
 .btn:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .btn-primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 24px -10px var(--accent); }
-.btn-primary:hover { background: var(--accent-dark); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); color: #fff; } /* white on accent-dark in both schemes */
 .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--stroke); }
 
 .store {
@@ -161,8 +166,8 @@ img, svg { display: block; }
 }
 .pill-accent { background: var(--card-muted); color: var(--on-accent-chip); }
 .pill-danger { background: var(--danger-bg); color: var(--danger-text); }
-.pill-success { background: var(--success-wash); color: var(--success); }
-.pill-gold { background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold); }
+.pill-success { background: var(--success-wash); color: var(--success-text); }
+.pill-gold { background: color-mix(in srgb, var(--gold) 16%, transparent); color: var(--gold-text); }
 
 /* Reveal on scroll (progressive: content is visible without JS). */
 @media (prefers-reduced-motion: no-preference) {

@@ -35,6 +35,10 @@ import alibarznji.qasa.screens.auth.WelcomePreferencesScreen
 import alibarznji.qasa.screens.settings.devices.DeviceReplaceHost
 import alibarznji.qasa.screens.shell.AppShellScreen
 import alibarznji.qasa.theme.ApiMisconfiguredBanner
+import alibarznji.qasa.theme.LocalQasaToast
+import alibarznji.qasa.theme.QasaToastHost
+import alibarznji.qasa.theme.QasaToastState
+import androidx.compose.runtime.CompositionLocalProvider
 import alibarznji.qasa.theme.QasaMotion
 import alibarznji.qasa.theme.SecuringVaultCard
 import alibarznji.qasa.theme.VaultPrivacyShield
@@ -110,67 +114,74 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
     val bootstrapping by vm.bootstrapping.collectAsState()
     LaunchedEffect(unlocked) { if (unlocked) vm.ensureStarted() }
     val configurationError = remember { QasaConfig.configurationError }
+    // Root-owned, so a toast raised inside a sheet outlives the sheet.
+    val toast = remember { QasaToastState() }
+    // A toast can name an item: it must not survive onto the unlock screen.
+    LaunchedEffect(unlocked) { if (!unlocked) toast.clear() }
 
-    Box(Modifier.fillMaxSize()) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                // While covered, the content underneath must leave the accessibility
-                // tree, or TalkBack reads vault rows through an opaque overlay. Its
-                // semantics are preserved so they come back when the shield lifts.
-                .then(
-                    if (shielded) Modifier.semantics { invisibleToUser() } else Modifier,
-                ),
-        ) {
-            // iOS `.safeAreaInset(edge: .top)`: the banner takes the status-bar inset and
-            // pushes the app down. The store error screen is its own window on iOS, so
-            // the banner is not shown there.
-            val banner = configurationError?.takeIf { storeFailure == null }
-            if (banner != null) ApiMisconfiguredBanner(banner)
-            Box(
+    CompositionLocalProvider(LocalQasaToast provides toast) {
+        Box(Modifier.fillMaxSize()) {
+            Column(
                 Modifier
                     .fillMaxSize()
+                    // While covered, the content underneath must leave the accessibility
+                    // tree, or TalkBack reads vault rows through an opaque overlay. Its
+                    // semantics are preserved so they come back when the shield lifts.
                     .then(
-                        if (banner != null) {
-                            Modifier.consumeWindowInsets(WindowInsets.statusBars)
-                        } else {
-                            Modifier
-                        },
+                        if (shielded) Modifier.semantics { invisibleToUser() } else Modifier,
                     ),
             ) {
-                when {
-                    // The store is the user's data, not a cache: when it will not open we
-                    // show the error screen and never offer to delete it.
-                    storeFailure != null -> VaultStoreErrorView(storeFailure!!)
-                    unlocked -> AppShellScreen(onLock = { vm.onLocked() })
-                    vaultExists && !pairOpen -> UnlockScreen(onUnlocked = { vm.onUnlocked() })
-                    !welcomeDone -> WelcomePreferencesScreen(onContinue = { welcomeDone = true })
-                    else -> CreateVaultScreen(
-                        onCreated = { vm.onUnlocked() },
-                        onPairOpenChanged = { pairOpen = it },
-                    )
-                }
-                if (bootstrapping) {
-                    SecuringVaultCard(Modifier.align(Alignment.Center))
-                } else if (unlocked && storeFailure == null) {
-                    // iOS asks right after the unlock bootstrap; so does Android 13+.
-                    NotificationPermissionPrompt(
-                        prefs = vm.prefs,
-                        onResult = vm.bootstrap::onNotificationStateMayHaveChanged,
-                    )
-                    // A restored backup's device-replace confirmation and its done notice.
-                    DeviceReplaceHost()
+                // iOS `.safeAreaInset(edge: .top)`: the banner takes the status-bar inset and
+                // pushes the app down. The store error screen is its own window on iOS, so
+                // the banner is not shown there.
+                val banner = configurationError?.takeIf { storeFailure == null }
+                if (banner != null) ApiMisconfiguredBanner(banner)
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (banner != null) {
+                                Modifier.consumeWindowInsets(WindowInsets.statusBars)
+                            } else {
+                                Modifier
+                            },
+                        ),
+                ) {
+                    when {
+                        // The store is the user's data, not a cache: when it will not open we
+                        // show the error screen and never offer to delete it.
+                        storeFailure != null -> VaultStoreErrorView(storeFailure!!)
+                        unlocked -> AppShellScreen(onLock = { vm.onLocked() })
+                        vaultExists && !pairOpen -> UnlockScreen(onUnlocked = { vm.onUnlocked() })
+                        !welcomeDone -> WelcomePreferencesScreen(onContinue = { welcomeDone = true })
+                        else -> CreateVaultScreen(
+                            onCreated = { vm.onUnlocked() },
+                            onPairOpenChanged = { pairOpen = it },
+                        )
+                    }
+                    if (bootstrapping) {
+                        SecuringVaultCard(Modifier.align(Alignment.Center))
+                    } else if (unlocked && storeFailure == null) {
+                        // iOS asks right after the unlock bootstrap; so does Android 13+.
+                        NotificationPermissionPrompt(
+                            prefs = vm.prefs,
+                            onResult = vm.bootstrap::onNotificationStateMayHaveChanged,
+                        )
+                        // A restored backup's device-replace confirmation and its done notice.
+                        DeviceReplaceHost()
+                    }
+                    QasaToastHost(toast, Modifier.align(Alignment.BottomCenter))
                 }
             }
-        }
-        // iOS `privacyShield` uses `.transition(.opacity)`. FLAG_SECURE (MainActivity)
-        // already blanks the Recents snapshot, so the short fade-in exposes nothing.
-        AnimatedVisibility(
-            visible = shielded,
-            enter = fadeIn(tween(QasaMotion.FAST)),
-            exit = fadeOut(tween(QasaMotion.FAST)),
-        ) {
-            VaultPrivacyShield(onReveal = vm.autoLock::dismissShield)
+            // iOS `privacyShield` uses `.transition(.opacity)`. FLAG_SECURE (MainActivity)
+            // already blanks the Recents snapshot, so the short fade-in exposes nothing.
+            AnimatedVisibility(
+                visible = shielded,
+                enter = fadeIn(tween(QasaMotion.FAST)),
+                exit = fadeOut(tween(QasaMotion.FAST)),
+            ) {
+                VaultPrivacyShield(onReveal = vm.autoLock::dismissShield)
+            }
         }
     }
 }

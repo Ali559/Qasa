@@ -91,6 +91,26 @@
 			);
 			target = 903FFA34301F9A73007AEC54 /* qasa */;
 		};
+		B20000000000000000000001 /* Exceptions for "qasa_ios" folder in "QasaCredentialProvider" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Resources/IBMPlexSansArabic-Bold.ttf",
+				"Resources/IBMPlexSansArabic-Medium.ttf",
+				"Resources/IBMPlexSansArabic-Regular.ttf",
+				"Resources/IBMPlexSansArabic-SemiBold.ttf",
+			);
+			target = A10000000000000000000005 /* QasaCredentialProvider */;
+		};
+		B20000000000000000000002 /* Exceptions for "qasa_ios" folder in "QasaPaymentNotification" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Resources/IBMPlexSansArabic-Bold.ttf",
+				"Resources/IBMPlexSansArabic-Medium.ttf",
+				"Resources/IBMPlexSansArabic-Regular.ttf",
+				"Resources/IBMPlexSansArabic-SemiBold.ttf",
+			);
+			target = A10000000000000000000023 /* QasaPaymentNotification */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -98,6 +118,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				A10000000000000000000031 /* Exceptions for "qasa_ios" folder in "qasa" target */,
+				B20000000000000000000001 /* Exceptions for "qasa_ios" folder in "QasaCredentialProvider" target */,
+				B20000000000000000000002 /* Exceptions for "qasa_ios" folder in "QasaPaymentNotification" target */,
 			);
 			path = qasa_ios;
 			sourceTree = "<group>";
@@ -493,7 +515,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -551,7 +573,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -658,7 +680,7 @@
 				INFOPLIST_FILE = QasaCredentialProvider/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Qasa;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -689,7 +711,7 @@
 				INFOPLIST_FILE = QasaCredentialProvider/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Qasa;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -719,7 +741,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QasaPaymentNotification/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Qasa;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -749,7 +771,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QasaPaymentNotification/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Qasa;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -777,7 +799,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R6H3Y7XP76;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = alibarznji.qasaTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -798,7 +820,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R6H3Y7XP76;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = alibarznji.qasaTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

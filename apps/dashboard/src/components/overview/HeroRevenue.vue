@@ -103,7 +103,7 @@ const latest = computed(() => props.growth.at(-1))
 }
 
 .sticker {
-  box-shadow: 0 4px 0 #b8861a;
+  box-shadow: 0 4px 0 var(--sun-lip);
 }
 
 .bar {

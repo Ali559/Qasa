@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// iOS `FormTextField`: section label over a 14pt-padded card field, with the field-rule
-// message (if any) underneath.
+// iOS `FormTextField`: section label over a `--field-height` card field (base.css; notes
+// grow), with the field-rule message (if any) underneath.
 import { ref } from 'vue'
 
 import FieldError from './FieldError.vue'
@@ -25,7 +25,7 @@ const focused = ref(false)
 <template>
   <div class="form-field">
     <label :for="id" class="label">{{ label }}</label>
-    <div class="box" :class="{ focused, invalid: !!error }">
+    <div class="box" :class="{ focused, invalid: !!error, multiline, 'has-trailing': !multiline && !!$slots.trailing }">
       <textarea
         v-if="multiline"
         :id="id"
@@ -83,12 +83,23 @@ const focused = ref(false)
 .box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 14px;
+  gap: 8px;
+  height: var(--field-height);
+  padding-block: 0;
+  padding-inline: var(--field-padding-inline);
   border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border-radius: var(--field-radius);
   background: var(--card-background);
   transition: border-color var(--motion-fast);
+}
+
+.box.has-trailing {
+  padding-inline-end: 4px;
+}
+
+.box.multiline {
+  height: auto;
+  align-items: stretch;
 }
 
 .box.focused {
@@ -108,18 +119,22 @@ input,
 textarea {
   flex: 1;
   min-width: 0;
-  padding: 14px 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--text-primary);
   font: inherit;
-  font-size: 16px;
+  font-size: var(--field-font-size);
   caret-color: var(--accent);
   user-select: text;
 }
 
 textarea {
+  height: auto;
+  padding-block: 10px;
   resize: vertical;
   min-height: 72px;
   line-height: 1.4;

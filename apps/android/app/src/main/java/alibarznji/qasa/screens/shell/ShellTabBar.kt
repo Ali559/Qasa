@@ -22,7 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -34,15 +38,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 
-/** The four destinations that replaced the side drawer in the calm + personal redesign. */
-enum class ShellTab(@StringRes val labelRes: Int, val icon: ImageVector) {
-    Home(R.string.tab_home, Icons.Outlined.Home),
-    Passwords(R.string.tab_passwords, Icons.Outlined.Key),
-    Alerts(R.string.tab_alerts, Icons.Outlined.NotificationsActive),
-    You(R.string.tab_you, Icons.Outlined.PersonOutline),
+/**
+ * The four destinations that replaced the side drawer in the calm + personal redesign.
+ * Each tab has an outline glyph for the resting state and the filled glyph of the same
+ * symbol for the selected one.
+ */
+enum class ShellTab(@StringRes val labelRes: Int, val icon: ImageVector, val selectedIcon: ImageVector) {
+    Home(R.string.tab_home, Icons.Outlined.Home, Icons.Filled.Home),
+    Passwords(R.string.tab_passwords, Icons.Outlined.Key, Icons.Filled.Key),
+    Alerts(R.string.tab_alerts, Icons.Outlined.NotificationsActive, Icons.Filled.NotificationsActive),
+    You(R.string.tab_you, Icons.Outlined.Person, Icons.Filled.Person),
 }
 
-/** Card-coloured bar with a hairline on top; the selected tab takes the accent colour. */
+/** Card-coloured bar with a hairline on top; the selected tab takes the accent colour and filled glyph. */
 @Composable
 fun ShellTabBar(selected: ShellTab, onSelect: (ShellTab) -> Unit) {
     val c = qasaColors
@@ -65,7 +73,7 @@ fun ShellTabBar(selected: ShellTab, onSelect: (ShellTab) -> Unit) {
                         .padding(vertical = QasaDimens.spaceSmall),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Icon(tab.icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaIconSize.xxl))
+                    Icon(if (on) tab.selectedIcon else tab.icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaIconSize.xxl))
                     Spacer(Modifier.height(QasaDimens.spaceSmall))
                     Text(
                         stringResource(tab.labelRes),

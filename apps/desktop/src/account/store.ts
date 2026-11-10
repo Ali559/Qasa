@@ -19,7 +19,7 @@ const t = useT()
 
 /** A registration just took the backup device's place: say so once. */
 function announceReplaced(status: AccountStatus): void {
-  if (status.replacedDeviceName) showToast(t('backup.replace.doneFmt', status.replacedDeviceName), 5000)
+  if (status.replacedDeviceName) showToast(t('backup.replace.doneFmt', status.replacedDeviceName), { ms: 5000 })
 }
 
 /** Offers the replacement when the backup's key allows it (setup restore, Linked devices). */

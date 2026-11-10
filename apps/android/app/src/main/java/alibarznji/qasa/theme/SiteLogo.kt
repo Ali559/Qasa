@@ -41,7 +41,7 @@ private val KnownBrands: List<Pair<String, Color>> = listOf(
 
 /** Soft, readable-with-white colours for sites we do not recognise. */
 private val FallbackColors = listOf(
-    Color(0xFF7C6CF2),
+    Color(0xFF722F99),
     Color(0xFFE07A5F),
     Color(0xFF3FA7C9),
     Color(0xFF2F9E6C),

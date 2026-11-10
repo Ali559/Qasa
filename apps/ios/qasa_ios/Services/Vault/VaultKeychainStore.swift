@@ -157,7 +157,9 @@ nonisolated enum VaultKeychainStore {
         ]
         var result: AnyObject?
         var status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status != errSecSuccess {
+        // Only look in the pre–App Group location when the item isn't there; after a
+        // cancelled or failed Face ID prompt that would just prompt a second time.
+        if status == errSecItemNotFound {
             query.removeValue(forKey: kSecAttrAccessGroup as String)
             status = SecItemCopyMatching(query as CFDictionary, &result)
         }
@@ -172,6 +174,8 @@ nonisolated enum VaultKeychainStore {
             // the old salt, verifier, and plaintext-biometric password behind on disk.
             SecItemDelete(legacyQuery(for: key) as CFDictionary)
         }
+        // Not one of this store's keys, but part of the same vault: a fresh vault starts due.
+        BiometricPolicy.clearMasterPasswordUnlock()
     }
 
     // MARK: - Private

@@ -41,28 +41,52 @@ struct FormTextField: View {
     var keyboard: UIKeyboardType = .default
     /// The field's rule message, shown under it in red.
     var error: String? = nil
+    /// Notes / content: a growing text area (`Theme.notesMinHeight`) instead of one line.
+    var multiline: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
             FormFieldLabel(text: title)
             Group {
-                if isSecure {
-                    SecureField(placeholder ?? title, text: $text)
+                if multiline {
+                    TextField(placeholder ?? title, text: $text, axis: .vertical)
+                        .lineLimit(4...12)
+                        .keyboardType(keyboard)
+                        .multilineTextAlignment(.leading)
+                        .padding(.vertical, 6)
+                        .qasaNotesField(isError: error != nil)
                 } else {
-                    TextField(placeholder ?? title, text: $text)
+                    Group {
+                        if isSecure {
+                            SecureField(placeholder ?? title, text: $text)
+                        } else {
+                            TextField(placeholder ?? title, text: $text)
+                        }
+                    }
+                    .keyboardType(keyboard)
+                    .multilineTextAlignment(.leading)
+                    .qasaField(isError: error != nil)
                 }
             }
-            .keyboardType(keyboard)
-            .font(.qasa(16))
-            .multilineTextAlignment(.leading)
-            .foregroundColor(Theme.textPrimary)
-            .padding(14)
-            .background(Theme.cardBackground)
-            .cornerRadius(Theme.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                    .stroke(error == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
-            )
+            InlineFieldError(message: error)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// A labelled menu picker drawn as a field (`Theme.fieldHeight`).
+struct FormPickerField<Content: View>: View {
+    let title: String
+    var error: String? = nil
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
+            FormFieldLabel(text: title)
+            content
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .qasaField(isError: error != nil, horizontalPadding: 4)
             InlineFieldError(message: error)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -76,18 +100,8 @@ struct CountryPickerField: View {
     var error: String? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: L10n.tr("vault.country", locale: AppLanguage.current.locale))
+        FormPickerField(title: L10n.tr("vault.country", locale: AppLanguage.current.locale), error: error) {
             CountryMenuPicker(countryCode: $countryCode, showsDialCode: showsDialCode)
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.cardBackground)
-                .cornerRadius(Theme.cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                        .stroke(error == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
-                )
-            InlineFieldError(message: error)
         }
     }
 }
@@ -121,41 +135,42 @@ struct CollectionPickerField: View {
     @State private var showNew = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
             FormFieldLabel(text: L10n.tr("vault.collection", locale: AppLanguage.current.locale))
-            HStack {
+            HStack(spacing: 4) {
                 Picker(L10n.tr("vault.collection", locale: AppLanguage.current.locale), selection: $collectionId) {
                     Text(L10n.tr("common.none", locale: AppLanguage.current.locale)).tag(UUID?.none)
                     ForEach(collections) { c in
                         Text(c.name).tag(Optional(c.id))
                     }
                 }
-                .tint(Theme.accent)
-                Button {
+                .pickerStyle(.menu)
+                .labelsHidden()
+                Spacer(minLength: 0)
+                FieldIconButton(
+                    systemImage: "folder.badge.plus",
+                    tint: Theme.accent,
+                    accessibilityLabel: L10n.tr("vault.newCollection", locale: AppLanguage.current.locale)
+                ) {
                     showNew = true
-                } label: {
-                    Image(systemName: "folder.badge.plus")
-                        .foregroundColor(Theme.accent)
                 }
             }
-            .padding(12)
-            .background(Theme.cardBackground)
-            .cornerRadius(Theme.cornerRadius)
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                    .stroke(Theme.stroke, lineWidth: 1)
-            )
+            .qasaField(horizontalPadding: 4)
         }
-        .alert(L10n.tr("vault.newCollection", locale: AppLanguage.current.locale), isPresented: $showNew) {
-            TextField(L10n.tr("common.name", locale: AppLanguage.current.locale), text: $newName)
-            Button(L10n.tr("common.cancel", locale: AppLanguage.current.locale), role: .cancel) { newName = "" }
-            Button(L10n.tr("common.create", locale: AppLanguage.current.locale)) {
-                let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !trimmed.isEmpty else { return }
-                guard let c = try? VaultRepository.makeCollection(name: trimmed, context: modelContext) else { return }
-                collectionId = c.id
-                newName = ""
-            }
+        .textPromptSheet(
+            isPresented: $showNew,
+            title: L10n.tr("vault.newCollection", locale: AppLanguage.current.locale),
+            placeholder: L10n.tr("common.name", locale: AppLanguage.current.locale),
+            text: $newName,
+            confirmTitle: L10n.tr("common.create", locale: AppLanguage.current.locale),
+            cancelTitle: L10n.tr("common.cancel", locale: AppLanguage.current.locale),
+            onCancel: { newName = "" }
+        ) {
+            let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return }
+            guard let c = try? VaultRepository.makeCollection(name: trimmed, context: modelContext) else { return }
+            collectionId = c.id
+            newName = ""
         }
     }
 }
@@ -172,8 +187,10 @@ struct NoteColorPicker: View {
                         .fill(c.color)
                         .frame(width: 28, height: 28)
                         .overlay(
-                            Circle().stroke(Color.white, lineWidth: color == c ? 2 : 0)
+                            Circle().stroke(Theme.textPrimary, lineWidth: color == c ? 2 : 0)
                         )
+                        .padding(3)
+                        .contentShape(Circle())
                         .onTapGesture { color = c }
                 }
             }
@@ -194,11 +211,12 @@ struct VaultFormChrome<Content: View>: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: Theme.formSpacing) {
                     content
                 }
                 .padding(Theme.screenPadding)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
@@ -206,16 +224,17 @@ struct VaultFormChrome<Content: View>: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.tr("common.cancel", locale: locale), action: onCancel)
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(
-                        isEditing
-                            ? L10n.tr("common.update", locale: locale)
-                            : L10n.tr("common.save", locale: locale),
-                        action: onSave
-                    )
-                    .disabled(!canSave)
-                    .tint(Theme.accent)
-                }
+            }
+            // Save is the page's main action: pinned to the bottom, always in reach.
+            .bottomActionBar {
+                Button(
+                    isEditing
+                        ? L10n.tr("common.update", locale: locale)
+                        : L10n.tr("common.save", locale: locale),
+                    action: onSave
+                )
+                .buttonStyle(.qasaPrimary)
+                .disabled(!canSave)
             }
         }
         .appLocalization()

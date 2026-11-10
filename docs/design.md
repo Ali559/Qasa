@@ -137,45 +137,36 @@ Apply the fix to every `.border().background()` pair in `theme/` and `screens/`.
 
 ## 3. Typography
 
-### 3.1 The two families
+### 3.1 Families
 
 | Role | iOS | Android |
 | --- | --- | --- |
 | UI / body | `Font.qasa(size, weight:)` → `AppTypography.font` (`Theme.swift:188`) | Type scale, locale-aware family |
 | Mono / label | `Font.kasoMono(size, weight:)` → `.system(design: .monospaced)` (`Theme.swift:183`) | `FontFamily.Monospace` |
 
-`AppTypography.font` (`AppTypography.swift:15-20`) returns `RudawRegular` for `ckb` and `ar`
-and the system face for `en`. Android bundles **no font at all** — `res/font/` does not
-exist — so Kurdish and Arabic render in Roboto.
+Every app uses one family for every language: **IBM Plex Sans Arabic** (SIL OFL 1.1), which
+covers Latin, Arabic and Sorani Kurdish. It is bundled with each app in four static weights
+(Regular 400, Medium 500, SemiBold 600, Bold 700); nothing loads it from Google Fonts.
 
-**MUST** ship `rudawregular2.ttf` (already in `qasa_ios/Resources/`) as `res/font/rudaw_regular.ttf`
-and swap the family per language:
+| App | Where |
+| --- | --- |
+| iOS (app + AutoFill + payment-notification extensions) | `qasa_ios/Resources/IBMPlexSansArabic-*.ttf`, mapped by weight in `SharedAutofill/QasaFontFace.swift`; `AppTypography.font` and `Font.qasa` go through it |
+| Android | `res/font/ibm_plex_sans_arabic_{regular,medium,semibold,bold}.ttf`, one `FontFamily` in `theme/QasaTypography.kt` |
+| Desktop, extension | `apps/desktop/src/assets/fonts/`, `@font-face` in `theme/base.css`; the extension build copies the files into `dist/*/fonts/` |
+| Landing, dashboard | bundled locally with `@font-face`, same four weights |
 
-```kotlin
-// theme/QasaTypography.kt
-val rudaw = FontFamily(Font(R.font.rudaw_regular))
+Requested ExtraBold / Black weights fall back to Bold, the heaviest bundled file. The only
+character in the string catalog the font lacks is U+2011 (non-breaking hyphen), which falls
+back to the system font.
 
-@Composable
-fun qasaFontFamily(): FontFamily =
-    if (currentLanguage() == AppLanguage.EN) FontFamily.SansSerif else rudaw
-```
+**MUST** keep these per-script rules (one decision, in the typography layer: `QasaText.arabicScript`
+on Android, `QasaFontFace` / `AppTypography` on iOS):
 
-**MUST** also do what iOS does at 5 sites (`Components.swift:124`, `VPNView.swift:144,199`,
-`PremiumUpgradeView.swift:216`, `ManageSubscriptionView.swift:125,250`): for `ckb`/`ar` the
-mono family is **dropped** in favour of the body family and `letterSpacing` is **zeroed**.
-Letter spacing breaks cursive joining in Arabic script, so this is a correctness
-requirement, not a preference.
-
-**MUST NOT** force `.uppercase()` on `ckb`/`ar` — those scripts have no case. iOS guards with
-`AppTypography.usesRudaw ? text : text.uppercased()`. Android applies `.uppercase()`
-unconditionally in `SectionLabel` (`QasaComponents.kt:135`), `StatBox`
-(`QasaListWidgets.kt:151`) and the drawer (`AppShellScreen.kt:194,207`).
-
-**DO NOT** port the iOS weight-dropping bug. `AppTypography.swift:16` returns
-`.custom("RudawRegular", size:)` and discards `weight`, so every bold title renders at regular
-weight in Kurdish/Arabic. Android should synthesize weights for the single bundled face
-(`FontFamily` with the same file registered at several weights) or accept the loss
-explicitly — but do not make it worse.
+- For `ckb`/`ar` the mono family is **dropped** in favour of the body family and
+  `letterSpacing` is **zeroed**. Letter spacing breaks cursive joining in Arabic script, so
+  this is a correctness requirement, not a preference. Passwords stay monospaced in `en`.
+- **MUST NOT** force `.uppercase()` on `ckb`/`ar`; those scripts have no case.
+- **MUST** pass the requested weight through. A bold title must render bold in every language.
 
 ### 3.2 Scale
 
@@ -322,8 +313,11 @@ Everything else — cards, chips, headers, drawer, sticky bar — is **flat**. N
   - `CheckToggle`'s `"✓"` (`QasaListWidgets.kt:243`) — use a vector.
 - **MUST** use `Icons.AutoMirrored.*` for every directional glyph. Android currently has 57
   `Icons.Default.*` and 4 `AutoMirrored.*`; nothing prevents a future regression.
-- **MUST** use `Icons.Default.Shield` for the brand mark and `Icons.Default.Menu` for the
-  drawer, matching `Components.swift:7` and `AppMenuHeader.swift:12`.
+- **MUST** use the Qasa mark (the Qaf Keyhole) for the brand, never a stock shield:
+  `QasaMark` on iOS (`Assets.xcassets/QasaMark`), `R.drawable.ic_qasa_mark` on Android,
+  `QasaMark.vue` on desktop and in the extension. Every icon and mark is generated from one
+  geometry by `assets/brand/generate.py`; change the shapes there, never in an app.
+  `Icons.Default.Menu` stays for the drawer.
 - Icon container frames: 14×14, 16×20 (brand shield), 24×24, 28×28, 32×32, 36×36, 40×40,
   44×44, 48×48, 56×56, 88×88.
 
@@ -341,7 +335,7 @@ Menu button: 40×40 circle, `cardBackground` fill, 1pt `strokeChrome` border, 17
 Title: **20 semibold**, `textPrimary`, single line. Optional trailing slot.
 
 #### `BrandMenuHeader` — `AppMenuHeader.swift:41` / `AppChromeHeaders.kt:71` ✅
-Same chrome, title slot replaced by shield glyph (16 semibold, `mint`, 8pt gap) + brand
+Same chrome, title slot replaced by the Qasa mark (22pt, accent) + brand
 wordmark at `titleSize` (default 20) heavy, `mint`.
 
 #### `KasoBrandHeader` — `Components.swift:4` / `AppChromeHeaders.kt:37` ✅
@@ -416,9 +410,7 @@ Overridable `background` and `borderColor`.
 Uppercased for `en` only, 12pt — mono + 0.6 tracking for `en`, 12 semibold + 0 tracking for
 `ckb`/`ar` — `textSecondary`.
 
-**DO NOT** port the 4× copy-pasted `usesRudaw` ternary (`Components.swift:124`,
-`VPNView.swift:144,199`, `ManageSubscriptionView.swift:125,250`,
-`PasswordGeneratorModal.swift:173`). One component, one decision.
+**DO NOT** repeat the Arabic-script check at call sites. One component, one decision.
 
 **MUST** bake the following gap into `SectionLabel` rather than making 15 call sites repeat
 `Spacer(8)` + `Spacer(24)`: a leading 24pt section gap, and expose an 8pt trailing slot.
@@ -800,8 +792,8 @@ produce English. Use catalog keys.
 
 ### 10.3 Font and case
 
-Covered in §3.1: ship Rudaw, swap the family per language, drop mono and zero the tracking
-for `ckb`/`ar`, and suppress `.uppercase()`.
+Covered in §3.1: one bundled family (IBM Plex Sans Arabic) for every language; drop mono and
+zero the tracking for `ckb`/`ar`, and suppress `.uppercase()`.
 
 **MUST** add `displayName` to `AppLanguage`, matching iOS (`AppPreferences.swift:9-15`).
 Android currently inlines a `when` in `WelcomePreferencesScreen.kt:92-96` and uses
@@ -1138,7 +1130,6 @@ Fix these on iOS while porting the correct behaviour to Android.
 | Half-migrated theme: static `Theme.*` facade alongside `themePalette`; 26 of 29 views read the static one | `Theme.swift:107-108` |
 | `themedBackground()` defined, zero call sites | `Theme.swift:193-205` |
 | `StatBox`, `BilingualToggleRow`, `AppTypography.uiFont`, `textPlaceholder`, `dangerTextMuted`, and 4 legacy aliases all unused | `Components.swift:186,375`, `AppTypography.swift:22` |
-| Rudaw drops `weight` — every bold title renders regular in ckb/ar | `AppTypography.swift:16` |
 | `.kasoMono` is never localized — passwords render in SF Mono in ckb/ar | `Theme.swift:183-185` |
 | `Font.qasa` missing from 10 files, 76 sites — no Kurdish glyphs in the vault list, breach cards, settings, collections, or login | see §3.2 |
 | 3 chip implementations, 3 text-field variants, 3 toggle styles, 4 hand-rolled headers, 4 section-label idioms | §6 |
@@ -1186,7 +1177,7 @@ Ordered by user impact. `docs/design.md` § references point at the rule that go
 | --- | --- | --- |
 | 7 | `setLanguage` is a no-op — no `localeConfig`, no locale override | §10.2 |
 | 8 | 555 of 559 catalog keys unused; `stringResource` count is 0 | §10.1 |
-| 9 | No Rudaw font; ckb/ar render in Roboto | §3.1 |
+| 9 | ~~No Kurdish font; ckb/ar render in Roboto~~ Fixed: IBM Plex Sans Arabic is bundled | §3.1 |
 | 10 | Search index is ASCII-only — Arabic and Sorani are unsearchable | §12.4 |
 | 11 | Drawer and chip strips are not RTL-aware | §10.4 |
 | 12 | US-format number and date strings; no plurals | §10.4 |
@@ -1198,7 +1189,7 @@ Ordered by user impact. `docs/design.md` § references point at the rule that go
 | 13 | Every border renders at ~0.5dp because of `.border().background()` ordering | §2.3 |
 | 14 | 99 raw `fontSize` bypass the type scale; no `lineHeight` anywhere | §3.2 |
 | 15 | 245 raw `.dp`; 5 `QasaDimens` tokens; `17.dp` magic number | §4.1 |
-| 16 | No Rudaw mono-swap or tracking zeroing; `.uppercase()` forced on ckb/ar | §3.1 |
+| 16 | No Arabic-script mono-swap or tracking zeroing; `.uppercase()` forced on ckb/ar | §3.1 |
 | 17 | `MintFab` has no mint border and the wrong shadow; the icon is hardcoded | §6.1 |
 | 18 | `CheckToggle` thumb is hardcoded `#2563EB`; no animation; no `toggleable` | §6.4 |
 | 19 | `HalfCircleGauge` is a flat stepped color, unanimated, number inside | §6.6 |

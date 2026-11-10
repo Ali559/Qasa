@@ -10,7 +10,7 @@ const open = () => (updater.stage === 'available' && !updater.dismissed) || upda
 </script>
 
 <template>
-  <Sheet :open="open()" :label="t('update.availableTitle', updater.next)" :width="400" @close="updater.stage !== 'downloading' && (updater.dismissed = true)">
+  <Sheet :open="open()" :label="t('update.availableTitle', updater.next)" :width="400" placement="bottom" @close="updater.stage !== 'downloading' && (updater.dismissed = true)">
     <div class="prompt">
       <h2>{{ t('update.availableTitle', updater.next) }}</h2>
       <template v-if="updater.stage === 'downloading'">
@@ -63,9 +63,10 @@ progress {
 
 .actions button {
   flex: 1;
-  padding: 12px;
-  border-radius: 14px;
-  font-size: 16px;
+  height: var(--button-height);
+  padding: 0 16px;
+  border-radius: var(--button-radius);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

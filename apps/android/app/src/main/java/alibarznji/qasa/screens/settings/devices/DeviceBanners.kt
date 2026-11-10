@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.settings.devices
 import alibarznji.qasa.R
 import alibarznji.qasa.network.RestoreKeyStatus
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -122,23 +123,14 @@ internal fun DevicesInfoNote() {
     }
 }
 
-/** iOS "Unlink all other devices" (LinkedDevicesView.swift:78): danger-outlined bar with icon. */
+/** iOS "Unlink all other devices" (LinkedDevicesView.swift:78): the shared destructive secondary button. */
 @Composable
 internal fun UnlinkAllButton(enabled: Boolean, onClick: () -> Unit) {
-    val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.radiusSmall)
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .border(QasaDimens.stroke, c.danger.copy(alpha = 0.45f), shape)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(vertical = QasaDimens.gapSmall),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Filled.LinkOff, contentDescription = null, tint = c.danger, modifier = Modifier.size(QasaIconSize.md))
-        Spacer(Modifier.width(QasaDimens.contentGap))
-        Text(stringResource(R.string.devices_unlinkallothers), color = c.danger, style = qasaText.bodyMediumSemibold)
-    }
+    SecondaryButton(
+        title = stringResource(R.string.devices_unlinkallothers),
+        onClick = onClick,
+        enabled = enabled,
+        destructive = true,
+        icon = Icons.Filled.LinkOff,
+    )
 }

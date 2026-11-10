@@ -2,8 +2,8 @@ package alibarznji.qasa.screens.vault.editor
 
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.vault.VaultDates
+import alibarznji.qasa.theme.FieldIconButton
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.ValidatedDateField
@@ -26,9 +26,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -158,27 +156,23 @@ fun PasswordFormField(value: String, onChange: (String) -> Unit, onGenerate: () 
     var visible by remember { mutableStateOf(false) }
     val touch = rememberTouch(FfiField.PASSWORD)
     FieldBlock(label, error = fieldError(FfiField.PASSWORD)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ThemedTextField(
-                value = value,
-                onValueChange = { touch(); onChange(it) },
-                placeholder = label,
-                isSecure = true,
-                passwordVisible = visible,
-                onToggleVisibility = { visible = !visible },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(QasaDimens.spaceSmall))
-            IconButton(onClick = onGenerate, modifier = Modifier.size(QasaDimens.touchTarget)) {
-                Icon(
-                    Icons.Default.AutoFixHigh,
+        ThemedTextField(
+            value = value,
+            onValueChange = { touch(); onChange(it) },
+            placeholder = label,
+            isSecure = true,
+            passwordVisible = visible,
+            onToggleVisibility = { visible = !visible },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            trailing = {
+                FieldIconButton(
+                    icon = Icons.Outlined.AutoFixHigh,
                     contentDescription = stringResource(R.string.vault_generatepassword),
+                    onClick = onGenerate,
                     tint = c.accent,
-                    modifier = Modifier.size(QasaIconSize.xl),
                 )
-            }
-        }
+            },
+        )
     }
 }
 
@@ -197,9 +191,10 @@ fun PhoneNumberField(dialCode: String, value: String, onChange: (String) -> Unit
             Box(
                 Modifier
                     .widthIn(min = 64.dp)
+                    .height(QasaDimens.fieldHeight)
                     .background(c.cardBackground, shape)
                     .border(QasaDimens.stroke, c.stroke, shape)
-                    .padding(horizontal = QasaDimens.gapSmall, vertical = QasaDimens.gapXLarge),
+                    .padding(horizontal = QasaDimens.gapSmall),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(dialCode, color = c.accent, style = qasaText.rowTitle, textAlign = TextAlign.Center)

@@ -14,6 +14,7 @@ import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
+import alibarznji.qasa.vault.BiometricPolicy
 import alibarznji.qasa.vault.VaultSecureStore
 import alibarznji.qasa.vault.VaultSession
 import androidx.compose.foundation.background
@@ -39,6 +40,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,6 +124,56 @@ fun UnlockScreen(
 
     fun unlockWithPassword(candidate: String) {
         runUnlock({ vm.session.unlockMatching(candidate) != null }) { error = wrongPasswordMessage }
+    }
+
+    // ---- Biometric auto-prompt, once per appearance ---------------------------------
+    //
+    // `autoPromptArmed` is saveable, so a rotation or locale recreate keeps it consumed and
+    // never re-prompts. It is re-armed only by a real return to the foreground (an ON_START
+    // that follows an ON_STOP this observer saw), and not when the stop was caused by the
+    // prompt itself: the device-credential fallback is its own activity, so cancelling it
+    // stops and restarts us, and re-arming there would loop.
+    var autoPromptArmed by rememberSaveable { mutableStateOf(true) }
+    // Bumped on every foreground return so the interval check below is re-read: the screen
+    // can sit locked across the 14-day boundary.
+    var foregroundTick by remember { mutableIntStateOf(0) }
+    val promptInFlight = rememberUpdatedState(prompt != null)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        // Adding the observer replays ON_CREATE/ON_START/ON_RESUME; those must not re-arm.
+        var sawStop = false
+        var stoppedDuringPrompt = false
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_STOP -> {
+                    sawStop = true
+                    stoppedDuringPrompt = promptInFlight.value
+                }
+                Lifecycle.Event.ON_START -> if (sawStop) {
+                    sawStop = false
+                    foregroundTick++
+                    if (!stoppedDuringPrompt) autoPromptArmed = true
+                    stoppedDuringPrompt = false
+                }
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val masterPasswordDue = remember(foregroundTick, busy) { vm.session.masterPasswordDue }
+    val biometricAllowed = remember(foregroundTick, busy, prompt) { vm.session.biometricUnlockAllowed() }
+    val showMasterPasswordDue = masterPasswordDue && vm.session.biometricsEnabled
+    LaunchedEffect(autoPromptArmed) {
+        if (!autoPromptArmed) return@LaunchedEffect
+        // `BiometricPrompt` must be shown from a resumed host.
+        lifecycleOwner.lifecycle.currentStateFlow.first { it.isAtLeast(Lifecycle.State.RESUMED) }
+        // Consumed whether or not it prompts: one chance per appearance, never a retry loop.
+        autoPromptArmed = false
+        if (prompt != null || busy || !vm.session.biometricUnlockAllowed()) return@LaunchedEffect
+        // No cipher means no usable gate: never fall back to a presence-only prompt here.
+        val cipher = vm.session.biometricUnlockCipher() ?: return@LaunchedEffect
+        prompt = UnlockPrompt.Unlock(cipher)
     }
 
     BiometricGateEffect(
@@ -203,7 +263,15 @@ fun UnlockScreen(
             Spacer(Modifier.height(QasaDimens.contentGap))
             Text(it, color = c.danger, style = qasaText.bodySmallMedium)
         }
-        if (vm.session.biometricUnlockAvailable()) {
+        if (showMasterPasswordDue) {
+            Spacer(Modifier.height(QasaDimens.contentGap))
+            Text(
+                stringResource(R.string.auth_unlock_masterpasswordduefmt, BiometricPolicy.MASTER_PASSWORD_INTERVAL_DAYS),
+                color = c.textSecondary,
+                style = qasaText.bodyMedium,
+            )
+        }
+        if (biometricAllowed) {
             Spacer(Modifier.height(QasaDimens.gap))
             Row(
                 modifier = Modifier

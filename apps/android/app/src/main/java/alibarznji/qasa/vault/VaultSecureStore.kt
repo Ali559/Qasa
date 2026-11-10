@@ -133,6 +133,20 @@ class VaultSecureStore @Inject constructor(
         get() = prefs.getBoolean(KEY_BIOMETRICS, false)
         set(value) = prefs.edit().putBoolean(KEY_BIOMETRICS, value).apply()
 
+    /**
+     * Epoch millis of the last create, unlock, or password change done with the master
+     * password (see [BiometricPolicy]). Biometric unlocks never write it. Null when none was
+     * recorded, which the policy treats as due. Kept next to the biometric flag so a vault
+     * reset clears both together.
+     */
+    var lastMasterPasswordUnlock: Long?
+        get() = if (prefs.contains(KEY_LAST_MASTER_UNLOCK)) prefs.getLong(KEY_LAST_MASTER_UNLOCK, 0L) else null
+        set(value) {
+            val edit = prefs.edit()
+            if (value == null) edit.remove(KEY_LAST_MASTER_UNLOCK) else edit.putLong(KEY_LAST_MASTER_UNLOCK, value)
+            edit.apply()
+        }
+
     // ---- Hardware-gated master-password cache -------------------------------------
     //
     // The master password used to sit in `EncryptedSharedPreferences` as a plaintext
@@ -313,6 +327,7 @@ class VaultSecureStore @Inject constructor(
         private const val KEY_LICENSE = "licenseToken"
         private const val KEY_LICENSE_KEY = "licenseVerifyingKey"
         private const val KEY_BIOMETRICS = "biometricsEnabled"
+        private const val KEY_LAST_MASTER_UNLOCK = "lastMasterPasswordUnlock"
         private const val KEY_RESTORE_KEY = "restoreKey"
         private const val KEY_RESTORE_KEY_WRITTEN = "restoreKeyWritten"
         private const val KEY_PENDING_RESTORE_KEY = "pendingRestoreKey"

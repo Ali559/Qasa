@@ -8,7 +8,9 @@ export type BridgeStatus =
   | { state: 'appNotRunning' }
   | { state: 'notPaired'; reason?: 'denied' | 'expired' }
   | { state: 'pairing'; code: string }
-  | { state: 'locked' }
+  /** `passwordDueDays`: Touch ID / Hello is set up but the main password is due again
+   *  (it's been that many days), so it must be typed in the desktop app. */
+  | { state: 'locked'; passwordDueDays?: number }
   | { state: 'noVault' }
   | { state: 'unlocked' }
 

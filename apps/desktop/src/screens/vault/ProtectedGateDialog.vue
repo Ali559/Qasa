@@ -36,7 +36,7 @@ async function confirm() {
 </script>
 
 <template>
-  <Sheet :open="protectedGate.open" :label="t('vault.unlockProtectedNote')" :width="420" @close="finishProtectedAccess(false)">
+  <Sheet :open="protectedGate.open" :label="t('vault.unlockProtectedNote')" :width="420" placement="bottom" @close="finishProtectedAccess(false)">
     <div class="gate">
       <span class="icon"><Lock :size="22" /></span>
       <h2>{{ t('vault.unlockProtectedNote') }}</h2>

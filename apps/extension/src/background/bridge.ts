@@ -102,6 +102,9 @@ export class Bridge {
     try {
       const reply = await this.request('status', {})
       const state = reply.state
+      if (state === 'locked' && reply.passwordDue === true && typeof reply.passwordIntervalDays === 'number') {
+        return { state, passwordDueDays: reply.passwordIntervalDays }
+      }
       if (state === 'locked' || state === 'unlocked' || state === 'noVault') return { state }
       return { state: 'appNotRunning' }
     } catch (error) {

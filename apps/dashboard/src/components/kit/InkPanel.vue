@@ -10,12 +10,13 @@
 
 <style scoped>
 .ink {
-  --ink-info: #9aa3ff;
-  --ink-warn: #ffc53d;
-  --ink-ok: #4be0a8;
-  --ink-bad: #ff7a98;
+  /* Dark-scheme values from apps/desktop/src/theme/tokens.css, read with dark --ink text. */
+  --ink-info: #C9A3E6; /* info */
+  --ink-warn: #F0C48C; /* gold-muted */
+  --ink-ok: #5CCB97; /* success */
+  --ink-bad: #FF6B6B; /* danger */
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 4px 0 #08071a;
+    0 4px 0 var(--dock-lip);
 }
 </style>

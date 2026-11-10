@@ -82,7 +82,7 @@ async function decideSave(accept: boolean) {
 </script>
 
 <template>
-  <Sheet :open="pair !== null" :label="pair ? t('bridge.pairTitle', pair.client) : ''" :width="400" @close="decidePair(false)">
+  <Sheet :open="pair !== null" :label="pair ? t('bridge.pairTitle', pair.client) : ''" :width="400" placement="bottom" @close="decidePair(false)">
     <div v-if="pair" class="prompt">
       <h2>{{ t('bridge.pairTitle', pair.client) }}</h2>
       <output class="code" dir="ltr">{{ pair.code.replace(/(\d{3})(\d{3})/, '$1 $2') }}</output>
@@ -240,9 +240,10 @@ dd {
 
 .actions button {
   flex: 1;
-  padding: 12px;
-  border-radius: 14px;
-  font-size: 16px;
+  height: var(--button-height);
+  padding: 0 16px;
+  border-radius: var(--button-radius);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// iOS `KasoBrandHeader`: 64pt, chrome surface, shield + wordmark in accent, no divider.
-import { Shield } from 'lucide-vue-next'
+// iOS `KasoBrandHeader`: 64pt, chrome surface, Qasa mark + wordmark in accent, no divider.
+import QasaMark from '@/components/QasaMark.vue'
 
 import { useT } from '@/prefs'
 
@@ -10,7 +10,7 @@ const t = useT()
 <template>
   <header class="brand-header">
     <div class="brand">
-      <Shield class="shield" :size="16" fill="currentColor" aria-hidden="true" />
+      <QasaMark class="mark" :size="22" />
       <span class="wordmark">{{ t('brand.name') }}</span>
     </div>
     <slot name="trailing" />
@@ -36,15 +36,14 @@ const t = useT()
   color: var(--accent);
 }
 
-.shield {
-  width: 16px;
-  height: 20px;
+.mark {
+  flex: none;
 }
 
-/* iOS draws the wordmark in the system face, not Rubik. */
+/* The wordmark in the app face too, at its heaviest bundled weight. */
 .wordmark {
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
 }
 </style>

@@ -44,7 +44,7 @@ async function create() {
       </button>
     </template>
   </SelectField>
-  <Sheet :open="showNew" :label="t('vault.newCollection')" :width="400" @close="showNew = false">
+  <Sheet :open="showNew" :label="t('vault.newCollection')" :width="400" placement="bottom" @close="showNew = false">
     <div class="new-sheet">
       <h2>{{ t('vault.newCollection') }}</h2>
       <TextField v-model="newName" :placeholder="t('common.name')" autofocus @submit="create" />
@@ -90,12 +90,13 @@ h2 {
 
 .actions button {
   flex: 1;
-  padding: 12px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid var(--stroke);
-  border-radius: 14px;
+  border-radius: var(--button-radius);
   background: var(--card-background);
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

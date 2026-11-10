@@ -1,8 +1,10 @@
 <script setup lang="ts">
 // iOS `LoginView`: main password, and the fingerprint / Hello row when it is turned on and
-// sealed for this vault.
-import { ChevronRight, Fingerprint, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+// sealed for this vault. With biometrics on, the prompt starts by itself (once each time the
+// screen appears or the window comes back), unless the main password is due again: then
+// only the password is offered, and the screen says why.
+import { ChevronRight, Fingerprint, KeyRound, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
@@ -23,10 +25,56 @@ const error = ref<string | null>(null)
 const busy = ref(false)
 const canUnlock = computed(() => password.value.trim().length > 0 && !busy.value)
 const bio = ref<BiometricStatus | null>(null)
-const showBiometric = computed(() => !!bio.value && bio.value.kind !== 'none' && bio.value.enabled && bio.value.sealed)
+const bioReady = computed(() => !!bio.value && bio.value.kind !== 'none' && bio.value.enabled && bio.value.sealed)
+/** Biometrics is set up but the main password is due: no button, no prompt. */
+const passwordDue = computed(() => bioReady.value && !!bio.value?.masterPasswordDue)
+const showBiometric = computed(() => bioReady.value && !passwordDue.value)
+
+/** Set when the window loses focus (not while our own prompt has it), so the next focus
+ * prompts once. The system prompt itself blurs the window; that never re-arms it. */
+let armed = false
+let gone = false
+
+async function refreshBio() {
+  bio.value = await vaultApi.biometricStatus().catch(() => null)
+}
+
+/** Starts the prompt by itself only when it would be offered as a button. */
+function autoPrompt() {
+  if (showBiometric.value && !busy.value && !gone) void unlockWithBiometrics()
+}
+
+function onBlur() {
+  if (!busy.value) armed = true
+}
+
+function onFocus() {
+  if (!armed) return
+  armed = false
+  // The status may have changed while away (the interval ran out, or Settings turned it off).
+  void refreshBio().then(autoPrompt)
+}
+
+function onVisibility() {
+  if (document.visibilityState === 'hidden') onBlur()
+  else onFocus()
+}
 
 onMounted(async () => {
-  bio.value = await vaultApi.biometricStatus().catch(() => null)
+  window.addEventListener('blur', onBlur)
+  window.addEventListener('focus', onFocus)
+  document.addEventListener('visibilitychange', onVisibility)
+  await refreshBio()
+  // A window opened in the background prompts when it comes forward instead.
+  if (document.hasFocus()) autoPrompt()
+  else armed = true
+})
+
+onBeforeUnmount(() => {
+  gone = true
+  window.removeEventListener('blur', onBlur)
+  window.removeEventListener('focus', onFocus)
+  document.removeEventListener('visibilitychange', onVisibility)
 })
 
 async function unlockWithBiometrics() {
@@ -37,9 +85,11 @@ async function unlockWithBiometrics() {
     error.value = null
     emit('unlocked')
   } catch (e) {
-    // Dismissing the prompt is not an error; anything else falls back to the password.
-    if (!(isCommandError(e) && e.code === 'cancelled')) error.value = t('auth.unlock.biometricsFailed')
-    bio.value = await vaultApi.biometricStatus().catch(() => null)
+    // Dismissing the prompt is not an error, and a due password is shown by the note
+    // (after the refresh below); anything else falls back to the password.
+    const quiet = isCommandError(e) && (e.code === 'cancelled' || e.code === 'masterPasswordDue')
+    if (!quiet) error.value = t('auth.unlock.biometricsFailed')
+    await refreshBio()
   } finally {
     busy.value = false
   }
@@ -91,6 +141,10 @@ async function unlock() {
           @submit="unlock"
         />
         <p v-if="error" class="error" role="alert">{{ error }}</p>
+        <p v-else-if="passwordDue" class="due">
+          <KeyRound :size="16" class="due-icon" aria-hidden="true" />
+          <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
+        </p>
       </div>
 
       <button v-if="showBiometric" type="button" class="bio" :disabled="busy" @click="unlockWithBiometrics">
@@ -156,6 +210,22 @@ async function unlock() {
   font-size: 13px;
   font-weight: 500;
   color: var(--danger);
+}
+
+.due {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.due-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
 }
 
 .bio {

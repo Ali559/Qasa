@@ -43,9 +43,9 @@ struct BreachCard: View {
                 resolvedAction
             }
         }
-        .padding(21)
+        .padding(20)
         .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
                 .stroke(accent, lineWidth: 1)
@@ -69,7 +69,7 @@ struct BreachCard: View {
     private func compromisedChip(_ field: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: fieldIcon(field))
-                .font(.qasa(10))
+                .font(.system(size: 10))
             Text(field)
                 .font(.qasaLabel(12))
         }
@@ -77,47 +77,32 @@ struct BreachCard: View {
         .padding(.vertical, 5)
         .background(Theme.cardBackgroundLight)
         .foregroundColor(Theme.textPrimary)
-        .cornerRadius(4)
+        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
     }
 
     private var unresolvedAction: some View {
         Button(action: onRotate) {
-            HStack(spacing: 8) {
-                Image(systemName: "key.fill")
-                Text(L10n.tr("breach.rotatePassword"))
-            }
-            .font(.qasa(14))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 11)
-            .foregroundColor(Theme.danger)
-            .background(Theme.chrome)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Theme.danger, lineWidth: 1)
-            )
+            QasaButtonLabel(title: L10n.tr("breach.rotatePassword"), icon: "key.fill")
         }
+        .buttonStyle(.qasaDestructive)
     }
 
     private var resolvedAction: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "checkmark")
-            Text(L10n.tr("breach.actionTaken"))
-        }
-        .font(.qasa(14))
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 11)
-        .foregroundColor(Theme.textTertiary)
-        .background(Theme.cardBackgroundLight)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Theme.strokeChrome, lineWidth: 1)
-        )
+        QasaButtonLabel(title: L10n.tr("breach.actionTaken"), icon: "checkmark")
+            .font(.qasa(16, weight: .semibold))
+            .foregroundColor(Theme.textTertiary)
+            .frame(maxWidth: .infinity)
+            .frame(height: Theme.buttonHeight)
+            .background(Theme.cardBackgroundLight)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
+                    .stroke(Theme.strokeChrome, lineWidth: 1)
+            )
     }
 
     private func fieldIcon(_ field: String) -> String {

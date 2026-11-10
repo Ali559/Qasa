@@ -14,24 +14,24 @@ struct EphemeralNotificationPanel: View {
     @State private var lastCopiedFieldId: String?
     @State private var didExpire = false
 
-    private let mint = Color(red: 0.35, green: 0.85, blue: 0.72)
-    private let danger = Color.red
+    private let mint = QasaSharedPalette.accent
+    private let danger = QasaSharedPalette.danger
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(QasaFontFace.font(size: 16, weight: .semibold))
                     if !subtitle.isEmpty {
                         Text(subtitle)
-                            .font(.system(size: 13))
+                            .font(QasaFontFace.font(size: 13))
                             .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 Text(AutofillL10n.format("autofill.expiresIn", "Expires in %ds", secondsRemaining))
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(QasaFontFace.font(size: 12, weight: .semibold))
                     .foregroundStyle(secondsRemaining <= 5 ? danger : mint)
             }
 
@@ -39,7 +39,7 @@ struct EphemeralNotificationPanel: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(field.label)
-                            .font(.system(size: 11))
+                            .font(QasaFontFace.font(size: 11))
                             .foregroundStyle(.secondary)
                         Text(EphemeralPaymentNotificationSupport.displayValue(for: field))
                             .font(.system(size: 14, design: .monospaced))
@@ -55,7 +55,7 @@ struct EphemeralNotificationPanel: View {
                                 ? AutofillL10n.tr("autofill.copied", "Copied")
                                 : AutofillL10n.tr("autofill.copy", "Copy")
                         )
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(QasaFontFace.font(size: 13, weight: .semibold))
                         .foregroundStyle(mint)
                     }
                     .buttonStyle(.plain)

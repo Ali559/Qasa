@@ -9,7 +9,7 @@
 import type { BgRequest, BgResponse, BridgeStatus, ContentRequest, IdentityItem, LoginMatch, PopupRequest, SearchHit } from '@ext/shared/messages'
 import { isWebUrl, NATIVE_HOST } from '@ext/shared/protocol'
 import type { FontBytes } from '@ext/content/fonts'
-import { FONT_FILES } from '@ext/shared/fonts'
+import { FONT_FILES, FONT_WEIGHTS } from '@ext/shared/fonts'
 import { Bridge, BridgeError, type PairingStore, type StoredPairing } from './bridge'
 import { UsernameMemory } from './usernames'
 
@@ -59,8 +59,8 @@ async function readFont(path: string): Promise<string> {
 }
 
 function fonts(): Promise<FontBytes> {
-  fontBytes ??= Promise.all([readFont(FONT_FILES.rubik), readFont(FONT_FILES.rudaw)])
-    .then(([rubik, rudaw]) => ({ rubik, rudaw }))
+  fontBytes ??= Promise.all(FONT_WEIGHTS.map((w) => readFont(FONT_FILES[w])))
+    .then((files) => Object.fromEntries(FONT_WEIGHTS.map((w, i) => [w, files[i]])) as FontBytes)
     .catch((e) => {
       fontBytes = undefined
       throw e

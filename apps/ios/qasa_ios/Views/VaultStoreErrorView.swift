@@ -45,7 +45,7 @@ struct VaultStoreErrorView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: "lock.trianglebadge.exclamationmark.fill")
-                .font(.qasa(40, weight: .semibold))
+                .font(.system(size: 40, weight: .semibold))
                 .foregroundColor(Theme.danger)
             Text(L10n.tr("error.vaultStoreTitle", locale: locale))
                 .font(.qasa(26, weight: .bold))
@@ -66,7 +66,11 @@ struct VaultStoreErrorView: View {
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.cardBackground)
-            .cornerRadius(Theme.cornerRadius)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+                    .stroke(Theme.stroke, lineWidth: 1)
+            )
     }
 
     private var diagnostics: some View {
@@ -74,7 +78,7 @@ struct VaultStoreErrorView: View {
             Text(L10n.tr("error.vaultStorePath", locale: locale) + " " + failure.storePath)
             Text(L10n.tr("error.vaultStoreDetail", locale: locale) + " " + failure.underlying)
         }
-        .font(.system(size: 12, design: .monospaced))
+        .font(.kasoMono(12, weight: .regular))
         .foregroundColor(Theme.textSecondary)
         .textSelection(.enabled)
         .fixedSize(horizontal: false, vertical: true)

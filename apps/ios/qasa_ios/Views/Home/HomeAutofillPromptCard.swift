@@ -29,9 +29,15 @@ final class AutofillPromptState {
     }
 
     /// iOS 18's own "Allow Qasa to fill passwords?" prompt; no trip through Settings.
+    /// iOS 17 has no prompt, so it opens Qasa's AutoFill page in Settings instead; the
+    /// card refreshes when the app comes back to the foreground.
     func activate() {
-        ASSettingsHelper.requestToTurnOnCredentialProviderExtension { _ in
-            Task { @MainActor in await self.refresh() }
+        if #available(iOS 18.0, *) {
+            ASSettingsHelper.requestToTurnOnCredentialProviderExtension { _ in
+                Task { @MainActor in await self.refresh() }
+            }
+        } else {
+            ASSettingsHelper.openCredentialProviderAppSettings { _ in }
         }
     }
 }
@@ -46,9 +52,8 @@ struct HomeAutofillPromptCard: View {
         let l = prefs.locale
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Image(systemName: "checkmark.shield.fill")
-                    .font(.qasa(20, weight: .semibold))
-                    .foregroundColor(.white)
+                QasaMark(size: 24)
+                    .foregroundColor(theme.onAccent)
                     .frame(width: 44, height: 44)
                     .background(theme.accent)
                     .clipShape(Circle())
@@ -64,29 +69,19 @@ struct HomeAutofillPromptCard: View {
                 .foregroundColor(theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 12) {
-                Button(action: state.activate) {
-                    Text(L10n.tr("autofill.prompt.activate", locale: l))
-                        .font(.qasa(15, weight: .semibold))
-                        .foregroundColor(theme.onAccent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(theme.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-                .buttonStyle(.plain)
-                Button(action: state.notNow) {
-                    Text(L10n.tr("autofill.prompt.notNow", locale: l))
-                        .font(.qasa(14, weight: .medium))
-                        .foregroundColor(theme.textSecondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 12)
-                }
-                .buttonStyle(.plain)
+                Button(L10n.tr("autofill.prompt.activate", locale: l), action: state.activate)
+                    .buttonStyle(.qasaPrimary)
+                Button(L10n.tr("autofill.prompt.notNow", locale: l), action: state.notNow)
+                    .buttonStyle(QasaButtonStyle(kind: .plain, fullWidth: false))
             }
         }
         .padding(17)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                .stroke(theme.stroke, lineWidth: 1)
+        )
     }
 }

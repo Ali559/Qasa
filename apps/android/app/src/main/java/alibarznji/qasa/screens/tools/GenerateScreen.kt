@@ -9,6 +9,7 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaSlider
 import alibarznji.qasa.theme.ScreenScaffold
+import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.StrengthBar
 import alibarznji.qasa.theme.qasaColors
@@ -61,17 +62,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.delay
 
+/**
+ * The Generator page. "Save to my passwords" hands the current password to
+ * [onSaveToPasswords], which opens the new-login editor with it filled in.
+ */
 @Composable
-fun GenerateScreen(onOpenMenu: (() -> Unit)? = null) {
+fun GenerateScreen(
+    onOpenMenu: (() -> Unit)? = null,
+    onSaveToPasswords: (password: String) -> Unit = {},
+) {
     val state = rememberPasswordGeneratorState()
     ScreenScaffold(
         header = { AppMenuHeader(title = stringResource(R.string.nav_generator), onMenu = onOpenMenu, applyStatusBars = false) },
+        stickyBottom = {
+            StickyBottomBar {
+                PrimaryButton(
+                    title = stringResource(R.string.gen_savetovault),
+                    onClick = { onSaveToPasswords(state.password) },
+                    enabled = state.password.isNotEmpty(),
+                )
+            }
+        },
     ) {
         // iOS `GeneratorView` uses the roomy (`compact: false`) layout; the sheet keeps compact.
         PasswordGeneratorContent(state, compact = false)
-        Spacer(Modifier.height(QasaDimens.sectionGap))
-        // Save to vault is a no-op on iOS GeneratorView — parity
-        PrimaryButton(title = stringResource(R.string.gen_savetovault), onClick = { /* no-op */ })
     }
 }
 

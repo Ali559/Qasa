@@ -10,12 +10,10 @@ struct KasoBrandHeader: View {
     var body: some View {
         HStack(spacing: 12) {
             HStack(spacing: 12) {
-                Image(systemName: "shield.fill")
-                    .font(.qasa(16, weight: .semibold))
+                QasaMark(size: 22)
                     .foregroundColor(theme.accent)
-                    .frame(width: 16, height: 20)
                 Text(L10n.tr("brand.name", locale: prefs.locale))
-                    .font(.system(size: titleSize, weight: .heavy))
+                    .font(.qasa(titleSize, weight: .bold))
                     .foregroundColor(theme.accent)
             }
             Spacer()
@@ -58,33 +56,53 @@ struct StatusPill: View {
 }
 
 // MARK: - Primary Button
+/// Full-width main action (`QasaButtonStyle`, `Theme.buttonHeight`). `color` swaps the fill
+/// for the rare tinted call to action; `cornerRadius` is kept for source compatibility.
 struct PrimaryButton: View {
     @Environment(\.themePalette) private var theme
     let title: String
     var icon: String? = nil
     var color: Color? = nil
     var textColor: Color? = nil
-    var cornerRadius: CGFloat = Theme.cornerRadius
+    var cornerRadius: CGFloat = Theme.controlCornerRadius
+    var kind: QasaButtonKind = .primary
     var action: () -> Void
 
     var body: some View {
-        let fill = color ?? theme.accent
-        let label = textColor ?? theme.onAccent
-        Button(action: action) {
-            HStack(spacing: 8) {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(.qasa(16, weight: .semibold))
-                }
-                Text(title)
-                    .font(.qasa(18, weight: .semibold))
+        if let color {
+            Button(action: action) {
+                QasaButtonLabel(title: title, icon: icon)
+                    .font(.qasa(16, weight: .semibold))
+                    .foregroundColor(textColor ?? theme.onAccent)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: Theme.buttonHeight)
+                    .background(color)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(fill)
-            .foregroundColor(label)
-            .cornerRadius(cornerRadius)
-            .shadow(color: fill == theme.accent ? theme.accent.opacity(0.3) : .clear, radius: 10, y: 0)
+            .buttonStyle(PressableStyle())
+        } else {
+            Button(action: action) {
+                QasaButtonLabel(title: title, icon: icon)
+            }
+            .buttonStyle(QasaButtonStyle(kind: kind))
+        }
+    }
+}
+
+/// Pressed / disabled feedback for custom-drawn buttons.
+struct PressableStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        PressableBody(configuration: configuration)
+    }
+
+    private struct PressableBody: View {
+        @Environment(\.isEnabled) private var isEnabled
+        let configuration: ButtonStyle.Configuration
+        var body: some View {
+            configuration.label
+                .opacity(isEnabled ? (configuration.isPressed ? 0.85 : 1) : 0.45)
+                .scaleEffect(configuration.isPressed && isEnabled ? 0.98 : 1)
+                .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
         }
     }
 }
@@ -118,7 +136,7 @@ struct SectionLabel: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
+            .font(.qasa(12, weight: .semibold))
             .foregroundColor(theme.textSecondary)
     }
 }
@@ -144,18 +162,10 @@ struct ThemedTextField: View {
                     TextField(placeholder, text: $text)
                 }
             }
-            .foregroundColor(theme.textPrimary)
-            .tint(theme.accent)
+            .multilineTextAlignment(.leading)
             if let trailing { trailing }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 18)
-        .background(theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(theme.stroke, lineWidth: 1)
-        )
+        .qasaField()
     }
 }
 
@@ -211,6 +221,7 @@ struct StatBox: View {
 }
 
 // MARK: - Toggle Row
+/// A `SettingsRow` with a switch.
 struct ToggleRow: View {
     @Environment(\.themePalette) private var theme
     let icon: String
@@ -221,34 +232,22 @@ struct ToggleRow: View {
     var iconBackground: Color? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(iconBackground ?? iconColor.opacity(0.2))
-                    .frame(width: 40, height: 40)
-                Image(systemName: icon)
-                    .foregroundColor(iconColor)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .foregroundColor(theme.textPrimary)
-                    .font(.qasa(16))
-                if !subtitle.isEmpty {
-                    Text(subtitle)
-                        .foregroundColor(theme.textSecondary)
-                        .font(.qasa(14))
-                }
-            }
-            Spacer()
+        SettingsRow(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+            iconColor: iconColor == theme.textPrimary ? nil : iconColor,
+            iconBackground: iconBackground
+        ) {
             Toggle("", isOn: $isOn)
                 .labelsHidden()
                 .tint(theme.accent)
         }
-        .padding(.vertical, 8)
     }
 }
 
 // MARK: - Nav Chevron Row
+/// A `SettingsRow` that navigates: optional trailing value, chevron (none when destructive).
 struct NavChevronRow: View {
     @Environment(\.themePalette) private var theme
     let icon: String
@@ -259,33 +258,18 @@ struct NavChevronRow: View {
     var iconColor: Color? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundColor(destructive ? theme.danger : (iconColor ?? theme.textPrimary))
-                .frame(width: 28)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .foregroundColor(destructive ? theme.danger : theme.textPrimary)
-                    .font(.qasa(15, weight: .medium))
-                if let subtitle {
-                    Text(subtitle)
-                        .foregroundColor(theme.textSecondary)
-                        .font(.qasa(12))
-                }
-            }
-            Spacer()
-            if let trailingText {
-                Text(trailingText)
-                    .font(.qasa(12))
-                    .foregroundColor(theme.textSecondary)
-            }
-            if !destructive {
-                Image(systemName: "chevron.forward")
-                    .font(.qasa(12))
-                    .foregroundColor(theme.textTertiary)
+        SettingsRow(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+            iconColor: iconColor,
+            destructive: destructive
+        ) {
+            HStack(spacing: 8) {
+                if let trailingText { RowValue(text: trailingText) }
+                if !destructive { RowChevron() }
             }
         }
-        .padding(.vertical, 10)
     }
 }
 
@@ -325,12 +309,12 @@ struct CheckToggleStyle: ToggleStyle {
                     .frame(width: 48, height: 24)
 
                 Circle()
-                    .fill(configuration.isOn ? Color(hex: "2563EB") : theme.stroke)
+                    .fill(configuration.isOn ? theme.cardBackground : theme.textTertiary)
                     .frame(width: 24, height: 24)
                     .overlay(
                         Image(systemName: "checkmark")
                             .font(.qasa(11, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(theme.accent)
                             .opacity(configuration.isOn ? 1 : 0)
                     )
                     .offset(x: configuration.isOn ? 12 : -12)
@@ -388,7 +372,7 @@ struct FilterChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
+                .font(.qasa(14, weight: isSelected ? .semibold : .regular))
                 .padding(.horizontal, 17)
                 .padding(.vertical, 7)
                 .background(selectedBackground)
@@ -398,6 +382,7 @@ struct FilterChip: View {
                 )
                 .clipShape(Capsule())
         }
+        .buttonStyle(PressableStyle())
     }
 
     private var selectedBackground: Color {
@@ -438,5 +423,20 @@ struct MintFAB: View {
                 )
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
         }
+    }
+}
+
+/// The Qasa brand mark, the Qaf Keyhole (`Assets.xcassets/QasaMark`, generated by
+/// `assets/brand/generate.py`). A template image: colour it with `.foregroundColor`.
+struct QasaMark: View {
+    var size: CGFloat
+
+    var body: some View {
+        Image("QasaMark")
+            .renderingMode(.template)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .accessibilityHidden(true)
     }
 }

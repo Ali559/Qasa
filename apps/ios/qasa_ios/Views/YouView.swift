@@ -58,17 +58,13 @@ struct YouView: View {
     }
 
     private func group(_ label: String, _ pages: [AppPage]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionLabel(text: label)
-            CardContainer {
-                VStack(spacing: 0) {
-                    ForEach(pages) { page in
-                        Button { onOpen(page) } label: {
-                            NavChevronRow(icon: page.youIcon, title: page.title)
-                        }
-                        .buttonStyle(.plain)
-                    }
+        SettingsSection(title: label) {
+            ForEach(Array(pages.enumerated()), id: \.element) { index, page in
+                if index > 0 { RowDivider() }
+                Button { onOpen(page) } label: {
+                    NavChevronRow(icon: page.youIcon, title: page.title)
                 }
+                .buttonStyle(.qasaRow)
             }
         }
     }

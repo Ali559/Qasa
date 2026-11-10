@@ -94,9 +94,9 @@ fun StatusPill(
 }
 
 /**
- * `PrimaryButton` — `Components.swift:64`. Full width, 16pt vertical padding,
- * `cornerRadius`, `accent` fill, `onAccent` label at 18 semibold, optional 16
- * leading icon, mint-30% glow at radius 10.
+ * `PrimaryButton` — `Components.swift:64`. Full width, exactly [QasaDimens.buttonHeight]
+ * tall, `cornerRadius`, `accent` fill (`danger` when [destructive]), `onAccent` label at
+ * 17 semibold, optional 16 leading icon, a soft accent glow while enabled.
  *
  * Disabled callers must pass `enabled = false`, never hand-roll an opacity (§6.2).
  */
@@ -107,8 +107,10 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    destructive: Boolean = false,
 ) {
     val c = qasaColors
+    val fill = if (destructive) c.danger else c.accent
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
     val interaction = remember { MutableInteractionSource() }
     val scale = rememberPressScale(interaction)
@@ -118,15 +120,15 @@ fun PrimaryButton(
         interactionSource = interaction,
         modifier = modifier
             .fillMaxWidth()
-            .height(QasaDimens.stickyButtonHeight)
+            .height(QasaDimens.buttonHeight)
             .scale(scale)
             .then(
                 if (enabled) {
                     Modifier.shadow(
-                        QasaDimens.gapMedium,
+                        QasaDimens.contentGap,
                         shape,
-                        ambientColor = c.accent.copy(alpha = 0.3f),
-                        spotColor = c.accent.copy(alpha = 0.3f),
+                        ambientColor = fill.copy(alpha = 0.3f),
+                        spotColor = fill.copy(alpha = 0.3f),
                     )
                 } else {
                     Modifier
@@ -134,18 +136,18 @@ fun PrimaryButton(
             ),
         shape = shape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = c.accent,
+            containerColor = fill,
             contentColor = c.onAccent,
-            disabledContainerColor = c.accent.copy(alpha = 0.45f),
-            disabledContentColor = c.onAccent.copy(alpha = 0.7f),
+            disabledContainerColor = fill.copy(alpha = 0.4f),
+            disabledContentColor = c.onAccent.copy(alpha = 0.75f),
         ),
-        contentPadding = PaddingValues(vertical = QasaDimens.gap),
+        contentPadding = ButtonContentPadding,
     ) {
         if (icon != null) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(QasaIconSize.md))
             Spacer(Modifier.width(QasaDimens.contentGap))
         }
-        Text(title, style = qasaText.buttonLabel)
+        Text(title, style = qasaText.ctaLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -187,7 +189,7 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     Text(
         text = qasaText.label(text),
         color = c.textSecondary,
-        style = if (qasaText.usesRudaw) qasaText.sectionLabelSemibold else qasaText.sectionLabel,
+        style = if (qasaText.arabicScript) qasaText.sectionLabelSemibold else qasaText.sectionLabel,
         modifier = modifier,
     )
 }
@@ -241,33 +243,49 @@ fun MintFab(
     }
 }
 
-/** Android-only. 56 tall, `cardBackgroundLight`, 1pt `stroke` border, 16 semibold. */
+/** No vertical padding: the fixed [QasaDimens.buttonHeight] centers the label. */
+private val ButtonContentPadding = PaddingValues(horizontal = QasaDimens.gap)
+
+/**
+ * Android-only. Same [QasaDimens.buttonHeight] as [PrimaryButton], `cardBackgroundLight`,
+ * 1pt `stroke` border, 16 semibold; `danger` label when [destructive].
+ */
 @Composable
 fun SecondaryButton(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    destructive: Boolean = false,
+    icon: ImageVector? = null,
 ) {
     val c = qasaColors
     val interaction = remember { MutableInteractionSource() }
     val scale = rememberPressScale(interaction)
+    val content = if (destructive) c.danger else c.textPrimary
     Button(
         onClick = onClick,
         enabled = enabled,
         interactionSource = interaction,
         modifier = modifier
             .fillMaxWidth()
-            .height(QasaDimens.stickyButtonHeight)
+            .height(QasaDimens.buttonHeight)
             .scale(scale),
         shape = RoundedCornerShape(QasaDimens.cornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = c.cardBackgroundLight,
-            contentColor = c.textPrimary,
+            contentColor = content,
+            disabledContainerColor = c.cardBackgroundLight.copy(alpha = 0.6f),
+            disabledContentColor = content.copy(alpha = 0.45f),
         ),
         border = BorderStroke(StrokeWidth, c.stroke),
+        contentPadding = ButtonContentPadding,
     ) {
-        Text(title, style = qasaText.rowTitle)
+        if (icon != null) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(QasaIconSize.md))
+            Spacer(Modifier.width(QasaDimens.contentGap))
+        }
+        Text(title, style = qasaText.rowTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 

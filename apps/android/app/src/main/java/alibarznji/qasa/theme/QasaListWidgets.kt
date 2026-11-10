@@ -7,16 +7,19 @@ import alibarznji.qasa.theme.qasaText
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,17 +37,76 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 
 /**
- * `NavChevronRow` — `Components.swift:257`. 10pt vertical padding, 28pt icon,
- * 12pt gap, title 15 medium (`.subheadline.weight(.medium)`), subtitle and trailing
- * 12 regular sans (`.caption`, not mono, no tracking) with a 2pt title/subtitle gap,
- * chevron 12 `textTertiary`, hidden when destructive. No press-scale: iOS rows only
- * highlight.
+ * The rounded-square icon badge every settings / list row leads with: a fixed
+ * [QasaDimens.rowIconBadge] square, `tint @ 12%` fill (or [background]), 20dp glyph.
+ */
+@Composable
+fun RowIconBadge(icon: ImageVector, tint: Color, background: Color? = null) {
+    val shape = RoundedCornerShape(QasaDimens.rowIconBadgeRadius)
+    Box(
+        modifier = Modifier
+            .size(QasaDimens.rowIconBadge)
+            .clip(shape)
+            .background(background ?: tint.copy(alpha = 0.12f), shape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, null, tint = tint, modifier = Modifier.size(QasaIconSize.xl))
+    }
+}
+
+/**
+ * The one row layout behind [NavChevronRow] and [ToggleRow]: at least
+ * [QasaDimens.rowMinHeight] tall, optional [RowIconBadge], title 16 medium and subtitle
+ * 13 stacked and vertically centered against the badge, then the [trailing] slot
+ * (chevron, value, switch) centered on the same line. Start/end only, so it mirrors in RTL.
+ */
+@Composable
+fun QasaRow(
+    title: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconColor: Color? = null,
+    iconBackground: Color? = null,
+    subtitle: String? = null,
+    titleColor: Color? = null,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    val c = qasaColors
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = QasaDimens.rowMinHeight)
+            .padding(vertical = QasaDimens.contentGap),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            RowIconBadge(icon, tint = iconColor ?: c.accent, background = iconBackground)
+            Spacer(Modifier.width(QasaDimens.drawerGap))
+        }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+            Text(title, color = titleColor ?: c.textPrimary, style = qasaText.rowTitleMedium)
+            if (!subtitle.isNullOrEmpty()) {
+                Spacer(Modifier.height(QasaDimens.spaceMicro))
+                Text(subtitle, color = c.textSecondary, style = qasaText.bodySmall)
+            }
+        }
+        if (trailing != null) {
+            Spacer(Modifier.width(QasaDimens.gapSmall))
+            trailing()
+        }
+    }
+}
+
+/**
+ * `NavChevronRow` — `Components.swift:257`, on the shared [QasaRow]: badge, title,
+ * subtitle, optional trailing value, then a 16dp `textTertiary` chevron (hidden when
+ * destructive; the title and badge take `danger` instead).
  *
- * The chevron is `AutoMirrored` so it points the right way in RTL — the previous
- * `"›"` glyph did not (§5).
+ * The chevron is `AutoMirrored` so it points the right way in RTL (§5).
  */
 @Composable
 fun NavChevronRow(
@@ -58,56 +120,49 @@ fun NavChevronRow(
     iconColor: Color? = null,
 ) {
     val c = qasaColors
-    val titleColor = if (destructive) c.danger else c.textPrimary
     QasaPressable(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = QasaDimens.gapMedium),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (icon != null) {
-                Icon(
-                    icon,
-                    null,
-                    tint = iconColor ?: if (destructive) c.danger else c.textPrimary,
-                    modifier = Modifier.width(QasaIconSize.x4l),
-                )
-                Spacer(Modifier.width(QasaDimens.gapSmall))
-            }
-            Column(Modifier.weight(1f)) {
-                Text(title, color = titleColor, style = qasaText.bodyMedium15)
-                if (subtitle != null) {
-                    Spacer(Modifier.height(QasaDimens.spaceMicro))
-                    Text(subtitle, color = c.textSecondary, style = qasaText.labelRegular)
+        QasaRow(
+            title = title,
+            icon = icon,
+            iconColor = iconColor ?: if (destructive) c.danger else null,
+            subtitle = subtitle,
+            titleColor = if (destructive) c.danger else null,
+            trailing = if (trailingText == null && destructive) {
+                null
+            } else {
+                {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (trailingText != null) {
+                            Text(
+                                trailingText,
+                                color = c.textSecondary,
+                                style = qasaText.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        if (!destructive) {
+                            if (trailingText != null) Spacer(Modifier.width(QasaDimens.spaceSmall))
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = c.textTertiary,
+                                modifier = Modifier.size(QasaIconSize.xl),
+                            )
+                        }
+                    }
                 }
-            }
-            if (trailingText != null) {
-                Text(trailingText, color = c.textSecondary, style = qasaText.labelRegular)
-                // iOS HStack(spacing: 12) puts 12 between the trailing text and the chevron.
-                if (!destructive) Spacer(Modifier.width(QasaDimens.gapSmall))
-            }
-            if (!destructive) {
-                Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = c.textTertiary,
-                    modifier = Modifier.size(QasaIconSize.tiny),
-                )
-            }
-        }
+            },
+        )
     }
 }
 
 /**
- * `ToggleRow` — `Components.swift:219`. 40x40 circular `iconColor @ 20%` disc with
- * a 20pt icon, 12pt gap, title 16, subtitle 14, mint switch, 8pt vertical padding.
- *
- * `iconBackground` was missing on Android, so the VPN kill-switch tile could not
- * match iOS (§6.4).
+ * `ToggleRow` — `Components.swift:219`, on the shared [QasaRow] with the switch as the
+ * trailing slot. The whole row toggles (`Role.Switch`), so the target is the full row.
  */
 @Composable
 fun ToggleRow(
@@ -121,32 +176,20 @@ fun ToggleRow(
     iconBackground: Color? = null,
     enabled: Boolean = true,
 ) {
-    val c = qasaColors
-    Row(
-        modifier = modifier.fillMaxWidth().padding(vertical = QasaDimens.contentGap),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (icon != null) {
-            val tint = iconColor ?: c.accent
-            Box(
-                modifier = Modifier
-                    .size(QasaIconFrame.toggleDisc)
-                    .clip(CircleShape)
-                    .background(iconBackground ?: tint.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(icon, null, tint = tint, modifier = Modifier.size(QasaIconSize.xl))
-            }
-            Spacer(Modifier.width(QasaDimens.gapSmall))
-        }
-        Column(Modifier.weight(1f)) {
-            Text(title, color = c.textPrimary, style = qasaText.bodyLarge)
-            if (subtitle.isNotEmpty()) {
-                Text(subtitle, color = c.textSecondary, style = qasaText.bodyMedium)
-            }
-        }
-        MintSwitch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-    }
+    QasaRow(
+        title = title,
+        modifier = modifier.toggleable(
+            value = checked,
+            enabled = enabled,
+            role = Role.Switch,
+            onValueChange = onCheckedChange,
+        ),
+        icon = icon,
+        iconColor = iconColor,
+        iconBackground = iconBackground,
+        subtitle = subtitle,
+        trailing = { MintSwitch(checked = checked, onCheckedChange = null, enabled = enabled) },
+    )
 }
 
 /** `PillBadge` — `Components.swift:298`. 4pt radius, 8/2 padding, `@ 10%` fill + `@ 20%` border or solid. */

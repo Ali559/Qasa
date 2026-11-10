@@ -60,8 +60,8 @@ struct SettingsView: View {
                                 title: L10n.tr("settings.changeMasterPassword", locale: locale)
                             )
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         ToggleRow(
                             icon: "touchid",
                             iconColor: Theme.textPrimary,
@@ -73,7 +73,7 @@ struct SettingsView: View {
                             VaultKeychainStore.biometricsEnabled = newValue
                             SharedVaultKeychain.biometricsEnabled = newValue
                         }
-                        Divider().background(Theme.stroke)
+                        RowDivider()
                         Button {
                             openAutofillSettings()
                         } label: {
@@ -83,8 +83,8 @@ struct SettingsView: View {
                                 subtitle: L10n.tr("settings.autofillSubtitle", locale: locale)
                             )
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         Button { showAutoLock = true } label: {
                             NavChevronRow(
                                 icon: "clock",
@@ -95,18 +95,17 @@ struct SettingsView: View {
                                 )
                             )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.qasaRow)
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            SectionLabel(text: L10n.tr("settings.linkedDevices", locale: locale))
-                            Spacer()
+                    SettingsSection(
+                        title: L10n.tr("settings.linkedDevices", locale: locale),
+                        trailingTitle: AnyView(
                             Text(String(format: L10n.tr("settings.activeCount", locale: locale), linkedDeviceCount))
                                 .font(.qasaLabel(12))
                                 .foregroundColor(Theme.accent)
-                        }
-                        CardContainer {
+                        )
+                    ) {
                             Button { showLinkedDevices = true } label: {
                                 NavChevronRow(
                                     icon: "iphone",
@@ -115,8 +114,8 @@ struct SettingsView: View {
                                     iconColor: Theme.accent
                                 )
                             }
-                            .buttonStyle(.plain)
-                            Divider().background(Theme.stroke)
+                            .buttonStyle(.qasaRow)
+                            RowDivider()
                             Button { showLANSync = true } label: {
                                 NavChevronRow(
                                     icon: "wifi",
@@ -126,8 +125,7 @@ struct SettingsView: View {
                                         : L10n.tr("settings.requiresPremium", locale: locale)
                                 )
                             }
-                            .buttonStyle(.plain)
-                        }
+                            .buttonStyle(.qasaRow)
                     }
 
                     settingsSection(title: L10n.tr("settings.appearance", locale: locale)) {
@@ -142,7 +140,8 @@ struct SettingsView: View {
                                 trailingText: prefs.language.displayName
                             )
                         }
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         Menu {
                             ForEach(AppThemePreference.allCases) { theme in
                                 Button(L10n.tr(theme.displayNameKey, locale: locale)) {
@@ -156,6 +155,7 @@ struct SettingsView: View {
                                 trailingText: L10n.tr(prefs.theme.displayNameKey, locale: locale)
                             )
                         }
+                        .buttonStyle(.qasaRow)
                     }
 
                     settingsSection(title: L10n.tr("settings.dataAccount", locale: locale)) {
@@ -166,16 +166,16 @@ struct SettingsView: View {
                                 subtitle: L10n.tr("backup.subtitle", locale: locale)
                             )
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         Button { showImport = true } label: {
                             NavChevronRow(
                                 icon: "square.and.arrow.down",
                                 title: L10n.tr("settings.importCsv", locale: locale)
                             )
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         if let exportDocument {
                             // Save/share the file rather than the clipboard: a
                             // plaintext vault backup on `UIPasteboard.general` is
@@ -189,8 +189,8 @@ struct SettingsView: View {
                                     title: L10n.tr("settings.exportCsv", locale: locale)
                                 )
                             }
-                            .buttonStyle(.plain)
-                            Divider().background(Theme.stroke)
+                            .buttonStyle(.qasaRow)
+                            RowDivider()
                         } else {
                             Button {
                                 performExport()
@@ -200,8 +200,8 @@ struct SettingsView: View {
                                     title: L10n.tr("settings.exportCsv", locale: locale)
                                 )
                             }
-                            .buttonStyle(.plain)
-                            Divider().background(Theme.stroke)
+                            .buttonStyle(.qasaRow)
+                            RowDivider()
                         }
                         Button { showClearDataAlert = true } label: {
                             NavChevronRow(
@@ -210,17 +210,17 @@ struct SettingsView: View {
                                 destructive: true
                             )
                         }
-                        .buttonStyle(.plain)
-                        Divider().background(Theme.stroke)
+                        .buttonStyle(.qasaRow)
+                        RowDivider()
                         Button { showLogoutConfirm = true } label: {
                             NavChevronRow(
                                 icon: "rectangle.portrait.and.arrow.right",
                                 title: L10n.tr("settings.logout", locale: locale)
                             )
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.qasaRow)
                         if canDeleteAccount {
-                            Divider().background(Theme.stroke)
+                            RowDivider()
                             Button { showDeleteAccountAlert = true } label: {
                                 NavChevronRow(
                                     icon: "person.crop.circle.badge.xmark",
@@ -228,7 +228,7 @@ struct SettingsView: View {
                                     destructive: true
                                 )
                             }
-                            .buttonStyle(.plain)
+                            .buttonStyle(.qasaRow)
                             .disabled(isDeletingAccount)
                         }
                     }
@@ -244,36 +244,45 @@ struct SettingsView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .alert(L10n.tr("settings.clearAlertTitle", locale: locale), isPresented: $showClearDataAlert) {
-            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) {}
-            Button(L10n.tr("settings.clear", locale: locale), role: .destructive) {
-                VaultAuthStore.resetVaultAuth()
-            }
-        } message: {
-            Text(L10n.tr("settings.clearAlertMessage", locale: locale))
+        .confirmSheet(
+            isPresented: $showClearDataAlert,
+            title: L10n.tr("settings.clearAlertTitle", locale: locale),
+            message: L10n.tr("settings.clearAlertMessage", locale: locale),
+            icon: "xmark.bin",
+            confirmTitle: L10n.tr("settings.clear", locale: locale),
+            cancelTitle: L10n.tr("settings.cancel", locale: locale),
+            destructive: true
+        ) {
+            VaultAuthStore.resetVaultAuth()
         }
-        .alert(L10n.tr("settings.lockAlertTitle", locale: locale), isPresented: $showLogoutConfirm) {
-            Button(L10n.tr("settings.cancel", locale: locale), role: .cancel) {}
-            Button(L10n.tr("settings.logout", locale: locale), role: .destructive) {
-                onLogout?()
-            }
-        } message: {
-            Text(L10n.tr("settings.lockAlertMessage", locale: locale))
+        .confirmSheet(
+            isPresented: $showLogoutConfirm,
+            title: L10n.tr("settings.lockAlertTitle", locale: locale),
+            message: L10n.tr("settings.lockAlertMessage", locale: locale),
+            icon: "rectangle.portrait.and.arrow.right",
+            confirmTitle: L10n.tr("settings.logout", locale: locale),
+            cancelTitle: L10n.tr("settings.cancel", locale: locale),
+            destructive: true
+        ) {
+            onLogout?()
         }
-        .alert(L10n.tr("settings.deleteAccountTitle", locale: locale), isPresented: $showDeleteAccountAlert) {
-            Button(L10n.tr("common.cancel", locale: locale), role: .cancel) {}
-            Button(L10n.tr("settings.deleteAccount", locale: locale), role: .destructive) {
-                Task { await deleteAccount() }
-            }
-        } message: {
-            Text(L10n.tr("settings.deleteAccountMessage", locale: locale))
+        .confirmSheet(
+            isPresented: $showDeleteAccountAlert,
+            title: L10n.tr("settings.deleteAccountTitle", locale: locale),
+            message: L10n.tr("settings.deleteAccountMessage", locale: locale),
+            icon: "person.crop.circle.badge.xmark",
+            confirmTitle: L10n.tr("settings.deleteAccount", locale: locale),
+            cancelTitle: L10n.tr("common.cancel", locale: locale),
+            destructive: true
+        ) {
+            Task { await deleteAccount() }
         }
         .overlay {
             if isDeletingAccount {
                 ProgressView()
                     .padding(24)
                     .background(Theme.cardBackground)
-                    .cornerRadius(12)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
             }
         }
         .sheet(isPresented: $showLinkedDevices) { LinkedDevicesView().appLocalization() }
@@ -353,7 +362,7 @@ struct SettingsView: View {
                     .frame(width: 56, height: 56)
                     .overlay(
                         Image(systemName: "person.fill")
-                            .font(.title2)
+                            .font(.system(size: 22))
                             .foregroundColor(Theme.textSecondary)
                     )
                 VStack(alignment: .leading, spacing: 4) {
@@ -382,28 +391,20 @@ struct SettingsView: View {
             }
 
             Button { showPremium = true } label: {
-                Text(
-                    session.isPremium
+                QasaButtonLabel(
+                    title: session.isPremium
                         ? L10n.tr("settings.manageSubscription", locale: locale)
-                        : L10n.tr("settings.upgradePremium", locale: locale)
+                        : L10n.tr("settings.upgradePremium", locale: locale),
+                    icon: session.isPremium ? nil : "crown"
                 )
-                .font(.qasa(14, weight: .medium))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(Theme.cardBackgroundLight)
-                .foregroundColor(Theme.textPrimary)
-                .cornerRadius(8)
             }
-            .buttonStyle(.plain)
-            .padding(.top, 12)
+            .buttonStyle(QasaButtonStyle(kind: session.isPremium ? .secondary : .primary))
+            .padding(.top, 14)
         }
     }
 
     private func settingsSection(title: String, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionLabel(text: title)
-            CardContainer { content() }
-        }
+        SettingsSection(title: title) { content() }
     }
 
     private func openAutofillSettings() {

@@ -149,7 +149,7 @@ function exportEvents() {
           <div
             v-for="stat in regionStats"
             :key="stat.label"
-            class="rounded-3xl p-5 text-[#1c1b33]"
+            class="rounded-3xl p-5 text-ink"
             :style="{ background: stat.accent, boxShadow: `inset 0 2px 0 rgb(255 255 255 / 0.35), 0 4px 0 color-mix(in oklch, ${stat.accent} 60%, black)` }"
           >
             <p class="text-sm font-semibold opacity-75">{{ stat.label }}</p>
@@ -206,7 +206,7 @@ function exportEvents() {
           >
             <span class="text-sidebar-foreground/55 shrink-0 tabular-nums">{{ event.time }}</span>
             <span
-              class="w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-[0.7rem] font-semibold text-[#1c1b33]"
+              class="w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-[0.7rem] font-semibold text-ink"
               :style="{ background: levelColor[event.level] }"
             >{{ event.level }}</span>
             <span class="min-w-0 break-words">{{ event.message }}</span>

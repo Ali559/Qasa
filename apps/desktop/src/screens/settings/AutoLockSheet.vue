@@ -43,7 +43,7 @@ function onStepperKey(e: KeyboardEvent) {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('settings.autoLock')" :width="460" @close="emit('close')">
+  <Sheet :open="open" :label="t('settings.autoLock')" :width="460" placement="bottom" @close="emit('close')">
     <SheetHeader :title="t('settings.autoLock')" :done-label="t('settings.done')" @done="emit('close')" />
     <div class="body">
       <section class="group">

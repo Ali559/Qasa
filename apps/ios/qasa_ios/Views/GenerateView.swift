@@ -3,6 +3,9 @@ import SwiftUI
 /// Full-page Generator (brand chrome + save). For sheets, use `PasswordGeneratorModal`.
 struct GeneratorView: View {
     var onOpenMenu: (() -> Void)? = nil
+    /// Opens the new-login editor with this password filled in (the shell switches to
+    /// Passwords). Mirrors desktop `nav.pendingPassword`.
+    var onSaveToVault: ((String) -> Void)? = nil
 
     @Environment(AppPreferences.self) private var prefs
     @StateObject private var model = PasswordGeneratorModel()
@@ -14,29 +17,25 @@ struct GeneratorView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     PasswordGeneratorContent(model: model, compact: false)
-                    saveButton
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 24)
-                .padding(.bottom, 40)
+                .padding(.bottom, 24)
             }
         }
+        .bottomActionBar { saveButton }
         .background(Theme.chrome.ignoresSafeArea())
         .onAppear { model.regenerate() }
     }
 
     private var saveButton: some View {
-        Button {} label: {
-            Text(L10n.tr("gen.saveToVault", locale: prefs.locale))
-                .font(.qasa(16, weight: .semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Theme.accent)
-                .foregroundColor(Theme.onAccentChip)
-                .cornerRadius(Theme.cornerRadius)
-                .shadow(color: Theme.accent.opacity(0.3), radius: 8)
+        Button {
+            onSaveToVault?(model.password)
+        } label: {
+            QasaButtonLabel(title: L10n.tr("gen.saveToVault", locale: prefs.locale), icon: "key")
         }
-        .padding(.top, 16)
+        .buttonStyle(.qasaPrimary)
+        .disabled(model.password.isEmpty || onSaveToVault == nil)
     }
 }
 

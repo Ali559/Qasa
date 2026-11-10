@@ -42,10 +42,10 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 50px;
-  padding-inline: 12px;
+  height: var(--field-height);
+  padding-inline: var(--field-padding-inline);
   border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border-radius: var(--field-radius);
   background: var(--card-background);
 }
 
@@ -60,7 +60,9 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
 select {
   flex: 1;
   min-width: 0;
-  padding: 12px 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   padding-inline-end: 20px;
   border: 0;
   outline: none;
@@ -68,18 +70,22 @@ select {
   background: transparent;
   color: var(--accent);
   font: inherit;
-  font-size: 16px;
+  font-size: var(--field-font-size);
   cursor: pointer;
 }
 
 .chevron {
   position: absolute;
-  inset-inline-end: 12px;
+  inset-inline-end: var(--field-padding-inline);
   color: var(--accent);
   pointer-events: none;
 }
 
+.box:has(> :nth-child(3)) {
+  padding-inline-end: 4px;
+}
+
 .box:has(> :nth-child(3)) .chevron {
-  inset-inline-end: 48px;
+  inset-inline-end: 44px;
 }
 </style>

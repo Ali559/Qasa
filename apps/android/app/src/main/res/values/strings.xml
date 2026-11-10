@@ -41,6 +41,7 @@
     <string name="auth_unlock_localonly">Private to you</string>
     <string name="auth_unlock_localonlybody">Your passwords stay on this phone. Qasa can\'t reset your main password.</string>
     <string name="auth_unlock_masterpassword">Main password</string>
+    <string name="auth_unlock_masterpasswordduefmt">It\'s been %d days, so enter your main password to keep it fresh in your mind. Face or fingerprint unlock works again after this.</string>
     <string name="auth_unlock_placeholder">Enter password</string>
     <string name="auth_unlock_subtitle">Enter your main password to see your passwords.</string>
     <string name="auth_unlock_title">Welcome back</string>
@@ -498,6 +499,8 @@
     <string name="premium_autorenewdetailcharge">We charge your wallet the plan price at the end of each period until you turn this off in Settings.</string>
     <string name="premium_autorenewhint">Before each period ends, we send you a link to pay for the next one. Nothing is taken until you pay it.</string>
     <string name="premium_bestvalue">BEST VALUE</string>
+    <string name="premium_comingsoonbody">Paying with Iraqi wallets is almost ready. Premium will open up here as soon as it is.</string>
+    <string name="premium_comingsoontitle">Coming soon</string>
     <string name="premium_completeinwallet">Complete payment in %s…</string>
     <string name="premium_fastpay">FastPay</string>
     <string name="premium_featurebreach">Breached password check</string>
@@ -674,6 +677,10 @@
     <string name="tab_home">Home</string>
     <string name="tab_passwords">Passwords</string>
     <string name="tab_you">You</string>
+    <string name="toast_itemcreated">Item added</string>
+    <string name="toast_itemcreatedfmt">%s added</string>
+    <string name="toast_itemupdated">Changes saved</string>
+    <string name="toast_itemupdatedfmt">%s updated</string>
     <string name="totp_add">Add 2FA code</string>
     <string name="totp_cameradenied">Qasa needs the camera to scan the QR code. Allow it in Settings, or enter the setup key instead.</string>
     <string name="totp_copied">2FA code copied</string>

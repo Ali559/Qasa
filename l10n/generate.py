@@ -23,6 +23,7 @@ ANDROID_RES = ROOT / "apps/android/app/src/main/res"
 WEB_DIR = ROOT / "apps/desktop/src/i18n"
 
 CREDENTIAL_KEYS = [
+    "auth.unlock.masterPasswordDueFmt",
     "auth.unlock.placeholder",
     "autofill.addressLine2",
     "autofill.bank",

@@ -18,22 +18,22 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{t.soon.title}</title>
     <meta name="description" content={t.meta.description} />
-    <meta name="theme-color" content="#f6f4fb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#17152a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#FBF6F0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17111D" media="(prefers-color-scheme: dark)" />
     <meta property="og:title" content={t.soon.title} />
     <meta property="og:description" content={t.meta.description} />
     <meta property="og:locale" content={{ en: "en_US", ckb: "ckb_IQ", ar: "ar_IQ" }[lang]} />
     {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={l.href} />)}
     <link rel="alternate" hreflang="x-default" href="/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/Rubik-Variable.ttf" as="font" type="font/ttf" crossorigin />
-    {dir === "rtl" && <link rel="preload" href="/fonts/rudawregular2.ttf" as="font" type="font/ttf" crossorigin />}
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/IBMPlexSansArabic-Regular.ttf" as="font" type="font/ttf" crossorigin />
   </head>
   <body>
     <header class="nav">
       <div class="wrap nav-inner">
         <a href={languages.find((l) => l.lang === lang)!.href} class="brand" lang="en" aria-label="Qasa">
-          <span class="brand-mark"><Icon name="shield-check" filled size={18} /></span>
+          <img class="brand-mark" src="/favicon.svg" alt="" width="34" height="34" />
           Qasa
         </a>
         <nav class="lang-switch" aria-label={t.nav.language}>
@@ -96,7 +96,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
 
     <footer class="footer">
       <div class="wrap footer-inner">
-        <span class="brand small" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={15} /></span>Qasa</span>
+        <span class="brand small" lang="en"><img class="brand-mark" src="/favicon.svg" alt="" width="34" height="34" />Qasa</span>
         <a href={privacyHrefs[lang]} class="footer-link">{t.legal.privacyPolicy}</a>
         <a href={termsHrefs[lang]} class="footer-link">{t.nav.terms}</a>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
@@ -113,9 +113,9 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 68px; }
   /* The logo lockup is artwork: same order and font in every language. */
   .brand { direction: ltr; display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 21px; color: var(--accent); letter-spacing: -0.01em; }
-  .brand-mark { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+  .brand-mark { width: 34px; height: 34px; display: block; flex: none; }
   .brand.small { font-size: 16px; gap: 8px; }
-  .brand.small .brand-mark { width: 26px; height: 26px; border-radius: 8px; }
+  .brand.small .brand-mark { width: 26px; height: 26px; }
 
   .lang-switch {
     display: flex; gap: 2px; padding: 3px; border-radius: 12px;
@@ -151,8 +151,8 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
 
   .hero-art { position: relative; display: grid; place-items: center; }
   .device {
-    margin: 0; position: relative; width: 290px; border-radius: 46px; padding: 9px; background: #1c1a2b;
-    box-shadow: 0 0 0 1px #2c2944, var(--shadow-soft), 0 50px 100px -40px rgba(76, 61, 184, 0.45);
+    margin: 0; position: relative; width: 290px; border-radius: 46px; padding: 9px; background: var(--night);
+    box-shadow: 0 0 0 1px var(--night-stroke), var(--shadow-soft), 0 50px 100px -40px var(--brand-glow);
   }
   .device img { display: block; width: 100%; height: auto; border-radius: 37px; }
 
@@ -167,7 +167,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
   .point-icon { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; background: var(--card-muted); color: var(--on-accent-chip); }
 
   .footer { border-top: 1px solid var(--stroke); }
-  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-3); }
+  .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding-block: 22px; font-size: 13.5px; color: var(--text-2); }
   .footer-link { color: var(--text-2); font-weight: 500; }
   .footer-link:hover { color: var(--text); }
 

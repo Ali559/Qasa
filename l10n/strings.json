@@ -4122,5 +4122,40 @@
     "en": "Not in iCloud Drive. If this folder is only on this iPhone, the backup goes with the phone.",
     "ar": "ليست في iCloud Drive. إذا كان هذا المجلد على هذا الآيفون فقط، فستضيع النسخة الاحتياطية مع الهاتف.",
     "ckb": "لە iCloud Drive نییە. ئەگەر ئەم فۆڵدەرە تەنها لەسەر ئەم ئایفۆنە بێت، پاشەکەوتەکە لەگەڵ مۆبایلەکەدا ون دەبێت."
+  },
+  "auth.unlock.masterPasswordDueFmt": {
+    "en": "It's been %lld days, so enter your main password to keep it fresh in your mind. Face or fingerprint unlock works again after this.",
+    "ar": "مرّ %lld يومًا، لذا أدخل كلمة مرورك الرئيسية حتى تبقى في ذاكرتك. سيعمل الفتح بالوجه أو البصمة مجددًا بعد ذلك.",
+    "ckb": "%lld ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە تاوەکو لەبیرت بمێنێت. دوای ئەوە کردنەوە بە ڕوخسار یان پەنجەمۆر دووبارە کار دەکات."
+  },
+  "toast.itemCreatedFmt": {
+    "en": "%@ added",
+    "ar": "تمت إضافة %@",
+    "ckb": "%@ زیادکرا"
+  },
+  "toast.itemUpdatedFmt": {
+    "en": "%@ updated",
+    "ar": "تم تحديث %@",
+    "ckb": "%@ نوێکرایەوە"
+  },
+  "toast.itemCreated": {
+    "en": "Item added",
+    "ar": "تمت إضافة العنصر",
+    "ckb": "بابەتەکە زیادکرا"
+  },
+  "toast.itemUpdated": {
+    "en": "Changes saved",
+    "ar": "تم حفظ التغييرات",
+    "ckb": "گۆڕانکارییەکان پاشەکەوتکران"
+  },
+  "premium.comingSoonTitle": {
+    "en": "Coming soon",
+    "ar": "قريبًا",
+    "ckb": "بەم زووانە"
+  },
+  "premium.comingSoonBody": {
+    "en": "Paying with Iraqi wallets is almost ready. Premium will open up here as soon as it is.",
+    "ar": "الدفع عبر المحافظ العراقية على وشك الجاهزية. سيُتاح الاشتراك المميز من هنا فور جاهزيته.",
+    "ckb": "پارەدان بە جزدانە عێراقییەکان خەریکە ئامادە دەبێت. هەر کە ئامادە بوو، پرێمیەم لێرەوە بەردەست دەبێت."
   }
 }

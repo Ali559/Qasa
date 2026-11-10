@@ -20,8 +20,7 @@ struct VaultPrivacyShield: View {
             Theme.background
                 .ignoresSafeArea()
             VStack(spacing: 14) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.qasa(44, weight: .semibold))
+                QasaMark(size: 52)
                     .foregroundColor(Theme.textSecondary)
                 Text(L10n.tr("security.hidden", locale: locale))
                     .font(.qasa(15, weight: .medium))

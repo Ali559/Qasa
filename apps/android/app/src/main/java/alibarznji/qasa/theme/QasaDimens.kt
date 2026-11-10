@@ -30,7 +30,27 @@ object QasaDimens {
 
     // ---- Layout ----
     val headerHeight: Dp = 64.dp
-    val stickyButtonHeight: Dp = 56.dp
+
+    /**
+     * 48 — the one height of every single-line input: text, password, search, date,
+     * dropdown-as-field. Multi-line fields grow from it.
+     */
+    val fieldHeight: Dp = 48.dp
+
+    /** 48 — the one height of every full-width action button (primary and secondary). */
+    val buttonHeight: Dp = 48.dp
+
+    /** 40 — trailing icon buttons inside a [fieldHeight] field (reveal, generate, clear). */
+    val fieldIconButton: Dp = 40.dp
+
+    /** 36 — the rounded-square icon badge on settings and list rows. */
+    val rowIconBadge: Dp = 36.dp
+
+    /** 10 — corner radius of [rowIconBadge]. */
+    val rowIconBadgeRadius: Dp = 10.dp
+
+    /** 56 — minimum height of a settings / navigation row. */
+    val rowMinHeight: Dp = 56.dp
 
     /** 17 — the single most-repeated magic number in the codebase. */
     val cardPadding: Dp = 17.dp
@@ -46,6 +66,12 @@ object QasaDimens {
 
     /** 96 — vertical clearance so a FAB never covers the last row. */
     val fabClearance: Dp = 96.dp
+
+    /**
+     * 88 — the toast's distance above the navigation bar: clears the shell tab bar (~67)
+     * and a [StickyBottomBar] holding one button (~73).
+     */
+    val toastBottomClearance: Dp = 88.dp
 
     /** 16 — header horizontal padding and the standard inter-element gap. */
     val gap: Dp = 16.dp

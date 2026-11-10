@@ -265,13 +265,19 @@ impl Bridge {
         if op == "unlock" {
             // `prompt`: the in-page menu asks for Touch ID / Hello right away (plan §3.2).
             // The extension then watches `status` until the vault is unlocked.
-            let locked = host.vault().lock().map(|v| !v.is_unlocked()).unwrap_or(false);
+            // When the master password is due, no prompt: the window asks for the password,
+            // and `passwordDue` lets the extension say why.
+            let (locked, due) = host
+                .vault()
+                .lock()
+                .map(|v| (!v.is_unlocked(), ops::password_due(&v)))
+                .unwrap_or((false, false));
             let wants_prompt = req.get("prompt").and_then(Value::as_bool).unwrap_or(false);
-            if locked && wants_prompt && host.start_biometric(Auth::Unlock) {
+            if locked && wants_prompt && !due && host.start_biometric(Auth::Unlock) {
                 return Ok(json!({ "method": "biometric" }));
             }
             host.focus();
-            return Ok(json!({ "method": "window" }));
+            return Ok(if locked && due { json!({ "method": "window", "passwordDue": true }) } else { json!({ "method": "window" }) });
         }
         if op == "generate" {
             return ops::generate();

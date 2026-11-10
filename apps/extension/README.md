@@ -126,7 +126,7 @@ into the frame it is switched to, so frame fields are clicked from inside their 
   sign-in, kept per tab in `storage.session` (memory only, never on disk, gone when the
   browser quits, unreadable by content scripts) for at most 10 minutes, so step 2 can save
   it with the password even if the browser stopped the service worker in between.
-- **Fonts:** the in-page menu uses Rubik and Rudaw. The service worker reads the bundled
+- **Fonts:** the in-page menu uses IBM Plex Sans Arabic (400, 600, 700) for every language. The service worker reads the bundled
   files and passes the bytes to the content script, which adds them as `FontFace`s with
   per-page random names. No `web_accessible_resources`, so sites can't probe for Qasa by
   URL.

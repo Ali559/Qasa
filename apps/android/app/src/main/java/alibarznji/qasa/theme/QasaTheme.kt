@@ -1,6 +1,9 @@
 package alibarznji.qasa.theme
 
 import alibarznji.qasa.prefs.AppLanguage
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.LocalLayoutDirection
+import android.view.View
 import alibarznji.qasa.prefs.AppThemeMode
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -18,10 +21,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 /**
- * Semantic palette. The calm + personal redesign (`docs/design/mobile-redesign-mockup.html`):
- * a misty lilac base, lavender for actions, and a warm peach wash for "all good" states.
- * Android leads this redesign; iOS `ThemePalette` still carries the previous mint palette
- * until it is ported.
+ * Semantic palette: a warm cream base, plum for actions, and a peach wash for "all good"
+ * states. Byte-identical to the iOS `ThemePalette` (`apps/ios/qasa_ios/Theme/Theme.swift`);
+ * change both together.
  */
 @Immutable
 data class QasaColors(
@@ -62,64 +64,64 @@ data class QasaColors(
 )
 
 val LightQasaColors = QasaColors(
-    background = Color(0xFFF6F4FB),
-    chrome = Color(0xFFF6F4FB),
+    background = Color(0xFFFBF6F0),
+    chrome = Color(0xFFFBF6F0),
     cardBackground = Color(0xFFFFFFFF),
-    cardBackgroundLight = Color(0xFFF1EEFA),
-    cardMuted = Color(0xFFECE8FD),
-    stroke = Color(0xFFEBE8F4),
-    strokeChrome = Color(0xFFE4E0F0),
-    accent = Color(0xFF7C6CF2),
-    accentDark = Color(0xFF6656E0),
+    cardBackgroundLight = Color(0xFFFFF3E3),
+    cardMuted = Color(0xFFF3EAF7),
+    stroke = Color(0xFFE6E1E1),
+    strokeChrome = Color(0xFFDCD7D7),
+    accent = Color(0xFF722F99),
+    accentDark = Color(0xFF5C2580),
     onAccent = Color(0xFFFFFFFF),
-    onAccentChip = Color(0xFF3A2FA0),
-    gold = Color(0xFFE09A2B),
-    goldMuted = Color(0xFFB7791F),
-    cyan = Color(0xFF3FA7C9),
-    info = Color(0xFF5B7CF0),
+    onAccentChip = Color(0xFF4A1A66),
+    gold = Color(0xFFB7701E),
+    goldMuted = Color(0xFF94591A),
+    cyan = Color(0xFFE2707A),
+    info = Color(0xFF8A4FB3),
     success = Color(0xFF2F9E6C),
-    danger = Color(0xFFE45D5D),
-    dangerBackground = Color(0xFFFDEAEA),
-    dangerText = Color(0xFF9E2F2F),
-    dangerTextMuted = Color(0xFFB23C3C),
-    textPrimary = Color(0xFF24213A),
-    textSecondary = Color(0xFF6B6785),
-    textTertiary = Color(0xFFA19DB8),
-    textPlaceholder = Color(0xFFA19DB8),
-    textOnChrome = Color(0xFF3A3654),
-    warm = Color(0xFFFFD9C7),
-    calm = Color(0xFFE6E3F2),
+    danger = Color(0xFFC8323C),
+    dangerBackground = Color(0xFFFFE6E6),
+    dangerText = Color(0xFF9E2F35),
+    dangerTextMuted = Color(0xFFB83C44),
+    textPrimary = Color(0xFF2A1F33),
+    textSecondary = Color(0xFF6E6475),
+    textTertiary = Color(0xFFA39DA3),
+    textPlaceholder = Color(0xFFA39DA3),
+    textOnChrome = Color(0xFF3E3346),
+    warm = Color(0xFFFEE7C8),
+    calm = Color(0xFFEDE9E9),
     scrim = Color(0xFF000000).copy(alpha = 0.45f),
 )
 
 val DarkQasaColors = QasaColors(
-    background = Color(0xFF17152A),
-    chrome = Color(0xFF17152A),
-    cardBackground = Color(0xFF221F3A),
-    cardBackgroundLight = Color(0xFF2A2745),
-    cardMuted = Color(0xFF2F2B52),
-    stroke = Color(0xFF332F4F),
-    strokeChrome = Color(0xFF3A3658),
-    accent = Color(0xFFA79BFF),
-    accentDark = Color(0xFF7C6CF2),
-    onAccent = Color(0xFF1B1640),
-    onAccentChip = Color(0xFFE8E4FF),
-    gold = Color(0xFFF5B84A),
-    goldMuted = Color(0xFFE09A2B),
-    cyan = Color(0xFF6CC6E3),
-    info = Color(0xFF8FA6FF),
+    background = Color(0xFF17111D),
+    chrome = Color(0xFF17111D),
+    cardBackground = Color(0xFF231A2B),
+    cardBackgroundLight = Color(0xFF2B2134),
+    cardMuted = Color(0xFF33243F),
+    stroke = Color(0xFF352B3D),
+    strokeChrome = Color(0xFF3F3448),
+    accent = Color(0xFFB67FDB),
+    accentDark = Color(0xFF722F99),
+    onAccent = Color(0xFF22102F),
+    onAccentChip = Color(0xFFF1E3FA),
+    gold = Color(0xFFFEE7C8),
+    goldMuted = Color(0xFFF0C48C),
+    cyan = Color(0xFFFF9292),
+    info = Color(0xFFC9A3E6),
     success = Color(0xFF5CCB97),
-    danger = Color(0xFFF27F7F),
-    dangerBackground = Color(0xFF4A2030),
-    dangerText = Color(0xFFFFB8B8),
-    dangerTextMuted = Color(0xFFFFD3D3),
-    textPrimary = Color(0xFFEEECF8),
-    textSecondary = Color(0xFFB5B1CC),
-    textTertiary = Color(0xFF7D7998),
-    textPlaceholder = Color(0xFF7D7998),
-    textOnChrome = Color(0xFFCFCBE6),
-    warm = Color(0xFF3D2B3B),
-    calm = Color(0xFF26233F),
+    danger = Color(0xFFFF6B6B),
+    dangerBackground = Color(0xFF4A1F28),
+    dangerText = Color(0xFFFFC0C0),
+    dangerTextMuted = Color(0xFFFFD9D9),
+    textPrimary = Color(0xFFF2EDF4),
+    textSecondary = Color(0xFFC5C1C1),
+    textTertiary = Color(0xFF8A8290),
+    textPlaceholder = Color(0xFF8A8290),
+    textOnChrome = Color(0xFFD9D3DD),
+    warm = Color(0xFF3E2B2F),
+    calm = Color(0xFF2A2430),
     scrim = Color(0xFF000000).copy(alpha = 0.45f),
 )
 
@@ -184,6 +186,23 @@ fun QasaTheme(
             onSurface = colors.textPrimary,
             outline = colors.stroke,
             error = colors.danger,
+            primaryContainer = colors.cardMuted,
+            onPrimaryContainer = colors.onAccentChip,
+            onSecondary = colors.onAccent,
+            secondaryContainer = colors.cardMuted,
+            onSecondaryContainer = colors.onAccentChip,
+            tertiary = colors.info,
+            surfaceVariant = colors.cardBackgroundLight,
+            onSurfaceVariant = colors.textSecondary,
+            surfaceContainerLowest = colors.cardBackground,
+            surfaceContainerLow = colors.cardBackground,
+            surfaceContainer = colors.cardBackground,
+            surfaceContainerHigh = colors.cardBackground,
+            surfaceContainerHighest = colors.cardBackgroundLight,
+            outlineVariant = colors.strokeChrome,
+            errorContainer = colors.dangerBackground,
+            onErrorContainer = colors.dangerText,
+            scrim = colors.scrim,
         )
     } else {
         lightColorScheme(
@@ -196,6 +215,23 @@ fun QasaTheme(
             onSurface = colors.textPrimary,
             outline = colors.stroke,
             error = colors.danger,
+            primaryContainer = colors.cardMuted,
+            onPrimaryContainer = colors.onAccentChip,
+            onSecondary = colors.onAccent,
+            secondaryContainer = colors.cardMuted,
+            onSecondaryContainer = colors.onAccentChip,
+            tertiary = colors.info,
+            surfaceVariant = colors.cardBackgroundLight,
+            onSurfaceVariant = colors.textSecondary,
+            surfaceContainerLowest = colors.cardBackground,
+            surfaceContainerLow = colors.cardBackground,
+            surfaceContainer = colors.cardBackground,
+            surfaceContainerHigh = colors.cardBackground,
+            surfaceContainerHighest = colors.cardBackgroundLight,
+            outlineVariant = colors.strokeChrome,
+            errorContainer = colors.dangerBackground,
+            onErrorContainer = colors.dangerText,
+            scrim = colors.scrim,
         )
     }
 
@@ -205,6 +241,9 @@ fun QasaTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            // Views outside Compose (decor, IME, autofill popups) follow the app language too.
+            window.decorView.layoutDirection =
+                if (language.isRtl) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !dark
                 isAppearanceLightNavigationBars = !dark
@@ -216,6 +255,10 @@ fun QasaTheme(
         LocalQasaColors provides colors,
         LocalIsDarkScheme provides dark,
         LocalQasaText provides text,
+        // Explicit, not derived from the configuration: on API 31-32 the wrapped
+        // configuration can be lost on recreate, and ICU may not know `ckb` is RTL.
+        // Sheets and popups read this local, so they follow it too.
+        LocalLayoutDirection provides if (language.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
     ) {
         ProvideQasaMotion {
             MaterialTheme(

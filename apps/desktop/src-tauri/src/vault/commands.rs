@@ -52,9 +52,11 @@ pub fn vault_set_biometric(state: State<'_, VaultState>, enabled: bool) -> Comma
 }
 
 /// Opens the seal with Touch ID / Hello, outside the vault lock (the prompt can stay up
-/// for a while), then checks the result against the verifier.
-async fn unseal_root(state: &State<'_, VaultState>, reason: String) -> CommandResult<qasa_vault::RootKey> {
-    let sealed = with(state, |v| v.sealed())?.ok_or(CommandError::BiometricUnavailable)?;
+/// for a while), then checks the result against the verifier. `for_unlock` applies the
+/// master password interval (`MasterPasswordDue` before any prompt appears).
+async fn unseal_root(state: &State<'_, VaultState>, reason: String, for_unlock: bool) -> CommandResult<qasa_vault::RootKey> {
+    let sealed = with(state, |v| if for_unlock { v.sealed_for_unlock() } else { v.sealed() })?
+        .ok_or(CommandError::BiometricUnavailable)?;
     let result = tauri::async_runtime::spawn_blocking(move || {
         use super::biometrics::{Biometrics, PlatformBiometrics};
         PlatformBiometrics.unseal(&sealed, &reason)
@@ -75,14 +77,14 @@ async fn unseal_root(state: &State<'_, VaultState>, reason: String) -> CommandRe
 
 #[tauri::command]
 pub async fn vault_unlock_biometric(state: State<'_, VaultState>, reason: String) -> CommandResult<()> {
-    let root = unseal_root(&state, reason).await?;
+    let root = unseal_root(&state, reason, true).await?;
     with(&state, |v| v.unlock_with_root(root))
 }
 
 /// The protected-note gate with Touch ID / Hello: true when the user authenticated.
 #[tauri::command]
 pub async fn vault_verify_biometric(state: State<'_, VaultState>, reason: String) -> CommandResult<bool> {
-    let root = unseal_root(&state, reason).await?;
+    let root = unseal_root(&state, reason, false).await?;
     with(&state, |v| v.root_matches(&root))
 }
 

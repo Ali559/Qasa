@@ -39,10 +39,14 @@ final class VaultSession {
         if biometricsEnabled {
             VaultKeychainStore.storeBiometricPassword(password)
         }
+        BiometricPolicy.recordMasterPasswordUnlock()
     }
 
+    /// Unlocks with a typed master password and restarts the biometric interval
+    /// (`BiometricPolicy`). Pass `recordsMasterPasswordUse: false` only for a password
+    /// that came out of the biometric keychain item.
     @discardableResult
-    func unlock(password: String) -> Bool {
+    func unlock(password: String, recordsMasterPasswordUse: Bool = true) -> Bool {
         guard vaultExists,
               let salt = VaultKeychainStore.kdfSalt,
               let expected = VaultKeychainStore.passwordVerifier else {
@@ -65,6 +69,9 @@ final class VaultSession {
         if VaultKeychainStore.biometricsEnabled {
             VaultKeychainStore.storeBiometricPassword(password)
         }
+        if recordsMasterPasswordUse {
+            BiometricPolicy.recordMasterPasswordUnlock()
+        }
         return true
     }
 
@@ -82,9 +89,24 @@ final class VaultSession {
         return version
     }
 
-    func unlockWithBiometrics() -> String? {
-        guard let password = VaultKeychainStore.loadBiometricPassword() else { return nil }
-        return unlock(password: password) ? password : nil
+    /// Whether biometric unlock may be offered now: on for this vault, usable on this
+    /// device, and the master password isn't due (`BiometricPolicy`).
+    var canOfferBiometricUnlock: Bool {
+        VaultKeychainStore.biometricsEnabled
+            && !BiometricPolicy.isMasterPasswordDue
+            && BiometricPolicy.isBiometryAvailable
+    }
+
+    /// Face ID / Touch ID through the access-controlled keychain item. The keychain read
+    /// (which shows the system prompt) runs off the main actor so the UI keeps drawing.
+    /// Refused once the master password is due; never restarts the 14-day interval.
+    func unlockWithBiometrics() async -> String? {
+        guard !BiometricPolicy.isMasterPasswordDue else { return nil }
+        let password = await Task.detached(priority: .userInitiated) {
+            VaultKeychainStore.loadBiometricPassword()
+        }.value
+        guard let password else { return nil }
+        return unlock(password: password, recordsMasterPasswordUse: false) ? password : nil
     }
 
     #if DEBUG
@@ -171,5 +193,6 @@ final class VaultSession {
         if VaultKeychainStore.biometricsEnabled {
             VaultKeychainStore.storeBiometricPassword(newPassword)
         }
+        BiometricPolicy.recordMasterPasswordUnlock()
     }
 }

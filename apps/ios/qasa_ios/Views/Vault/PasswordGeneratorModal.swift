@@ -9,36 +9,22 @@ struct PasswordGeneratorModal: View {
     @StateObject private var model = PasswordGeneratorModel()
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    PasswordGeneratorContent(model: model)
-                }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 12)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                PasswordGeneratorContent(model: model)
             }
-
-            VStack(spacing: 0) {
-                Rectangle().fill(Theme.stroke).frame(height: 1)
-                Button {
-                    onUsePassword(model.password)
-                } label: {
-                    Text(L10n.tr("gen.usePassword"))
-                        .font(.qasa(17, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Theme.accent)
-                        .foregroundColor(Theme.onAccentChip)
-                        .cornerRadius(Theme.cornerRadius)
-                }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 20)
-            }
-            .background(Theme.chrome)
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
         .background(Theme.background.ignoresSafeArea())
+        .bottomActionBar {
+            Button(L10n.tr("gen.usePassword")) {
+                onUsePassword(model.password)
+            }
+            .buttonStyle(.qasaPrimary)
+            .disabled(model.password.isEmpty)
+        }
         .appLocalization()
         .onAppear { model.regenerate() }
     }
@@ -128,16 +114,18 @@ struct PasswordGeneratorContent: View {
                 HStack {
                     SectionLabel(text: L10n.tr("gen.generatedPassword"))
                     Spacer()
-                    Button { model.regenerate() } label: {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(Theme.cyan)
-                            .padding(8)
+                    FieldIconButton(
+                        systemImage: "arrow.clockwise",
+                        tint: Theme.accent,
+                        accessibilityLabel: L10n.tr("gen.generatedPassword")
+                    ) {
+                        model.regenerate()
                     }
                 }
                 .padding(.bottom, compact ? 12 : 16)
 
                 Text(model.password)
-                    .font(.system(size: compact ? 22 : 28, weight: .bold, design: .monospaced))
+                    .font(.kasoMono(compact ? 22 : 28, weight: .bold))
                     .tracking(compact ? 1.5 : 2.8)
                     .foregroundColor(Theme.textPrimary)
                     .lineLimit(1)
@@ -148,21 +136,13 @@ struct PasswordGeneratorContent: View {
                 Button {
                     model.copyPassword()
                 } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: model.copied ? "checkmark" : "doc.on.doc")
-                        Text(model.copied ? L10n.tr("gen.copied") : L10n.tr("gen.copyPassword"))
-                    }
-                    .font(.qasa(14))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(Theme.accentDark.opacity(0.2))
-                    .foregroundColor(Theme.accent)
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Theme.accent.opacity(0.3), lineWidth: 1)
+                    QasaButtonLabel(
+                        title: model.copied ? L10n.tr("gen.copied") : L10n.tr("gen.copyPassword"),
+                        icon: model.copied ? "checkmark" : "doc.on.doc"
                     )
                 }
+                .buttonStyle(.qasaSecondary)
+                .disabled(model.password.isEmpty)
             }
             .padding(compact ? 18 : 25)
         }
@@ -178,7 +158,7 @@ struct PasswordGeneratorContent: View {
         CardContainer(padding: compact ? 14 : 17, cornerRadius: Theme.cornerRadiusLarge) {
             HStack {
                 Text(L10n.tr("gen.strength"))
-                    .font(AppTypography.usesRudaw ? .qasa(12, weight: .semibold) : .qasaLabel(12))
+                    .font(.qasa(12, weight: .semibold))
                     .foregroundColor(Theme.textSecondary)
                 Spacer()
                 Text(model.strengthLabel.text)

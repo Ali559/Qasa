@@ -113,8 +113,8 @@ try {
   check('field icon appears', await waitFor(async () => (await hosts()) === 1))
   await fillVia(`document.querySelector('#username')`)
   check('fills 127.0.0.1 login', (await value(`document.querySelector('#username')`)) === 'alice' && (await value(`document.querySelector('#password')`)) === 'alice-pass-127')
-  const faces = await exec(`return [...document.fonts].filter((f) => f.family.replace(/"/g, '').startsWith('qasa-')).map((f) => f.family.replace(/"/g, '').split('-')[1] + ':' + f.status).sort().join(',')`)
-  check('the menu loads Rubik and Rudaw', faces === 'rubik:loaded,rudaw:loaded', faces)
+  const faces = await exec(`return [...document.fonts].filter((f) => f.family.replace(/"/g, '').startsWith('qasa-')).map((f) => f.family.replace(/"/g, '').split('-')[1] + ':' + f.weight + ':' + f.status).sort().join(',')`)
+  check('the menu loads IBM Plex Sans Arabic', faces === 'plex:400:loaded,plex:600:loaded,plex:700:loaded', faces)
 
   await go(`${servers.other}/login.html`)
   await waitFor(async () => (await hosts()) === 1)

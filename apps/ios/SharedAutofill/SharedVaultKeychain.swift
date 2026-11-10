@@ -13,6 +13,8 @@ nonisolated enum SharedVaultKeychain {
         case kdfVersion
         case biometricsEnabled
         case biometricPassword
+        /// When the vault was last opened with the master password (see `BiometricPolicy`).
+        case lastMasterPasswordUnlock
     }
 
     static var vaultExists: Bool {
@@ -49,6 +51,27 @@ nonisolated enum SharedVaultKeychain {
         set {
             setBool(newValue, for: .biometricsEnabled)
             if !newValue { delete(.biometricPassword) }
+        }
+    }
+
+    /// When the vault was last unlocked, created or re-keyed with the master password
+    /// (never by biometrics). Stored in the shared access group so the AutoFill extension
+    /// reads the same value as the app. 8 bytes: big-endian bit pattern of the Unix time.
+    static var lastMasterPasswordUnlock: Date? {
+        get {
+            guard let data = data(for: .lastMasterPasswordUnlock), data.count == 8 else { return nil }
+            let bits = data.reduce(UInt64(0)) { ($0 << 8) | UInt64($1) }
+            let seconds = Double(bitPattern: bits)
+            guard seconds.isFinite else { return nil }
+            return Date(timeIntervalSince1970: seconds)
+        }
+        set {
+            setData(
+                newValue.map { date in
+                    withUnsafeBytes(of: date.timeIntervalSince1970.bitPattern.bigEndian) { Data($0) }
+                },
+                for: .lastMasterPasswordUnlock
+            )
         }
     }
 

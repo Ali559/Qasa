@@ -114,7 +114,7 @@ fun FilterChipButton(
 }
 
 @Composable
-fun MintSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, enabled: Boolean = true) {
+fun MintSwitch(checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, enabled: Boolean = true) {
     val c = qasaColors
     Switch(
         checked = checked,

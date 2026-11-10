@@ -135,7 +135,7 @@ struct NotificationsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(note.title(locale: localeCode))
-                            .font(.title2.bold())
+                            .font(.qasa(22, weight: .bold))
                             .foregroundColor(Theme.textPrimary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Text(formatNotificationDate(note.created_at))

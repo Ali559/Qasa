@@ -5,7 +5,7 @@ import { Bell, FileText, Folder, Hand, HeartPulse, Settings as SettingsIcon, Use
 import { computed, type Component } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
-import NavChevronRow from '@/components/NavChevronRow.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
@@ -64,8 +64,8 @@ const premium = computed(() => account.status?.isPremium ?? false)
 
     <section v-for="group in groups" :key="group.label" class="group">
       <SectionLabel :text="group.label" />
-      <CardContainer>
-        <NavChevronRow
+      <CardContainer :padding="0" class="settings-list">
+        <SettingsRow
           v-for="page in group.pages"
           :key="page"
           :icon="ROWS[page]!.icon"

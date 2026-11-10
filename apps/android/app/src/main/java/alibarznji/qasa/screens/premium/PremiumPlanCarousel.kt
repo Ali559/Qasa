@@ -81,7 +81,8 @@ internal fun PremiumPlanCarousel(plans: List<PricingPlanDTO>, pagerState: PagerS
                 plan = plans[page],
                 selected = page == pagerState.currentPage,
                 modifier = Modifier
-                    .padding(horizontal = QasaDimens.spaceMicro)
+                    // Vertical room too, so the pager never clips the card's border.
+                    .padding(horizontal = QasaDimens.spaceMicro, vertical = QasaDimens.spaceMicro)
                     .heightIn(min = minHeight)
                     .onSizeChanged { if (it.height > tallest) tallest = it.height },
             )
@@ -177,8 +178,8 @@ private fun PlanHeader(plan: PricingPlanDTO) {
         Text(
             stringResource(if (plan.id == "premium_yearly") R.string.sub_planyearly else R.string.sub_planmonthly),
             color = c.accent,
-            // iOS: Rudaw 11 semibold for ckb/ar, mono 11 otherwise.
-            style = if (text.usesRudaw) text.detailSemibold else text.detailMono,
+            // 11 semibold for ckb/ar, mono 11 otherwise.
+            style = if (text.arabicScript) text.detailSemibold else text.detailMono,
         )
     }
 }

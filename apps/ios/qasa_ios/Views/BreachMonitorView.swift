@@ -36,30 +36,34 @@ struct BreachMonitorView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .alert(L10n.tr("breach.removeEmailTitle"), isPresented: Binding(
-            get: { pendingRemoval != nil },
-            set: { if !$0 { pendingRemoval = nil } }
-        )) {
-            Button(L10n.tr("common.cancel"), role: .cancel) { pendingRemoval = nil }
-            Button(L10n.tr("common.remove"), role: .destructive) {
-                if let pendingRemoval {
-                    let email = pendingRemoval.email
-                    modelContext.delete(pendingRemoval)
-                    try? modelContext.save()
-                    Task { await BreachMonitorService.unregisterMonitor(email: email) }
-                }
-                pendingRemoval = nil
-            }
-        } message: {
+        // Dismissal clears the target on the next turn, so the confirm action still sees it.
+        .confirmSheet(
+            isPresented: Binding(
+                get: { pendingRemoval != nil },
+                set: { if !$0 { DispatchQueue.main.async { pendingRemoval = nil } } }
+            ),
+            title: L10n.tr("breach.removeEmailTitle"),
+            message: pendingRemoval.map { String(format: L10n.tr("breach.removeEmailMessage"), $0.email) },
+            icon: "envelope.badge.shield.half.filled",
+            confirmTitle: L10n.tr("common.remove"),
+            cancelTitle: L10n.tr("common.cancel"),
+            destructive: true
+        ) {
             if let pendingRemoval {
-                Text(String(format: L10n.tr("breach.removeEmailMessage"), pendingRemoval.email))
+                let email = pendingRemoval.email
+                modelContext.delete(pendingRemoval)
+                try? modelContext.save()
+                Task { await BreachMonitorService.unregisterMonitor(email: email) }
             }
+            pendingRemoval = nil
         }
-        .alert(L10n.tr("breach.slotLimitTitle"), isPresented: $showLimitAlert) {
-            Button(L10n.tr("common.ok"), role: .cancel) {}
-        } message: {
-            Text(String(format: L10n.tr("breach.slotLimitMessage", locale: AppLanguage.current.locale), maxSlots))
-        }
+        .confirmSheet(
+            isPresented: $showLimitAlert,
+            title: L10n.tr("breach.slotLimitTitle"),
+            message: String(format: L10n.tr("breach.slotLimitMessage", locale: AppLanguage.current.locale), maxSlots),
+            icon: "exclamationmark.circle",
+            confirmTitle: L10n.tr("common.ok")
+        ) {}
         .sheet(item: $rotateTarget) { target in
             RotatePasswordSheet(email: target.email) { itemName in
                 errorMessage = nil
@@ -152,26 +156,16 @@ struct BreachMonitorView: View {
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                        .foregroundColor(Theme.textPrimary)
-                        .tint(Theme.accent)
+                        .multilineTextAlignment(.leading)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .background(Theme.cardBackgroundLight)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Theme.stroke, lineWidth: 1)
-                )
+                .qasaField()
 
                 PrimaryButton(
                     title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"),
-                    icon: "plus",
-                    cornerRadius: 8
+                    icon: "plus"
                 ) {
                     Task { await addEmail() }
                 }
-                .opacity(monitored.count >= maxSlots ? 0.5 : 1)
                 .disabled(monitored.count >= maxSlots || isChecking)
             }
         }
@@ -208,20 +202,22 @@ struct BreachMonitorView: View {
                 pendingRemoval = item
             } label: {
                 Image(systemName: "xmark")
-                    .font(.qasa(12, weight: .bold))
+                    .font(.system(size: 12, weight: .bold))
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 32, height: 32)
                     .background(Theme.chrome)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(Theme.strokeChrome, lineWidth: 1))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PressableStyle())
         }
-        .padding(14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(minHeight: Theme.rowMinHeight)
         .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
+            RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
                 .stroke(Theme.stroke, lineWidth: 1)
         )
     }
@@ -250,7 +246,7 @@ struct BreachMonitorView: View {
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(selected ? Theme.accent : Theme.stroke, lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableStyle())
     }
 
     private var breachList: some View {

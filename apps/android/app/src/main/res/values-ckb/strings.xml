@@ -41,6 +41,7 @@
     <string name="auth_unlock_localonly">تەنها بۆ تۆ</string>
     <string name="auth_unlock_localonlybody">وشە نهێنییەکانت لەسەر ئەم مۆبایلە دەمێننەوە. قاسە ناتوانێت وشەی نهێنی سەرەکیت ڕێکبخاتەوە.</string>
     <string name="auth_unlock_masterpassword">وشەی نهێنی سەرەکی</string>
+    <string name="auth_unlock_masterpasswordduefmt">%d ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە تاوەکو لەبیرت بمێنێت. دوای ئەوە کردنەوە بە ڕوخسار یان پەنجەمۆر دووبارە کار دەکات.</string>
     <string name="auth_unlock_placeholder">وشەی نهێنی بنووسە</string>
     <string name="auth_unlock_subtitle">وشەی نهێنی سەرەکیت بنووسە بۆ بینینی وشە نهێنییەکانت.</string>
     <string name="auth_unlock_title">بەخێربێیتەوە</string>
@@ -498,6 +499,8 @@
     <string name="premium_autorenewdetailcharge">لە کۆتایی هەر ماوەیەکدا نرخی پلانەکە لە جزدانەکەت دەبڕین تا لە ڕێکخستنەکاندا ئەمە بکوژێنیتەوە.</string>
     <string name="premium_autorenewhint">پێش کۆتایی هەر ماوەیەک، بەستەرێکت بۆ دەنێرین بۆ پارەدانی ماوەی داهاتوو. هیچ پارەیەک نابڕدرێت تا خۆت نەیدەیت.</string>
     <string name="premium_bestvalue">باشترین نرخ</string>
+    <string name="premium_comingsoonbody">پارەدان بە جزدانە عێراقییەکان خەریکە ئامادە دەبێت. هەر کە ئامادە بوو، پرێمیەم لێرەوە بەردەست دەبێت.</string>
+    <string name="premium_comingsoontitle">بەم زووانە</string>
     <string name="premium_completeinwallet">پارەدان لە %s تەواو بکە…</string>
     <string name="premium_fastpay">FastPay</string>
     <string name="premium_featurebreach">پشکنینی وشە نهێنییە دزراوەکان</string>
@@ -674,6 +677,10 @@
     <string name="tab_home">سەرەکی</string>
     <string name="tab_passwords">وشە نهێنییەکان</string>
     <string name="tab_you">تۆ</string>
+    <string name="toast_itemcreated">بابەتەکە زیادکرا</string>
+    <string name="toast_itemcreatedfmt">%s زیادکرا</string>
+    <string name="toast_itemupdated">گۆڕانکارییەکان پاشەکەوتکران</string>
+    <string name="toast_itemupdatedfmt">%s نوێکرایەوە</string>
     <string name="totp_add">زیادکردنی کۆدی دوو هەنگاوی</string>
     <string name="totp_cameradenied">قاسە پێویستی بە کامێرایە بۆ سکانکردنی کۆدی QR. لە ڕێکخستنەکاندا ڕێگەی پێبدە، یان لەبری ئەوە کلیلی ڕێکخستن بنووسە.</string>
     <string name="totp_copied">کۆدی دوو هەنگاوی لەبەرگیرایەوە</string>

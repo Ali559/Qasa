@@ -33,14 +33,17 @@ struct TOTPEditorField: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .alert(L10n.tr("totp.enterKey"), isPresented: $showKeyEntry) {
-            TextField(L10n.tr("totp.keyPlaceholder"), text: $keyInput)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-            Button(L10n.tr("common.cancel"), role: .cancel) {}
-            Button(L10n.tr("totp.add")) { applyKey(keyInput) }
-        } message: {
-            Text(L10n.tr("totp.hint"))
+        .textPromptSheet(
+            isPresented: $showKeyEntry,
+            title: L10n.tr("totp.enterKey"),
+            message: L10n.tr("totp.hint"),
+            placeholder: L10n.tr("totp.keyPlaceholder"),
+            text: $keyInput,
+            confirmTitle: L10n.tr("totp.add"),
+            cancelTitle: L10n.tr("common.cancel"),
+            plainText: true
+        ) {
+            applyKey(keyInput)
         }
         .sheet(isPresented: $showScanner) {
             TOTPScannerSheet(
@@ -73,15 +76,15 @@ struct TOTPEditorField: View {
                 Label(L10n.tr("totp.enterKey"), systemImage: "keyboard")
             }
         } label: {
-            Label(L10n.tr("totp.add"), systemImage: "plus")
+            QasaButtonLabel(title: L10n.tr("totp.add"), icon: "plus")
                 .font(.qasa(16, weight: .semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Theme.cardBackground)
                 .foregroundColor(Theme.accent)
-                .cornerRadius(Theme.cornerRadius)
+                .frame(maxWidth: .infinity)
+                .frame(height: Theme.buttonHeight)
+                .background(Theme.cardBackground)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: Theme.cornerRadius)
+                    RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
                         .stroke(Theme.accent.opacity(0.4), lineWidth: 1)
                 )
         }

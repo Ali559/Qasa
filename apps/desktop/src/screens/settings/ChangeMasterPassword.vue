@@ -90,7 +90,7 @@ function close() {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('settings.changeMasterPassword')" :width="520" @close="close">
+  <Sheet :open="open" :label="t('settings.changeMasterPassword')" :width="520" placement="bottom" @close="close">
     <SheetHeader :title="t('settings.changeMasterPassword')" :cancel-label="t('settings.cancel')" @cancel="close" />
     <form ref="form" class="body" @submit.prevent="save">
       <p class="subtitle">{{ t('settings.changeMasterSubtitle') }}</p>
@@ -186,12 +186,13 @@ function close() {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 14px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--on-accent-chip);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }

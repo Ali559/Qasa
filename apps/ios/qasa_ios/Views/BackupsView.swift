@@ -38,6 +38,15 @@ struct BackupsView: View {
                 .padding(.bottom, 24)
             }
             .background(Theme.background.ignoresSafeArea())
+            .bottomActionBar {
+                PrimaryButton(
+                    title: L10n.tr(service.isBackingUp ? "backup.backingUp" : "backup.backUpNow", locale: locale),
+                    icon: service.isBackingUp ? nil : "externaldrive.badge.checkmark"
+                ) {
+                    backUpNow()
+                }
+                .disabled(service.isBackingUp)
+            }
             .navigationTitle(L10n.tr("backup.title", locale: locale))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -67,20 +76,15 @@ struct BackupsView: View {
 
     private var backUpCard: some View {
         CardContainer {
-            VStack(alignment: .leading, spacing: 12) {
-                PrimaryButton(
-                    title: L10n.tr(service.isBackingUp ? "backup.backingUp" : "backup.backUpNow", locale: locale),
-                    icon: service.isBackingUp ? nil : "externaldrive.badge.checkmark",
-                    cornerRadius: 8
-                ) {
-                    backUpNow()
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 14) {
+                    IconBadge(systemImage: "externaldrive.badge.checkmark")
+                    Text(BackupService.lastBackupText(ms: backup.lastBackupMs, locale: locale))
+                        .font(.qasa(14, weight: .medium))
+                        .foregroundColor(Theme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if service.isBackingUp { ProgressView() }
                 }
-                .disabled(service.isBackingUp)
-                .opacity(service.isBackingUp ? 0.7 : 1)
-
-                Text(BackupService.lastBackupText(ms: backup.lastBackupMs, locale: locale))
-                    .font(.qasa(13))
-                    .foregroundColor(Theme.textSecondary)
 
                 if backup.lastBackupFailed, !service.isBackingUp {
                     Text(L10n.tr("backup.failed", locale: locale))
@@ -99,8 +103,7 @@ struct BackupsView: View {
 
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionLabel(text: L10n.tr("backup.locationTitle", locale: locale))
-            CardContainer {
+            SettingsSection(title: L10n.tr("backup.locationTitle", locale: locale)) {
                 Button {
                     backUpAfterPick = false
                     showFolderPicker = true
@@ -111,7 +114,7 @@ struct BackupsView: View {
                         trailingText: L10n.tr(backup.hasLocation ? "backup.changeLocation" : "backup.chooseLocation", locale: locale)
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.qasaRow)
             }
             // Where the file is: Qasa never uploads it, so say whether it left the phone.
             if let inICloud = backup.isInICloudDrive {
@@ -133,12 +136,16 @@ struct BackupsView: View {
                                 .font(.qasa(14, weight: .semibold))
                                 .foregroundColor(Theme.accent)
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableStyle())
                     }
                     .padding(14)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Theme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous)
+                            .stroke(Theme.stroke, lineWidth: 1)
+                    )
                 }
             }
             helpText("backup.locationHelp")
@@ -147,7 +154,7 @@ struct BackupsView: View {
 
     private var automaticSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CardContainer {
+            SettingsSection {
                 Menu {
                     ForEach(BackupFrequency.allCases) { frequency in
                         Button(L10n.tr(frequency.labelKey, locale: locale)) {
@@ -169,14 +176,14 @@ struct BackupsView: View {
 
     private var restoreSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CardContainer {
+            SettingsSection {
                 Button { showRestore = true } label: {
                     NavChevronRow(
                         icon: "arrow.counterclockwise",
                         title: L10n.tr("backup.restore", locale: locale)
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.qasaRow)
             }
             helpText("backup.restoreHelp")
         }
@@ -187,6 +194,7 @@ struct BackupsView: View {
             .font(.qasa(12))
             .foregroundColor(Theme.textSecondary)
             .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 4)
     }
 
     private func backUpNow() {

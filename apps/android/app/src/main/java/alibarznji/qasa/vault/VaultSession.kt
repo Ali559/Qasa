@@ -77,6 +77,7 @@ class VaultSession @Inject constructor(
         store.biometricsEnabled = biometricsEnabled && sealed
         encKey = enc
         searchKey = search
+        recordMasterPasswordUnlock()
         _unlocked.value = true
     }
 
@@ -108,7 +109,18 @@ class VaultSession @Inject constructor(
         return true
     }
 
+    /**
+     * Unlocks with the master password. This is a master-password unlock for
+     * [BiometricPolicy]: it restarts the interval. The biometric path goes through
+     * [openWithPassword] directly so it never does.
+     */
     fun unlock(password: String): Boolean {
+        val ok = openWithPassword(password)
+        if (ok) recordMasterPasswordUnlock()
+        return ok
+    }
+
+    private fun openWithPassword(password: String): Boolean {
         val salt = store.kdfSalt ?: return false
         val expected = store.passwordVerifier ?: return false
         if (!store.vaultExists) return false
@@ -155,6 +167,24 @@ class VaultSession @Inject constructor(
     fun biometricUnlockAvailable(): Boolean =
         store.biometricsEnabled && store.biometricGateAvailable && store.biometricSecretStored
 
+    /**
+     * True when [BiometricPolicy.MASTER_PASSWORD_INTERVAL] has run out (or no
+     * master-password unlock was ever recorded, or the clock went backwards).
+     */
+    val masterPasswordDue: Boolean
+        get() = BiometricPolicy.isMasterPasswordDue(store.lastMasterPasswordUnlock, System.currentTimeMillis())
+
+    /**
+     * What the unlock surfaces offer and auto-prompt on: a sealed secret, a usable gate,
+     * and the master password not yet due. [biometricUnlockAvailable] stays the
+     * "is it set up" answer for Settings.
+     */
+    fun biometricUnlockAllowed(): Boolean = biometricUnlockAvailable() && !masterPasswordDue
+
+    private fun recordMasterPasswordUnlock() {
+        store.lastMasterPasswordUnlock = System.currentTimeMillis()
+    }
+
     /** The user's preference, independent of whether a secret is currently sealed. */
     val biometricsEnabled: Boolean
         get() = store.biometricsEnabled
@@ -166,7 +196,7 @@ class VaultSession @Inject constructor(
 
     /** The cipher to hand to `BiometricPrompt` for the unlock, or null when unavailable. */
     fun biometricUnlockCipher(): Cipher? =
-        if (biometricUnlockAvailable()) store.biometricDecryptCipher() else null
+        if (biometricUnlockAllowed()) store.biometricDecryptCipher() else null
 
     /**
      * Unlocks using the password sealed behind the gate, decrypting it with a cipher the
@@ -176,13 +206,17 @@ class VaultSession @Inject constructor(
      * reads the cache without a cipher the platform issued post-authentication.
      */
     fun unlockWithBiometricCipher(cipher: Cipher): Boolean {
+        // The interval ran out while the prompt was up: the password is due, not wrong,
+        // so the sealed secret stays.
+        if (masterPasswordDue) return false
         val password = store.loadBiometricSecret(cipher) ?: run {
             // The gate opened but the secret did not decrypt. Drop it so a stale or
             // tampered value cannot be replayed on the next attempt.
             store.clearBiometricPassword()
             return false
         }
-        val ok = unlock(password)
+        // Not `unlock`: a biometric unlock must not restart the master-password interval.
+        val ok = openWithPassword(password)
         if (!ok) store.clearBiometricPassword()
         return ok
     }
@@ -240,6 +274,7 @@ class VaultSession @Inject constructor(
         store.passwordVerifier = material.newVerifier
         encKey = material.newEnc
         searchKey = material.newSearch
+        recordMasterPasswordUnlock()
         // The sealed secret held the old password, so it can no longer open the vault.
         // It is destroyed here and re-captured from the new password behind a fresh
         // prompt, rather than silently left to fail on the next unlock.

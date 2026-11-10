@@ -10,6 +10,8 @@ import { accountApi } from '@/account/api'
 import { account, isPremium, refreshLicense } from '@/account/store'
 import type { PaymentIntent, PricingPlan } from '@/account/types'
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
+import BottomActionBar from '@/components/BottomActionBar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { openUrl } from '@/opener'
@@ -151,6 +153,16 @@ async function finish(paymentId: string, attempts: number, intervalMs: number) {
     qrLink.value = null
     stubIntent.value = null
   }
+}
+
+/** Wallet payments aren't open yet: the pay button shows "Coming soon" and sends nothing
+ *  to the server. `startPayment` stays for when they open (flip this). */
+const PAYMENTS_OPEN = false
+const comingSoon = ref(false)
+function onPay() {
+  if (isPaying.value || premium.value) return
+  if (PAYMENTS_OPEN) void startPayment()
+  else comingSoon.value = true
 }
 
 async function startPayment() {
@@ -320,13 +332,21 @@ async function simulateStub() {
       </div>
     </div>
 
-    <footer class="footer">
-      <div class="footer-inner">
-        <PrimaryButton :title="payTitle" :icon="Lock" :disabled="isPaying || premium" class="pay" @click="startPayment" />
-        <p v-if="premium" class="footnote success">{{ t('premium.alreadyPremium') }}</p>
-        <p v-else class="footnote">{{ tr('premium.opensWalletDesktop', 'Opens checkout in your browser, or a code to scan with your phone. We\'ll refresh your license when payment completes.') }}</p>
-      </div>
-    </footer>
+    <BottomActionBar stack :max-width="680">
+      <PrimaryButton :title="payTitle" :icon="Lock" :disabled="isPaying || premium" @click="onPay" />
+      <p v-if="premium" class="footnote success">{{ t('premium.alreadyPremium') }}</p>
+      <p v-else class="footnote">{{ tr('premium.opensWalletDesktop', 'Opens checkout in your browser, or a code to scan with your phone. We\'ll refresh your license when payment completes.') }}</p>
+    </BottomActionBar>
+
+    <ConfirmDialog
+      :open="comingSoon"
+      :title="t('premium.comingSoonTitle')"
+      :message="t('premium.comingSoonBody')"
+      :confirm-label="t('common.ok')"
+      no-cancel
+      @confirm="comingSoon = false"
+      @cancel="comingSoon = false"
+    />
   </div>
 </template>
 
@@ -366,8 +386,14 @@ async function simulateStub() {
   gap: 12px;
 }
 
+/* The track clips (it scrolls), so it keeps 2px of room on every side: the cards' borders
+   and rounded corners never touch the clip edge. Cards step by exactly one track width
+   (card + gap = content + padding), which onTrackScroll relies on. */
 .track {
   display: flex;
+  gap: 4px;
+  padding: 2px;
+  scroll-padding-inline: 2px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
@@ -385,8 +411,7 @@ async function simulateStub() {
 
 .plan-card {
   position: relative;
-  flex: 0 0 calc(100% - 4px);
-  margin-inline: 2px;
+  flex: 0 0 100%;
   min-height: 240px;
   box-sizing: border-box;
   display: flex;
@@ -546,6 +571,9 @@ async function simulateStub() {
 .method {
   display: flex;
   align-items: center;
+  /* One gap on both sides of the text: the trailing check sits as far from it as the
+     leading badge does, and the row's padding mirrors them at the edges. */
+  gap: 16px;
   width: 100%;
   padding: 17px;
   border: 1px solid var(--stroke);
@@ -577,7 +605,6 @@ async function simulateStub() {
   justify-content: center;
   width: 36px;
   height: 36px;
-  margin-inline-end: 16px;
   border-radius: 9px;
   background: color-mix(in srgb, var(--accent) 12%, var(--chrome));
   color: var(--accent);
@@ -650,24 +677,8 @@ async function simulateStub() {
 }
 
 /* Pinned footer */
-.footer {
-  flex-shrink: 0;
-  border-top: 1px solid var(--stroke);
-  background: color-mix(in srgb, var(--card-muted) 95%, transparent);
-}
 
-.footer-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 720px;
-  margin-inline: auto;
-  padding: 21px var(--screen-padding) 20px;
-}
 
-.footer-inner .pay {
-  border-radius: 8px;
-}
 
 .footnote {
   margin: 0;

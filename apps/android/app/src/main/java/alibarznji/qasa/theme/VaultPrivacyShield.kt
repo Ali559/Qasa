@@ -1,6 +1,7 @@
 package alibarznji.qasa.theme
 
 import alibarznji.qasa.R
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,7 @@ fun VaultPrivacyShield(
         verticalArrangement = Arrangement.spacedBy(ShieldGap, Alignment.CenterVertically),
     ) {
         Icon(
-            Icons.Default.Shield,
+            painterResource(R.drawable.ic_qasa_mark),
             contentDescription = null,
             tint = c.textSecondary,
             modifier = Modifier.size(QasaIconSize.x7l),

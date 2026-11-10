@@ -176,9 +176,10 @@ watch(options, regenerate)
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px;
+  height: var(--button-height);
+  padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   background: color-mix(in srgb, var(--accent-dark) 20%, transparent);
   color: var(--accent);
   font-size: 14px;

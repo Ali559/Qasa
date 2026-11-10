@@ -13,14 +13,16 @@ import java.security.MessageDigest
  * JVM unit tests, and it is verify-only, so no secret material is ever handled here.
  */
 internal object Ed25519 {
-    private val P: BigInteger = BigInteger.TWO.pow(255) - BigInteger.valueOf(19)
+    /** Not `BigInteger.TWO`: that field is API 33, and this runs on every minSdk 26 device. */
+    private val TWO: BigInteger = BigInteger.valueOf(2)
+    private val P: BigInteger = TWO.pow(255) - BigInteger.valueOf(19)
     private val L: BigInteger =
-        BigInteger.TWO.pow(252) + BigInteger("27742317777372353535851937790883648493")
+        TWO.pow(252) + BigInteger("27742317777372353535851937790883648493")
     private val D: BigInteger = BigInteger.valueOf(-121665)
         .multiply(BigInteger.valueOf(121666).modInverse(P))
         .mod(P)
     private val TWO_D: BigInteger = D.add(D).mod(P)
-    private val SQRT_M1: BigInteger = BigInteger.TWO.modPow(
+    private val SQRT_M1: BigInteger = TWO.modPow(
         P.subtract(BigInteger.ONE).divide(BigInteger.valueOf(4)),
         P,
     )

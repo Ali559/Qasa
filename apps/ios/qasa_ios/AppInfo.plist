@@ -10,8 +10,10 @@
 	<string>Qasa finds your other devices on this Wi‑Fi to sync your encrypted vault.</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>rudawregular2.ttf</string>
-		<string>Rubik-Variable.ttf</string>
+		<string>IBMPlexSansArabic-Regular.ttf</string>
+		<string>IBMPlexSansArabic-Medium.ttf</string>
+		<string>IBMPlexSansArabic-SemiBold.ttf</string>
+		<string>IBMPlexSansArabic-Bold.ttf</string>
 	</array>
 </dict>
 </plist>
