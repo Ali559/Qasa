@@ -15,7 +15,8 @@ final class NotificationViewController: UIViewController, UNNotificationContentE
         let info = notification.request.content.userInfo
         let title = EphemeralPaymentNotificationSupport.title(from: info)
         let subtitle = EphemeralPaymentNotificationSupport.subtitle(from: info)
-        let fields = EphemeralPaymentNotificationSupport.fields(from: info)
+        // The values come from the keychain, not the notification (EphemeralSecretStore).
+        let fields = EphemeralSecretStore.load()
         let expiresAt = EphemeralPaymentNotificationSupport.expiresAt(from: info)
             ?? Date().addingTimeInterval(30)
 

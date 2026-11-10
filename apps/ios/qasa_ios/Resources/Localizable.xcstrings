@@ -947,6 +947,28 @@
         }
       }
     },
+    "autofill.addressLine2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Building, floor, apartment"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المبنى، الطابق، الشقة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بینا، نهۆم، شوقە"
+          }
+        }
+      }
+    },
     "autofill.bank": {
       "localizations": {
         "en": {
@@ -1035,6 +1057,28 @@
         }
       }
     },
+    "autofill.chooseField": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what to insert"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر ما تريد إدراجه"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵبژێرە چی دابنرێت"
+          }
+        }
+      }
+    },
     "autofill.confirmTitle": {
       "localizations": {
         "en": {
@@ -1097,6 +1141,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "لەبەرگرتنەوە"
+          }
+        }
+      }
+    },
+    "autofill.country": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Country"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الدولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وڵات"
           }
         }
       }
@@ -1211,6 +1277,50 @@
         }
       }
     },
+    "autofill.fullName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full name"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم الكامل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوی تەواو"
+          }
+        }
+      }
+    },
+    "autofill.insertTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert from Qasa"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إدراج من قاصة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە قاسەوە دابنێ"
+          }
+        }
+      }
+    },
     "autofill.nameOnCard": {
       "localizations": {
         "en": {
@@ -1273,6 +1383,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "لە هەموو وشە نهێنییەکانت بگەڕێ."
+          }
+        }
+      }
+    },
+    "autofill.phoneNational": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone number without country code"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم الهاتف بدون رمز الدولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی تەلەفۆن بەبێ کۆدی وڵات"
           }
         }
       }

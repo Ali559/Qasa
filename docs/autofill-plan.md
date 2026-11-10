@@ -12,6 +12,23 @@ not in the same way on each platform (§3.3).
 
 ## Progress log
 
+**2026-11-10 — iOS done (§3.4).**
+- **Card notification:**
+  - The values moved out of `userInfo` into `EphemeralSecretStore`: shared keychain, `WhenUnlockedThisDeviceOnly`, deleted on expiry. The notification extension got the keychain group.
+  - Copies from the notification and the drawer are `localOnly` and expire after 30 s.
+- **Credential provider:** declares `ProvidesPasswords`, `ProvidesOneTimeCodes` and `ProvidesTextToInsert`.
+  - The request-based entry points are added.
+  - `prepareOneTimeCodeCredentialList` returns the current code of a login with 2FA.
+  - `prepareInterfaceForUserChoosingTextToInsert` → `TextInsertionView`: unlock (Face ID on its own, else the master password), then an item, then one value (`AutofillTextChoices`). Card numbers and codes are masked in the list.
+- **Index:** gains Name, Email, Phone, Address and Company (text insertion only, never in the password list), and `hasTOTP`.
+- **Identities:** `AutofillIdentitySync` registers a one-time-code identity per login with 2FA, and clears the store on local reset and account deletion.
+- **Tests:** 7 new Swift Testing cases (`AutofillTests`), passing on the iPhone 17 simulator; the app and both extensions build.
+  - Full suite: 109 of 110. `VaultSyncStoreTests/snapshotApplyRoundTrip` failed once in the parallel run and passes on its own (twice). It doesn't touch autofill, so it looks like a flaky test that was already there.
+- **Not tried yet:**
+  - on a device or in the simulator UI: QuickType codes, "AutoFill → Qasa" text insertion, the notification panel reading from the keychain;
+  - Face ID in the extensions.
+- **Follow-up:** iOS 26.2 lets a provider save passwords (`prepareInterfaceForSavePasswordRequest`), which would give iOS the save prompt Android and the extension have.
+
 **2026-11-10 — Browser extension and desktop bridge done (§3.2).**
 - **Detection:** `content/identity.ts` classifies card, name, contact and address inputs and selects (the same rules as Android). Card and profile groups live next to the login groups in `detect.ts`.
 - **Menu:**

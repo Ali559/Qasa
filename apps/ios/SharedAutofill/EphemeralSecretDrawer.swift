@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 @MainActor
 final class EphemeralPasteboardSession: ObservableObject {
@@ -54,7 +55,7 @@ final class EphemeralPasteboardSession: ObservableObject {
 
     func present(secrets: AutofillSecrets, copyFieldId: String? = nil) {
         switch secrets {
-        case .login:
+        case .login, .name, .email, .phone, .address, .company:
             return
         case .card(let c):
             present(
@@ -87,7 +88,11 @@ final class EphemeralPasteboardSession: ObservableObject {
     }
 
     func copy(_ field: Field) {
-        UIPasteboard.general.string = field.value
+        // This phone only, and iOS drops it after the drawer's lifetime.
+        UIPasteboard.general.setItems(
+            [[UTType.utf8PlainText.identifier: field.value]],
+            options: [.localOnly: true, .expirationDate: Date().addingTimeInterval(Self.ttlSeconds)]
+        )
         ownedPasteboardChangeCount = UIPasteboard.general.changeCount
         lastCopiedFieldId = field.id
         UIImpactFeedbackGenerator(style: .light).impactOccurred()

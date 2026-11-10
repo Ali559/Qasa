@@ -1,10 +1,15 @@
 import SwiftUI
 
 struct CredentialProviderRootView: View {
+    /// A password request, or an iOS 18 one-time-code request (only logins with 2FA).
+    enum Mode { case password, oneTimeCode }
+
+    let mode: Mode
     let serviceIdentifiers: [String]
     let preferredRecordId: UUID?
     let onCancel: () -> Void
     let onProvideLogin: (_ user: String, _ password: String) -> Void
+    let onProvideCode: (_ code: String) -> Void
 
     @ObservedObject private var ephemeral = EphemeralPasteboardSession.shared
     @State private var candidates: [AutofillCandidate] = []
@@ -141,7 +146,13 @@ struct CredentialProviderRootView: View {
     }
 
     private func load() {
-        let entries = AutofillIndexStore.load().entries
+        // Profile items are only inserted as text; a code request lists logins with 2FA.
+        let entries = AutofillIndexStore.load().entries.filter { entry in
+            switch mode {
+            case .password: return entry.kind.isCredentialListKind
+            case .oneTimeCode: return entry.kind == .login && entry.hasTOTP == true
+            }
+        }
         var list = AutofillContextMatcher.candidates(
             from: entries,
             serviceIdentifiers: serviceIdentifiers,
@@ -209,11 +220,20 @@ struct CredentialProviderRootView: View {
             showUnlock = false
             password = ""
             switch secrets {
+            case .login(let login) where mode == .oneTimeCode:
+                guard let code = TOTP(stored: login.totp)?.code() else {
+                    unlockError = AutofillL10n.tr("autofill.decryptFailed", "Could not decrypt item.")
+                    return
+                }
+                onProvideCode(code)
             case .login(let login):
                 let user = login.username.isEmpty ? login.email : login.username
                 // The site usually asks for the 2FA code right after the password.
                 TOTPPasteboard.copyCurrentCode(stored: login.totp)
                 onProvideLogin(user, login.password)
+            case .name, .email, .phone, .address, .company:
+                // Never listed here (see `load`).
+                onCancel()
             case .card, .bank:
                 showedPaymentDrawer = true
                 ephemeral.present(secrets: secrets)
@@ -236,6 +256,11 @@ struct CredentialProviderRootView: View {
         case .login: return "person.crop.circle"
         case .card: return "creditcard"
         case .bankAccount: return "building.columns"
+        case .name: return "person.text.rectangle"
+        case .email: return "envelope"
+        case .phone: return "phone"
+        case .address: return "house"
+        case .company: return "building.2"
         }
     }
 }

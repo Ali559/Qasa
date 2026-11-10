@@ -4062,5 +4062,35 @@
     "en": "Confirm it's you",
     "ar": "أكّد هويتك",
     "ckb": "دڵنیابکەرەوە کە خۆتی"
+  },
+  "autofill.insertTitle": {
+    "en": "Insert from Qasa",
+    "ar": "إدراج من قاصة",
+    "ckb": "لە قاسەوە دابنێ"
+  },
+  "autofill.chooseField": {
+    "en": "Choose what to insert",
+    "ar": "اختر ما تريد إدراجه",
+    "ckb": "هەڵبژێرە چی دابنرێت"
+  },
+  "autofill.fullName": {
+    "en": "Full name",
+    "ar": "الاسم الكامل",
+    "ckb": "ناوی تەواو"
+  },
+  "autofill.phoneNational": {
+    "en": "Phone number without country code",
+    "ar": "رقم الهاتف بدون رمز الدولة",
+    "ckb": "ژمارەی تەلەفۆن بەبێ کۆدی وڵات"
+  },
+  "autofill.addressLine2": {
+    "en": "Building, floor, apartment",
+    "ar": "المبنى، الطابق، الشقة",
+    "ckb": "بینا، نهۆم، شوقە"
+  },
+  "autofill.country": {
+    "en": "Country",
+    "ar": "الدولة",
+    "ckb": "وڵات"
   }
 }

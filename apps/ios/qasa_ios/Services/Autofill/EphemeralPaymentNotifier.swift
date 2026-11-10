@@ -37,7 +37,7 @@ final class EphemeralPaymentNotifier {
 
     private func makePayload(secrets: AutofillSecrets) -> Built? {
         switch secrets {
-        case .login:
+        case .login, .name, .email, .phone, .address, .company:
             return nil
         case .card(let c):
             let title = c.itemName.isEmpty ? AutofillL10n.tr("autofill.card", "Card") : c.itemName
@@ -106,10 +106,10 @@ final class EphemeralPaymentNotifier {
         )
         content.categoryIdentifier = EphemeralPaymentNotificationSupport.categoryId
         content.sound = .default
+        EphemeralSecretStore.put(fields, expiresAt: expiresAt)
         content.userInfo = EphemeralPaymentNotificationSupport.userInfo(
             title: title,
             subtitle: subtitle,
-            fields: fields,
             expiresAt: expiresAt
         )
         if #available(iOS 15.0, *) {
