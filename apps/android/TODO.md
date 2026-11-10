@@ -10,3 +10,12 @@
       module on first use; until then it falls back to manual entry. Check that on a device.
 - [x] **Delete account in the app** (2026-11-09): Settings > Data & Account; not yet tried
       on a device against a real server.
+- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows show a letter
+      tile. Fetching favicons would tell a third party which sites the user has, and bundling
+      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
+      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
+      every platform; anything else keeps the letter tile.
+- [ ] **Try the new flows on a phone (2026-11-10):** fingerprint unlock after an app restart
+      (fixed key reuse), the autofill banner's Activate, Settings sheets opening and closing,
+      the card editor's expiry/code row, Backups' "Only on this phone" card with a Google Drive
+      folder, and Scan with NFC on a real card, ID card and passport.

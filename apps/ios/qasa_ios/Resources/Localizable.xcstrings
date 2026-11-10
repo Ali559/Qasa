@@ -9681,6 +9681,534 @@
         }
       }
     },
+    "nfc.card.step1": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take the card out of any wallet or case."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أخرج البطاقة من المحفظة أو الغلاف."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتەکە لە جزدان یان کالانەکەی دەربهێنە."
+          }
+        }
+      }
+    },
+    "nfc.card.step2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold it flat against the back of your phone, near the top."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ضعها مسطّحة على ظهر هاتفك، قرب الأعلى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+          }
+        }
+      }
+    },
+    "nfc.card.step3": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep still until you feel a buzz. It takes about a second."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تحرّكها حتى تشعر باهتزاز. يستغرق ذلك نحو ثانية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مەیجوڵێنە تا لەرزینێک هەست پێدەکەیت. نزیکەی چرکەیەک دەخایەنێت."
+          }
+        }
+      }
+    },
+    "nfc.card.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa reads the number and expiry date. Nothing leaves your phone."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقرأ قاصة الرقم وتاريخ الانتهاء. لا يغادر شيء هاتفك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە ژمارە و بەرواری بەسەرچوون دەخوێنێتەوە. هیچ شتێک لە مۆبایلەکەت دەرناچێت."
+          }
+        }
+      }
+    },
+    "nfc.card.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold your card to the phone"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قرّب بطاقتك من الهاتف"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتەکەت بهێنە نزیک مۆبایلەکە"
+          }
+        }
+      }
+    },
+    "nfc.error.access": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The chip didn't accept these details. Check the document number and dates."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تقبل الشريحة هذه البيانات. تحقّق من رقم الوثيقة والتواريخ."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "چیپەکە ئەم زانیارییانەی وەرنەگرت. ژمارەی بەڵگەنامە و بەروارەکان بپشکنە."
+          }
+        }
+      }
+    },
+    "nfc.error.lost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The card moved away. Hold it still and try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابتعدت البطاقة. أمسكها ثابتة وحاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتەکە دوورکەوتەوە. جێگیری بکە و دووبارە هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
+    "nfc.error.none": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This phone doesn't have NFC."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الهاتف لا يدعم NFC."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم مۆبایلە NFCی تێدا نییە."
+          }
+        }
+      }
+    },
+    "nfc.error.off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NFC is off. Turn it on in your phone's settings."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NFC متوقف. فعّله من إعدادات هاتفك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NFC کوژاوەتەوە. لە ڕێکخستنەکانی مۆبایلەکەت چالاکی بکە."
+          }
+        }
+      }
+    },
+    "nfc.error.unsupported": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This card can't be read over NFC."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يمكن قراءة هذه البطاقة عبر NFC."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم کارتە بە NFC ناخوێنرێتەوە."
+          }
+        }
+      }
+    },
+    "nfc.field.birthDate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Birth date"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تاريخ الميلاد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەرواری لەدایکبوون"
+          }
+        }
+      }
+    },
+    "nfc.field.documentNumber": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Document number"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم الوثيقة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی بەڵگەنامە"
+          }
+        }
+      }
+    },
+    "nfc.id.step1": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the document number, birth date and expiry date below."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل رقم الوثيقة وتاريخ الميلاد وتاريخ الانتهاء أدناه."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی بەڵگەنامە، بەرواری لەدایکبوون و بەرواری بەسەرچوون لە خوارەوە بنووسە."
+          }
+        }
+      }
+    },
+    "nfc.id.step2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold the card flat against the back of your phone, near the top."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ضع البطاقة مسطّحة على ظهر هاتفك، قرب الأعلى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+          }
+        }
+      }
+    },
+    "nfc.id.step3": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep still for a few seconds until you feel a buzz."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا تحرّك شيئًا لبضع ثوانٍ حتى تشعر باهتزاز."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "چەند چرکەیەک مەیجوڵێنە تا لەرزینێک هەست پێدەکەیت."
+          }
+        }
+      }
+    },
+    "nfc.id.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa reads your name, number and dates from the chip. Nothing leaves your phone."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقرأ قاصة اسمك ورقمك والتواريخ من الشريحة. لا يغادر شيء هاتفك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە ناو، ژمارە و بەروارەکانت لە چیپەکە دەخوێنێتەوە. هیچ شتێک لە مۆبایلەکەت دەرناچێت."
+          }
+        }
+      }
+    },
+    "nfc.id.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold your ID card to the phone"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قرّب بطاقة هويتك من الهاتف"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتی ناسنامەکەت بهێنە نزیک مۆبایلەکە"
+          }
+        }
+      }
+    },
+    "nfc.passport.step2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lay the phone on the passport cover, over the chip symbol."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ضع الهاتف على غلاف الجواز، فوق رمز الشريحة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مۆبایلەکە بخەرە سەر بەرگی پاسپۆرتەکە، لەسەر هێمای چیپەکە."
+          }
+        }
+      }
+    },
+    "nfc.passport.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold your passport to the phone"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قرّب جواز سفرك من الهاتف"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پاسپۆرتەکەت بهێنە نزیک مۆبایلەکە"
+          }
+        }
+      }
+    },
+    "nfc.start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start scanning"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابدأ المسح"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەستپێکردنی سکان"
+          }
+        }
+      }
+    },
+    "nfc.status.done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done. The fields are filled in."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم. مُلئت الحقول."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەواو. خانەکان پڕکرانەوە."
+          }
+        }
+      }
+    },
+    "nfc.status.reading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading… keep still"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ القراءة… لا تحرّك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەخوێنرێتەوە… مەیجوڵێنە"
+          }
+        }
+      }
+    },
+    "nfc.status.ready": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready to scan"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جاهز للمسح"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئامادەیە بۆ سکان"
+          }
+        }
+      }
+    },
+    "nfc.tryAgain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حاول مرة أخرى"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دووبارە هەوڵ بدەرەوە"
+          }
+        }
+      }
+    },
     "notifications.actionFailed": {
       "localizations": {
         "en": {
@@ -16506,19 +17034,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NFC scanning requires a compatible device and card."
+            "value": "Reads the chip of a card, ID card or passport. Needs a phone with NFC."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يتطلب مسح NFC جهازاً وبطاقة متوافقين."
+            "value": "يقرأ شريحة البطاقة أو بطاقة الهوية أو جواز السفر. يتطلب هاتفًا يدعم NFC."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "سکانکردنی NFC پێویستی بە ئامێر و کارتی گونجاو هەیە."
+            "value": "چیپی کارت، کارتی ناسنامە یان پاسپۆرت دەخوێنێتەوە. پێویستی بە مۆبایلێکی خاوەن NFC هەیە."
           }
         }
       }

@@ -8,7 +8,7 @@
       `DataScannerViewController`, which needs a real camera: the simulator only offers
       manual entry. On a device without a supported camera it shows `totp.cameraDenied`,
       whose text ("allow it in Settings") doesn't quite fit that case.
-- [ ] **iOS 18 one-time codes.** AutoFill only puts the 2FA code on the pasteboard (local,
+- [x] **iOS 18 one-time codes.** Done 2026-11-10 (docs/autofill-plan.md §3.4). AutoFill only puts the 2FA code on the pasteboard (local,
       60 seconds). Filling it straight into the code field needs `ASOneTimeCodeCredential`:
       the `ProvidesOneTimeCodes` capability in the extension's Info.plist, registering
       one-time-code identities with the identity store, and new extension entry points.
@@ -18,3 +18,11 @@
       account id…), so the rows can't be decrypted any more, but the encrypted rows stay in
       the SwiftData store until a new vault replaces them. Delete account erases them; Clear
       local data should too.
+- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows show a letter
+      tile. Fetching favicons would tell a third party which sites the user has, and bundling
+      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
+      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
+      every platform; anything else keeps the letter tile.
+- [ ] **NFC capability in the Apple developer portal.** Passport/ID scanning needs "NFC Tag
+      Reading" on the App ID and a regenerated provisioning profile; then try it on a device
+      with a real passport and ID card (the simulator has no NFC).

@@ -2645,9 +2645,9 @@
     "ckb": "%@ی نوێ"
   },
   "vault.nfcHint": {
-    "en": "NFC scanning requires a compatible device and card.",
-    "ar": "يتطلب مسح NFC جهازاً وبطاقة متوافقين.",
-    "ckb": "سکانکردنی NFC پێویستی بە ئامێر و کارتی گونجاو هەیە."
+    "en": "Reads the chip of a card, ID card or passport. Needs a phone with NFC.",
+    "ar": "يقرأ شريحة البطاقة أو بطاقة الهوية أو جواز السفر. يتطلب هاتفًا يدعم NFC.",
+    "ckb": "چیپی کارت، کارتی ناسنامە یان پاسپۆرت دەخوێنێتەوە. پێویستی بە مۆبایلێکی خاوەن NFC هەیە."
   },
   "vault.noDetails": {
     "en": "No details",
@@ -4132,5 +4132,125 @@
     "en": "Not in iCloud Drive. If this folder is only on this iPhone, the backup goes with the phone.",
     "ar": "ليست في iCloud Drive. إذا كان هذا المجلد على هذا الآيفون فقط، فستضيع النسخة الاحتياطية مع الهاتف.",
     "ckb": "لە iCloud Drive نییە. ئەگەر ئەم فۆڵدەرە تەنها لەسەر ئەم ئایفۆنە بێت، پاشەکەوتەکە لەگەڵ مۆبایلەکەدا ون دەبێت."
+  },
+  "nfc.card.title": {
+    "en": "Hold your card to the phone",
+    "ar": "قرّب بطاقتك من الهاتف",
+    "ckb": "کارتەکەت بهێنە نزیک مۆبایلەکە"
+  },
+  "nfc.card.subtitle": {
+    "en": "Qasa reads the number and expiry date. Nothing leaves your phone.",
+    "ar": "تقرأ قاصة الرقم وتاريخ الانتهاء. لا يغادر شيء هاتفك.",
+    "ckb": "قاسە ژمارە و بەرواری بەسەرچوون دەخوێنێتەوە. هیچ شتێک لە مۆبایلەکەت دەرناچێت."
+  },
+  "nfc.card.step1": {
+    "en": "Take the card out of any wallet or case.",
+    "ar": "أخرج البطاقة من المحفظة أو الغلاف.",
+    "ckb": "کارتەکە لە جزدان یان کالانەکەی دەربهێنە."
+  },
+  "nfc.card.step2": {
+    "en": "Hold it flat against the back of your phone, near the top.",
+    "ar": "ضعها مسطّحة على ظهر هاتفك، قرب الأعلى.",
+    "ckb": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+  },
+  "nfc.card.step3": {
+    "en": "Keep still until you feel a buzz. It takes about a second.",
+    "ar": "لا تحرّكها حتى تشعر باهتزاز. يستغرق ذلك نحو ثانية.",
+    "ckb": "مەیجوڵێنە تا لەرزینێک هەست پێدەکەیت. نزیکەی چرکەیەک دەخایەنێت."
+  },
+  "nfc.id.title": {
+    "en": "Hold your ID card to the phone",
+    "ar": "قرّب بطاقة هويتك من الهاتف",
+    "ckb": "کارتی ناسنامەکەت بهێنە نزیک مۆبایلەکە"
+  },
+  "nfc.passport.title": {
+    "en": "Hold your passport to the phone",
+    "ar": "قرّب جواز سفرك من الهاتف",
+    "ckb": "پاسپۆرتەکەت بهێنە نزیک مۆبایلەکە"
+  },
+  "nfc.id.subtitle": {
+    "en": "Qasa reads your name, number and dates from the chip. Nothing leaves your phone.",
+    "ar": "تقرأ قاصة اسمك ورقمك والتواريخ من الشريحة. لا يغادر شيء هاتفك.",
+    "ckb": "قاسە ناو، ژمارە و بەروارەکانت لە چیپەکە دەخوێنێتەوە. هیچ شتێک لە مۆبایلەکەت دەرناچێت."
+  },
+  "nfc.id.step1": {
+    "en": "Enter the document number, birth date and expiry date below.",
+    "ar": "أدخل رقم الوثيقة وتاريخ الميلاد وتاريخ الانتهاء أدناه.",
+    "ckb": "ژمارەی بەڵگەنامە، بەرواری لەدایکبوون و بەرواری بەسەرچوون لە خوارەوە بنووسە."
+  },
+  "nfc.id.step2": {
+    "en": "Hold the card flat against the back of your phone, near the top.",
+    "ar": "ضع البطاقة مسطّحة على ظهر هاتفك، قرب الأعلى.",
+    "ckb": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+  },
+  "nfc.passport.step2": {
+    "en": "Lay the phone on the passport cover, over the chip symbol.",
+    "ar": "ضع الهاتف على غلاف الجواز، فوق رمز الشريحة.",
+    "ckb": "مۆبایلەکە بخەرە سەر بەرگی پاسپۆرتەکە، لەسەر هێمای چیپەکە."
+  },
+  "nfc.id.step3": {
+    "en": "Keep still for a few seconds until you feel a buzz.",
+    "ar": "لا تحرّك شيئًا لبضع ثوانٍ حتى تشعر باهتزاز.",
+    "ckb": "چەند چرکەیەک مەیجوڵێنە تا لەرزینێک هەست پێدەکەیت."
+  },
+  "nfc.field.documentNumber": {
+    "en": "Document number",
+    "ar": "رقم الوثيقة",
+    "ckb": "ژمارەی بەڵگەنامە"
+  },
+  "nfc.field.birthDate": {
+    "en": "Birth date",
+    "ar": "تاريخ الميلاد",
+    "ckb": "بەرواری لەدایکبوون"
+  },
+  "nfc.start": {
+    "en": "Start scanning",
+    "ar": "ابدأ المسح",
+    "ckb": "دەستپێکردنی سکان"
+  },
+  "nfc.status.ready": {
+    "en": "Ready to scan",
+    "ar": "جاهز للمسح",
+    "ckb": "ئامادەیە بۆ سکان"
+  },
+  "nfc.status.reading": {
+    "en": "Reading… keep still",
+    "ar": "جارٍ القراءة… لا تحرّك",
+    "ckb": "دەخوێنرێتەوە… مەیجوڵێنە"
+  },
+  "nfc.status.done": {
+    "en": "Done. The fields are filled in.",
+    "ar": "تم. مُلئت الحقول.",
+    "ckb": "تەواو. خانەکان پڕکرانەوە."
+  },
+  "nfc.error.lost": {
+    "en": "The card moved away. Hold it still and try again.",
+    "ar": "ابتعدت البطاقة. أمسكها ثابتة وحاول مرة أخرى.",
+    "ckb": "کارتەکە دوورکەوتەوە. جێگیری بکە و دووبارە هەوڵ بدەرەوە."
+  },
+  "nfc.error.unsupported": {
+    "en": "This card can't be read over NFC.",
+    "ar": "لا يمكن قراءة هذه البطاقة عبر NFC.",
+    "ckb": "ئەم کارتە بە NFC ناخوێنرێتەوە."
+  },
+  "nfc.error.access": {
+    "en": "The chip didn't accept these details. Check the document number and dates.",
+    "ar": "لم تقبل الشريحة هذه البيانات. تحقّق من رقم الوثيقة والتواريخ.",
+    "ckb": "چیپەکە ئەم زانیارییانەی وەرنەگرت. ژمارەی بەڵگەنامە و بەروارەکان بپشکنە."
+  },
+  "nfc.error.off": {
+    "en": "NFC is off. Turn it on in your phone's settings.",
+    "ar": "NFC متوقف. فعّله من إعدادات هاتفك.",
+    "ckb": "NFC کوژاوەتەوە. لە ڕێکخستنەکانی مۆبایلەکەت چالاکی بکە."
+  },
+  "nfc.error.none": {
+    "en": "This phone doesn't have NFC.",
+    "ar": "هذا الهاتف لا يدعم NFC.",
+    "ckb": "ئەم مۆبایلە NFCی تێدا نییە."
+  },
+  "nfc.tryAgain": {
+    "en": "Try again",
+    "ar": "حاول مرة أخرى",
+    "ckb": "دووبارە هەوڵ بدەرەوە"
   }
 }
