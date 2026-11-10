@@ -469,8 +469,14 @@ fn lists_cards_and_profiles_without_secrets() {
     assert_eq!(items[0]["hint"], "•••• 4242");
     assert_eq!(items[1]["hint"], "Sulaymaniyah, IQ");
     assert_eq!(items[4]["hint"], "•••• 67");
-    let text = r.to_string();
-    assert!(!text.contains("123") && !text.contains("4242 4242") && !text.contains("0750"), "{text}");
+    // Each row is an id (random, so not searched) and what the menu shows: no secret there.
+    for item in items {
+        let mut keys: Vec<&str> = item.as_object().unwrap().keys().map(String::as_str).collect();
+        keys.sort();
+        assert_eq!(keys, ["hint", "id", "kind", "title"]);
+        let shown = format!("{} {}", item["title"], item["hint"]);
+        assert!(!shown.contains("123") && !shown.contains("4242 4242") && !shown.contains("0750"), "{shown}");
+    }
 }
 
 #[test]
