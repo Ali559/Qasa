@@ -6,7 +6,6 @@ import alibarznji.qasa.vault.Country
 import alibarznji.qasa.vault.VaultPayload
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -119,7 +118,7 @@ internal data class IdDoc(
  * free-text entry, plus the picker and format hint) as the parity plan asks.
  */
 @Composable
-internal fun IdDocumentFields(d: IdDoc, showIssuePlace: Boolean, nfc: NfcDocument? = null, onChange: (IdDoc) -> Unit) {
+internal fun IdDocumentFields(d: IdDoc, showIssuePlace: Boolean, onChange: (IdDoc) -> Unit) {
     FormTextField(R.string.field_name, d.name, FfiField.NAME) { onChange(d.copy(name = it)) }
     CountryPickerField(d.countryCode) { onChange(d.copy(countryCode = it)) }
     FormTextField(R.string.field_number, d.number, FfiField.NUMBER) { onChange(d.copy(number = it)) }
@@ -128,19 +127,4 @@ internal fun IdDocumentFields(d: IdDoc, showIssuePlace: Boolean, nfc: NfcDocumen
         FormTextField(R.string.field_issueplace, d.issuePlace, FfiField.ISSUE_PLACE) { onChange(d.copy(issuePlace = it)) }
     }
     FormDateField(R.string.field_expirydate, d.expiryDate, FfiField.EXPIRY_DATE) { onChange(d.copy(expiryDate = it)) }
-    if (nfc != null) {
-        Spacer(Modifier.height(QasaDimens.gap))
-        // eMRTD read over BAC: name, number, country, expiry from the chip's DG1.
-        NfcScanButton(nfc, initialNumber = d.number, initialExpiry = d.expiryDate) { result ->
-            val mrz = (result as? NfcScanResult.Document)?.mrz ?: return@NfcScanButton
-            onChange(
-                d.copy(
-                    name = mrz.displayName.ifBlank { d.name },
-                    number = mrz.documentNumber.ifBlank { d.number },
-                    countryCode = mrz.countryCodeIso2 ?: d.countryCode,
-                    expiryDate = mrz.expiryIso ?: d.expiryDate,
-                ),
-            )
-        }
-    }
 }

@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.settings
 
+import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.account.AccountDeletionResult
 import alibarznji.qasa.account.AccountDeletionService
 import alibarznji.qasa.services.LocalDataEraser
@@ -125,7 +126,7 @@ private fun SettingsSheet(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
+    val maxHeight = qasaSheetMaxHeight()
     QasaModalBottomSheet(onDismissRequest = onDismiss) {
         Box(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
             content()

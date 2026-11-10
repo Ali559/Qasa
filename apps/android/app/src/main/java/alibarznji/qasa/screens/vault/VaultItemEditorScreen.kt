@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault
 
+import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.vault.editor.EditorEnv
 import alibarznji.qasa.screens.vault.editor.EditorFields
@@ -111,7 +112,7 @@ fun VaultItemEditorSheetContent(
     var phones by remember { mutableStateOf<List<PhoneOption>?>(null) }
     val collections by vm.collections.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
+    val maxHeight = qasaSheetMaxHeight()
 
     // Only the address form links a phone; skip decrypting the vault for other kinds.
     val needsPhones = payload is VaultPayload.Address

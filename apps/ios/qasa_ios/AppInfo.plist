@@ -6,12 +6,6 @@
 	<array>
 		<string>_qasa-sync._tcp</string>
 	</array>
-	<key>NFCReaderUsageDescription</key>
-	<string>Qasa reads the chip of your passport or ID card to fill it in. Nothing leaves your phone.</string>
-	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
-	<array>
-		<string>A0000002471001</string>
-	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Qasa finds your other devices on this Wi‑Fi to sync your encrypted vault.</string>
 	<key>UIAppFonts</key>

@@ -1,13 +1,9 @@
 package alibarznji.qasa.screens.vault.editor
 
 import uniffi.qasa_ffi.FfiField
-import uniffi.qasa_ffi.formatCardNumber
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.ToggleRow
-import alibarznji.qasa.theme.qasaColors
-import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.layout.Arrangement
@@ -17,10 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,11 +42,9 @@ fun EditorFields(payload: VaultPayload, env: EditorEnv, onChange: (VaultPayload)
         is VaultPayload.Website -> WebsiteFields(p, onChange)
         is VaultPayload.IdCard -> IdDocumentFields(
             IdDoc(p.name, p.countryCode, p.number, p.issueDate, p.expiryDate, p.issuePlace), showIssuePlace = false,
-            nfc = NfcDocument.IdCard,
         ) { onChange(p.copy(name = it.name, countryCode = it.countryCode, number = it.number, issueDate = it.issueDate, expiryDate = it.expiryDate, issuePlace = it.issuePlace)) }
         is VaultPayload.Passport -> IdDocumentFields(
             IdDoc(p.name, p.countryCode, p.number, p.issueDate, p.expiryDate, p.issuePlace), showIssuePlace = true,
-            nfc = NfcDocument.Passport,
         ) { onChange(p.copy(name = it.name, countryCode = it.countryCode, number = it.number, issueDate = it.issueDate, expiryDate = it.expiryDate, issuePlace = it.issuePlace)) }
         is VaultPayload.DriverLicense -> IdDocumentFields(
             IdDoc(p.name, p.countryCode, p.number, p.issueDate, p.expiryDate, p.issuePlace), showIssuePlace = false,
@@ -114,39 +104,6 @@ private fun CardFields(p: VaultPayload.Card, onChange: (VaultPayload) -> Unit) {
     }
     FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Blue)) { onChange(p.copy(color = it.raw)) }
-    // Contactless EMV read: number and expiry (cards never give the CVV over NFC).
-    NfcScanButton(NfcDocument.Card, initialNumber = "", initialExpiry = "") { result ->
-        val card = (result as? NfcScanResult.Card)?.card ?: return@NfcScanButton
-        onChange(p.copy(number = formatCardNumber(card.pan), expiryDate = card.expiry ?: p.expiryDate))
-    }
-}
-
-/**
- * "Scan with NFC" plus its hint, and the scan sheet it opens. Shown for cards, ID cards
- * and passports only (driver licences carry no ICAO chip; bank accounts no chip at all).
- */
-@Composable
-internal fun NfcScanButton(
-    document: NfcDocument,
-    initialNumber: String,
-    initialExpiry: String,
-    onResult: (NfcScanResult) -> Unit,
-) {
-    val c = qasaColors
-    var open by rememberSaveable { mutableStateOf(false) }
-    SecondaryButton(title = stringResource(R.string.vault_scannfc), onClick = { open = true })
-    Spacer(Modifier.height(QasaDimens.gapTiny))
-    Text(stringResource(R.string.vault_nfchint), color = c.textSecondary, style = qasaText.bodySmall)
-    Spacer(Modifier.height(QasaDimens.gap))
-    if (open) {
-        NfcScanSheet(
-            document = document,
-            initialNumber = initialNumber,
-            initialExpiry = initialExpiry,
-            onDismiss = { open = false },
-            onResult = onResult,
-        )
-    }
 }
 
 // MARK: - Bank (VaultItemEditor.swift:231)

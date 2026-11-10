@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault
 
+import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
@@ -86,7 +87,7 @@ fun AddItemMenuSheetContent(
     onSelect: (VaultPayload) -> Unit,
     onCancel: () -> Unit,
 ) {
-    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
+    val maxHeight = qasaSheetMaxHeight()
     // The drilled-into kind on the All tab — iOS pushes `AddRoute.subtypes(kind)`.
     var drilled by rememberSaveable { mutableStateOf<VaultItemKind?>(null) }
     BackHandler(enabled = drilled != null) { drilled = null }
