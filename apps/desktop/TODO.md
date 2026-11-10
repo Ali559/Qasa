@@ -56,6 +56,15 @@ Steps that need the account owner. The details for each are in
 
 ## Also open
 
+- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows (desktop and extension menu) show a letter
+      tile. Fetching favicons would tell a third party which sites the user has, and bundling
+      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
+      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
+      every platform; anything else keeps the letter tile.
+- [ ] **Review the draft terms of use** before release: `apps/landing/src/terms.ts` (en/ar/ckb),
+      shown at qasa-app.com/terms and opened from the apps' Terms row. Needs the owner's legal
+      review, and native review of the Arabic and Sorani text.
+
 - [x] **Privacy policy.** Live at https://qasa-app.com/privacy (en/ar/ckb) since 2026-11-09:
       operator Noovio (Sulaymaniyah, Iraq), server in Germany, contact
       `privacy@qasa-app.com`. Update it when the phone apps get account deletion.
