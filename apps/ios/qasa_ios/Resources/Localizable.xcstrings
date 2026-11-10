@@ -2140,19 +2140,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A backup is one encrypted file with everything in your vault. Keep it off this phone, for example in iCloud Drive or Google Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password."
+            "value": "A backup is one encrypted file with everything in your vault. Qasa doesn't upload it anywhere: you choose where it's saved. Pick a folder in Google Drive or iCloud Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الهاتف، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية."
+            "value": "النسخة الاحتياطية ملف مشفّر واحد يحوي كل ما في خزنتك. لا ترفعه قاصة إلى أي مكان: أنت تختار أين يُحفظ. اختر مجلدًا في Google Drive أو iCloud Drive، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم مۆبایلە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩، تا ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە."
+            "value": "پاشەکەوت یەک فایلی کۆدکراوە کە هەموو ناوەڕۆکی گەنجینەکەتی تێدایە. قاسە بۆ هیچ شوێنێک بەرزی ناکاتەوە: خۆت هەڵدەبژێریت لە کوێ پاشەکەوت بکرێت. فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە، بۆ ئەوەی ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە گەنجینەکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنیی سەرەکیت دەکرێتەوە."
           }
         }
       }
@@ -2791,6 +2791,116 @@
           "stringUnit": {
             "state": "translated",
             "value": "باکئەپەکان"
+          }
+        }
+      }
+    },
+    "backup.where.cloudFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved in %@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "محفوظة في %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە %@ پاشەکەوت کراوە"
+          }
+        }
+      }
+    },
+    "backup.where.device": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only on this phone"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "على هذا الهاتف فقط"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەنها لەسەر ئەم مۆبایلەیە"
+          }
+        }
+      }
+    },
+    "backup.where.deviceBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you lose this phone, the backup goes with it. Choose a folder in Google Drive or iCloud Drive instead."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إذا فقدت هذا الهاتف، تضيع النسخة الاحتياطية معه. اختر مجلدًا في Google Drive أو iCloud Drive بدلًا من ذلك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەگەر ئەم مۆبایلە ون بکەیت، پاشەکەوتەکەش لەگەڵیدا ون دەبێت. لەبری ئەوە فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە."
+          }
+        }
+      }
+    },
+    "backup.where.notCloud": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in iCloud Drive. If this folder is only on this iPhone, the backup goes with the phone."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليست في iCloud Drive. إذا كان هذا المجلد على هذا الآيفون فقط، فستضيع النسخة الاحتياطية مع الهاتف."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە iCloud Drive نییە. ئەگەر ئەم فۆڵدەرە تەنها لەسەر ئەم ئایفۆنە بێت، پاشەکەوتەکە لەگەڵ مۆبایلەکەدا ون دەبێت."
+          }
+        }
+      }
+    },
+    "backup.where.pick": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a cloud folder"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر مجلدًا سحابيًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فۆڵدەرێکی هەور هەڵبژێرە"
           }
         }
       }

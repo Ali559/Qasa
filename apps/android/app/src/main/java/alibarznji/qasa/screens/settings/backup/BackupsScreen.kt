@@ -1,5 +1,7 @@
 package alibarznji.qasa.screens.settings.backup
 
+import alibarznji.qasa.backup.BackupPlace
+import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.R
 import alibarznji.qasa.backup.BackupFrequency
 import alibarznji.qasa.backup.BackupRunResult
@@ -240,6 +242,29 @@ fun BackupsScreen(
                 ),
                 onClick = { if (!running) pickLocation() },
             )
+        }
+        // Where the file is: Qasa never uploads it, so say whether it left the phone.
+        val place = settings.locationUri?.let { BackupPlace.of(android.net.Uri.parse(it).authority) }
+        when (place) {
+            is BackupPlace.Cloud -> {
+                Spacer(Modifier.height(QasaDimens.contentGap))
+                Text(stringResource(R.string.backup_where_cloudfmt, place.name), color = c.success, style = qasaText.bodySmallMedium)
+            }
+            BackupPlace.ThisPhone -> {
+                Spacer(Modifier.height(QasaDimens.contentGap))
+                CardContainer(background = c.cardBackgroundLight) {
+                    Text(stringResource(R.string.backup_where_device), color = c.textPrimary, style = qasaText.rowTitle)
+                    Spacer(Modifier.height(QasaDimens.spaceSmall))
+                    Text(stringResource(R.string.backup_where_devicebody), color = c.textSecondary, style = qasaText.bodySmall)
+                    Spacer(Modifier.height(QasaDimens.contentGap))
+                    SecondaryButton(
+                        title = stringResource(R.string.backup_where_pick),
+                        onClick = { if (!running) pickLocation() },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+            else -> Unit
         }
         Spacer(Modifier.height(QasaDimens.contentGap))
         Text(stringResource(R.string.backup_locationhelp), color = c.textSecondary, style = qasaText.bodySmall)

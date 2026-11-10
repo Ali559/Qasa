@@ -3644,9 +3644,9 @@
     "ckb": "کۆپییەکی شفرەکراوی کۆگاکەت هەڵبگرە"
   },
   "backup.intro": {
-    "en": "A backup is one encrypted file with everything in your vault. Keep it off this phone, for example in iCloud Drive or Google Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password.",
-    "ar": "النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الهاتف، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.",
-    "ckb": "باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم مۆبایلە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩، تا ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە."
+    "en": "A backup is one encrypted file with everything in your vault. Qasa doesn't upload it anywhere: you choose where it's saved. Pick a folder in Google Drive or iCloud Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password.",
+    "ar": "النسخة الاحتياطية ملف مشفّر واحد يحوي كل ما في خزنتك. لا ترفعه قاصة إلى أي مكان: أنت تختار أين يُحفظ. اختر مجلدًا في Google Drive أو iCloud Drive، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.",
+    "ckb": "پاشەکەوت یەک فایلی کۆدکراوە کە هەموو ناوەڕۆکی گەنجینەکەتی تێدایە. قاسە بۆ هیچ شوێنێک بەرزی ناکاتەوە: خۆت هەڵدەبژێریت لە کوێ پاشەکەوت بکرێت. فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە، بۆ ئەوەی ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە گەنجینەکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنیی سەرەکیت دەکرێتەوە."
   },
   "backup.backUpNow": {
     "en": "Back up now",
@@ -4107,5 +4107,30 @@
     "en": "Add the Qasa extension to Chrome, Edge or Firefox and connect it to fill your logins, cards and addresses on websites.",
     "ar": "أضف إضافة قاصة إلى Chrome أو Edge أو Firefox وصِلها لتعبئة تسجيلات الدخول والبطاقات والعناوين على المواقع.",
     "ckb": "پێوەکراوی قاسە بۆ Chrome، Edge یان Firefox زیاد بکە و بیبەستەوە بۆ پڕکردنەوەی چوونەژوورەوە، کارت و ناونیشانەکانت لە ماڵپەڕەکان."
+  },
+  "backup.where.cloudFmt": {
+    "en": "Saved in %@",
+    "ar": "محفوظة في %@",
+    "ckb": "لە %@ پاشەکەوت کراوە"
+  },
+  "backup.where.device": {
+    "en": "Only on this phone",
+    "ar": "على هذا الهاتف فقط",
+    "ckb": "تەنها لەسەر ئەم مۆبایلەیە"
+  },
+  "backup.where.deviceBody": {
+    "en": "If you lose this phone, the backup goes with it. Choose a folder in Google Drive or iCloud Drive instead.",
+    "ar": "إذا فقدت هذا الهاتف، تضيع النسخة الاحتياطية معه. اختر مجلدًا في Google Drive أو iCloud Drive بدلًا من ذلك.",
+    "ckb": "ئەگەر ئەم مۆبایلە ون بکەیت، پاشەکەوتەکەش لەگەڵیدا ون دەبێت. لەبری ئەوە فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە."
+  },
+  "backup.where.pick": {
+    "en": "Choose a cloud folder",
+    "ar": "اختر مجلدًا سحابيًا",
+    "ckb": "فۆڵدەرێکی هەور هەڵبژێرە"
+  },
+  "backup.where.notCloud": {
+    "en": "Not in iCloud Drive. If this folder is only on this iPhone, the backup goes with the phone.",
+    "ar": "ليست في iCloud Drive. إذا كان هذا المجلد على هذا الآيفون فقط، فستضيع النسخة الاحتياطية مع الهاتف.",
+    "ckb": "لە iCloud Drive نییە. ئەگەر ئەم فۆڵدەرە تەنها لەسەر ئەم ئایفۆنە بێت، پاشەکەوتەکە لەگەڵ مۆبایلەکەدا ون دەبێت."
   }
 }

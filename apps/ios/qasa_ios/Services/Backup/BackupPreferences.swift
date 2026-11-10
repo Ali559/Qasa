@@ -73,6 +73,22 @@ final class BackupPreferences {
         reminderSnoozedUntilMs = (defaults.object(forKey: Key.snoozedUntilMs) as? NSNumber)?.int64Value
     }
 
+    /// Whether the chosen folder is in iCloud Drive. Qasa never uploads backups, so this is
+    /// what tells the user whether the file leaves the phone. Nil without a location.
+    var isInICloudDrive: Bool? {
+        guard let folderBookmark else { return nil }
+        var stale = false
+        guard let url = try? URL(resolvingBookmarkData: folderBookmark, options: [.withoutUI], relativeTo: nil, bookmarkDataIsStale: &stale) else {
+            return nil
+        }
+        return Self.isICloudDrivePath(url.path)
+    }
+
+    /// iCloud Drive folders live under `Mobile Documents` (the ubiquity containers).
+    static func isICloudDrivePath(_ path: String) -> Bool {
+        path.contains("/Mobile Documents/")
+    }
+
     func setLocation(bookmark: Data, name: String) {
         folderBookmark = bookmark
         folderName = name

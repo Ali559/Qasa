@@ -100,7 +100,7 @@
     <string name="backup_freq_monthly">Monthly</string>
     <string name="backup_freq_off">Off</string>
     <string name="backup_freq_weekly">Weekly</string>
-    <string name="backup_intro">A backup is one encrypted file with everything in your vault. Keep it off this phone, for example in iCloud Drive or Google Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password.</string>
+    <string name="backup_intro">A backup is one encrypted file with everything in your vault. Qasa doesn\'t upload it anywhere: you choose where it\'s saved. Pick a folder in Google Drive or iCloud Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password.</string>
     <string name="backup_lastbackupfmt">Last backup: %s</string>
     <string name="backup_locationhelp">Each new backup replaces this device\'s previous one, automatic or manual.</string>
     <string name="backup_locationnone">Not chosen</string>
@@ -130,6 +130,11 @@
     <string name="backup_restoresubtitle">Bring back your vault from a backup file</string>
     <string name="backup_subtitle">Keep an encrypted copy of your vault</string>
     <string name="backup_title">Backups</string>
+    <string name="backup_where_cloudfmt">Saved in %s</string>
+    <string name="backup_where_device">Only on this phone</string>
+    <string name="backup_where_devicebody">If you lose this phone, the backup goes with it. Choose a folder in Google Drive or iCloud Drive instead.</string>
+    <string name="backup_where_notcloud">Not in iCloud Drive. If this folder is only on this iPhone, the backup goes with the phone.</string>
+    <string name="backup_where_pick">Choose a cloud folder</string>
     <string name="brand_localoffline">Stays on this phone</string>
     <string name="brand_name">Qasa</string>
     <string name="breach_actiontaken">Action Taken</string>
