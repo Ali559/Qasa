@@ -113,6 +113,34 @@ struct BackupsView: View {
                 }
                 .buttonStyle(.plain)
             }
+            // Where the file is: Qasa never uploads it, so say whether it left the phone.
+            if let inICloud = backup.isInICloudDrive {
+                if inICloud {
+                    Text(String(format: L10n.tr("backup.where.cloudFmt", locale: locale), "iCloud Drive"))
+                        .font(.qasa(13, weight: .medium))
+                        .foregroundColor(Theme.success)
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L10n.tr("backup.where.notCloud", locale: locale))
+                            .font(.qasa(13))
+                            .foregroundColor(Theme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button {
+                            backUpAfterPick = false
+                            showFolderPicker = true
+                        } label: {
+                            Text(L10n.tr("backup.where.pick", locale: locale))
+                                .font(.qasa(14, weight: .semibold))
+                                .foregroundColor(Theme.accent)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.cardBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+                }
+            }
             helpText("backup.locationHelp")
         }
     }

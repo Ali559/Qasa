@@ -100,7 +100,7 @@
     <string name="backup_freq_monthly">مانگانە</string>
     <string name="backup_freq_off">کوژاوە</string>
     <string name="backup_freq_weekly">هەفتانە</string>
-    <string name="backup_intro">باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم مۆبایلە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩، تا ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە.</string>
+    <string name="backup_intro">پاشەکەوت یەک فایلی کۆدکراوە کە هەموو ناوەڕۆکی گەنجینەکەتی تێدایە. قاسە بۆ هیچ شوێنێک بەرزی ناکاتەوە: خۆت هەڵدەبژێریت لە کوێ پاشەکەوت بکرێت. فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە، بۆ ئەوەی ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە گەنجینەکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنیی سەرەکیت دەکرێتەوە.</string>
     <string name="backup_lastbackupfmt">دوایین باکئەپ: %s</string>
     <string name="backup_locationhelp">هەر باکئەپێکی نوێ جێگەی باکئەپی پێشووی ئەم ئامێرە دەگرێتەوە، خۆکار بێت یان دەستی.</string>
     <string name="backup_locationnone">هەڵنەبژێردراوە</string>
@@ -130,6 +130,11 @@
     <string name="backup_restoresubtitle">کۆگاکەت لە فایلێکی باکئەپ بگەڕێنەوە</string>
     <string name="backup_subtitle">کۆپییەکی شفرەکراوی کۆگاکەت هەڵبگرە</string>
     <string name="backup_title">باکئەپەکان</string>
+    <string name="backup_where_cloudfmt">لە %s پاشەکەوت کراوە</string>
+    <string name="backup_where_device">تەنها لەسەر ئەم مۆبایلەیە</string>
+    <string name="backup_where_devicebody">ئەگەر ئەم مۆبایلە ون بکەیت، پاشەکەوتەکەش لەگەڵیدا ون دەبێت. لەبری ئەوە فۆڵدەرێک لە Google Drive یان iCloud Drive هەڵبژێرە.</string>
+    <string name="backup_where_notcloud">لە iCloud Drive نییە. ئەگەر ئەم فۆڵدەرە تەنها لەسەر ئەم ئایفۆنە بێت، پاشەکەوتەکە لەگەڵ مۆبایلەکەدا ون دەبێت.</string>
+    <string name="backup_where_pick">فۆڵدەرێکی هەور هەڵبژێرە</string>
     <string name="brand_localoffline">لەسەر ئەم مۆبایلە دەمێنێتەوە</string>
     <string name="brand_name">Qasa</string>
     <string name="breach_actiontaken">کرداری ئەنجامدراو</string>

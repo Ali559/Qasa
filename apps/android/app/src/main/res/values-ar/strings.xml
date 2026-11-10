@@ -100,7 +100,7 @@
     <string name="backup_freq_monthly">شهريًا</string>
     <string name="backup_freq_off">إيقاف</string>
     <string name="backup_freq_weekly">أسبوعيًا</string>
-    <string name="backup_intro">النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الهاتف، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.</string>
+    <string name="backup_intro">النسخة الاحتياطية ملف مشفّر واحد يحوي كل ما في خزنتك. لا ترفعه قاصة إلى أي مكان: أنت تختار أين يُحفظ. اختر مجلدًا في Google Drive أو iCloud Drive، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.</string>
     <string name="backup_lastbackupfmt">آخر نسخة احتياطية: %s</string>
     <string name="backup_locationhelp">كل نسخة احتياطية جديدة تحل محل النسخة السابقة من هذا الجهاز، تلقائية كانت أو يدوية.</string>
     <string name="backup_locationnone">لم يُحدَّد</string>
@@ -130,6 +130,11 @@
     <string name="backup_restoresubtitle">استعد خزنتك من ملف نسخة احتياطية</string>
     <string name="backup_subtitle">احتفظ بنسخة مشفّرة من خزنتك</string>
     <string name="backup_title">النسخ الاحتياطية</string>
+    <string name="backup_where_cloudfmt">محفوظة في %s</string>
+    <string name="backup_where_device">على هذا الهاتف فقط</string>
+    <string name="backup_where_devicebody">إذا فقدت هذا الهاتف، تضيع النسخة الاحتياطية معه. اختر مجلدًا في Google Drive أو iCloud Drive بدلًا من ذلك.</string>
+    <string name="backup_where_notcloud">ليست في iCloud Drive. إذا كان هذا المجلد على هذا الآيفون فقط، فستضيع النسخة الاحتياطية مع الهاتف.</string>
+    <string name="backup_where_pick">اختر مجلدًا سحابيًا</string>
     <string name="brand_localoffline">تبقى على هذا الهاتف</string>
     <string name="brand_name">Qasa</string>
     <string name="breach_actiontaken">تم اتخاذ إجراء</string>
