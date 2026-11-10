@@ -90,6 +90,7 @@ struct ChangeMasterPasswordView: View {
                 placeholder: title,
                 text: text,
                 isSecure: !passwordVisible,
+                            isPassword: true,
                 trailing: AnyView(
                     FieldIconButton(
                         systemImage: passwordVisible ? "eye.slash" : "eye",

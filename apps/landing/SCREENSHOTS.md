@@ -16,6 +16,12 @@ instead of the developer samples (`VaultSeedData.seedScreenshotVault` in
 `apps/ios/qasa_ios/Models/VaultModels.swift`). Gmail's password is in Pwned Passwords, so the
 breach check finds one.
 
+`-screenshotPremium` (DEBUG only, `LicenseManager.isPremium`) shows the Premium screens without a
+server-signed licence, so the Alerts tab and Password health show breach results instead of the
+upgrade card.
+
+Use a simulator of its own for this (for example one named "Qasa Screens"): step 3 wipes the vault.
+
 - Test main password for this vault: `qasa-screens-2026!` (simulator only, never a real vault)
 
 ## Refreshing them
@@ -24,7 +30,7 @@ breach check finds one.
 2. Set a clean status bar: `xcrun simctl status_bar booted override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3`
 3. First run only: launch with `-wipeLocalVault -screenshotVault -qasa.language en -qasa.hasCompletedWelcome YES`, create the vault with the test password and turn biometrics off.
 4. For each language (`en`, `ckb`, `ar`) and theme (`light`, `dark`): launch with
-   `-screenshotVault -qasa.language <lang> -qasa.theme <theme> -qasa.hasCompletedWelcome YES`,
+   `-screenshotVault -screenshotPremium -qasa.language <lang> -qasa.theme <theme> -qasa.hasCompletedWelcome YES`,
    unlock, then capture each screen with `xcrun simctl io booted screenshot --type=png <screen>-<lang>-<theme>.png`:
    the Passwords tab, the Alerts tab (wait a few seconds for the breach check), and You → Password health.
    With the Arabic or Kurdish keyboard active, typed text comes out in that script: paste the password
