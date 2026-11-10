@@ -6,5 +6,9 @@
 	<array>
 		<string>group.alibarznji.qasa</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)alibarznji.qasa.shared</string>
+	</array>
 </dict>
 </plist>

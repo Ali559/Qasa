@@ -6,6 +6,8 @@
 // own copy did not run (frames written by script into about:blank, for example); a frame
 // whose copy runs marks its window, and the parent leaves it alone.
 
+import { identityGroups, type IdentityElement, type IdentityGroup } from './identity'
+
 export type FormKind = 'login' | 'signup' | 'change' | 'usernameStep'
 
 export interface FieldGroup {
@@ -24,6 +26,8 @@ export interface FieldGroup {
 export interface Detection {
   groups: FieldGroup[]
   otpFields: HTMLInputElement[]
+  /** Card and profile forms (identity.ts). */
+  identity: IdentityGroup[]
 }
 
 /** Set on a frame's window by its own content script (see header). */
@@ -81,12 +85,17 @@ function isUsernameLike(input: HTMLInputElement): boolean {
 /** Every <input> under `root` in tree order, through open shadow roots and script-less
  *  same-origin frames. */
 export function deepInputs(root: Document | ShadowRoot | Element): HTMLInputElement[] {
-  const out: HTMLInputElement[] = []
+  return deepFields(root).filter(isInput)
+}
+
+/** Every <input> and <select> under `root`, the same way as [deepInputs]. */
+export function deepFields(root: Document | ShadowRoot | Element): IdentityElement[] {
+  const out: IdentityElement[] = []
   const visit = (node: Document | ShadowRoot | Element) => {
     const walker = (node.ownerDocument ?? (node as Document)).createTreeWalker(node, 1 /* SHOW_ELEMENT */)
     for (let el = walker.currentNode as Element | null; el; el = walker.nextNode() as Element | null) {
       if (el.nodeType !== 1) continue
-      if (isInput(el)) out.push(el)
+      if (isInput(el) || el.tagName === 'SELECT') out.push(el as IdentityElement)
       if (el.shadowRoot) visit(el.shadowRoot)
       if (el.tagName === 'IFRAME' || el.tagName === 'FRAME') {
         const doc = sameOriginChild(el as HTMLIFrameElement)
@@ -115,7 +124,7 @@ function fillable(input: HTMLInputElement): boolean {
 }
 
 /** Groups inputs by their form, or by shadow root / document when there is no form. */
-function containerOf(input: HTMLInputElement): Element | ShadowRoot | Document {
+function containerOf(input: IdentityElement): Element | ShadowRoot | Document {
   return input.form ?? (input.getRootNode() as ShadowRoot | Document)
 }
 
@@ -166,21 +175,33 @@ function classify(container: FieldGroup['container'], inputs: HTMLInputElement[]
 
 /** Finds every form group and one-time-code field under `root`. */
 export function detect(root: Document | ShadowRoot | Element): Detection {
-  const inputs = deepInputs(root)
-  const byContainer = new Map<FieldGroup['container'], HTMLInputElement[]>()
-  for (const input of inputs) {
-    const c = containerOf(input)
+  const all = deepFields(root)
+  const inputs = all.filter(isInput)
+  const byContainer = new Map<FieldGroup['container'], IdentityElement[]>()
+  for (const field of all) {
+    const c = containerOf(field)
     const list = byContainer.get(c)
-    if (list) list.push(input)
-    else byContainer.set(c, [input])
+    if (list) list.push(field)
+    else byContainer.set(c, [field])
   }
   const groups: FieldGroup[] = []
+  const identity: IdentityGroup[] = []
   for (const [container, list] of byContainer) {
-    const group = classify(container, list)
+    const group = classify(container, list.filter(isInput))
     if (group) groups.push(group)
+    // Fields a login form uses are never also a profile's (an email that is the username).
+    const loginFields = new Set<Element>(group ? [group.username, group.password, group.newPassword].filter((f): f is HTMLInputElement => !!f) : [])
+    const otp = list.filter((f) => isInput(f) && isOtpField(f))
+    for (const f of otp) loginFields.add(f)
+    identity.push(...identityGroups(container, list, loginFields))
   }
   const otpFields = inputs.filter((i) => fillable(i) && isOtpField(i))
-  return { groups, otpFields }
+  return { groups, otpFields, identity }
+}
+
+/** The card or profile group a field belongs to, if any. */
+export function identityGroupOf(groups: IdentityGroup[], field: Element): IdentityGroup | undefined {
+  return groups.find((g) => g.fields.some((f) => f.field === field))
 }
 
 /** The group a field belongs to, if any. */
@@ -188,13 +209,17 @@ export function groupOf(groups: FieldGroup[], field: Element): FieldGroup | unde
   return groups.find((g) => g.username === field || g.password === field || g.newPassword === field)
 }
 
-/** Fields that get a Qasa icon: where filling makes sense (not signup forms). */
+/** Fields that get a Qasa icon: where filling makes sense (not signup forms). Card and
+ *  profile fields get one too, except selects (no room for it). */
 export function iconFields(d: Detection): HTMLInputElement[] {
   const out: HTMLInputElement[] = []
   for (const g of d.groups) {
     if (g.kind === 'signup') continue
     if (g.username) out.push(g.username)
     if (g.password) out.push(g.password)
+  }
+  for (const g of d.identity) {
+    for (const f of g.fields) if (isInput(f.field) && !out.includes(f.field)) out.push(f.field)
   }
   return [...out, ...d.otpFields]
 }

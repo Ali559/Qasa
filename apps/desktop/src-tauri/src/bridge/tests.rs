@@ -23,12 +23,16 @@ struct Seen {
     saves: Vec<SavePrompt>,
     copies: Vec<(String, u64)>,
     focused: usize,
+    biometrics: Vec<Auth>,
+    confirms: Vec<Option<ConfirmPrompt>>,
 }
 
 struct FakeHost {
     bridge: BridgeState,
     vault: Mutex<Vault>,
     seen: Mutex<Seen>,
+    /// Whether this fake computer has Touch ID sealed.
+    biometric: bool,
 }
 
 impl Host for FakeHost {
@@ -52,6 +56,15 @@ impl Host for FakeHost {
     }
     fn show_save(&self, p: SavePrompt) {
         self.seen.lock().unwrap().saves.push(p);
+    }
+    fn start_biometric(&self, auth: Auth) -> bool {
+        if self.biometric {
+            self.seen.lock().unwrap().biometrics.push(auth);
+        }
+        self.biometric
+    }
+    fn show_confirm(&self, p: Option<ConfirmPrompt>) {
+        self.seen.lock().unwrap().confirms.push(p);
     }
 }
 
@@ -79,6 +92,7 @@ fn host() -> (FakeHost, String, String) {
         bridge: BridgeState(Mutex::new(Bridge::new(Box::new(MemoryClients::default())))),
         vault: Mutex::new(vault),
         seen: Mutex::new(Seen::default()),
+        biometric: false,
     };
     (host, gh, google)
 }
@@ -365,10 +379,14 @@ fn bridge_demo_server() {
     ] {
         vault.save(None, &login(name, site, user, pw, totp)).unwrap();
     }
+    for p in profile_items() {
+        vault.save(None, &p).unwrap();
+    }
     let host = Arc::new(FakeHost {
         bridge: BridgeState(Mutex::new(Bridge::new(Box::new(MemoryClients::default())))),
         vault: Mutex::new(vault),
         seen: Mutex::new(Seen::default()),
+        biometric: false,
     });
     let _ = std::fs::remove_file(&path);
     server::start(Arc::clone(&host), std::path::PathBuf::from(&path));
@@ -380,6 +398,13 @@ fn bridge_demo_server() {
             bridge.decide_pair(true, host.as_ref());
             println!("PAIRED {client}");
         }
+        // Card fills: confirm as if the user touched the sensor.
+        let pending: Vec<String> =
+            bridge.confirms.iter().filter(|(_, (_, s))| *s == ConfirmState::Pending).map(|(k, _)| k.clone()).collect();
+        for key in pending {
+            bridge.finish_confirm(&key, true, host.as_ref());
+            println!("CONFIRMED {key}");
+        }
         let ids: Vec<String> = bridge.saves.keys().cloned().collect();
         for id in ids {
             let save = bridge.saves[&id].2.clone();
@@ -390,4 +415,161 @@ fn bridge_demo_server() {
             }
         }
     }
+}
+
+// MARK: cards and identities
+
+fn profile_items() -> Vec<VaultPayload> {
+    use qasa_vault::payload::*;
+    vec![
+        VaultPayload::Card(CardFields {
+            item_name: "Visa".into(),
+            account_holder: "Ali Barznji".into(),
+            number: "4242 4242 4242 4242".into(),
+            security_code: "123".into(),
+            expiry_date: "03/29".into(),
+            ..Default::default()
+        }),
+        VaultPayload::Address(AddressFields {
+            item_name: "Home".into(),
+            address: "100 Salim St".into(),
+            city: "Sulaymaniyah".into(),
+            zip_code: "46001".into(),
+            country_code: "IQ".into(),
+            building: "Building 4".into(),
+            ..Default::default()
+        }),
+        VaultPayload::Name(NameFields { first_name: "Ali".into(), last_name: "Barznji".into(), ..Default::default() }),
+        VaultPayload::PersonalEmail(PersonalEmailFields { email: "ali@example.com".into(), ..Default::default() }),
+        VaultPayload::Phone(PhoneFields { country_code: "IQ".into(), number: "0750 123 4567".into(), ..Default::default() }),
+    ]
+}
+
+fn with_profile(biometric: bool) -> (FakeHost, Ext, String, String) {
+    let (mut host, _, _) = host();
+    host.biometric = biometric;
+    let ext = Ext::pair(&host);
+    let mut ids = vec![];
+    {
+        let mut v = host.vault.lock().unwrap();
+        for p in profile_items() {
+            ids.push(v.save(None, &p).unwrap().id);
+        }
+    }
+    (host, ext, ids[0].clone(), ids[1].clone())
+}
+
+#[test]
+fn lists_cards_and_profiles_without_secrets() {
+    let (host, ext, _, _) = with_profile(false);
+    let r = ext.call(&host, "identities", json!({}));
+    let items = r["items"].as_array().unwrap();
+    let kinds: Vec<&str> = items.iter().map(|i| i["kind"].as_str().unwrap()).collect();
+    assert_eq!(kinds, ["card", "address", "name", "email", "phone"]);
+    assert_eq!(items[0]["hint"], "•••• 4242");
+    assert_eq!(items[1]["hint"], "Sulaymaniyah, IQ");
+    assert_eq!(items[4]["hint"], "•••• 67");
+    // Each row is an id (random, so not searched) and what the menu shows: no secret there.
+    for item in items {
+        let mut keys: Vec<&str> = item.as_object().unwrap().keys().map(String::as_str).collect();
+        keys.sort();
+        assert_eq!(keys, ["hint", "id", "kind", "title"]);
+        let shown = format!("{} {}", item["title"], item["hint"]);
+        assert!(!shown.contains("123") && !shown.contains("4242 4242") && !shown.contains("0750"), "{shown}");
+    }
+}
+
+#[test]
+fn a_profile_pick_fills_the_whole_profile() {
+    let (host, ext, _, address) = with_profile(false);
+    let r = ext.call(&host, "fillIdentity", json!({ "itemId": address }));
+    assert_eq!(r["ok"], true, "{r}");
+    let v = &r["values"];
+    assert_eq!(v["street-address"], "100 Salim St");
+    assert_eq!(v["address-line2"], "Building 4");
+    assert_eq!(v["address-level2"], "Sulaymaniyah");
+    assert_eq!(v["postal-code"], "46001");
+    assert_eq!(v["country"], "IQ");
+    assert_eq!(v["country-name"], "Iraq");
+    assert_eq!(v["name"], "Ali Barznji");
+    assert_eq!(v["given-name"], "Ali");
+    assert_eq!(v["email"], "ali@example.com");
+    assert_eq!(v["tel"], "+9647501234567");
+    assert_eq!(v["tel-national"], "07501234567");
+    // A profile never carries card values.
+    assert!(v.get("cc-number").is_none());
+}
+
+#[test]
+fn a_card_needs_a_confirmation_every_time() {
+    let (host, ext, card, _) = with_profile(false);
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "confirm");
+    // No Touch ID here: the password prompt shows in the window.
+    assert_eq!(ext.call(&host, "confirm", json!({ "itemId": card }))["ok"], true);
+    let prompt = host.seen.lock().unwrap().confirms.last().cloned().flatten().unwrap();
+    assert_eq!(prompt.item_title, "Visa");
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "pending");
+    host.bridge.0.lock().unwrap().finish_confirm(&prompt.id, true, &host);
+    let r = ext.call(&host, "fillIdentity", json!({ "itemId": card }));
+    assert_eq!(r["values"]["cc-number"], "4242424242424242");
+    assert_eq!(r["values"]["cc-exp"], "03/29");
+    assert_eq!(r["values"]["cc-exp-month"], "03");
+    assert_eq!(r["values"]["cc-exp-year"], "2029");
+    assert_eq!(r["values"]["cc-csc"], "123");
+    assert!(r["values"].get("email").is_none());
+    // The approval was used up.
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "confirm");
+}
+
+#[test]
+fn a_dismissed_confirmation_cancels_the_fill() {
+    let (host, ext, card, _) = with_profile(true);
+    ext.call(&host, "confirm", json!({ "itemId": card }));
+    // Touch ID ran instead of the window prompt.
+    let Auth::Confirm(prompt) = host.seen.lock().unwrap().biometrics.last().cloned().unwrap() else { panic!() };
+    assert!(host.seen.lock().unwrap().confirms.is_empty());
+    host.bridge.0.lock().unwrap().finish_confirm(&prompt.id, false, &host);
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "cancelled");
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "confirm");
+}
+
+#[test]
+fn an_approval_belongs_to_one_browser() {
+    let (host, ext, card, _) = with_profile(false);
+    ext.call(&host, "confirm", json!({ "itemId": card }));
+    let prompt = host.seen.lock().unwrap().confirms.last().cloned().flatten().unwrap();
+    host.bridge.0.lock().unwrap().finish_confirm(&prompt.id, true, &host);
+    let other = Ext::pair(&host);
+    assert_eq!(other.call(&host, "fillIdentity", json!({ "itemId": card }))["error"], "confirm");
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": card }))["ok"], true);
+}
+
+#[test]
+fn only_payment_items_can_be_confirmed_and_logins_are_not_identities() {
+    let (host, ext, _, address) = with_profile(false);
+    assert_eq!(ext.call(&host, "confirm", json!({ "itemId": address }))["error"], "bad");
+    let (_, gh, _) = host_ids(&host);
+    assert_eq!(ext.call(&host, "fillIdentity", json!({ "itemId": gh }))["error"], "notFound");
+}
+
+fn host_ids(host: &FakeHost) -> ((), String, String) {
+    let v = host.vault.lock().unwrap();
+    let (all, _) = v.all_payloads().unwrap();
+    let login = |name: &str| all.iter().find(|(_, p)| matches!(p, VaultPayload::Login(f) if f.item_name == name)).unwrap().0.clone();
+    ((), login("GitHub"), login("Google"))
+}
+
+#[test]
+fn unlock_prompts_touch_id_when_sealed_else_the_window() {
+    let (mut host, _, _) = host();
+    let ext = Ext::pair(&host);
+    host.vault.lock().unwrap().lock();
+    assert_eq!(ext.call(&host, "unlock", json!({ "prompt": true }))["method"], "window");
+    host.biometric = true;
+    assert_eq!(ext.call(&host, "unlock", json!({ "prompt": true }))["method"], "biometric");
+    assert_eq!(host.seen.lock().unwrap().biometrics, vec![Auth::Unlock]);
+    // The popup's plain unlock still just brings the window forward.
+    assert_eq!(ext.call(&host, "unlock", json!({}))["method"], "window");
+    // Locked: no identities.
+    assert_eq!(ext.call(&host, "identities", json!({}))["error"], "locked");
 }

@@ -46,7 +46,7 @@ function deepElementFromPoint(doc: Document, x: number, y: number): Element | nu
  * host), and it and its ancestors are not mostly transparent or hidden.
  * `ownHost` is our overlay host in the field's document, which may sit on top of a small field.
  */
-export function isFieldVisible(field: HTMLInputElement, ownHost?: Element | null): boolean {
+export function isFieldVisible(field: HTMLElement, ownHost?: Element | null): boolean {
   const doc = field.ownerDocument
   const win = doc.defaultView
   if (!win) return false
@@ -112,6 +112,21 @@ export const HOST_STYLE = [
  *   - where the browser supports IntersectionObserver v2, the menu was last reported visible
  *     (this also catches covers with `pointer-events: none`, which hit-testing skips).
  */
+/**
+ * The other fields of a card or profile form, which may be below the fold: drawn, not
+ * mostly transparent or `visibility: hidden`, and inside the page (not pushed to negative
+ * coordinates, the usual way to hide a field that harvests autofill).
+ */
+export function isFieldRendered(field: HTMLElement): boolean {
+  const win = field.ownerDocument.defaultView
+  if (!win || !field.isConnected) return false
+  const rect = field.getBoundingClientRect()
+  if (rect.width < 2 || rect.height < 2) return false
+  if (rect.right + win.scrollX <= 0 || rect.bottom + win.scrollY <= 0) return false
+  if (win.getComputedStyle(field).visibility !== 'visible') return false
+  return effectiveOpacity(field) >= 0.5
+}
+
 export function isHostIntact(host: HTMLElement, click: { x: number; y: number }, ioVisible: boolean | null): boolean {
   if (host.getAttribute('style') !== HOST_STYLE) return false
   if (host.parentNode !== host.ownerDocument.documentElement) return false

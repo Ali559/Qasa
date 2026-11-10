@@ -947,6 +947,28 @@
         }
       }
     },
+    "autofill.addressLine2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Building, floor, apartment"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المبنى، الطابق، الشقة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بینا، نهۆم، شوقە"
+          }
+        }
+      }
+    },
     "autofill.bank": {
       "localizations": {
         "en": {
@@ -1035,6 +1057,50 @@
         }
       }
     },
+    "autofill.chooseField": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what to insert"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر ما تريد إدراجه"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵبژێرە چی دابنرێت"
+          }
+        }
+      }
+    },
+    "autofill.confirmTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm it's you"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أكّد هويتك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دڵنیابکەرەوە کە خۆتی"
+          }
+        }
+      }
+    },
     "autofill.copied": {
       "localizations": {
         "en": {
@@ -1075,6 +1141,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "لەبەرگرتنەوە"
+          }
+        }
+      }
+    },
+    "autofill.country": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Country"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الدولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وڵات"
           }
         }
       }
@@ -1167,6 +1255,72 @@
         }
       }
     },
+    "autofill.fillInto": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill into %@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التعبئة في %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پڕکردنەوە لە %@"
+          }
+        }
+      }
+    },
+    "autofill.fullName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full name"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم الكامل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوی تەواو"
+          }
+        }
+      }
+    },
+    "autofill.insertTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert from Qasa"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إدراج من قاصة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە قاسەوە دابنێ"
+          }
+        }
+      }
+    },
     "autofill.nameOnCard": {
       "localizations": {
         "en": {
@@ -1233,6 +1387,28 @@
         }
       }
     },
+    "autofill.phoneNational": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone number without country code"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم الهاتف بدون رمز الدولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی تەلەفۆن بەبێ کۆدی وڵات"
+          }
+        }
+      }
+    },
     "autofill.search": {
       "localizations": {
         "en": {
@@ -1251,6 +1427,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "گەڕان"
+          }
+        }
+      }
+    },
+    "autofill.searchQasa": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search Qasa"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البحث في قاصة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە قاسە بگەڕێ"
           }
         }
       }
@@ -11283,6 +11481,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "پڕکردنەوەی خۆکار"
+          }
+        }
+      }
+    },
+    "settings.autofillConfirm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm every fill"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التأكيد قبل كل تعبئة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پێش هەر پڕکردنەوەیەک دڵنیابەرەوە"
+          }
+        }
+      }
+    },
+    "settings.autofillConfirmSubtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask for your fingerprint, face or master password before filling logins and personal info. Cards always ask."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اطلب البصمة أو الوجه أو كلمة المرور الرئيسية قبل تعبئة تسجيلات الدخول والمعلومات الشخصية. البطاقات تطلب ذلك دائمًا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پێش پڕکردنەوەی چوونەژوورەوە و زانیاریی کەسی، پەنجەمۆر، ڕوخسار یان وشەی نهێنیی سەرەکی داوا بکە. کارتەکان هەمیشە داوا دەکەن."
           }
         }
       }

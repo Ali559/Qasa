@@ -59,6 +59,8 @@ const ALLOWED = new Set([
   'bridge_revoke',
   'bridge_pair_decide',
   'bridge_save_decide',
+  'bridge_confirm_decide',
+  'bridge_set_auth_reasons',
   'account_status',
   'account_bootstrap',
   'account_refresh_license',

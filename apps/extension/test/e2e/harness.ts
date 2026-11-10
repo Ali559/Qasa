@@ -118,6 +118,16 @@ export async function fillVia(page: Page, field: Locator, index = 0): Promise<vo
   await clickMenuRow(page, field, index)
 }
 
+/** Text of the open in-page menu, read through the closed shadow root by hit-testing
+ *  isn't possible, so callers check effects instead; this waits for the menu to arm. */
+export async function openMenuByClick(page: Page, field: Locator): Promise<void> {
+  await expect.poll(async () => (await Promise.all(page.frames().map(iconHosts))).reduce((a, b) => a + b, 0)).toBeGreaterThan(0)
+  const b = await box(field)
+  // Into the field, away from the icon.
+  await page.mouse.click(b.x + 12, b.y + b.height / 2)
+  await page.waitForTimeout(800)
+}
+
 /** Number of Qasa host elements on <html> of `page`'s main frame. */
 export function iconHosts(target: Page | import('@playwright/test').Frame): Promise<number> {
   return target.evaluate(() => [...document.documentElement.children].filter((e) => e.tagName === 'DIV' && (e.getAttribute('style') ?? '').includes('2147483647')).length)
@@ -149,7 +159,13 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
     shared.fake.saves.length = 0
     shared.fake.copies.length = 0
     shared.fake.urlOps.length = 0
+    shared.fake.confirms.length = 0
+    shared.fake.confirmAnswer = 'approve'
+    shared.fake.unlockDelayMs = 0
     await use(shared)
+    // A test that changed the vault's state leaves that answer in the service worker's
+    // 3 s status cache, and a page that saw it rechecks only after 30 s.
+    if (shared.fake.state !== 'unlocked') await new Promise((r) => setTimeout(r, 3500))
     // Keep the first (blank) page so the browser always has a window.
     for (const p of shared.context.pages().slice(1)) await p.close()
   },

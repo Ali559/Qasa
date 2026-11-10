@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import UniformTypeIdentifiers
 import UserNotifications
 
 /// Keys / helpers for ephemeral payment secret notifications (OS notification tray).
@@ -19,35 +20,20 @@ nonisolated enum EphemeralPaymentNotificationSupport: Sendable {
         let value: String
     }
 
+    /// What the notification carries: its title, the masked number and the expiry. Never
+    /// a field value: those are in `EphemeralSecretStore` (the notification database keeps
+    /// `userInfo` on disk).
     nonisolated static func userInfo(
         title: String,
         subtitle: String,
-        fields: [FieldPayload],
         expiresAt: Date
     ) -> [AnyHashable: Any] {
-        let encoded: String
-        if let data = try? JSONEncoder().encode(fields),
-           let string = String(data: data, encoding: .utf8) {
-            encoded = string
-        } else {
-            encoded = "[]"
-        }
-        return [
+        [
             userInfoFlag: true,
             userInfoTitle: title,
             userInfoSubtitle: subtitle,
-            userInfoFields: encoded,
             userInfoExpiresAt: expiresAt.timeIntervalSince1970
         ]
-    }
-
-    nonisolated static func fields(from userInfo: [AnyHashable: Any]) -> [FieldPayload] {
-        guard let raw = userInfo[userInfoFields] as? String,
-              let data = raw.data(using: .utf8),
-              let decoded = try? JSONDecoder().decode([FieldPayload].self, from: data) else {
-            return []
-        }
-        return decoded
     }
 
     nonisolated static func title(from userInfo: [AnyHashable: Any]) -> String {
@@ -86,9 +72,14 @@ nonisolated enum EphemeralPaymentNotificationSupport: Sendable {
         defaults?.removeObject(forKey: pasteboardChangeCountKey)
     }
 
+    /// This phone only (no Universal Clipboard), and iOS drops it after 30 s even if the
+    /// app never runs again to clear it.
     @MainActor
     static func copyField(_ field: FieldPayload) {
-        UIPasteboard.general.string = field.value
+        UIPasteboard.general.setItems(
+            [[UTType.utf8PlainText.identifier: field.value]],
+            options: [.localOnly: true, .expirationDate: Date().addingTimeInterval(30)]
+        )
         markOwnedPasteboard()
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
@@ -115,6 +106,7 @@ nonisolated enum EphemeralPaymentNotificationSupport: Sendable {
 
     /// Removes the ephemeral payment notification from Notification Center (app + content extension).
     nonisolated static func removeDeliveredEphemeralNotification() {
+        EphemeralSecretStore.clear()
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [requestId])
         center.removeDeliveredNotifications(withIdentifiers: [requestId])

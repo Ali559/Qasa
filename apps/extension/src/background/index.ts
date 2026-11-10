@@ -6,7 +6,7 @@
 //   - `copy`, `search`, `generate` and `pair` are accepted only from our own extension pages.
 //   - Nothing is cached: secrets in a reply go straight to the caller. The only stored
 //     data is the pairing (bridge.ts).
-import type { BgRequest, BgResponse, BridgeStatus, ContentRequest, LoginMatch, PopupRequest, SearchHit } from '@ext/shared/messages'
+import type { BgRequest, BgResponse, BridgeStatus, ContentRequest, IdentityItem, LoginMatch, PopupRequest, SearchHit } from '@ext/shared/messages'
 import { isWebUrl, NATIVE_HOST } from '@ext/shared/protocol'
 import type { FontBytes } from '@ext/content/fonts'
 import { FONT_FILES } from '@ext/shared/fonts'
@@ -104,7 +104,8 @@ async function handlePopup(req: PopupRequest): Promise<unknown> {
     case 'pair':
       return bridge.pair()
     case 'unlock':
-      await bridge.request('unlock', {})
+      // Touch ID / Hello right away when the desktop has it, else its window comes forward.
+      await bridge.request('unlock', { prompt: true })
       return null
     case 'search':
       return items<SearchHit>(await bridge.request('search', { query: String(req.query).slice(0, 200) }))
@@ -132,7 +133,15 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
       }
       return contentStatus.value
     case 'unlock':
-      await bridge.request('unlock', {})
+      await bridge.request('unlock', { prompt: true })
+      contentStatus = undefined
+      return null
+    case 'identities':
+      return items<IdentityItem>(await bridge.request('identities', {}))
+    case 'fillIdentity':
+      return (await bridge.request('fillIdentity', { itemId: String(req.itemId) })).values ?? {}
+    case 'confirm':
+      await bridge.request('confirm', { itemId: String(req.itemId) })
       return null
     case 'matches':
       return items<LoginMatch>(await bridge.request('matches', { url }))
@@ -159,7 +168,7 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
 }
 
 const POPUP_ONLY = new Set(['pair', 'search', 'copy', 'generate'])
-const CONTENT_ONLY = new Set(['matches', 'fill', 'totp', 'save', 'rememberUsername', 'fonts'])
+const CONTENT_ONLY = new Set(['matches', 'fill', 'totp', 'save', 'rememberUsername', 'fonts', 'identities', 'fillIdentity', 'confirm'])
 
 async function handle(req: BgRequest, sender: chrome.runtime.MessageSender): Promise<unknown> {
   if (!req || typeof req !== 'object' || typeof req.kind !== 'string') throw new BridgeError('bad')

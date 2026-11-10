@@ -35,6 +35,10 @@ const SEEN_WINDOW_MS: i64 = 5 * 60 * 1000;
 /// Unanswered save prompts are dropped after this.
 const SAVE_LIFETIME: Duration = Duration::from_secs(10 * 60);
 const MAX_PENDING_SAVES: usize = 20;
+/// A payment confirmation waits this long for Touch ID / Hello or the master password.
+const CONFIRM_LIFETIME: Duration = Duration::from_secs(120);
+/// An approved confirmation must be used for its fill within this.
+const APPROVAL_LIFETIME: Duration = Duration::from_secs(60);
 
 /// What the bridge needs from the running app.
 pub trait Host: Send + Sync {
@@ -49,6 +53,38 @@ pub trait Host: Send + Sync {
     fn show_pair(&self, prompt: Option<PairPrompt>);
     /// Shows a save or update prompt.
     fn show_save(&self, prompt: SavePrompt);
+    /// Starts Touch ID / Windows Hello for `auth` on its own thread, outside every lock,
+    /// and reports a confirmation back through [`Bridge::finish_confirm`] (an unlock just
+    /// unlocks the vault). False when this computer has no usable seal: the caller then
+    /// asks for the master password in the window instead.
+    fn start_biometric(&self, auth: Auth) -> bool;
+    /// Shows "Confirm to fill <card>" with a master password field, or hides it (`None`).
+    fn show_confirm(&self, prompt: Option<ConfirmPrompt>);
+}
+
+/// What a Touch ID / Hello prompt started by the bridge is for.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Auth {
+    /// The extension's "Unlock": unlock the vault.
+    Unlock,
+    /// A payment fill (plan §1.3): approve the confirmation `key`.
+    Confirm(ConfirmPrompt),
+}
+
+/// A payment fill waiting for the user. `id` is the confirmation's key.
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ConfirmPrompt {
+    pub id: String,
+    pub item_title: String,
+    pub client: String,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ConfirmState {
+    Pending,
+    Approved,
+    Denied,
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
@@ -106,6 +142,8 @@ pub struct Bridge {
     seen: HashMap<String, i64>,
     pair: Option<PendingPair>,
     saves: HashMap<String, (Instant, String, PendingSave)>,
+    /// Payment confirmations by `<client>:<item>`, with when they last changed.
+    confirms: HashMap<String, (Instant, ConfirmState)>,
 }
 
 pub struct BridgeState(pub Mutex<Bridge>);
@@ -120,7 +158,7 @@ fn clear_error(code: &str) -> Value {
 
 impl Bridge {
     pub fn new(store: Box<dyn ClientStore>) -> Self {
-        Bridge { clients: Clients::new(store), seen: HashMap::new(), pair: None, saves: HashMap::new() }
+        Bridge { clients: Clients::new(store), seen: HashMap::new(), pair: None, saves: HashMap::new(), confirms: HashMap::new() }
     }
 
     pub fn clients(&self) -> Vec<ClientInfo> {
@@ -207,7 +245,7 @@ impl Bridge {
         } else {
             self.seen.insert(id.clone(), now);
             self.clients.touch(client_id, now);
-            self.run(&req, &client_name, host)
+            self.run(&req, client_id, &client_name, host)
         };
 
         let body = match reply {
@@ -222,11 +260,18 @@ impl Bridge {
         json!({ "type": "res", "n": n, "c": c })
     }
 
-    fn run(&mut self, req: &Value, client: &str, host: &dyn Host) -> Result<Value, OpError> {
+    fn run(&mut self, req: &Value, client_id: &str, client: &str, host: &dyn Host) -> Result<Value, OpError> {
         let op = req.get("op").and_then(Value::as_str).ok_or(OpError::Bad)?;
         if op == "unlock" {
+            // `prompt`: the in-page menu asks for Touch ID / Hello right away (plan §3.2).
+            // The extension then watches `status` until the vault is unlocked.
+            let locked = host.vault().lock().map(|v| !v.is_unlocked()).unwrap_or(false);
+            let wants_prompt = req.get("prompt").and_then(Value::as_bool).unwrap_or(false);
+            if locked && wants_prompt && host.start_biometric(Auth::Unlock) {
+                return Ok(json!({ "method": "biometric" }));
+            }
             host.focus();
-            return Ok(json!({}));
+            return Ok(json!({ "method": "window" }));
         }
         if op == "generate" {
             return ops::generate();
@@ -248,6 +293,20 @@ impl Bridge {
             "totp" => ops::totp(&vault, req),
             "copy" => ops::copy(&mut vault, req, host),
             "search" => ops::search(&vault, req),
+            "identities" => ops::identities(&vault),
+            "fillIdentity" => {
+                let key = confirm_key(client_id, req)?;
+                let confirmed = self.take_approval(&key)?;
+                ops::fill_identity(&mut vault, req, confirmed)
+            }
+            "confirm" => {
+                let key = confirm_key(client_id, req)?;
+                let id = req.get("itemId").and_then(Value::as_str).ok_or(OpError::Bad)?;
+                let item_title = ops::confirmable(&vault, id)?;
+                drop(vault);
+                self.start_confirm(key, item_title, client, host);
+                Ok(json!({}))
+            }
             "save" => {
                 let Some(save) = ops::plan_save(&vault, req)? else { return Ok(json!({ "result": "unchanged" })) };
                 drop(vault);
@@ -256,6 +315,51 @@ impl Bridge {
             }
             _ => Err(OpError::Bad),
         }
+    }
+
+    /// Whether a payment fill was approved: consumes an approval, reports a pending or
+    /// dismissed one, and forgets stale ones.
+    fn take_approval(&mut self, key: &str) -> Result<bool, OpError> {
+        self.confirms.retain(|_, (t, state)| match state {
+            ConfirmState::Approved => t.elapsed() < APPROVAL_LIFETIME,
+            _ => t.elapsed() < CONFIRM_LIFETIME,
+        });
+        match self.confirms.get(key).map(|(_, s)| *s) {
+            None => Ok(false),
+            Some(ConfirmState::Pending) => Err(OpError::Pending),
+            Some(ConfirmState::Approved) => {
+                self.confirms.remove(key);
+                Ok(true)
+            }
+            Some(ConfirmState::Denied) => {
+                self.confirms.remove(key);
+                Err(OpError::Cancelled)
+            }
+        }
+    }
+
+    /// Asks the user to confirm a payment fill: Touch ID / Hello when sealed, else the
+    /// master password in the window. One prompt per item at a time.
+    fn start_confirm(&mut self, key: String, item_title: String, client: &str, host: &dyn Host) {
+        if self.confirms.get(&key).is_some_and(|(t, s)| *s == ConfirmState::Pending && t.elapsed() < CONFIRM_LIFETIME) {
+            return;
+        }
+        self.confirms.insert(key.clone(), (Instant::now(), ConfirmState::Pending));
+        let prompt = ConfirmPrompt { id: key, item_title, client: client.to_string() };
+        if !host.start_biometric(Auth::Confirm(prompt.clone())) {
+            host.show_confirm(Some(prompt));
+            host.focus();
+        }
+    }
+
+    /// The answer to a payment confirmation (Touch ID / Hello, or the password prompt).
+    pub fn finish_confirm(&mut self, key: &str, approved: bool, host: &dyn Host) {
+        if let Some(entry) = self.confirms.get_mut(key) {
+            if entry.1 == ConfirmState::Pending {
+                *entry = (Instant::now(), if approved { ConfirmState::Approved } else { ConfirmState::Denied });
+            }
+        }
+        host.show_confirm(None);
     }
 
     fn queue_save(&mut self, save: PendingSave, client: &str, host: &dyn Host) {
@@ -294,6 +398,12 @@ impl Bridge {
         })?;
         Ok(true)
     }
+}
+
+/// A confirmation belongs to one paired browser and one item.
+fn confirm_key(client_id: &str, req: &Value) -> Result<String, OpError> {
+    let id = req.get("itemId").and_then(Value::as_str).filter(|s| !s.is_empty() && s.len() <= 64).ok_or(OpError::Bad)?;
+    Ok(format!("{client_id}:{id}"))
 }
 
 #[cfg(test)]

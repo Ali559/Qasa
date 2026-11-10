@@ -64,6 +64,18 @@ class AppPreferences @Inject constructor(
         _vpnNodeId.value = id
     }
 
+    /**
+     * Autofill asks for biometrics or the master password before every login and profile
+     * fill, not only when the vault is locked (docs/autofill-plan.md §1.3). Cards always ask.
+     */
+    private val _autofillConfirmEveryFill = MutableStateFlow(prefs.getBoolean(KEY_AUTOFILL_CONFIRM, false))
+    val autofillConfirmEveryFill: StateFlow<Boolean> = _autofillConfirmEveryFill.asStateFlow()
+
+    fun setAutofillConfirmEveryFill(on: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTOFILL_CONFIRM, on).apply()
+        _autofillConfirmEveryFill.value = on
+    }
+
     var hasCompletedWelcome: Boolean
         get() = prefs.getBoolean(KEY_WELCOME, false)
         set(value) = prefs.edit().putBoolean(KEY_WELCOME, value).apply()
@@ -132,6 +144,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_THEME = "qasa.theme"
         private const val KEY_AUTO_LOCK = "qasa.autoLockMinutes"
         private const val KEY_WELCOME = "qasa.welcomeCompleted"
+        private const val KEY_AUTOFILL_CONFIRM = "qasa.autofill.confirmEveryFill"
         private const val KEY_VPN_KILL_SWITCH = "qasa.vpn.killSwitch"
         private const val KEY_VPN_AUTO_CONNECT = "qasa.vpn.autoConnect"
         private const val KEY_VPN_NODE_ID = "qasa.vpn.nodeId"

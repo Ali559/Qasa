@@ -22,6 +22,8 @@ data class AutofillIndexEntry(
     val title: String,
     val subtitle: String,
     val websiteHost: String? = null,
+    /** The item's website as saved (3+): matching needs `androidapp://` links too. */
+    val website: String? = null,
     val last4: String? = null,
     val encryptedSecrets: String,
 )
@@ -43,6 +45,25 @@ data class AutofillSecrets(
     val accountNumber: String? = null,
     /** The login's otpauth URI, encrypted with the password so autofill can copy its code. */
     val totp: String? = null,
+    // Format 3: what card and identity forms ask for (docs/autofill-plan.md §3.1).
+    val holder: String? = null,
+    /** `MM/YY`, the canonical card expiry. */
+    val expiry: String? = null,
+    val honorific: String? = null,
+    val firstName: String? = null,
+    val middleName: String? = null,
+    val lastName: String? = null,
+    val email: String? = null,
+    /** ISO country code of the phone number (`IQ`). */
+    val phoneCountry: String? = null,
+    val phoneNumber: String? = null,
+    val street: String? = null,
+    val line2: String? = null,
+    val city: String? = null,
+    val postalCode: String? = null,
+    /** ISO country code of the address. */
+    val country: String? = null,
+    val organization: String? = null,
 )
 
 @Singleton
@@ -90,47 +111,78 @@ class AutofillIndexStore @Inject constructor(
 
     fun entryFromPayload(id: String, payload: VaultPayload): AutofillIndexEntry? {
         val enc = try { session.requireEncKey() } catch (_: Exception) { return null }
+        fun entry(
+            kind: String,
+            secrets: AutofillSecrets,
+            subtitle: String = payload.subtitle(),
+            website: String? = null,
+            last4: String? = null,
+        ): AutofillIndexEntry {
+            val blob = VaultCrypto.encrypt(json.encodeToString(secrets).toByteArray(), enc)
+            return AutofillIndexEntry(
+                id = id,
+                kind = kind,
+                title = payload.displayName(),
+                subtitle = subtitle,
+                websiteHost = website?.let(::hostFrom),
+                website = website?.trim()?.ifEmpty { null },
+                last4 = last4,
+                encryptedSecrets = android.util.Base64.encodeToString(blob, android.util.Base64.NO_WRAP),
+            )
+        }
         return when (payload) {
-            is VaultPayload.Login -> {
-                val secrets = AutofillSecrets(
+            is VaultPayload.Login -> entry(
+                KIND_LOGIN,
+                AutofillSecrets(
                     username = payload.username.ifBlank { payload.email },
                     password = payload.password,
                     totp = payload.totp.ifEmpty { null },
-                )
-                val blob = VaultCrypto.encrypt(json.encodeToString(secrets).toByteArray(), enc)
-                AutofillIndexEntry(
-                    id = id,
-                    kind = "login",
-                    title = payload.displayName(),
-                    subtitle = payload.subtitle(),
-                    websiteHost = hostFrom(payload.website),
-                    encryptedSecrets = android.util.Base64.encodeToString(blob, android.util.Base64.NO_WRAP),
-                )
-            }
+                ),
+                website = payload.website,
+            )
             is VaultPayload.Card -> {
                 val digits = payload.number.filter { it.isDigit() }
-                val secrets = AutofillSecrets(number = payload.number, securityCode = payload.securityCode)
-                val blob = VaultCrypto.encrypt(json.encodeToString(secrets).toByteArray(), enc)
-                AutofillIndexEntry(
-                    id = id,
-                    kind = "card",
-                    title = payload.displayName(),
-                    subtitle = payload.subtitle(),
+                entry(
+                    KIND_CARD,
+                    AutofillSecrets(
+                        number = payload.number,
+                        securityCode = payload.securityCode,
+                        holder = payload.accountHolder.ifBlank { null },
+                        expiry = payload.expiryDate.ifBlank { null },
+                    ),
                     last4 = digits.takeLast(4).ifEmpty { null },
-                    encryptedSecrets = android.util.Base64.encodeToString(blob, android.util.Base64.NO_WRAP),
                 )
             }
-            is VaultPayload.BankAccount -> {
-                val secrets = AutofillSecrets(accountNumber = payload.accountNumber)
-                val blob = VaultCrypto.encrypt(json.encodeToString(secrets).toByteArray(), enc)
-                AutofillIndexEntry(
-                    id = id,
-                    kind = "bankAccount",
-                    title = payload.displayName(),
-                    subtitle = payload.subtitle(),
-                    encryptedSecrets = android.util.Base64.encodeToString(blob, android.util.Base64.NO_WRAP),
-                )
-            }
+            is VaultPayload.BankAccount -> entry(KIND_BANK, AutofillSecrets(accountNumber = payload.accountNumber))
+            is VaultPayload.Name -> entry(
+                KIND_NAME,
+                AutofillSecrets(
+                    honorific = payload.type.takeIf { it != "None of these" && it.isNotBlank() },
+                    firstName = payload.firstName.ifBlank { null },
+                    middleName = payload.middleName.ifBlank { null },
+                    lastName = payload.lastName.ifBlank { null },
+                ),
+                subtitle = "",
+            )
+            is VaultPayload.PersonalEmail -> entry(KIND_EMAIL, AutofillSecrets(email = payload.email.ifBlank { null }))
+            is VaultPayload.Phone -> entry(
+                KIND_PHONE,
+                AutofillSecrets(phoneCountry = payload.countryCode, phoneNumber = payload.number.ifBlank { null }),
+                // The index's plain part is readable while locked: only the last digits.
+                subtitle = payload.number.filter { it.isDigit() }.takeLast(2).let { if (it.isEmpty()) "" else "•••• $it" },
+            )
+            is VaultPayload.Address -> entry(
+                KIND_ADDRESS,
+                AutofillSecrets(
+                    street = payload.address.ifBlank { null },
+                    line2 = listOf(payload.building, payload.floor, payload.apartment).filter { it.isNotBlank() }.joinToString(", ").ifEmpty { null },
+                    city = payload.city.ifBlank { null },
+                    postalCode = payload.zipCode.ifBlank { null },
+                    country = payload.countryCode.ifBlank { null },
+                    holder = payload.recipient.ifBlank { null },
+                ),
+            )
+            is VaultPayload.Company -> entry(KIND_COMPANY, AutofillSecrets(organization = payload.companyName.ifBlank { null }))
             else -> null
         }
     }
@@ -168,9 +220,23 @@ class AutofillIndexStore @Inject constructor(
     companion object {
         /**
          * Bump whenever entries gain data an older index lacks. 2: logins carry their
-         * otpauth URI (`AutofillSecrets.totp`) so autofill can copy the 2FA code.
+         * otpauth URI (`AutofillSecrets.totp`) so autofill can copy the 2FA code. 3: card
+         * holder and expiry, names, email, phone, addresses and companies, and the raw
+         * website for app matching.
          */
-        const val CURRENT_FORMAT_VERSION = 2
+        const val CURRENT_FORMAT_VERSION = 3
+
+        const val KIND_LOGIN = "login"
+        const val KIND_CARD = "card"
+        const val KIND_BANK = "bankAccount"
+        const val KIND_NAME = "name"
+        const val KIND_EMAIL = "email"
+        const val KIND_PHONE = "phone"
+        const val KIND_ADDRESS = "address"
+        const val KIND_COMPANY = "company"
+
+        /** Identity kinds, in the order a profile is assembled from them. */
+        val IDENTITY_KINDS = listOf(KIND_ADDRESS, KIND_NAME, KIND_EMAIL, KIND_PHONE, KIND_COMPANY)
 
         private val versionJson = Json { ignoreUnknownKeys = true }
 

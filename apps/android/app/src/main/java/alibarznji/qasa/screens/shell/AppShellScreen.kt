@@ -64,6 +64,12 @@ fun AppShellScreen(
         .takeUnless { it.isBlank() || it == "Qasa User" }
         ?: stringResource(R.string.session_qasauser)
 
+    val pendingSave by vm.appSession.pendingLoginSave.collectAsState()
+    LaunchedEffect(pendingSave) {
+        // The Passwords tab opens the new-login form (VaultListScreen).
+        if (pendingSave != null) { page = null; tab = ShellTab.Passwords }
+    }
+
     LaunchedEffect(openNotifications) {
         if (openNotifications) {
             page = AppPage.Notifications

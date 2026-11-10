@@ -35,13 +35,23 @@
             </intent-filter>
         </activity>
 
-        <!-- Invisible: fills a login that has a 2FA code and copies the code. -->
+        <!-- Every autofill pick goes through here: unlock or confirm, then fill. -->
         <activity
-            android:name=".credentials.AutofillTotpActivity"
+            android:name=".credentials.AutofillAuthActivity"
             android:exported="false"
             android:excludeFromRecents="true"
             android:noHistory="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+            android:theme="@style/Theme.Qasa"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Credential Manager picks: unlock, then return the password. -->
+        <activity
+            android:name=".credentials.CredentialPickActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.Qasa"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".credentials.QasaAutofillService"

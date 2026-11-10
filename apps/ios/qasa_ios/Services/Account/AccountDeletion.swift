@@ -75,6 +75,7 @@ enum AccountDeletion {
         VaultAuthStore.resetVaultAuth()
         SharedVaultKeychain.resetAll()
         AutofillIndexStore.clear()
-        AutofillIdentitySync.sync(entries: [])
+        AutofillIdentitySync.clear()
+        EphemeralSecretStore.clear()
     }
 }

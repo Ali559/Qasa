@@ -135,6 +135,8 @@ dependencies {
 
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
+    // Inline (keyboard) autofill suggestions.
+    implementation(libs.androidx.autofill)
     implementation(libs.androidx.credentials)
     // 2FA QR codes: Google's code scanner runs in Play services, so no camera permission.
     implementation(libs.play.services.code.scanner)
