@@ -4149,9 +4149,9 @@
     "ckb": "کارتەکە لە جزدان یان کالانەکەی دەربهێنە."
   },
   "nfc.card.step2": {
-    "en": "Hold it flat against the back of your phone, near the top.",
-    "ar": "ضعها مسطّحة على ظهر هاتفك، قرب الأعلى.",
-    "ckb": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+    "en": "Hold it flat against the back of your phone. If nothing happens, slide it slowly: the reader's spot differs by phone.",
+    "ar": "ضعها مسطّحة على ظهر هاتفك. إن لم يحدث شيء، حرّكها ببطء، فمكان القارئ يختلف من هاتف لآخر.",
+    "ckb": "بە ڕێکی بیخەرە سەر پشتی مۆبایلەکەت. ئەگەر هیچ ڕووی نەدا، هێواش بیجووڵێنە، شوێنی خوێنەرەکە لە مۆبایلێکەوە بۆ یەکێکی تر جیاوازە."
   },
   "nfc.card.step3": {
     "en": "Keep still until you feel a buzz. It takes about a second.",
@@ -4179,9 +4179,9 @@
     "ckb": "ژمارەی بەڵگەنامە، بەرواری لەدایکبوون و بەرواری بەسەرچوون لە خوارەوە بنووسە."
   },
   "nfc.id.step2": {
-    "en": "Hold the card flat against the back of your phone, near the top.",
-    "ar": "ضع البطاقة مسطّحة على ظهر هاتفك، قرب الأعلى.",
-    "ckb": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت، نزیک سەرەوە."
+    "en": "Hold the card flat against the back of your phone. If nothing happens, slide it slowly: the reader's spot differs by phone.",
+    "ar": "ضع البطاقة مسطّحة على ظهر هاتفك. إن لم يحدث شيء، حرّكها ببطء، فمكان القارئ يختلف من هاتف لآخر.",
+    "ckb": "کارتەکە بە ڕێکی بخەرە سەر پشتی مۆبایلەکەت. ئەگەر هیچ ڕووی نەدا، هێواش بیجووڵێنە، شوێنی خوێنەرەکە لە مۆبایلێکەوە بۆ یەکێکی تر جیاوازە."
   },
   "nfc.passport.step2": {
     "en": "Lay the phone on the passport cover, over the chip symbol.",
@@ -4224,9 +4224,9 @@
     "ckb": "تەواو. خانەکان پڕکرانەوە."
   },
   "nfc.error.lost": {
-    "en": "The card moved away. Hold it still and try again.",
-    "ar": "ابتعدت البطاقة. أمسكها ثابتة وحاول مرة أخرى.",
-    "ckb": "کارتەکە دوورکەوتەوە. جێگیری بکە و دووبارە هەوڵ بدەرەوە."
+    "en": "Lost contact with the card. Hold it against the phone again and keep still.",
+    "ar": "انقطع الاتصال بالبطاقة. ضعها على الهاتف مرة أخرى ولا تحرّكها.",
+    "ckb": "پەیوەندی لەگەڵ کارتەکە پچڕا. دووبارە بیخەرە سەر مۆبایلەکە و مەیجووڵێنە."
   },
   "nfc.error.unsupported": {
     "en": "This card can't be read over NFC.",

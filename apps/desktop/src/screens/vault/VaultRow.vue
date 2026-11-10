@@ -84,7 +84,7 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
 
 <template>
   <div class="row" :class="{ selected }" role="button" tabindex="0" @click="emit('select')" @keydown.enter.self="emit('select')">
-    <ItemTile :variant="row.variant" :name="row.displayName" />
+    <ItemTile :variant="row.variant" :name="row.displayName" :website="row.siteHost" />
     <span class="text">
       <span class="name">{{ row.displayName }}</span>
       <span class="subtitle">{{ subtitle }}</span>

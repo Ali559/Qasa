@@ -21,6 +21,7 @@ import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.theme.rememberSheetDismiss
 import android.content.Intent
+import android.nfc.Tag
 import android.os.Build
 import android.provider.Settings
 import android.view.HapticFeedbackConstants
@@ -56,6 +57,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +87,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /** What a successful scan hands back to the editor. */
 sealed interface NfcScanResult {
@@ -109,8 +112,9 @@ private sealed interface ScanStatus {
  * picture ([NfcScanArt]), three numbered steps (for ID / passport the chip key inputs sit
  * right under them), a live status line and Cancel.
  *
- * Reader mode is on only while this sheet is in composition, NFC is on and the scan is
- * armed; leaving composition always turns it off. Tags are read on the reader's binder
+ * Reader mode is on for as long as this sheet is in composition and NFC is on, so a card
+ * on the phone never reaches the system dispatcher; tags are only read while the scan is
+ * armed. Leaving composition always turns it off. Tags are read on the reader's binder
  * thread; results come back to the main thread through the composition's scope.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,38 +174,63 @@ private fun NfcScanContent(
     var session by remember { mutableIntStateOf(0) }
     val busy = remember { AtomicBoolean(false) }
 
-    val armed = status == ScanStatus.Ready || status == ScanStatus.Reading
-    val readerOn = activity != null && availability == NfcAvailability.Ready && armed
+    // What a tag arriving now should be read with: null swallows it (details missing, done).
+    // After a dropped link the next tag reads again, so lifting the card and putting it
+    // back is enough. Written on the main thread, read on the reader's binder thread.
     val armedKey = if (isCard) "card" else mrzInfo
-    DisposableEffect(readerOn, session, armedKey) {
-        if (readerOn && activity != null) {
-            NfcTagReader.enable(activity) { tag ->
-                if (!busy.compareAndSet(false, true)) return@enable
-                scope.launch { status = ScanStatus.Reading }
-                val outcome = runCatching {
-                    if (isCard) {
-                        NfcScanResult.Card(NfcTagReader.readCard(tag))
-                    } else {
-                        NfcScanResult.Document(NfcTagReader.readMrtd(tag, armedKey ?: error("not armed")))
-                    }
-                }
-                scope.launch {
-                    busy.set(false)
-                    outcome
-                        .onSuccess { r ->
-                            status = ScanStatus.Done
-                            confirmHaptic(view)
-                            result(r)
-                            delay(SUCCESS_BEAT_MS)
-                            dismiss()
-                        }
-                        .onFailure { e ->
-                            status = ScanStatus.Failed((e as? NfcReadException)?.failure ?: NfcFailure.Unsupported)
-                        }
+    val armed = status == ScanStatus.Ready || status == ScanStatus.Reading ||
+        (status as? ScanStatus.Failed)?.failure == NfcFailure.Lost
+    val readKey = remember { AtomicReference<String?>(null) }
+    SideEffect { readKey.set(if (armed) armedKey else null) }
+
+    val readerOn = activity != null && availability == NfcAvailability.Ready
+    DisposableEffect(readerOn, session, lifecycle) {
+        val host = activity
+        if (!readerOn || host == null) return@DisposableEffect onDispose { }
+        val onTag: (Tag) -> Unit = onTag@{ tag ->
+            val key = readKey.get() ?: return@onTag
+            if (!busy.compareAndSet(false, true)) return@onTag
+            scope.launch { status = ScanStatus.Reading }
+            val outcome = runCatching {
+                if (isCard) {
+                    NfcScanResult.Card(NfcTagReader.readCard(tag))
+                } else {
+                    NfcScanResult.Document(NfcTagReader.readMrtd(tag, key))
                 }
             }
+            scope.launch {
+                busy.set(false)
+                outcome
+                    .onSuccess { r ->
+                        status = ScanStatus.Done
+                        confirmHaptic(view)
+                        result(r)
+                        delay(SUCCESS_BEAT_MS)
+                        dismiss()
+                    }
+                    .onFailure { e ->
+                        status = ScanStatus.Failed((e as? NfcReadException)?.failure ?: NfcFailure.Unsupported)
+                    }
+            }
         }
-        onDispose { activity?.let(NfcTagReader::disable) }
+        // Reader mode belongs to the resumed activity: apply it now and again after every
+        // resume (back from Settings, the lock screen, a system dialog), and retry shortly
+        // when the activity was not quite in the foreground yet.
+        val retry = scope.launch {
+            repeat(ENABLE_ATTEMPTS) {
+                if (NfcTagReader.enable(host, onTag)) return@launch
+                delay(ENABLE_RETRY_MS)
+            }
+        }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) NfcTagReader.enable(host, onTag)
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            retry.cancel()
+            lifecycle.removeObserver(observer)
+            NfcTagReader.disable(host)
+        }
     }
 
     val transition = rememberInfiniteTransition(label = "nfc")
@@ -287,6 +316,8 @@ private fun disarmed(status: ScanStatus): ScanStatus =
     if (status == ScanStatus.Ready || status is ScanStatus.Failed) ScanStatus.NeedsDetails else status
 
 private const val SUCCESS_BEAT_MS = 700L
+private const val ENABLE_ATTEMPTS = 5
+private const val ENABLE_RETRY_MS = 300L
 
 /** Long enough for a TD1 number with its overflow (9303 Part 5 allows up to 22 + check). */
 private const val MAX_DOC_NUMBER = 22

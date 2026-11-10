@@ -10,12 +10,19 @@
       module on first use; until then it falls back to manual entry. Check that on a device.
 - [x] **Delete account in the app** (2026-11-09): Settings > Data & Account; not yet tried
       on a device against a real server.
-- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows show a letter
-      tile. Fetching favicons would tell a third party which sites the user has, and bundling
-      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
-      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
-      every platform; anything else keeps the letter tile.
+- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
+      (Simple Icons, `assets/site-icons`, about 55 KB of path data in `theme/SiteIconData.kt`),
+      matched by the login website's registrable domain (`SiteIcons.kt`), on vault rows and
+      the detail hero; other sites keep the letter tile, nothing is fetched. Not yet seen on
+      a phone: check the icons in light and dark, and that rows don't flicker as they load.
 - [ ] **Try the new flows on a phone (2026-11-10):** fingerprint unlock after an app restart
       (fixed key reuse), the autofill banner's Activate, Settings sheets opening and closing,
       the card editor's expiry/code row, Backups' "Only on this phone" card with a Google Drive
       folder, and Scan with NFC on a real card, ID card and passport.
+- [ ] **Scan with NFC again on a phone (fixed 2026-11-10 after the first try).** A debit card
+      never read and an ID card failed with "moved away", then the system's "no app supports
+      this NFC tag". Now reader mode stays on for the whole sheet (no system popup), is
+      re-applied on resume, a dropped link reconnects and retries twice, and a card put back
+      after a drop reads again by itself; the steps no longer say "near the top". If it still
+      fails, `adb logcat -s QasaNfc` shows the tag techs, each attempt and the status words
+      (no card data).

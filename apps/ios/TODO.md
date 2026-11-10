@@ -18,11 +18,11 @@
       account id…), so the rows can't be decrypted any more, but the encrypted rows stay in
       the SwiftData store until a new vault replaces them. Delete account erases them; Clear
       local data should too.
-- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows show a letter
-      tile. Fetching favicons would tell a third party which sites the user has, and bundling
-      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
-      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
-      every platform; anything else keeps the letter tile.
+- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
+      (Simple Icons, `assets/site-icons`, template SVGs in `Assets.xcassets/SiteIcons`),
+      matched by the login website's registrable domain (`SiteIcon.swift`), on `VaultItemRow`
+      and the detail hero; other sites keep the letter tile, nothing is fetched. Tested on the
+      simulator only: check them on a device in light and dark.
 - [ ] **NFC capability in the Apple developer portal.** Passport/ID scanning needs "NFC Tag
       Reading" on the App ID and a regenerated provisioning profile; then try it on a device
       with a real passport and ID card (the simulator has no NFC).

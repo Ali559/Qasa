@@ -94,6 +94,23 @@ mod tests {
         assert!(score("shop.co.uk", "https://evil.co.uk") < FILL_THRESHOLD);
     }
 
+    /// The bundled site icons (`assets/site-icons`) are matched by walking a host's parent
+    /// domains on every platform, which only equals a registrable-domain match while each
+    /// listed domain is itself a registrable domain, never a public suffix like `github.io`.
+    #[test]
+    fn site_icon_domains_are_registrable_domains() {
+        let sites: serde_json::Value =
+            serde_json::from_str(include_str!("../../../../../assets/site-icons/sites.json")).unwrap();
+        let sites = sites["sites"].as_array().unwrap();
+        assert!(sites.len() >= 50);
+        for site in sites {
+            for domain in site["domains"].as_array().unwrap() {
+                let domain = domain.as_str().unwrap();
+                assert_eq!(registrable_domain(domain), domain, "{domain} is not a registrable domain");
+            }
+        }
+    }
+
     #[test]
     fn ip_addresses_and_localhost_are_their_own_site() {
         assert!(score("http://10.0.0.1", "http://127.0.0.1") < FILL_THRESHOLD);

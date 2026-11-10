@@ -56,11 +56,13 @@ Steps that need the account owner. The details for each are in
 
 ## Also open
 
-- [ ] **Site icons on login items (decided 2026-11-10: not yet).** Login rows (desktop and extension menu) show a letter
-      tile. Fetching favicons would tell a third party which sites the user has, and bundling
-      icons grows the app. Option when wanted: a small bundled set of monochrome icons for the
-      ~50 most common sites (about 100–200 KB), matched by registrable domain, same set on
-      every platform; anything else keeps the letter tile.
+- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
+      (Simple Icons, `assets/site-icons`, generated into `src/vault/siteIconData.ts`), matched
+      by registrable domain (`siteIcon.ts`) on `VaultRow`, the detail hero, the extension
+      popup's `LoginRow` and the in-page menu (the bridge now sends each match's `website`);
+      other sites keep the letter tile, nothing is fetched. Not yet looked at in the running
+      app or a browser: check light and dark, and an older desktop app (no `website`) still
+      shows letters.
 - [ ] **Review the draft terms of use** before release: `apps/landing/src/terms.ts` (en/ar/ckb),
       shown at qasa-app.com/terms and opened from the apps' Terms row. Needs the owner's legal
       review, and native review of the Arabic and Sorani text.

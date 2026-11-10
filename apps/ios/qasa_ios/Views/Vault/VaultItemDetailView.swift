@@ -157,9 +157,24 @@ struct VaultItemDetailView: View {
         }
     }
 
+    /// The subtype symbol, or the login's bundled site icon (`SiteIcon`) when it has one.
+    @ViewBuilder
+    private var heroGlyph: some View {
+        if case .login(let login) = payload, let asset = SiteIcon.assetName(forWebsite: login.website) {
+            Image(asset)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 36, height: 36)
+                .accessibilityHidden(true)
+        } else {
+            Image(systemName: payload.systemImage)
+                .font(.qasa(36, weight: .medium))
+        }
+    }
+
     private var heroIcon: some View {
-        Image(systemName: payload.systemImage)
-            .font(.qasa(36, weight: .medium))
+        heroGlyph
             .foregroundColor(Theme.textPrimary)
             .frame(width: 88, height: 88)
             .background(Theme.chrome)

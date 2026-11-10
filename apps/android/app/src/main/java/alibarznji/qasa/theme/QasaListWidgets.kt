@@ -226,6 +226,8 @@ fun VaultItemRow(
     copyContentDescription: String? = null,
     /** When set, the tile shows this site logo instead of [icon] (logins). */
     logo: SiteLogo? = null,
+    /** A bundled [SiteIcons] icon for the login's site; shown instead of [logo] when set. */
+    siteIcon: ImageVector? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val c = qasaColors
@@ -246,10 +248,12 @@ fun VaultItemRow(
             Box(
                 modifier = Modifier
                     .size(QasaIconFrame.tile)
-                    .background(logo?.color ?: c.cardMuted, tileShape),
+                    .background(if (siteIcon == null) logo?.color ?: c.cardMuted else c.cardMuted, tileShape),
                 contentAlignment = Alignment.Center,
             ) {
-                if (logo != null) {
+                if (siteIcon != null) {
+                    Icon(siteIcon, null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.x3l))
+                } else if (logo != null) {
                     Text(logo.letter, color = Color.White, style = qasaText.cardTitleBold)
                 } else {
                     Icon(icon, null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))

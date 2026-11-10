@@ -1,19 +1,30 @@
 <script setup lang="ts">
-// The row/detail tile: logins show the site's letter on its brand colour (iOS
-// `SiteLogo`), other items their type symbol on a muted square.
+// The row/detail tile: logins show their site's bundled icon (`siteIcon.ts`) or else the
+// site's letter on its brand colour (iOS `SiteLogo`), other items their type symbol on a
+// muted square.
 import { computed } from 'vue'
 
 import { VARIANT_ICON } from '@/icons'
 import { siteLogo } from '@/vault/present'
+import { siteIconPath } from '@/vault/siteIcon'
 import type { Variant } from '@/vault/types'
 
-const props = withDefaults(defineProps<{ variant: Variant; name: string; size?: number }>(), { size: 48 })
-const logo = computed(() => (props.variant === 'login' ? siteLogo(props.name) : null))
+const props = withDefaults(defineProps<{ variant: Variant; name: string; website?: string | null; size?: number }>(), {
+  size: 48,
+  website: null,
+})
+const iconPath = computed(() => (props.variant === 'login' ? siteIconPath(props.website) : null))
+const logo = computed(() => (props.variant === 'login' && !iconPath.value ? siteLogo(props.name) : null))
 </script>
 
 <template>
+  <span v-if="iconPath" class="tile site" :style="{ width: `${size}px`, height: `${size}px` }" aria-hidden="true">
+    <svg viewBox="0 0 24 24" :width="size * 0.5" :height="size * 0.5" fill="currentColor" focusable="false">
+      <path :d="iconPath" />
+    </svg>
+  </span>
   <span
-    v-if="logo"
+    v-else-if="logo"
     class="tile letter"
     :style="{ width: `${size}px`, height: `${size}px`, background: logo.color, fontSize: `${size * 0.375}px` }"
     aria-hidden="true"
@@ -40,5 +51,10 @@ const logo = computed(() => (props.variant === 'login' ? siteLogo(props.name) : 
 .icon {
   background: var(--card-muted);
   color: var(--accent);
+}
+
+.site {
+  background: var(--card-muted);
+  color: var(--text-primary);
 }
 </style>

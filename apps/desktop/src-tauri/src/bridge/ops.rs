@@ -116,6 +116,8 @@ fn row(id: &str, f: &LoginFields) -> Value {
         "title": title_of(f),
         "username": user_of(f),
         "hasTotp": totp_of(f).is_some(),
+        // The extension picks the row's bundled site icon from it (`siteIcon.ts`).
+        "website": f.website,
     })
 }
 
@@ -193,15 +195,7 @@ pub fn search(vault: &Vault, args: &Value) -> OpResult {
         })
         .collect();
     found.sort_by_key(|(_, f)| title_of(f).to_lowercase());
-    let items: Vec<Value> = found
-        .iter()
-        .take(SEARCH_LIMIT)
-        .map(|(id, f)| {
-            let mut r = row(id, f);
-            r["website"] = json!(f.website);
-            r
-        })
-        .collect();
+    let items: Vec<Value> = found.iter().take(SEARCH_LIMIT).map(|(id, f)| row(id, f)).collect();
     Ok(json!({ "items": items }))
 }
 

@@ -13,6 +13,7 @@ import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -275,7 +276,8 @@ private fun HeroIcon(p: VaultPayload) {
             .border(QasaDimens.stroke, c.strokeChrome, shape),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(p.subtypeIcon, contentDescription = null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.x5l))
+        val siteIcon = (p as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) }
+        Icon(siteIcon ?: p.subtypeIcon, contentDescription = null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.x5l))
     }
 }
 
