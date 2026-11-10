@@ -30,6 +30,8 @@ fun QasaModalBottomSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = qasaColors
+    // The sheet is its own window, so MainActivity.onUserInteraction never sees it.
+    val activity = LocalUserActivity.current
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -43,6 +45,7 @@ fun QasaModalBottomSheet(
     ) {
         Column(
             Modifier
+                .reportUserActivity(activity)
                 .fillMaxWidth()
                 .navigationBarsPadding(),
             content = content,

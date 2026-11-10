@@ -19,7 +19,10 @@ import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.RootNav
 import alibarznji.qasa.services.AppBootstrap
 import alibarznji.qasa.services.AutoLockMonitor
+import alibarznji.qasa.theme.LocalUserActivity
 import alibarznji.qasa.theme.QasaTheme
+import alibarznji.qasa.theme.UserActivitySink
+import androidx.compose.runtime.CompositionLocalProvider
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -33,6 +36,9 @@ class MainActivity : FragmentActivity() {
     @Inject lateinit var appSession: AppSession
     @Inject lateinit var bootstrap: AppBootstrap
     @Inject lateinit var notifications: NotificationService
+
+    /** One instance, so the static local never invalidates the tree. */
+    private val userActivity = UserActivitySink { autoLock.noteActivity() }
 
     /** The language the current resources were built with; a different pick recreates. */
     private lateinit var appliedLanguage: AppLanguage
@@ -67,8 +73,11 @@ class MainActivity : FragmentActivity() {
         setContent {
             val theme by prefs.themeMode.collectAsState()
             val language by prefs.language.collectAsState()
-            QasaTheme(themeMode = theme, language = language) {
-                RootNav()
+            // Sheets and the IME bypass onUserInteraction below; they report through this.
+            CompositionLocalProvider(LocalUserActivity provides userActivity) {
+                QasaTheme(themeMode = theme, language = language) {
+                    RootNav()
+                }
             }
         }
     }
