@@ -78,6 +78,7 @@ struct CreateVaultView: View {
                             placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
                             text: $password,
                             isSecure: !passwordVisible,
+                            isPassword: true,
                             trailing: AnyView(
                                 FieldIconButton(
                                     systemImage: passwordVisible ? "eye.slash" : "eye",
@@ -113,7 +114,8 @@ struct CreateVaultView: View {
                             icon: "lock.rotation",
                             placeholder: L10n.tr("auth.create.reenter", locale: locale),
                             text: $confirmPassword,
-                            isSecure: true
+                            isSecure: true,
+                            isPassword: true
                         )
                     }
                     .padding(.top, 4)

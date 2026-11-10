@@ -24,7 +24,14 @@ final class LicenseManager {
     /// marks scheduled expiry checks as handled (see `PremiumRefreshPolicy`).
     @ObservationIgnored private(set) var lastRefreshAttempt: Date?
 
-    var isPremium: Bool { parsed?.isPremium ?? false }
+    var isPremium: Bool {
+        #if DEBUG
+        // Marketing screenshots (apps/landing/SCREENSHOTS.md): Premium screens without a
+        // server-signed licence. Never compiled into a release build.
+        if ProcessInfo.processInfo.arguments.contains("-screenshotPremium") { return true }
+        #endif
+        return parsed?.isPremium ?? false
+    }
     var deviceLimit: Int { parsed?.deviceLimit ?? 1 }
     var tierLabel: String { parsed?.tier.capitalized ?? "Free" }
 

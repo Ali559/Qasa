@@ -56,6 +56,7 @@ struct LoginView: View {
                             placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
                             text: $password,
                             isSecure: !passwordVisible,
+                            isPassword: true,
                             trailing: AnyView(
                                 FieldIconButton(
                                     systemImage: passwordVisible ? "eye.slash" : "eye",
@@ -65,7 +66,8 @@ struct LoginView: View {
                                 ) {
                                     passwordVisible.toggle()
                                 }
-                            )
+                            ),
+                            onSubmit: attemptUnlock
                         )
 
                         if let errorMessage {

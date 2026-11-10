@@ -148,7 +148,12 @@ struct ThemedTextField: View {
     let placeholder: String
     @Binding var text: String
     var isSecure: Bool = false
+    /// A password, even while revealed: no autocorrect, auto-capitalisation or spell check,
+    /// which would otherwise change what was typed (e.g. "qasa…" becoming "Qasa…").
+    var isPassword: Bool = false
     var trailing: AnyView? = nil
+    /// Return key action (for example "unlock").
+    var onSubmit: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
@@ -162,6 +167,9 @@ struct ThemedTextField: View {
                     TextField(placeholder, text: $text)
                 }
             }
+            .textInputAutocapitalization(isPassword ? .never : nil)
+            .autocorrectionDisabled(isPassword)
+            .onSubmit { onSubmit?() }
             .multilineTextAlignment(.leading)
             if let trailing { trailing }
         }
