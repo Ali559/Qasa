@@ -16,21 +16,43 @@ struct FormFieldLabel: View {
     }
 }
 
+/// A field's rule message (`VaultValidation.message`), shown under the field.
+struct InlineFieldError: View {
+    let message: String?
+
+    var body: some View {
+        if let message {
+            Text(message)
+                .font(.qasa(11))
+                .foregroundColor(Theme.danger)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .multilineTextAlignment(.leading)
+                .accessibilityLabel(message)
+        }
+    }
+}
+
 struct FormTextField: View {
     let title: String
     @Binding var text: String
     var isSecure: Bool = false
+    /// Placeholder text; the title when `nil`.
+    var placeholder: String? = nil
+    var keyboard: UIKeyboardType = .default
+    /// The field's rule message, shown under it in red.
+    var error: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             FormFieldLabel(text: title)
             Group {
                 if isSecure {
-                    SecureField(title, text: $text)
+                    SecureField(placeholder ?? title, text: $text)
                 } else {
-                    TextField(title, text: $text)
+                    TextField(placeholder ?? title, text: $text)
                 }
             }
+            .keyboardType(keyboard)
             .font(.qasa(16))
             .multilineTextAlignment(.leading)
             .foregroundColor(Theme.textPrimary)
@@ -39,8 +61,9 @@ struct FormTextField: View {
             .cornerRadius(Theme.cornerRadius)
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                    .stroke(Theme.stroke, lineWidth: 1)
+                    .stroke(error == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
             )
+            InlineFieldError(message: error)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -50,6 +73,7 @@ struct CountryPickerField: View {
     @Binding var countryCode: String
     /// When `true`, options show dial codes (e.g. `Iraq (+964)`). Use for phone forms only.
     var showsDialCode: Bool = false
+    var error: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -61,8 +85,9 @@ struct CountryPickerField: View {
                 .cornerRadius(Theme.cornerRadius)
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                        .stroke(Theme.stroke, lineWidth: 1)
+                        .stroke(error == nil ? Theme.stroke : Theme.danger, lineWidth: 1)
                 )
+            InlineFieldError(message: error)
         }
     }
 }

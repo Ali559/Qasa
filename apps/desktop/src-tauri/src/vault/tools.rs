@@ -263,14 +263,17 @@ pub struct ImportResult {
     pub imported: usize,
     /// Rows already in the vault.
     pub skipped: usize,
+    /// Imported items that still break a field rule after normalizing (imported anyway).
+    pub flagged: usize,
 }
 
-/// Asks for a CSV file and adds the rows that aren't already in the vault, all at once.
+/// Asks for a CSV file and adds the rows that aren't already in the vault, all at once,
+/// normalized; rows with field issues are imported too and counted in `flagged`.
 /// Errors: `invalid` with message `empty` or `invalidHeader`.
 #[tauri::command]
 pub async fn vault_import_csv(app: AppHandle, state: State<'_, VaultState>) -> CommandResult<ImportResult> {
     let Some(path) = app.dialog().file().add_filter("CSV", &["csv", "txt"]).blocking_pick_file() else {
-        return Ok(ImportResult { cancelled: true, imported: 0, skipped: 0 });
+        return Ok(ImportResult { cancelled: true, imported: 0, skipped: 0, flagged: 0 });
     };
     let path = path.into_path().map_err(|e| CommandError::Storage(e.to_string()))?;
     let text = std::fs::read_to_string(&path).map_err(|e| CommandError::Storage(e.to_string()))?;
@@ -281,6 +284,6 @@ pub async fn vault_import_csv(app: AppHandle, state: State<'_, VaultState>) -> C
         qasa_vault::csv::CsvError::Empty => CommandError::Invalid("empty".into()),
         _ => CommandError::Invalid("invalidHeader".into()),
     })?;
-    let imported = vault.insert_many(&outcome.imported)?;
-    Ok(ImportResult { cancelled: false, imported, skipped: outcome.skipped })
+    let done = vault.insert_many(&outcome.imported)?;
+    Ok(ImportResult { cancelled: false, imported: done.imported, skipped: outcome.skipped, flagged: done.flagged })
 }

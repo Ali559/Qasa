@@ -14,9 +14,14 @@ struct LinkedDevicesView: View {
     @State private var showUnlinkAllConfirm = false
     @State private var showPremium = false
     @State private var isActing = false
+    /// The device a restored backup may replace, awaiting confirmation.
+    @State private var pendingReplace: RestoreKeyDevice?
+    /// "<old device> was unlinked…" after a replacement.
+    @State private var noticeMessage: String?
 
     private var registration = DeviceRegistrationService.shared
-    private var currentDeviceId = LicenseManager.shared.parsed?.deviceId
+    /// Read live: a replacement registers this device under a new id.
+    private var currentDeviceId: String? { LicenseManager.shared.parsed?.deviceId }
     private var locale: Locale { prefs.locale }
 
     private var tierLabel: String {
@@ -54,9 +59,16 @@ struct LinkedDevicesView: View {
                                 .font(.qasa(20, weight: .semibold))
                                 .foregroundColor(Theme.textPrimary)
                             Spacer()
-                            if isLoading || isActing {
+                            if isLoading || isActing || registration.isReplacing {
                                 ProgressView()
                             }
+                        }
+
+                        if let noticeMessage {
+                            Text(noticeMessage)
+                                .font(.qasa(14, weight: .medium))
+                                .foregroundColor(Theme.accent)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
 
                         if let errorMessage {
@@ -156,6 +168,21 @@ struct LinkedDevicesView: View {
             }
         }
         .alert(
+            L10n.tr("backup.replace.title", locale: locale),
+            isPresented: Binding(
+                get: { pendingReplace != nil },
+                set: { if !$0 { pendingReplace = nil } }
+            ),
+            presenting: pendingReplace
+        ) { _ in
+            Button(L10n.tr("backup.replace.button", locale: locale)) {
+                Task { await replaceOldDevice() }
+            }
+            Button(L10n.tr("backup.reminder.dismiss", locale: locale), role: .cancel) {}
+        } message: { device in
+            Text(String(format: L10n.tr("backup.replace.bodyFmt", locale: locale), device.device_name))
+        }
+        .alert(
             L10n.tr("devices.unlinkAllTitle", locale: locale),
             isPresented: $showUnlinkAllConfirm
         ) {
@@ -244,6 +271,23 @@ struct LinkedDevicesView: View {
             await loadDevices()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Takes the place of the device the restored backup came from, then continues as
+    /// after any successful registration.
+    private func replaceOldDevice() async {
+        errorMessage = nil
+        noticeMessage = nil
+        switch await registration.replaceOldDevice() {
+        case .replaced(let oldName):
+            await AppBootstrap.onDeviceReplaced(session: session)
+            if let oldName {
+                noticeMessage = String(format: L10n.tr("backup.replace.doneFmt", locale: locale), oldName)
+            }
+            await loadDevices()
+        case .failed:
+            errorMessage = L10n.tr("backup.replace.failed", locale: locale)
         }
     }
 
@@ -463,6 +507,7 @@ struct LinkedDevicesView: View {
             Text(error.message)
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
+            restoreKeyNote(error)
         }
         .padding(17)
         .background(Theme.dangerBackground.opacity(0.2))
@@ -471,6 +516,47 @@ struct LinkedDevicesView: View {
             RoundedRectangle(cornerRadius: Theme.cornerRadius)
                 .stroke(Theme.danger.opacity(0.4), lineWidth: 1)
         )
+    }
+
+    /// What the restored backup's key can do about the limit (nothing when none was sent).
+    @ViewBuilder
+    private func restoreKeyNote(_ error: DeviceLimitErrorBody) -> some View {
+        switch error.restoreKeyStatus {
+        case .replaceable:
+            if registration.canReplaceOldDevice, let device = error.replaceable_device {
+                Button {
+                    pendingReplace = device
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text(L10n.tr("backup.replace.button", locale: locale))
+                    }
+                    .font(.qasa(14, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .foregroundColor(Theme.accent)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Theme.accent.opacity(0.45), lineWidth: 1)
+                    )
+                }
+                .disabled(isActing || registration.isReplacing)
+                .padding(.top, 4)
+            }
+        case .unknown:
+            restoreKeyText("backup.replace.unknown")
+        case .notEnough:
+            restoreKeyText("backup.replace.notEnough")
+        case nil:
+            EmptyView()
+        }
+    }
+
+    private func restoreKeyText(_ key: String) -> some View {
+        Text(L10n.tr(key, locale: locale))
+            .font(.qasa(14))
+            .foregroundColor(Theme.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var upgradeHintBanner: some View {

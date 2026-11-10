@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.settings.devices
 
 import alibarznji.qasa.R
+import alibarznji.qasa.network.RestoreKeyStatus
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +66,11 @@ internal fun UpgradeHintBanner(onUpgrade: () -> Unit) {
 
 /** iOS `limitExceededBanner` (LinkedDevicesView.swift:458): title + server message, no button. */
 @Composable
-internal fun LimitExceededBanner(message: String) {
+internal fun LimitExceededBanner(
+    message: String,
+    restoreKey: RestoreKeyStatus? = null,
+    onReplace: () -> Unit = {},
+) {
     val c = qasaColors
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
     Column(
@@ -77,6 +83,17 @@ internal fun LimitExceededBanner(message: String) {
     ) {
         Text(stringResource(R.string.devices_limitreached), color = c.danger, style = qasaText.rowTitle)
         Text(message, color = c.textSecondary, style = qasaText.bodyMedium)
+        // A restored backup's key: what it can do about the full slot.
+        when (restoreKey) {
+            RestoreKeyStatus.Replaceable -> TextButton(onClick = onReplace) {
+                Text(stringResource(R.string.backup_replace_button), color = c.accent, style = qasaText.rowTitle)
+            }
+            RestoreKeyStatus.Unknown ->
+                Text(stringResource(R.string.backup_replace_unknown), color = c.textSecondary, style = qasaText.bodyMedium)
+            RestoreKeyStatus.NotEnough ->
+                Text(stringResource(R.string.backup_replace_notenough), color = c.textSecondary, style = qasaText.bodyMedium)
+            null -> Unit
+        }
     }
 }
 

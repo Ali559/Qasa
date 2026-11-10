@@ -22,5 +22,6 @@ object SettingsRoutes {
     const val CHANGE_PASSWORD = "settings/change_password"
     const val DEVICES = "settings/devices"
     const val LAN = "settings/lan"
+    const val BACKUPS = "settings/backups"
     const val SUBSCRIPTION = "settings/subscription"
 }

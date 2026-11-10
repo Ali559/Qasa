@@ -15,6 +15,11 @@ nonisolated enum VaultKeychainStore {
         case licenseToken
         case biometricsEnabled
         case biometricPassword
+        // Backup restore key (see `RestoreKeyRotation`). Cleared with the rest by
+        // `resetVaultSecrets`, which walks every case.
+        case restoreKey
+        case restoreKeyWritten
+        case pendingRestoreKey
     }
 
     static var vaultExists: Bool {
@@ -63,6 +68,26 @@ nonisolated enum VaultKeychainStore {
     static var licenseToken: String? {
         get { string(for: .licenseToken) }
         set { setString(newValue, for: .licenseToken) }
+    }
+
+    /// This device's backup restore key (32 bytes). Set only once the server confirmed
+    /// its hash (`PUT /v1/devices/me/restore-key`).
+    static var restoreKey: Data? {
+        get { data(for: .restoreKey) }
+        set { setData(newValue, for: .restoreKey) }
+    }
+
+    /// Whether a backup file holding `restoreKey` was written successfully.
+    static var restoreKeyWritten: Bool {
+        get { bool(for: .restoreKeyWritten) ?? false }
+        set { setBool(newValue, for: .restoreKeyWritten) }
+    }
+
+    /// The restore key of a backup this device adopted, kept until a registration
+    /// succeeds with it (`restore_key` on register).
+    static var pendingRestoreKey: Data? {
+        get { data(for: .pendingRestoreKey) }
+        set { setData(newValue, for: .pendingRestoreKey) }
     }
 
     static var biometricsEnabled: Bool {

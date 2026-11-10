@@ -20,7 +20,7 @@ pub mod wire;
 
 pub use channel::{generate_code, Channel, Role, SyncError};
 pub use merge::{merge, MergePlan};
-pub use session::{run, Adoption, Outcome, SyncStore};
+pub use session::{normalize, run, Adoption, Outcome, SyncStore};
 pub use wire::{Intro, Snapshot, VaultMeta, WireCollection, WireItem};
 
 /// Bumped for any incompatible protocol change; peers with a different version refuse.

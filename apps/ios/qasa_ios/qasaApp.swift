@@ -84,6 +84,7 @@ struct qasaApp: App {
         @Environment(AppPreferences.self) private var prefs
         @State private var unlocked = false
         @State private var showPairing = false
+        @State private var showRestoreBackup = false
         @State private var session = AppSession()
         @State private var isBootstrapping = false
         @State private var createError: String? = nil
@@ -91,6 +92,11 @@ struct qasaApp: App {
         /// `VaultAuthStore.vaultExists` lives in the Keychain, which SwiftUI can't observe.
         /// Bumped when pairing creates a vault, so the root re-reads it and shows Login.
         @State private var vaultRevision = 0
+        /// A confirmed device replacement failed (`backup.replace.failed`).
+        @State private var replaceFailed = false
+        /// "<old device> was unlinked…", shown for a few seconds after a replacement.
+        @State private var replacedNotice: String?
+        private var registration = DeviceRegistrationService.shared
 
         private var showLogin: Bool {
             _ = vaultRevision
@@ -133,6 +139,7 @@ struct qasaApp: App {
                             Task { await handleCreate(password: password, biometrics: biometrics) }
                         },
                         onPairExisting: { showPairing = true },
+                        onRestoreBackup: { showRestoreBackup = true },
                         onLogin: nil
                     )
                 }
@@ -163,8 +170,30 @@ struct qasaApp: App {
                 .environment(\.themePalette, ThemePalette.resolved(for: effectiveScheme))
                 .appLocalization()
             }
+            .fullScreenCover(isPresented: $showRestoreBackup) {
+                BackupRestoreView(
+                    mode: .setup,
+                    // The backup's vault and account are now this device's: unlock with the
+                    // password just typed and continue as after a Wi‑Fi sync adoption
+                    // (device registration under the adopted account, warm cache…).
+                    onAdopted: { password in
+                        showRestoreBackup = false
+                        vaultRevision += 1
+                        Task { await handleUnlock(password: password) }
+                    }
+                )
+                .modelContext(modelContext)
+                .environment(prefs)
+                .environment(\.themePalette, ThemePalette.resolved(for: effectiveScheme))
+                .appLocalization()
+            }
             .overlay {
-                if isBootstrapping {
+                if registration.isReplacing {
+                    ProgressView()
+                        .padding(24)
+                        .background(Theme.cardBackground)
+                        .cornerRadius(12)
+                } else if isBootstrapping {
                     ProgressView(L10n.tr("auth.securingVault", locale: prefs.locale))
                         .padding(24)
                         .background(Theme.cardBackground)
@@ -194,6 +223,47 @@ struct qasaApp: App {
                     .background(Theme.cardBackground)
                 }
             }
+            .overlay(alignment: .top) {
+                if let replacedNotice {
+                    Text(replacedNotice)
+                        .font(.qasa(13, weight: .semibold))
+                        .foregroundColor(Theme.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Theme.cardBackground)
+                        .cornerRadius(12)
+                        .padding(.horizontal, Theme.screenPadding)
+                        .padding(.top, 8)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            // Right after a setup restore hit the device limit: offer to take the place of
+            // the device the backup came from. "Not now" leaves the same button on Linked
+            // Devices.
+            .alert(
+                L10n.tr("backup.replace.title", locale: prefs.locale),
+                isPresented: Binding(
+                    get: { unlocked && registration.replacePrompt != nil },
+                    set: { if !$0 { registration.replacePrompt = nil } }
+                ),
+                presenting: registration.replacePrompt
+            ) { _ in
+                Button(L10n.tr("backup.replace.button", locale: prefs.locale)) {
+                    Task { await replaceOldDevice() }
+                }
+                Button(L10n.tr("backup.reminder.dismiss", locale: prefs.locale), role: .cancel) {}
+            } message: { device in
+                Text(String(format: L10n.tr("backup.replace.bodyFmt", locale: prefs.locale), device.device_name))
+            }
+            .alert(
+                L10n.tr("backup.replace.title", locale: prefs.locale),
+                isPresented: $replaceFailed
+            ) {
+                Button(L10n.tr("common.ok", locale: prefs.locale), role: .cancel) {}
+            } message: {
+                Text(L10n.tr("backup.replace.failed", locale: prefs.locale))
+            }
             .alert(
                 L10n.tr("error.vaultCreateTitle", locale: prefs.locale),
                 isPresented: Binding(
@@ -219,7 +289,10 @@ struct qasaApp: App {
                     // Bell badge on foreground (silent without a license token).
                     Task { await NotificationService.shared.refreshUnreadCount() }
                     // Premium may have ended (or been bought elsewhere) while away.
-                    if unlocked { session.handleForeground() }
+                    if unlocked {
+                        session.handleForeground()
+                        BackupService.shared.runIfDue(container: modelContext.container)
+                    }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: AutoLockMonitor.obscureNotification)) { _ in
@@ -242,6 +315,7 @@ struct qasaApp: App {
                 await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
                 unlocked = true
                 AutoLockMonitor.shared.start(onLock: handleLogout)
+                BackupService.shared.runIfDue(container: modelContext.container)
             } catch {
                 // Silently swallowing this left the spinner stopping with no message
                 // and no way to tell the user why creation failed.
@@ -257,6 +331,32 @@ struct qasaApp: App {
             await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
             unlocked = true
             AutoLockMonitor.shared.start(onLock: handleLogout)
+            BackupService.shared.runIfDue(container: modelContext.container)
+        }
+
+        @MainActor
+        private func replaceOldDevice() async {
+            switch await registration.replaceOldDevice() {
+            case .replaced(let oldName):
+                await AppBootstrap.onDeviceReplaced(session: session)
+                if let oldName {
+                    showReplacedNotice(String(
+                        format: L10n.tr("backup.replace.doneFmt", locale: prefs.locale),
+                        oldName
+                    ))
+                }
+            case .failed:
+                replaceFailed = true
+            }
+        }
+
+        @MainActor
+        private func showReplacedNotice(_ text: String) {
+            withAnimation { replacedNotice = text }
+            Task {
+                try? await Task.sleep(for: .seconds(4))
+                withAnimation { replacedNotice = nil }
+            }
         }
 
         @MainActor

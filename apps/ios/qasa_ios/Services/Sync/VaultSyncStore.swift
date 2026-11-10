@@ -54,6 +54,9 @@ nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
     private let deviceName: String
     private let onApplied: @Sendable () -> Void
     private let onIntro: @Sendable () -> Void
+    /// Item rows the last `apply` skipped for failing `VaultRecordGuard` (Wi‑Fi sync and
+    /// backup restore both write through `apply`).
+    private(set) var lastRejectedCount = 0
 
     init(
         container: ModelContainer,
@@ -155,9 +158,23 @@ nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
     func apply(items: [FfiItem], collections: [FfiCollection]) -> Int64 {
         let context = ModelContext(container)
         var written: Int64 = 0
+        var rejected = 0
         do {
             for item in items {
                 guard let id = UUID(uuidString: item.id) else { continue }
+                // Ciphertext is stored unchanged (never decrypted or rewritten here), so only
+                // the structural rules apply. SwiftData has no CHECK constraints: this guard
+                // is the constraint. A row that fails it is skipped, never stored.
+                guard VaultRecordGuard.isStructurallyValid(
+                    kind: item.kind,
+                    envelope: item.envelope,
+                    payload: item.payload,
+                    schemaVersion: item.schemaVersion,
+                    isDeleted: item.deletedAtMs != nil
+                ) else {
+                    rejected += 1
+                    continue
+                }
                 let record = try fetchItem(id: id, in: context) ?? {
                     let r = VaultItemRecord(kind: VaultItemKind(rawValue: item.kind) ?? .login)
                     r.id = id
@@ -204,6 +221,10 @@ nonisolated final class VaultSyncStore: SyncStoreCallback, @unchecked Sendable {
             try context.save()
         } catch {
             return -1
+        }
+        lastRejectedCount = rejected
+        if rejected > 0 {
+            print("VaultSyncStore.apply: skipped \(rejected) structurally invalid item row(s)")
         }
         if written > 0 { onApplied() }
         return written

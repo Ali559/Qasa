@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.DestructiveTextButton
 import alibarznji.qasa.theme.PrimaryButton
@@ -58,7 +59,7 @@ internal fun TotpFormField(value: String, onChange: (String) -> Unit) {
     // The scanner answers after its own activity closes; save into the latest payload.
     val latestOnChange by rememberUpdatedState(onChange)
 
-    FieldBlock(stringResource(R.string.field_totp)) {
+    FieldBlock(stringResource(R.string.field_totp), error = fieldError(FfiField.TOTP)) {
         if (value.isNotEmpty()) {
             val params = remember(value) { Totp.parse(value) }
             Row(verticalAlignment = Alignment.CenterVertically) {

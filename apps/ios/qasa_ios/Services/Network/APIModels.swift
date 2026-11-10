@@ -30,20 +30,27 @@ nonisolated struct RemoteDevice: Codable, Identifiable, Hashable, Sendable {
     }
 }
 
-struct RegisterDeviceRequest: Encodable {
+nonisolated struct RegisterDeviceRequest: Encodable, Sendable {
     let account_id: String
     let device_fingerprint: String
     let device_name: String
     let platform: String
     let location: String?
+    /// Base64 of the raw 32-byte restore key of the backup this device restored.
+    /// Left out of the JSON when `nil`.
+    var restore_key: String? = nil
+    /// With `restore_key`: unlink the device that key belongs to and take its place.
+    var replace_device: Bool? = nil
 }
 
-struct RegisterDeviceResponse: Decodable {
+nonisolated struct RegisterDeviceResponse: Decodable, Sendable {
     let device_id: String
     let license_token: String
     let devices_used: Int
     let device_limit: Int
     let tier: String
+    /// The device this registration replaced (`replace_device: true`).
+    var replaced_device: RestoreKeyDevice? = nil
 }
 
 struct DeviceLinkCheckRequest: Encodable {

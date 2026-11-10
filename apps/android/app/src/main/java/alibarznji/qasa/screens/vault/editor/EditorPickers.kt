@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
@@ -123,8 +124,9 @@ fun CountryMenuPicker(countryCode: String, onChange: (String) -> Unit, showsDial
 
 @Composable
 fun CountryPickerField(countryCode: String, onChange: (String) -> Unit) {
-    FieldBlock(stringResource(R.string.vault_country)) {
-        CountryMenuPicker(countryCode, onChange)
+    val touch = rememberTouch(FfiField.COUNTRY_CODE)
+    FieldBlock(stringResource(R.string.vault_country), error = fieldError(FfiField.COUNTRY_CODE)) {
+        CountryMenuPicker(countryCode, { touch(); onChange(it) })
     }
 }
 

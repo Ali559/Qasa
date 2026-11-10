@@ -3581,6 +3581,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
 
 [[package]]
+name = "qasa-backup"
+version = "0.1.0"
+dependencies = [
+ "aes-gcm",
+ "base64 0.22.1",
+ "hkdf",
+ "qasa-sync",
+ "qasa-vault",
+ "rand 0.8.8",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.21",
+ "zeroize",
+]
+
+[[package]]
 name = "qasa-biometric"
 version = "0.1.0"
 dependencies = [
@@ -3603,6 +3620,7 @@ dependencies = [
  "aes-gcm",
  "arboard",
  "base64 0.22.1",
+ "chrono",
  "ed25519-dalek",
  "hkdf",
  "image",
@@ -3611,6 +3629,7 @@ dependencies = [
  "mdns-sd",
  "p256",
  "psl",
+ "qasa-backup",
  "qasa-biometric",
  "qasa-sync",
  "qasa-vault",
@@ -3634,6 +3653,7 @@ dependencies = [
  "url",
  "uuid",
  "whoami",
+ "zeroize",
 ]
 
 [[package]]

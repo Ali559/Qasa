@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 
 /**
  * The 1dp stroke every outlined surface in the app renders. `Modifier.border` draws
@@ -120,6 +121,45 @@ fun ThemedTextField(
                 )
             }
         }
+    }
+}
+
+/**
+ * [ThemedTextField] over a [TextFieldValue], for fields that reformat what is typed (card
+ * number, card expiry) and so must place the cursor themselves.
+ */
+@Composable
+fun ThemedTextField(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    label: String = placeholder,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+) {
+    val c = qasaColors
+    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(c.cardBackground, shape)
+            .border(StrokeWidth, c.stroke, shape)
+            .padding(horizontal = QasaDimens.gap, vertical = QasaDimens.gapXLarge),
+    ) {
+        if (value.text.isEmpty()) {
+            Text(placeholder, color = c.textPlaceholder, style = qasaText.bodyLarge)
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = qasaText.bodyLarge.copy(color = c.textPrimary),
+            cursorBrush = SolidColor(c.accent),
+            keyboardOptions = keyboardOptions,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semanticsFieldLabel(label),
+        )
     }
 }
 

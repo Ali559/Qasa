@@ -22,6 +22,7 @@ import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.StatusPill
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
+import alibarznji.qasa.vault.VaultSecureStore
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,12 +56,15 @@ class LinkedDevicesViewModel @Inject constructor(
     val appSession: AppSession,
     private val autoLock: AutoLockMonitor,
     private val vpn: VPNService,
+    private val secrets: VaultSecureStore,
 ) : ViewModel() {
     /** iOS `LicenseManager.shared.clear()` when this device loses its slot; the session follows. */
     fun clearLicense() {
         // The server already ended this device's VPN session; drop the tunnel and key too.
         viewModelScope.launch { vpn.forget() }
         license.clear()
+        // The server cleared this device's restore key hashes along with the slot.
+        secrets.clearOwnRestoreKey()
         appSession.syncFromLicense(license)
     }
 
@@ -83,6 +87,7 @@ fun LinkedDevicesScreen(
     var isActing by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val isPremium by vm.appSession.isPremium.collectAsState()
+    val limitError by vm.devices.limitError.collectAsState()
     val parsed by vm.license.parsed.collectAsState()
     // iOS reads the device id from the licence; registration's id covers a missing token.
     val currentId = parsed?.deviceId ?: vm.devices.currentDeviceId
@@ -126,7 +131,8 @@ fun LinkedDevicesScreen(
         }
     }
 
-    LaunchedEffect(Unit) { loadDevices() }
+    // Also after a replace from the banner cleared the limit error.
+    LaunchedEffect(limitError == null) { loadDevices() }
 
     ScreenScaffold(
         header = {
@@ -146,7 +152,9 @@ fun LinkedDevicesScreen(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionGap)) {
             if (!isPremium) UpgradeHintBanner(onUpgrade)
-            vm.devices.lastLimitError?.let { LimitExceededBanner(it.message) }
+            limitError?.let {
+                LimitExceededBanner(it.message, it.restoreKeyStatus, onReplace = vm.devices::showReplacePrompt)
+            }
 
             Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

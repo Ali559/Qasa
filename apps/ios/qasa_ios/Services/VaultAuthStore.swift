@@ -17,5 +17,7 @@ enum VaultAuthStore {
     static func resetVaultAuth() {
         VaultSession.shared.wipeVault()
         LicenseManager.shared.clear()
+        // The backup file itself stays where the user put it.
+        BackupPreferences.shared.clear()
     }
 }

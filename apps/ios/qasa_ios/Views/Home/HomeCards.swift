@@ -207,6 +207,53 @@ struct HomeBreachedCard: View {
     }
 }
 
+/// Nudge to set up backups while the vault lives only on this phone (core
+/// `backupShouldRemind`). Not a whole-card button: it carries its own action and dismiss.
+struct HomeBackupReminderCard: View {
+    var onSetUp: () -> Void
+    var onDismiss: () -> Void
+
+    @Environment(\.themePalette) private var theme
+    @Environment(AppPreferences.self) private var prefs
+
+    var body: some View {
+        let l = prefs.locale
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 12) {
+                HomeIconTile(systemImage: "externaldrive.badge.exclamationmark")
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.tr("backup.reminder.title", locale: l))
+                        .font(.qasa(16, weight: .semibold))
+                        .foregroundColor(theme.textPrimary)
+                    Text(L10n.tr("backup.reminder.body", locale: l))
+                        .font(.qasa(13))
+                        .foregroundColor(theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            HStack(spacing: 12) {
+                Button(action: onSetUp) {
+                    HomePill(text: L10n.tr("backup.reminder.action", locale: l),
+                             background: theme.cardMuted, color: theme.onAccentChip)
+                }
+                .buttonStyle(.plain)
+                Button(action: onDismiss) {
+                    Text(L10n.tr("backup.reminder.dismiss", locale: l))
+                        .font(.qasa(13, weight: .medium))
+                        .foregroundColor(theme.textSecondary)
+                }
+                .buttonStyle(.plain)
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(17)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+    }
+}
+
 private struct HomeCard<Content: View>: View {
     var onTap: () -> Void
     @ViewBuilder var content: Content

@@ -366,7 +366,38 @@ const VARIANTS: [&str; 13] = [
     "driverLicense",
 ];
 
+/// Which of the two stored JSON shapes a payload uses.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PayloadShape {
+    /// `{"login":{"_0":{…}}}`, the canonical shape.
+    Ios,
+    /// `{"type":"login", …}`.
+    Android,
+}
+
+impl PayloadShape {
+    /// `None` when the bytes are neither shape.
+    pub fn detect(bytes: &[u8]) -> Option<Self> {
+        let Ok(Value::Object(map)) = serde_json::from_slice::<Value>(bytes) else { return None };
+        if map.len() == 1 {
+            let (variant, inner) = map.iter().next().expect("one entry");
+            if VARIANTS.contains(&variant.as_str()) && inner.get("_0").is_some() {
+                return Some(PayloadShape::Ios);
+            }
+        }
+        matches!(map.get("type"), Some(Value::String(_))).then_some(PayloadShape::Android)
+    }
+}
+
 impl VaultPayload {
+    /// The payload in `shape`.
+    pub fn to_json(&self, shape: PayloadShape) -> Vec<u8> {
+        match shape {
+            PayloadShape::Ios => self.to_stored_json(),
+            PayloadShape::Android => self.to_android_json(),
+        }
+    }
+
     pub fn variant(&self) -> &'static str {
         match self {
             VaultPayload::Login(_) => "login",

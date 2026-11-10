@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.PersonRemove
 import androidx.compose.material3.HorizontalDivider
@@ -47,6 +48,7 @@ fun SettingsHomeContent(
     onChangePassword: () -> Unit,
     onDevices: () -> Unit,
     onLan: () -> Unit,
+    onBackups: () -> Unit,
     onSubscription: () -> Unit,
     vm: SettingsViewModel,
 ) {
@@ -89,6 +91,13 @@ fun SettingsHomeContent(
 
         SectionGap()
         SettingsSection(stringResource(R.string.settings_dataaccount)) {
+            NavChevronRow(
+                icon = Icons.Outlined.Backup,
+                title = stringResource(R.string.backup_title),
+                subtitle = stringResource(R.string.backup_subtitle),
+                onClick = onBackups,
+            )
+            HorizontalDivider(color = c.stroke)
             CsvImportExportRows(onStatus = { statusMessage = it })
             HorizontalDivider(color = c.stroke)
             NavChevronRow(

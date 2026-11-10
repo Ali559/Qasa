@@ -9,10 +9,12 @@ pub mod license;
 pub mod secrets;
 
 use std::collections::HashMap;
+use std::time::Duration;
 
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use base64::Engine;
 use sha1::{Digest, Sha1};
 
 use api::{ApiClient, ApiError, ApiResult};
@@ -26,6 +28,78 @@ pub fn now_secs() -> i64 {
 /// iOS uses lowercase UUIDs for the account id and fingerprint.
 fn new_lower_uuid() -> String {
     uuid::Uuid::new_v4().to_string()
+}
+
+const B64: base64::engine::GeneralPurpose = base64::engine::general_purpose::STANDARD;
+
+/// The restore-key `PUT` must never hold a backup up for long.
+const RESTORE_KEY_TIMEOUT: Duration = Duration::from_secs(5);
+
+fn decode_restore_key(b64: &str) -> Option<[u8; qasa_backup::RESTORE_KEY_LEN]> {
+    B64.decode(b64).ok()?.try_into().ok()
+}
+
+/// Whether the next backup makes a new restore key: only with a license token (the `PUT`
+/// needs one), and only when there is no key yet or the current one is already in a
+/// written backup file. A key whose file was never written is reused, so the file on disk
+/// always holds the current or the previous hash the server keeps.
+pub fn should_rotate_restore_key(has_token: bool, has_key: bool, written: bool) -> bool {
+    has_token && (!has_key || written)
+}
+
+/// `PUT /v1/devices/me/restore-key` with base64(SHA-256(key)). Short timeout; the caller
+/// only logs a failure.
+pub async fn put_restore_key_hash(api: &ApiClient, token: &str, key: &[u8; qasa_backup::RESTORE_KEY_LEN]) -> ApiResult<()> {
+    let body = json!({ "key_hash": B64.encode(qasa_backup::restore_key_hash(key)) });
+    api.send_raw_within(Method::PUT, "/v1/devices/me/restore-key", Some(token), Some(&body), Some(RESTORE_KEY_TIMEOUT)).await?;
+    Ok(())
+}
+
+/// The `POST /v1/devices/register` body. A restored backup's key goes along as
+/// `restore_key`; `replace_device` asks the server to unlink the device that made it.
+fn register_body(
+    account_id: &str,
+    fingerprint: &str,
+    device_name: &str,
+    platform: &str,
+    location: Option<&str>,
+    restore_key: Option<&[u8]>,
+    replace_device: bool,
+) -> Value {
+    let mut body = json!({
+        "account_id": account_id,
+        "device_fingerprint": fingerprint,
+        "device_name": device_name,
+        "platform": platform,
+        "location": location,
+    });
+    if let Some(key) = restore_key {
+        body["restore_key"] = json!(B64.encode(key));
+        if replace_device {
+            body["replace_device"] = json!(true);
+        }
+    }
+    body
+}
+
+/// What a device-limit 403 says about the restore key: its status (`unknown`,
+/// `not_enough`, `replaceable`, or `None` when none was sent) and, when replaceable, the
+/// old device's name. Both fields are taken out of the body the UI keeps.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct RestoreKeyLimit {
+    pub status: Option<String>,
+    pub replaceable_device_name: Option<String>,
+}
+
+fn take_restore_key_limit(body: &mut Value) -> RestoreKeyLimit {
+    let Some(map) = body.as_object_mut() else { return RestoreKeyLimit::default() };
+    let status = map.remove("restore_key").and_then(|v| v.as_str().map(str::to_string));
+    let device = map.remove("replaceable_device");
+    let replaceable_device_name = match status.as_deref() {
+        Some("replaceable") => device.as_ref().and_then(|d| d.get("device_name")).and_then(Value::as_str).map(str::to_string),
+        _ => None,
+    };
+    RestoreKeyLimit { status, replaceable_device_name }
 }
 
 /// What the UI shows about the account: plan, device slots, and why registration failed.
@@ -42,6 +116,13 @@ pub struct AccountStatus {
     /// Set when the last registration hit the device limit: the server's body, with the
     /// device list the UI uses to offer an unlink.
     pub device_limit_error: Option<Value>,
+    /// With a device-limit error after restoring a backup: `unknown`, `not_enough` or
+    /// `replaceable` (the server's `restore_key`), else `None`.
+    pub restore_key_status: Option<String>,
+    /// When replaceable: the name of the device that made the backup.
+    pub replaceable_device_name: Option<String>,
+    /// Set once, right after a registration replaced the backup's device: its name.
+    pub replaced_device_name: Option<String>,
     /// The last bootstrap could not reach the server.
     pub offline: bool,
     /// A release build without a valid https API address.
@@ -54,6 +135,14 @@ struct RegisterResponse {
     license_token: String,
     devices_used: u32,
     device_limit: u32,
+    #[serde(default)]
+    replaced_device: Option<ReplacedDevice>,
+}
+
+#[derive(Deserialize)]
+struct ReplacedDevice {
+    #[serde(default)]
+    device_name: String,
 }
 
 #[derive(Deserialize)]
@@ -75,6 +164,9 @@ pub struct Account {
     device_limit: u32,
     device_id: Option<String>,
     limit_error: Option<Value>,
+    restore_limit: RestoreKeyLimit,
+    /// The replaced device's name, until a status carries it to the UI once.
+    replaced_notice: Option<String>,
     offline: bool,
     misconfigured: bool,
     /// Pwned Passwords ranges by SHA-1 prefix, for this unlocked session.
@@ -91,6 +183,8 @@ impl Account {
             device_limit: 1,
             device_id: None,
             limit_error: None,
+            restore_limit: RestoreKeyLimit::default(),
+            replaced_notice: None,
             offline: false,
             misconfigured: false,
             breach_ranges: HashMap::new(),
@@ -150,9 +244,75 @@ impl Account {
             devices_used: self.devices_used,
             license: self.license.clone(),
             device_limit_error: self.limit_error.clone(),
+            restore_key_status: self.restore_limit.status.clone(),
+            replaceable_device_name: self.restore_limit.replaceable_device_name.clone(),
+            replaced_device_name: self.replaced_notice.clone(),
             offline: self.offline,
             misconfigured: self.misconfigured,
         }
+    }
+
+    /// The status, handing the "device replaced" notice to the UI only once.
+    pub fn take_status(&mut self) -> AccountStatus {
+        let status = self.status();
+        self.replaced_notice = None;
+        status
+    }
+
+    // MARK: backup restore key
+
+    /// This device's current restore key, whose hash the server confirmed.
+    pub fn restore_key(&self) -> Option<[u8; qasa_backup::RESTORE_KEY_LEN]> {
+        decode_restore_key(&self.secrets.get(Secret::RestoreKey)?)
+    }
+
+    fn restore_key_written(&self) -> bool {
+        self.secrets.get(Secret::RestoreKeyWritten).as_deref() == Some("1")
+    }
+
+    /// The license token to send a new key's hash with, when the next backup should
+    /// rotate the key ([`should_rotate_restore_key`]); `None` to keep the current one.
+    pub fn restore_key_rotation(&self) -> Option<String> {
+        let token = self.token()?;
+        should_rotate_restore_key(true, self.restore_key().is_some(), self.restore_key_written()).then_some(token)
+    }
+
+    /// The server took `key`'s hash: it becomes the current key, not yet in a file.
+    pub fn confirm_restore_key(&self, key: &[u8; qasa_backup::RESTORE_KEY_LEN]) {
+        self.secrets.set(Secret::RestoreKey, Some(&B64.encode(key)));
+        self.secrets.set(Secret::RestoreKeyWritten, None);
+    }
+
+    /// A backup file holding `key` was written (ignored if the key changed meanwhile).
+    pub fn mark_restore_key_written(&self, key: &[u8; qasa_backup::RESTORE_KEY_LEN]) {
+        if self.restore_key().as_ref() == Some(key) {
+            self.secrets.set(Secret::RestoreKeyWritten, Some("1"));
+        }
+    }
+
+    /// The key of a backup this device just adopted, for the registration that follows.
+    pub fn set_pending_restore_key(&self, key: &[u8]) {
+        if key.len() == qasa_backup::RESTORE_KEY_LEN {
+            self.secrets.set(Secret::PendingRestoreKey, Some(&B64.encode(key)));
+        }
+    }
+
+    fn pending_restore_key(&self) -> Option<[u8; qasa_backup::RESTORE_KEY_LEN]> {
+        decode_restore_key(&self.secrets.get(Secret::PendingRestoreKey)?)
+    }
+
+    #[cfg(test)]
+    pub fn pending_restore_key_for_tests(&self) -> Option<[u8; qasa_backup::RESTORE_KEY_LEN]> {
+        self.pending_restore_key()
+    }
+
+    /// Local vault reset: the restore secrets go with the vault.
+    pub fn clear_restore_keys(&mut self) {
+        for secret in Secret::RESTORE {
+            self.secrets.set(secret, None);
+        }
+        self.restore_limit = RestoreKeyLimit::default();
+        self.replaced_notice = None;
     }
 
     /// Creates the account id and device fingerprint the first time (iOS does this when
@@ -184,6 +344,8 @@ impl Account {
         self.license = None;
         self.device_id = None;
         self.limit_error = None;
+        self.restore_limit = RestoreKeyLimit::default();
+        self.replaced_notice = None;
         self.devices_used = 0;
         self.breach_ranges.clear();
     }
@@ -216,18 +378,23 @@ impl Account {
         self.verifying_key().is_some()
     }
 
-    /// `POST /v1/devices/register`. A device-limit answer is kept for the UI.
-    pub async fn register(&mut self, device_name: &str, platform: &str, locale_region: Option<&str>) {
+    /// `POST /v1/devices/register`. A device-limit answer is kept for the UI. A restored
+    /// backup's key goes along until a registration succeeds; with `replace_device` the
+    /// server unlinks the device that made that backup.
+    pub async fn register(&mut self, device_name: &str, platform: &str, locale_region: Option<&str>, replace_device: bool) -> ApiResult<()> {
         let (Some(account_id), Some(fingerprint)) = (self.account_id(), self.secrets.get(Secret::DeviceFingerprint)) else {
-            return;
+            return Err(ApiError::Decode);
         };
-        let body = json!({
-            "account_id": account_id,
-            "device_fingerprint": fingerprint,
-            "device_name": device_name,
-            "platform": platform,
-            "location": locale_region,
-        });
+        let pending = self.pending_restore_key();
+        let body = register_body(
+            &account_id,
+            &fingerprint,
+            device_name,
+            platform,
+            locale_region,
+            pending.as_ref().map(|k| k.as_slice()),
+            replace_device,
+        );
         let result: ApiResult<RegisterResponse> = self.api.send(Method::POST, "/v1/devices/register", None, Some(&body)).await;
         self.note(&result);
         match result {
@@ -237,15 +404,37 @@ impl Account {
                 self.device_limit = r.device_limit;
                 self.device_id = Some(r.device_id);
                 self.limit_error = None;
+                self.restore_limit = RestoreKeyLimit::default();
+                self.secrets.set(Secret::PendingRestoreKey, None);
+                if let Some(replaced) = r.replaced_device {
+                    self.replaced_notice = Some(replaced.device_name);
+                }
+                Ok(())
             }
-            Err(ApiError::DeviceLimit { body }) => {
+            Err(ApiError::DeviceLimit { mut body }) => {
                 self.device_limit = body.get("device_limit").and_then(Value::as_u64).unwrap_or(1) as u32;
                 self.devices_used = body.get("devices_used").and_then(Value::as_u64).unwrap_or(self.device_limit as u64) as u32;
-                self.limit_error = Some(body);
+                self.restore_limit = take_restore_key_limit(&mut body);
+                self.limit_error = Some(body.clone());
+                Err(ApiError::DeviceLimit { body })
             }
             // Offline or a server error: the vault keeps working; the next unlock retries.
-            Err(_) => {}
+            Err(e) => Err(e),
         }
+    }
+
+    /// Device limit → "Unlink and continue": register again with the restored backup's
+    /// key and `replace_device`, then carry on like any successful registration.
+    pub async fn replace_device(&mut self, device_name: &str, platform: &str, region: Option<&str>, locale: &str) -> ApiResult<AccountStatus> {
+        if self.pending_restore_key().is_none() {
+            return Err(ApiError::Decode);
+        }
+        self.register(device_name, platform, region, true).await?;
+        if self.token().is_some() {
+            self.refresh_license().await;
+        }
+        self.sync_locale(locale).await;
+        Ok(self.take_status())
     }
 
     /// `GET /v1/license`, retrying once after re-fetching the key (a rotated key).
@@ -283,12 +472,12 @@ impl Account {
         self.offline = false;
         self.misconfigured = false;
         self.refresh_verifying_key().await;
-        self.register(device_name, platform, region).await;
+        let _ = self.register(device_name, platform, region, false).await;
         if self.token().is_some() {
             self.refresh_license().await;
         }
         self.sync_locale(locale).await;
-        self.status()
+        self.take_status()
     }
 
     /// An authorized call for the account screens. 401 means the token is dead (unlinked,
@@ -475,6 +664,99 @@ mod tests {
         a.call(Method::DELETE, "/v1/account", Some(&json!({ "confirm_account_id": account_id }))).await.unwrap();
         assert!(matches!(a.call(Method::GET, "/v1/devices", None).await, Err(ApiError::Unauthorized)));
         assert!(!a.status().is_premium, "a dead token must drop Premium");
+    }
+
+    #[test]
+    fn restore_key_rotation_rules() {
+        // No key → rotate; written → rotate; not yet written → reuse; never without a token.
+        assert!(should_rotate_restore_key(true, false, false));
+        assert!(should_rotate_restore_key(true, true, true));
+        assert!(!should_rotate_restore_key(true, true, false));
+        assert!(!should_rotate_restore_key(false, false, false));
+        assert!(!should_rotate_restore_key(false, true, true));
+
+        let a = account();
+        assert_eq!(a.restore_key_rotation(), None, "no license token: no rotation");
+        a.secrets.set(Secret::LicenseToken, Some("tok"));
+        assert_eq!(a.restore_key_rotation().as_deref(), Some("tok"), "no key yet");
+        let key = [7u8; 32];
+        a.confirm_restore_key(&key);
+        assert_eq!(a.restore_key(), Some(key));
+        assert_eq!(a.restore_key_rotation(), None, "the key isn't in a file yet: reuse it");
+        a.mark_restore_key_written(&[8u8; 32]);
+        assert_eq!(a.restore_key_rotation(), None, "another key's file doesn't count");
+        a.mark_restore_key_written(&key);
+        assert_eq!(a.restore_key_rotation().as_deref(), Some("tok"), "written: rotate");
+        a.confirm_restore_key(&[9u8; 32]);
+        assert_eq!(a.restore_key(), Some([9u8; 32]));
+        assert!(!a.restore_key_written());
+    }
+
+    /// A failed `PUT` (here: nothing listening) is an error the caller keeps the old key on.
+    #[tokio::test]
+    async fn restore_key_put_failure_is_reported() {
+        let api = ApiClient::new("http://127.0.0.1:9".into());
+        assert!(matches!(put_restore_key_hash(&api, "tok", &[1u8; 32]).await, Err(ApiError::Offline)));
+    }
+
+    #[test]
+    fn register_body_with_and_without_a_restore_key() {
+        let plain = register_body("acc", "fp", "Mac", "macos", None, None, true);
+        assert!(plain.get("restore_key").is_none());
+        assert!(plain.get("replace_device").is_none());
+        assert_eq!(plain["account_id"], "acc");
+
+        let key = [3u8; 32];
+        let with_key = register_body("acc", "fp", "Mac", "macos", None, Some(&key), false);
+        assert_eq!(B64.decode(with_key["restore_key"].as_str().unwrap()).unwrap(), key);
+        assert!(with_key.get("replace_device").is_none());
+        let replace = register_body("acc", "fp", "Mac", "macos", None, Some(&key), true);
+        assert_eq!(replace["replace_device"], true);
+    }
+
+    #[test]
+    fn device_limit_restore_key_fields() {
+        let mut body = json!({
+            "error": "device_limit_exceeded", "device_limit": 1, "devices_used": 1, "devices": [],
+            "restore_key": "replaceable",
+            "replaceable_device": { "id": "d1", "device_name": "Old Mac", "platform": "macos" },
+        });
+        let limit = take_restore_key_limit(&mut body);
+        assert_eq!(limit.status.as_deref(), Some("replaceable"));
+        assert_eq!(limit.replaceable_device_name.as_deref(), Some("Old Mac"));
+        assert!(body.get("replaceable_device").is_none() && body.get("restore_key").is_none());
+        assert_eq!(body["device_limit"], 1);
+
+        for status in ["unknown", "not_enough"] {
+            let mut body = json!({ "restore_key": status });
+            assert_eq!(take_restore_key_limit(&mut body), RestoreKeyLimit { status: Some(status.into()), replaceable_device_name: None });
+        }
+        let mut none = json!({ "restore_key": null, "device_limit": 1 });
+        assert_eq!(take_restore_key_limit(&mut none), RestoreKeyLimit::default());
+        assert_eq!(take_restore_key_limit(&mut json!({})), RestoreKeyLimit::default());
+    }
+
+    #[test]
+    fn resets_clear_the_restore_secrets() {
+        let mut a = account();
+        a.ensure_identity();
+        a.confirm_restore_key(&[1u8; 32]);
+        a.mark_restore_key_written(&[1u8; 32]);
+        a.set_pending_restore_key(&[2u8; 32]);
+        a.set_pending_restore_key(&[2u8; 5]);
+        assert_eq!(a.pending_restore_key(), Some([2u8; 32]), "a short key is ignored");
+        a.clear_restore_keys();
+        for secret in Secret::RESTORE {
+            assert!(a.secrets.get(secret).is_none(), "{secret:?}");
+        }
+        assert!(a.account_id().is_some(), "a vault reset keeps the account");
+
+        a.confirm_restore_key(&[1u8; 32]);
+        a.set_pending_restore_key(&[2u8; 32]);
+        a.clear_identity();
+        for secret in Secret::RESTORE {
+            assert!(a.secrets.get(secret).is_none(), "{secret:?}");
+        }
     }
 
     #[test]

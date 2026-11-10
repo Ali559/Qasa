@@ -1,0 +1,21 @@
+[package]
+name = "qasa-backup"
+version = "0.1.0"
+description = "Qasa encrypted vault backup files: one self-contained file per device, sealed with a key derived from the master password."
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish.workspace = true
+
+[dependencies]
+aes-gcm = "0.10"
+base64 = "0.22"
+hkdf = "0.12"
+qasa-sync = { path = "../qasa-sync" }
+qasa-vault = { path = "../qasa-vault" }
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+zeroize = "1"

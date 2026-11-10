@@ -15,6 +15,7 @@ mod kdf;
 pub mod payload;
 mod search;
 pub mod totp;
+pub mod validate;
 
 pub use aead::{decrypt, encrypt, NONCE_LEN, TAG_LEN};
 pub use error::VaultError;

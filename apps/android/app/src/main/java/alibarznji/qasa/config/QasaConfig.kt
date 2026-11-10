@@ -26,6 +26,7 @@ object QasaConfig {
     val devicesLinkCheckUrl get() = "$apiBaseUrl/v1/devices/link-check"
     val devicesUrl get() = "$apiBaseUrl/v1/devices"
     val devicesOthersUrl get() = "$apiBaseUrl/v1/devices/others"
+    val restoreKeyUrl get() = "$apiBaseUrl/v1/devices/me/restore-key"
     /** `DELETE` with `{"confirm_account_id": …}`: permanently deletes the caller's account. */
     val accountUrl get() = "$apiBaseUrl/v1/account"
     val licenseRefreshUrl get() = "$apiBaseUrl/v1/license"

@@ -16,7 +16,7 @@ import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { isCommandError, type BiometricStatus } from '@/vault/types'
 
-const emit = defineEmits<{ created: []; pair: [] }>()
+const emit = defineEmits<{ created: []; pair: []; restore: [] }>()
 const t = useT()
 
 const password = ref('')
@@ -77,6 +77,10 @@ async function create() {
         <h1 class="title">{{ t('auth.create.title') }}</h1>
         <p class="subtitle">{{ t('auth.create.subtitle') }}</p>
         <button type="button" class="pair" @click="emit('pair')">{{ t('auth.create.pairExisting') }}</button>
+        <button type="button" class="pair restore" @click="emit('restore')">
+          <span>{{ t('backup.restore') }}</span>
+          <span class="pair-subtitle">{{ t('backup.restoreSubtitle') }}</span>
+        </button>
       </div>
 
       <div class="group">
@@ -185,6 +189,21 @@ async function create() {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.restore {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 0;
+  text-align: start;
+}
+
+.pair-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .group {

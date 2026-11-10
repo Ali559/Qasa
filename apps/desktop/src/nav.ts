@@ -18,6 +18,7 @@ export type AppPage =
   | 'linkedDevices'
   | 'wifiSync'
   | 'browserExtension'
+  | 'backups'
 
 export const nav = reactive({
   tab: 'home' as ShellTab,

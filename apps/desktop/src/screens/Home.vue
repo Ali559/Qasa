@@ -3,11 +3,13 @@
 // the health bar card, the VPN card and the breached-passwords card. The page wash turns
 // warm when nothing needs attention and cool when something does. On desktop the VPN card
 // points to the phone (no VPN in v1), and the notifications bell arrives with the inbox.
-import { Bell, CheckCircle2, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
+import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import { account } from '@/account/store'
+import { backupApi } from '@/backup/api'
+import { backup, refreshBackup, setBackupStatus } from '@/backup/store'
 import { selectTab, openPage } from '@/nav'
 import { useT } from '@/prefs'
 import { session } from '@/vault/session'
@@ -33,7 +35,18 @@ async function refresh() {
 }
 
 onMounted(refresh)
+onMounted(refreshBackup)
 watch(() => session.items, refresh)
+// The reminder depends on the item count (an empty vault isn't reminded).
+watch(() => session.items.length, refreshBackup)
+
+async function snoozeBackupReminder() {
+  try {
+    setBackupStatus(await backupApi.snoozeReminder())
+  } catch (e) {
+    console.error('Could not dismiss the backup reminder', e)
+  }
+}
 watch(() => account.status?.isPremium, refresh)
 
 const premium = computed(() => account.status?.isPremium ?? false)
@@ -105,6 +118,21 @@ const health = computed(() => {
           <PrimaryButton :title="t('home.addfirst')" @click="selectTab('passwords')" />
         </div>
       </section>
+
+      <!-- Backup reminder: the vault is only on this computer (spec: backups §7). -->
+      <div v-if="backup.status?.remind" class="home-card static" role="region" :aria-label="t('backup.reminder.title')">
+        <div class="card-row">
+          <span class="tile"><DatabaseBackup :size="18" /></span>
+          <span class="card-text">
+            <span class="card-title">{{ t('backup.reminder.title') }}</span>
+            <span class="card-line">{{ t('backup.reminder.body') }}</span>
+          </span>
+        </div>
+        <div class="card-actions">
+          <button type="button" class="card-action primary" @click="openPage('backups')">{{ t('backup.reminder.action') }}</button>
+          <button type="button" class="card-action" @click="snoozeBackupReminder">{{ t('backup.reminder.dismiss') }}</button>
+        </div>
+      </div>
 
       <button v-if="status !== 'empty'" type="button" class="home-card" @click="openPage('passwordHealth')">
         <div class="card-row">
@@ -337,6 +365,29 @@ const health = computed(() => {
 
 .spacer {
   flex: 1;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-inline-start: 52px;
+}
+
+.card-action {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--card-muted);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card-action.primary {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .tile {

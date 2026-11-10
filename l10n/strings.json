@@ -1475,9 +1475,9 @@
     "ckb": "دوایین نوێکردنەوە: %@"
   },
   "legal.privacyBody": {
-    "en": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy",
-    "ar": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩",
-    "ckb": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
+    "en": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nBackups are encrypted files you save where you choose, such as iCloud Drive or Google Drive. They go there straight from your device, never through our server, and open only with your main password. You can also export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy",
+    "ar": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nالنسخ الاحتياطية ملفات مشفّرة تحفظها حيث تختار، مثل ⁨iCloud Drive⁩ أو ⁨Google Drive⁩. تذهب إليه مباشرة من جهازك، ولا تمر أبدًا عبر خادمنا، ولا تُفتح إلا بكلمة مرورك الرئيسية. ويمكنك أيضًا تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩",
+    "ckb": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nباکئەپەکان فایلی شفرەکراون کە لەو شوێنەی هەڵیدەبژێریت پاشەکەوتیان دەکەیت، بۆ نموونە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩. ڕاستەوخۆ لە ئامێرەکەتەوە دەچنە ئەوێ، هەرگیز بە سێرڤەرەکەماندا تێناپەڕن، و تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێنەوە. هەروەها هەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
   },
   "legal.termsBody": {
     "en": "These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.",
@@ -3647,5 +3647,395 @@
     "en": "This removes your account, linked devices and inbox from Qasa's servers and erases the vault on this phone. Payments are kept as financial records. This can't be undone.",
     "ar": "يزيل هذا حسابك والأجهزة المرتبطة وصندوق الوارد من خوادم قاصة، ويمسح الخزنة على هذا الهاتف. تبقى المدفوعات كسجلات مالية. لا يمكن التراجع عن ذلك.",
     "ckb": "ئەمە هەژمارەکەت، ئامێرە بەستراوەکان و سندوقی نامەکانت لە ڕاژەکارەکانی قاسە دەسڕێتەوە و گەنجینەی سەر ئەم مۆبایلە دەسڕێتەوە. پارەدانەکان وەک تۆماری دارایی دەمێننەوە. ناگەڕێتەوە."
+  },
+  "backup.title": {
+    "en": "Backups",
+    "ar": "النسخ الاحتياطية",
+    "ckb": "باکئەپەکان"
+  },
+  "backup.subtitle": {
+    "en": "Keep an encrypted copy of your vault",
+    "ar": "احتفظ بنسخة مشفّرة من خزنتك",
+    "ckb": "کۆپییەکی شفرەکراوی کۆگاکەت هەڵبگرە"
+  },
+  "backup.intro": {
+    "en": "A backup is one encrypted file with everything in your vault. Keep it off this phone, for example in iCloud Drive or Google Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password.",
+    "ar": "النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الهاتف، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية.",
+    "ckb": "باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم مۆبایلە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩، تا ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە."
+  },
+  "backup.backUpNow": {
+    "en": "Back up now",
+    "ar": "نسخ احتياطي الآن",
+    "ckb": "ئێستا باکئەپ بکە"
+  },
+  "backup.backingUp": {
+    "en": "Backing up…",
+    "ar": "جارٍ النسخ الاحتياطي…",
+    "ckb": "باکئەپ دەکرێت…"
+  },
+  "backup.lastBackupFmt": {
+    "en": "Last backup: %@",
+    "ar": "آخر نسخة احتياطية: %@",
+    "ckb": "دوایین باکئەپ: %@"
+  },
+  "backup.never": {
+    "en": "No backup yet",
+    "ar": "لا توجد نسخة احتياطية بعد",
+    "ckb": "هێشتا باکئەپ نییە"
+  },
+  "backup.done": {
+    "en": "Backup saved",
+    "ar": "تم حفظ النسخة الاحتياطية",
+    "ckb": "باکئەپ پاشەکەوت کرا"
+  },
+  "backup.failed": {
+    "en": "Couldn't save the backup. Choose the location again, then try again.",
+    "ar": "تعذّر حفظ النسخة الاحتياطية. اختر الموقع مرة أخرى ثم أعد المحاولة.",
+    "ckb": "نەتوانرا باکئەپ پاشەکەوت بکرێت. دووبارە شوێنەکە هەڵبژێرە، پاشان هەوڵ بدەرەوە."
+  },
+  "backup.locationTitle": {
+    "en": "Backup location",
+    "ar": "موقع النسخة الاحتياطية",
+    "ckb": "شوێنی باکئەپ"
+  },
+  "backup.locationNone": {
+    "en": "Not chosen",
+    "ar": "لم يُحدَّد",
+    "ckb": "هەڵنەبژێردراوە"
+  },
+  "backup.chooseLocation": {
+    "en": "Choose location",
+    "ar": "اختيار الموقع",
+    "ckb": "هەڵبژاردنی شوێن"
+  },
+  "backup.changeLocation": {
+    "en": "Change location",
+    "ar": "تغيير الموقع",
+    "ckb": "گۆڕینی شوێن"
+  },
+  "backup.chooseLocationFirst": {
+    "en": "Choose where to keep the backup first.",
+    "ar": "اختر أولًا مكان حفظ النسخة الاحتياطية.",
+    "ckb": "سەرەتا هەڵبژێرە باکئەپەکە لە کوێ هەڵبگیرێت."
+  },
+  "backup.locationHelp": {
+    "en": "Each new backup replaces this device's previous one, automatic or manual.",
+    "ar": "كل نسخة احتياطية جديدة تحل محل النسخة السابقة من هذا الجهاز، تلقائية كانت أو يدوية.",
+    "ckb": "هەر باکئەپێکی نوێ جێگەی باکئەپی پێشووی ئەم ئامێرە دەگرێتەوە، خۆکار بێت یان دەستی."
+  },
+  "backup.auto": {
+    "en": "Automatic backups",
+    "ar": "النسخ الاحتياطي التلقائي",
+    "ckb": "باکئەپی خۆکار"
+  },
+  "backup.autoHelp": {
+    "en": "Runs once it's due, while Qasa is open and unlocked.",
+    "ar": "يعمل متى حان موعده، عندما تكون قاصة مفتوحة وغير مقفلة.",
+    "ckb": "کاتێک کاتی هات ئەنجام دەدرێت، لە کاتێکدا قاسە کراوەیە و قفڵ نییە."
+  },
+  "backup.freq.off": {
+    "en": "Off",
+    "ar": "إيقاف",
+    "ckb": "کوژاوە"
+  },
+  "backup.freq.daily": {
+    "en": "Daily",
+    "ar": "يوميًا",
+    "ckb": "ڕۆژانە"
+  },
+  "backup.freq.weekly": {
+    "en": "Weekly",
+    "ar": "أسبوعيًا",
+    "ckb": "هەفتانە"
+  },
+  "backup.freq.monthly": {
+    "en": "Monthly",
+    "ar": "شهريًا",
+    "ckb": "مانگانە"
+  },
+  "backup.restore": {
+    "en": "Restore from a backup",
+    "ar": "الاستعادة من نسخة احتياطية",
+    "ckb": "گەڕاندنەوە لە باکئەپێک"
+  },
+  "backup.restoreHelp": {
+    "en": "Adds what's in a backup to this vault. Nothing newer on this device is replaced.",
+    "ar": "يضيف محتوى النسخة الاحتياطية إلى هذه الخزنة. لا يُستبدل أي شيء أحدث على هذا الجهاز.",
+    "ckb": "ناوەڕۆکی باکئەپەکە بۆ ئەم کۆگایە زیاد دەکات. هیچ شتێکی نوێتر لەسەر ئەم ئامێرە ناگۆڕدرێت."
+  },
+  "backup.restoreSubtitle": {
+    "en": "Bring back your vault from a backup file",
+    "ar": "استعد خزنتك من ملف نسخة احتياطية",
+    "ckb": "کۆگاکەت لە فایلێکی باکئەپ بگەڕێنەوە"
+  },
+  "backup.restore.title": {
+    "en": "Restore backup",
+    "ar": "استعادة نسخة احتياطية",
+    "ckb": "گەڕاندنەوەی باکئەپ"
+  },
+  "backup.restore.fromFmt": {
+    "en": "Backup from %1$@, %2$@",
+    "ar": "نسخة احتياطية من %1$@، %2$@",
+    "ckb": "باکئەپ لە %1$@، %2$@"
+  },
+  "backup.restore.passwordPrompt": {
+    "en": "Enter the main password your vault had when this backup was made.",
+    "ar": "أدخل كلمة المرور الرئيسية التي كانت لخزنتك عند إنشاء هذه النسخة الاحتياطية.",
+    "ckb": "ئەو وشە نهێنییە سەرەکییە بنووسە کە کۆگاکەت لە کاتی دروستکردنی ئەم باکئەپەدا هەیبوو."
+  },
+  "backup.restore.button": {
+    "en": "Restore",
+    "ar": "استعادة",
+    "ckb": "گەڕاندنەوە"
+  },
+  "backup.restore.working": {
+    "en": "Restoring…",
+    "ar": "جارٍ الاستعادة…",
+    "ckb": "دەگەڕێندرێتەوە…"
+  },
+  "backup.restore.doneFmt": {
+    "en": "Backup restored: %lld item(s).",
+    "ar": "تمت استعادة النسخة الاحتياطية: %lld عنصر.",
+    "ckb": "باکئەپ گەڕێندرایەوە: %lld بابەت."
+  },
+  "backup.restore.mergedFmt": {
+    "en": "Backup restored. %lld item(s) or folder(s) brought back or updated.",
+    "ar": "تمت استعادة النسخة الاحتياطية. أُعيد أو حُدِّث %lld عنصر أو مجلد.",
+    "ckb": "باکئەپ گەڕێندرایەوە. %lld بابەت یان بوخچە گەڕانەوە یان نوێ کرانەوە."
+  },
+  "backup.restore.upToDate": {
+    "en": "This vault already has everything in the backup.",
+    "ar": "هذه الخزنة تحتوي بالفعل على كل ما في النسخة الاحتياطية.",
+    "ckb": "ئەم کۆگایە پێشتر هەموو ناوەڕۆکی باکئەپەکەی تێدایە."
+  },
+  "backup.error.notABackup": {
+    "en": "This file isn't a Qasa backup.",
+    "ar": "هذا الملف ليس نسخة احتياطية من قاصة.",
+    "ckb": "ئەم فایلە باکئەپی قاسە نییە."
+  },
+  "backup.error.newerVersion": {
+    "en": "This backup was made by a newer version of Qasa. Update Qasa, then try again.",
+    "ar": "أُنشئت هذه النسخة الاحتياطية بإصدار أحدث من قاصة. حدّث قاصة ثم حاول مرة أخرى.",
+    "ckb": "ئەم باکئەپە بە وەشانێکی نوێتری قاسە دروست کراوە. قاسە نوێ بکەرەوە، پاشان دووبارە هەوڵ بدەرەوە."
+  },
+  "backup.error.wrongPassword": {
+    "en": "That main password doesn't open this backup.",
+    "ar": "كلمة المرور الرئيسية هذه لا تفتح هذه النسخة الاحتياطية.",
+    "ckb": "ئەو وشە نهێنییە سەرەکییە ئەم باکئەپە ناکاتەوە."
+  },
+  "backup.error.differentVault": {
+    "en": "This backup is of a different vault. To restore it, clear this device's local data first, then restore during setup.",
+    "ar": "هذه النسخة الاحتياطية لخزنة مختلفة. لاستعادتها، امسح البيانات المحلية على هذا الجهاز أولًا، ثم استعدها أثناء الإعداد.",
+    "ckb": "ئەم باکئەپە هی کۆگایەکی ترە. بۆ گەڕاندنەوەی، سەرەتا داتای ناوخۆیی ئەم ئامێرە بسڕەوە، پاشان لە کاتی ڕێکخستندا بیگەڕێنەوە."
+  },
+  "backup.error.noVault": {
+    "en": "There's no vault on this device to back up.",
+    "ar": "لا توجد خزنة على هذا الجهاز لنسخها احتياطيًا.",
+    "ckb": "هیچ کۆگایەک لەسەر ئەم ئامێرە نییە بۆ باکئەپکردن."
+  },
+  "backup.error.unreadable": {
+    "en": "Couldn't read that file.",
+    "ar": "تعذّرت قراءة ذلك الملف.",
+    "ckb": "نەتوانرا ئەو فایلە بخوێندرێتەوە."
+  },
+  "backup.reminder.title": {
+    "en": "Back up your vault",
+    "ar": "انسخ خزنتك احتياطيًا",
+    "ckb": "باکئەپی کۆگاکەت بکە"
+  },
+  "backup.reminder.body": {
+    "en": "Your vault is only on this phone. If you lose it or delete Qasa, a backup is the only way to get your passwords back.",
+    "ar": "خزنتك موجودة على هذا الهاتف فقط. إذا فقدته أو حذفت قاصة، فالنسخة الاحتياطية هي الطريقة الوحيدة لاستعادة كلمات مرورك.",
+    "ckb": "کۆگاکەت تەنها لەسەر ئەم مۆبایلەیە. ئەگەر ونی بکەیت یان قاسە بسڕیتەوە، باکئەپ تاکە ڕێگەیە بۆ گەڕاندنەوەی وشە نهێنییەکانت."
+  },
+  "backup.reminder.action": {
+    "en": "Set up backups",
+    "ar": "إعداد النسخ الاحتياطي",
+    "ckb": "ڕێکخستنی باکئەپ"
+  },
+  "backup.reminder.dismiss": {
+    "en": "Not now",
+    "ar": "ليس الآن",
+    "ckb": "ئێستا نا"
+  },
+  "backup.replace.title": {
+    "en": "Replace your old device?",
+    "ar": "استبدال جهازك القديم؟",
+    "ckb": "ئامێرە کۆنەکەت بگۆڕیت؟"
+  },
+  "backup.replace.bodyFmt": {
+    "en": "This device restored a backup made on “%1$@”. Unlink “%1$@” and continue here? It will be signed out right away, and your other devices will be told.",
+    "ar": "استعاد هذا الجهاز نسخة احتياطية أُنشئت على «%1$@». هل تريد إلغاء ربط «%1$@» والمتابعة هنا؟ سيُسجَّل خروجه فورًا، وستُبلَّغ أجهزتك الأخرى.",
+    "ckb": "ئەم ئامێرە باکئەپێکی گەڕاندەوە کە لەسەر «%1$@» دروست کرابوو. «%1$@» لاببەیت و لێرە بەردەوام بیت؟ دەستبەجێ دەردەچێت، و ئامێرەکانی ترت ئاگادار دەکرێنەوە."
+  },
+  "backup.replace.button": {
+    "en": "Unlink and continue",
+    "ar": "إلغاء الربط والمتابعة",
+    "ckb": "لابردن و بەردەوامبوون"
+  },
+  "backup.replace.doneFmt": {
+    "en": "“%@” was unlinked. This device has taken its place.",
+    "ar": "تم إلغاء ربط «%@». أخذ هذا الجهاز مكانه.",
+    "ckb": "«%@» لابرا. ئەم ئامێرە جێگەکەی گرتەوە."
+  },
+  "backup.replace.unknown": {
+    "en": "This backup can't free a place for this device. It may be older than that device's latest backup, or that device was unlinked or never went online. Unlink the old device from another device, upgrade to Premium, or contact us.",
+    "ar": "لا يمكن لهذه النسخة الاحتياطية أن تُفرغ مكانًا لهذا الجهاز. قد تكون أقدم من آخر نسخة احتياطية لذلك الجهاز، أو أُلغي ربط ذلك الجهاز أو لم يتصل بالإنترنت قط. ألغِ ربط الجهاز القديم من جهاز آخر، أو رقِّ إلى بريميوم، أو تواصل معنا.",
+    "ckb": "ئەم باکئەپە ناتوانێت شوێن بۆ ئەم ئامێرە بکاتەوە. لەوانەیە لە دوایین باکئەپی ئەو ئامێرە کۆنتر بێت، یان ئەو ئامێرە لابرابێت یان هەرگیز ئۆنلاین نەبووبێت. ئامێرە کۆنەکە لە ئامێرێکی ترەوە لاببە، بڕۆ بۆ پریمیۆم، یان پەیوەندیمان پێوە بکە."
+  },
+  "backup.replace.notEnough": {
+    "en": "Unlinking the old device wouldn't free enough room for your plan. Upgrade to Premium, or unlink more devices from another device.",
+    "ar": "إلغاء ربط الجهاز القديم لن يُفرغ مساحة كافية لخطتك. رقِّ إلى بريميوم، أو ألغِ ربط أجهزة أخرى من جهاز آخر.",
+    "ckb": "لابردنی ئامێرە کۆنەکە شوێنی پێویست بۆ پلانەکەت ناکاتەوە. بڕۆ بۆ پریمیۆم، یان ئامێری زیاتر لە ئامێرێکی ترەوە لاببە."
+  },
+  "backup.replace.failed": {
+    "en": "Couldn't replace the device. Check your connection, then try again.",
+    "ar": "تعذّر استبدال الجهاز. تحقّق من اتصالك ثم حاول مرة أخرى.",
+    "ckb": "نەتوانرا ئامێرەکە بگۆڕدرێت. پەیوەندییەکەت بپشکنە، پاشان هەوڵ بدەرەوە."
+  },
+  "validation.required": {
+    "en": "Required",
+    "ar": "مطلوب",
+    "ckb": "پێویستە"
+  },
+  "validation.tooLong": {
+    "en": "Too long: at most %d characters",
+    "ar": "طويل جدًا: %d حرفًا كحد أقصى",
+    "ckb": "زۆر درێژە: لانی زۆر %d پیت"
+  },
+  "validation.digitsOnly": {
+    "en": "Use digits only",
+    "ar": "استخدم الأرقام فقط",
+    "ckb": "تەنها ژمارە بەکاربهێنە"
+  },
+  "validation.lettersDigitsOnly": {
+    "en": "Use only letters, digits, spaces and dashes",
+    "ar": "استخدم الحروف والأرقام والمسافات والشرطات فقط",
+    "ckb": "تەنها پیت، ژمارە، بۆشایی و هێڵی کورت بەکاربهێنە"
+  },
+  "validation.cardNumberLength": {
+    "en": "This card number has the wrong number of digits",
+    "ar": "عدد أرقام البطاقة غير صحيح",
+    "ckb": "درێژی ژمارەی کارتەکە هەڵەیە"
+  },
+  "validation.cardNumberChecksum": {
+    "en": "This card number isn't valid. Check for typos.",
+    "ar": "رقم البطاقة غير صالح. تحقّق من الأخطاء.",
+    "ckb": "ژمارەی کارتەکە دروست نییە. هەڵەی نووسین بپشکنە."
+  },
+  "validation.securityCodeExact": {
+    "en": "Use %d digits",
+    "ar": "استخدم %d أرقام",
+    "ckb": "%d ژمارە بەکاربهێنە"
+  },
+  "validation.securityCodeRange": {
+    "en": "Use %1$d or %2$d digits",
+    "ar": "استخدم %1$d أو %2$d أرقام",
+    "ckb": "%1$d یان %2$d ژمارە بەکاربهێنە"
+  },
+  "validation.expiryFormat": {
+    "en": "Use MM/YY, e.g. 08/29",
+    "ar": "استخدم الصيغة MM/YY، مثل 08/29",
+    "ckb": "شێوازی MM/YY بەکاربهێنە، وەک 08/29"
+  },
+  "validation.expiryMonth": {
+    "en": "The month must be 01 to 12",
+    "ar": "يجب أن يكون الشهر من 01 إلى 12",
+    "ckb": "مانگ دەبێت لە 01 بۆ 12 بێت"
+  },
+  "validation.yearsAway": {
+    "en": "More than %d years away. Check the year.",
+    "ar": "بعد أكثر من %d سنة. تحقّق من السنة.",
+    "ckb": "زیاتر لە %d ساڵ دوورە. ساڵەکە بپشکنە."
+  },
+  "validation.dateInvalid": {
+    "en": "Not a real date",
+    "ar": "ليس تاريخًا صحيحًا",
+    "ckb": "بەروارێکی ڕاست نییە"
+  },
+  "validation.dateInFuture": {
+    "en": "Can't be in the future",
+    "ar": "لا يمكن أن يكون في المستقبل",
+    "ckb": "ناتوانێت لە داهاتوودا بێت"
+  },
+  "validation.dateTooOld": {
+    "en": "Too far in the past. Check the year.",
+    "ar": "قديم جدًا. تحقّق من السنة.",
+    "ckb": "زۆر کۆنە. ساڵەکە بپشکنە."
+  },
+  "validation.dateBeforeIssue": {
+    "en": "Must be after the issue date",
+    "ar": "يجب أن يكون بعد تاريخ الإصدار",
+    "ckb": "دەبێت دوای بەرواری دەرچوون بێت"
+  },
+  "validation.emailInvalid": {
+    "en": "Enter an email like name@example.com",
+    "ar": "أدخل بريدًا مثل name@example.com",
+    "ckb": "ئیمەیڵێک وەک name@example.com بنووسە"
+  },
+  "validation.urlInvalid": {
+    "en": "Enter a web address like example.com",
+    "ar": "أدخل عنوانًا مثل example.com",
+    "ckb": "ناونیشانێکی وێب وەک example.com بنووسە"
+  },
+  "validation.phoneLength": {
+    "en": "Use %1$d to %2$d digits after the country code",
+    "ar": "استخدم من %1$d إلى %2$d أرقام بعد رمز الدولة",
+    "ckb": "%1$d بۆ %2$d ژمارە دوای کۆدی وڵات بەکاربهێنە"
+  },
+  "validation.phoneCountryMismatch": {
+    "en": "This number has another country code. Pick the country from the list.",
+    "ar": "هذا الرقم برمز دولة أخرى. اختر الدولة من القائمة.",
+    "ckb": "ئەم ژمارەیە کۆدی وڵاتێکی تری هەیە. وڵاتەکە لە لیستەکە هەڵبژێرە."
+  },
+  "validation.ibanInvalid": {
+    "en": "This IBAN has the wrong length",
+    "ar": "طول رقم IBAN غير صحيح",
+    "ckb": "درێژی IBAN ـەکە هەڵەیە"
+  },
+  "validation.ibanChecksum": {
+    "en": "This IBAN isn't valid. Check for typos.",
+    "ar": "رقم IBAN غير صالح. تحقّق من الأخطاء.",
+    "ckb": "IBAN ـەکە دروست نییە. هەڵەی نووسین بپشکنە."
+  },
+  "validation.routingInvalid": {
+    "en": "Not a valid routing number, sort code or SWIFT/BIC",
+    "ar": "ليس رقم توجيه أو رمز فرع أو SWIFT/BIC صالحًا",
+    "ckb": "ژمارەی ڕێڕەو، کۆدی لق یان SWIFT/BIC دروست نییە"
+  },
+  "validation.countryInvalid": {
+    "en": "Choose a country",
+    "ar": "اختر دولة",
+    "ckb": "وڵاتێک هەڵبژێرە"
+  },
+  "validation.totpInvalid": {
+    "en": "Not a valid 2FA setup key or link",
+    "ar": "ليس مفتاح أو رابط إعداد مصادقة ثنائية صالحًا",
+    "ckb": "کلیل یان بەستەری ڕێکخستنی 2FA دروست نییە"
+  },
+  "validation.fixToSave": {
+    "en": "Fix the highlighted fields to save",
+    "ar": "أصلح الحقول المحددة لتتمكن من الحفظ",
+    "ckb": "خانە دیاریکراوەکان چاک بکە بۆ پاشەکەوتکردن"
+  },
+  "validation.needsAttention": {
+    "en": "Some fields don't match Qasa's checks. Edit the item to fix them.",
+    "ar": "بعض الحقول لا تجتاز فحوصات قاصة. عدّل العنصر لإصلاحها.",
+    "ckb": "هەندێک خانە لە پشکنینەکانی قاسە دەرناچن. بابەتەکە دەستکاری بکە بۆ چاککردنیان."
+  },
+  "validation.importFlaggedFmt": {
+    "en": "Imported items with fields to check: %d",
+    "ar": "عناصر مستوردة فيها حقول تحتاج إلى مراجعة: %d",
+    "ckb": "بابەتی هاوردەکراو کە خانەی پێویست بە پشکنینیان هەیە: %d"
+  },
+  "field.expiryPlaceholder": {
+    "en": "MM/YY",
+    "ar": "شهر/سنة",
+    "ckb": "مانگ/ساڵ"
+  },
+  "field.datePlaceholder": {
+    "en": "YYYY-MM-DD",
+    "ar": "سنة-شهر-يوم",
+    "ckb": "ساڵ-مانگ-ڕۆژ"
   }
 }

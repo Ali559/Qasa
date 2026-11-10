@@ -31,6 +31,7 @@ import alibarznji.qasa.services.AutoLockMonitor
 import alibarznji.qasa.screens.auth.CreateVaultScreen
 import alibarznji.qasa.screens.auth.UnlockScreen
 import alibarznji.qasa.screens.auth.WelcomePreferencesScreen
+import alibarznji.qasa.screens.settings.devices.DeviceReplaceHost
 import alibarznji.qasa.screens.shell.AppShellScreen
 import alibarznji.qasa.theme.ApiMisconfiguredBanner
 import alibarznji.qasa.theme.QasaMotion
@@ -140,6 +141,8 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
                         prefs = vm.prefs,
                         onResult = vm.bootstrap::onNotificationStateMayHaveChanged,
                     )
+                    // A restored backup's device-replace confirmation and its done notice.
+                    DeviceReplaceHost()
                 }
             }
         }

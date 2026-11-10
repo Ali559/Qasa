@@ -33,8 +33,11 @@ todos:
     content: "Email leak alerts parked until there are enough subscribers to pay for a provider (much later). See 'Email leak alerts: parked'"
     status: pending
   - id: account-recovery
-    content: "Account recovery: design later (recovery_email_hash kept until then)"
+    content: "Account recovery: design later (recovery_email_hash kept until then). Backup files (2026-11-10) now bring back the vault and account id; this todo covers the rest"
     status: pending
+  - id: restore-device-slot
+    content: "Restoring a backup on a new phone while the lost phone still holds the account's slot: restore keys let the new device replace the device that made the backup (server done 2026-11-10; clients in progress). See 'Backups and the device limit'"
+    status: completed
   - id: admin-gaps
     content: "Admin: roles, audit log, login rate limit + logout, account detail/block/device unlink, VPN node CRUD, webhooks by order, search + paging, chart series, MRR (server done 2026-11-01)"
     status: completed
@@ -424,7 +427,11 @@ Migration `20261101000003_account_lifecycle.sql` adds `accounts.deleted_at`.
     - **HIBP Pro:** `/breachedaccount/range/{prefix}` takes the first 6 hex characters of the email's **SHA-1**, so the apps must also send that prefix (the server only stores SHA-256). From $379 a month. CC BY 4.0 attribution required. Non-matching range results must not be stored.
     - **Enzoic:** partial **SHA-256** email lookups, which match today's hashes. Enterprise plan after vetting; ask for startup pricing.
   - Rough break-even for HIBP Pro: about 100 Premium subscribers at 5,000 IQD a month, before wallet fees.
-- **Vault backup/sync: decided no (product owner, 2026-11-01).** There will be no cloud backup endpoint. Vault transfer between devices stays LAN-only (section 1).
+- **Vault backup/sync: no server side (product owner, 2026-11-01; backups 2026-11-10).** There will be no cloud backup endpoint, and vault transfer between devices stays LAN-only (section 1). Instead, every client writes an encrypted backup file to a place the user picks (iCloud Drive, Google Drive, a folder, a USB stick), by hand or on a daily, weekly or monthly schedule, one file per device that each backup replaces (ARCHITECTURE.md §9.5, `core/qasa-backup`). The server never sees it.
+- **Backups and the device limit: restore keys (todo `restore-device-slot`, decided 2026-11-10).** A backup carries the account id, so restoring it on a new phone registers that phone with the same account. On Free, or on Premium with every slot taken, the lost phone still held the slot and the new phone, without a license, couldn't unlink it. Each backup now carries a random restore key whose SHA-256 the device sent with `PUT /v1/devices/me/restore-key`; the restoring device sends the key as `restore_key` on register, the 403 reports whether it can replace a device (`replaceable` + `replaceable_device`, `unknown`, `not_enough`), and registering again with `replace_device: true` unlinks exactly that device after a "device replaced" notice to the whole account (migration `20261110000001_device_restore_keys.sql`, router test `a_restore_key_replaces_the_device_that_made_the_backup`, ARCHITECTURE.md §9.5).
+  - Rejected: replacing on the account id alone (anyone who once saw the id could kick the owner's device off, use their Premium or delete the account), and a "restored" flag replacing the least recently seen device (same problem).
+  - Still true: a backup without a key (made offline, or older than its device's latest key) can't replace anything; the user unlinks from another device, upgrades, or asks support.
+  - **Support rule:** never unlink a device because someone knows the account id. Ask them to restore their backup on the new device and use the button.
 - **Recovery: pending, design later (todo `account-recovery`).** There is no account recovery today. Keep `accounts.recovery_email_hash` until the design is done; deletion already clears it. Don't drop it in the section 9 cleanup.
 
 **Client follow-ups:**

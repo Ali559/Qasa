@@ -1387,6 +1387,1084 @@
         }
       }
     },
+    "backup.auto": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic backups"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النسخ الاحتياطي التلقائي"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپی خۆکار"
+          }
+        }
+      }
+    },
+    "backup.autoHelp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runs once it's due, while Qasa is open and unlocked."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يعمل متى حان موعده، عندما تكون قاصة مفتوحة وغير مقفلة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کاتێک کاتی هات ئەنجام دەدرێت، لە کاتێکدا قاسە کراوەیە و قفڵ نییە."
+          }
+        }
+      }
+    },
+    "backup.backUpNow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back up now"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ احتياطي الآن"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێستا باکئەپ بکە"
+          }
+        }
+      }
+    },
+    "backup.backingUp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backing up…"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ النسخ الاحتياطي…"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ دەکرێت…"
+          }
+        }
+      }
+    },
+    "backup.changeLocation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change location"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تغيير الموقع"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گۆڕینی شوێن"
+          }
+        }
+      }
+    },
+    "backup.chooseLocation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose location"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختيار الموقع"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵبژاردنی شوێن"
+          }
+        }
+      }
+    },
+    "backup.chooseLocationFirst": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose where to keep the backup first."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر أولًا مكان حفظ النسخة الاحتياطية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سەرەتا هەڵبژێرە باکئەپەکە لە کوێ هەڵبگیرێت."
+          }
+        }
+      }
+    },
+    "backup.done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup saved"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم حفظ النسخة الاحتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ پاشەکەوت کرا"
+          }
+        }
+      }
+    },
+    "backup.error.differentVault": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup is of a different vault. To restore it, clear this device's local data first, then restore during setup."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذه النسخة الاحتياطية لخزنة مختلفة. لاستعادتها، امسح البيانات المحلية على هذا الجهاز أولًا، ثم استعدها أثناء الإعداد."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم باکئەپە هی کۆگایەکی ترە. بۆ گەڕاندنەوەی، سەرەتا داتای ناوخۆیی ئەم ئامێرە بسڕەوە، پاشان لە کاتی ڕێکخستندا بیگەڕێنەوە."
+          }
+        }
+      }
+    },
+    "backup.error.newerVersion": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup was made by a newer version of Qasa. Update Qasa, then try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُنشئت هذه النسخة الاحتياطية بإصدار أحدث من قاصة. حدّث قاصة ثم حاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم باکئەپە بە وەشانێکی نوێتری قاسە دروست کراوە. قاسە نوێ بکەرەوە، پاشان دووبارە هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
+    "backup.error.noVault": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There's no vault on this device to back up."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد خزنة على هذا الجهاز لنسخها احتياطيًا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هیچ کۆگایەک لەسەر ئەم ئامێرە نییە بۆ باکئەپکردن."
+          }
+        }
+      }
+    },
+    "backup.error.notABackup": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file isn't a Qasa backup."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الملف ليس نسخة احتياطية من قاصة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم فایلە باکئەپی قاسە نییە."
+          }
+        }
+      }
+    },
+    "backup.error.unreadable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't read that file."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّرت قراءة ذلك الملف."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا ئەو فایلە بخوێندرێتەوە."
+          }
+        }
+      }
+    },
+    "backup.error.wrongPassword": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That main password doesn't open this backup."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمة المرور الرئيسية هذه لا تفتح هذه النسخة الاحتياطية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەو وشە نهێنییە سەرەکییە ئەم باکئەپە ناکاتەوە."
+          }
+        }
+      }
+    },
+    "backup.failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't save the backup. Choose the location again, then try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر حفظ النسخة الاحتياطية. اختر الموقع مرة أخرى ثم أعد المحاولة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا باکئەپ پاشەکەوت بکرێت. دووبارە شوێنەکە هەڵبژێرە، پاشان هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
+    "backup.freq.daily": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يوميًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ڕۆژانە"
+          }
+        }
+      }
+    },
+    "backup.freq.monthly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شهريًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مانگانە"
+          }
+        }
+      }
+    },
+    "backup.freq.off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إيقاف"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کوژاوە"
+          }
+        }
+      }
+    },
+    "backup.freq.weekly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أسبوعيًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەفتانە"
+          }
+        }
+      }
+    },
+    "backup.intro": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A backup is one encrypted file with everything in your vault. Keep it off this phone, for example in iCloud Drive or Google Drive, so you can get your vault back if you lose the phone or delete Qasa. It opens only with your main password."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النسخة الاحتياطية ملف واحد مشفّر يحتوي على كل ما في خزنتك. احفظه خارج هذا الهاتف، مثلًا في ⁨iCloud Drive⁩ أو ⁨Google Drive⁩، لتستعيد خزنتك إذا فقدت الهاتف أو حذفت قاصة. لا يُفتح إلا بكلمة مرورك الرئيسية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ یەک فایلی شفرەکراوە کە هەموو ناوەڕۆکی کۆگاکەتی تێدایە. لە دەرەوەی ئەم مۆبایلە هەڵیبگرە، بۆ نموونە لە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩، تا ئەگەر مۆبایلەکەت ون کرد یان قاسەت سڕییەوە کۆگاکەت بگەڕێنیتەوە. تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێتەوە."
+          }
+        }
+      }
+    },
+    "backup.lastBackupFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last backup: %@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آخر نسخة احتياطية: %@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دوایین باکئەپ: %@"
+          }
+        }
+      }
+    },
+    "backup.locationHelp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each new backup replaces this device's previous one, automatic or manual."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل نسخة احتياطية جديدة تحل محل النسخة السابقة من هذا الجهاز، تلقائية كانت أو يدوية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەر باکئەپێکی نوێ جێگەی باکئەپی پێشووی ئەم ئامێرە دەگرێتەوە، خۆکار بێت یان دەستی."
+          }
+        }
+      }
+    },
+    "backup.locationNone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not chosen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُحدَّد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵنەبژێردراوە"
+          }
+        }
+      }
+    },
+    "backup.locationTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup location"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موقع النسخة الاحتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شوێنی باکئەپ"
+          }
+        }
+      }
+    },
+    "backup.never": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No backup yet"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد نسخة احتياطية بعد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هێشتا باکئەپ نییە"
+          }
+        }
+      }
+    },
+    "backup.reminder.action": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up backups"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعداد النسخ الاحتياطي"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ڕێکخستنی باکئەپ"
+          }
+        }
+      }
+    },
+    "backup.reminder.body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your vault is only on this phone. If you lose it or delete Qasa, a backup is the only way to get your passwords back."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خزنتك موجودة على هذا الهاتف فقط. إذا فقدته أو حذفت قاصة، فالنسخة الاحتياطية هي الطريقة الوحيدة لاستعادة كلمات مرورك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆگاکەت تەنها لەسەر ئەم مۆبایلەیە. ئەگەر ونی بکەیت یان قاسە بسڕیتەوە، باکئەپ تاکە ڕێگەیە بۆ گەڕاندنەوەی وشە نهێنییەکانت."
+          }
+        }
+      }
+    },
+    "backup.reminder.dismiss": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس الآن"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێستا نا"
+          }
+        }
+      }
+    },
+    "backup.reminder.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back up your vault"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "انسخ خزنتك احتياطيًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپی کۆگاکەت بکە"
+          }
+        }
+      }
+    },
+    "backup.replace.bodyFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device restored a backup made on “%1$@”. Unlink “%1$@” and continue here? It will be signed out right away, and your other devices will be told."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استعاد هذا الجهاز نسخة احتياطية أُنشئت على «%1$@». هل تريد إلغاء ربط «%1$@» والمتابعة هنا؟ سيُسجَّل خروجه فورًا، وستُبلَّغ أجهزتك الأخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم ئامێرە باکئەپێکی گەڕاندەوە کە لەسەر «%1$@» دروست کرابوو. «%1$@» لاببەیت و لێرە بەردەوام بیت؟ دەستبەجێ دەردەچێت، و ئامێرەکانی ترت ئاگادار دەکرێنەوە."
+          }
+        }
+      }
+    },
+    "backup.replace.button": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlink and continue"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إلغاء الربط والمتابعة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لابردن و بەردەوامبوون"
+          }
+        }
+      }
+    },
+    "backup.replace.doneFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” was unlinked. This device has taken its place."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم إلغاء ربط «%@». أخذ هذا الجهاز مكانه."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«%@» لابرا. ئەم ئامێرە جێگەکەی گرتەوە."
+          }
+        }
+      }
+    },
+    "backup.replace.failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't replace the device. Check your connection, then try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر استبدال الجهاز. تحقّق من اتصالك ثم حاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نەتوانرا ئامێرەکە بگۆڕدرێت. پەیوەندییەکەت بپشکنە، پاشان هەوڵ بدەرەوە."
+          }
+        }
+      }
+    },
+    "backup.replace.notEnough": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlinking the old device wouldn't free enough room for your plan. Upgrade to Premium, or unlink more devices from another device."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إلغاء ربط الجهاز القديم لن يُفرغ مساحة كافية لخطتك. رقِّ إلى بريميوم، أو ألغِ ربط أجهزة أخرى من جهاز آخر."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لابردنی ئامێرە کۆنەکە شوێنی پێویست بۆ پلانەکەت ناکاتەوە. بڕۆ بۆ پریمیۆم، یان ئامێری زیاتر لە ئامێرێکی ترەوە لاببە."
+          }
+        }
+      }
+    },
+    "backup.replace.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace your old device?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استبدال جهازك القديم؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئامێرە کۆنەکەت بگۆڕیت؟"
+          }
+        }
+      }
+    },
+    "backup.replace.unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This backup can't free a place for this device. It may be older than that device's latest backup, or that device was unlinked or never went online. Unlink the old device from another device, upgrade to Premium, or contact us."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يمكن لهذه النسخة الاحتياطية أن تُفرغ مكانًا لهذا الجهاز. قد تكون أقدم من آخر نسخة احتياطية لذلك الجهاز، أو أُلغي ربط ذلك الجهاز أو لم يتصل بالإنترنت قط. ألغِ ربط الجهاز القديم من جهاز آخر، أو رقِّ إلى بريميوم، أو تواصل معنا."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم باکئەپە ناتوانێت شوێن بۆ ئەم ئامێرە بکاتەوە. لەوانەیە لە دوایین باکئەپی ئەو ئامێرە کۆنتر بێت، یان ئەو ئامێرە لابرابێت یان هەرگیز ئۆنلاین نەبووبێت. ئامێرە کۆنەکە لە ئامێرێکی ترەوە لاببە، بڕۆ بۆ پریمیۆم، یان پەیوەندیمان پێوە بکە."
+          }
+        }
+      }
+    },
+    "backup.restore": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore from a backup"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاستعادة من نسخة احتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕاندنەوە لە باکئەپێک"
+          }
+        }
+      }
+    },
+    "backup.restore.button": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استعادة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕاندنەوە"
+          }
+        }
+      }
+    },
+    "backup.restore.doneFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup restored: %lld item(s)."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمت استعادة النسخة الاحتياطية: %lld عنصر."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ گەڕێندرایەوە: %lld بابەت."
+          }
+        }
+      }
+    },
+    "backup.restore.fromFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup from %1$@, %2$@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخة احتياطية من %1$@، %2$@"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ لە %1$@، %2$@"
+          }
+        }
+      }
+    },
+    "backup.restore.mergedFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backup restored. %lld item(s) or folder(s) brought back or updated."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمت استعادة النسخة الاحتياطية. أُعيد أو حُدِّث %lld عنصر أو مجلد."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپ گەڕێندرایەوە. %lld بابەت یان بوخچە گەڕانەوە یان نوێ کرانەوە."
+          }
+        }
+      }
+    },
+    "backup.restore.passwordPrompt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the main password your vault had when this backup was made."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل كلمة المرور الرئيسية التي كانت لخزنتك عند إنشاء هذه النسخة الاحتياطية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەو وشە نهێنییە سەرەکییە بنووسە کە کۆگاکەت لە کاتی دروستکردنی ئەم باکئەپەدا هەیبوو."
+          }
+        }
+      }
+    },
+    "backup.restore.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore backup"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استعادة نسخة احتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕاندنەوەی باکئەپ"
+          }
+        }
+      }
+    },
+    "backup.restore.upToDate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This vault already has everything in the backup."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذه الخزنة تحتوي بالفعل على كل ما في النسخة الاحتياطية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم کۆگایە پێشتر هەموو ناوەڕۆکی باکئەپەکەی تێدایە."
+          }
+        }
+      }
+    },
+    "backup.restore.working": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restoring…"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الاستعادة…"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەگەڕێندرێتەوە…"
+          }
+        }
+      }
+    },
+    "backup.restoreHelp": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adds what's in a backup to this vault. Nothing newer on this device is replaced."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يضيف محتوى النسخة الاحتياطية إلى هذه الخزنة. لا يُستبدل أي شيء أحدث على هذا الجهاز."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوەڕۆکی باکئەپەکە بۆ ئەم کۆگایە زیاد دەکات. هیچ شتێکی نوێتر لەسەر ئەم ئامێرە ناگۆڕدرێت."
+          }
+        }
+      }
+    },
+    "backup.restoreSubtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring back your vault from a backup file"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استعد خزنتك من ملف نسخة احتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆگاکەت لە فایلێکی باکئەپ بگەڕێنەوە"
+          }
+        }
+      }
+    },
+    "backup.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep an encrypted copy of your vault"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "احتفظ بنسخة مشفّرة من خزنتك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆپییەکی شفرەکراوی کۆگاکەت هەڵبگرە"
+          }
+        }
+      }
+    },
+    "backup.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backups"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النسخ الاحتياطية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باکئەپەکان"
+          }
+        }
+      }
+    },
     "brand.localOffline": {
       "localizations": {
         "en": {
@@ -5325,6 +6403,28 @@
         }
       }
     },
+    "field.datePlaceholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YYYY-MM-DD"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سنة-شهر-يوم"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ساڵ-مانگ-ڕۆژ"
+          }
+        }
+      }
+    },
     "field.defaultUsername": {
       "localizations": {
         "en": {
@@ -5409,6 +6509,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "بەرواری بەسەرچوون"
+          }
+        }
+      }
+    },
+    "field.expiryPlaceholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MM/YY"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شهر/سنة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مانگ/ساڵ"
           }
         }
       }
@@ -7816,19 +8938,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nYou can export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy"
+            "value": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nBackups are encrypted files you save where you choose, such as iCloud Drive or Google Drive. They go there straight from your device, never through our server, and open only with your main password. You can also export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nيمكنك تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩"
+            "value": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nالنسخ الاحتياطية ملفات مشفّرة تحفظها حيث تختار، مثل ⁨iCloud Drive⁩ أو ⁨Google Drive⁩. تذهب إليه مباشرة من جهازك، ولا تمر أبدًا عبر خادمنا، ولا تُفتح إلا بكلمة مرورك الرئيسية. ويمكنك أيضًا تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nهەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
+            "value": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nباکئەپەکان فایلی شفرەکراون کە لەو شوێنەی هەڵیدەبژێریت پاشەکەوتیان دەکەیت، بۆ نموونە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩. ڕاستەوخۆ لە ئامێرەکەتەوە دەچنە ئەوێ، هەرگیز بە سێرڤەرەکەماندا تێناپەڕن، و تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێنەوە. هەروەها هەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
           }
         }
       }
@@ -13483,6 +14605,600 @@
           "stringUnit": {
             "state": "translated",
             "value": "کۆدی QR ـەکە سکان بکە"
+          }
+        }
+      }
+    },
+    "validation.cardNumberChecksum": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This card number isn't valid. Check for typos."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم البطاقة غير صالح. تحقّق من الأخطاء."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی کارتەکە دروست نییە. هەڵەی نووسین بپشکنە."
+          }
+        }
+      }
+    },
+    "validation.cardNumberLength": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This card number has the wrong number of digits"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عدد أرقام البطاقة غير صحيح"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "درێژی ژمارەی کارتەکە هەڵەیە"
+          }
+        }
+      }
+    },
+    "validation.countryInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a country"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر دولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وڵاتێک هەڵبژێرە"
+          }
+        }
+      }
+    },
+    "validation.dateBeforeIssue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Must be after the issue date"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يجب أن يكون بعد تاريخ الإصدار"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دەبێت دوای بەرواری دەرچوون بێت"
+          }
+        }
+      }
+    },
+    "validation.dateInFuture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't be in the future"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يمكن أن يكون في المستقبل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناتوانێت لە داهاتوودا بێت"
+          }
+        }
+      }
+    },
+    "validation.dateInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a real date"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس تاريخًا صحيحًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەروارێکی ڕاست نییە"
+          }
+        }
+      }
+    },
+    "validation.dateTooOld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too far in the past. Check the year."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قديم جدًا. تحقّق من السنة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زۆر کۆنە. ساڵەکە بپشکنە."
+          }
+        }
+      }
+    },
+    "validation.digitsOnly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use digits only"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم الأرقام فقط"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەنها ژمارە بەکاربهێنە"
+          }
+        }
+      }
+    },
+    "validation.emailInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter an email like name@example.com"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل بريدًا مثل name@example.com"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئیمەیڵێک وەک name@example.com بنووسە"
+          }
+        }
+      }
+    },
+    "validation.expiryFormat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use MM/YY, e.g. 08/29"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم الصيغة MM/YY، مثل 08/29"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شێوازی MM/YY بەکاربهێنە، وەک 08/29"
+          }
+        }
+      }
+    },
+    "validation.expiryMonth": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The month must be 01 to 12"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يجب أن يكون الشهر من 01 إلى 12"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مانگ دەبێت لە 01 بۆ 12 بێت"
+          }
+        }
+      }
+    },
+    "validation.fixToSave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix the highlighted fields to save"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أصلح الحقول المحددة لتتمكن من الحفظ"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خانە دیاریکراوەکان چاک بکە بۆ پاشەکەوتکردن"
+          }
+        }
+      }
+    },
+    "validation.ibanChecksum": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This IBAN isn't valid. Check for typos."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم IBAN غير صالح. تحقّق من الأخطاء."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IBAN ـەکە دروست نییە. هەڵەی نووسین بپشکنە."
+          }
+        }
+      }
+    },
+    "validation.ibanInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This IBAN has the wrong length"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طول رقم IBAN غير صحيح"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "درێژی IBAN ـەکە هەڵەیە"
+          }
+        }
+      }
+    },
+    "validation.importFlaggedFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imported items with fields to check: %d"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عناصر مستوردة فيها حقول تحتاج إلى مراجعة: %d"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بابەتی هاوردەکراو کە خانەی پێویست بە پشکنینیان هەیە: %d"
+          }
+        }
+      }
+    },
+    "validation.lettersDigitsOnly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use only letters, digits, spaces and dashes"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم الحروف والأرقام والمسافات والشرطات فقط"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەنها پیت، ژمارە، بۆشایی و هێڵی کورت بەکاربهێنە"
+          }
+        }
+      }
+    },
+    "validation.needsAttention": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some fields don't match Qasa's checks. Edit the item to fix them."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعض الحقول لا تجتاز فحوصات قاصة. عدّل العنصر لإصلاحها."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەندێک خانە لە پشکنینەکانی قاسە دەرناچن. بابەتەکە دەستکاری بکە بۆ چاککردنیان."
+          }
+        }
+      }
+    },
+    "validation.phoneCountryMismatch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This number has another country code. Pick the country from the list."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الرقم برمز دولة أخرى. اختر الدولة من القائمة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەم ژمارەیە کۆدی وڵاتێکی تری هەیە. وڵاتەکە لە لیستەکە هەڵبژێرە."
+          }
+        }
+      }
+    },
+    "validation.phoneLength": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use %1$d to %2$d digits after the country code"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم من %1$d إلى %2$d أرقام بعد رمز الدولة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d بۆ %2$d ژمارە دوای کۆدی وڵات بەکاربهێنە"
+          }
+        }
+      }
+    },
+    "validation.required": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Required"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مطلوب"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پێویستە"
+          }
+        }
+      }
+    },
+    "validation.routingInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a valid routing number, sort code or SWIFT/BIC"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس رقم توجيه أو رمز فرع أو SWIFT/BIC صالحًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ژمارەی ڕێڕەو، کۆدی لق یان SWIFT/BIC دروست نییە"
+          }
+        }
+      }
+    },
+    "validation.securityCodeExact": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use %d digits"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم %d أرقام"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d ژمارە بەکاربهێنە"
+          }
+        }
+      }
+    },
+    "validation.securityCodeRange": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use %1$d or %2$d digits"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم %1$d أو %2$d أرقام"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$d یان %2$d ژمارە بەکاربهێنە"
+          }
+        }
+      }
+    },
+    "validation.tooLong": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too long: at most %d characters"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طويل جدًا: %d حرفًا كحد أقصى"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زۆر درێژە: لانی زۆر %d پیت"
+          }
+        }
+      }
+    },
+    "validation.totpInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not a valid 2FA setup key or link"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس مفتاح أو رابط إعداد مصادقة ثنائية صالحًا"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کلیل یان بەستەری ڕێکخستنی 2FA دروست نییە"
+          }
+        }
+      }
+    },
+    "validation.urlInvalid": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a web address like example.com"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل عنوانًا مثل example.com"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناونیشانێکی وێب وەک example.com بنووسە"
+          }
+        }
+      }
+    },
+    "validation.yearsAway": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More than %d years away. Check the year."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعد أكثر من %d سنة. تحقّق من السنة."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زیاتر لە %d ساڵ دوورە. ساڵەکە بپشکنە."
           }
         }
       }

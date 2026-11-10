@@ -592,7 +592,7 @@ extension VaultPayload {
                 DetailField(label: L10n.tr("field.middleName"), value: f.middleName),
                 DetailField(label: L10n.tr("field.lastName"), value: f.lastName),
                 DetailField(label: L10n.tr("field.defaultUsername"), value: f.defaultUsername),
-                DetailField(label: L10n.tr("field.birthDate"), value: f.birthDate),
+                DetailField(label: L10n.tr("field.birthDate"), value: VaultValidation.displayDate(f.birthDate)),
                 DetailField(label: L10n.tr("field.birthPlace"), value: f.birthPlace)
             ].filter { !$0.value.isEmpty }
         case .personalEmail(let f):
@@ -636,8 +636,8 @@ extension VaultPayload {
                 DetailField(label: L10n.tr("field.name"), value: f.name),
                 DetailField(label: L10n.tr("vault.country"), value: Country.name(for: f.countryCode)),
                 DetailField(label: L10n.tr("field.number"), value: f.number),
-                DetailField(label: L10n.tr("field.issueDate"), value: f.issueDate),
-                DetailField(label: L10n.tr("field.expiryDate"), value: f.expiryDate)
+                DetailField(label: L10n.tr("field.issueDate"), value: VaultValidation.displayDate(f.issueDate)),
+                DetailField(label: L10n.tr("field.expiryDate"), value: VaultValidation.displayDate(f.expiryDate))
             ]
             if case .passport = self, !f.issuePlace.isEmpty {
                 fields.append(DetailField(label: L10n.tr("field.issuePlace"), value: f.issuePlace))

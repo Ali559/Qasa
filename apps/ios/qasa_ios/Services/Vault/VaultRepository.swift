@@ -50,8 +50,79 @@ final class VaultRepository {
         await syncAutofillIndex()
     }
 
+    /// Where a decrypted payload being encrypted comes from. Rows that arrive as ciphertext
+    /// (Wi‑Fi sync, backup restore) never pass through here: they get the structural check
+    /// in `VaultSyncStore.apply` (`VaultRecordGuard`) and are stored unchanged.
+    enum WriteOrigin {
+        /// The add/edit form: normalized, then refused (nothing written) while any field
+        /// issue remains.
+        case user
+        /// CSV import: normalized and always stored, even with issues (they are counted
+        /// and shown on the item; the editor makes the user fix them on the next save).
+        case csvImport
+        /// An existing item the app (not the user) rewrites without touching its fields:
+        /// re-encrypting a legacy plaintext row at unlock, or taking it out of a deleted
+        /// folder. Stored as is, so an older item with issues is never blocked or rewritten.
+        case storedAsIs
+    }
+
+    /// A user save (add/edit form). Throws `VaultValidationError` and writes nothing while
+    /// the normalized payload has any issue.
     func save(payload: VaultPayload, id: UUID? = nil) throws -> VaultListRow {
+        try write(payload: payload, id: id, origin: .user).row
+    }
+
+    /// A CSV-imported item: stored normalized, issues or not. `flagged` is true when it
+    /// still has issues, so the import can say how many need checking.
+    func importItem(_ payload: VaultPayload) throws -> (row: VaultListRow, flagged: Bool) {
+        let (row, issues) = try write(payload: payload, id: nil, origin: .csvImport)
+        return (row, !issues.isEmpty)
+    }
+
+    /// Replaces only a login's password (rotating a breached one). The other fields are not
+    /// the user's edit here, so an older item with issues is not blocked (Android parity:
+    /// `BreachViewModel.rotatePassword`).
+    func rotatePassword(itemId: UUID, to password: String) throws {
+        guard case .login(var f) = try self.payload(for: itemId) else { return }
+        f.password = password
+        _ = try write(payload: .login(f), id: itemId, origin: .storedAsIs)
+    }
+
+    /// Takes an item out of its folder (the folder is being deleted). Not a user edit of its
+    /// fields, so it is stored as is.
+    func removeFromCollection(itemId: UUID) throws {
+        var item = try self.payload(for: itemId)
+        switch item {
+        case .login(var f):
+            f.collectionId = nil
+            item = .login(f)
+        case .secureNote(var f):
+            f.collectionId = nil
+            item = .secureNote(f)
+        default:
+            break
+        }
+        _ = try write(payload: item, id: itemId, origin: .storedAsIs)
+    }
+
+    /// The single write path for decrypted payloads: normalize and validate per `origin`,
+    /// then encrypt.
+    private func write(payload input: VaultPayload, id: UUID?, origin: WriteOrigin) throws -> (row: VaultListRow, issues: [FfiFieldIssue]) {
         guard let context else { throw VaultCryptoError.vaultLocked }
+        let payload: VaultPayload
+        let issues: [FfiFieldIssue]
+        switch origin {
+        case .user:
+            payload = try VaultValidation.normalized(input)
+            issues = try VaultValidation.validate(payload)
+            guard issues.isEmpty else { throw VaultValidationError(issues: issues) }
+        case .csvImport:
+            payload = try VaultValidation.normalized(input)
+            issues = try VaultValidation.validate(payload)
+        case .storedAsIs:
+            payload = input
+            issues = []
+        }
         let encKey = try VaultSession.shared.requireEncKey()
         let searchKey = try VaultSession.shared.requireSearchKey()
         let envelope = VaultEnvelope(from: payload)
@@ -79,7 +150,7 @@ final class VaultRepository {
         let row = VaultListRow(record: record, envelope: envelope)
         cache.upsert(row)
         Task { await syncAutofillIndex() }
-        return row
+        return (row, issues)
     }
 
     /// Deletes as a tombstone: the row stays (empty) so the delete reaches other devices
@@ -424,7 +495,7 @@ final class VaultRepository {
         for record in records where record.schemaVersion < 1 {
             guard let legacy = record.legacyPayloadData, !legacy.isEmpty else { continue }
             guard let payload = try? JSONDecoder().decode(VaultPayload.self, from: legacy) else { continue }
-            _ = try? save(payload: payload, id: record.id)
+            _ = try? write(payload: payload, id: record.id, origin: .storedAsIs)
         }
         try? context.save()
     }

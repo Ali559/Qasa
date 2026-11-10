@@ -738,10 +738,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "qasa-backup"
+version = "0.1.0"
+dependencies = [
+ "aes-gcm",
+ "base64",
+ "hkdf",
+ "qasa-sync",
+ "qasa-vault",
+ "rand",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 2.0.21",
+ "zeroize",
+]
+
+[[package]]
 name = "qasa-ffi"
 version = "0.1.0"
 dependencies = [
  "mdns-sd",
+ "qasa-backup",
  "qasa-sync",
  "qasa-vault",
  "thiserror 2.0.21",

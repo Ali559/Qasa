@@ -8,6 +8,7 @@ import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.screens.AppSession
+import alibarznji.qasa.screens.settings.backup.BackupsScreen
 import alibarznji.qasa.screens.settings.main.SettingsHomeContent
 import alibarznji.qasa.screens.nav.SettingsRoutes
 import alibarznji.qasa.theme.QasaModalBottomSheet
@@ -80,6 +81,7 @@ fun SettingsScreen(
                     onChangePassword = { navController.navigate(SettingsRoutes.CHANGE_PASSWORD) },
                     onDevices = { navController.navigate(SettingsRoutes.DEVICES) },
                     onLan = { navController.navigate(SettingsRoutes.LAN) },
+                    onBackups = { navController.navigate(SettingsRoutes.BACKUPS) },
                     onSubscription = { navController.navigate(SettingsRoutes.SUBSCRIPTION) },
                     vm = vm,
                 )
@@ -109,6 +111,11 @@ fun SettingsScreen(
                             onUpgrade()
                         },
                     )
+                }
+            }
+            composable(SettingsRoutes.BACKUPS) {
+                SettingsSheet(onDismiss = { navController.popBackStack() }) {
+                    BackupsScreen(onDone = { navController.popBackStack() })
                 }
             }
             composable(SettingsRoutes.SUBSCRIPTION) {

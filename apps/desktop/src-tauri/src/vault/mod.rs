@@ -8,12 +8,14 @@ pub mod error;
 pub mod store;
 pub mod tools;
 pub mod biometrics;
+pub mod fields;
 
 use std::collections::HashMap;
 use std::path::Path;
 use std::time::Instant;
 
 use qasa_vault::payload::{Envelope, ItemKind, VaultPayload};
+use qasa_vault::validate::{self, CivilDate, FieldIssue};
 use qasa_vault::{decode_kdf_version, derive_root_key, encode_kdf_version, generate_salt, VaultKeys, KDF_VERSION};
 use serde::Serialize;
 
@@ -72,6 +74,22 @@ pub struct Vault {
     keys: Option<VaultKeys>,
     last_activity: Instant,
     bio: Box<dyn Biometrics>,
+}
+
+/// The device's local calendar day, for the "not in the future" / "not absurdly far
+/// out" date rules.
+pub fn today() -> CivilDate {
+    use chrono::Datelike;
+    let d = chrono::Local::now().date_naive();
+    CivilDate { year: d.year(), month: d.month(), day: d.day() }
+}
+
+/// What a CSV import did: every row is written; `flagged` of them still break a field
+/// rule after normalizing (the detail view shows them as needing attention).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Imported {
+    pub imported: usize,
+    pub flagged: usize,
 }
 
 fn new_id() -> String {
@@ -298,8 +316,38 @@ impl Vault {
         Ok((row, hashes))
     }
 
-    /// iOS `VaultRepository.save`: new when `id` is None or unknown, else an update.
+    /// A user save from the add/edit form (iOS `VaultRepository.save`): new when `id` is
+    /// None or unknown, else an update. The payload is normalized to its stored form and
+    /// must pass every field rule; otherwise nothing is written and the issues come back
+    /// as `InvalidFields`. The one write path for anything the user typed.
     pub fn save(&mut self, id: Option<&str>, payload: &VaultPayload) -> CommandResult<ItemSummary> {
+        self.save_on(id, payload, today())
+    }
+
+    /// [`Self::save`] with an explicit "today" (tests).
+    pub fn save_on(&mut self, id: Option<&str>, payload: &VaultPayload, today: CivilDate) -> CommandResult<ItemSummary> {
+        self.keys()?;
+        let normalized = validate::normalize(payload);
+        let issues = validate::validate(&normalized, today);
+        if !issues.is_empty() {
+            return Err(CommandError::InvalidFields(issues));
+        }
+        self.write(id, &normalized)
+    }
+
+    /// A save that must never be lost (a login the browser extension captured): normalized
+    /// and written even when a field rule fails. Returns the issues it was stored with; the
+    /// detail view flags the item and the editor asks for the fix.
+    pub fn save_flagged(&mut self, id: Option<&str>, payload: &VaultPayload) -> CommandResult<(ItemSummary, Vec<FieldIssue>)> {
+        self.keys()?;
+        let normalized = validate::normalize(payload);
+        let issues = validate::validate(&normalized, today());
+        Ok((self.write(id, &normalized)?, issues))
+    }
+
+    /// Encrypts and stores `payload` as it is: no field rules. Only for rewrites of items
+    /// already in the vault (moving them out of a deleted folder).
+    fn write(&mut self, id: Option<&str>, payload: &VaultPayload) -> CommandResult<ItemSummary> {
         self.keys()?;
         let existing = match id {
             Some(id) => self.store.item(id)?,
@@ -335,15 +383,29 @@ impl Vault {
         Ok((out, failures))
     }
 
-    /// Saves many new items in one transaction (CSV import).
-    pub fn insert_many(&mut self, payloads: &[VaultPayload]) -> CommandResult<usize> {
+    /// Saves many new items in one transaction (CSV import). Each is normalized; none is
+    /// dropped for a field rule (a password manager import must not lose rows), and the
+    /// ones that still have issues are counted so the UI can say how many to check.
+    pub fn insert_many(&mut self, payloads: &[VaultPayload]) -> CommandResult<Imported> {
+        self.insert_many_on(payloads, today())
+    }
+
+    /// [`Self::insert_many`] with an explicit "today" (tests).
+    pub fn insert_many_on(&mut self, payloads: &[VaultPayload], today: CivilDate) -> CommandResult<Imported> {
         self.keys()?;
+        let mut flagged = 0;
         let rows = payloads
             .iter()
-            .map(|p| self.encrypt_row(new_id(), p, None))
+            .map(|p| {
+                let normalized = validate::normalize(p);
+                if !validate::is_valid(&normalized, today) {
+                    flagged += 1;
+                }
+                self.encrypt_row(new_id(), &normalized, None)
+            })
             .collect::<CommandResult<Vec<_>>>()?;
         self.store.put_items(&rows, &[])?;
-        Ok(rows.len())
+        Ok(Imported { imported: rows.len(), flagged })
     }
 
     // MARK: collections
@@ -423,7 +485,8 @@ impl Vault {
         for (item_id, mut payload) in payloads {
             if payload.collection_id().is_some_and(|c| c.eq_ignore_ascii_case(id)) {
                 payload.set_collection_id(None);
-                self.save(Some(&item_id), &payload)?;
+                // Only the folder changes: an item with a legacy issue still moves out.
+                self.write(Some(&item_id), &payload)?;
             }
         }
         self.store.delete_collection(id)
@@ -624,6 +687,19 @@ impl Vault {
         Ok(())
     }
 
+    // MARK: backups
+
+    /// A copy of the unlocked data key for `qasa_backup::create`, which reads the vault
+    /// through `DesktopStore` and so can't run under this vault's lock. Zeroed on drop;
+    /// it never leaves the core process.
+    pub fn backup_key(&self) -> CommandResult<zeroize::Zeroizing<[u8; 32]>> {
+        Ok(zeroize::Zeroizing::new(*self.keys()?.enc()))
+    }
+
+    pub fn live_item_count(&self) -> CommandResult<u32> {
+        self.store.live_item_count()
+    }
+
     /// "Clear local data": locks and deletes every item, collection and the key material.
     pub fn wipe(&mut self) -> CommandResult<()> {
         self.lock();
@@ -706,7 +782,8 @@ mod tests {
     }
 
     /// The UI sends payloads shaped like `emptyPayload` in `src/vault/present.ts`, with
-    /// unset optionals left out. Every variant must deserialize and save.
+    /// unset optionals left out. Every variant must deserialize and save (filled in enough
+    /// to pass the field rules), and comes back in its normalized form.
     #[test]
     fn ui_shaped_payloads_save() {
         let mut v = vault();
@@ -714,11 +791,11 @@ mod tests {
         let shapes = [
             r#"{"variant":"login","fields":{"itemName":"GitHub","email":"","username":"","password":"p","website":"","note":""}}"#,
             r#"{"variant":"secureNote","fields":{"title":"n","content":"","color":"mint","protectItem":true}}"#,
-            r#"{"variant":"card","fields":{"itemName":"c","accountHolder":"","number":"4111","securityCode":"","expiryDate":"","note":"","color":"blue"}}"#,
+            r#"{"variant":"card","fields":{"itemName":"c","accountHolder":"","number":"4111111111111111","securityCode":"","expiryDate":"","note":"","color":"blue"}}"#,
             r#"{"variant":"bankAccount","fields":{"itemName":"b","accountHolder":"","accountNumber":"","routingNumber":"","countryCode":"IQ","bankName":""}}"#,
             r#"{"variant":"name","fields":{"type":"Mr","firstName":"Ali","lastName":"","middleName":"","defaultUsername":"","birthDate":"","birthPlace":""}}"#,
-            r#"{"variant":"personalEmail","fields":{"itemName":"","type":"Work","email":"a@b.c"}}"#,
-            r#"{"variant":"phone","fields":{"itemName":"","type":"Work Cell","countryCode":"IQ","number":"750"}}"#,
+            r#"{"variant":"personalEmail","fields":{"itemName":"","type":"Work","email":"a@example.com"}}"#,
+            r#"{"variant":"phone","fields":{"itemName":"","type":"Work Cell","countryCode":"IQ","number":"7501234567"}}"#,
             r#"{"variant":"address","fields":{"itemName":"Home","address":"","city":"","zipCode":"","countryCode":"IQ","recipient":"","building":"","floor":"","apartment":"","doorCode":""}}"#,
             r#"{"variant":"company","fields":{"companyName":"Qasa","jobTitle":""}}"#,
             r#"{"variant":"website","fields":{"itemName":"w","websiteURL":"https://qasa-app.com"}}"#,
@@ -728,10 +805,91 @@ mod tests {
         ];
         for shape in shapes {
             let payload: VaultPayload = serde_json::from_str(shape).unwrap_or_else(|e| panic!("{shape}: {e}"));
-            let saved = v.save(None, &payload).unwrap();
-            assert_eq!(v.get(&saved.id).unwrap(), payload);
+            let saved = v.save(None, &payload).unwrap_or_else(|e| panic!("{shape}: {e:?}"));
+            assert_eq!(v.get(&saved.id).unwrap(), validate::normalize(&payload));
         }
         assert_eq!(v.list().unwrap().0.len(), 13);
+    }
+
+    // MARK: field rules on the write paths
+
+    const TODAY: CivilDate = CivilDate { year: 2026, month: 11, day: 10 };
+
+    fn card(number: &str, expiry: &str) -> VaultPayload {
+        VaultPayload::Card(qasa_vault::payload::CardFields {
+            item_name: "Visa".into(),
+            number: number.into(),
+            expiry_date: expiry.into(),
+            ..Default::default()
+        })
+    }
+
+    #[test]
+    fn an_invalid_user_save_is_refused_and_nothing_is_stored() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        let Err(CommandError::InvalidFields(issues)) = v.save_on(None, &card("4111 1111 1111 1112", "13/29"), TODAY) else {
+            panic!("an invalid card was saved");
+        };
+        let codes: Vec<String> = issues.iter().map(FieldIssue::code).collect();
+        assert_eq!(codes, ["number:cardNumberChecksum", "expiryDate:expiryMonth"]);
+        assert!(v.list().unwrap().0.is_empty());
+        assert!(v.sync_snapshot().unwrap().items.is_empty(), "no row, not even a tombstone");
+
+        // An edit that breaks a rule leaves the stored item as it was.
+        let saved = v.save_on(None, &card("4111111111111111", "8/29"), TODAY).unwrap();
+        assert!(matches!(v.save_on(Some(&saved.id), &card("4111", "08/29"), TODAY), Err(CommandError::InvalidFields(_))));
+        // …and the stored form is the normalized one.
+        assert_eq!(v.get(&saved.id).unwrap(), card("4111 1111 1111 1111", "08/29"));
+        // The error reaches the UI with its issues.
+        let err = serde_json::to_value(v.save_on(None, &card("4111 1111 1111 1112", "08/29"), TODAY).unwrap_err()).unwrap();
+        assert_eq!(err["code"], "invalidFields");
+        assert_eq!(err["issues"], serde_json::json!([{"field": "number", "problem": {"kind": "cardNumberChecksum"}}]));
+    }
+
+    #[test]
+    fn a_user_save_rewrites_legacy_dates_to_iso() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        let name = VaultPayload::Name(qasa_vault::payload::NameFields { first_name: "Ali".into(), birth_date: "Nov 6, 2000".into(), ..Default::default() });
+        let saved = v.save_on(None, &name, TODAY).unwrap();
+        let VaultPayload::Name(stored) = v.get(&saved.id).unwrap() else { panic!() };
+        assert_eq!(stored.birth_date, "2000-11-06");
+    }
+
+    #[test]
+    fn csv_import_keeps_every_row_and_counts_the_flagged_ones() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        let rows = [login("GitHub"), card("4111 1111 1111 1112", "08/29"), login(""), card("4111111111111111", "8/2029")];
+        assert_eq!(v.insert_many_on(&rows, TODAY).unwrap(), Imported { imported: 4, flagged: 2 });
+        let (payloads, unreadable) = v.all_payloads().unwrap();
+        assert_eq!((payloads.len(), unreadable), (4, 0));
+        // Normalized on the way in, flagged or not.
+        assert!(payloads.iter().any(|(_, p)| *p == card("4111 1111 1111 1111", "08/29")));
+        assert!(payloads.iter().any(|(_, p)| *p == card("4111 1111 1111 1112", "08/29")));
+    }
+
+    #[test]
+    fn a_browser_capture_is_stored_even_with_issues() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        let capture = VaultPayload::Login(LoginFields { item_name: "".into(), password: "pw".into(), ..Default::default() });
+        let (saved, issues) = v.save_flagged(None, &capture).unwrap();
+        assert_eq!(issues.iter().map(FieldIssue::code).collect::<Vec<_>>(), ["itemName:required"]);
+        assert_eq!(v.get(&saved.id).unwrap(), capture);
+    }
+
+    #[test]
+    fn deleting_a_folder_moves_out_items_that_have_legacy_issues() {
+        let mut v = vault();
+        v.create("password1", false).unwrap();
+        let c = v.create_collection("Work").unwrap();
+        let mut bad = VaultPayload::Login(LoginFields { item_name: "".into(), password: "pw".into(), ..Default::default() });
+        bad.set_collection_id(Some(c.id.clone()));
+        let (saved, _) = v.save_flagged(None, &bad).unwrap();
+        v.delete_collection(&c.id).unwrap();
+        assert_eq!(v.get(&saved.id).unwrap().collection_id(), None);
     }
 
     #[test]

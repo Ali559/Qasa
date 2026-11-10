@@ -221,7 +221,7 @@ interface VaultDao {
         AppNotificationEntity::class,
         MonitoredEmailEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class VaultDatabase : RoomDatabase() {
@@ -285,5 +285,67 @@ object VaultMigrations {
         }
     }
 
-    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    /**
+     * v4: structural checks on item rows ([VaultRowRules]) as SQLite triggers, since Room
+     * entities can't declare CHECK constraints. Existing rows are left as they are (the
+     * update trigger only fires on the checked columns); a stray `schemaVersion < 1` is
+     * raised to 1 first so a later edit of that row isn't refused.
+     */
+    val MIGRATION_3_4_SQL: List<String> =
+        listOf("UPDATE vault_items SET schemaVersion = 1 WHERE schemaVersion < 1") + VaultRowRules.TRIGGERS_SQL
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            MIGRATION_3_4_SQL.forEach(db::execSQL)
+        }
+    }
+
+    val ALL: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+
+    /** Fresh installs: Room creates the v4 tables itself; the triggers are added here. */
+    object CreateTriggersCallback : RoomDatabase.Callback() {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            VaultRowRules.TRIGGERS_SQL.forEach(db::execSQL)
+        }
+    }
+}
+
+/**
+ * The structural rules every stored item row obeys, whatever wrote it (user save, CSV
+ * import, Wi‑Fi sync, backup restore). The payload is ciphertext, so these are the only
+ * checks the store itself can make; field rules run on the plaintext before a user save
+ * ([alibarznji.qasa.vault.VaultValidation]).
+ *
+ * - `kindRaw` is one of the five item kinds.
+ * - A live row (no `deletedAt`) has a non-empty envelope and payload; a tombstone may not.
+ * - `schemaVersion >= 1`.
+ */
+object VaultRowRules {
+    val KINDS: List<String> = listOf("login", "secureNote", "payment", "personalInfo", "idDocument")
+
+    fun isValid(row: VaultItemEntity): Boolean =
+        row.kindRaw in KINDS &&
+            row.schemaVersion >= 1 &&
+            (row.deletedAt != null || (row.encryptedEnvelope.isNotEmpty() && row.encryptedPayload.isNotEmpty()))
+
+    private val kindList = KINDS.joinToString(",") { "'$it'" }
+
+    private fun violation(kindCheck: String) =
+        "$kindCheck OR NEW.schemaVersion < 1 OR " +
+            "(NEW.deletedAt IS NULL AND (length(NEW.encryptedEnvelope) = 0 OR length(NEW.encryptedPayload) = 0))"
+
+    /**
+     * BEFORE INSERT covers `INSERT OR REPLACE` (every `upsert`). The update trigger is
+     * scoped to the checked columns, so `markUsed` on a legacy row never aborts, and its
+     * kind check only applies when the kind itself changes.
+     */
+    val TRIGGERS_SQL: List<String> = listOf(
+        "CREATE TRIGGER IF NOT EXISTS vault_items_check_insert BEFORE INSERT ON vault_items " +
+            "WHEN ${violation("NEW.kindRaw NOT IN ($kindList)")} " +
+            "BEGIN SELECT RAISE(ABORT, 'vault_items: invalid row'); END",
+        "CREATE TRIGGER IF NOT EXISTS vault_items_check_update " +
+            "BEFORE UPDATE OF kindRaw, encryptedEnvelope, encryptedPayload, schemaVersion, deletedAt ON vault_items " +
+            "WHEN ${violation("(NEW.kindRaw IS NOT OLD.kindRaw AND NEW.kindRaw NOT IN ($kindList))")} " +
+            "BEGIN SELECT RAISE(ABORT, 'vault_items: invalid row'); END",
+    )
 }

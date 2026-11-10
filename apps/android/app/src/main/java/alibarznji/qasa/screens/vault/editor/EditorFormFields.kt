@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.vault.editor
 
 import alibarznji.qasa.R
+import alibarznji.qasa.screens.vault.VaultDates
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.SectionLabel
@@ -40,33 +41,49 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalConfiguration
+import java.util.Locale
+import uniffi.qasa_ffi.FfiField
+import uniffi.qasa_ffi.formatCardExpiry
+import uniffi.qasa_ffi.formatCardNumber
 
 /** iOS `FormFieldLabel` + content + the 16pt `VStack` spacing of `VaultFormChrome`. */
 @Composable
-fun FieldBlock(label: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun FieldBlock(
+    label: String,
+    modifier: Modifier = Modifier,
+    error: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(modifier.fillMaxWidth()) {
         SectionLabel(label)
         Spacer(Modifier.height(QasaDimens.contentGap))
         content()
+        FieldErrorText(error)
         Spacer(Modifier.height(QasaDimens.gap))
     }
 }
 
-/** iOS `FormTextField` (FormHelpers.swift:19); secure rows add an eye toggle. */
+/**
+ * iOS `FormTextField` (FormHelpers.swift:19); secure rows add an eye toggle. [field] is the
+ * payload field whose rule message shows under it.
+ */
 @Composable
 fun FormTextField(
     @StringRes labelRes: Int,
     value: String,
+    field: FfiField? = null,
     secure: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     onChange: (String) -> Unit,
 ) {
     val label = stringResource(labelRes)
     var visible by remember { mutableStateOf(false) }
-    FieldBlock(label) {
+    val touch = rememberTouch(field)
+    FieldBlock(label, error = fieldError(field)) {
         ThemedTextField(
             value = value,
-            onValueChange = onChange,
+            onValueChange = { touch(); onChange(it) },
             placeholder = label,
             isSecure = secure,
             passwordVisible = visible,
@@ -76,11 +93,57 @@ fun FormTextField(
     }
 }
 
-/** iOS `ValidatedDateField` in the editor's field rhythm. */
+/**
+ * iOS `ValidatedDateField` in the editor's field rhythm: stores ISO `YYYY-MM-DD` from the
+ * picker, shows the date localized beside it, and the shared rule message for [field].
+ */
 @Composable
-fun FormDateField(@StringRes labelRes: Int, value: String, onChange: (String) -> Unit) {
-    ValidatedDateField(title = stringResource(labelRes), text = value, onTextChange = onChange)
+fun FormDateField(@StringRes labelRes: Int, value: String, field: FfiField, onChange: (String) -> Unit) {
+    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    val date = remember(value) { VaultDates.parse(value) }
+    val touch = rememberTouch(field)
+    ValidatedDateField(
+        title = stringResource(labelRes),
+        text = value,
+        onTextChange = { touch(); onChange(it) },
+        placeholder = stringResource(R.string.field_dateplaceholder),
+        error = fieldError(field),
+        date = date,
+        localized = date?.let { VaultDates.format(it, locale) },
+    )
     Spacer(Modifier.height(QasaDimens.gap))
+}
+
+/** Card number: grouped as you type (`formatCardNumber`), number keyboard. */
+@Composable
+fun CardNumberField(value: String, onChange: (String) -> Unit) {
+    val label = stringResource(R.string.field_number)
+    val touch = rememberTouch(FfiField.NUMBER)
+    FieldBlock(label, error = fieldError(FfiField.NUMBER)) {
+        FormattedTextField(
+            value = value,
+            placeholder = label,
+            label = label,
+            format = ::formatCardNumber,
+            keyboardType = KeyboardType.Number,
+        ) { touch(); onChange(it) }
+    }
+}
+
+/** Card expiry: `MM/YY` as you type (`formatCardExpiry`), number keyboard. */
+@Composable
+fun CardExpiryField(value: String, onChange: (String) -> Unit) {
+    val label = stringResource(R.string.field_expirydate)
+    val touch = rememberTouch(FfiField.EXPIRY_DATE)
+    FieldBlock(label, error = fieldError(FfiField.EXPIRY_DATE)) {
+        FormattedTextField(
+            value = value,
+            placeholder = stringResource(R.string.field_expiryplaceholder),
+            label = label,
+            format = ::formatCardExpiry,
+            keyboardType = KeyboardType.Number,
+        ) { touch(); onChange(it) }
+    }
 }
 
 /**
@@ -92,11 +155,12 @@ fun PasswordFormField(value: String, onChange: (String) -> Unit, onGenerate: () 
     val c = qasaColors
     val label = stringResource(R.string.field_password)
     var visible by remember { mutableStateOf(false) }
-    FieldBlock(label) {
+    val touch = rememberTouch(FfiField.PASSWORD)
+    FieldBlock(label, error = fieldError(FfiField.PASSWORD)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             ThemedTextField(
                 value = value,
-                onValueChange = onChange,
+                onValueChange = { touch(); onChange(it) },
                 placeholder = label,
                 isSecure = true,
                 passwordVisible = visible,
@@ -126,7 +190,8 @@ fun PhoneNumberField(dialCode: String, value: String, onChange: (String) -> Unit
     val c = qasaColors
     val label = stringResource(R.string.field_phonenumber)
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
-    FieldBlock(label) {
+    val touch = rememberTouch(FfiField.NUMBER)
+    FieldBlock(label, error = fieldError(FfiField.NUMBER)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
@@ -141,7 +206,7 @@ fun PhoneNumberField(dialCode: String, value: String, onChange: (String) -> Unit
             Spacer(Modifier.width(QasaDimens.contentGap))
             ThemedTextField(
                 value = value,
-                onValueChange = onChange,
+                onValueChange = { touch(); onChange(it) },
                 placeholder = label,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.weight(1f),

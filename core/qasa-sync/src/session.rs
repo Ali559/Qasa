@@ -93,7 +93,8 @@ fn refuse_reason(e: &SyncError) -> &'static str {
     }
 }
 
-fn normalize(mut s: Snapshot) -> Snapshot {
+/// Ids uppercase, as compared and sent (iOS writes uppercase UUIDs, Android lowercase).
+pub fn normalize(mut s: Snapshot) -> Snapshot {
     for i in &mut s.items {
         i.id = i.id.to_uppercase();
         i.collection_id = i.collection_id.as_ref().map(|c| c.to_uppercase());

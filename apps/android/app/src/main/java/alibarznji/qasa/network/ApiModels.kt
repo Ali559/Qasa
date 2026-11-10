@@ -20,7 +20,15 @@ data class RegisterDeviceRequest(
     val device_name: String,
     val platform: String,
     val location: String? = null,
+    /** Base64 of the raw 32-byte key from a restored backup; omitted when none. */
+    val restore_key: String? = null,
+    /** With [restore_key]: unlink the device that made the backup and take its slot. */
+    val replace_device: Boolean? = null,
 )
+
+/** The device a `replace_device` registration unlinked. */
+@Serializable
+data class ReplacedDevice(val id: String, val device_name: String)
 
 @Serializable
 data class RegisterDeviceResponse(
@@ -29,6 +37,7 @@ data class RegisterDeviceResponse(
     val devices_used: Int,
     val device_limit: Int,
     val tier: String,
+    val replaced_device: ReplacedDevice? = null,
 )
 
 @Serializable
@@ -310,7 +319,26 @@ data class DeviceLimitErrorBody(
     val devices_used: Int? = null,
     val device_limit: Int? = null,
     val devices: List<RemoteDevice>? = null,
-)
+    /**
+     * What the sent restore key can do when there is no free slot: null (none sent),
+     * `unknown`, `not_enough` or `replaceable`. See [restoreKeyStatus].
+     */
+    val restore_key: String? = null,
+    /** With `restore_key == "replaceable"`: the device a replace would unlink. */
+    val replaceable_device: RemoteDevice? = null,
+) {
+    val restoreKeyStatus: RestoreKeyStatus?
+        get() = when (restore_key) {
+            null -> null
+            "replaceable" -> if (replaceable_device != null) RestoreKeyStatus.Replaceable else RestoreKeyStatus.Unknown
+            "not_enough" -> RestoreKeyStatus.NotEnough
+            // "unknown" and anything a newer server adds.
+            else -> RestoreKeyStatus.Unknown
+        }
+}
+
+/** The server's verdict on a restore key sent with a registration that hit the limit. */
+enum class RestoreKeyStatus { Replaceable, Unknown, NotEnough }
 
 @Serializable
 data class StubWebhookBody(val order_id: String, val status: String)

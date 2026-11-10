@@ -1,5 +1,6 @@
 // Vault types as the Rust core sends them (core/qasa-vault/src/payload.rs, UI shape:
 // {"variant": …, "fields": {…}}). Field names and defaults mirror iOS `VaultEnums.swift`.
+import type { FieldIssue } from './fields'
 
 export type ItemKind = 'login' | 'secureNote' | 'payment' | 'personalInfo' | 'idDocument'
 
@@ -156,12 +157,15 @@ export interface CommandError {
     | 'unsupportedKdf'
     | 'notFound'
     | 'invalid'
+    | 'invalidFields'
     | 'storage'
     | 'corrupt'
     | 'biometricInvalidated'
     | 'cancelled'
     | 'biometricUnavailable'
   message: string
+  /** With `invalidFields`: what to fix (nothing was saved). */
+  issues?: FieldIssue[]
 }
 
 export function isCommandError(e: unknown): e is CommandError {

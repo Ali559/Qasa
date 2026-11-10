@@ -19,6 +19,12 @@ export interface AccountStatus {
   license: License | null
   /** The server's 403 body when registration hit the device limit. */
   deviceLimitError: { message?: string; devices_used?: number; device_limit?: number; devices?: RemoteDevice[] } | null
+  /** With `deviceLimitError` after restoring a backup: what the backup's restore key can do. */
+  restoreKeyStatus: 'unknown' | 'not_enough' | 'replaceable' | null
+  /** When replaceable: the name of the device that made the backup. */
+  replaceableDeviceName: string | null
+  /** Set once, right after this device took the backup device's place. */
+  replacedDeviceName: string | null
   offline: boolean
   misconfigured: boolean
 }

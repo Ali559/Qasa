@@ -1,6 +1,12 @@
 package alibarznji.qasa.screens.auth
 
 import alibarznji.qasa.R
+import alibarznji.qasa.screens.settings.backup.RestoreBackupPage
+import alibarznji.qasa.screens.settings.backup.RestoreBackupViewModel
+import alibarznji.qasa.screens.settings.backup.RestoreFromBackupOption
+import alibarznji.qasa.theme.BackChromeHeader
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import alibarznji.qasa.theme.BrandHeader
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.MintSwitch
@@ -69,6 +75,7 @@ fun CreateVaultScreen(
     /** True while the Link Device flow covers this screen (it may adopt a vault). */
     onPairOpenChanged: (Boolean) -> Unit = {},
     vm: CreateVaultViewModel = hiltViewModel(),
+    restoreVm: RestoreBackupViewModel = hiltViewModel(),
 ) {
     val c = qasaColors
     var password by remember { mutableStateOf("") }
@@ -77,17 +84,57 @@ fun CreateVaultScreen(
     var biometrics by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showPair by remember { mutableStateOf(false) }
+    // Restore from a backup file: adopts the backup's vault and account, like Link Device.
+    var showRestore by remember { mutableStateOf(false) }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        restoreVm.open(uri)
+        showRestore = true
+    }
     // Non-null while the seal prompt is in flight. Creating the vault navigates away, so
     // the password has to be sealed first or the prompt is torn down mid-attempt.
     var sealCipher by remember { mutableStateOf<Cipher?>(null) }
 
-    DisposableEffect(showPair) {
-        onPairOpenChanged(showPair)
+    // Both flows may adopt a vault; Root keeps this screen until they close.
+    val covered = showPair || showRestore
+    DisposableEffect(covered) {
+        onPairOpenChanged(covered)
         onDispose { onPairOpenChanged(false) }
     }
     if (showPair) {
         BackHandler { showPair = false }
         PairExistingVaultScreen(onDone = { showPair = false })
+        return
+    }
+    if (showRestore) {
+        val close = {
+            if (!restoreVm.busy) {
+                restoreVm.reset()
+                showRestore = false
+            }
+        }
+        BackHandler(onBack = close)
+        RestoreBackupPage(
+            vm = restoreVm,
+            setup = true,
+            header = {
+                BackChromeHeader(
+                    title = stringResource(R.string.backup_restore_title),
+                    onBack = close,
+                    applyStatusBars = false,
+                )
+            },
+            onPickFile = { restoreLauncher.launch(arrayOf("*/*")) },
+            onClose = close,
+            onSetupFinished = { unlocked ->
+                restoreVm.reset()
+                showRestore = false
+                // Unlocked: the same post-unlock bootstrap as a vault adopted over Wi‑Fi
+                // (device registration under the adopted account, search reindex,
+                // autofill index). Otherwise the Unlock screen takes over.
+                if (unlocked) onCreated()
+            },
+        )
         return
     }
 
@@ -185,6 +232,7 @@ fun CreateVaultScreen(
         TextButton(onClick = { showPair = true }) {
             Text(stringResource(R.string.auth_create_pairexisting), color = c.accent, fontWeight = FontWeight.SemiBold)
         }
+        RestoreFromBackupOption(onClick = { restoreLauncher.launch(arrayOf("*/*")) })
         Spacer(Modifier.height(QasaDimens.contentGap))
         SectionLabel(stringResource(R.string.auth_unlock_masterpassword))
         Spacer(Modifier.height(QasaDimens.contentGap))

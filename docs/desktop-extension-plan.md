@@ -357,7 +357,8 @@ checked by iOS and Android tests too, so all three cannot drift apart.
 | Verifier | SHA-256(root key), constant-time compare | same |
 | Cipher | AES-256-GCM, `nonce(12) ‖ ciphertext ‖ tag(16)` | `VaultCrypto.swift` |
 | Payload JSON | Read both the iOS synthesized-enum shape and Android's `type` discriminator, plus old lowercase spellings. Write the canonical sync shape (section 6.4) | `VaultEnums.swift`, parity plan P3 note |
-| Item taxonomy | All 13 subtypes: login, secure note, card, bank account, name, email, phone, address, …, passport, national ID, driver licence, other | `VaultEnums.swift` |
+| Item taxonomy | All 13 subtypes: login, secure note, card, bank account, name, email, phone, address, company, website, national ID, passport, driver licence | `VaultEnums.swift` |
+| Field validation | One Rust implementation (`qasa-vault::validate`, FFI on the phones): typed per-field issues, `normalize` before every save (ISO dates, `MM/YY` expiry, grouped card numbers), user saves with issues refused, CSV/sync/restore accepted and flagged. Golden vectors in `core/qasa-vault/tests/validation_vectors.json`, checked by iOS and Android. ARCHITECTURE.md §5.1 | `qasaTests/ValidationVectorTests.swift` |
 | Search | Unicode tokenizer (`\p{L}\p{N}`), words + 2–3 char n-grams, HMAC-SHA256 with the search key. Tests in Arabic and Sorani | `VaultSearchIndex.swift` |
 | Password health | Length ≥ 10, character-class scoring, trimmed, blanks skipped, −15 per breached login | `PasswordHealthAnalyzer.swift` |
 | Generator | One character from each selected class, then shuffle (Android's version, which design.md says to port to iOS). One length cap for all three | `GenerateView.swift` |

@@ -25,6 +25,15 @@ val qasaDebugApiUrl: String = (
     (project.findProperty("qasaApiUrl") as String?) ?: "http://10.0.2.2:8080"
 ).trim()
 
+// The Rust core (`core/`) and a host build of its FFI library for the JVM unit tests.
+// Pass `-PskipHostFfi` to use an existing build (e.g. without a Rust toolchain).
+val qasaCoreDir: File = rootDir.resolve("../../core").canonicalFile
+val buildHostFfi by tasks.registering(Exec::class) {
+    description = "Builds libqasa_ffi for the host (cargo build -p qasa-ffi --lib)."
+    workingDir = qasaCoreDir
+    commandLine("cargo", "build", "-p", "qasa-ffi", "--lib")
+}
+
 android {
     namespace = "alibarznji.qasa"
     compileSdk = 35
@@ -78,6 +87,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests.all { test ->
+            // JVM unit tests call the shared Rust core (field rules, payload shapes) through
+            // UniFFI/JNA: load the host build of libqasa_ffi from core/target/debug.
+            test.systemProperty("jna.library.path", qasaCoreDir.resolve("target/debug").absolutePath)
+            if (!project.hasProperty("skipHostFfi")) test.dependsOn(buildHostFfi)
+        }
+    }
 }
 
 dependencies {
@@ -126,6 +143,8 @@ dependencies {
     implementation(libs.firebase.messaging)
 
     testImplementation(libs.junit)
+    // The plain JNA jar carries libjnidispatch for the host (the aar only has Android ABIs).
+    testImplementation(libs.jna)
     testImplementation(libs.kotlinx.coroutines.test)
     // Real SQLite on the JVM: runs the vault DAO's SQL and the Room migration in unit tests.
     testImplementation(libs.sqlite.jdbc)

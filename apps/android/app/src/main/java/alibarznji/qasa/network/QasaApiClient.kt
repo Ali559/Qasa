@@ -4,6 +4,7 @@ import alibarznji.qasa.BuildConfig
 import alibarznji.qasa.config.QasaConfig
 import alibarznji.qasa.vault.VaultSecureStore
 import javax.inject.Inject
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -67,14 +68,24 @@ class QasaApiClient @Inject constructor(
         throw QasaApiException.Decoding(e)
     }
 
-    fun raw(url: String, method: String, bodyJson: String?, authorized: Boolean): String {
+    /**
+     * A call that must give up quickly (the restore key PUT before a backup): same pool and
+     * interceptors, [timeoutMs] for the whole call.
+     */
+    fun rawQuick(url: String, method: String, bodyJson: String?, authorized: Boolean, timeoutMs: Long): String =
+        raw(url, method, bodyJson, authorized, client.newBuilder().callTimeout(timeoutMs, TimeUnit.MILLISECONDS).build())
+
+    fun raw(url: String, method: String, bodyJson: String?, authorized: Boolean): String =
+        raw(url, method, bodyJson, authorized, client)
+
+    private fun raw(url: String, method: String, bodyJson: String?, authorized: Boolean, client: OkHttpClient): String {
         val builder = Request.Builder().url(url).header("Accept", "application/json")
         when {
             bodyJson != null -> {
                 builder.header("Content-Type", "application/json")
                 builder.method(method, bodyJson.toRequestBody(media))
             }
-            method == "POST" || method == "PATCH" -> builder.method(method, "{}".toRequestBody(media))
+            method == "POST" || method == "PATCH" || method == "PUT" -> builder.method(method, "{}".toRequestBody(media))
             else -> builder.method(method, null)
         }
         if (authorized) {

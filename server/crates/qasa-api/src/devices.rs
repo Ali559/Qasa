@@ -23,6 +23,56 @@ pub struct RegisterDeviceRequest {
     /// Optional human-readable region/city hint from the client.
     #[serde(default)]
     pub location: Option<String>,
+    /// The restore key from a backup this device restored (base64, 32 bytes). With no free
+    /// slot, it names the device that made the backup, which this one may replace.
+    #[serde(default)]
+    pub restore_key: Option<String>,
+    /// The user tapped "Unlink it and continue on this device": replace the device the
+    /// restore key names. Without it the 403 only reports that device.
+    #[serde(default)]
+    pub replace_device: bool,
+}
+
+/// A base64 32-byte value from a request, or a 400.
+fn decode_key32(b64: &str, field: &str) -> ApiResult<Vec<u8>> {
+    use base64::Engine;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(b64.trim())
+        .map_err(|_| CoreError::BadRequest(format!("{field} must be base64")))?;
+    if bytes.len() != 32 {
+        return Err(CoreError::BadRequest(format!("{field} must be 32 bytes")).into());
+    }
+    Ok(bytes)
+}
+
+/// SHA-256 of a restore key, as the device stored it (`qasa_backup::restore_key_hash`).
+fn restore_key_hash(key: &[u8]) -> Vec<u8> {
+    use sha2::{Digest, Sha256};
+    Sha256::digest(key).to_vec()
+}
+
+/// What a restore key can do for a device that found no free slot.
+enum RestoreKeyCheck {
+    /// No key sent.
+    None,
+    /// No linked device has this key (it was replaced by a newer one, the device was
+    /// unlinked, or the backup's device never reached the server).
+    Unknown,
+    /// It names a device, but unlinking it still leaves no free slot (more devices than a
+    /// lapsed plan allows).
+    NotEnough,
+    Replaceable(qasa_db::models::DeviceRow),
+}
+
+impl RestoreKeyCheck {
+    fn status(&self) -> Option<&'static str> {
+        match self {
+            Self::None => None,
+            Self::Unknown => Some("unknown"),
+            Self::NotEnough => Some("not_enough"),
+            Self::Replaceable(_) => Some("replaceable"),
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -107,6 +157,7 @@ pub async fn register(
     )
     .await?;
 
+    let mut replaced: Option<qasa_db::models::DeviceRow> = None;
     let device = match existing {
         Some(linked) if linked.revoked_at.is_none() => {
             // Still linked, but the account may hold more devices than its tier now
@@ -128,7 +179,30 @@ pub async fn register(
             let active_count =
                 qasa_db::repos::device::count_active(&state.pool, account.id).await?;
             if active_count >= entitlements.device_limit as i64 {
-                return device_limit_response(&state, account.id, &entitlements).await;
+                let check = match body.restore_key.as_deref() {
+                    None => RestoreKeyCheck::None,
+                    Some(b64) => {
+                        let hash = restore_key_hash(&decode_key32(b64, "restore_key")?);
+                        match qasa_db::repos::device::find_by_restore_key(&state.pool, account.id, &hash).await? {
+                            None => RestoreKeyCheck::Unknown,
+                            Some(_) if active_count - 1 >= entitlements.device_limit as i64 => RestoreKeyCheck::NotEnough,
+                            Some(old) => RestoreKeyCheck::Replaceable(old),
+                        }
+                    }
+                };
+                match check {
+                    RestoreKeyCheck::Replaceable(old) if body.replace_device => {
+                        // Tell every device first, so the old one still gets the push.
+                        let notice = qasa_db::repos::push_copy::device_replaced(&old.device_name, &body.device_name);
+                        if let Err(err) = state.push.notify_account(&state.pool, account.id, &notice, &format!("device_replaced:{}", old.id)).await {
+                            tracing::warn!(?err, "device replaced notice failed");
+                        }
+                        // Unlinking clears its restore keys: each key replaces once.
+                        qasa_db::repos::device::revoke_device(&state.pool, account.id, old.id).await?;
+                        replaced = Some(old);
+                    }
+                    check => return device_limit_response_with(&state, account.id, &entitlements, &check).await,
+                }
             }
 
             match unlinked_or_new {
@@ -173,6 +247,7 @@ pub async fn register(
             "device_limit": entitlements.device_limit,
             "breach_monitor_limit": entitlements.breach_monitor_limit,
             "tier": entitlements.tier.as_str(),
+            "replaced_device": replaced.map(|d| json!({ "id": d.id, "device_name": d.device_name })),
         })),
     ))
 }
@@ -184,8 +259,26 @@ pub(crate) async fn device_limit_response(
     account_id: Uuid,
     entitlements: &qasa_core::Entitlements,
 ) -> ApiResult<(StatusCode, Json<serde_json::Value>)> {
+    device_limit_response_with(state, account_id, entitlements, &RestoreKeyCheck::None).await
+}
+
+/// The 403, plus what the restore key sent (if any) can do: `restore_key` is
+/// `replaceable` (then `replaceable_device` names the device the user may replace by
+/// registering again with `replace_device: true`), `unknown` or `not_enough`.
+async fn device_limit_response_with(
+    state: &AppState,
+    account_id: Uuid,
+    entitlements: &qasa_core::Entitlements,
+    check: &RestoreKeyCheck,
+) -> ApiResult<(StatusCode, Json<serde_json::Value>)> {
     let devices = qasa_db::repos::device::list_active(&state.pool, account_id).await?;
+    let replaceable = match check {
+        RestoreKeyCheck::Replaceable(old) => devices.iter().position(|d| d.id == old.id),
+        _ => None,
+    };
     let devices_used = devices.len();
+    let public = to_public(devices);
+    let replaceable_device = replaceable.map(|i| serde_json::to_value(&public[i]).unwrap_or_default());
     Ok((
         StatusCode::FORBIDDEN,
         Json(json!({
@@ -197,9 +290,31 @@ pub(crate) async fn device_limit_response(
             ),
             "devices_used": devices_used,
             "device_limit": entitlements.device_limit,
-            "devices": to_public(devices),
+            "devices": public,
+            "restore_key": check.status(),
+            "replaceable_device": replaceable_device,
         })),
     ))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RestoreKeyRequest {
+    /// SHA-256 of the device's new restore key, base64.
+    pub key_hash: String,
+}
+
+/// `PUT /v1/devices/me/restore-key`: the device switched to a new restore key, which its
+/// next backup will carry. Its previous hash stays valid (see the migration).
+pub async fn set_restore_key(
+    State(state): State<AppState>,
+    LicenseAuth(claims): LicenseAuth,
+    Json(body): Json<RestoreKeyRequest>,
+) -> ApiResult<StatusCode> {
+    let hash = decode_key32(&body.key_hash, "key_hash")?;
+    if !qasa_db::repos::device::set_restore_key_hash(&state.pool, claims.device_id()?, &hash).await? {
+        return Err(ApiError::Core(CoreError::NotFound));
+    }
+    Ok(StatusCode::NO_CONTENT)
 }
 
 pub async fn list(

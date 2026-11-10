@@ -8,6 +8,8 @@ const tauriAccountApi = {
   status: () => invoke<AccountStatus>('account_status'),
   bootstrap: (locale: string) => invoke<AccountStatus>('account_bootstrap', { locale }),
   refreshLicense: () => invoke<AccountStatus>('account_refresh_license'),
+  /** Device limit after a restore: unlink the backup's device and register here instead. */
+  replaceDevice: (locale: string) => invoke<AccountStatus>('account_replace_device', { locale }),
   syncLocale: (locale: string) => invoke<void>('account_sync_locale', { locale }),
 
   devices: () => invoke<RemoteDevice[]>('devices_list'),
@@ -48,12 +50,14 @@ const mockNotifications: InboxNotification[] = [
 let mockPremium = false
 const mockStatus = (): AccountStatus => ({
   accountId: '6f1c2a5e-0000-4000-8000-000000000000', deviceId: 'd1', isPremium: mockPremium, tier: mockPremium ? 'premium' : 'free',
-  deviceLimit: mockPremium ? 5 : 1, devicesUsed: 1, license: null, deviceLimitError: null, offline: false, misconfigured: false,
+  deviceLimit: mockPremium ? 5 : 1, devicesUsed: 1, license: null, deviceLimitError: null,
+  restoreKeyStatus: null, replaceableDeviceName: null, replacedDeviceName: null, offline: false, misconfigured: false,
 })
 const mockAccountApi: typeof tauriAccountApi = {
   status: async () => mockStatus(),
   bootstrap: async () => mockStatus(),
   refreshLicense: async () => mockStatus(),
+  replaceDevice: async () => mockStatus(),
   syncLocale: async () => {},
   devices: async () => [
     { id: 'd1', device_name: 'MacBook Pro', platform: 'macos', location: null, created_at: new Date(now - 86_400_000 * 30).toISOString(), last_seen_at: new Date().toISOString(), is_primary: true },

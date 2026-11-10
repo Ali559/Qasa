@@ -23,9 +23,13 @@ internal data class DetailField(
  * Port of iOS `VaultPayload.detailFields` (`Models/VaultEnums.swift:548`): same fields,
  * order, labels and secrecy; blank values are dropped (iOS `.filter { !$0.value.isEmpty }`)
  * rather than rendered as "—". [str] resolves the localized enum labels (honorific,
- * email/phone kind, Yes/No) in the caller's locale.
+ * email/phone kind, Yes/No) in the caller's locale; [date] shows a stored date (ISO
+ * `YYYY-MM-DD`) localized.
  */
-internal fun VaultPayload.detailFields(str: (Int) -> String): List<DetailField> = when (this) {
+internal fun VaultPayload.detailFields(
+    str: (Int) -> String,
+    date: (String) -> String = { it },
+): List<DetailField> = when (this) {
     is VaultPayload.Login -> listOf(
         DetailField(R.string.field_itemname, itemName),
         DetailField(R.string.field_email, email),
@@ -64,7 +68,7 @@ internal fun VaultPayload.detailFields(str: (Int) -> String): List<DetailField> 
         DetailField(R.string.field_middlename, middleName),
         DetailField(R.string.field_lastname, lastName),
         DetailField(R.string.field_defaultusername, defaultUsername),
-        DetailField(R.string.field_birthdate, birthDate),
+        DetailField(R.string.field_birthdate, date(birthDate)),
         DetailField(R.string.field_birthplace, birthPlace),
     )
     is VaultPayload.PersonalEmail -> listOf(
@@ -99,11 +103,11 @@ internal fun VaultPayload.detailFields(str: (Int) -> String): List<DetailField> 
         DetailField(R.string.field_itemname, itemName),
         DetailField(R.string.field_website, websiteURL),
     )
-    is VaultPayload.IdCard -> idFields(name, countryCode, number, issueDate, expiryDate)
+    is VaultPayload.IdCard -> idFields(name, countryCode, number, date(issueDate), date(expiryDate))
     // iOS appends Issue Place for passports only.
-    is VaultPayload.Passport -> idFields(name, countryCode, number, issueDate, expiryDate) +
+    is VaultPayload.Passport -> idFields(name, countryCode, number, date(issueDate), date(expiryDate)) +
         DetailField(R.string.field_issueplace, issuePlace)
-    is VaultPayload.DriverLicense -> idFields(name, countryCode, number, issueDate, expiryDate)
+    is VaultPayload.DriverLicense -> idFields(name, countryCode, number, date(issueDate), date(expiryDate))
 }.filter { it.value.isNotEmpty() }
 
 /** ID / passport / licence — the ID number is not a secret on iOS. */

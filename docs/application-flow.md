@@ -617,3 +617,64 @@ All eight loop forever. Errors are logged, never fatal. `std::future::pending()`
 | Autolock | scene phase + gesture | 15 s poll |
 
 The API contract has no drift. Every divergence is client-side capability, not protocol.
+
+---
+
+## 15. Backups and restore — every plan, no server
+
+Format and rules: [`ARCHITECTURE.md` §9.5](../ARCHITECTURE.md). Settings → Backups on all three clients.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as App (unlocked)
+    participant C as qasa-backup (Rust)
+    participant F as Chosen place (iCloud Drive, Google Drive, folder, USB)
+
+    Note over A: on unlock / back to foreground: is_due(frequency, last backup)?
+    U->>A: Back up now (or the schedule is due)
+    A->>C: create(store, data key)
+    C->>A: snapshot via SyncStore (ciphertext rows + vault meta + account id)
+    C-->>A: header ‖ AES-256-GCM(HKDF(data key, "qasa-backup-v1"))
+    A->>F: overwrite "Qasa backup - <device>.qasabackup"
+    A->>A: record last backup time
+```
+
+```mermaid
+sequenceDiagram
+    participant U as User on a new phone
+    participant A as Setup screen
+    participant C as qasa-backup (Rust)
+    participant S as qasa-api
+
+    U->>A: Restore from a backup → pick file
+    A->>C: info(file)
+    C-->>A: device name, date
+    U->>A: main password (the one the vault had then)
+    A->>C: restore(file, password, store)
+    C->>C: PBKDF2 → data key → backup key → decrypt, check verifier
+    alt wrong password / not a backup / newer format
+        C-->>A: error, nothing written
+    else device has no vault
+        C->>A: adopt(vault meta, account id) + apply(all rows)
+        A->>A: unlock with the typed password
+        A->>S: POST /v1/devices/register  [none]  (restored account id)
+        A->>S: POST /v1/devices/register  [none]  restore_key
+        alt a free slot
+            S-->>A: license JWT
+        else no free slot, key names the device that made the backup
+            S-->>A: 403 device_limit_exceeded, restore_key = replaceable, replaceable_device
+            U->>A: Unlink “old phone” and continue
+            A->>S: POST /v1/devices/register  [none]  restore_key + replace_device
+            S->>S: notice to every device, then unlink the old one (its keys cleared)
+            S-->>A: license JWT + replaced_device
+        else key unknown / not enough room
+            S-->>A: 403 with restore_key = unknown | not_enough
+            A-->>U: why, and what to do instead
+        end
+    end
+```
+
+Before each backup the device rotates its restore key: if it has none, or its current key is already in a written backup, it sends the new key's SHA-256 with `PUT /v1/devices/me/restore-key` [Lic] and uses the key only after a 204. The server keeps the current and previous hash.
+
+Restoring in Settings (a vault already exists) merges last-writer-wins and refuses a backup of a different vault. There is no uninstall hook on iOS or Android, so the home-screen reminder ("Back up your vault", after 30 days without a backup) is how users hear about it.
