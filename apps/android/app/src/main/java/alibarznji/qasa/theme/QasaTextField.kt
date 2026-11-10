@@ -64,6 +64,8 @@ fun ThemedTextField(
     val c = qasaColors
     val shape = RoundedCornerShape(QasaDimens.cornerRadius)
     val imeController = LocalSoftwareKeyboardController.current
+    // Soft-keyboard typing comes through the IME connection, not as touches or key events.
+    val activity = LocalUserActivity.current
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -87,7 +89,10 @@ fun ThemedTextField(
             }
             BasicTextField(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = {
+                    activity.noteActivity()
+                    onValueChange(it)
+                },
                 singleLine = true,
                 textStyle = qasaText.bodyLarge.copy(color = c.textPrimary),
                 cursorBrush = SolidColor(c.accent),

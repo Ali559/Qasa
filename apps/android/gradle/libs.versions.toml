@@ -5,7 +5,7 @@ ksp = "2.1.0-1.0.29"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-espressoCore = "3.6.1"
+espressoCore = "3.7.0"
 lifecycle = "2.8.7"
 activityCompose = "1.9.3"
 # 2026.08.00 requires compileSdk 37 + AGP 9.1; use 2026.06.01 for SDK 35
