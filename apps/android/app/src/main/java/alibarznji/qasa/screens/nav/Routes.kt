@@ -24,4 +24,6 @@ object SettingsRoutes {
     const val LAN = "settings/lan"
     const val BACKUPS = "settings/backups"
     const val SUBSCRIPTION = "settings/subscription"
+    /** Upgrade from Settings or Linked Devices: a sheet with an X, as on iOS. */
+    const val PREMIUM = "settings/premium"
 }

@@ -1,15 +1,19 @@
 ---
-// The privacy policy page (/privacy, /ckb/privacy, /ar/privacy). Standalone like the download
-// page, so it works while the home page is still the coming-soon page; the store listings
-// and the apps' in-app summary point here. The text is in src/privacy.ts.
+// The privacy policy and terms of use pages (/privacy, /terms and their /ckb, /ar versions).
+// Standalone like the download page, so they work while the home page is still the
+// coming-soon page; the store listings and the apps' Privacy and Terms rows point here.
+// The text is in src/privacy.ts and src/terms.ts.
 import "../styles/global.css";
 import Icon from "./Icon.astro";
-import { dictionaries, downloadHrefs, languages, privacyHrefs, type Lang } from "../i18n";
+import { dictionaries, downloadHrefs, languages, privacyHrefs, termsHrefs, type Lang } from "../i18n";
 import { policies, PRIVACY_UPDATED } from "../privacy";
+import { termsByLang, TERMS_UPDATED } from "../terms";
 
-const { lang } = Astro.props as { lang: Lang };
+const { lang, kind = "privacy" } = Astro.props as { lang: Lang; kind?: "privacy" | "terms" };
 const t = dictionaries[lang];
-const p = policies[lang];
+const p = kind === "terms" ? termsByLang[lang] : policies[lang];
+const hrefs = kind === "terms" ? termsHrefs : privacyHrefs;
+const updatedIso = kind === "terms" ? TERMS_UPDATED : PRIVACY_UPDATED;
 const dir = lang === "en" ? "ltr" : "rtl";
 const home = languages.find((l) => l.lang === lang)!.href;
 const short = p.sections.find((s) => s.id === "short")!;
@@ -27,8 +31,8 @@ const rest = p.sections.filter((s) => s.id !== "short");
     <meta property="og:title" content={p.pageTitle} />
     <meta property="og:description" content={p.pageDescription} />
     <meta property="og:locale" content={{ en: "en_US", ckb: "ckb_IQ", ar: "ar_IQ" }[lang]} />
-    {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={privacyHrefs[l.lang]} />)}
-    <link rel="alternate" hreflang="x-default" href={privacyHrefs.en} />
+    {languages.map((l) => <link rel="alternate" hreflang={l.lang} href={hrefs[l.lang]} />)}
+    <link rel="alternate" hreflang="x-default" href={hrefs.en} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/Rubik-Variable.ttf" as="font" type="font/ttf" crossorigin />
     {dir === "rtl" && <link rel="preload" href="/fonts/rudawregular2.ttf" as="font" type="font/ttf" crossorigin />}
@@ -42,7 +46,7 @@ const rest = p.sections.filter((s) => s.id !== "short");
         </a>
         <nav class="lang-switch" aria-label={t.nav.language}>
           {languages.map((l) => (
-            <a href={privacyHrefs[l.lang]} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? "page" : undefined}>{l.label}</a>
+            <a href={hrefs[l.lang]} lang={l.lang} hreflang={l.lang} aria-current={l.lang === lang ? "page" : undefined}>{l.label}</a>
           ))}
         </nav>
       </div>
@@ -54,7 +58,7 @@ const rest = p.sections.filter((s) => s.id !== "short");
         <header class="policy-head">
           <p class="kicker">{p.kicker}</p>
           <h1 class="title">{p.title}</h1>
-          <p class="updated"><time datetime={PRIVACY_UPDATED}>{p.updated}</time></p>
+          <p class="updated"><time datetime={updatedIso}>{p.updated}</time></p>
         </header>
 
         <section class="short" aria-labelledby="short">
@@ -92,6 +96,7 @@ const rest = p.sections.filter((s) => s.id !== "short");
         <nav class="footer-links" aria-label="Footer">
           <a href={home}><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
           <a href={downloadHrefs[lang]}><Icon name="device-desktop" size={16} /> {t.desktop.kicker}</a>
+          <a href={kind === "terms" ? privacyHrefs[lang] : termsHrefs[lang]}>{kind === "terms" ? t.nav.privacy : t.nav.terms}</a>
         </nav>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
       </div>

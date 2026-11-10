@@ -11,7 +11,6 @@ import { useT } from '@/prefs'
 import Home from './Home.vue'
 import Alerts from './Alerts.vue'
 import You from './You.vue'
-import Legal from './Legal.vue'
 import VaultScreen from './vault/VaultScreen.vue'
 import Collections from './tools/Collections.vue'
 import Generator from './tools/Generator.vue'
@@ -94,8 +93,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <WifiSync v-else-if="nav.page === 'wifiSync'" key="wifi" @back="back" />
         <BrowserExtension v-else-if="nav.page === 'browserExtension'" key="extension" @back="back" />
         <Backups v-else-if="nav.page === 'backups'" key="backups" @back="back" />
-        <Legal v-else-if="nav.page === 'terms'" key="terms" kind="terms" @back="back" />
-        <Legal v-else-if="nav.page === 'privacy'" key="privacy" kind="privacy" @back="back" />
         <Home v-else-if="nav.tab === 'home'" key="home" />
         <VaultScreen v-else-if="nav.tab === 'passwords'" key="passwords" />
         <Alerts v-else-if="nav.tab === 'alerts'" key="alerts" />

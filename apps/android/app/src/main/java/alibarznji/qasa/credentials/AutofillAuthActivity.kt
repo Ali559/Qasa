@@ -61,6 +61,10 @@ import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 
 /**
  * Every autofill dataset is authenticated through this activity (docs/autofill-plan.md
@@ -303,6 +307,23 @@ internal fun ColumnScope.AutofillUnlockPane(
     var cipher by remember { mutableStateOf(session.biometricUnlockCipher()) }
     val wrong = stringResource(R.string.autofill_wrongpassword)
     val failed = stringResource(R.string.autofill_biometricfailed)
+    // The key derivation takes a moment: off the main thread.
+    val scope = rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    fun runUnlock(work: () -> Boolean, onFail: () -> Unit) {
+        if (busy) return
+        busy = true
+        scope.launch {
+            val ok = withContext(Dispatchers.Default) { work() }
+            busy = false
+            if (ok) {
+                password = ""
+                onUnlocked()
+            } else {
+                onFail()
+            }
+        }
+    }
 
     BiometricGateEffect(
         enabled = cipher != null,
@@ -311,18 +332,14 @@ internal fun ColumnScope.AutofillUnlockPane(
         cipher = cipher,
         onAuthenticated = { authorized ->
             cipher = null
-            if (authorized != null && session.unlockWithBiometricCipher(authorized)) onUnlocked() else error = failed
+            runUnlock({ authorized != null && session.unlockWithBiometricCipher(authorized) }) { error = failed }
         },
         onDismissed = { cipher = null },
     )
 
     fun submit() {
-        if (session.unlockMatching(password) != null) {
-            password = ""
-            onUnlocked()
-        } else {
-            error = wrong
-        }
+        val typed = password
+        runUnlock({ session.unlockMatching(typed) != null }) { error = wrong }
     }
 
     Text(title, color = c.textPrimary, style = qasaText.displayLarge)
@@ -348,7 +365,7 @@ internal fun ColumnScope.AutofillUnlockPane(
     PrimaryButton(
         title = stringResource(R.string.autofill_unlock),
         icon = Icons.Default.LockOpen,
-        enabled = password.isNotBlank(),
+        enabled = password.isNotBlank() && !busy,
         onClick = ::submit,
         modifier = Modifier.fillMaxWidth(),
     )

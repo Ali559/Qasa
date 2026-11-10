@@ -75,12 +75,13 @@ fun FormTextField(
     field: FfiField? = null,
     secure: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
+    modifier: Modifier = Modifier,
     onChange: (String) -> Unit,
 ) {
     val label = stringResource(labelRes)
     var visible by remember { mutableStateOf(false) }
     val touch = rememberTouch(field)
-    FieldBlock(label, error = fieldError(field)) {
+    FieldBlock(label, modifier, error = fieldError(field)) {
         ThemedTextField(
             value = value,
             onValueChange = { touch(); onChange(it) },
@@ -132,10 +133,10 @@ fun CardNumberField(value: String, onChange: (String) -> Unit) {
 
 /** Card expiry: `MM/YY` as you type (`formatCardExpiry`), number keyboard. */
 @Composable
-fun CardExpiryField(value: String, onChange: (String) -> Unit) {
+fun CardExpiryField(value: String, modifier: Modifier = Modifier, onChange: (String) -> Unit) {
     val label = stringResource(R.string.field_expirydate)
     val touch = rememberTouch(FfiField.EXPIRY_DATE)
-    FieldBlock(label, error = fieldError(FfiField.EXPIRY_DATE)) {
+    FieldBlock(label, modifier, error = fieldError(FfiField.EXPIRY_DATE)) {
         FormattedTextField(
             value = value,
             placeholder = stringResource(R.string.field_expiryplaceholder),

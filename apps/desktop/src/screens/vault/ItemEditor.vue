@@ -240,23 +240,26 @@ function onKey(e: KeyboardEvent) {
             <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
             <FormField v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />
             <FormField v-model="payload.fields.number" :label="t('field.number')" inputmode="numeric" :maxlength="23" mono :error="err('number')" />
-            <FormField
-              v-model="payload.fields.securityCode"
-              :label="t('field.securityCode')"
-              secure
-              inputmode="numeric"
-              :maxlength="4"
-              :error="err('securityCode')"
-            />
-            <FormField
-              v-model="payload.fields.expiryDate"
-              :label="t('field.expiryDate')"
-              :placeholder="t('field.expiryPlaceholder')"
-              inputmode="numeric"
-              :maxlength="5"
-              mono
-              :error="err('expiryDate')"
-            />
+            <!-- Expiry and security code side by side, as printed on the card. -->
+            <div class="card-pair">
+              <FormField
+                v-model="payload.fields.expiryDate"
+                :label="t('field.expiryDate')"
+                :placeholder="t('field.expiryPlaceholder')"
+                inputmode="numeric"
+                :maxlength="5"
+                mono
+                :error="err('expiryDate')"
+              />
+              <FormField
+                v-model="payload.fields.securityCode"
+                :label="t('field.securityCode')"
+                secure
+                inputmode="numeric"
+                :maxlength="4"
+                :error="err('securityCode')"
+              />
+            </div>
             <FormField v-model="payload.fields.note" :label="t('field.note')" multiline :error="err('note')" />
             <ColorPicker v-model="payload.fields.color" />
           </template>
@@ -498,5 +501,13 @@ function onKey(e: KeyboardEvent) {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* Expiry and security code on one row; the code is the narrower box. */
+.card-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
 }
 </style>

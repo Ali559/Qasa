@@ -1,7 +1,7 @@
 // The privacy policy (/privacy, /ckb/privacy, /ar/privacy). It describes what the apps and
 // the server actually do: check it against server/migrations, server/crates/qasa-db/src/repos/
 // account_deletion.rs and apps/extension/store/listing.md whenever data handling changes, and
-// bump `updated` (and the in-app summary, legal.privacyBody in l10n/strings.json).
+// bump `updated`. The apps' Privacy rows open this page.
 //
 // Paragraphs and list items are trusted HTML written here (links, <strong>). In ckb and ar,
 // Latin runs are wrapped in FSI/PDI (`L`), as in the rest of the site's copy.

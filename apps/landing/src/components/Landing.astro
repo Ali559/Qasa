@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import Icon from "./Icon.astro";
 import DesktopDownloads from "./DesktopDownloads.astro";
-import { dictionaries, downloadHrefs, languages, privacyHrefs, type Lang } from "../i18n";
+import { dictionaries, downloadHrefs, languages, privacyHrefs, termsHrefs, type Lang } from "../i18n";
 
 const { lang } = Astro.props as { lang: Lang };
 const t = dictionaries[lang];
@@ -302,6 +302,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
           <a href="#faq">{t.nav.faq}</a>
           <a href={downloadHrefs[lang]}>{t.desktop.kicker}</a>
           <a href={privacyHrefs[lang]}>{t.legal.privacyPolicy}</a>
+          <a href={termsHrefs[lang]}>{t.nav.terms}</a>
         </nav>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
       </div>

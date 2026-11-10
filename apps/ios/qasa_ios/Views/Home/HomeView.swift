@@ -33,6 +33,8 @@ struct HomeView: View {
     @State private var report: PasswordHealthReport?
     @Bindable private var backup = BackupPreferences.shared
     @State private var showBackups = false
+    @State private var autofillPrompt = AutofillPromptState.shared
+    @Environment(\.scenePhase) private var scenePhase
     @Query(filter: #Predicate<AppNotification> { $0.isRead == false }) private var unreadLocalNotes: [AppNotification]
 
     /// Bell badge: the server's `unread_count` (whole inbox) plus unread "On this device"
@@ -45,6 +47,9 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: 16) {
                 greeting
+                if autofillPrompt.show {
+                    HomeAutofillPromptCard(state: autofillPrompt)
+                }
                 HomeStatusHero(status: status, onAddFirst: { onTab(.passwords) })
                 if backup.shouldRemind(itemCount: cache.rows.count, nowMs: BackupPreferences.nowMs()) {
                     HomeBackupReminderCard(
@@ -82,6 +87,11 @@ struct HomeView: View {
                 .appLocalization()
         }
         .onAppear(perform: refreshReport)
+        // Back from AutoFill settings (or the system prompt): recheck.
+        .task { await autofillPrompt.refresh() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await autofillPrompt.refresh() } }
+        }
         .onChange(of: cache.rows) { _, _ in refreshReport() }
         .onChange(of: session.isPremium) { _, _ in refreshReport() }
         .task {

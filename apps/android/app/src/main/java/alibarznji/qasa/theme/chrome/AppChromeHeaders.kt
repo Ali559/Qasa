@@ -32,6 +32,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.fillMaxSize
 
 /**
  * The shared chrome primitive. iOS hand-rolls this `VStack` four times
@@ -224,10 +227,13 @@ private fun BackButton(onClick: () -> Unit) {
     QasaPressable(
         onClick = onClick,
         contentDescription = stringResource(R.string.common_back),
-        modifier = Modifier.size(QasaIconFrame.toggleDisc),
+        modifier = Modifier.size(BACK_BUTTON_SIZE).clip(CircleShape),
     ) {
+        // The circle fills the whole button, with the arrow centred, so it lines up with
+        // the title. It used to wrap only the icon, sitting at the top-start corner.
         Box(
             Modifier
+                .fillMaxSize()
                 .background(c.cardBackground, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
@@ -240,6 +246,9 @@ private fun BackButton(onClick: () -> Unit) {
         }
     }
 }
+
+/** A little roomier than the 40pt iOS circle, so the arrow doesn't crowd its edge. */
+private val BACK_BUTTON_SIZE = 44.dp
 
 /** Mint cancellation action at the 17 semibold chrome-button slot. */
 @Composable

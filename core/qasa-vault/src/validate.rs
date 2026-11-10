@@ -956,12 +956,18 @@ pub fn format_card_number(raw: &str) -> String {
 }
 
 /// Card expiry as the user types: digits only, `MM/YY` with the slash added after the
-/// month. A first digit of 2–9 can only be a single-digit month, so it becomes `0d`.
+/// month. A first digit of 2–9 can only be a single-digit month, so it becomes `0d`. A
+/// second digit that would make the month 00 or more than 12 is not taken, so the field
+/// never holds a month outside 01–12.
 pub fn format_card_expiry(raw: &str) -> String {
-    let mut digits: String = ascii_digits(raw).chars().filter(char::is_ascii_digit).collect();
-    if digits.starts_with(|ch: char| ('2'..='9').contains(&ch)) {
+    let mut digits: Vec<char> = ascii_digits(raw).chars().filter(char::is_ascii_digit).collect();
+    if digits.first().is_some_and(|ch| ('2'..='9').contains(ch)) {
         digits.insert(0, '0');
     }
+    while digits.len() >= 2 && !matches!((digits[0], digits[1]), ('0', '1'..='9') | ('1', '0'..='2')) {
+        digits.remove(1);
+    }
+    let mut digits: String = digits.into_iter().collect();
     digits.truncate(4);
     if digits.len() <= 2 { digits } else { format!("{}/{}", &digits[..2], &digits[2..]) }
 }
@@ -1129,6 +1135,13 @@ mod tests {
         assert_eq!(format_card_expiry("123"), "12/3");
         assert_eq!(format_card_expiry("12/28"), "12/28");
         assert_eq!(format_card_expiry("122899"), "12/28");
+        // Months stay within 01–12 while typing.
+        assert_eq!(format_card_expiry("13"), "1");
+        assert_eq!(format_card_expiry("1328"), "12/8");
+        assert_eq!(format_card_expiry("00"), "0");
+        assert_eq!(format_card_expiry("0012"), "01/2");
+        assert_eq!(format_card_expiry("10"), "10");
+        assert_eq!(format_card_expiry("09/30"), "09/30");
     }
 
     #[test]

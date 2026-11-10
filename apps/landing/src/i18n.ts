@@ -17,13 +17,16 @@ export const downloadHrefs: Record<Lang, string> = { en: "/download", ckb: "/ckb
 /** The privacy policy in each language; every footer links here, and the store listings use /privacy. */
 export const privacyHrefs: Record<Lang, string> = { en: "/privacy", ckb: "/ckb/privacy", ar: "/ar/privacy" };
 
+/** The terms of use in each language; the apps' Terms rows open these. */
+export const termsHrefs: Record<Lang, string> = { en: "/terms", ckb: "/ckb/terms", ar: "/ar/terms" };
+
 const en = {
   meta: {
     title: "Qasa: your passwords, kept safe on your phone",
     description:
       "Qasa remembers your passwords, cards and IDs, encrypted on your phone. In English, Kurdish and Arabic. Free to start; Premium paid through Wayl.",
   },
-  nav: { features: "Features", privacy: "Privacy", pricing: "Pricing", faq: "FAQ", cta: "Get Qasa", language: "Language" },
+  nav: { features: "Features", privacy: "Privacy", terms: "Terms", pricing: "Pricing", faq: "FAQ", cta: "Get Qasa", language: "Language" },
   hero: {
     eyebrow: "Free on iPhone and Android",
     h1: "Your passwords, kept safe",
@@ -170,7 +173,7 @@ const ckb: Dict = {
     description:
       "قاسە وشەی نهێنی، کارت و ناسنامەکانت بە شفرەکراوی لەسەر مۆبایلەکەت هەڵدەگرێت. بە ئینگلیزی، کوردی و عەرەبی. بە خۆڕایی دەست پێبکە؛ پارەی پریمیۆم لە ڕێگەی Wayl بدە.",
   },
-  nav: { features: "تایبەتمەندییەکان", privacy: "نهێنیپارێزی", pricing: "نرخەکان", faq: "پرسیارەکان", cta: "قاسە دابەزێنە", language: "زمان" },
+  nav: { features: "تایبەتمەندییەکان", privacy: "نهێنیپارێزی", terms: "مەرجەکان", pricing: "نرخەکان", faq: "پرسیارەکان", cta: "قاسە دابەزێنە", language: "زمان" },
   hero: {
     eyebrow: "بە خۆڕایی بۆ iPhone و Android",
     h1: "وشە نهێنییەکانت، بە سەلامەتی",
@@ -315,7 +318,7 @@ const ar: Dict = {
     description:
       "تحفظ قاصة كلمات مرورك وبطاقاتك وهوياتك مشفّرة على هاتفك. بالإنجليزية والكردية والعربية. ابدأ مجانًا، وادفع اشتراك بريميوم عبر Wayl.",
   },
-  nav: { features: "الميزات", privacy: "الخصوصية", pricing: "الأسعار", faq: "الأسئلة", cta: "حمّل قاصة", language: "اللغة" },
+  nav: { features: "الميزات", privacy: "الخصوصية", terms: "الشروط", pricing: "الأسعار", faq: "الأسئلة", cta: "حمّل قاصة", language: "اللغة" },
   hero: {
     eyebrow: "مجاني على iPhone و Android",
     h1: "كلمات مرورك في أمان",

@@ -4,7 +4,7 @@
 // pages switch back to it at launch (see TODO.md).
 import "../styles/global.css";
 import Icon from "./Icon.astro";
-import { dictionaries, languages, privacyHrefs, type Lang } from "../i18n";
+import { dictionaries, languages, privacyHrefs, termsHrefs, type Lang } from "../i18n";
 
 const { lang } = Astro.props as { lang: Lang };
 const t = dictionaries[lang];
@@ -98,6 +98,7 @@ const pointIcons = ["device-mobile", "key", "cloud-off"];
       <div class="wrap footer-inner">
         <span class="brand small" lang="en"><span class="brand-mark"><Icon name="shield-check" filled size={15} /></span>Qasa</span>
         <a href={privacyHrefs[lang]} class="footer-link">{t.legal.privacyPolicy}</a>
+        <a href={termsHrefs[lang]} class="footer-link">{t.nav.terms}</a>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
       </div>
     </footer>

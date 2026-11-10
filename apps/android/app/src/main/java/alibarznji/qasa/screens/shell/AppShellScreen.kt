@@ -28,7 +28,6 @@ import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.breach.BreachedPasswordsScreen
 import alibarznji.qasa.screens.home.HomeScreen
 import alibarznji.qasa.screens.premium.PremiumUpgradeScreen
-import alibarznji.qasa.screens.settings.LegalPlaceholderScreen
 import alibarznji.qasa.screens.settings.SettingsScreen
 import alibarznji.qasa.screens.settings.backup.BackupsScreen
 import alibarznji.qasa.screens.tools.CollectionsScreen
@@ -77,8 +76,11 @@ fun AppShellScreen(
         }
     }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
     fun open(target: AppPage) {
         when {
+            // Privacy and Terms live on the website, in the app's language.
+            target == AppPage.Terms || target == AppPage.Privacy -> LegalLinks.open(context, terms = target == AppPage.Terms)
             target.requiresPremium && !isPremium -> page = AppPage.PremiumUpgrade
             // The two pages that became tabs switch tabs instead of stacking.
             target == AppPage.Vault -> { page = null; tab = ShellTab.Passwords }
@@ -139,18 +141,8 @@ private fun PageContent(
         AppPage.Collections -> CollectionsScreen(onOpenMenu = back)
         AppPage.Settings -> SettingsScreen(onOpenMenu = back, onLock = onLock, onUpgrade = upgrade)
         AppPage.Backups -> BackupsScreen(onDone = back, inSheet = false)
-        AppPage.Terms -> LegalPlaceholderScreen(
-            stringResource(R.string.nav_terms),
-            bodyRes = R.string.legal_termsbody,
-            onOpenMenu = back,
-        )
-        AppPage.Privacy -> LegalPlaceholderScreen(
-            stringResource(R.string.nav_privacy),
-            bodyRes = R.string.legal_privacybody,
-            onOpenMenu = back,
-        )
         AppPage.PremiumUpgrade -> PremiumUpgradeScreen(onOpenMenu = back, onDone = back)
-        // Tabs, never stacked: `open` routes these to their tab.
-        AppPage.Vault, AppPage.BreachedPasswords -> Unit
+        // Tabs and website links, never stacked: `open` routes these elsewhere.
+        AppPage.Vault, AppPage.BreachedPasswords, AppPage.Terms, AppPage.Privacy -> Unit
     }
 }
