@@ -1102,7 +1102,6 @@ to a stub webhook all match. Remaining Android gaps:
 | **Collections** | Android can create and delete only. iOS can rename and drill into contents. **Port `CollectionDetailView` and rename.** |
 | **Config error banner** | iOS shows a banner when a release build cannot reach a valid HTTPS host. Android has none. |
 | **FCM vs APNs** | `PushChannels.kt` needs review; iOS registers notification categories, Android does not. |
-| **NFC card read** | Android shows an enabled-looking "Scan NFC" button wired to `onClick = {}` (`VaultItemEditorScreen.kt:109`). **Either implement it or set `enabled = false`.** An enabled button that does nothing is worse than an absent one. |
 | **Save-to-vault from the generator** | A no-op on both (`GenerateView.swift:28-39`, `GenerateScreen.kt:205`). Implement it or disable the button. |
 
 ### 12.12 No-op buttons
@@ -1114,7 +1113,6 @@ disabled.
 | --- | --- |
 | `SettingsScreen.kt:312` | CSV import — `onClick = { }` |
 | `SettingsScreen.kt:317` | CSV export — `onClick = { }` |
-| `VaultItemEditorScreen.kt:109` | NFC scan — `onClick = { }` |
 | `GenerateScreen.kt:206` | Save to vault — no-op on both platforms |
 | `BreachCard.swift:89` (iOS) | Rotate password — empty `Button {}` |
 | `AddItemMenuView.swift:66` (iOS) | Renders the raw key `"common.cancel"` |

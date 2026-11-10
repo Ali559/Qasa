@@ -235,7 +235,7 @@ function onKey(e: KeyboardEvent) {
             <CollectionPicker v-model="payload.fields.collectionId" />
           </template>
 
-          <!-- Card (NFC scanning is phone-only) -->
+          <!-- Card -->
           <template v-else-if="payload.variant === 'card'">
             <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
             <FormField v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />

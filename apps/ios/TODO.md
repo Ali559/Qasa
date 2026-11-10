@@ -23,6 +23,3 @@
       matched by the login website's registrable domain (`SiteIcon.swift`), on `VaultItemRow`
       and the detail hero; other sites keep the letter tile, nothing is fetched. Tested on the
       simulator only: check them on a device in light and dark.
-- [ ] **NFC capability in the Apple developer portal.** Passport/ID scanning needs "NFC Tag
-      Reading" on the App ID and a regenerated provisioning profile; then try it on a device
-      with a real passport and ID card (the simulator has no NFC).

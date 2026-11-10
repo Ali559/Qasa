@@ -221,7 +221,7 @@ warnings before using `design.md` as a reference:
   - 2FA QR codes are read from an image file (a screenshot) instead of the camera.
   - The Suggested section is left out: on iOS it comes from a mock context provider.
   - iOS no-ops are implemented or dropped: generator "Save to my passwords" opens a new
-    login; the disabled "Pronounceable" toggle and the NFC button are gone.
+    login; the disabled "Pronounceable" toggle is gone.
   - Phone-only wording ("on this phone") has desktop overrides in
     `l10n/platform/desktop.json`, with drafted ar/ckb text for a native speaker to review.
 - Left for later phases: account rows (profile, plan, upgrade, linked devices, pairing,

@@ -1,7 +1,11 @@
 package alibarznji.qasa.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -165,9 +169,15 @@ object QasaIconFrame {
     val shield: Dp = 88.dp
 }
 
-/** The sheet maximum height: 92% of the screen. Triplicated at three call sites on iOS. */
+/**
+ * The sheet maximum height: 92% of the window, and always below the status bar (on
+ * phones where `screenHeightDp` leaves the system bars out, 92% of it could reach it).
+ */
 @Composable
 fun qasaSheetMaxHeight(): Dp {
-    val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
-    return screenHeightDp * 0.92f
+    val density = LocalDensity.current
+    val window = with(density) { LocalWindowInfo.current.containerSize.height.toDp() }
+    val statusBar = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
+    val screen = if (window > 0.dp) window else LocalConfiguration.current.screenHeightDp.dp
+    return minOf(screen * 0.92f, screen - statusBar - QasaDimens.gap)
 }

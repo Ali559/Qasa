@@ -72,7 +72,7 @@ app/src/main/java/alibarznji/qasa/
 - [ ] Auto-lock after configured minutes / return from background past threshold.
 - [ ] Biometric unlock when enabled.
 - [ ] Collections CRUD; Password Health scores logins; Generator Save is no-op.
-- [ ] Suggested section mock on vault list; NFC button is no-op; CSV export empty stub.
+- [ ] Suggested section mock on vault list; CSV export empty stub.
 
 ### API / registration
 

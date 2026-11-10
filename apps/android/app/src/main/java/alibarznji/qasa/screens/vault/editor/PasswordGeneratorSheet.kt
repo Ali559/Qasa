@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.tools.PasswordGeneratorContent
 import alibarznji.qasa.screens.tools.rememberPasswordGeneratorState
@@ -33,7 +34,7 @@ import androidx.compose.ui.unit.dp
 fun PasswordGeneratorSheet(onDismiss: () -> Unit, onUsePassword: (String) -> Unit) {
     val c = qasaColors
     val state = rememberPasswordGeneratorState()
-    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
+    val maxHeight = qasaSheetMaxHeight()
     QasaModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
             Column(

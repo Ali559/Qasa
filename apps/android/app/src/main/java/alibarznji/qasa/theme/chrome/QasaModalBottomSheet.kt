@@ -3,7 +3,12 @@ package alibarznji.qasa.theme
 import alibarznji.qasa.theme.QasaDimens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,7 +23,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+
+/** M3's `BottomSheetDefaults.DragHandle`: 22dp above and below a 4dp bar. */
+private val SheetDragHandleHeight = 48.dp
 
 /**
  * Closes the enclosing [QasaModalBottomSheet] the same way a swipe does: it slides down
@@ -71,6 +80,10 @@ fun QasaModalBottomSheet(
         shape = androidx.compose.foundation.shape.RoundedCornerShape(QasaDimens.cornerRadiusLarge),
         dragHandle = { BottomSheetDefaults.DragHandle(color = c.textTertiary) },
         tonalElevation = QasaDimens.stroke,
+        // Bottom insets only (gesture bar, keyboard). The default also pads the top by the
+        // status bar, and its share changed as the sheet moved: the sheet crept up for a
+        // second after opening, and a fling at the top of its scroll set it bouncing.
+        contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal) },
         modifier = modifier,
     ) {
         CompositionLocalProvider(LocalSheetDismiss provides animatedDismiss) {
@@ -78,6 +91,9 @@ fun QasaModalBottomSheet(
                 Modifier
                     .reportUserActivity(activity)
                     .fillMaxWidth()
+                    // Sized to its content like an iOS sheet; with the drag handle above it,
+                    // never taller than 92% of the window, so it stays clear of the status bar.
+                    .heightIn(max = qasaSheetMaxHeight() - SheetDragHandleHeight)
                     .navigationBarsPadding(),
                 content = content,
             )

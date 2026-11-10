@@ -53,13 +53,20 @@ fun ScreenScaffold(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = qasaColors
-    Column(modifier.fillMaxSize().background(c.background)) {
-        Box(Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+    // Inside a sheet: wrap the content (the sheet caps the height and handles the insets).
+    // Filling the screen there made every sub-page a full-height sheet.
+    val inSheet = LocalSheetDismiss.current != null
+    Column(
+        modifier
+            .then(if (inSheet) Modifier.fillMaxWidth() else Modifier.fillMaxSize())
+            .background(c.background),
+    ) {
+        Box(if (inSheet) Modifier else Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
             header()
         }
-        val tailInset = if (stickyBottom == null) WindowInsets.navigationBars else NoInsets
+        val tailInset = if (stickyBottom == null && !inSheet) WindowInsets.navigationBars else NoInsets
         val bodyMod = Modifier
-            .weight(1f)
+            .weight(1f, fill = !inSheet)
             .fillMaxWidth()
             .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
             .padding(horizontal = QasaDimens.screenPadding)
