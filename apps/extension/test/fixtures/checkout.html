@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checkout</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<form id="checkout" action="/done" onsubmit="return false">
+  <h2>Shipping</h2>
+  <label>Full name <input id="fullname" name="fullname"></label>
+  <label>Email <input id="email" type="email" name="email"></label>
+  <label>Phone <input id="phone" type="tel" name="phone"></label>
+  <label>Street address <input id="street" name="address1"></label>
+  <label>Apartment, building <input id="line2" name="address2"></label>
+  <label>City <input id="city" name="city"></label>
+  <label>ZIP <input id="zip" name="zip"></label>
+  <label>Country
+    <select id="country" name="country">
+      <option value="">Choose</option>
+      <option value="US">United States</option>
+      <option value="IQ">Iraq</option>
+    </select>
+  </label>
+  <h2>Card</h2>
+  <label>Card number <input id="ccnumber" autocomplete="cc-number"></label>
+  <label>Name on card <input id="ccname" autocomplete="cc-name"></label>
+  <label>Month
+    <select id="ccmonth" autocomplete="cc-exp-month">
+      <option value="">MM</option><option>01</option><option>02</option><option>03</option><option>04</option>
+    </select>
+  </label>
+  <label>Year
+    <select id="ccyear" autocomplete="cc-exp-year">
+      <option value="">YYYY</option><option>2028</option><option>2029</option><option>2030</option>
+    </select>
+  </label>
+  <label>CVC <input id="cvc" name="cvc" maxlength="4"></label>
+  <!-- A field pushed off the page: never filled. -->
+  <input id="hidden-cc" name="cardnumber2" autocomplete="cc-csc" style="position:absolute;left:-9999px">
+  <button type="submit">Pay</button>
+</form>
+</body>
+</html>

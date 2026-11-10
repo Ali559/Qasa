@@ -3,11 +3,14 @@
 // Unlock screen, for pairing): "Allow Chrome to use Qasa?" with the matching code, and
 // "Save this login?" / "Update the saved password?" after a sign-in form was sent.
 // Saves queue up and are shown one at a time; nothing is written until Save is clicked.
-import { Globe, KeyRound, User } from 'lucide-vue-next'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+// Third: "Confirm to fill <card>", the master password for a card fill when Touch ID /
+// Hello isn't set up (docs/autofill-plan.md §3.2).
+import { Globe, KeyRound, Lock, User } from 'lucide-vue-next'
+import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 
 import Sheet from '@/components/Sheet.vue'
-import { bridgeApi, type PairPrompt, type SavePrompt } from '@/bridge/api'
+import TextField from '@/components/TextField.vue'
+import { bridgeApi, type ConfirmPrompt, type PairPrompt, type SavePrompt } from '@/bridge/api'
 import { useT } from '@/prefs'
 import { showToast } from '@/toast'
 import { loadVault, session } from '@/vault/session'
@@ -16,12 +19,42 @@ const t = useT()
 const pair = ref<PairPrompt | null>(null)
 const saves = ref<SavePrompt[]>([])
 const busy = ref(false)
+const confirm = ref<ConfirmPrompt | null>(null)
+const confirmPassword = ref('')
+const confirmError = ref('')
 const unlisten: Array<() => void> = []
+
+// The Touch ID / Hello prompts the browser starts speak the UI language.
+watchEffect(() => void bridgeApi.setAuthReasons(t('bridge.unlockReason'), t('bridge.confirmReason')).catch(() => {}))
 
 onMounted(async () => {
   unlisten.push(await bridgeApi.onPair((p) => (pair.value = p)))
   unlisten.push(await bridgeApi.onSave((p) => saves.value.push(p)))
+  unlisten.push(
+    await bridgeApi.onConfirm((p) => {
+      confirm.value = p
+      confirmPassword.value = ''
+      confirmError.value = ''
+    }),
+  )
 })
+
+async function decideConfirm(accept: boolean) {
+  const current = confirm.value
+  if (!current || busy.value) return
+  busy.value = true
+  try {
+    const answered = await bridgeApi.decideConfirm(current.id, accept ? confirmPassword.value : null)
+    if (answered) confirm.value = null
+    else confirmError.value = t('auth.unlock.wrongPassword')
+  } catch (e) {
+    console.error('Could not confirm the fill', e)
+    confirm.value = null
+  } finally {
+    confirmPassword.value = ''
+    busy.value = false
+  }
+}
 onBeforeUnmount(() => unlisten.forEach((u) => u()))
 
 async function decidePair(allow: boolean) {
@@ -95,9 +128,43 @@ async function decideSave(accept: boolean) {
       </div>
     </div>
   </Sheet>
+
+  <Sheet
+    :open="pair === null && confirm !== null"
+    :label="confirm ? t('bridge.confirmTitle', confirm.itemTitle) : ''"
+    :width="400"
+    @close="decideConfirm(false)"
+  >
+    <div v-if="confirm" class="prompt">
+      <h2>{{ t('bridge.confirmTitle', confirm.itemTitle) }}</h2>
+      <p>{{ t('bridge.confirmBody', confirm.client) }}</p>
+      <TextField
+        v-model="confirmPassword"
+        :icon="Lock"
+        :placeholder="t('auth.unlock.placeholder')"
+        :label="t('auth.unlock.masterPassword')"
+        secure
+        revealable
+        autofocus
+        :invalid="!!confirmError"
+        @submit="decideConfirm(true)"
+      />
+      <p v-if="confirmError" class="error" role="alert">{{ confirmError }}</p>
+      <div class="actions">
+        <button type="button" class="secondary" :disabled="busy" @click="decideConfirm(false)">{{ t('common.cancel') }}</button>
+        <button type="button" class="primary" :disabled="busy || !confirmPassword" @click="decideConfirm(true)">
+          {{ t('bridge.confirm') }}
+        </button>
+      </div>
+    </div>
+  </Sheet>
 </template>
 
 <style scoped>
+.error {
+  color: var(--danger);
+}
+
 .prompt {
   display: flex;
   flex-direction: column;

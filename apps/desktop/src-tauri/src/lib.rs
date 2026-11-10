@@ -40,6 +40,7 @@ pub fn run() {
             app.manage(sync::SyncState::default());
             app.manage(backup::BackupState::default());
             app.manage(bridge::BridgeState(Mutex::new(bridge::Bridge::new(Box::new(bridge::clients::KeyringClients)))));
+            app.manage(bridge::commands::AuthReasons::default());
             // The browser extension: register nm-host with the browsers, then listen.
             bridge::manifest::install(&dir);
             let host = std::sync::Arc::new(bridge::commands::TauriHost { app: app.handle().clone() });
@@ -106,6 +107,8 @@ pub fn run() {
             bridge::commands::bridge_revoke,
             bridge::commands::bridge_pair_decide,
             bridge::commands::bridge_save_decide,
+            bridge::commands::bridge_confirm_decide,
+            bridge::commands::bridge_set_auth_reasons,
             ac::account_status,
             ac::account_bootstrap,
             ac::account_refresh_license,

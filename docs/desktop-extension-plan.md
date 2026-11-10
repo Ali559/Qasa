@@ -734,7 +734,9 @@ before sync lands.
    device, and Premium covers phone + desktop. Alternative: let one desktop not count.
 2. **VPN on the desktop.** It needs a privileged helper on every OS (a macOS Network
    Extension, wireguard-nt on Windows, root on Linux). **Recommend:** after v1.
-3. **Cards in the extension.** iOS deliberately never returns cards as credentials.
+3. **Cards in the extension.** *Replaced 2026-11-10 by [`autofill-plan.md`](autofill-plan.md):
+   cards and profiles fill, cards after a Touch ID / Hello or master password confirmation.*
+   iOS deliberately never returns cards as credentials.
    **Recommend:** no card autofill in v1. The popup shows the card in the 30-second copy
    drawer instead.
 4. **Sync conflicts.** **Recommend:** last writer wins per item. Alternative: keep the losing

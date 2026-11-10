@@ -133,7 +133,7 @@ export function newRequestId(): string {
   return [...crypto.getRandomValues(new Uint8Array(8))].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-export type Op = 'status' | 'unlock' | 'matches' | 'fill' | 'totp' | 'copy' | 'search' | 'generate' | 'save'
+export type Op = 'status' | 'unlock' | 'matches' | 'fill' | 'totp' | 'copy' | 'search' | 'generate' | 'save' | 'identities' | 'fillIdentity' | 'confirm'
 
 /** Encrypts one request into its `req` frame. */
 export async function sealRequest(
@@ -179,7 +179,9 @@ export type InFrame =
   | { type: 'pairExpired' }
   | { type: 'error'; code: string; n?: string }
 
-export type ReplyError = 'locked' | 'noVault' | 'notFound' | 'noMatch' | 'bad'
+/** `confirm`: a card needs Touch ID / Hello or the master password first; `pending`: that
+ *  confirmation is still up; `cancelled`: the user dismissed it. */
+export type ReplyError = 'locked' | 'noVault' | 'notFound' | 'noMatch' | 'bad' | 'confirm' | 'pending' | 'cancelled'
 
 export interface ReplyBody {
   id: string

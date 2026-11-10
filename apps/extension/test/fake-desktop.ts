@@ -26,6 +26,39 @@ export const LOGINS: FakeLogin[] = [
   { id: 'c1', title: 'Elsewhere', username: 'carol', password: 'elsewhere-password', website: 'https://example.com' },
 ]
 
+/** Cards and profile items, as the desktop's `identities` lists them, with their values. */
+export const IDENTITIES = [
+  {
+    id: 'card-1',
+    kind: 'card',
+    title: 'Visa',
+    hint: '•••• 4242',
+    values: { 'cc-number': '4242424242424242', 'cc-name': 'Ali Barznji', 'cc-exp': '03/29', 'cc-exp-month': '03', 'cc-exp-year': '2029', 'cc-csc': '123' },
+  },
+  {
+    id: 'addr-1',
+    kind: 'address',
+    title: 'Home',
+    hint: 'Sulaymaniyah, IQ',
+    values: {
+      name: 'Ali Barznji',
+      'given-name': 'Ali',
+      'family-name': 'Barznji',
+      email: 'ali@example.com',
+      tel: '+9647501234567',
+      'tel-national': '07501234567',
+      'tel-country-code': '+964',
+      'street-address': '100 Salim St',
+      'address-line1': '100 Salim St',
+      'address-line2': 'Building 4',
+      'address-level2': 'Sulaymaniyah',
+      'postal-code': '46001',
+      country: 'IQ',
+      'country-name': 'Iraq',
+    },
+  },
+] as const
+
 export type VaultState = 'locked' | 'unlocked' | 'noVault'
 
 // MARK: TOTP (RFC 6238, SHA-1, 6 digits, 30 s), also used by the tests to check codes.
@@ -62,6 +95,12 @@ export class FakeDesktop {
   readonly urlOps: string[] = []
   readonly hellos: string[] = []
   unlocks = 0
+  /** How a card confirmation ends, a moment after it was asked for. */
+  confirmAnswer: 'approve' | 'deny' = 'approve'
+  readonly confirms: string[] = []
+  private readonly approvals = new Map<string, 'pending' | 'approved' | 'denied'>()
+  /** `unlock` with `prompt`: unlock this long after (Touch ID being touched). */
+  unlockDelayMs = 0
   lastPairCode: string | undefined
   private server: Server | undefined
   private readonly sockets = new Set<Socket>()
@@ -164,8 +203,11 @@ export class FakeDesktop {
     if (op === 'status') return { ok: true, state: this.state, device: 'Fake Mac' }
     if (op === 'unlock') {
       this.unlocks++
-      if (this.state === 'locked') this.state = 'unlocked'
-      return { ok: true }
+      if (this.state === 'locked') {
+        if (body.prompt && this.unlockDelayMs > 0) setTimeout(() => (this.state = 'unlocked'), this.unlockDelayMs)
+        else this.state = 'unlocked'
+      }
+      return { ok: true, method: body.prompt ? 'biometric' : 'window' }
     }
     if (this.state === 'noVault') return { ok: false, error: 'noVault' }
     if (this.state === 'locked') return { ok: false, error: 'locked' }
@@ -198,6 +240,28 @@ export class FakeDesktop {
           .slice(0, 50)
           .map((l) => ({ id: l.id, title: l.title, username: l.username, website: l.website, hasTotp: !!l.totpSecret }))
         return { ok: true, items }
+      }
+      case 'identities':
+        return { ok: true, items: IDENTITIES.map(({ id, kind, title, hint }) => ({ id, kind, title, hint })) }
+      case 'fillIdentity': {
+        const it = IDENTITIES.find((i) => i.id === body.itemId)
+        if (!it) return { ok: false, error: 'notFound' }
+        if (it.kind === 'card') {
+          const a = this.approvals.get(it.id)
+          if (!a) return { ok: false, error: 'confirm' }
+          if (a === 'pending') return { ok: false, error: 'pending' }
+          this.approvals.delete(it.id)
+          if (a === 'denied') return { ok: false, error: 'cancelled' }
+        }
+        return { ok: true, kind: it.kind, values: it.values }
+      }
+      case 'confirm': {
+        const id = String(body.itemId)
+        this.confirms.push(id)
+        this.approvals.set(id, 'pending')
+        const answer = this.confirmAnswer
+        setTimeout(() => this.approvals.set(id, answer === 'approve' ? 'approved' : 'denied'), 600)
+        return { ok: true }
       }
       case 'generate':
         return { ok: true, password: randomBytes(15).toString('base64').replace(/[+/=]/g, 'x') }

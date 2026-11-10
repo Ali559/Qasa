@@ -202,6 +202,11 @@ export class Overlay {
     return this.menu !== null
   }
 
+  /** The field the open menu belongs to. */
+  menuField(): HTMLInputElement | null {
+    return this.menu?.field ?? null
+  }
+
   closeMenu(): void {
     this.observer?.disconnect()
     this.observer = null

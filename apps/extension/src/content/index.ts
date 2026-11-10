@@ -6,13 +6,14 @@
 // A copy only takes charge of an http(s) document. Frames without a URL of their own
 // (about:blank, srcdoc, written by script) share their creator's origin, and the parent's
 // copy handles them through detect.ts's same-origin traversal, with the parent's URL.
-import type { BgResponse, BridgeStatus, ContentRequest, FillValues, LoginMatch, TabRequest } from '@ext/shared/messages'
+import type { BgResponse, BridgeStatus, ContentRequest, FillValues, IdentityItem, LoginMatch, TabRequest } from '@ext/shared/messages'
 import { loadLanguage } from '@ext/shared/language'
 import { isWebUrl } from '@ext/shared/protocol'
-import { detect, FRAME_MARK, groupOf, iconFields, isOtpField, type Detection, type FieldGroup } from './detect'
-import { setFieldValue } from './fill'
+import { detect, FRAME_MARK, groupOf, iconFields, identityGroupOf, isOtpField, type Detection, type FieldGroup } from './detect'
+import { setFieldValue, setSelectValue } from './fill'
+import { candidates, optionFor, type IdentityGroup, type IdentityValues } from './identity'
 import { loadFonts, type FontBytes } from './fonts'
-import { effectiveOpacity, isFieldVisible } from './guard'
+import { effectiveOpacity, isFieldRendered, isFieldVisible } from './guard'
 import type { ContentLanguage } from './i18n'
 import { Overlay } from './overlay'
 import { groupContaining, isSubmitControl, SaveDeduper, saveMessageFor } from './save'
@@ -27,7 +28,7 @@ if (ownsDocument) (window as MarkedWindow)[FRAME_MARK] = true
 let language: ContentLanguage = 'en'
 void loadLanguage().then((l) => (language = l))
 
-let detection: Detection = { groups: [], otpFields: [] }
+let detection: Detection = { groups: [], otpFields: [], identity: [] }
 /** One overlay per document we handle (ours, plus script-less same-origin frames). */
 const overlays = new Map<Document, Overlay>()
 /** Icons show only while the desktop is reachable and paired. */
@@ -107,26 +108,45 @@ function scheduleReposition(): void {
 
 // MARK: menu
 
-function openMenuFor(field: HTMLInputElement): void {
-  const overlay = overlayFor(field.ownerDocument)
-  void loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
-  const otp = isOtpField(field)
+/** What a field's menu offers: its login form's logins, 2FA codes, cards or profiles. */
+type MenuContext =
+  | { kind: 'login'; group: FieldGroup }
+  | { kind: 'otp' }
+  | { kind: 'identity'; group: IdentityGroup }
+
+function contextOf(field: HTMLInputElement): MenuContext | null {
+  if (isOtpField(field)) return { kind: 'otp' }
   const group = groupOf(detection.groups, field)
-  overlay.openMenu(field, {
-    onPick: (item) => {
-      overlay.closeMenu()
-      if (otp) void fillTotp(field, item.id, overlay.element)
-      else if (group) void fillGroup(group, item.id, overlay.element)
-    },
-  })
-  void loadMenu(overlay, otp)
+  if (group) return { kind: 'login', group }
+  const identity = identityGroupOf(detection.identity, field)
+  return identity ? { kind: 'identity', group: identity } : null
 }
 
-async function loadMenu(overlay: Overlay, otpOnly: boolean): Promise<void> {
+function openMenuFor(field: HTMLInputElement): void {
+  const context = contextOf(field)
+  if (!context) return
+  const overlay = overlayFor(field.ownerDocument)
+  void loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
+  overlay.openMenu(field, {
+    onPick: (item) => {
+      if (context.kind === 'identity') {
+        // The menu stays up while a card waits for its confirmation.
+        void fillIdentity(field, context.group, item.id, overlay)
+        return
+      }
+      overlay.closeMenu()
+      if (context.kind === 'otp') void fillTotp(field, item.id, overlay.element)
+      else void fillGroup(context.group, item.id, overlay.element)
+    },
+  })
+  void loadMenu(overlay, context)
+}
+
+async function loadMenu(overlay: Overlay, context: MenuContext): Promise<void> {
   try {
     const status = await ask<BridgeStatus>({ kind: 'status' })
     if (status.state === 'locked') {
-      overlay.setMenu({ kind: 'message', key: 'ext.page.locked', action: { key: 'ext.page.unlock', run: () => void unlock(overlay) } })
+      overlay.setMenu({ kind: 'message', key: 'ext.page.locked', action: { key: 'ext.page.unlock', run: () => void unlock(overlay, context) } })
       return
     }
     if (status.state !== 'unlocked') {
@@ -134,17 +154,45 @@ async function loadMenu(overlay: Overlay, otpOnly: boolean): Promise<void> {
       overlay.setMenu({ kind: 'message', key })
       return
     }
+    if (context.kind === 'identity') {
+      const card = context.group.kind === 'card'
+      const all = await ask<IdentityItem[]>({ kind: 'identities' })
+      const items: LoginMatch[] = all
+        .filter((i) => (i.kind === 'card') === card)
+        .map((i) => ({ id: i.id, title: i.title, username: i.hint, hasTotp: false }))
+      overlay.setMenu(items.length ? { kind: 'items', items } : { kind: 'message', key: card ? 'ext.page.noCards' : 'ext.page.noProfiles' })
+      return
+    }
     let items = await ask<LoginMatch[]>({ kind: 'matches' })
-    if (otpOnly) items = items.filter((i) => i.hasTotp)
+    if (context.kind === 'otp') items = items.filter((i) => i.hasTotp)
     overlay.setMenu(items.length ? { kind: 'items', items } : { kind: 'message', key: 'ext.page.noMatches' })
   } catch {
     overlay.setMenu({ kind: 'message', key: 'ext.page.error' })
   }
 }
 
-async function unlock(overlay: Overlay): Promise<void> {
-  overlay.closeMenu()
+const UNLOCK_WAIT_MS = 120_000
+const POLL_MS = 1_000
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+/**
+ * The menu's Unlock: the desktop starts Touch ID / Hello (or shows its window for the
+ * password), and the menu waits, then lists the items for the same field: no second
+ * click on the field (docs/autofill-plan.md §1.2).
+ */
+async function unlock(overlay: Overlay, context: MenuContext): Promise<void> {
+  overlay.setMenu({ kind: 'message', key: 'ext.page.unlocking' })
   await ask({ kind: 'unlock' }).catch(() => undefined)
+  const started = Date.now()
+  while (overlay.isMenuOpen() && Date.now() - started < UNLOCK_WAIT_MS) {
+    await sleep(POLL_MS)
+    const status = await ask<BridgeStatus>({ kind: 'status' }).catch(() => null)
+    if (status?.state === 'unlocked') {
+      if (overlay.isMenuOpen()) await loadMenu(overlay, context)
+      return
+    }
+  }
+  if (overlay.isMenuOpen()) await loadMenu(overlay, context)
 }
 
 // MARK: filling
@@ -177,6 +225,53 @@ async function fillTotp(field: HTMLInputElement, itemId: string, ownHost: Elemen
   const code = await ask<string>({ kind: 'totp', itemId })
   if (!isFieldVisible(field, ownHost)) return false
   setFieldValue(field, code)
+  return true
+}
+
+const CONFIRM_WAIT_MS = 120_000
+
+/**
+ * Fills a card or profile form after a pick. A card is confirmed on the desktop first
+ * (Touch ID / Hello or the master password); the menu says so and waits. The field that
+ * was clicked must be really visible (guard.ts); the rest of the form, which may be below
+ * the fold, must at least be rendered inside the page.
+ */
+async function fillIdentity(anchor: HTMLInputElement, group: IdentityGroup, itemId: string, overlay: Overlay): Promise<boolean> {
+  const ownHost = overlay.element
+  if (!isFieldVisible(anchor, ownHost)) return false
+  let values: IdentityValues | null = null
+  const started = Date.now()
+  let asked = false
+  while (!values) {
+    try {
+      values = await ask<IdentityValues>({ kind: 'fillIdentity', itemId })
+    } catch (e) {
+      const code = e instanceof Error ? e.message : 'bad'
+      if (code === 'confirm' && !asked) {
+        asked = true
+        overlay.setMenu({ kind: 'message', key: 'ext.page.confirming' })
+        await ask({ kind: 'confirm', itemId }).catch(() => undefined)
+      } else if ((code === 'pending' || code === 'confirm') && Date.now() - started < CONFIRM_WAIT_MS && overlay.isMenuOpen()) {
+        await sleep(POLL_MS)
+      } else {
+        if (overlay.isMenuOpen()) overlay.setMenu({ kind: 'message', key: code === 'cancelled' ? 'ext.page.cancelled' : 'ext.page.error' })
+        return false
+      }
+    }
+  }
+  overlay.closeMenu()
+  if (!isFieldVisible(anchor, ownHost)) return false
+  for (const f of group.fields) {
+    if (f.field !== anchor && !isFieldRendered(f.field)) continue
+    const wanted = candidates(f, group.fields, values)
+    if (!wanted.length) continue
+    if (f.field.tagName === 'SELECT') {
+      const option = optionFor(f.field as HTMLSelectElement, wanted)
+      if (option) setSelectValue(f.field as HTMLSelectElement, option.value)
+    } else {
+      setFieldValue(f.field as HTMLInputElement, wanted[0])
+    }
+  }
   return true
 }
 
@@ -238,6 +333,30 @@ function watchDocument(doc: Document): void {
     (e) => {
       const t = eventTarget(e)
       if (e.isTrusted && t && isSubmitControl(t)) captureFrom(t)
+    },
+    true,
+  )
+  // Clicking into a field Qasa can fill opens its menu, as Dashlane does; typing closes it.
+  // Only a real click: a script focusing or clicking a field opens nothing.
+  doc.addEventListener(
+    'click',
+    (e) => {
+      const t = eventTarget(e)
+      if (!e.isTrusted || !iconsAllowed || t?.tagName !== 'INPUT') return
+      const field = t as HTMLInputElement
+      if (!iconFields(detection).includes(field) || effectiveOpacity(field) < 0.5) return
+      const overlay = overlays.get(field.ownerDocument)
+      if (overlay?.menuField() === field) return
+      openMenuFor(field)
+    },
+    true,
+  )
+  doc.addEventListener(
+    'keydown',
+    (e) => {
+      const t = eventTarget(e)
+      const overlay = t ? overlays.get(t.ownerDocument) : undefined
+      if (e.isTrusted && overlay?.menuField() === t && (e.key.length === 1 || e.key === 'Backspace')) overlay.closeMenu()
     },
     true,
   )

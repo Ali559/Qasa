@@ -41,3 +41,14 @@ export function setFieldValue(field: HTMLInputElement, value: string): void {
 export function wasFilledWith(field: HTMLInputElement, value: string): boolean {
   return filledByUs.get(field) === digest(value)
 }
+
+/** Picks a <select> option the way a user would, with the events frameworks listen for. */
+export function setSelectValue(select: HTMLSelectElement, value: string): void {
+  const win = select.ownerDocument.defaultView ?? window
+  const proto = (win as typeof window).HTMLSelectElement?.prototype ?? HTMLSelectElement.prototype
+  const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set
+  if (setter) setter.call(select, value)
+  else select.value = value
+  select.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+  select.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
+}

@@ -19,6 +19,14 @@ export interface LoginMatch {
   hasTotp: boolean
 }
 
+/** A card or profile item for the in-page menu: never a secret, only a masked hint. */
+export interface IdentityItem {
+  id: string
+  kind: 'card' | 'address' | 'name' | 'email' | 'phone' | 'company'
+  title: string
+  hint: string
+}
+
 export interface SearchHit extends LoginMatch {
   website: string
 }
@@ -42,6 +50,12 @@ export type ContentRequest =
   | { kind: 'fill'; itemId: string }
   | { kind: 'totp'; itemId: string }
   | { kind: 'save'; username: string; password: string }
+  /** Cards and profile items (not tied to a site). */
+  | { kind: 'identities' }
+  /** A picked card or profile: its values by `autocomplete` token. Cards answer `confirm` first. */
+  | { kind: 'fillIdentity'; itemId: string }
+  /** Ask the desktop to confirm a card fill (Touch ID / Hello or the master password). */
+  | { kind: 'confirm'; itemId: string }
   /** Step 1 of a multi-step sign-in: kept in memory for this tab and site only. */
   | { kind: 'rememberUsername'; username: string }
   /** The in-page menu's font files (content/fonts.ts). */

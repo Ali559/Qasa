@@ -12,6 +12,33 @@ not in the same way on each platform (§3.3).
 
 ## Progress log
 
+**2026-11-10 — Browser extension and desktop bridge done (§3.2).**
+- **Detection:** `content/identity.ts` classifies card, name, contact and address inputs and selects (the same rules as Android). Card and profile groups live next to the login groups in `detect.ts`.
+- **Menu:**
+  - A real click into any fillable field opens the menu; typing closes it. A script's click or focus opens nothing.
+  - Card fields list cards; profile fields list addresses, names, email, phone and company.
+- **Locked vault:** the menu's Unlock sends `unlock {prompt: true}`.
+  - The desktop starts Touch ID / Hello on its own thread (`Host::start_biometric`), else brings its window forward.
+  - The menu waits, then lists the items for the same field.
+- **Bridge ops:**
+  - `identities`.
+  - `fillIdentity`: values by `autocomplete` token. A profile pick fills what it lacks from the first item of each other kind.
+  - `confirm`.
+  - Cards answer `confirm`, then `pending` until Touch ID / Hello or the new "Fill <card>?" master password sheet (`BridgePrompts.vue`) answers. An approval is single-use, lasts 60 s, and belongs to one paired browser.
+- **Filling:** the clicked field must pass the visibility check. The rest of the form must be rendered inside the page, so fields below the fold fill and fields pushed off the page don't. Selects match by value, text or number.
+- **Desktop app:**
+  - The Touch ID / Hello texts come from the UI language (`bridge_set_auth_reasons`).
+  - A vault unlocked from the browser enters the app (`vault-unlocked`).
+- **Not done on the desktop:** "Confirm every fill" (no setting there yet; logins and profiles fill once unlocked).
+- **Tests:**
+  - 8 Vitest tests (`identity.test.ts`).
+  - 6 Playwright tests (`identity.spec.ts`): card with confirmation, dismissed confirmation, profile below the fold, click-to-open, script click ignored, locked → Unlock → list.
+  - A real-bridge test (card and profile against the Rust demo server).
+  - 7 Rust tests in `bridge/tests.rs`.
+  - Results: 41 Chromium, 2 real-bridge and 71 Rust tests pass.
+  - Firefox not run (no Firefox or geckodriver on this Mac).
+- **By hand still:** Touch ID from the extension in the real app, the confirm sheet on screen, and real checkout pages (Stripe iframes).
+
 **2026-11-10 — Android done (§3.3), except passkeys.**
 - **Fill path:** `QasaAutofillService` rewritten.
   - Fields are classified by `AutofillFieldClassifier`: hints, HTML attributes, ids and labels in en/ar/ckb.

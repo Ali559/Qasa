@@ -22,6 +22,12 @@ pub enum OpError {
     NotFound,
     NoMatch,
     Bad,
+    /// A payment item: confirm with Touch ID / Hello or the master password first (`confirm`).
+    Confirm,
+    /// A confirmation is waiting for the user.
+    Pending,
+    /// The user dismissed the confirmation (or it timed out).
+    Cancelled,
 }
 
 impl OpError {
@@ -32,6 +38,9 @@ impl OpError {
             OpError::NotFound => "notFound",
             OpError::NoMatch => "noMatch",
             OpError::Bad => "bad",
+            OpError::Confirm => "confirm",
+            OpError::Pending => "pending",
+            OpError::Cancelled => "cancelled",
         }
     }
 }
@@ -262,4 +271,182 @@ pub fn apply_save(vault: &mut Vault, save: &PendingSave) -> Result<(), OpError> 
         }
     }
     Ok(())
+}
+
+// MARK: cards and identities (docs/autofill-plan.md §3.2)
+
+/// Item kinds a form other than a login can take values from, in the order a profile is
+/// assembled (an address first, then the name, email, phone and company).
+const IDENTITY_KINDS: [&str; 5] = ["address", "name", "email", "phone", "company"];
+
+/// The menu row kind of a payload: `card` or one of [`IDENTITY_KINDS`].
+fn identity_kind(p: &VaultPayload) -> Option<&'static str> {
+    Some(match p {
+        VaultPayload::Card(_) => "card",
+        VaultPayload::Address(_) => "address",
+        VaultPayload::Name(_) => "name",
+        VaultPayload::PersonalEmail(_) => "email",
+        VaultPayload::Phone(_) => "phone",
+        VaultPayload::Company(_) => "company",
+        _ => return None,
+    })
+}
+
+/// Whether filling this item needs Touch ID / Hello or the master password first, even
+/// with the vault unlocked (plan §1.3: payment kinds always ask).
+pub fn needs_confirm(p: &VaultPayload) -> bool {
+    matches!(p, VaultPayload::Card(_))
+}
+
+fn nonempty(s: &str) -> Option<String> {
+    let t = s.trim();
+    (!t.is_empty()).then(|| t.to_string())
+}
+
+fn digits(s: &str) -> String {
+    s.chars().filter(char::is_ascii_digit).collect()
+}
+
+/// `MM/YY` → ("MM", "YY").
+fn expiry(raw: &str) -> Option<(String, String)> {
+    let (m, y) = raw.trim().split_once('/')?;
+    let month: u32 = m.trim().parse().ok().filter(|m| (1..=12).contains(m))?;
+    let year = digits(y);
+    if year.len() != 2 && year.len() != 4 {
+        return None;
+    }
+    Some((format!("{month:02}"), year[year.len() - 2..].to_string()))
+}
+
+/// What the menu shows for an item: a title and a hint that is never a secret.
+fn identity_row(id: &str, p: &VaultPayload) -> Option<Value> {
+    let kind = identity_kind(p)?;
+    let (title, hint) = match p {
+        VaultPayload::Card(f) => {
+            let d = digits(&f.number);
+            let last4 = if d.len() >= 4 { format!("•••• {}", &d[d.len() - 4..]) } else { String::new() };
+            (nonempty(&f.item_name).unwrap_or_else(|| "Card".into()), last4)
+        }
+        VaultPayload::Address(f) => {
+            let place = [f.city.trim(), f.country_code.trim()].iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(", ");
+            (nonempty(&f.item_name).or_else(|| nonempty(&f.address)).unwrap_or_else(|| "Address".into()), place)
+        }
+        VaultPayload::Name(f) => {
+            let full = [f.first_name.trim(), f.middle_name.trim(), f.last_name.trim()].iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(" ");
+            (if full.is_empty() { "Name".into() } else { full }, String::new())
+        }
+        VaultPayload::PersonalEmail(f) => (nonempty(&f.item_name).unwrap_or_else(|| f.email.clone()), f.email.clone()),
+        VaultPayload::Phone(f) => {
+            let d = digits(&f.number);
+            let tail = if d.len() >= 2 { format!("•••• {}", &d[d.len() - 2..]) } else { String::new() };
+            (nonempty(&f.item_name).unwrap_or_else(|| "Phone".into()), tail)
+        }
+        VaultPayload::Company(f) => (nonempty(&f.company_name).unwrap_or_else(|| "Company".into()), f.job_title.clone()),
+        _ => return None,
+    };
+    Some(json!({ "id": id, "kind": kind, "title": title, "hint": hint }))
+}
+
+/// Cards and profile items for the in-page menu. Not tied to a site, so no URL.
+pub fn identities(vault: &Vault) -> OpResult {
+    let (all, _) = vault.all_payloads()?;
+    let mut rows: Vec<(usize, String, Value)> = all
+        .iter()
+        .filter_map(|(id, p)| {
+            let row = identity_row(id, p)?;
+            let order = std::iter::once("card").chain(IDENTITY_KINDS).position(|k| Some(k) == identity_kind(p)).unwrap_or(9);
+            Some((order, row["title"].as_str().unwrap_or_default().to_lowercase(), row))
+        })
+        .collect();
+    rows.sort_by(|a, b| a.0.cmp(&b.0).then_with(|| a.1.cmp(&b.1)));
+    Ok(json!({ "items": rows.into_iter().map(|r| r.2).collect::<Vec<_>>() }))
+}
+
+/// The values one item gives, keyed by HTML `autocomplete` token (plan §3.1).
+fn values_of(p: &VaultPayload, out: &mut serde_json::Map<String, Value>) {
+    let mut put = |k: &str, v: Option<String>| {
+        if let Some(v) = v {
+            out.entry(k.to_string()).or_insert(json!(v));
+        }
+    };
+    match p {
+        VaultPayload::Card(f) => {
+            put("cc-number", nonempty(&digits(&f.number)));
+            put("cc-name", nonempty(&f.account_holder));
+            put("cc-csc", nonempty(&f.security_code));
+            if let Some((mm, yy)) = expiry(&f.expiry_date) {
+                put("cc-exp", Some(format!("{mm}/{yy}")));
+                put("cc-exp-month", Some(mm));
+                put("cc-exp-year", Some(format!("20{yy}")));
+            }
+        }
+        VaultPayload::Name(f) => {
+            let full = [f.first_name.trim(), f.middle_name.trim(), f.last_name.trim()].iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(" ");
+            put("name", nonempty(&full));
+            put("given-name", nonempty(&f.first_name));
+            put("additional-name", nonempty(&f.middle_name));
+            put("family-name", nonempty(&f.last_name));
+        }
+        VaultPayload::PersonalEmail(f) => put("email", nonempty(&f.email)),
+        VaultPayload::Phone(f) => {
+            let number = f.number.trim();
+            if !number.is_empty() {
+                let national = digits(number);
+                let dial = qasa_vault::country::dial_code(f.country_code.trim());
+                let full = if number.starts_with('+') { number.to_string() } else { format!("{dial}{}", national.trim_start_matches('0')) };
+                put("tel", Some(full));
+                put("tel-national", Some(national));
+                put("tel-country-code", Some(dial));
+            }
+        }
+        VaultPayload::Address(f) => {
+            put("street-address", nonempty(&f.address));
+            put("address-line1", nonempty(&f.address));
+            let line2 = [f.building.trim(), f.floor.trim(), f.apartment.trim()].iter().filter(|s| !s.is_empty()).copied().collect::<Vec<_>>().join(", ");
+            put("address-line2", nonempty(&line2));
+            put("address-level2", nonempty(&f.city));
+            put("postal-code", nonempty(&f.zip_code));
+            if let Some(code) = nonempty(&f.country_code) {
+                put("country-name", Some(qasa_vault::country::country_name(&code)));
+                put("country", Some(code));
+            }
+            // An address made out to someone fills a full-name field when no Name item does.
+            put("name", nonempty(&f.recipient));
+        }
+        VaultPayload::Company(f) => put("organization", nonempty(&f.company_name)),
+        _ => {}
+    }
+}
+
+/// The values for a picked card or profile item. A card fills only its own fields; a
+/// profile pick takes the picked item first and fills what it lacks from the first item
+/// of each other identity kind. Payment kinds must have been confirmed (`confirmed`).
+pub fn fill_identity(vault: &mut Vault, args: &Value, confirmed: bool) -> OpResult {
+    let id = arg(args, "itemId")?;
+    let picked = vault.get(id)?;
+    let kind = identity_kind(&picked).ok_or(OpError::NotFound)?;
+    if needs_confirm(&picked) && !confirmed {
+        return Err(OpError::Confirm);
+    }
+    let mut values = serde_json::Map::new();
+    values_of(&picked, &mut values);
+    if kind != "card" {
+        let (all, _) = vault.all_payloads()?;
+        for other in IDENTITY_KINDS.iter().filter(|k| **k != kind) {
+            if let Some((_, p)) = all.iter().find(|(_, p)| identity_kind(p) == Some(other)) {
+                values_of(p, &mut values);
+            }
+        }
+    }
+    vault.mark_used(id).map_err(OpError::from)?;
+    Ok(json!({ "kind": kind, "values": values }))
+}
+
+/// A confirmation may only be asked for an item that needs one.
+pub fn confirmable(vault: &Vault, id: &str) -> Result<String, OpError> {
+    let p = vault.get(id)?;
+    if !needs_confirm(&p) {
+        return Err(OpError::Bad);
+    }
+    Ok(identity_row(id, &p).and_then(|r| r["title"].as_str().map(str::to_string)).unwrap_or_default())
 }

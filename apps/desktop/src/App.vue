@@ -17,6 +17,7 @@ import ReplaceDevicePrompt from '@/screens/backup/ReplaceDevicePrompt.vue'
 import RestoreSetup from '@/screens/backup/RestoreSetup.vue'
 import { forgetBackup, onVaultUnlocked } from '@/backup/store'
 import BridgePrompts from '@/screens/bridge/BridgePrompts.vue'
+import { bridgeApi } from '@/bridge/api'
 import UpdatePrompt from '@/screens/UpdatePrompt.vue'
 import { scheduleUpdateCheck } from '@/updater'
 import { protectedReason } from '@/vault/protectedGate'
@@ -47,6 +48,11 @@ async function route() {
     stage.value = 'unlock'
   }
 }
+
+// Unlocked with Touch ID / Hello from the browser (the extension's in-page Unlock).
+bridgeApi.onVaultUnlocked(() => {
+  if (stage.value === 'unlock') void enterShell()
+}).catch(() => {})
 
 async function enterShell(afterRestore = false) {
   resetNav()

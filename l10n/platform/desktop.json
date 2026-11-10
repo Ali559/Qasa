@@ -448,5 +448,55 @@
     "en": "Your vault is only on this computer. If you lose it or delete Qasa, a backup is the only way to get your passwords back.",
     "ar": "خزنتك موجودة على هذا الحاسوب فقط. إذا فقدته أو حذفت قاصة، فالنسخة الاحتياطية هي الطريقة الوحيدة لاستعادة كلمات مرورك.",
     "ckb": "کۆگاکەت تەنها لەسەر ئەم کۆمپیوتەرەیە. ئەگەر ونی بکەیت یان قاسە بسڕیتەوە، باکئەپ تاکە ڕێگەیە بۆ گەڕاندنەوەی وشە نهێنییەکانت."
+  },
+  "bridge.confirm": {
+    "en": "Fill",
+    "ar": "تعبئة",
+    "ckb": "پڕکردنەوە"
+  },
+  "bridge.confirmBody": {
+    "en": "%@ wants to fill this card. Enter your main password to allow it.",
+    "ar": "يريد %@ تعبئة هذه البطاقة. أدخل كلمة مرورك الرئيسية للسماح بذلك.",
+    "ckb": "%@ دەیەوێت ئەم کارتە پڕبکاتەوە. وشەی نهێنیی سەرەکیت بنووسە بۆ ڕێگەدان."
+  },
+  "bridge.confirmReason": {
+    "en": "Confirm to fill your card",
+    "ar": "أكّد لتعبئة بطاقتك",
+    "ckb": "دڵنیابکەرەوە بۆ پڕکردنەوەی کارتەکەت"
+  },
+  "bridge.confirmTitle": {
+    "en": "Fill %@?",
+    "ar": "تعبئة %@؟",
+    "ckb": "%@ پڕبکرێتەوە؟"
+  },
+  "bridge.unlockReason": {
+    "en": "Unlock Qasa to fill in your browser",
+    "ar": "افتح قاصة للتعبئة في متصفحك",
+    "ckb": "قاسە بکەرەوە بۆ پڕکردنەوە لە وێبگەڕەکەت"
+  },
+  "ext.page.cancelled": {
+    "en": "Not filled.",
+    "ar": "لم تتم التعبئة.",
+    "ckb": "پڕنەکرایەوە."
+  },
+  "ext.page.confirming": {
+    "en": "Confirm on your computer to fill this card.",
+    "ar": "أكّد على حاسوبك لتعبئة هذه البطاقة.",
+    "ckb": "لەسەر کۆمپیوتەرەکەت دڵنیابکەرەوە بۆ پڕکردنەوەی ئەم کارتە."
+  },
+  "ext.page.noCards": {
+    "en": "No cards saved in Qasa.",
+    "ar": "لا توجد بطاقات محفوظة في قاصة.",
+    "ckb": "هیچ کارتێک لە قاسە پاشەکەوت نەکراوە."
+  },
+  "ext.page.noProfiles": {
+    "en": "No addresses or personal info saved in Qasa.",
+    "ar": "لا توجد عناوين أو معلومات شخصية محفوظة في قاصة.",
+    "ckb": "هیچ ناونیشان یان زانیاریی کەسی لە قاسە پاشەکەوت نەکراوە."
+  },
+  "ext.page.unlocking": {
+    "en": "Waiting for Qasa to unlock…",
+    "ar": "بانتظار فتح قاصة…",
+    "ckb": "چاوەڕێی کردنەوەی قاسە…"
   }
 }
