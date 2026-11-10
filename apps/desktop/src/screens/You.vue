@@ -11,11 +11,14 @@ import PrimaryButton from '@/components/PrimaryButton.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import { account } from '@/account/store'
 import { openPage, type AppPage } from '@/nav'
-import { useT } from '@/prefs'
+import { openUrl } from '@/opener'
+import { prefs, useT } from '@/prefs'
 
 const t = useT()
 
-const ROWS: Partial<Record<AppPage, { key: string; icon: Component }>> = {
+/** Rows: app pages, plus Terms and Privacy, which open the website in the browser. */
+type Row = AppPage | 'terms' | 'privacy'
+const ROWS: Partial<Record<Row, { key: string; icon: Component }>> = {
   notifications: { key: 'nav.notifications', icon: Bell },
   passwordHealth: { key: 'nav.passwordHealth', icon: HeartPulse },
   generator: { key: 'nav.generator', icon: WandSparkles },
@@ -26,10 +29,20 @@ const ROWS: Partial<Record<AppPage, { key: string; icon: Component }>> = {
 }
 
 const groups = computed(() => [
-  { label: t('nav.tools'), pages: ['notifications', 'passwordHealth', 'generator', 'collections'] as AppPage[] },
-  { label: t('you.account'), pages: ['settings'] as AppPage[] },
-  { label: t('you.about'), pages: ['terms', 'privacy'] as AppPage[] },
+  { label: t('nav.tools'), pages: ['notifications', 'passwordHealth', 'generator', 'collections'] as Row[] },
+  { label: t('you.account'), pages: ['settings'] as Row[] },
+  { label: t('you.about'), pages: ['terms', 'privacy'] as Row[] },
 ])
+
+/** qasa-app.com/terms or /privacy, in the app's language. */
+function openRow(row: Row) {
+  if (row === 'terms' || row === 'privacy') {
+    const prefix = prefs.language === 'en' ? '' : `/${prefs.language}`
+    void openUrl(`https://qasa-app.com${prefix}/${row}`)
+  } else {
+    openPage(row)
+  }
+}
 
 const premium = computed(() => account.status?.isPremium ?? false)
 </script>
@@ -58,7 +71,7 @@ const premium = computed(() => account.status?.isPremium ?? false)
           :icon="ROWS[page]!.icon"
           :title="t(ROWS[page]!.key)"
           :trailing-text="page === 'notifications' && account.unread > 0 ? String(account.unread) : undefined"
-          @click="openPage(page)"
+          @click="openRow(page)"
         />
       </CardContainer>
     </section>

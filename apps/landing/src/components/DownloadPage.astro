@@ -6,7 +6,7 @@
 import "../styles/global.css";
 import Icon from "./Icon.astro";
 import DesktopDownloads from "./DesktopDownloads.astro";
-import { dictionaries, downloadHrefs, languages, privacyHrefs, type Lang } from "../i18n";
+import { dictionaries, downloadHrefs, languages, privacyHrefs, termsHrefs, type Lang } from "../i18n";
 
 const { lang } = Astro.props as { lang: Lang };
 const t = dictionaries[lang];
@@ -57,6 +57,7 @@ const home = languages.find((l) => l.lang === lang)!.href;
         <nav class="footer-links" aria-label="Footer">
           <a href={home} class="phones"><Icon name="device-mobile" size={16} /> {t.desktop.phones}</a>
           <a href={privacyHrefs[lang]} class="phones">{t.legal.privacyPolicy}</a>
+          <a href={termsHrefs[lang]} class="phones">{t.nav.terms}</a>
         </nav>
         <p>© {new Date().getFullYear()} <span lang="en">Qasa</span></p>
       </div>

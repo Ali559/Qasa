@@ -3,12 +3,13 @@
 // the health bar card, the VPN card and the breached-passwords card. The page wash turns
 // warm when nothing needs attention and cool when something does. On desktop the VPN card
 // points to the phone (no VPN in v1), and the notifications bell arrives with the inbox.
-import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
-import { computed, onMounted, ref, watch } from 'vue'
+import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldCheck, ShieldHalf } from 'lucide-vue-next'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import { account } from '@/account/store'
 import { backupApi } from '@/backup/api'
+import { bridgeApi } from '@/bridge/api'
 import { backup, refreshBackup, setBackupStatus } from '@/backup/store'
 import { selectTab, openPage } from '@/nav'
 import { useT } from '@/prefs'
@@ -48,6 +49,42 @@ async function snoozeBackupReminder() {
   }
 }
 watch(() => account.status?.isPremium, refresh)
+
+// "Fill passwords in your browser": the desktop's autofill is the browser extension, so
+// Home asks until a browser is connected or the user taps Not now (hidden for 3 days).
+const PROMPT_SNOOZE_KEY = 'qasa.autofill.promptSnoozedUntil'
+const PROMPT_SNOOZE_MS = 3 * 24 * 60 * 60 * 1000
+const askBrowser = ref(false)
+async function refreshBrowserPrompt() {
+  let snoozedUntil = 0
+  try {
+    snoozedUntil = Number(localStorage.getItem(PROMPT_SNOOZE_KEY) ?? 0)
+  } catch {
+    // Storage blocked: keep asking.
+  }
+  if (Date.now() < snoozedUntil) {
+    askBrowser.value = false
+    return
+  }
+  try {
+    askBrowser.value = (await bridgeApi.clients()).length === 0
+  } catch {
+    askBrowser.value = false
+  }
+}
+function snoozeBrowserPrompt() {
+  try {
+    localStorage.setItem(PROMPT_SNOOZE_KEY, String(Date.now() + PROMPT_SNOOZE_MS))
+  } catch {
+    // Storage blocked: hide it for this visit only.
+  }
+  askBrowser.value = false
+}
+onMounted(() => {
+  void refreshBrowserPrompt()
+  window.addEventListener('focus', refreshBrowserPrompt)
+})
+onBeforeUnmount(() => window.removeEventListener('focus', refreshBrowserPrompt))
 
 const premium = computed(() => account.status?.isPremium ?? false)
 
@@ -103,6 +140,21 @@ const health = computed(() => {
           <Bell :size="18" />
           <span v-if="account.unread > 0" class="badge">{{ account.unread > 99 ? '99+' : account.unread }}</span>
         </button>
+      </div>
+
+      <!-- No browser connected yet: the desktop's autofill is the browser extension. -->
+      <div v-if="askBrowser" class="home-card static prompt" role="region" :aria-label="t('autofill.prompt.desktopTitle')">
+        <div class="card-row">
+          <span class="mark" aria-hidden="true"><ShieldCheck :size="22" /></span>
+          <span class="card-text">
+            <span class="card-title">{{ t('autofill.prompt.desktopTitle') }}</span>
+            <span class="card-line">{{ t('autofill.prompt.desktopBody') }}</span>
+          </span>
+        </div>
+        <div class="card-actions">
+          <button type="button" class="card-action primary" @click="openPage('browserExtension')">{{ t('autofill.prompt.activate') }}</button>
+          <button type="button" class="card-action" @click="snoozeBrowserPrompt">{{ t('autofill.prompt.notNow') }}</button>
+        </div>
       </div>
 
       <section class="hero">
@@ -431,5 +483,17 @@ const health = computed(() => {
   overflow: hidden;
   border-radius: 999px;
   background: var(--stroke);
+}
+
+/* The browser prompt carries the Qasa mark instead of an icon tile. */
+.prompt .mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
 }
 </style>

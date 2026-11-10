@@ -4,6 +4,7 @@ import alibarznji.qasa.credentials.AutofillIndexStore
 import alibarznji.qasa.screens.nav.VaultRoutes
 import alibarznji.qasa.screens.vault.list.VaultListContent
 import alibarznji.qasa.theme.QasaModalBottomSheet
+import alibarznji.qasa.theme.rememberSheetDismiss
 import alibarznji.qasa.vault.EphemeralClipboard
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultRepository
@@ -86,11 +87,9 @@ fun VaultListScreen(
 ) {
     val navController = rememberNavController()
     var sheet by remember { mutableStateOf<VaultSheet?>(null) }
-    // Bumped when the editor closes over the detail screen so it re-reads the saved item.
-    var detailVersion by remember { mutableIntStateOf(0) }
-
+    // The detail screen re-reads its item when the row's updatedAt changes, so closing the
+    // editor doesn't rebuild it (a rebuild flashed the whole screen).
     fun dismissSheet() {
-        if (editorHolder.existingId != null) detailVersion++
         sheet = null
         editorHolder.clear()
     }
@@ -142,16 +141,14 @@ fun VaultListScreen(
                 val itemId = entry.arguments?.getString("itemId").orEmpty()
                 // The editor sheet opens over the detail screen (iOS presents it from the
                 // pushed detail view), so save / cancel land back here, not on the list.
-                key(detailVersion) {
-                    VaultItemDetailScreen(
-                        itemId = itemId,
-                        onBack = { navController.popBackStack() },
-                        onEdit = { payload ->
-                            editorHolder.beginEdit(itemId, payload)
-                            sheet = VaultSheet.Edit
-                        },
-                    )
-                }
+                VaultItemDetailScreen(
+                    itemId = itemId,
+                    onBack = { navController.popBackStack() },
+                    onEdit = { payload ->
+                        editorHolder.beginEdit(itemId, payload)
+                        sheet = VaultSheet.Edit
+                    },
+                )
             }
         }
 
@@ -164,7 +161,7 @@ fun VaultListScreen(
                             editorHolder.beginCreate(payload)
                             sheet = VaultSheet.Edit
                         },
-                        onCancel = ::dismissSheet,
+                        onCancel = rememberSheetDismiss(::dismissSheet),
                     )
                 }
             }
@@ -175,7 +172,7 @@ fun VaultListScreen(
                         VaultItemEditorSheetContent(
                             initial = draft,
                             existingId = editorHolder.existingId,
-                            onDone = ::dismissSheet,
+                            onDone = rememberSheetDismiss(::dismissSheet),
                         )
                     }
                 }

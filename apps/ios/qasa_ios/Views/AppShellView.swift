@@ -12,6 +12,7 @@ enum ShellTab: Hashable {
 struct AppShellView: View {
     var onLogout: (() -> Void)? = nil
 
+    @Environment(\.openURL) private var openURL
     @Environment(AppSession.self) private var session
     @Environment(AppPreferences.self) private var prefs
     @State private var tab: ShellTab = .home
@@ -60,6 +61,11 @@ struct AppShellView: View {
     }
 
     private func open(_ next: AppPage) {
+        // Privacy and Terms live on the website, in the app's language.
+        if next == .terms || next == .privacy {
+            openURL(LegalLinks.url(locale: prefs.locale, terms: next == .terms))
+            return
+        }
         withAnimation(.easeOut(duration: 0.22)) {
             if next.requiresPremium && !session.isPremium {
                 page = .premiumUpgrade
@@ -95,23 +101,10 @@ struct AppShellView: View {
             }
         case .settings:
             SettingsView(onOpenMenu: back, onLogout: onLogout)
-        case .terms:
-            LegalPlaceholderView(
-                title: L10n.tr("nav.terms", locale: prefs.locale),
-                onOpenMenu: back,
-                bodyText: L10n.tr("legal.termsBody", locale: prefs.locale)
-            )
-        case .privacy:
-            LegalPlaceholderView(
-                title: L10n.tr("nav.privacy", locale: prefs.locale),
-                onOpenMenu: back,
-                bodyText: L10n.tr("legal.privacyBody", locale: prefs.locale),
-                lastUpdated: LegalPlaceholderView.privacyUpdated
-            )
         case .premiumUpgrade:
             PremiumUpgradeView(onOpenMenu: back, embedded: true)
-        case .vault, .breachedPasswords:
-            // Tabs, never stacked: `open` routes these to their tab.
+        case .vault, .breachedPasswords, .terms, .privacy:
+            // Tabs and website links, never stacked: `open` routes these elsewhere.
             EmptyView()
         }
     }

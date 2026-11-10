@@ -231,15 +231,21 @@ struct VaultItemEditor: View {
             FormTextField(title: L10n.tr("field.itemName"), text: cardBinding(\.itemName), error: error("itemName"))
             FormTextField(title: L10n.tr("field.accountHolder"), text: cardBinding(\.accountHolder), error: error("accountHolder"))
             FormTextField(title: L10n.tr("field.number"), text: cardNumberBinding, keyboard: .numberPad, error: error("number"))
-            FormTextField(title: L10n.tr("field.securityCode"), text: cardSecurityCodeBinding, isSecure: true, keyboard: .numberPad, error: error("securityCode"))
-            // MM/YY, its own format (not a calendar date).
-            FormTextField(
-                title: L10n.tr("field.expiryDate"),
-                text: cardExpiryBinding,
-                placeholder: L10n.tr("field.expiryPlaceholder"),
-                keyboard: .numberPad,
-                error: error("expiryDate")
-            )
+            // Expiry and security code side by side, as printed on the card; the code (at
+            // most 4 digits) gets the narrower box.
+            HStack(alignment: .top, spacing: 12) {
+                // MM/YY, its own format (not a calendar date).
+                FormTextField(
+                    title: L10n.tr("field.expiryDate"),
+                    text: cardExpiryBinding,
+                    placeholder: L10n.tr("field.expiryPlaceholder"),
+                    keyboard: .numberPad,
+                    error: error("expiryDate")
+                )
+                .frame(maxWidth: .infinity)
+                FormTextField(title: L10n.tr("field.securityCode"), text: cardSecurityCodeBinding, isSecure: true, keyboard: .numberPad, error: error("securityCode"))
+                    .frame(minWidth: 96, maxWidth: 150)
+            }
             FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"))
             NoteColorPicker(color: cardColorBinding)
             Button {

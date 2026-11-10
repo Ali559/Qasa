@@ -1469,21 +1469,6 @@
     "ar": "المزامنة عبر Wi‑Fi",
     "ckb": "هاوکاتکردن لەسەر Wi‑Fi"
   },
-  "legal.lastUpdated": {
-    "en": "Last updated: %@",
-    "ar": "آخر تحديث: %@",
-    "ckb": "دوایین نوێکردنەوە: %@"
-  },
-  "legal.privacyBody": {
-    "en": "Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa's server. We can't read it, and we can't reset your main password.\n\nThere's no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl's page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password's hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nBackups are encrypted files you save where you choose, such as iCloud Drive or Google Drive. They go there straight from your device, never through our server, and open only with your main password. You can also export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy",
-    "ar": "تبقى خزنتك على جهازك. كل ما فيها مشفّر بمفتاح مشتق من كلمة مرورك الرئيسية، ولا يصل إلى خادم قاصة أبدًا. لا نستطيع قراءتها، ولا إعادة تعيين كلمة مرورك الرئيسية.\n\nلا يوجد تسجيل: لا اسم ولا بريد إلكتروني ولا رقم هاتف. لا يحتفظ خادمنا إلا بما يلزم لتشغيل حسابك: معرّف حساب عشوائي، وأجهزتك المرتبطة (الاسم والنوع واللغة، ورمز الإشعارات إذا سمحت بها)، وخطتك ومدفوعاتك، والإشعارات التي نرسلها إليك. يتم الدفع في صفحة ⁨Wayl⁩، ولا نرى أبدًا تفاصيل بطاقتك أو محفظتك.\n\nيرسل فحص كلمات المرور المسرّبة أول 5 أحرف فقط من بصمة كل كلمة مرور، مباشرة إلى ⁨Have I Been Pwned⁩. وتتم المزامنة عبر ⁨Wi‑Fi⁩ مباشرة بين أجهزتك. لا إعلانات ولا تحليلات ولا تتبّع، ولا نبيع بياناتك أبدًا.\n\nالنسخ الاحتياطية ملفات مشفّرة تحفظها حيث تختار، مثل ⁨iCloud Drive⁩ أو ⁨Google Drive⁩. تذهب إليه مباشرة من جهازك، ولا تمر أبدًا عبر خادمنا، ولا تُفتح إلا بكلمة مرورك الرئيسية. ويمكنك أيضًا تصدير خزنتك إلى ملف ⁨CSV⁩ في أي وقت، وأن تحذف حسابك وكل ما يحتفظ به خادمنا عنك من الإعدادات أو بطلب منا.\n\nالسياسة الكاملة: ⁨qasa-app.com/privacy⁩",
-    "ckb": "کۆگاکەت لەسەر ئامێرەکەت دەمێنێتەوە. هەموو ناوەڕۆکەکەی بە کلیلێک شفرە دەکرێت کە لە وشەی نهێنی سەرەکییەکەت دروست دەکرێت، و هەرگیز ناگاتە سێرڤەری قاسە. ناتوانین بیخوێنینەوە، و ناتوانین وشەی نهێنی سەرەکییەکەت ڕێکبخەینەوە.\n\nخۆتۆمارکردن نییە: نە ناو، نە ئیمەیڵ، نە ژمارەی مۆبایل. سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ کارپێکردنی هەژمارەکەت پێویستە: ناسنامەیەکی هەڕەمەکیی هەژمار، ئامێرە بەستراوەکانت (ناو، جۆر، زمان و، ئەگەر ڕێگە بە ئاگادارییەکان بدەیت، نیشانەیەکی پوش)، پلان و پارەدانەکانت، و ئەو ئاگادارییانەی بۆتی دەنێرین. پارەدان لە پەڕەی ⁨Wayl⁩ دەکرێت؛ هەرگیز زانیاریی کارت یان جزدانەکەت نابینین.\n\nپشکنینی وشەی نهێنیی دزراو تەنها ٥ پیتی یەکەمی هاشی هەر وشەیەکی نهێنی ڕاستەوخۆ دەنێرێت بۆ ⁨Have I Been Pwned⁩. هاوکاتکردن لەسەر ⁨Wi‑Fi⁩ ڕاستەوخۆ لە نێوان ئامێرەکانتدا دەکرێت. نە ڕیکلام، نە شیکاری، نە شوێنکەوتن، و هەرگیز داتاکانت نافرۆشین.\n\nباکئەپەکان فایلی شفرەکراون کە لەو شوێنەی هەڵیدەبژێریت پاشەکەوتیان دەکەیت، بۆ نموونە ⁨iCloud Drive⁩ یان ⁨Google Drive⁩. ڕاستەوخۆ لە ئامێرەکەتەوە دەچنە ئەوێ، هەرگیز بە سێرڤەرەکەماندا تێناپەڕن، و تەنها بە وشەی نهێنی سەرەکییەکەت دەکرێنەوە. هەروەها هەر کاتێک بتەوێت دەتوانیت کۆگاکەت بۆ ⁨CSV⁩ هەناردە بکەیت، و هەژمارەکەت و هەموو ئەوەی سێرڤەرەکەمان دەربارەت هەیەتی لە ڕێکخستنەکاندا یان بە داواکردن لە ئێمە بسڕیتەوە.\n\nسیاسەتی تەواو: ⁨qasa-app.com/privacy⁩"
-  },
-  "legal.termsBody": {
-    "en": "These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.",
-    "ar": "شروط الاستخدام هذه نص مؤقت لاتفاقية قاصة القانونية.\n\nباستخدامك للتطبيق توافق على الالتزام بالقوانين المعمول بها. ستُنشر الشروط الكاملة هنا قبل الإطلاق العام.",
-    "ckb": "ئەم مەرجانە جێگرەوەی ڕێککەوتنی یاسایی قاسەن.\n\nبە بەکارهێنانی ئەپەکە ڕەزامەندیت لەسەر پابەندبوون بە یاساکان. مەرجی تەواو پێش بڵاوکردنەوەی گشتی لێرە دادەنرێت."
-  },
   "nav.breachMonitoring": {
     "en": "Email leak alerts",
     "ar": "تنبيهات تسريب البريد",
@@ -4092,5 +4077,35 @@
     "en": "Country",
     "ar": "الدولة",
     "ckb": "وڵات"
+  },
+  "autofill.prompt.title": {
+    "en": "Fill passwords with Qasa",
+    "ar": "املأ كلمات المرور بقاصة",
+    "ckb": "وشە نهێنییەکان بە قاسە پڕبکەرەوە"
+  },
+  "autofill.prompt.body": {
+    "en": "Turn on Qasa autofill to fill your logins, cards and addresses in apps and your browser.",
+    "ar": "فعّل تعبئة قاصة التلقائية لتعبئة تسجيلات الدخول والبطاقات والعناوين في التطبيقات والمتصفح.",
+    "ckb": "پڕکردنەوەی خۆکاری قاسە چالاک بکە بۆ پڕکردنەوەی چوونەژوورەوە، کارت و ناونیشانەکانت لە ئەپەکان و وێبگەڕەکەت."
+  },
+  "autofill.prompt.activate": {
+    "en": "Activate",
+    "ar": "تفعيل",
+    "ckb": "چالاککردن"
+  },
+  "autofill.prompt.notNow": {
+    "en": "Not now",
+    "ar": "ليس الآن",
+    "ckb": "ئێستا نا"
+  },
+  "autofill.prompt.desktopTitle": {
+    "en": "Fill passwords in your browser",
+    "ar": "املأ كلمات المرور في متصفحك",
+    "ckb": "وشە نهێنییەکان لە وێبگەڕەکەتدا پڕبکەرەوە"
+  },
+  "autofill.prompt.desktopBody": {
+    "en": "Add the Qasa extension to Chrome, Edge or Firefox and connect it to fill your logins, cards and addresses on websites.",
+    "ar": "أضف إضافة قاصة إلى Chrome أو Edge أو Firefox وصِلها لتعبئة تسجيلات الدخول والبطاقات والعناوين على المواقع.",
+    "ckb": "پێوەکراوی قاسە بۆ Chrome، Edge یان Firefox زیاد بکە و بیبەستەوە بۆ پڕکردنەوەی چوونەژوورەوە، کارت و ناونیشانەکانت لە ماڵپەڕەکان."
   }
 }

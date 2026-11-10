@@ -11,17 +11,22 @@ import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.settings.backup.BackupsScreen
 import alibarznji.qasa.screens.settings.main.SettingsHomeContent
 import alibarznji.qasa.screens.nav.SettingsRoutes
+import alibarznji.qasa.screens.premium.PremiumUpgradeScreen
 import alibarznji.qasa.theme.QasaModalBottomSheet
+import alibarznji.qasa.theme.rememberSheetDismiss
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultSecureStore
 import alibarznji.qasa.vault.VaultSession
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
@@ -29,9 +34,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -65,63 +67,53 @@ fun SettingsScreen(
     onUpgrade: () -> Unit,
     vm: SettingsViewModel = hiltViewModel(),
 ) {
-    val navController = rememberNavController()
+    // Sub-pages are sheets over Settings, not navigation destinations: as destinations the
+    // Settings page faded out behind an opening sheet (the top sat empty for a beat), and
+    // popping one removed the sheet in a single frame instead of sliding it down.
+    var sheet by remember { mutableStateOf<String?>(null) }
+    val close = { sheet = null }
 
     Box(Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = SettingsRoutes.HOME,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            composable(SettingsRoutes.HOME) {
-                SettingsHomeContent(
-                    onOpenMenu = onOpenMenu,
-                    onLock = onLock,
-                    onUpgrade = onUpgrade,
-                    onChangePassword = { navController.navigate(SettingsRoutes.CHANGE_PASSWORD) },
-                    onDevices = { navController.navigate(SettingsRoutes.DEVICES) },
-                    onLan = { navController.navigate(SettingsRoutes.LAN) },
-                    onBackups = { navController.navigate(SettingsRoutes.BACKUPS) },
-                    onSubscription = { navController.navigate(SettingsRoutes.SUBSCRIPTION) },
-                    vm = vm,
+        SettingsHomeContent(
+            onOpenMenu = onOpenMenu,
+            onLock = onLock,
+            // iOS opens the upgrade as a sheet from Settings (SettingsView.swift:288).
+            onUpgrade = { sheet = SettingsRoutes.PREMIUM },
+            onChangePassword = { sheet = SettingsRoutes.CHANGE_PASSWORD },
+            onDevices = { sheet = SettingsRoutes.DEVICES },
+            onLan = { sheet = SettingsRoutes.LAN },
+            onBackups = { sheet = SettingsRoutes.BACKUPS },
+            onSubscription = { sheet = SettingsRoutes.SUBSCRIPTION },
+            vm = vm,
+        )
+        when (sheet) {
+            SettingsRoutes.CHANGE_PASSWORD -> SettingsSheet(onDismiss = close) {
+                ChangeMasterPasswordScreen(onDone = rememberSheetDismiss(close))
+            }
+            SettingsRoutes.DEVICES -> SettingsSheet(onDismiss = close) {
+                val done = rememberSheetDismiss(close)
+                LinkedDevicesScreen(
+                    onDone = done,
+                    onUpgrade = { sheet = SettingsRoutes.PREMIUM },
                 )
             }
-            composable(SettingsRoutes.CHANGE_PASSWORD) {
-                SettingsSheet(onDismiss = { navController.popBackStack() }) {
-                    ChangeMasterPasswordScreen(onDone = { navController.popBackStack() })
-                }
+            SettingsRoutes.LAN -> SettingsSheet(onDismiss = close) {
+                LANSyncScreen(
+                    onDone = rememberSheetDismiss(close),
+                    onUpgrade = {
+                        close()
+                        onUpgrade()
+                    },
+                )
             }
-            composable(SettingsRoutes.DEVICES) {
-                SettingsSheet(onDismiss = { navController.popBackStack() }) {
-                    LinkedDevicesScreen(
-                        onDone = { navController.popBackStack() },
-                        onUpgrade = {
-                            navController.popBackStack()
-                            onUpgrade()
-                        },
-                    )
-                }
+            SettingsRoutes.BACKUPS -> SettingsSheet(onDismiss = close) {
+                BackupsScreen(onDone = rememberSheetDismiss(close))
             }
-            composable(SettingsRoutes.LAN) {
-                SettingsSheet(onDismiss = { navController.popBackStack() }) {
-                    LANSyncScreen(
-                        onDone = { navController.popBackStack() },
-                        onUpgrade = {
-                            navController.popBackStack()
-                            onUpgrade()
-                        },
-                    )
-                }
+            SettingsRoutes.SUBSCRIPTION -> SettingsSheet(onDismiss = close) {
+                ManageSubscriptionScreen(onDone = rememberSheetDismiss(close))
             }
-            composable(SettingsRoutes.BACKUPS) {
-                SettingsSheet(onDismiss = { navController.popBackStack() }) {
-                    BackupsScreen(onDone = { navController.popBackStack() })
-                }
-            }
-            composable(SettingsRoutes.SUBSCRIPTION) {
-                SettingsSheet(onDismiss = { navController.popBackStack() }) {
-                    ManageSubscriptionScreen(onDone = { navController.popBackStack() })
-                }
+            SettingsRoutes.PREMIUM -> SettingsSheet(onDismiss = close) {
+                PremiumUpgradeScreen(onDone = rememberSheetDismiss(close), asSheet = true)
             }
         }
     }
@@ -133,7 +125,6 @@ private fun SettingsSheet(
     onDismiss: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    BackHandler(onBack = onDismiss)
     val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.92f
     QasaModalBottomSheet(onDismissRequest = onDismiss) {
         Box(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {

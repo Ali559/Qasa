@@ -118,7 +118,10 @@ const mockFields: typeof tauriFields = {
     return raw.replace(/\D/g, '').slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 ')
   },
   async formatCardExpiry(raw) {
-    const d = raw.replace(/\D/g, '').replace(/^[2-9]/, '0$&').slice(0, 4)
+    // Same rule as the core: the month stays within 01–12 while typing.
+    const digits = raw.replace(/\D/g, '').replace(/^[2-9]/, '0$&').split('')
+    while (digits.length >= 2 && !/^(0[1-9]|1[0-2])$/.test(digits[0] + digits[1])) digits.splice(1, 1)
+    const d = digits.join('').slice(0, 4)
     return d.length <= 2 ? d : `${d.slice(0, 2)}/${d.slice(2)}`
   },
   async cardBrand() {

@@ -52,6 +52,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 
 @HiltViewModel
 class UnlockViewModel @Inject constructor(
@@ -89,13 +93,27 @@ fun UnlockScreen(
     val failedMessage = stringResource(R.string.auth_unlock_biometricsfailed)
     val wrongPasswordMessage = stringResource(R.string.auth_unlock_wrongpassword)
 
-    fun unlockWithPassword(candidate: String) {
-        if (vm.session.unlockMatching(candidate) != null) {
-            password = ""
-            onUnlocked()
-        } else {
-            error = wrongPasswordMessage
+    // Deriving the key (310,000 PBKDF2 rounds) takes a moment: off the main thread, or a
+    // slow phone shows "Qasa isn't responding" while it runs.
+    val scope = rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    fun runUnlock(work: () -> Boolean, onFail: () -> Unit) {
+        if (busy) return
+        busy = true
+        scope.launch {
+            val ok = withContext(Dispatchers.Default) { work() }
+            busy = false
+            if (ok) {
+                password = ""
+                onUnlocked()
+            } else {
+                onFail()
+            }
         }
+    }
+
+    fun unlockWithPassword(candidate: String) {
+        runUnlock({ vm.session.unlockMatching(candidate) != null }) { error = wrongPasswordMessage }
     }
 
     BiometricGateEffect(
@@ -106,26 +124,17 @@ fun UnlockScreen(
         onAuthenticated = { cipher ->
             when (val attempt = prompt) {
                 is UnlockPrompt.Unlock -> {
-                    val ok = cipher != null && vm.session.unlockWithBiometricCipher(cipher)
-                    if (ok) {
-                        password = ""
-                        onUnlocked()
-                    } else {
-                        error = failedMessage
-                    }
+                    runUnlock({ cipher != null && vm.session.unlockWithBiometricCipher(cipher) }) { error = failedMessage }
                 }
                 is UnlockPrompt.Capture -> {
                     // Unlock first so only the variant that verified gets sealed (sealing
                     // the password requires the same authorization as reading it). Sealing
                     // is optional, so a failed seal still lets the user in.
-                    val used = vm.session.unlockMatching(attempt.password)
-                    if (used == null) {
-                        error = wrongPasswordMessage
-                    } else {
-                        if (cipher != null) vm.session.captureBiometricSecret(cipher, used)
-                        password = ""
-                        onUnlocked()
-                    }
+                    runUnlock({
+                        val used = vm.session.unlockMatching(attempt.password)
+                        if (used != null && cipher != null) vm.session.captureBiometricSecret(cipher, used)
+                        used != null
+                    }) { error = wrongPasswordMessage }
                 }
                 null -> Unit
             }
@@ -151,7 +160,7 @@ fun UnlockScreen(
                 PrimaryButton(
                     title = stringResource(R.string.auth_unlock_button),
                     icon = Icons.Default.LockOpen,
-                    enabled = canUnlock,
+                    enabled = canUnlock && !busy,
                     onClick = {
                         // The secret is sealed at unlock time, not at create time: a
                         // password can only be cached behind a cipher the hardware

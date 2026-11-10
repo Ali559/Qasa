@@ -61,11 +61,32 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.crypto.Cipher
 import javax.inject.Inject
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewModelScope
 
 @HiltViewModel
 class CreateVaultViewModel @Inject constructor(val session: VaultSession) : ViewModel() {
-    fun create(password: String, biometrics: Boolean, sealedCipher: Cipher? = null) {
-        session.createVault(password, biometrics, sealedCipher)
+    /** True while the key is being derived: the button stays disabled. */
+    var creating by androidx.compose.runtime.mutableStateOf(false)
+        private set
+
+    /**
+     * Derives the key (310,000 PBKDF2 rounds) off the main thread, then runs [then] on it.
+     * On the main thread a slow phone showed "Qasa isn't responding" while it ran.
+     */
+    fun create(password: String, biometrics: Boolean, sealedCipher: Cipher? = null, then: () -> Unit) {
+        if (creating) return
+        creating = true
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.Default) { session.createVault(password, biometrics, sealedCipher) }
+                then()
+            } finally {
+                creating = false
+            }
+        }
     }
 }
 
@@ -146,19 +167,23 @@ fun CreateVaultScreen(
         onAuthenticated = { cipher ->
             // Only an authorized cipher can seal the password; a null one means the
             // platform did not hand back a usable CryptoObject, so biometrics stay off.
-            vm.create(password, biometrics = true, sealedCipher = cipher)
-            password = ""
-            confirm = ""
+            val typed = password
             sealCipher = null
-            onCreated()
+            vm.create(typed, biometrics = true, sealedCipher = cipher) {
+                password = ""
+                confirm = ""
+                onCreated()
+            }
         },
         onDismissed = {
             // Declining the prompt still creates the vault, just without a cached copy.
-            vm.create(password, biometrics = false)
-            password = ""
-            confirm = ""
+            val typed = password
             sealCipher = null
-            onCreated()
+            vm.create(typed, biometrics = false) {
+                password = ""
+                confirm = ""
+                onCreated()
+            }
         },
     )
 
@@ -198,7 +223,7 @@ fun CreateVaultScreen(
                 PrimaryButton(
                     title = stringResource(R.string.auth_create_buttonlocal),
                     icon = Icons.Default.Key,
-                    enabled = canCreate,
+                    enabled = canCreate && !vm.creating,
                     onClick = {
                         when {
                             password.length < 8 -> error = tooShortMessage
@@ -208,14 +233,10 @@ fun CreateVaultScreen(
                             biometrics -> {
                                 val cipher = vm.session.biometricCaptureCipher()
                                 if (cipher != null) sealCipher = cipher else {
-                                    vm.create(password, biometrics = false)
-                                    onCreated()
+                                    vm.create(password, biometrics = false, then = onCreated)
                                 }
                             }
-                            else -> {
-                                vm.create(password, biometrics = false)
-                                onCreated()
-                            }
+                            else -> vm.create(password, biometrics = false, then = onCreated)
                         }
                     },
                 )

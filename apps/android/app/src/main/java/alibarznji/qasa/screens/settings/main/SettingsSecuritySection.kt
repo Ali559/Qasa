@@ -87,7 +87,7 @@ internal fun SecurityRows(
         // iOS's `settings.autofillSubtitle` walks through iOS Settings ("Passwords → AutoFill
         // Passwords"); on Android the row opens the system autofill picker instead.
         subtitle = stringResource(R.string.settings_autofillsubtitleandroid),
-        onClick = { openAutofillSettings(context) },
+        onClick = { alibarznji.qasa.credentials.AutofillSettings.openPicker(context) },
     )
     HorizontalDivider(color = c.stroke)
     val confirmEveryFill by vm.prefs.autofillConfirmEveryFill.collectAsState()
@@ -161,15 +161,3 @@ private fun deviceName(context: Context): String =
     Settings.Global.getString(context.contentResolver, Settings.Global.DEVICE_NAME)
         ?.takeIf { it.isNotBlank() }
         ?: Build.MODEL
-
-private fun openAutofillSettings(context: Context) {
-    try {
-        context.startActivity(
-            Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE).apply {
-                data = android.net.Uri.parse("package:${context.packageName}")
-            },
-        )
-    } catch (_: Exception) {
-        context.startActivity(Intent(Settings.ACTION_SETTINGS))
-    }
-}

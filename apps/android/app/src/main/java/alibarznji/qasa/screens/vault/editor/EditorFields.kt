@@ -9,7 +9,10 @@ import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultCollection
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,15 +93,19 @@ private fun CardFields(p: VaultPayload.Card, onChange: (VaultPayload) -> Unit) {
     FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
     FormTextField(R.string.field_accountholder, p.accountHolder, FfiField.ACCOUNT_HOLDER) { onChange(p.copy(accountHolder = it)) }
     CardNumberField(p.number) { onChange(p.copy(number = it)) }
-    // Digits only, at most 4 (American Express); the rule message says how many this brand uses.
-    FormTextField(
-        R.string.field_securitycode,
-        p.securityCode,
-        FfiField.SECURITY_CODE,
-        secure = true,
-        keyboardType = KeyboardType.NumberPassword,
-    ) { onChange(p.copy(securityCode = it.filter(Char::isDigit).take(4))) }
-    CardExpiryField(p.expiryDate) { onChange(p.copy(expiryDate = it)) }
+    // Expiry and security code side by side, as printed on the card; the code is the
+    // narrower one (at most 4 digits, American Express).
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
+        CardExpiryField(p.expiryDate, Modifier.weight(1.25f)) { onChange(p.copy(expiryDate = it)) }
+        FormTextField(
+            R.string.field_securitycode,
+            p.securityCode,
+            FfiField.SECURITY_CODE,
+            secure = true,
+            keyboardType = KeyboardType.NumberPassword,
+            modifier = Modifier.weight(1f),
+        ) { onChange(p.copy(securityCode = it.filter(Char::isDigit).take(4))) }
+    }
     FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Blue)) { onChange(p.copy(color = it.raw)) }
     // NFC stub — gated in UI only, as on iOS.

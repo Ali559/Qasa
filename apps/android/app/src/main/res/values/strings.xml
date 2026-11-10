@@ -66,6 +66,12 @@
     <string name="autofill_nomatches">No matches</string>
     <string name="autofill_nomatcheshint">Try searching all your passwords.</string>
     <string name="autofill_phonenational">Phone number without country code</string>
+    <string name="autofill_prompt_activate">Activate</string>
+    <string name="autofill_prompt_body">Turn on Qasa autofill to fill your logins, cards and addresses in apps and your browser.</string>
+    <string name="autofill_prompt_desktopbody">Add the Qasa extension to Chrome, Edge or Firefox and connect it to fill your logins, cards and addresses on websites.</string>
+    <string name="autofill_prompt_desktoptitle">Fill passwords in your browser</string>
+    <string name="autofill_prompt_notnow">Not now</string>
+    <string name="autofill_prompt_title">Fill passwords with Qasa</string>
     <string name="autofill_search">Search</string>
     <string name="autofill_searchqasa">Search Qasa</string>
     <string name="autofill_service_description">Qasa password autofill</string>
@@ -417,9 +423,6 @@
     <string name="lan_starthost">Start hosting</string>
     <string name="lan_stop">Stop</string>
     <string name="lan_title">Sync on Wi‑Fi</string>
-    <string name="legal_lastupdated">Last updated: %s</string>
-    <string name="legal_privacybody">Your vault stays on your device. Everything in it is encrypted with a key made from your main password, and it never reaches Qasa\'s server. We can\'t read it, and we can\'t reset your main password.\n\nThere\'s no sign-up: no name, email or phone number. Our server keeps only what it needs to run your account: a random account ID, your linked devices (name, type, language and, if you allow notifications, a push token), your plan and payments, and the notices we send you. Payments happen on Wayl\'s page; we never see your card or wallet details.\n\nThe breached-password check sends only the first 5 characters of each password\'s hash, straight to Have I Been Pwned. Wi‑Fi sync goes directly between your devices. No ads, no analytics, no trackers, and we never sell your data.\n\nBackups are encrypted files you save where you choose, such as iCloud Drive or Google Drive. They go there straight from your device, never through our server, and open only with your main password. You can also export your vault to CSV at any time, and delete your account, with everything our server holds about you, in Settings or by asking us.\n\nFull policy: qasa-app.com/privacy</string>
-    <string name="legal_termsbody">These Terms of Use are a placeholder for Qasa’s legal agreement with you.\n\nBy using the app you agree to follow applicable laws and not misuse the service. Full terms will be published here before public release.</string>
     <string name="nav_breached_passwords">Breached passwords</string>
     <string name="nav_breachmonitoring">Email leak alerts</string>
     <string name="nav_collections">Folders</string>

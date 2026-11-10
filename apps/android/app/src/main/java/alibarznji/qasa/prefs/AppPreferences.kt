@@ -76,6 +76,11 @@ class AppPreferences @Inject constructor(
         _autofillConfirmEveryFill.value = on
     }
 
+    /** Epoch ms until which Home doesn't ask to turn on Qasa autofill (Not now). */
+    var autofillPromptSnoozedUntil: Long
+        get() = prefs.getLong(KEY_AUTOFILL_PROMPT_SNOOZE, 0L)
+        set(value) = prefs.edit().putLong(KEY_AUTOFILL_PROMPT_SNOOZE, value).apply()
+
     var hasCompletedWelcome: Boolean
         get() = prefs.getBoolean(KEY_WELCOME, false)
         set(value) = prefs.edit().putBoolean(KEY_WELCOME, value).apply()
@@ -145,6 +150,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_AUTO_LOCK = "qasa.autoLockMinutes"
         private const val KEY_WELCOME = "qasa.welcomeCompleted"
         private const val KEY_AUTOFILL_CONFIRM = "qasa.autofill.confirmEveryFill"
+        private const val KEY_AUTOFILL_PROMPT_SNOOZE = "qasa.autofill.promptSnoozedUntil"
         private const val KEY_VPN_KILL_SWITCH = "qasa.vpn.killSwitch"
         private const val KEY_VPN_AUTO_CONNECT = "qasa.vpn.autoConnect"
         private const val KEY_VPN_NODE_ID = "qasa.vpn.nodeId"

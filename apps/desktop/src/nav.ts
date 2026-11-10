@@ -10,8 +10,6 @@ export type AppPage =
   | 'passwordHealth'
   | 'collections'
   | 'settings'
-  | 'terms'
-  | 'privacy'
   | 'notifications'
   | 'premiumUpgrade'
   | 'manageSubscription'

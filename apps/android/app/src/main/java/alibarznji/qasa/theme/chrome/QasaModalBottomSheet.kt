@@ -11,7 +11,28 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
+
+/**
+ * Closes the enclosing [QasaModalBottomSheet] the same way a swipe does: it slides down
+ * first, then `onDismissRequest` runs. Null outside a sheet.
+ */
+val LocalSheetDismiss = staticCompositionLocalOf<(() -> Unit)?> { null }
+
+/**
+ * What a sheet's Cancel / Done / Save should call: the animated close when inside a
+ * sheet, else [fallback]. Removing a sheet from composition directly (by flipping the
+ * state that shows it) skips the slide-down, so the sheet vanished after a beat.
+ */
+@Composable
+fun rememberSheetDismiss(fallback: () -> Unit): () -> Unit = LocalSheetDismiss.current ?: fallback
 
 /**
  * The one sheet presentation for the whole app: add-item picker, vault editor,
@@ -32,6 +53,15 @@ fun QasaModalBottomSheet(
     val c = qasaColors
     // The sheet is its own window, so MainActivity.onUserInteraction never sees it.
     val activity = LocalUserActivity.current
+    val scope = rememberCoroutineScope()
+    val onDismiss by rememberUpdatedState(onDismissRequest)
+    val animatedDismiss: () -> Unit = remember(sheetState) {
+        {
+            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                if (!sheetState.isVisible) onDismiss()
+            }
+        }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -43,12 +73,14 @@ fun QasaModalBottomSheet(
         tonalElevation = QasaDimens.stroke,
         modifier = modifier,
     ) {
-        Column(
-            Modifier
-                .reportUserActivity(activity)
-                .fillMaxWidth()
-                .navigationBarsPadding(),
-            content = content,
-        )
+        CompositionLocalProvider(LocalSheetDismiss provides animatedDismiss) {
+            Column(
+                Modifier
+                    .reportUserActivity(activity)
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
+                content = content,
+            )
+        }
     }
 }

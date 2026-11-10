@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import kotlinx.coroutines.flow.stateIn
 
 /** Whether Home shows the backup reminder card. */
@@ -96,6 +97,7 @@ fun HomeScreen(
     vpnVm: VpnViewModel = hiltViewModel(),
     badge: NotificationBadgeViewModel = hiltViewModel(),
     backupReminder: BackupReminderViewModel = hiltViewModel(),
+    autofillPrompt: AutofillPromptViewModel = hiltViewModel(),
 ) {
     val c = qasaColors
     val report by health.report.collectAsState()
@@ -107,6 +109,12 @@ fun HomeScreen(
 
     val unread by badge.count.collectAsState()
     val remindBackup by backupReminder.show.collectAsState()
+    val askAutofill by autofillPrompt.show.collectAsState()
+    // Back from the system picker (or Settings): recheck whether Qasa is the autofill service.
+    LifecycleResumeEffect(Unit) {
+        autofillPrompt.refresh()
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(isPremium) { if (isPremium) vpnVm.vpn.refreshStatus() }
     LaunchedEffect(Unit) { badge.refresh() }
@@ -126,6 +134,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(QasaDimens.gap),
         ) {
             GreetingRow(displayName = displayName, unread = unread, onNotifications = { onOpen(AppPage.Notifications) })
+            if (askAutofill) AutofillPromptCard(onNotNow = autofillPrompt::notNow)
             StatusHero(status = status, onAddFirst = { onTab(ShellTab.Passwords) })
             if (remindBackup) {
                 BackupReminderCard(onOpen = { onOpen(AppPage.Backups) }, onDismiss = backupReminder::dismiss)

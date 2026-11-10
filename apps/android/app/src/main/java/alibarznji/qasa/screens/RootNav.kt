@@ -73,6 +73,8 @@ class RootViewModel @Inject constructor(
     }
 
     fun onUnlocked() {
+        // Once per unlock: the unlock screen's callback and `ensureStarted` can both arrive.
+        if (started) return
         started = true
         viewModelScope.launch {
             // iOS `handleCreate` / `handleUnlock` show "Securing vault…" around
