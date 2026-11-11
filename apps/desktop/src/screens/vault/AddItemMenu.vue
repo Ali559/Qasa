@@ -3,14 +3,14 @@
 // drill into their subtypes); on a kind's tab, that kind's subtypes directly. The rows are
 // a `SettingsSection` card of `SettingsRow`s, 20 from the sheet's edges, under the shared
 // sheet header (no Cancel). A drilled page keeps iOS's navigation back button at the start.
-import Chevron from '@/components/Chevron.vue'
-import {CreditCard, FileText, IdCard, KeyRound, User} from 'lucide-vue-next'
-import { computed, ref, watch, type Component } from 'vue'
+import { computed, ref, watch } from 'vue'
 
+import QasaIcon from '@/components/QasaIcon.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import Sheet from '@/components/Sheet.vue'
 import SheetHeader from '@/components/SheetHeader.vue'
 import { VARIANT_ICON } from '@/icons'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import { useT } from '@/prefs'
 import { KIND_ADD_KEY, KIND_SUBTYPES, VARIANT_TYPE_KEY } from '@/vault/present'
 import type { ItemKind, Variant } from '@/vault/types'
@@ -19,12 +19,12 @@ const props = defineProps<{ open: boolean; filter: 'all' | ItemKind }>()
 const emit = defineEmits<{ pick: [variant: Variant]; close: [] }>()
 const t = useT()
 
-const KINDS: Array<{ kind: ItemKind; icon: Component; variant?: Variant }> = [
-  { kind: 'login', icon: KeyRound, variant: 'login' },
-  { kind: 'secureNote', icon: FileText, variant: 'secureNote' },
-  { kind: 'payment', icon: CreditCard },
-  { kind: 'personalInfo', icon: User },
-  { kind: 'idDocument', icon: IdCard },
+const KINDS: Array<{ kind: ItemKind; icon: QasaIconName; variant?: Variant }> = [
+  { kind: 'login', icon: 'login', variant: 'login' },
+  { kind: 'secureNote', icon: 'note', variant: 'secureNote' },
+  { kind: 'payment', icon: 'card' },
+  { kind: 'personalInfo', icon: 'person' },
+  { kind: 'idDocument', icon: 'identity' },
 ]
 
 const drilled = ref<ItemKind | null>(null)
@@ -49,7 +49,7 @@ const rows = computed(() => {
     <div class="head">
       <SheetHeader :title="title" />
       <button v-if="drilled" type="button" class="back" :aria-label="t('common.back')" @click="drilled = null">
-        <Chevron dir="back" />
+        <QasaIcon name="chevron-back" :size="17" />
       </button>
     </div>
     <div class="list">

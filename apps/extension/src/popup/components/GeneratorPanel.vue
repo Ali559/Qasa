@@ -2,9 +2,9 @@
 // The generator tab: the desktop's generated-password card (GeneratorContent.vue), with the
 // shared generator's defaults from the desktop (`generate` op). A fresh password isn't a
 // stored secret, so the popup copies it itself.
-import { Check, Copy, RefreshCw } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import { useT } from '@/prefs'
 import { showToast } from '@/toast'
@@ -38,13 +38,12 @@ onMounted(regenerate)
     <div class="card-head">
       <SectionLabel :text="t('gen.generatedPassword')" />
       <button type="button" class="regen" :aria-label="t('gen.regenerate')" :title="t('gen.regenerate')" @click="regenerate">
-        <RefreshCw :stroke-width="2.5" />
+        <QasaIcon name="refresh" :size="16" />
       </button>
     </div>
     <output class="password" dir="ltr" data-testid="generated">{{ password || ' ' }}</output>
     <button type="button" class="qasa-button secondary" :disabled="!password" @click="copy">
-      <Check v-if="copied" :stroke-width="2.5" aria-hidden="true" />
-      <Copy v-else :stroke-width="2.5" aria-hidden="true" />
+      <QasaIcon :name="copied ? 'check' : 'copy'" :size="15" />
       <span>{{ copied ? t('gen.copied') : t('gen.copyPassword') }}</span>
     </button>
   </div>

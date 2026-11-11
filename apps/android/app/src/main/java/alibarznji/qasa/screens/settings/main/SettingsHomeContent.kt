@@ -10,6 +10,7 @@ import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.qasaColors
@@ -17,11 +18,6 @@ import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.outlined.Backup
-import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.PersonRemove
 import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,7 +88,7 @@ fun SettingsHomeContent(
         SectionGap()
         SettingsSection(stringResource(R.string.settings_dataaccount)) {
             NavChevronRow(
-                icon = Icons.Outlined.Backup,
+                icon = QasaIcons.Backup,
                 title = stringResource(R.string.backup_title),
                 subtitle = stringResource(R.string.backup_subtitle),
                 onClick = onBackups,
@@ -101,7 +97,7 @@ fun SettingsHomeContent(
             CsvImportExportRows(onStatus = { statusMessage = it })
             RowDivider()
             NavChevronRow(
-                icon = Icons.Outlined.DeleteForever,
+                icon = QasaIcons.DeleteForever,
                 title = stringResource(R.string.settings_clearlocaldata),
                 destructive = true,
                 onClick = { showClear = true },
@@ -109,7 +105,7 @@ fun SettingsHomeContent(
             if (accountRegistered) {
                 RowDivider()
                 NavChevronRow(
-                    icon = Icons.Outlined.PersonRemove,
+                    icon = QasaIcons.DeviceRemove,
                     title = stringResource(R.string.settings_deleteaccount),
                     destructive = true,
                     onClick = { if (!deletingAccount) showDeleteAccount = true },
@@ -117,7 +113,7 @@ fun SettingsHomeContent(
             }
             RowDivider()
             NavChevronRow(
-                icon = Icons.AutoMirrored.Filled.Logout,
+                icon = QasaIcons.SignOut,
                 title = stringResource(R.string.settings_logout),
                 onClick = { showLockConfirm = true },
             )

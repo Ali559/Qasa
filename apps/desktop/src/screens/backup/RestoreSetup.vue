@@ -3,8 +3,7 @@
 // account (as a device joining over Wi‑Fi sync does) and the core unlocks it with the
 // password just typed. Continue then enters the app like any unlock, which registers this
 // computer under the restored account.
-import Chevron from '@/components/Chevron.vue'
-import {Check} from 'lucide-vue-next'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -22,7 +21,7 @@ const done = ref<RestoreOutcome | null>(null)
   <AuthFrame>
     <div class="content">
       <button v-if="!done" type="button" class="back" @click="emit('back')">
-        <Chevron dir="back" />{{ t('common.back') }}
+        <QasaIcon name="chevron-back" :size="17" />{{ t('common.back') }}
       </button>
 
       <h1 class="title">{{ t('backup.restore.title') }}</h1>
@@ -32,7 +31,7 @@ const done = ref<RestoreOutcome | null>(null)
     </div>
 
     <template #footer>
-      <PrimaryButton v-if="done" :title="t('pair.done')" :icon="Check" @click="emit('restored')" />
+      <PrimaryButton v-if="done" :title="t('pair.done')" icon="check" @click="emit('restored')" />
     </template>
   </AuthFrame>
 </template>

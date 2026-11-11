@@ -5,6 +5,7 @@ import alibarznji.qasa.screens.settings.SettingsViewModel
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
@@ -17,14 +18,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.outlined.Password
-import androidx.compose.material.icons.outlined.Schedule
 import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,13 +49,13 @@ internal fun SecurityRows(
     var biometrics by remember { mutableStateOf(vm.store.biometricsEnabled) }
 
     NavChevronRow(
-        icon = Icons.Outlined.Password,
+        icon = QasaIcons.Login,
         title = stringResource(R.string.settings_changemasterpassword),
         onClick = onChangePassword,
     )
     RowDivider()
     ToggleRow(
-        icon = Icons.Filled.Fingerprint,
+        icon = QasaIcons.Fingerprint,
         title = stringResource(R.string.settings_biometricunlock),
         // Seal-state subtitle, shown on both apps (iOS `SettingsView.biometricSubtitle`).
         // The toggle is the preference; the sealed copy behind the hardware gate is
@@ -81,7 +74,7 @@ internal fun SecurityRows(
     )
     RowDivider()
     NavChevronRow(
-        icon = Icons.Filled.TextFields,
+        icon = QasaIcons.Type,
         title = stringResource(R.string.settings_autofill),
         // iOS's `settings.autofillSubtitle` walks through iOS Settings ("Passwords → AutoFill
         // Passwords"); on Android the row opens the system autofill picker instead.
@@ -91,7 +84,7 @@ internal fun SecurityRows(
     RowDivider()
     val confirmEveryFill by vm.prefs.autofillConfirmEveryFill.collectAsState()
     ToggleRow(
-        icon = Icons.Filled.VerifiedUser,
+        icon = QasaIcons.Protected,
         title = stringResource(R.string.settings_autofillconfirm),
         subtitle = stringResource(R.string.settings_autofillconfirmsubtitle),
         checked = confirmEveryFill,
@@ -99,7 +92,7 @@ internal fun SecurityRows(
     )
     RowDivider()
     NavChevronRow(
-        icon = Icons.Outlined.Schedule,
+        icon = QasaIcons.AutoLock,
         title = stringResource(R.string.settings_autolock),
         trailingText = stringResource(R.string.settings_autolockminutesfmt, autoLock),
         onClick = onAutoLock,
@@ -138,7 +131,7 @@ internal fun LinkedDevicesSection(
     Spacer(Modifier.height(QasaDimens.contentGap))
     CardContainer {
         NavChevronRow(
-            icon = Icons.Filled.PhoneAndroid,
+            icon = QasaIcons.Device,
             iconColor = c.accent,
             title = remember { deviceName(context) },
             subtitle = stringResource(R.string.settings_thisdevice),
@@ -146,7 +139,7 @@ internal fun LinkedDevicesSection(
         )
         RowDivider()
         NavChevronRow(
-            icon = Icons.Filled.Wifi,
+            icon = QasaIcons.Wifi,
             title = stringResource(R.string.settings_syncnetwork),
             subtitle = stringResource(if (isPremium) R.string.settings_premiumlansync else R.string.settings_requirespremium),
             onClick = onLan,

@@ -5,14 +5,11 @@ import alibarznji.qasa.prefs.AppLanguage
 import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.prefs.AppThemeMode
 import alibarznji.qasa.theme.NavChevronRow
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import alibarznji.qasa.theme.RowDivider
@@ -56,7 +53,7 @@ internal fun AppearanceRows(prefs: AppPreferences) {
     val themeLabels = AppThemeMode.entries.associateWith { stringResource(it.labelRes) }
 
     MenuRow(
-        icon = Icons.Filled.Language,
+        icon = QasaIcons.Language,
         title = stringResource(R.string.settings_language),
         options = AppLanguage.entries,
         selected = lang,
@@ -65,7 +62,7 @@ internal fun AppearanceRows(prefs: AppPreferences) {
     )
     RowDivider()
     MenuRow(
-        icon = Icons.Filled.DarkMode,
+        icon = QasaIcons.ThemeDark,
         title = stringResource(R.string.settings_theme),
         options = AppThemeMode.entries,
         selected = theme,
@@ -96,7 +93,7 @@ private fun <T> MenuRow(
                 DropdownMenuItem(
                     text = { Text(label(option), color = c.textPrimary, style = qasaText.bodyLarge) },
                     trailingIcon = if (option == selected) {
-                        { Icon(Icons.Filled.Check, null, tint = c.accent) }
+                        { Icon(QasaIcons.Check, null, tint = c.accent) }
                     } else {
                         null
                     },

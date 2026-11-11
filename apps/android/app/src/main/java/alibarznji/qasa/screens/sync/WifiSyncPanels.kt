@@ -12,6 +12,7 @@ import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.QasaFieldGroup
 import alibarznji.qasa.theme.QasaTextRow
@@ -27,12 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DesktopWindows
-import androidx.compose.material.icons.filled.Laptop
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.PhoneIphone
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -216,7 +211,7 @@ internal fun HostPanel(vm: WifiSyncViewModel) {
             (state as? HostState.Failed)?.let { FailureText(syncFailureText(it.failure)) }
             PrimaryButton(
                 title = stringResource(R.string.lan_starthost),
-                icon = Icons.Filled.Wifi,
+                icon = QasaIcons.Wifi,
                 onClick = vm::startHost,
             )
         }
@@ -257,7 +252,7 @@ internal fun JoinPanel(vm: WifiSyncViewModel) {
         }
         PrimaryButton(
             title = stringResource(if (vm.joining) R.string.sync_connecting else R.string.sync_syncbutton),
-            icon = if (vm.joining) null else Icons.Filled.Wifi,
+            icon = if (vm.joining) null else QasaIcons.Wifi,
             enabled = selected != null && vm.code.length == 6 && !vm.joining,
             onClick = { vm.join(selected) },
         )
@@ -319,11 +314,11 @@ private fun PeerList(peers: List<SyncPeer>, selected: SyncPeer?, onSelect: (Sync
 }
 
 private fun platformIcon(platform: String) = when (platform) {
-    "ios" -> Icons.Filled.PhoneIphone
-    "android" -> Icons.Filled.PhoneAndroid
-    "macos" -> Icons.Filled.Laptop
-    "windows", "linux" -> Icons.Filled.DesktopWindows
-    else -> Icons.Filled.Wifi
+    "ios" -> QasaIcons.Device
+    "android" -> QasaIcons.Device
+    "macos" -> QasaIcons.Laptop
+    "windows", "linux" -> QasaIcons.Desktop
+    else -> QasaIcons.Wifi
 }
 
 @Composable

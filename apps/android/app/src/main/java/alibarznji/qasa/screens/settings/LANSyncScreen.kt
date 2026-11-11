@@ -9,6 +9,7 @@ import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.sync.HostState
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.QasaSheetHeader
@@ -24,8 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -79,7 +78,7 @@ fun LANSyncScreen(
                 StickyBottomBar {
                     PrimaryButton(
                         title = stringResource(R.string.nav_upgrade),
-                        icon = Icons.Filled.WorkspacePremium,
+                        icon = QasaIcons.Premium,
                         onClick = onUpgrade,
                     )
                 }

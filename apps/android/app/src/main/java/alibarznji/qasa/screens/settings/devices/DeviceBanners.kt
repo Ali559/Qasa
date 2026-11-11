@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.settings.devices
 import alibarznji.qasa.R
 import alibarznji.qasa.network.RestoreKeyStatus
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
@@ -21,10 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LinkOff
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,7 +52,7 @@ internal fun UpgradeHintBanner(onUpgrade: () -> Unit) {
             Modifier.size(QasaIconSize.x7l).clip(CircleShape).background(c.gold.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Filled.Star, contentDescription = null, tint = c.gold)
+            Icon(QasaIcons.Favorite, contentDescription = null, tint = c.gold)
         }
         Spacer(Modifier.width(QasaDimens.gap))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QasaDimens.spaceSmall)) {
@@ -112,7 +109,7 @@ internal fun DevicesInfoNote() {
             .padding(QasaDimens.cardPadding),
         verticalAlignment = Alignment.Top,
     ) {
-        Icon(Icons.Filled.Info, contentDescription = null, tint = c.info, modifier = Modifier.size(QasaIconSize.lg))
+        Icon(QasaIcons.Info, contentDescription = null, tint = c.info, modifier = Modifier.size(QasaIconSize.lg))
         Spacer(Modifier.width(QasaDimens.gapSmall))
         Text(
             stringResource(R.string.devices_infonote),
@@ -131,6 +128,6 @@ internal fun UnlinkAllButton(enabled: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         enabled = enabled,
         destructive = true,
-        icon = Icons.Filled.LinkOff,
+        icon = QasaIcons.Unlink,
     )
 }

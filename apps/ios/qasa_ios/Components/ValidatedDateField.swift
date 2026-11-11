@@ -60,7 +60,7 @@ struct ValidatedDateField: View {
             }
         } trailing: {
             FieldIconButton(
-                systemImage: "calendar",
+                icon: .calendar,
                 tint: Theme.accent,
                 accessibilityLabel: L10n.tr("date.pick", locale: locale)
             ) {

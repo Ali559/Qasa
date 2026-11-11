@@ -37,7 +37,7 @@ struct LANSyncView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 if !session.isPremium {
                     BottomActionBar {
-                        PrimaryButton(title: L10n.tr("nav.upgrade", locale: locale), icon: "crown.fill") {
+                        PrimaryButton(title: L10n.tr("nav.upgrade", locale: locale), icon: .premium) {
                             onUpgrade()
                         }
                     }
@@ -128,7 +128,7 @@ struct WiFiHostPanel: View {
                 } else {
                     PrimaryButton(
                         title: L10n.tr("lan.startHost", locale: locale),
-                        icon: "wifi"
+                        icon: .wifi
                     ) {
                         sync.startHost(container: container)
                     }
@@ -207,7 +207,7 @@ struct WiFiJoinPanel: View {
                     title: sync.isJoining
                         ? L10n.tr("sync.connecting", locale: locale)
                         : L10n.tr("sync.syncButton", locale: locale),
-                    icon: sync.isJoining ? nil : "arrow.triangle.2.circlepath"
+                    icon: sync.isJoining ? nil : .sync
                 ) {
                     guard canSync, let selected else { return }
                     sync.join(peer: selected, code: code, container: container)
@@ -230,17 +230,16 @@ struct WiFiJoinPanel: View {
 
     private func peerRow(_ peer: WiFiSyncController.Peer) -> some View {
         SettingsRow(icon: Self.icon(for: peer.platform), title: peer.name) {
-            Image(systemName: selected == peer ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 20))
+            QasaIconImage(selected == peer ? .success : .circle, size: 20)
                 .foregroundColor(selected == peer ? Theme.accent : Theme.textTertiary)
         }
     }
 
-    private static func icon(for platform: String) -> String {
+    private static func icon(for platform: String) -> QasaIcon {
         switch platform {
-        case "ios", "android": return "iphone"
-        case "macos": return "laptopcomputer"
-        default: return "desktopcomputer"
+        case "ios", "android": return .device
+        case "macos": return .laptop
+        default: return .desktop
         }
     }
 }

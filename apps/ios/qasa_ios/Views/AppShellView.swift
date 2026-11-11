@@ -7,13 +7,23 @@ enum ShellTab: Hashable {
 }
 
 extension ShellTab {
-    /// Base outline SF Symbol; every one has a `.fill` variant.
-    var symbol: String {
+    /// The tab's linear glyph, shown while it is not the active tab.
+    var icon: QasaIcon {
         switch self {
-        case .home: return "house"
-        case .passwords: return "key"
-        case .alerts: return "bell"
-        case .you: return "person.crop.circle"
+        case .home: return .home
+        case .passwords: return .passwords
+        case .alerts: return .alerts
+        case .you: return .you
+        }
+    }
+
+    /// The filled glyph (Solar Bold) the tab shows while it is active.
+    var activeIcon: QasaIcon {
+        switch self {
+        case .home: return .homeFill
+        case .passwords: return .passwordsFill
+        case .alerts: return .alertsFill
+        case .you: return .youFill
         }
     }
 
@@ -80,16 +90,26 @@ struct AppShellView: View {
         }
     }
 
-    /// Outline symbol when inactive, its `.fill` twin when selected.
+    /// Linear glyph when inactive, its filled twin when selected.
     private func tabLabel(_ item: ShellTab) -> some View {
         let selected = tab == item
         return Label {
             Text(L10n.tr(item.titleKey, locale: prefs.locale))
         } icon: {
-            Image(systemName: selected ? item.symbol + ".fill" : item.symbol)
+            Self.tabIcon(selected ? item.activeIcon : item.icon)
         }
-        // The tab bar fills every symbol by default; keep the outline for inactive tabs.
-        .environment(\.symbolVariants, .none)
+    }
+
+    /// The tab bar draws a tab item's image at its own size and ignores SwiftUI frames, so
+    /// the 24-unit glyph is rendered at the tab-bar size (22 pt) up front, as a template.
+    private static func tabIcon(_ icon: QasaIcon) -> Image {
+        let side: CGFloat = 22
+        guard let source = UIImage(named: icon.rawValue) else { return Image(icon.rawValue) }
+        let size = CGSize(width: side, height: side)
+        let rendered = UIGraphicsImageRenderer(size: size).image { _ in
+            source.draw(in: CGRect(origin: .zero, size: size))
+        }
+        return Image(uiImage: rendered.withRenderingMode(.alwaysTemplate))
     }
 
     /// Generator "Save to my passwords": close the page, show Passwords, and let the list

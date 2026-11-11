@@ -4,7 +4,6 @@
 // colour while empty (never the label). `secure` hides the text; `revealable` adds the
 // eye `FieldIconButton` after any `trailing` controls. `prefix` sits before the input on
 // the value line (a phone number's dial code); `below` is a caption inside the row.
-import { Eye, EyeOff } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 import FieldIconButton from './FieldIconButton.vue'
@@ -60,7 +59,7 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
       <slot name="trailing" />
       <FieldIconButton
         v-if="secure && revealable"
-        :icon="revealed ? EyeOff : Eye"
+        :icon="revealed ? 'hide' : 'show'"
         :label="revealed ? t('a11y.hidePassword') : t('a11y.showPassword')"
         @click="revealed = !revealed"
       />

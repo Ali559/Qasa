@@ -121,8 +121,7 @@ struct HomeView: View {
             }
             Spacer()
             Button { onOpen(.notifications) } label: {
-                Image(systemName: "bell")
-                    .font(.qasa(18, weight: .medium))
+                QasaIconImage(.alerts, size: 18)
                     .foregroundColor(theme.textPrimary)
                     .frame(width: 44, height: 44)
                     .background(theme.cardBackground)

@@ -4,11 +4,11 @@
 // Search, filter chips, Most Recent (filtered tab with over 10 items), letter sections,
 // the + button and the tab-aware add flow match iOS. The Suggested section is left out:
 // on iOS it comes from a mock context provider; on desktop the extension will supply it.
-import { CircleX, Inbox, Plus, Search } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
 import Fab from '@/components/Fab.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import FilterChip from '@/components/FilterChip.vue'
 import { nav } from '@/nav'
 import { useT } from '@/prefs'
@@ -111,10 +111,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <div class="scroll">
         <div class="list">
           <label class="qasa-field search" :class="{ 'has-clear': !!query }">
-            <Search class="search-icon" :stroke-width="2.5" aria-hidden="true" />
+            <QasaIcon name="search" :size="16" class="search-icon" />
             <input ref="searchInput" v-model="query" type="search" :placeholder="t('vault.searchPlaceholder')" :aria-label="t('vault.search')" />
             <button v-if="query" type="button" class="clear" :aria-label="t('common.cancel')" @click.prevent="query = ''">
-              <CircleX :stroke-width="2.5" />
+              <QasaIcon name="close" :size="16" />
             </button>
           </label>
 
@@ -155,14 +155,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           </template>
 
           <div v-if="filtered.length === 0" class="empty">
-            <Inbox :size="40" aria-hidden="true" />
+            <QasaIcon name="inbox" :size="40" />
             <strong>{{ t('vault.emptyTitle') }}</strong>
             <span>{{ query.trim() ? t('vault.noSearchMatches') : t('vault.emptyHint') }}</span>
           </div>
         </div>
       </div>
       <div class="fab">
-        <Fab :icon="Plus" :label="t('a11y.addItem')" @click="add" />
+        <Fab icon="add" :label="t('a11y.addItem')" @click="add" />
       </div>
     </section>
 

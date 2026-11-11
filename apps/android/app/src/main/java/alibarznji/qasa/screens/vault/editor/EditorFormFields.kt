@@ -4,14 +4,13 @@ import alibarznji.qasa.R
 import alibarznji.qasa.screens.vault.VaultDates
 import alibarznji.qasa.theme.FieldIconButton
 import alibarznji.qasa.theme.QasaDateRow
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaNotesCard
 import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.theme.qasaColors
 import androidx.annotation.StringRes
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -145,7 +144,7 @@ fun PasswordFormField(value: String, onChange: (String) -> Unit, onGenerate: () 
         error = fieldError(FfiField.PASSWORD),
         trailing = {
             FieldIconButton(
-                icon = Icons.Outlined.AutoFixHigh,
+                icon = QasaIcons.Generate,
                 contentDescription = stringResource(R.string.vault_generatepassword),
                 onClick = onGenerate,
                 tint = c.accent,

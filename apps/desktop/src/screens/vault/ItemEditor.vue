@@ -5,7 +5,6 @@
 // countries and dates. Field rules come from the core (`validate_item`): checked live,
 // shown under each field the user changed (every field after a Save attempt, and on an
 // existing item), and Save refuses while any remain — as the core does on its side.
-import { TriangleAlert, WandSparkles } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import BottomActionBar from '@/components/BottomActionBar.vue'
@@ -203,7 +202,7 @@ function onKey(e: KeyboardEvent) {
               <FieldRow v-model="payload.fields.username" :label="t('field.username')" :error="err('username')" />
               <FieldRow v-model="payload.fields.password" :label="t('field.password')" secure revealable mono :error="err('password')">
                 <template #trailing>
-                  <FieldIconButton :icon="WandSparkles" :label="t('vault.generatePassword')" accent @click="showGenerator = true" />
+                  <FieldIconButton icon="generate" :label="t('vault.generatePassword')" accent @click="showGenerator = true" />
                 </template>
               </FieldRow>
               <TotpField v-model="payload.fields.totp" :error="err('totp')" />
@@ -365,7 +364,7 @@ function onKey(e: KeyboardEvent) {
     <ConfirmDialog
       :open="!!saveError"
       :title="t('vault.couldNotSave')"
-      :icon="TriangleAlert"
+      icon="warning"
       :message="saveError ?? undefined"
       :confirm-label="t('common.ok')"
       no-cancel

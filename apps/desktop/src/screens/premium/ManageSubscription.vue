@@ -2,13 +2,13 @@
 // iOS `ManageSubscriptionView` (embedded in the shell): the details card, the renewal link
 // card when one is out, auto-renew with "Remove saved payment method", and one cancel
 // button behind a confirm, then the reason sheet.
-import { CircleX, CreditCard, Lock, RefreshCw, XCircle } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
 import { refreshAccount, refreshLicense } from '@/account/store'
 import type { Subscription } from '@/account/types'
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
@@ -228,7 +228,7 @@ async function confirmCancel(reason: string) {
             </p>
             <PrimaryButton
               :title="isPayingRenewal ? t('premium.processing') : t('sub.payRenewal')"
-              :icon="Lock"
+              icon="lock"
               :disabled="isPayingRenewal"
               @click="payRenewal"
             />
@@ -237,7 +237,7 @@ async function confirmCancel(reason: string) {
           <!-- Auto-renew -->
           <div class="row-card">
             <div class="renew-row">
-              <RefreshCw :size="18" :stroke-width="2" class="accent" aria-hidden="true" />
+              <QasaIcon name="sync" :size="18" class="accent" />
               <div class="row-text">
                 <span class="row-title">{{ t('sub.autoRenew') }}</span>
                 <span class="row-detail">{{ autoRenewSubtitle }}</span>
@@ -275,7 +275,7 @@ async function confirmCancel(reason: string) {
     <AlertDialog
       :open="showCancelConfirm"
       :title="t('sub.cancelConfirmTitle')"
-      :icon="CircleX"
+      icon="close"
       :message="t('sub.cancelConfirmMessage', formatDate(subscription?.expires_at))"
       :cancel-label="t('sub.keepPremium')"
       :confirm-label="t('sub.continue')"
@@ -287,7 +287,7 @@ async function confirmCancel(reason: string) {
     <ConfirmDialog
       :open="showRemovePaymentConfirm"
       :title="t('sub.removePaymentMethod')"
-      :icon="CreditCard"
+      icon="card"
       :message="t('sub.removePaymentMethodConfirm')"
       :confirm-label="t('sub.removePaymentMethod')"
       :cancel-label="t('common.cancel')"
@@ -316,7 +316,7 @@ async function confirmCancel(reason: string) {
         <PrimaryButton
           kind="destructive"
           :title="isCancelling ? t('sub.cancellingProgress') : t('sub.confirmCancel')"
-          :icon="XCircle"
+          icon="close"
           :disabled="isCancelling"
           @click="confirmCancel(cancelReason)"
         />

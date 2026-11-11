@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // iOS `TOTPCodeRow`: the live code (grouped, mono), a countdown ring that turns red in
 // the last 5 seconds, and copy. Only codes are shown, never the 2FA secret.
-import { Copy } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
+import QasaIcon from '@/components/QasaIcon.vue'
 import { useT } from '@/prefs'
 import { toolsApi, type TotpCode } from '@/vault/tools'
 
@@ -35,7 +35,7 @@ const CIRC = 2 * Math.PI * R
   <div v-if="code" class="totp" role="button" tabindex="0" @click="emit('copy', code.code, code.secondsRemaining)" @keydown.enter="emit('copy', code.code, code.secondsRemaining)">
     <div class="head">
       <span class="label">{{ t('field.totp') }}</span>
-      <Copy :size="14" class="accent" :aria-label="t('copy.totp')" />
+      <span class="accent" role="img" :aria-label="t('copy.totp')"><QasaIcon name="copy" :size="14" /></span>
     </div>
     <div class="body">
       <span class="code">{{ code.grouped }}</span>

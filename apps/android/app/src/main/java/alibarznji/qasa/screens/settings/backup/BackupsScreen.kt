@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.settings.backup
 
 import alibarznji.qasa.backup.BackupPlace
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.R
 import alibarznji.qasa.backup.BackupFrequency
@@ -29,11 +30,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -198,7 +194,7 @@ fun BackupsScreen(
             StickyBottomBar {
                 PrimaryButton(
                     title = stringResource(if (running) R.string.backup_backingup else R.string.backup_backupnow),
-                    icon = if (running) null else Icons.Filled.Backup,
+                    icon = if (running) null else QasaIcons.Backup,
                     enabled = !running,
                     onClick = {
                         if (settings.locationUri == null) {
@@ -233,7 +229,7 @@ fun BackupsScreen(
         Spacer(Modifier.height(QasaDimens.contentGap))
         CardContainer {
             NavChevronRow(
-                icon = Icons.Outlined.FolderOpen,
+                icon = QasaIcons.Folder,
                 title = settings.locationName ?: stringResource(R.string.backup_locationnone),
                 subtitle = stringResource(
                     if (settings.locationUri == null) R.string.backup_chooselocation else R.string.backup_changelocation,
@@ -284,7 +280,7 @@ fun BackupsScreen(
                             style = qasaText.bodyLarge,
                             modifier = Modifier.weight(1f),
                         )
-                        if (settings.frequency == frequency) Icon(Icons.Filled.Check, null, tint = c.accent)
+                        if (settings.frequency == frequency) Icon(QasaIcons.Check, null, tint = c.accent)
                     }
                 }
             }
@@ -295,7 +291,7 @@ fun BackupsScreen(
         Spacer(Modifier.height(QasaDimens.sectionGap))
         CardContainer {
             NavChevronRow(
-                icon = Icons.Outlined.Restore,
+                icon = QasaIcons.History,
                 title = stringResource(R.string.backup_restore),
                 subtitle = stringResource(R.string.backup_restoresubtitle),
                 onClick = pickRestoreFile,

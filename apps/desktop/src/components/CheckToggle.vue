@@ -3,7 +3,7 @@
 // vertical padding; a 48 × 24 capsule (accent on, stroke off) with a 24pt knob (card fill
 // with an 11 bold accent check on, tertiary text off) moving 24 on the `toggle` spring.
 // Disabled: opacity .7 and a tertiary title.
-import { Check } from 'lucide-vue-next'
+import QasaIcon from './QasaIcon.vue'
 
 defineProps<{ label: string; disabled?: boolean }>()
 const model = defineModel<boolean>({ required: true })
@@ -13,7 +13,7 @@ const model = defineModel<boolean>({ required: true })
   <button type="button" role="switch" class="row" :aria-checked="model" :disabled="disabled" @click="model = !model">
     <span class="title">{{ label }}</span>
     <span class="track" :class="{ on: model }">
-      <span class="knob"><Check :stroke-width="3.5" /></span>
+      <span class="knob"><QasaIcon name="check" :size="11" /></span>
     </span>
   </button>
 </template>

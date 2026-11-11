@@ -2,14 +2,12 @@ package alibarznji.qasa.screens.settings.csv
 
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.NavChevronRow
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.FileUpload
 import alibarznji.qasa.theme.RowDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,13 +79,13 @@ fun CsvImportExportRows(onStatus: (String) -> Unit) {
 
     NavChevronRow(
         title = stringResource(R.string.settings_importcsv),
-        icon = Icons.Outlined.FileDownload,
+        icon = QasaIcons.Import,
         onClick = { importLauncher.launch(IMPORT_MIME_TYPES) },
     )
     RowDivider()
     NavChevronRow(
         title = stringResource(R.string.settings_exportcsv),
-        icon = Icons.Outlined.FileUpload,
+        icon = QasaIcons.Export,
         onClick = {
             scope.launch {
                 // iOS checks for an empty vault before offering the file.

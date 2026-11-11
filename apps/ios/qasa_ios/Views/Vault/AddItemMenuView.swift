@@ -20,11 +20,11 @@ struct AddItemMenuView: View {
                         ForEach(Array(VaultItemKind.allCases.enumerated()), id: \.element.id) { index, kind in
                             if index > 0 { RowDivider() }
                             if kind.subtypes != nil {
-                                row(kind.addTitle, icon: kind.systemImage, chevron: true) {
+                                row(kind.addTitle, icon: kind.icon, chevron: true) {
                                     path.append(.subtypes(kind))
                                 }
                             } else {
-                                row(kind.addTitle, icon: kind.systemImage) {
+                                row(kind.addTitle, icon: kind.icon) {
                                     onSelect(defaultPayload(for: kind))
                                 }
                             }
@@ -32,12 +32,12 @@ struct AddItemMenuView: View {
                     case .login:
                         row(
                             L10n.tr("vault.type.login", locale: AppPreferences.shared.locale),
-                            icon: "person.badge.key.fill"
+                            icon: .login
                         ) { onSelect(.login(LoginFields())) }
                     case .secureNote:
                         row(
                             L10n.tr("vault.type.secureNote", locale: AppPreferences.shared.locale),
-                            icon: "note.text"
+                            icon: .note
                         ) { onSelect(.secureNote(SecureNoteFields())) }
                     case .payment:
                         subtypeButtons(for: .payment)
@@ -68,7 +68,7 @@ struct AddItemMenuView: View {
         .tint(Theme.accent)
     }
 
-    private func row(_ title: String, icon: String, chevron: Bool = false, action: @escaping () -> Void) -> some View {
+    private func row(_ title: String, icon: QasaIcon, chevron: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             SettingsRow(icon: icon, title: title) {
                 if chevron { RowChevron() }
@@ -82,7 +82,7 @@ struct AddItemMenuView: View {
         if let subtypes = kind.subtypes {
             ForEach(Array(subtypes.enumerated()), id: \.element.id) { index, subtype in
                 if index > 0 { RowDivider() }
-                row(subtype.title, icon: payload(for: subtype).systemImage) {
+                row(subtype.title, icon: payload(for: subtype).icon) {
                     onSelect(payload(for: subtype))
                 }
             }

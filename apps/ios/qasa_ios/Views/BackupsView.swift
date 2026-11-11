@@ -41,7 +41,7 @@ struct BackupsView: View {
             .bottomActionBar {
                 PrimaryButton(
                     title: L10n.tr(service.isBackingUp ? "backup.backingUp" : "backup.backUpNow", locale: locale),
-                    icon: service.isBackingUp ? nil : "externaldrive.badge.checkmark"
+                    icon: service.isBackingUp ? nil : .backupDone
                 ) {
                     backUpNow()
                 }
@@ -72,7 +72,7 @@ struct BackupsView: View {
         CardContainer {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 14) {
-                    IconBadge(systemImage: "externaldrive.badge.checkmark")
+                    IconBadge(icon: .backupDone)
                     Text(BackupService.lastBackupText(ms: backup.lastBackupMs, locale: locale))
                         .font(.qasa(14, weight: .medium))
                         .foregroundColor(Theme.textPrimary)
@@ -103,7 +103,7 @@ struct BackupsView: View {
                     showFolderPicker = true
                 } label: {
                     NavChevronRow(
-                        icon: "folder",
+                        icon: .folder,
                         title: backup.folderName ?? L10n.tr("backup.locationNone", locale: locale),
                         trailingText: L10n.tr(backup.hasLocation ? "backup.changeLocation" : "backup.chooseLocation", locale: locale)
                     )
@@ -158,7 +158,7 @@ struct BackupsView: View {
                     }
                 } label: {
                     NavChevronRow(
-                        icon: "clock.arrow.circlepath",
+                        icon: .history,
                         title: L10n.tr("backup.auto", locale: locale),
                         trailingText: L10n.tr(backup.frequency.labelKey, locale: locale)
                     )
@@ -173,7 +173,7 @@ struct BackupsView: View {
             SettingsSection {
                 Button { showRestore = true } label: {
                     NavChevronRow(
-                        icon: "arrow.counterclockwise",
+                        icon: .history,
                         title: L10n.tr("backup.restore", locale: locale)
                     )
                 }

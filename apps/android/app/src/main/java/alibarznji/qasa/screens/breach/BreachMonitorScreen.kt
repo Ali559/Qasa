@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.PremiumGate
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.StatusPill
@@ -24,8 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -183,7 +182,7 @@ private fun AddEmailCard(
         Spacer(Modifier.height(QasaDimens.formGap))
         PrimaryButton(
             title = stringResource(if (isChecking) R.string.breach_saving else R.string.breach_addtomonitoring),
-            icon = Icons.Default.Add,
+            icon = QasaIcons.Add,
             // Android keeps a blank field disabled (iOS no-ops the tap); the slot-limit alert stays
             // reachable on Android, whereas iOS disables the button at the limit.
             enabled = email.isNotBlank() && !isChecking,

@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.breach
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.db.MonitoredEmailEntity
@@ -19,8 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -70,7 +69,7 @@ fun MonitoredEmailRow(item: MonitoredEmailEntity, onRemove: () -> Unit) {
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    Icons.Default.Close,
+                    QasaIcons.Close,
                     contentDescription = stringResource(R.string.a11y_removemonitor, item.email),
                     tint = c.textSecondary,
                     modifier = Modifier.size(QasaIconSize.tiny),

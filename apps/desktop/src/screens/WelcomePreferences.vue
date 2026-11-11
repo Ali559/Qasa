@@ -1,6 +1,5 @@
 <script setup lang="ts">
 // iOS `WelcomePreferencesView`: language and theme, chosen before the vault is created.
-import { ArrowRight, Contrast, Languages, Moon, Sun } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -17,16 +16,16 @@ const languageChoices = computed<Choice<Language>[]>(() =>
   LANGUAGES.map((language) => ({
     value: language,
     label: LANGUAGE_NAMES[language],
-    icon: Languages,
+    icon: 'language',
     dir: isRtl(language) ? 'rtl' : 'ltr',
     lang: language,
   })),
 )
 
 const themeChoices = computed<Choice<ThemePreference>[]>(() => [
-  { value: 'system', label: t('settings.theme.system'), icon: Contrast },
-  { value: 'light', label: t('settings.theme.light'), icon: Sun },
-  { value: 'dark', label: t('settings.theme.dark'), icon: Moon },
+  { value: 'system', label: t('settings.theme.system'), icon: 'theme-system' },
+  { value: 'light', label: t('settings.theme.light'), icon: 'theme-light' },
+  { value: 'dark', label: t('settings.theme.dark'), icon: 'theme-dark' },
 ])
 
 function finish() {
@@ -55,7 +54,7 @@ function finish() {
     </div>
 
     <template #footer>
-      <PrimaryButton :title="t('onboarding.continue')" :icon="ArrowRight" mirror-icon @click="finish" />
+      <PrimaryButton :title="t('onboarding.continue')" icon="forward" mirror-icon @click="finish" />
     </template>
   </AuthFrame>
 </template>

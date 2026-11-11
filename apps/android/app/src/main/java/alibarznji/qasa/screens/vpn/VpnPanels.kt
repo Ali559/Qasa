@@ -5,6 +5,7 @@ import alibarznji.qasa.network.VPNNode
 import alibarznji.qasa.network.VPNUsage
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.SecondaryButton
@@ -22,8 +23,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -92,7 +91,7 @@ private fun ServerRow(title: String, subtitle: String, selected: Boolean, onClic
                 Text(title, color = c.textPrimary, style = qasaText.bodyLarge)
                 Text(subtitle, color = c.textSecondary, style = qasaText.bodySmall)
             }
-            if (selected) Icon(Icons.Filled.Check, null, tint = c.accent)
+            if (selected) Icon(QasaIcons.Check, null, tint = c.accent)
         }
     }
 }

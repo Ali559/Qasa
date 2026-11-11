@@ -39,7 +39,7 @@ struct CredentialProviderRootView: View {
                     if filtered.isEmpty {
                         ContentUnavailableView(
                             AutofillL10n.tr("autofill.noMatches", "No matches"),
-                            systemImage: "key.fill",
+                            icon: .login,
                             description: Text(AutofillL10n.tr("autofill.noMatchesHint", "Try searching all vault items."))
                         )
                     } else {
@@ -57,7 +57,7 @@ struct CredentialProviderRootView: View {
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer()
-                                    Image(systemName: icon(for: item.kind))
+                                    QasaIconImage(icon(for: item.kind), size: 17)
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -126,10 +126,11 @@ struct CredentialProviderRootView: View {
                     Button {
                         Task { await unlockWithBiometrics(automatic: false) }
                     } label: {
-                        Label(
-                            AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID"),
-                            systemImage: "faceid"
-                        )
+                        Label {
+                            Text(AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID"))
+                        } icon: {
+                            QasaIconImage(.face, size: 17)
+                        }
                     }
                 }
 
@@ -271,16 +272,16 @@ struct CredentialProviderRootView: View {
         return item.subtitle
     }
 
-    private func icon(for kind: AutofillItemKind) -> String {
+    private func icon(for kind: AutofillItemKind) -> QasaIcon {
         switch kind {
-        case .login: return "person.crop.circle"
-        case .card: return "creditcard"
-        case .bankAccount: return "building.columns"
-        case .name: return "person.text.rectangle"
-        case .email: return "envelope"
-        case .phone: return "phone"
-        case .address: return "house"
-        case .company: return "building.2"
+        case .login: return .login
+        case .card: return .card
+        case .bankAccount: return .bank
+        case .name: return .identity
+        case .email: return .email
+        case .phone: return .phone
+        case .address: return .address
+        case .company: return .work
         }
     }
 }

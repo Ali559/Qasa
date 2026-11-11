@@ -1,12 +1,12 @@
 <script setup lang="ts">
 // Settings → Browser extension (plan §8.1): the browsers allowed to fill logins, each
 // with Remove. Pairing itself starts from the extension's popup.
-import { Globe, Puzzle } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
@@ -44,7 +44,7 @@ async function remove() {
     <section v-if="clients.length === 0" class="group">
       <span class="label"><SectionLabel :text="t('bridge.allowedBrowsers')" /></span>
       <CardContainer :padding="20" class="empty">
-        <Puzzle :size="28" aria-hidden="true" />
+        <QasaIcon name="link" :size="28" />
         <p class="muted">{{ t('bridge.noClients') }}</p>
       </CardContainer>
     </section>
@@ -53,7 +53,7 @@ async function remove() {
       <SettingsRow
         v-for="c in clients"
         :key="c.id"
-        :icon="Globe"
+        icon="website"
         :title="c.name"
         :subtitle="c.lastUsedAt ? t('bridge.lastUsed', formatDate(c.lastUsedAt)) : t('bridge.neverUsed')"
       >

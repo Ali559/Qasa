@@ -3,13 +3,13 @@
 // pickers): a `SettingsSection` card of `SettingsRow`s, the badge tinted accent when
 // selected and secondary otherwise, a trailing 15 bold check that fades and scales in
 // (0.6 → 1, `motion.fast`), `RowDivider`s between rows and the `RowButtonStyle` wash.
-import { Check } from 'lucide-vue-next'
-import type { Component } from 'vue'
+import QasaIcon from './QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
 export interface Choice<V extends string> {
   value: V
   label: string
-  icon?: Component
+  icon?: QasaIconName
   /** Set for a language name, so it is laid out in its own direction. */
   dir?: 'ltr' | 'rtl'
   lang?: string
@@ -32,11 +32,11 @@ const model = defineModel<T>({ required: true })
       @click="model = choice.value"
     >
       <span v-if="choice.icon" class="badge" aria-hidden="true">
-        <component :is="choice.icon" :stroke-width="2.5" />
+        <QasaIcon :name="choice.icon" :size="16" />
       </span>
       <span class="choice-label" :dir="choice.dir" :lang="choice.lang">{{ choice.label }}</span>
       <span class="spacer" />
-      <Check class="check" :stroke-width="3" aria-hidden="true" />
+      <QasaIcon name="check" :size="15" class="check" />
     </button>
   </div>
 </template>

@@ -70,7 +70,7 @@ struct BreachedPasswordsView: View {
             if report.breachCheckFailed {
                 CardContainer(padding: 20) {
                     VStack(alignment: .leading, spacing: 14) {
-                        Label(L10n.tr("breached.offline"), systemImage: "wifi.exclamationmark")
+                        Label { Text(L10n.tr("breached.offline")) } icon: { QasaIconImage(.wifiOff, size: 14) }
                             .font(.qasa(14))
                             .foregroundColor(Theme.textSecondary)
                         checkAgainButton
@@ -95,7 +95,7 @@ struct BreachedPasswordsView: View {
             } else {
                 CardContainer(padding: 20) {
                     VStack(alignment: .leading, spacing: 10) {
-                        Label(L10n.tr("breached.noneTitle"), systemImage: "checkmark.shield.fill")
+                        Label { Text(L10n.tr("breached.noneTitle")) } icon: { QasaIconImage(.protected, size: 18) }
                             .font(.qasa(18, weight: .semibold))
                             .foregroundColor(Theme.success)
                         Text(L10n.tr("breached.noneBody"))
@@ -121,7 +121,7 @@ struct BreachedPasswordsView: View {
         Button {
             Task { await check() }
         } label: {
-            Label(L10n.tr("breached.checkAgain"), systemImage: "arrow.clockwise")
+            Label { Text(L10n.tr("breached.checkAgain")) } icon: { QasaIconImage(.refresh, size: 14) }
                 .font(.qasa(14, weight: .semibold))
                 .foregroundColor(Theme.accent)
         }
@@ -189,7 +189,7 @@ struct BreachLockedCard: View {
     var body: some View {
         CardContainer(padding: 20) {
             VStack(alignment: .leading, spacing: 10) {
-                Label(L10n.tr("breached.lockedTitle"), systemImage: "lock.shield.fill")
+                Label { Text(L10n.tr("breached.lockedTitle")) } icon: { QasaIconImage(.shieldLock, size: 18) }
                     .font(.qasa(18, weight: .semibold))
                     .foregroundColor(Theme.textPrimary)
                 Text(L10n.tr("breached.lockedBody"))
@@ -197,7 +197,7 @@ struct BreachLockedCard: View {
                     .foregroundColor(Theme.textSecondary)
                 PrimaryButton(
                     title: L10n.tr("breached.unlock"),
-                    icon: "crown.fill",
+                    icon: .premium,
                     action: onUpgrade
                 )
                 .padding(.top, 6)

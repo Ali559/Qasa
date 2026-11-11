@@ -7,6 +7,7 @@ import alibarznji.qasa.theme.CheckToggle
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaSlider
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.StickyBottomBar
@@ -35,10 +36,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -160,7 +157,7 @@ fun PasswordGeneratorContent(
                 SectionLabel(stringResource(R.string.gen_generatedpassword))
                 Spacer(Modifier.weight(1f))
                 Icon(
-                    Icons.Default.Refresh,
+                    QasaIcons.Refresh,
                     contentDescription = stringResource(R.string.gen_regenerate),
                     tint = c.cyan,
                     modifier = Modifier
@@ -202,7 +199,7 @@ fun PasswordGeneratorContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    if (state.copied) Icons.Default.Check else Icons.Default.ContentCopy,
+                    if (state.copied) QasaIcons.Check else QasaIcons.Copy,
                     contentDescription = null,
                     tint = c.accent,
                     modifier = Modifier.size(QasaIconSize.md),

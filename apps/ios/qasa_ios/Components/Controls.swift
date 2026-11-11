@@ -39,15 +39,14 @@ extension View {
 /// A square icon button that sits inside a field (reveal, generate, copy…).
 struct FieldIconButton: View {
     @Environment(\.themePalette) private var theme
-    let systemImage: String
+    let icon: QasaIcon
     var tint: Color? = nil
     let accessibilityLabel: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: 16, weight: .semibold))
+            QasaIconImage(icon, size: 16)
                 .foregroundColor(tint ?? theme.textSecondary)
                 .frame(width: 32, height: 32)
                 .contentShape(Rectangle())
@@ -137,16 +136,17 @@ extension ButtonStyle where Self == QasaButtonStyle {
     static var qasaPlain: QasaButtonStyle { QasaButtonStyle(kind: .plain) }
 }
 
-/// Title + optional leading SF Symbol, for `QasaButtonStyle` buttons.
+/// Title + optional leading icon, for `QasaButtonStyle` buttons.
 struct QasaButtonLabel: View {
     let title: String
-    var icon: String? = nil
+    var icon: QasaIcon? = nil
 
     var body: some View {
         HStack(spacing: 8) {
             if let icon {
-                Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
+                QasaIconImage(icon, size: 15)
+                    // A forward arrow points the reading direction.
+                    .flipsForRightToLeftLayoutDirection(icon == .forward)
             }
             Text(title)
         }
@@ -195,14 +195,13 @@ extension View {
 /// The rounded-square icon tile every settings / tools row leads with.
 struct IconBadge: View {
     @Environment(\.themePalette) private var theme
-    let systemImage: String
+    let icon: QasaIcon
     var tint: Color? = nil
     var background: Color? = nil
 
     var body: some View {
         let color = tint ?? theme.accent
-        Image(systemName: systemImage)
-            .font(.system(size: Theme.iconBadgeGlyphSize, weight: .semibold))
+        QasaIconImage(icon, size: Theme.iconBadgeGlyphSize)
             .foregroundColor(color)
             .frame(width: Theme.iconBadgeSize, height: Theme.iconBadgeSize)
             .background(
@@ -217,7 +216,7 @@ struct IconBadge: View {
 /// centred, at least `Theme.rowMinHeight` tall, leading-aligned (mirrors in RTL).
 struct SettingsRow<Trailing: View>: View {
     @Environment(\.themePalette) private var theme
-    let icon: String
+    let icon: QasaIcon
     let title: String
     var subtitle: String? = nil
     var iconColor: Color? = nil
@@ -228,7 +227,7 @@ struct SettingsRow<Trailing: View>: View {
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
             IconBadge(
-                systemImage: icon,
+                icon: icon,
                 tint: destructive ? theme.danger : iconColor,
                 background: iconBackground
             )
@@ -254,12 +253,12 @@ struct SettingsRow<Trailing: View>: View {
     }
 }
 
-/// Trailing chevron for navigation rows (mirrors in RTL via `chevron.forward`).
+/// Trailing chevron for navigation rows (mirrors in RTL).
 struct RowChevron: View {
     @Environment(\.themePalette) private var theme
     var body: some View {
-        Image(systemName: "chevron.forward")
-            .font(.system(size: 13, weight: .semibold))
+        QasaIconImage(.chevronForward, size: 13)
+            .flipsForRightToLeftLayoutDirection(true)
             .foregroundColor(theme.textTertiary)
             .accessibilityHidden(true)
     }
@@ -435,7 +434,7 @@ struct ConfirmSheetContent: View {
     @Environment(\.themePalette) private var theme
     let title: String
     var message: String? = nil
-    var icon: String? = nil
+    var icon: QasaIcon? = nil
     let confirmTitle: String
     var cancelTitle: String? = nil
     var destructive: Bool = false
@@ -446,7 +445,7 @@ struct ConfirmSheetContent: View {
         VStack(spacing: 20) {
             VStack(spacing: 10) {
                 if let icon {
-                    IconBadge(systemImage: icon, tint: destructive ? theme.danger : theme.accent)
+                    IconBadge(icon: icon, tint: destructive ? theme.danger : theme.accent)
                         .scaleEffect(1.2)
                         .padding(.bottom, 4)
                 }
@@ -531,7 +530,7 @@ extension View {
         isPresented: Binding<Bool>,
         title: String,
         message: String? = nil,
-        icon: String? = nil,
+        icon: QasaIcon? = nil,
         confirmTitle: String,
         cancelTitle: String? = nil,
         destructive: Bool = false,

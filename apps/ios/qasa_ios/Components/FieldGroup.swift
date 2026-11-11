@@ -244,7 +244,7 @@ struct PasswordFieldRow<Extra: View>: View {
         ) {
             extra
             FieldIconButton(
-                systemImage: revealed ? "eye.slash" : "eye",
+                icon: revealed ? .hide : .show,
                 accessibilityLabel: L10n.tr(revealed ? "vault.hidePassword" : "vault.showPassword")
             ) {
                 revealed.toggle()

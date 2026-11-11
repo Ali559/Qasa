@@ -84,7 +84,7 @@ struct PremiumUpgradeView: View {
                         formattedAmount,
                         selectedMethod?.badgeText ?? "Wayl"
                     ),
-                icon: "lock.fill"
+                icon: .lock
             ) {
                 // Payments are not open yet: no request goes to the server.
                 // `startPayment()` stays for when they are.
@@ -112,7 +112,7 @@ struct PremiumUpgradeView: View {
             isPresented: $showComingSoon,
             title: L10n.tr("premium.comingSoonTitle", locale: locale),
             message: L10n.tr("premium.comingSoonBody", locale: locale),
-            icon: "clock",
+            icon: .autoLock,
             confirmTitle: L10n.tr("common.ok", locale: locale),
             onConfirm: {}
         )
@@ -233,7 +233,7 @@ struct PremiumUpgradeView: View {
 
     private var autoRenewRow: some View {
         ToggleRow(
-            icon: "arrow.triangle.2.circlepath",
+            icon: .sync,
             iconColor: Theme.accent,
             title: L10n.tr("premium.autoRenew", locale: locale),
             subtitle: autoRenewDetail,
@@ -280,9 +280,8 @@ struct PremiumUpgradeView: View {
                         .foregroundColor(Theme.textSecondary)
                 }
                 Spacer(minLength: 12)
-                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                QasaIconImage(selected ? .success : .circle, size: 22)
                     .foregroundColor(selected ? Theme.accent : Theme.textTertiary)
-                    .font(.system(size: 22))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -386,9 +385,8 @@ struct FeatureRow: View {
     let text: String
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
+            QasaIconImage(.success, size: 18)
                 .foregroundColor(Theme.accent)
-                .font(.system(size: 18))
             Text(text)
                 .font(.qasa(14))
                 .foregroundColor(Theme.textPrimary)

@@ -10,6 +10,7 @@ import alibarznji.qasa.screens.vault.subtypeIcon
 import alibarznji.qasa.screens.vault.websiteUrl
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaRowIconButton
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.theme.QasaIconSize
@@ -25,12 +26,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -92,7 +87,7 @@ internal fun VaultListItemRow(
             Box {
                 // iOS: `ellipsis` rotated 90° in a 36pt frame.
                 QasaRowIconButton(
-                    icon = Icons.Default.MoreVert,
+                    icon = QasaIcons.More,
                     contentDescription = stringResource(R.string.a11y_moreactions),
                     onClick = { menuOpen = true },
                 )
@@ -102,13 +97,13 @@ internal fun VaultListItemRow(
                     containerColor = c.cardBackground,
                 ) {
                     payload?.rowCopyActions().orEmpty().forEach { action ->
-                        MenuItem(stringResource(action.menuLabelRes), Icons.Default.ContentCopy) {
+                        MenuItem(stringResource(action.menuLabelRes), QasaIcons.Copy) {
                             menuOpen = false
                             onCopy(action.copy, action.gated)
                         }
                     }
                     payload?.websiteUrl?.let { url ->
-                        MenuItem(stringResource(R.string.vault_openwebsite), Icons.Default.OpenInBrowser) {
+                        MenuItem(stringResource(R.string.vault_openwebsite), QasaIcons.Website) {
                             menuOpen = false
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(normalizedWebsiteUrl(url)))
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -119,14 +114,14 @@ internal fun VaultListItemRow(
                             }
                         }
                     }
-                    MenuItem(stringResource(R.string.vault_edititem), Icons.Default.Edit) {
+                    MenuItem(stringResource(R.string.vault_edititem), QasaIcons.Edit) {
                         menuOpen = false
                         scope.launch {
                             val p = payload ?: runCatching { loadPayload(row.id) }.getOrNull() ?: return@launch
                             onEdit(p)
                         }
                     }
-                    MenuItem(stringResource(R.string.vault_deleteitem), Icons.Default.Delete, destructive = true) {
+                    MenuItem(stringResource(R.string.vault_deleteitem), QasaIcons.Delete, destructive = true) {
                         menuOpen = false
                         confirmDelete = true
                     }

@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault
 
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.R
 import alibarznji.qasa.screens.vault.editor.EditorEnv
@@ -31,8 +32,6 @@ import uniffi.qasa_ffi.FfiField
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -217,7 +216,7 @@ fun VaultItemEditorSheetContent(
             onDismiss = { saveError = null },
             dismissLabel = null,
             destructive = false,
-            icon = Icons.Outlined.WarningAmber,
+            icon = QasaIcons.Warning,
         )
     }
 }

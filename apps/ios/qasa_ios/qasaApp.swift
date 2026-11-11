@@ -208,7 +208,7 @@ struct qasaApp: App {
                     // A Release build with no https QASA_API_URL reaches nothing at all.
                     // Say so instead of letting every screen look broken.
                     HStack(spacing: 8) {
-                        Image(systemName: "wifi.exclamationmark")
+                        QasaIconImage(.wifiOff, size: 12)
                         Text(
                             String(
                                 format: L10n.tr("error.apiHostMisconfigured", locale: prefs.locale),
@@ -253,7 +253,7 @@ struct qasaApp: App {
                 message: registration.replacePrompt.map {
                     String(format: L10n.tr("backup.replace.bodyFmt", locale: prefs.locale), $0.device_name)
                 },
-                icon: "arrow.triangle.2.circlepath",
+                icon: .sync,
                 confirmTitle: L10n.tr("backup.replace.button", locale: prefs.locale),
                 cancelTitle: L10n.tr("backup.reminder.dismiss", locale: prefs.locale)
             ) {
@@ -263,7 +263,7 @@ struct qasaApp: App {
                 isPresented: $replaceFailed,
                 title: L10n.tr("backup.replace.title", locale: prefs.locale),
                 message: L10n.tr("backup.replace.failed", locale: prefs.locale),
-                icon: "exclamationmark.triangle",
+                icon: .warning,
                 confirmTitle: L10n.tr("common.ok", locale: prefs.locale)
             ) {}
             .confirmSheet(
@@ -273,7 +273,7 @@ struct qasaApp: App {
                 ),
                 title: L10n.tr("error.vaultCreateTitle", locale: prefs.locale),
                 message: createError,
-                icon: "exclamationmark.triangle",
+                icon: .warning,
                 confirmTitle: L10n.tr("common.ok", locale: prefs.locale)
             ) {
                 createError = nil

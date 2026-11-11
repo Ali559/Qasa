@@ -155,7 +155,7 @@ struct PairExistingVaultView: View {
     private var premiumBody: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 10) {
-                Image(systemName: "star.fill")
+                QasaIconImage(.favorite, size: 16)
                     .foregroundColor(Theme.gold)
                 Text(L10n.tr("pair.premiumTitle", locale: locale))
                     .font(.qasa(20, weight: .bold))
@@ -203,7 +203,7 @@ struct PairExistingVaultView: View {
                 if step == .success || step == .adopted {
                     PrimaryButton(
                         title: L10n.tr("pair.done", locale: locale),
-                        icon: "checkmark"
+                        icon: .check
                     ) {
                         onPaired()
                     }
@@ -212,7 +212,7 @@ struct PairExistingVaultView: View {
                         title: isChecking
                             ? L10n.tr("pair.checking", locale: locale)
                             : L10n.tr("pair.continue", locale: locale),
-                        icon: isChecking ? nil : "link"
+                        icon: isChecking ? nil : .link
                     ) {
                         Task { await applyPairing() }
                     }

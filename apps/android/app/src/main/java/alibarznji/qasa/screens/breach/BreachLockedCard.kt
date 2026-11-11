@@ -5,6 +5,7 @@ import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.layout.Row
@@ -12,9 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,13 +30,13 @@ internal fun BreachLockedCard(onUpgrade: () -> Unit, modifier: Modifier = Modifi
     val c = qasaColors
     CardContainer(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.lg))
+            Icon(QasaIcons.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.lg))
             Spacer(Modifier.width(QasaDimens.contentGap))
             Text(stringResource(R.string.breached_lockedtitle), color = c.textPrimary, style = qasaText.rowTitle)
         }
         Spacer(Modifier.height(QasaDimens.gapMedium))
         Text(stringResource(R.string.breached_lockedbody), color = c.textSecondary, style = qasaText.bodyMedium)
         Spacer(Modifier.height(QasaDimens.gap))
-        PrimaryButton(title = stringResource(R.string.breached_unlock), icon = Icons.Default.Star, onClick = onUpgrade)
+        PrimaryButton(title = stringResource(R.string.breached_unlock), icon = QasaIcons.Favorite, onClick = onUpgrade)
     }
 }

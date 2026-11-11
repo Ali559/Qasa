@@ -84,7 +84,7 @@ struct VaultListView: View {
                         if filteredRows.isEmpty {
                             ContentUnavailableView(
                                 L10n.tr("vault.emptyTitle", locale: prefs.locale),
-                                systemImage: "tray",
+                                icon: .inbox,
                                 // A search with no hits says so instead of "add your first item".
                                 description: Text(L10n.tr(
                                     searchText.trimmingCharacters(in: .whitespaces).isEmpty
@@ -102,7 +102,7 @@ struct VaultListView: View {
                 }
             }
 
-            MintFAB(systemImage: "plus") {
+            MintFAB(icon: .add) {
                 handleAddTapped()
             }
             .padding(.trailing, Theme.screenPadding)
@@ -134,14 +134,14 @@ struct VaultListView: View {
 
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
+            QasaIconImage(.search, size: 16)
                 .foregroundColor(Theme.textSecondary)
             TextField(L10n.tr("vault.searchPlaceholder", locale: prefs.locale), text: $searchText)
                 .multilineTextAlignment(.leading)
                 .submitLabel(.search)
             if !searchText.isEmpty {
                 FieldIconButton(
-                    systemImage: "xmark.circle.fill",
+                    icon: .close,
                     tint: Theme.textTertiary,
                     accessibilityLabel: L10n.tr("common.cancel", locale: prefs.locale)
                 ) {

@@ -37,7 +37,7 @@ struct RotatePasswordSheet: View {
             isPresented: $showConfirm,
             title: L10n.tr("breach.rotateConfirmTitle"),
             message: selected.map { String(format: L10n.tr("breach.rotateConfirmMessage"), $0.name) },
-            icon: "key",
+            icon: .login,
             confirmTitle: L10n.tr("breach.rotateReplace"),
             cancelTitle: L10n.tr("common.cancel"),
             destructive: true
@@ -87,7 +87,7 @@ struct RotatePasswordSheet: View {
             .padding(.bottom, 24)
         }
         .bottomActionBar {
-            PrimaryButton(title: L10n.tr("breach.rotateSave"), icon: "key.fill") {
+            PrimaryButton(title: L10n.tr("breach.rotateSave"), icon: .login) {
                 showConfirm = true
             }
             .disabled(selected == nil || isSaving)
@@ -106,7 +106,7 @@ struct RotatePasswordSheet: View {
     private func loginRow(_ login: RotateLoginCandidate, selectable: Bool) -> some View {
         let isSelected = selectable && login.id == selectedId
         let row = HStack(spacing: 12) {
-            Image(systemName: "person.badge.key")
+            QasaIconImage(.login, size: 16)
                 .foregroundColor(isSelected ? Theme.accent : Theme.textSecondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(login.name)
@@ -120,7 +120,7 @@ struct RotatePasswordSheet: View {
             }
             Spacer(minLength: 0)
             if isSelected {
-                Image(systemName: "checkmark.circle.fill")
+                QasaIconImage(.success, size: 16)
                     .foregroundColor(Theme.accent)
             }
         }
@@ -158,18 +158,18 @@ struct RotatePasswordSheet: View {
                 HStack(spacing: 10) {
                     actionButton(
                         title: L10n.tr("gen.regenerate"),
-                        icon: "arrow.clockwise"
+                        icon: .refresh
                     ) { generator.regenerate() }
                     actionButton(
                         title: generator.copied ? L10n.tr("gen.copied") : L10n.tr("gen.copy"),
-                        icon: generator.copied ? "checkmark" : "doc.on.doc"
+                        icon: generator.copied ? .check : .copy
                     ) { generator.copyPassword() }
                 }
             }
         }
     }
 
-    private func actionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func actionButton(title: String, icon: QasaIcon, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             QasaButtonLabel(title: title, icon: icon)
         }

@@ -3,12 +3,13 @@
 // a code (`SettingsRow`s with a selection circle), the code field and Sync, 12 apart.
 // Find a device showing a code on this Wi‑Fi, type the code, sync. Used by Sync on this
 // network (join) and by "I already have Qasa on another device" on Create vault.
-import { Circle, CircleCheck, Laptop, Monitor, RefreshCw, Smartphone } from 'lucide-vue-next'
-import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import FieldGroup from '@/components/FieldGroup.vue'
 import FieldRow from '@/components/FieldRow.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import SettingsRow from '@/components/SettingsRow.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import { useT } from '@/prefs'
@@ -39,7 +40,7 @@ onBeforeUnmount(() => {
 })
 
 /** iOS `WiFiJoinPanel.icon(for:)`. */
-const ICON = { ios: Smartphone, android: Smartphone, macos: Laptop, windows: Monitor, linux: Monitor } as Record<string, Component>
+const ICON: Record<string, QasaIconName> = { ios: 'device', android: 'device', macos: 'laptop', windows: 'desktop', linux: 'desktop' }
 
 
 async function sync() {
@@ -79,10 +80,10 @@ async function sync() {
           :aria-checked="selected?.address === p.address"
           @click="selected = p"
         >
-          <SettingsRow :icon="ICON[p.platform] ?? Monitor" :title="p.name">
+          <SettingsRow :icon="ICON[p.platform] ?? 'desktop'" :title="p.name">
             <template #trailing>
-              <CircleCheck v-if="selected?.address === p.address" class="mark on" fill="currentColor" stroke="var(--card-background)" aria-hidden="true" />
-              <Circle v-else class="mark" aria-hidden="true" />
+              <QasaIcon v-if="selected?.address === p.address" name="success" :size="20" class="mark on" />
+              <QasaIcon v-else name="circle" :size="20" class="mark" />
             </template>
           </SettingsRow>
         </button>
@@ -93,7 +94,7 @@ async function sync() {
       </FieldGroup>
       <PrimaryButton
         :title="busy ? t('sync.connecting') : t('sync.syncButton')"
-        :icon="busy ? undefined : RefreshCw"
+        :icon="busy ? undefined : 'sync'"
         :disabled="!selected || code.replace(/\D/g, '').length !== 6 || busy"
         @click="sync"
       />

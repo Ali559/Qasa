@@ -68,8 +68,7 @@ struct BreachCard: View {
 
     private func compromisedChip(_ field: String) -> some View {
         HStack(spacing: 4) {
-            Image(systemName: fieldIcon(field))
-                .font(.system(size: 10))
+            QasaIconImage(fieldIcon(field), size: 10)
             Text(field)
                 .font(.qasaLabel(12))
         }
@@ -86,13 +85,13 @@ struct BreachCard: View {
 
     private var unresolvedAction: some View {
         Button(action: onRotate) {
-            QasaButtonLabel(title: L10n.tr("breach.rotatePassword"), icon: "key.fill")
+            QasaButtonLabel(title: L10n.tr("breach.rotatePassword"), icon: .login)
         }
         .buttonStyle(.qasaDestructive)
     }
 
     private var resolvedAction: some View {
-        QasaButtonLabel(title: L10n.tr("breach.actionTaken"), icon: "checkmark")
+        QasaButtonLabel(title: L10n.tr("breach.actionTaken"), icon: .check)
             .font(.qasa(16, weight: .semibold))
             .foregroundColor(Theme.textTertiary)
             .frame(maxWidth: .infinity)
@@ -105,13 +104,13 @@ struct BreachCard: View {
             )
     }
 
-    private func fieldIcon(_ field: String) -> String {
+    private func fieldIcon(_ field: String) -> QasaIcon {
         switch field {
-        case "Passwords": return "keyboard"
-        case "Emails": return "envelope"
-        case "Names": return "person"
-        case "Job Titles": return "briefcase"
-        default: return "tag"
+        case "Passwords": return .keyboard
+        case "Emails": return .email
+        case "Names": return .person
+        case "Job Titles": return .work
+        default: return .tag
         }
     }
 }

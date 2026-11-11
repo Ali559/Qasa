@@ -3,11 +3,11 @@
 // the generated password card (regenerate, copy), the strength bar and the options. The
 // password comes from the Rust core (`core/qasa-vault/src/generator.rs`). iOS's disabled
 // "Pronounceable" toggle is left out: it does nothing.
-import { Check, Copy, RefreshCw } from 'lucide-vue-next'
 import { onMounted, reactive, ref, watch } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import CheckToggle from '@/components/CheckToggle.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import StrengthBar from '@/components/StrengthBar.vue'
 import { copySecret } from '@/clipboard'
@@ -58,13 +58,12 @@ watch(options, regenerate)
       <div class="card-head">
         <SectionLabel :text="t('gen.generatedPassword')" />
         <button type="button" class="regen" :aria-label="t('gen.regenerate')" :title="t('gen.regenerate')" @click="regenerate">
-          <RefreshCw :stroke-width="2.5" />
+          <QasaIcon name="refresh" :size="16" />
         </button>
       </div>
       <output class="password" dir="ltr">{{ password || ' ' }}</output>
       <button type="button" class="qasa-button secondary" :disabled="!password" @click="copy">
-        <Check v-if="copied" :stroke-width="2.5" />
-        <Copy v-else :stroke-width="2.5" />
+        <QasaIcon :name="copied ? 'check' : 'copy'" :size="15" />
         <span>{{ copied ? t('gen.copied') : t('gen.copyPassword') }}</span>
       </button>
     </div>

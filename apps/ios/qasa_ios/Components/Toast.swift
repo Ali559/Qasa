@@ -12,7 +12,7 @@ final class ToastCenter {
     struct Toast: Identifiable, Equatable {
         let id = UUID()
         let message: String
-        let systemImage: String
+        let icon: QasaIcon
     }
 
     /// How long a toast stays up before it dismisses itself.
@@ -24,8 +24,8 @@ final class ToastCenter {
     private init() {}
 
     /// Shows `message` (replacing any toast already up) and announces it to VoiceOver.
-    func show(_ message: String, systemImage: String = "checkmark.circle.fill") {
-        let toast = Toast(message: message, systemImage: systemImage)
+    func show(_ message: String, icon: QasaIcon = .success) {
+        let toast = Toast(message: message, icon: icon)
         current = toast
         dismissTask?.cancel()
         dismissTask = Task { [weak self] in
@@ -62,8 +62,7 @@ struct ToastView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: toast.systemImage)
-                .font(.system(size: QasaTokens.Size.toastGlyph, weight: .semibold))
+            QasaIconImage(toast.icon, size: QasaTokens.Size.toastGlyph)
                 .accessibilityHidden(true)
             Text(toast.message)
                 .font(.qasa(QasaTokens.Typography.toast.size, weight: QasaTokens.Typography.toast.weight))

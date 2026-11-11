@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Desktop-only (plan §7): a wallet deep link (`fib://…`) can't open on a computer, so it is
 // shown as a QR code to scan with the phone, with the link itself to copy as a fallback.
-import { Copy, Smartphone } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import { copySecret } from '@/clipboard'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { showToast } from '@/toast'
 import { useT } from '@/prefs'
 import { encodeQr, qrPath } from './qr'
@@ -33,7 +33,7 @@ async function copy() {
 <template>
   <div class="qr-card">
     <div class="head">
-      <Smartphone :size="18" class="accent" aria-hidden="true" />
+      <QasaIcon name="device" :size="18" class="accent" />
       <span class="title">{{ t('premium.scanTitle') }}</span>
     </div>
     <p class="body">{{ t('premium.scanBody', wallet) }}</p>
@@ -51,7 +51,7 @@ async function copy() {
     <div class="link">
       <code>{{ link }}</code>
       <button type="button" class="copy" :aria-label="t('autofill.copy')" @click="copy">
-        <Copy :size="16" aria-hidden="true" />
+        <QasaIcon name="copy" :size="16" />
         <span>{{ t('autofill.copy') }}</span>
       </button>
     </div>

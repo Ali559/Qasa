@@ -71,7 +71,7 @@ struct VaultItemDetailView: View {
                     Button {
                         onEdit()
                     } label: {
-                        Image(systemName: "pencil")
+                        QasaIconImage(.edit, size: 17)
                             .foregroundColor(Theme.accent)
                     }
                     .accessibilityLabel(L10n.tr("common.edit"))
@@ -79,7 +79,7 @@ struct VaultItemDetailView: View {
                     Button(role: .destructive) {
                         showDeleteConfirm = true
                     } label: {
-                        Image(systemName: "trash")
+                        QasaIconImage(.delete, size: 17)
                             .foregroundColor(Theme.danger)
                     }
                     .accessibilityLabel(L10n.tr("common.delete"))
@@ -93,7 +93,7 @@ struct VaultItemDetailView: View {
                 format: L10n.tr("vault.deleteItemMessage"),
                 row?.displayName ?? L10n.tr("vault.thisItem")
             ),
-            icon: "trash",
+            icon: .delete,
             confirmTitle: L10n.tr("common.delete"),
             cancelTitle: L10n.tr("common.cancel"),
             destructive: true
@@ -122,7 +122,7 @@ struct VaultItemDetailView: View {
 
     private var attentionBanner: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
+            QasaIconImage(.warning, size: 16)
                 .foregroundColor(Theme.danger)
                 .accessibilityHidden(true)
             Text(L10n.tr("validation.needsAttention"))
@@ -171,8 +171,7 @@ struct VaultItemDetailView: View {
                 .frame(width: 36, height: 36)
                 .accessibilityHidden(true)
         } else {
-            Image(systemName: payload.systemImage)
-                .font(.qasa(36, weight: .medium))
+            QasaIconImage(payload.icon, size: 36)
         }
     }
 
@@ -326,8 +325,7 @@ struct VaultItemDetailView: View {
                             revealedSecrets.insert(field.id)
                         }
                     } label: {
-                        Image(systemName: hidden ? "eye" : "eye.slash")
-                            .font(.qasa(14))
+                        QasaIconImage(hidden ? .show : .hide, size: 14)
                             .foregroundColor(Theme.accent)
                     }
                     .buttonStyle(.plain)

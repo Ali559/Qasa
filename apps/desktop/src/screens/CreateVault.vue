@@ -1,12 +1,12 @@
 <script setup lang="ts">
 // iOS `CreateVaultView`. The biometrics card shows when the computer has Touch ID or
 // Windows Hello; "I already have Qasa on another device" joins a vault over Wi‑Fi.
-import { Fingerprint, KeyRound, Lock, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import FieldGroup from '@/components/FieldGroup.vue'
 import FieldRow from '@/components/FieldRow.vue'
 import StatusPill from '@/components/StatusPill.vue'
@@ -106,7 +106,7 @@ async function create() {
 
       <CardContainer v-if="bio && bio.kind !== 'none'" class="biometric settings-list">
         <SettingsRow
-          :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
+          :icon="bio.kind === 'windowsHello' ? 'face' : 'fingerprint'"
           :title="t('auth.create.enableBiometrics')"
           :subtitle="t('auth.create.biometricsHint')"
         >
@@ -117,9 +117,9 @@ async function create() {
       </CardContainer>
 
       <CardContainer muted class="zero-knowledge">
-        <Shield class="watermark" :size="88" fill="currentColor" aria-hidden="true" />
+        <QasaIcon name="shield" :size="88" class="watermark" />
         <div class="zk-title">
-          <Lock :size="17" class="accent" aria-hidden="true" />
+          <QasaIcon name="lock" :size="17" class="accent" />
           <span>{{ t('auth.create.zeroKnowledge') }}</span>
         </div>
         <p class="zk-body">{{ t('auth.create.zeroKnowledgeBody') }}</p>
@@ -129,7 +129,7 @@ async function create() {
     <template #footer>
       <PrimaryButton
         :title="busy ? t('auth.securingVault') : t('auth.create.buttonLocal')"
-        :icon="KeyRound"
+        icon="login"
         :disabled="!canCreate || busy"
         @click="create"
       />

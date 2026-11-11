@@ -3,8 +3,7 @@
 // `error`), bottom-centre just above the BottomActionBar, announced politely to screen
 // readers. Centred by a full-width flex row (no left/translate), so it sits right in RTL
 // too; under reduced motion it only fades.
-import { CircleAlert, CircleCheck } from 'lucide-vue-next'
-
+import QasaIcon from './QasaIcon.vue'
 import { toast } from '@/toast'
 </script>
 
@@ -13,8 +12,7 @@ import { toast } from '@/toast'
   <div class="toast-region" role="status" aria-live="polite" aria-atomic="true">
     <Transition name="toast">
       <div v-if="toast.visible" :key="toast.seq" class="toast" :class="toast.tone" @click="toast.visible = false">
-        <CircleAlert v-if="toast.tone === 'error'" class="toast-icon" :stroke-width="2.5" aria-hidden="true" />
-        <CircleCheck v-else class="toast-icon" :stroke-width="2.5" aria-hidden="true" />
+        <QasaIcon :name="toast.tone === 'error' ? 'error' : 'success'" :size="17" class="toast-icon" />
         <span class="toast-text">{{ toast.message }}</span>
       </div>
     </Transition>

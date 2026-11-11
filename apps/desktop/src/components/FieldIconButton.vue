@@ -1,9 +1,10 @@
 <script setup lang="ts">
 // iOS `FieldIconButton`: a 32-square trailing control in a field row (reveal, generate,
 // copy, scan, calendar), 16 semibold glyph, secondary (accent for the row's action).
-import type { Component } from 'vue'
+import QasaIcon from './QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
-defineProps<{ icon: Component; label: string; accent?: boolean; pressed?: boolean }>()
+defineProps<{ icon: QasaIconName; label: string; accent?: boolean; pressed?: boolean }>()
 const emit = defineEmits<{ click: [] }>()
 </script>
 
@@ -17,7 +18,7 @@ const emit = defineEmits<{ click: [] }>()
     :aria-pressed="pressed"
     @click.prevent="emit('click')"
   >
-    <component :is="icon" :stroke-width="2.5" aria-hidden="true" />
+    <QasaIcon :name="icon" :size="16" />
   </button>
 </template>
 

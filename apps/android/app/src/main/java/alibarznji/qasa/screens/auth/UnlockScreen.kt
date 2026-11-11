@@ -5,6 +5,7 @@ import alibarznji.qasa.theme.BrandHeader
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.RowChevron
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.ScreenScaffold
@@ -32,9 +33,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,7 +52,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -218,7 +215,7 @@ fun UnlockScreen(
             StickyBottomBar {
                 PrimaryButton(
                     title = stringResource(R.string.auth_unlock_button),
-                    icon = Icons.Default.LockOpen,
+                    icon = QasaIcons.Unlock,
                     enabled = canUnlock && !busy,
                     onClick = {
                         // The secret is sealed at unlock time, not at create time: a
@@ -290,7 +287,7 @@ fun UnlockScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        Icons.Default.Fingerprint,
+                        QasaIcons.Fingerprint,
                         contentDescription = null,
                         tint = c.accent,
                         modifier = Modifier.size(QasaIconSize.xxl),
@@ -308,7 +305,7 @@ fun UnlockScreen(
         // iOS: shield + "Local unlock only" title above the body.
         CardContainer(background = c.cardBackgroundLight) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Shield, null, tint = c.accent)
+                Icon(QasaIcons.Shield, null, tint = c.accent)
                 Spacer(Modifier.width(QasaDimens.contentGap))
                 Text(stringResource(R.string.auth_unlock_localonly), color = c.textPrimary, style = qasaText.rowTitle)
             }

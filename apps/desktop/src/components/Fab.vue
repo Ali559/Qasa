@@ -1,15 +1,16 @@
 <script setup lang="ts">
 // iOS `MintFAB`: 56pt accent square with the large radius (24), 50% accent border, an 18 bold
 // glyph and a black 20% shadow (radius 8, y 4). No press effect, as iOS (default button).
-import type { Component } from 'vue'
+import QasaIcon from './QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
-defineProps<{ icon: Component; label: string }>()
+defineProps<{ icon: QasaIconName; label: string }>()
 defineEmits<{ click: [] }>()
 </script>
 
 <template>
   <button type="button" class="fab" :aria-label="label" :title="label" @click="$emit('click')">
-    <component :is="icon" :stroke-width="3" />
+    <QasaIcon :name="icon" :size="18" />
   </button>
 </template>
 

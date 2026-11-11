@@ -74,7 +74,7 @@ struct BackupRestoreView: View {
     @ViewBuilder
     private var bottomAction: some View {
         if let outcome {
-            PrimaryButton(title: L10n.tr("pair.done", locale: locale), icon: "checkmark") {
+            PrimaryButton(title: L10n.tr("pair.done", locale: locale), icon: .check) {
                 if mode == .setup, outcome.adopted {
                     onAdopted(password)
                 } else {
@@ -84,7 +84,7 @@ struct BackupRestoreView: View {
         } else if info != nil {
             PrimaryButton(
                 title: L10n.tr(isWorking ? "backup.restore.working" : "backup.restore.button", locale: locale),
-                icon: isWorking ? nil : "arrow.counterclockwise"
+                icon: isWorking ? nil : .history
             ) {
                 restore()
             }
@@ -92,7 +92,7 @@ struct BackupRestoreView: View {
         } else {
             PrimaryButton(
                 title: L10n.tr("backup.restore", locale: locale),
-                icon: "doc.badge.arrow.up"
+                icon: .export
             ) {
                 showPicker = true
             }

@@ -6,6 +6,7 @@ import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -19,9 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -86,7 +84,7 @@ internal fun PairAdoptedBody(peerName: String) {
     val c = qasaColors
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
         Icon(
-            Icons.Default.CheckCircle,
+            QasaIcons.Success,
             contentDescription = null,
             tint = c.success,
             modifier = Modifier.size(48.dp),
@@ -124,7 +122,7 @@ internal fun PairPremiumBody() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapMedium),
         ) {
-            Icon(Icons.Default.Star, contentDescription = null, tint = c.gold, modifier = Modifier.size(QasaIconSize.md))
+            Icon(QasaIcons.Favorite, contentDescription = null, tint = c.gold, modifier = Modifier.size(QasaIconSize.md))
             Text(
                 stringResource(R.string.pair_premiumtitle),
                 color = c.gold,

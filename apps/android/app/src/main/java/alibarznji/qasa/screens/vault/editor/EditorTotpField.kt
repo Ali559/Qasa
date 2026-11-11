@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import alibarznji.qasa.theme.QasaIcons
 import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.FieldIconButton
@@ -11,8 +12,6 @@ import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.totp.Totp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -76,7 +75,7 @@ internal fun TotpFormField(value: String, onChange: (String) -> Unit) {
             error = fieldError(FfiField.TOTP),
             trailing = {
                 FieldIconButton(
-                    icon = Icons.Outlined.Close,
+                    icon = QasaIcons.Close,
                     contentDescription = stringResource(R.string.totp_remove),
                     onClick = { onChange("") },
                 )

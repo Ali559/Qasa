@@ -36,7 +36,7 @@ struct NotificationsView: View {
                 if remote.isEmpty && localNotes.isEmpty {
                     ContentUnavailableView(
                         L10n.tr("notifications.empty", locale: locale),
-                        systemImage: "bell.slash",
+                        icon: .notificationsOff,
                         description: Text(L10n.tr("notifications.emptyDesc", locale: locale))
                     )
                 } else {

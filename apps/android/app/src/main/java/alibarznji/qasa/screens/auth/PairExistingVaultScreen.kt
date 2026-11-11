@@ -11,12 +11,10 @@ import alibarznji.qasa.screens.auth.pair.PairWifiBody
 import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.PrimaryButton
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.StickyBottomBar
 import androidx.activity.compose.BackHandler
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
@@ -96,12 +94,12 @@ private fun PairBottomBar(vm: PairViewModel, onFinish: () -> Unit) {
         when (vm.step) {
             PairStep.Success, PairStep.Adopted -> PrimaryButton(
                 title = stringResource(R.string.pair_done),
-                icon = Icons.Default.Check,
+                icon = QasaIcons.Check,
                 onClick = onFinish,
             )
             else -> PrimaryButton(
                 title = stringResource(if (vm.isChecking) R.string.pair_checking else R.string.pair_continue),
-                icon = if (vm.isChecking) null else Icons.Default.Link,
+                icon = if (vm.isChecking) null else QasaIcons.Link,
                 enabled = !vm.isChecking,
                 onClick = vm::applyPairing,
             )

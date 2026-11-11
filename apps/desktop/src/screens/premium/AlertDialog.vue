@@ -1,11 +1,10 @@
 <script setup lang="ts">
 // The iOS `.alert` where the cancel button has its own label ("Keep Premium"): the shared
 // confirm sheet with that label.
-import type { Component } from 'vue'
-
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
-defineProps<{ open: boolean; title: string; message?: string; cancelLabel: string; confirmLabel: string; destructive?: boolean; icon?: Component }>()
+defineProps<{ open: boolean; title: string; message?: string; cancelLabel: string; confirmLabel: string; destructive?: boolean; icon?: QasaIconName }>()
 const emit = defineEmits<{ confirm: []; cancel: [] }>()
 </script>
 

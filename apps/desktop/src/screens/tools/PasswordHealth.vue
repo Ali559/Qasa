@@ -2,12 +2,13 @@
 // iOS `PasswordHealthView` + `PasswordHealthIssuesView`: the half-circle score gauge
 // (animated 1.1 s, off with reduced motion), four stat cards, the locked breach card on
 // Free, "How scoring works", and the issue lists (Reused / Weak / Breached) one level in.
-import { ArrowLeftRight, Lock, ShieldCheck, TriangleAlert } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import FilterChip from '@/components/FilterChip.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import { nav, openPage, selectTab } from '@/nav'
 import { useT } from '@/prefs'
 import { session } from '@/vault/session'
@@ -75,10 +76,10 @@ const issueRows = computed(() => {
   return idsFor.value[issues.value].map((id) => byId.get(id)).filter((r) => !!r)
 })
 
-const EMPTY = {
-  reused: { title: 'health.noReusedTitle', body: 'health.noReusedBody', icon: ArrowLeftRight },
-  weak: { title: 'health.noWeakTitle', body: 'health.noWeakBody', icon: TriangleAlert },
-  breached: { title: 'breached.noneTitle', body: 'breached.noneBody', icon: ShieldCheck },
+const EMPTY: Record<IssueTab, { title: string; body: string; icon: QasaIconName }> = {
+  reused: { title: 'health.noReusedTitle', body: 'health.noReusedBody', icon: 'sync' },
+  weak: { title: 'health.noWeakTitle', body: 'health.noWeakBody', icon: 'warning' },
+  breached: { title: 'breached.noneTitle', body: 'breached.noneBody', icon: 'protected' },
 }
 
 function openItem(id: string) {
@@ -95,7 +96,7 @@ function openItem(id: string) {
     </div>
     <BreachLockedCard v-if="issues === 'breached' && breachLocked" />
     <div v-else-if="issueRows.length === 0" class="empty">
-      <component :is="EMPTY[issues].icon" :size="40" />
+      <QasaIcon :name="EMPTY[issues].icon" :size="40" />
       <strong>{{ t(EMPTY[issues].title) }}</strong>
       <span>{{ t(EMPTY[issues].body) }}</span>
     </div>
@@ -141,7 +142,7 @@ function openItem(id: string) {
         <span class="title">{{ t('health.weak') }}</span>
       </button>
       <button v-if="breachLocked" type="button" class="stat" @click="openPage('premiumUpgrade')">
-        <span class="value lock"><Lock :size="24" /></span>
+        <span class="value lock"><QasaIcon name="lock" :size="24" /></span>
         <span class="title">{{ t('health.breached') }}</span>
       </button>
       <button v-else type="button" class="stat" @click="issues = 'breached'">

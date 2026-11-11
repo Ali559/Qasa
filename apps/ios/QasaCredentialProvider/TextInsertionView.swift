@@ -96,7 +96,7 @@ struct TextInsertionView: View {
                 Button {
                     Task { await unlockWithBiometrics(automatic: false) }
                 } label: {
-                    Label(AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID"), systemImage: "faceid")
+                    Label { Text(AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID")) } icon: { QasaIconImage(.face, size: 17) }
                 }
             }
             Spacer()
@@ -144,7 +144,7 @@ struct TextInsertionView: View {
             if filtered.isEmpty {
                 ContentUnavailableView(
                     AutofillL10n.tr("autofill.noMatches", "No matches"),
-                    systemImage: "tray",
+                    icon: .inbox,
                     description: Text(AutofillL10n.tr("autofill.noMatchesHint", "Try searching all vault items."))
                 )
             }
@@ -153,7 +153,7 @@ struct TextInsertionView: View {
                     open(entry)
                 } label: {
                     HStack {
-                        Image(systemName: Self.icon(for: entry.kind))
+                        QasaIconImage(Self.icon(for: entry.kind), size: 17)
                             .foregroundStyle(.secondary)
                             .frame(width: 28)
                         VStack(alignment: .leading, spacing: 2) {
@@ -217,22 +217,22 @@ struct TextInsertionView: View {
                 Button {
                     picked = nil
                 } label: {
-                    Label(entry.title, systemImage: "chevron.backward")
+                    Label { Text(entry.title) } icon: { QasaIconImage(.chevronBack, size: 17).flipsForRightToLeftLayoutDirection(true) }
                 }
             }
         }
     }
 
-    static func icon(for kind: AutofillItemKind) -> String {
+    static func icon(for kind: AutofillItemKind) -> QasaIcon {
         switch kind {
-        case .login: return "person.crop.circle"
-        case .card: return "creditcard"
-        case .bankAccount: return "building.columns"
-        case .name: return "person.text.rectangle"
-        case .email: return "envelope"
-        case .phone: return "phone"
-        case .address: return "house"
-        case .company: return "building.2"
+        case .login: return .login
+        case .card: return .card
+        case .bankAccount: return .bank
+        case .name: return .identity
+        case .email: return .email
+        case .phone: return .phone
+        case .address: return .address
+        case .company: return .work
         }
     }
 }

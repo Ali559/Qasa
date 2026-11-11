@@ -72,8 +72,8 @@ struct HeaderBackButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "chevron.backward")
-                .font(.qasa(QasaTokens.Size.headerBackGlyph, weight: .semibold))
+            QasaIconImage(.chevronBack, size: QasaTokens.Size.headerBackGlyph)
+                .flipsForRightToLeftLayoutDirection(true)
                 .foregroundColor(theme.textPrimary)
                 .frame(width: QasaTokens.Size.headerBackButton, height: QasaTokens.Size.headerBackButton)
                 .background(theme.cardBackground)

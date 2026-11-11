@@ -5,6 +5,7 @@ import alibarznji.qasa.screens.settings.backup.RestoreBackupPage
 import alibarznji.qasa.screens.settings.backup.RestoreBackupViewModel
 import alibarznji.qasa.screens.settings.backup.RestoreFromBackupOption
 import alibarznji.qasa.theme.BackChromeHeader
+import alibarznji.qasa.theme.QasaIcons
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import alibarznji.qasa.theme.BrandHeader
@@ -32,10 +33,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,7 +49,6 @@ import alibarznji.qasa.theme.QasaIconFrame
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -221,7 +217,7 @@ fun CreateVaultScreen(
             StickyBottomBar {
                 PrimaryButton(
                     title = stringResource(R.string.auth_create_buttonlocal),
-                    icon = Icons.Default.Key,
+                    icon = QasaIcons.Login,
                     enabled = canCreate && !vm.creating,
                     onClick = {
                         when {
@@ -288,7 +284,7 @@ fun CreateVaultScreen(
                     Modifier.size(QasaIconFrame.toggleDisc).clip(CircleShape).background(c.cardBackgroundLight),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Default.Fingerprint, contentDescription = null, tint = c.accent)
+                    Icon(QasaIcons.Fingerprint, contentDescription = null, tint = c.accent)
                 }
                 Spacer(Modifier.width(QasaDimens.gapSmall))
                 Column(Modifier.weight(1f)) {
@@ -306,7 +302,7 @@ fun CreateVaultScreen(
         CardContainer(background = c.cardBackgroundLight) {
             Box(Modifier.fillMaxWidth()) {
                 Icon(
-                    Icons.Default.Shield,
+                    QasaIcons.Shield,
                     contentDescription = null,
                     tint = c.accent.copy(alpha = 0.14f),
                     modifier = Modifier
@@ -315,7 +311,7 @@ fun CreateVaultScreen(
                 )
                 Column(Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Lock, null, tint = c.accent)
+                        Icon(QasaIcons.Lock, null, tint = c.accent)
                         Spacer(Modifier.width(QasaDimens.contentGap))
                         Text(stringResource(R.string.auth_create_zeroknowledge), color = c.textPrimary, style = qasaText.rowTitle)
                     }

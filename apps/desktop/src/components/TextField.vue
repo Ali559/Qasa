@@ -4,14 +4,15 @@
 // and one-field prompt sheets with no visible label (`label` is then the accessible name).
 // Card fill, 1px stroke, control radius, 14 horizontal padding, 16 regular. Secure fields
 // get the 32pt eye button (`FieldIconButton`). Labelled fields are `FieldRow`s instead.
-import { Eye, EyeOff } from 'lucide-vue-next'
-import { computed, ref, type Component } from 'vue'
+import { computed, ref } from 'vue'
 
+import QasaIcon from './QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import { useT } from '@/prefs'
 
 const props = withDefaults(
   defineProps<{
-    icon?: Component
+    icon?: QasaIconName
     placeholder?: string
     secure?: boolean
     /** Show the reveal button on a secure field. */
@@ -34,7 +35,7 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
 
 <template>
   <label class="qasa-field field" :class="{ disabled, invalid, 'has-trailing': (secure && revealable) || !!$slots.trailing }">
-    <component :is="icon" v-if="icon" class="icon" aria-hidden="true" />
+    <QasaIcon v-if="icon" :name="icon" :size="16" class="icon" />
     <input
       v-model="model"
       :type="inputType"
@@ -58,8 +59,7 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
       :aria-label="revealed ? t('a11y.hidePassword') : t('a11y.showPassword')"
       @click.prevent="revealed = !revealed"
     >
-      <EyeOff v-if="revealed" :stroke-width="2.5" />
-      <Eye v-else :stroke-width="2.5" />
+      <QasaIcon :name="revealed ? 'hide' : 'show'" :size="16" />
     </button>
   </label>
 </template>

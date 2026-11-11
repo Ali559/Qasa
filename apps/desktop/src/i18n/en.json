@@ -920,5 +920,6 @@
   "vpn.upgradeHint": "Upgrade to browse privately through Qasa VPN.",
   "vpn.virtualIP": "Your VPN address",
   "you.about": "About",
-  "you.account": "Account"
+  "you.account": "Account",
+  "you.iconsCredit": "Icons: Solar by 480 Design, CC BY 4.0"
 }

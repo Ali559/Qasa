@@ -18,7 +18,14 @@ struct YouView: View {
                     group(L10n.tr("nav.tools", locale: prefs.locale),
                           [.notifications, .passwordHealth, .generator, .collections, .vpn])
                     group(L10n.tr("you.account", locale: prefs.locale), [.settings])
-                    group(L10n.tr("you.about", locale: prefs.locale), [.terms, .privacy])
+                    VStack(alignment: .leading, spacing: 8) {
+                        group(L10n.tr("you.about", locale: prefs.locale), [.terms, .privacy])
+                        // Solar is CC BY 4.0: the credit sits under About, as on Android.
+                        Text(L10n.tr("you.iconsCredit", locale: prefs.locale))
+                            .font(.qasa(12))
+                            .foregroundColor(theme.textSecondary)
+                            .padding(.horizontal, 4)
+                    }
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.top, 16)
@@ -32,8 +39,7 @@ struct YouView: View {
         CardContainer {
             VStack(spacing: 14) {
                 HStack(spacing: 12) {
-                    Image(systemName: "person.fill")
-                        .font(.qasa(26))
+                    QasaIconImage(.person, size: 26)
                         .foregroundColor(theme.textSecondary)
                         .frame(width: 56, height: 56)
                         .overlay(Circle().stroke(theme.accent, lineWidth: 2))
@@ -71,20 +77,20 @@ struct YouView: View {
 }
 
 private extension AppPage {
-    /// Outlined symbols: lighter than the filled set the side menu used.
-    var youIcon: String {
+    /// Linear glyphs, like every row icon.
+    var youIcon: QasaIcon {
         switch self {
-        case .vault: return "folder"
-        case .notifications: return "bell"
-        case .generator: return "wand.and.stars"
-        case .passwordHealth: return "heart.text.square"
-        case .breachedPasswords: return "exclamationmark.shield"
-        case .vpn: return "network.badge.shield.half.filled"
-        case .collections: return "folder"
-        case .settings: return "gearshape"
-        case .terms: return "doc.text"
-        case .privacy: return "hand.raised"
-        case .premiumUpgrade: return "crown"
+        case .vault: return .folder
+        case .notifications: return .alerts
+        case .generator: return .generate
+        case .passwordHealth: return .health
+        case .breachedPasswords: return .breach
+        case .vpn: return .vpn
+        case .collections: return .folder
+        case .settings: return .settings
+        case .terms: return .note
+        case .privacy: return .privacy
+        case .premiumUpgrade: return .premium
         }
     }
 }

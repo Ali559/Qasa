@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.network.PricingPlanDTO
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaTracking
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -24,8 +25,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -189,7 +188,7 @@ private fun PlanHeader(plan: PricingPlanDTO) {
 private fun FeatureRow(label: String) {
     val c = qasaColors
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
+        Icon(QasaIcons.Success, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
         Spacer(Modifier.width(QasaDimens.gapSmall))
         Text(label, color = c.textPrimary, style = qasaText.bodyMedium)
     }

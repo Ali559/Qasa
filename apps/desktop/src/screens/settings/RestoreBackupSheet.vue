@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // Settings → Backups → Restore: merges a backup into this vault (newest change wins, as
 // Wi‑Fi sync), then reloads the list the same way Wi‑Fi sync does.
-import { Check } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
@@ -37,7 +36,7 @@ async function restored(outcome: RestoreOutcome) {
         <p class="message" role="status">
           {{ result.written === 0 ? t('backup.restore.upToDate') : t('backup.restore.mergedFmt', result.written) }}
         </p>
-        <PrimaryButton :title="t('pair.done')" :icon="Check" @click="emit('close')" />
+        <PrimaryButton :title="t('pair.done')" icon="check" @click="emit('close')" />
       </template>
       <RestorePanel v-else @restored="restored" />
     </div>

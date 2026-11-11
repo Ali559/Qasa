@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // Settings → Backups: back up now, last backup, location, automatic backups, restore.
 // One backup file per computer; each new backup replaces it. Free on every plan.
-import { ArchiveRestore, DatabaseBackup, Folder, RotateCcw } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
@@ -9,6 +8,7 @@ import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import { backupApi, backupErrorKey, formatBackupDate, FREQUENCIES, type BackupFrequency } from '@/backup/api'
@@ -58,7 +58,7 @@ async function chooseLocation() {
 }
 
 const frequencyChoices = computed<Choice<BackupFrequency>[]>(() =>
-  FREQUENCIES.map((f) => ({ value: f, label: t(`backup.freq.${f}`), icon: RotateCcw })),
+  FREQUENCIES.map((f) => ({ value: f, label: t(`backup.freq.${f}`), icon: 'history' as const })),
 )
 
 const frequency = computed<BackupFrequency>({
@@ -81,7 +81,7 @@ const frequency = computed<BackupFrequency>({
     <CardContainer>
       <div class="state">
         <div class="last-row">
-          <span class="badge" aria-hidden="true"><DatabaseBackup :stroke-width="2.5" /></span>
+          <span class="badge" aria-hidden="true"><QasaIcon name="backup-done" :size="16" /></span>
           <span class="last">{{ lastLine }}</span>
           <span v-if="running" class="spinner" aria-hidden="true" />
         </div>
@@ -93,7 +93,7 @@ const frequency = computed<BackupFrequency>({
     <section class="group">
       <SettingsSection :title="t('backup.locationTitle')">
         <SettingsRow
-          :icon="Folder"
+          icon="folder"
           :title="status?.locationName ?? t('backup.locationNone')"
           :trailing-text="status?.location ? t('backup.changeLocation') : t('backup.chooseLocation')"
           :disabled="running"
@@ -112,7 +112,7 @@ const frequency = computed<BackupFrequency>({
 
     <section class="group">
       <SettingsSection>
-        <SettingsRow :icon="ArchiveRestore" :title="t('backup.restore')" aria-haspopup="dialog" @click="showRestore = true" />
+        <SettingsRow icon="history" :title="t('backup.restore')" aria-haspopup="dialog" @click="showRestore = true" />
       </SettingsSection>
       <p class="footer">{{ t('backup.restoreHelp') }}</p>
     </section>
@@ -120,7 +120,7 @@ const frequency = computed<BackupFrequency>({
     <template #actions>
       <PrimaryButton
         :title="running ? t('backup.backingUp') : t('backup.backUpNow')"
-        :icon="running ? undefined : DatabaseBackup"
+        :icon="running ? undefined : 'backup-done'"
         :disabled="running"
         @click="backUpNow"
       />

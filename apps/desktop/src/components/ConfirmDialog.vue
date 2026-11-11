@@ -5,9 +5,9 @@
 // red) and under it, 10 apart, the secondary cancel button, both full width. `busy` disables both while the confirmed
 // action runs; `error` shows why it failed. `noCancel` leaves only the confirm button (an
 // alert with just "OK"); Esc and the scrim still close it with `cancel`.
-import type { Component } from 'vue'
-
+import QasaIcon from './QasaIcon.vue'
 import Sheet from './Sheet.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import { useT } from '@/prefs'
 
 defineProps<{
@@ -21,7 +21,7 @@ defineProps<{
   error?: string | null
   noCancel?: boolean
   /** iOS `icon`: an icon badge (danger when destructive) scaled 1.2, 4 above the title. */
-  icon?: Component
+  icon?: QasaIconName
 }>()
 const emit = defineEmits<{ confirm: []; cancel: [] }>()
 const t = useT()
@@ -31,7 +31,7 @@ const t = useT()
   <Sheet :open="open" :label="title" :width="520" placement="bottom" @close="!busy && emit('cancel')">
     <div class="confirm-sheet" :aria-busy="busy || undefined">
       <div class="text">
-        <span v-if="icon" class="badge" :class="{ destructive }" aria-hidden="true"><component :is="icon" :stroke-width="2.5" /></span>
+        <span v-if="icon" class="badge" :class="{ destructive }" aria-hidden="true"><QasaIcon :name="icon" :size="19.2" /></span>
         <h2>{{ title }}</h2>
         <p v-if="message">{{ message }}</p>
         <p v-if="error" class="error" role="alert">{{ error }}</p>

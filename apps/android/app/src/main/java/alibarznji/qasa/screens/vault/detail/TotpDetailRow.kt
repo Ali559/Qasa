@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.vault.detail
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.totp.Totp
@@ -16,8 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,7 +73,7 @@ internal fun TotpDetailRow(uri: String, onCopy: (String) -> Unit) {
                 onClick = { onCopy(Totp.code(params, System.currentTimeMillis() / 1000)) },
                 modifier = Modifier.size(QasaIconSize.x3l),
             ) {
-                Icon(Icons.Outlined.ContentCopy, contentDescription = copyLabel, tint = c.accent, modifier = Modifier.size(QasaIconSize.sm))
+                Icon(QasaIcons.Copy, contentDescription = copyLabel, tint = c.accent, modifier = Modifier.size(QasaIconSize.sm))
             }
         }
         Spacer(Modifier.height(QasaDimens.gapTiny))

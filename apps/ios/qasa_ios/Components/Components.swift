@@ -61,7 +61,7 @@ struct StatusPill: View {
 struct PrimaryButton: View {
     @Environment(\.themePalette) private var theme
     let title: String
-    var icon: String? = nil
+    var icon: QasaIcon? = nil
     var color: Color? = nil
     var textColor: Color? = nil
     var cornerRadius: CGFloat = Theme.controlCornerRadius
@@ -170,15 +170,14 @@ struct StatBox: View {
     let label: String
     let value: String
     let unit: String
-    let icon: String
+    let icon: QasaIcon
     let iconColor: Color
 
     var body: some View {
         CardContainer {
             VStack(spacing: 8) {
-                Image(systemName: icon)
+                QasaIconImage(icon, size: 16)
                     .foregroundColor(iconColor)
-                    .font(.qasa(16, weight: .semibold))
                 Text(label)
                     .font(.qasaLabel(12))
                     .foregroundColor(theme.textSecondary)
@@ -200,7 +199,7 @@ struct StatBox: View {
 /// A `SettingsRow` with a switch.
 struct ToggleRow: View {
     @Environment(\.themePalette) private var theme
-    let icon: String
+    let icon: QasaIcon
     let iconColor: Color
     let title: String
     let subtitle: String
@@ -226,7 +225,7 @@ struct ToggleRow: View {
 /// A `SettingsRow` that navigates: optional trailing value, chevron (none when destructive).
 struct NavChevronRow: View {
     @Environment(\.themePalette) private var theme
-    let icon: String
+    let icon: QasaIcon
     let title: String
     var subtitle: String? = nil
     var trailingText: String? = nil
@@ -288,8 +287,7 @@ struct CheckToggleStyle: ToggleStyle {
                     .fill(configuration.isOn ? theme.cardBackground : theme.textTertiary)
                     .frame(width: 24, height: 24)
                     .overlay(
-                        Image(systemName: "checkmark")
-                            .font(.qasa(11, weight: .bold))
+                        QasaIconImage(.check, size: 11)
                             .foregroundColor(theme.accent)
                             .opacity(configuration.isOn ? 1 : 0)
                     )
@@ -382,13 +380,12 @@ struct FilterChip: View {
 // MARK: - Floating action button
 struct MintFAB: View {
     @Environment(\.themePalette) private var theme
-    let systemImage: String
+    let icon: QasaIcon
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.qasa(18, weight: .bold))
+            QasaIconImage(icon, size: 18)
                 .foregroundColor(theme.onAccent)
                 .frame(width: 56, height: 56)
                 .background(theme.accent)

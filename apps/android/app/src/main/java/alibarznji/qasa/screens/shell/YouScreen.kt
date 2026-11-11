@@ -7,22 +7,14 @@ import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.qasaColors
+import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoFixHigh
-import androidx.compose.material.icons.outlined.Backup
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.MonitorHeart
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.PanTool
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.VpnLock
-import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -64,13 +56,15 @@ fun YouScreen(
                 label = stringResource(R.string.you_about),
                 pages = listOf(AppPage.Terms, AppPage.Privacy),
                 onOpen = onOpen,
+                // Solar is CC BY 4.0: the credit it asks for (assets/icons/LICENSE.md).
+                footer = stringResource(R.string.you_iconscredit),
             )
         }
     }
 }
 
 @Composable
-private fun PageGroup(label: String, pages: List<AppPage>, onOpen: (AppPage) -> Unit) {
+private fun PageGroup(label: String, pages: List<AppPage>, onOpen: (AppPage) -> Unit, footer: String? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap)) {
         SectionLabel(label)
         CardContainer {
@@ -82,22 +76,25 @@ private fun PageGroup(label: String, pages: List<AppPage>, onOpen: (AppPage) -> 
                 )
             }
         }
+        if (footer != null) {
+            Text(footer, color = qasaColors.textSecondary, style = qasaText.bodySmall)
+        }
     }
 }
 
-/** Outlined Material stand-ins for iOS `AppPage.systemImage` (`AppSession.swift:90-104`). */
+/** The library glyphs for iOS `AppPage.youIcon` (`YouView.swift`). */
 private val AppPage.youIcon: ImageVector
     get() = when (this) {
-        AppPage.Vault -> Icons.Outlined.Folder
-        AppPage.Notifications -> Icons.Outlined.Notifications
-        AppPage.Generator -> Icons.Outlined.AutoFixHigh
-        AppPage.PasswordHealth -> Icons.Outlined.MonitorHeart
-        AppPage.BreachedPasswords -> Icons.Outlined.Shield
-        AppPage.Vpn -> Icons.Outlined.VpnLock
-        AppPage.Collections -> Icons.Outlined.Folder
-        AppPage.Settings -> Icons.Outlined.Settings
-        AppPage.Backups -> Icons.Outlined.Backup
-        AppPage.Terms -> Icons.Outlined.Description
-        AppPage.Privacy -> Icons.Outlined.PanTool
-        AppPage.PremiumUpgrade -> Icons.Outlined.WorkspacePremium
+        AppPage.Vault -> QasaIcons.Folder
+        AppPage.Notifications -> QasaIcons.Alerts
+        AppPage.Generator -> QasaIcons.Generate
+        AppPage.PasswordHealth -> QasaIcons.Health
+        AppPage.BreachedPasswords -> QasaIcons.Breach
+        AppPage.Vpn -> QasaIcons.Vpn
+        AppPage.Collections -> QasaIcons.Folder
+        AppPage.Settings -> QasaIcons.Settings
+        AppPage.Backups -> QasaIcons.Backup
+        AppPage.Terms -> QasaIcons.Note
+        AppPage.Privacy -> QasaIcons.Privacy
+        AppPage.PremiumUpgrade -> QasaIcons.Premium
     }

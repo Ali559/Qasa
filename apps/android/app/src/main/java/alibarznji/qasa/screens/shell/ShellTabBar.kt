@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.shell
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.annotation.StringRes
@@ -18,15 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,10 +36,10 @@ import androidx.compose.ui.text.font.FontWeight
  * symbol for the selected one.
  */
 enum class ShellTab(@StringRes val labelRes: Int, val icon: ImageVector, val selectedIcon: ImageVector) {
-    Home(R.string.tab_home, Icons.Outlined.Home, Icons.Filled.Home),
-    Passwords(R.string.tab_passwords, Icons.Outlined.Key, Icons.Filled.Key),
-    Alerts(R.string.tab_alerts, Icons.Outlined.NotificationsActive, Icons.Filled.NotificationsActive),
-    You(R.string.tab_you, Icons.Outlined.Person, Icons.Filled.Person),
+    Home(R.string.tab_home, QasaIcons.Home, QasaIcons.HomeFill),
+    Passwords(R.string.tab_passwords, QasaIcons.Passwords, QasaIcons.PasswordsFill),
+    Alerts(R.string.tab_alerts, QasaIcons.Alerts, QasaIcons.AlertsFill),
+    You(R.string.tab_you, QasaIcons.You, QasaIcons.YouFill),
 }
 
 /** Card-coloured bar with a hairline on top; the selected tab takes the accent colour and filled glyph. */
