@@ -1,10 +1,15 @@
 <script setup lang="ts">
 // iOS `AddItemMenuView`: on All, the five kinds (Payment, Personal Information and ID
-// drill into their subtypes); on a kind's tab, that kind's subtypes directly.
-import { ChevronLeft, ChevronRight, CreditCard, FileText, IdCard, KeyRound, User } from 'lucide-vue-next'
+// drill into their subtypes); on a kind's tab, that kind's subtypes directly. The rows are
+// a `SettingsSection` card of `SettingsRow`s, 20 from the sheet's edges, under the shared
+// sheet header (no Cancel). A drilled page keeps iOS's navigation back button at the start.
+import { ChevronLeft, CreditCard, FileText, IdCard, KeyRound, User } from 'lucide-vue-next'
 import { computed, ref, watch, type Component } from 'vue'
 
+import SettingsRow from '@/components/SettingsRow.vue'
 import Sheet from '@/components/Sheet.vue'
+import SheetHeader from '@/components/SheetHeader.vue'
+import { VARIANT_ICON } from '@/icons'
 import { useT } from '@/prefs'
 import { KIND_ADD_KEY, KIND_SUBTYPES, VARIANT_TYPE_KEY } from '@/vault/present'
 import type { ItemKind, Variant } from '@/vault/types'
@@ -40,105 +45,82 @@ const rows = computed(() => {
 
 <template>
   <Sheet :open="open" :label="title" :width="460" placement="bottom" @close="emit('close')">
-    <header class="sheet-head">
-      <button v-if="drilled" type="button" class="nav" :aria-label="t('common.back')" @click="drilled = null">
-        <ChevronLeft class="mirror-rtl" :size="20" />
+    <div class="head">
+      <SheetHeader :title="title" />
+      <button v-if="drilled" type="button" class="back" :aria-label="t('common.back')" @click="drilled = null">
+        <ChevronLeft class="mirror-rtl" :stroke-width="2.75" />
       </button>
-      <h2>{{ title }}</h2>
-      <button type="button" class="nav text" @click="emit('close')">{{ t('common.cancel') }}</button>
-    </header>
+    </div>
     <div class="list">
-      <template v-if="rows">
-        <button v-for="row in rows" :key="row.variant" type="button" class="row" @click="emit('pick', row.variant)">
-          <span>{{ row.label }}</span>
-        </button>
-      </template>
-      <template v-else>
-        <button
-          v-for="k in KINDS"
-          :key="k.kind"
-          type="button"
-          class="row"
-          @click="k.variant ? emit('pick', k.variant) : (drilled = k.kind)"
-        >
-          <component :is="k.icon" :size="18" class="icon" />
-          <span>{{ t(KIND_ADD_KEY[k.kind]) }}</span>
-          <ChevronRight v-if="!k.variant" class="chevron mirror-rtl" :size="16" />
-        </button>
-      </template>
+      <div class="card settings-list">
+        <template v-if="rows">
+          <SettingsRow
+            v-for="row in rows"
+            :key="row.variant"
+            class="no-chevron"
+            :icon="VARIANT_ICON[row.variant]"
+            :title="row.label"
+            @click="emit('pick', row.variant)"
+          />
+        </template>
+        <template v-else>
+          <SettingsRow
+            v-for="k in KINDS"
+            :key="k.kind"
+            :icon="k.icon"
+            :title="t(KIND_ADD_KEY[k.kind])"
+            :class="{ 'no-chevron': !!k.variant }"
+            @click="k.variant ? emit('pick', k.variant) : (drilled = k.kind)"
+          />
+        </template>
+      </div>
     </div>
   </Sheet>
 </template>
 
 <style scoped>
-.sheet-head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  height: 56px;
-  padding-inline: 12px;
-  border-bottom: 1px solid var(--stroke);
+.head {
+  position: relative;
 }
 
-.sheet-head h2 {
-  margin: 0;
-  grid-column: 2;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.nav {
-  grid-column: 1;
-  justify-self: start;
+/* iOS navigation back chevron: 17 semibold accent, at the start, on the title's line. */
+.back {
+  position: absolute;
+  inset-block-start: calc(var(--space-sheet-title-top) - (44px - var(--type-sheet-title-size) * var(--line-height)) / 2);
+  inset-inline-start: var(--space-screen-padding);
   display: grid;
   place-items: center;
-  height: 36px;
-  min-width: 36px;
+  width: 44px;
+  height: 44px;
+  margin-inline-start: -12px;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
   background: transparent;
   color: var(--accent);
   cursor: pointer;
 }
 
-.nav.text {
-  grid-column: 3;
-  justify-self: end;
-  padding-inline: 8px;
-  font-size: 16px;
+.back svg {
+  width: 17px;
+  height: 17px;
 }
 
 .list {
+  overflow-y: auto;
+  padding: 0 var(--space-screen-padding) var(--space-screen-padding);
+}
+
+.card {
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: var(--card-padding);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
+  background: var(--card-background);
 }
 
-.row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 12px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 16px;
-  text-align: start;
-  cursor: pointer;
-}
-
-.row:hover,
-.row:focus-visible {
-  background: var(--card-muted);
-}
-
-.icon {
-  color: var(--accent);
-}
-
-.chevron {
-  margin-inline-start: auto;
-  color: var(--text-tertiary);
+/* Rows that open the editor straight away have no chevron (iOS `row(chevron: false)`). */
+.no-chevron :deep(.chevron) {
+  display: none;
 }
 </style>

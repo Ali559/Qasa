@@ -31,7 +31,7 @@ const logo = computed(() => (props.variant === 'login' && !iconPath.value ? site
     >{{ logo.letter }}</span
   >
   <span v-else class="tile icon" :style="{ width: `${size}px`, height: `${size}px` }" aria-hidden="true">
-    <component :is="VARIANT_ICON[variant]" :size="size * 0.4" />
+    <component :is="VARIANT_ICON[variant]" :size="size * 0.375" />
   </span>
 </template>
 

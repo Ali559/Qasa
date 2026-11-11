@@ -3,7 +3,7 @@
 // `error`), bottom-centre just above the BottomActionBar, announced politely to screen
 // readers. Centred by a full-width flex row (no left/translate), so it sits right in RTL
 // too; under reduced motion it only fades.
-import { Check, CircleAlert } from 'lucide-vue-next'
+import { CircleAlert, CircleCheck } from 'lucide-vue-next'
 
 import { toast } from '@/toast'
 </script>
@@ -12,9 +12,9 @@ import { toast } from '@/toast'
   <!-- The live region stays mounted so screen readers notice each new message. -->
   <div class="toast-region" role="status" aria-live="polite" aria-atomic="true">
     <Transition name="toast">
-      <div v-if="toast.visible" :key="toast.seq" class="toast" :class="toast.tone">
-        <CircleAlert v-if="toast.tone === 'error'" class="toast-icon" :size="16" :stroke-width="2.5" aria-hidden="true" />
-        <Check v-else class="toast-icon" :size="16" :stroke-width="2.5" aria-hidden="true" />
+      <div v-if="toast.visible" :key="toast.seq" class="toast" :class="toast.tone" @click="toast.visible = false">
+        <CircleAlert v-if="toast.tone === 'error'" class="toast-icon" :stroke-width="2.5" aria-hidden="true" />
+        <CircleCheck v-else class="toast-icon" :stroke-width="2.5" aria-hidden="true" />
         <span class="toast-text">{{ toast.message }}</span>
       </div>
     </Transition>
@@ -26,30 +26,32 @@ import { toast } from '@/toast'
   position: fixed;
   inset-inline: 0;
   /* Clear of a BottomActionBar: its padding twice, a button, its hairline, then a gap. */
-  bottom: calc(var(--action-bar-padding) * 2 + var(--button-height) + 1px + 12px);
+  bottom: calc(var(--space-bottom-bar-vertical) * 3 + var(--size-button-height) + var(--size-stroke));
   z-index: 60;
   display: flex;
   justify-content: center;
-  padding-inline: var(--screen-padding, 16px);
+  padding-inline: var(--space-screen-padding);
   pointer-events: none;
 }
 
+/* iOS `ToastView`: accent fill, onAccent text, 17 semibold icon 10 from 14 semibold text (two
+   lines at most), padding 16 × 12, at least 44 tall, control radius, `shadow.toast`. */
 .toast {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  max-width: min(440px, 100%);
-  padding: 10px 16px;
-  border-radius: var(--button-radius);
+  gap: 10px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: var(--space-toast-vertical) var(--space-toast-horizontal);
+  border-radius: var(--radius-control);
   background: var(--accent);
   color: var(--on-accent);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.35;
-  box-shadow:
-    0 2px 6px var(--shadow-color),
-    0 10px 28px var(--shadow-color);
+  font-family: var(--font-family);
+  font-size: var(--type-toast-size);
+  font-weight: var(--type-toast-weight);
+  line-height: var(--line-height);
+  box-shadow: var(--shadow-toast);
+  pointer-events: auto;
 }
 
 .toast.error {
@@ -59,30 +61,38 @@ import { toast } from '@/toast'
 
 .toast-icon {
   flex-shrink: 0;
+  width: 17px;
+  height: 17px;
 }
 
 .toast-text {
+  display: -webkit-box;
   min-width: 0;
+  overflow: hidden;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
+/* iOS: `.move(edge: .bottom)` + opacity on the `toast` spring. */
 .toast-enter-active,
 .toast-leave-active {
   transition:
-    opacity var(--motion-standard) ease-out,
-    transform var(--motion-standard) ease-out;
+    opacity var(--motion-toast),
+    transform var(--motion-toast);
 }
 
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(calc(100% + var(--space-bottom-bar-vertical) * 3 + var(--size-button-height)));
 }
 
+/* Reduce motion: fade only (`motion.fade`). */
 @media (prefers-reduced-motion: reduce) {
   .toast-enter-active,
   .toast-leave-active {
-    transition: opacity 120ms linear;
+    transition: opacity var(--motion-fade);
   }
 
   .toast-enter-from,

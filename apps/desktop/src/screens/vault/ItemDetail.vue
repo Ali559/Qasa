@@ -4,7 +4,7 @@
 // Edit and Delete in the header. Protected note content needs the main password first.
 // Stored dates show in the UI language; an item that breaks a field rule (made by an
 // older version, an import or a browser capture) gets the "needs attention" banner.
-import { CircleAlert, Eye, EyeOff, Pencil, Trash2 } from 'lucide-vue-next'
+import { Eye, EyeOff, Pencil, Trash2, TriangleAlert } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -25,7 +25,8 @@ import {
 import { protectedGate, requestProtectedAccess } from '@/vault/protectedGate'
 import { removeItem, session } from '@/vault/session'
 import type { VaultPayload } from '@/vault/types'
-import ItemTile from './ItemTile.vue'
+import { VARIANT_ICON } from '@/icons'
+import { siteIconPath } from '@/vault/siteIcon'
 import TotpCodeRow from './TotpCodeRow.vue'
 
 const props = defineProps<{ itemId: string }>()
@@ -117,33 +118,33 @@ async function remove() {
 }
 
 const COLOR_KEY = (c: string) => `color.${c}`
+/** The hero's bundled site icon (logins), else the type symbol (iOS `heroGlyph`). */
+const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIconPath(payload.value.fields.website) : null))
 </script>
 
 <template>
   <div class="detail">
     <header class="bar">
       <button type="button" class="icon-button accent" :aria-label="t('common.edit')" :title="t('common.edit')" @click="emit('edit')">
-        <Pencil :size="18" />
+        <Pencil :size="17" :stroke-width="2.5" />
       </button>
       <button type="button" class="icon-button danger" :aria-label="t('common.delete')" :title="t('common.delete')" @click="confirmDelete = true">
-        <Trash2 :size="18" />
+        <Trash2 :size="17" :stroke-width="2.5" />
       </button>
     </header>
 
     <div v-if="payload" class="scroll">
       <div class="column">
         <div class="hero">
-          <ItemTile
-            :variant="payload.variant"
-            :name="row?.displayName ?? ''"
-            :website="payload.variant === 'login' ? payload.fields.website : null"
-            :size="88"
-          />
+          <span class="hero-icon" aria-hidden="true">
+            <svg v-if="heroSitePath" viewBox="0 0 24 24" width="36" height="36" fill="currentColor" focusable="false"><path :d="heroSitePath" /></svg>
+            <component :is="VARIANT_ICON[payload.variant]" v-else :size="36" :stroke-width="1.75" />
+          </span>
           <h1 class="name">{{ row?.displayName ?? t('vault.untitled') }}</h1>
         </div>
 
         <p v-if="needsAttention" class="attention" role="status">
-          <CircleAlert :size="18" aria-hidden="true" />
+          <TriangleAlert class="attention-icon" :stroke-width="2.5" aria-hidden="true" />
           <span>{{ t('validation.needsAttention') }}</span>
         </p>
 
@@ -162,8 +163,8 @@ const COLOR_KEY = (c: string) => `color.${c}`
                     :aria-label="revealed.has(field.label) ? t('vault.hidePassword') : t('vault.showPassword')"
                     @click.stop="toggleReveal(field)"
                   >
-                    <EyeOff v-if="revealed.has(field.label)" :size="15" />
-                    <Eye v-else :size="15" />
+                    <EyeOff v-if="revealed.has(field.label)" :size="14" />
+                    <Eye v-else :size="14" />
                   </button>
                 </div>
                 <span v-if="field.secret && !unlocked" class="field-value muted">{{ t('vault.lockedAuthenticate') }}</span>
@@ -216,6 +217,7 @@ const COLOR_KEY = (c: string) => `color.${c}`
     <ConfirmDialog
       :open="confirmDelete"
       :title="t('vault.deleteItemTitle')"
+      :icon="Trash2"
       :message="t('vault.deleteItemMessage', row?.displayName ?? t('vault.thisItem'))"
       :confirm-label="t('common.delete')"
       destructive
@@ -237,9 +239,9 @@ const COLOR_KEY = (c: string) => `color.${c}`
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  height: 64px;
+  height: var(--size-header-height);
   align-items: center;
-  padding-inline: 16px;
+  padding-inline: var(--space-header-horizontal);
   flex-shrink: 0;
 }
 
@@ -277,7 +279,7 @@ const COLOR_KEY = (c: string) => `color.${c}`
   gap: 24px;
   max-width: 640px;
   margin-inline: auto;
-  padding: 0 var(--screen-padding) 40px;
+  padding: 0 var(--space-screen-padding) 40px;
 }
 
 .hero {
@@ -287,9 +289,18 @@ const COLOR_KEY = (c: string) => `color.${c}`
   gap: 24px;
 }
 
-.hero :deep(.tile) {
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 20px;
+/* iOS `heroIcon`: 88 square, chrome fill, text-primary 36 glyph, radius 20, 1px strokeChrome,
+   12 above. */
+.hero-icon {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin-top: 12px;
+  border: var(--size-stroke) solid var(--stroke-chrome);
+  border-radius: var(--radius-card);
+  background: var(--chrome);
+  color: var(--text-primary);
 }
 
 .name {
@@ -300,22 +311,27 @@ const COLOR_KEY = (c: string) => `color.${c}`
   user-select: text;
 }
 
+/* iOS `attentionBanner`: danger 12% fill, 40% stroke, card radius, 14 padding; a danger
+   triangle 10 from 13 medium text-primary text. */
 .attention {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   margin: 0;
-  padding: 12px 14px;
-  border-radius: var(--corner-radius);
-  background: var(--danger-background);
-  color: var(--danger-text);
-  font-size: 14px;
-  line-height: 1.4;
+  padding: 14px;
+  border: var(--size-stroke) solid color-mix(in srgb, var(--danger) 40%, transparent);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.attention :deep(svg) {
+.attention-icon {
   flex-shrink: 0;
-  margin-top: 1px;
+  width: 17px;
+  height: calc(13px * var(--line-height));
+  color: var(--danger);
 }
 
 .section {
@@ -332,22 +348,17 @@ const COLOR_KEY = (c: string) => `color.${c}`
   text-transform: uppercase;
 }
 
-:root:lang(ar) .section-title,
-:root:lang(ckb) .section-title {
-  text-transform: none;
-}
-
 .card {
   display: flex;
   flex-direction: column;
   padding: 4px 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
 }
 
 .card > * + * {
-  border-top: 1px solid var(--stroke);
+  border-top: var(--size-stroke) solid var(--stroke);
 }
 
 .field {
@@ -365,7 +376,7 @@ const COLOR_KEY = (c: string) => `color.${c}`
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-secondary);
 }
 

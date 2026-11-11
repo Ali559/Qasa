@@ -1,22 +1,19 @@
 package alibarznji.qasa.theme
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,8 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,9 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 
 /*
  * Buttons, surfaces and labels from `Components.swift`. Inputs and toggles live in
@@ -93,12 +91,93 @@ fun StatusPill(
     }
 }
 
+/** iOS `QasaButtonKind`. */
+enum class QasaButtonKind {
+    /** Accent fill: the one main action of a page. */
+    Primary,
+
+    /** Card fill with a stroke: the alternative action. */
+    Secondary,
+
+    /** Danger fill: an irreversible action. */
+    Destructive,
+
+    /** Quiet accent text, still [QasaDimens.buttonHeight] tall. */
+    Plain,
+}
+
 /**
- * `PrimaryButton` — `Components.swift:64`. Full width, exactly [QasaDimens.buttonHeight]
- * tall, `cornerRadius`, `accent` fill (`danger` when [destructive]), `onAccent` label at
- * 17 semibold, optional 16 leading icon, a soft accent glow while enabled.
+ * iOS `QasaButtonStyle` (`Controls.swift`): exactly [QasaDimens.buttonHeight] tall,
+ * [QasaDimens.controlRadius] corners, [QasaDimens.buttonHorizontal] side padding, label
+ * `type.button` (16 semibold) on one line, optional 15dp leading icon 8dp before it.
+ * Pressed: opacity 0.85 and scale 0.98 over `motion.press`; disabled: opacity 0.45. No
+ * ripple, no shadow, no M3 minimum size: the same pixels as iOS.
  *
- * Disabled callers must pass `enabled = false`, never hand-roll an opacity (§6.2).
+ * [labelColor] overrides the kind's label color (the Android-only red secondary action).
+ */
+@Composable
+fun QasaButton(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    kind: QasaButtonKind = QasaButtonKind.Primary,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    fullWidth: Boolean = true,
+    labelColor: Color? = null,
+) {
+    val c = qasaColors
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
+    val interaction = remember { MutableInteractionSource() }
+    val scale = rememberPressScale(interaction, enabled = enabled)
+    val alpha = rememberPressOpacity(interaction, enabled = enabled)
+    val fill = when (kind) {
+        QasaButtonKind.Primary -> c.accent
+        QasaButtonKind.Secondary -> c.cardBackground
+        QasaButtonKind.Destructive -> c.danger
+        QasaButtonKind.Plain -> Color.Transparent
+    }
+    val label = labelColor ?: when (kind) {
+        QasaButtonKind.Primary -> c.onAccent
+        QasaButtonKind.Secondary -> c.textPrimary
+        // iOS draws the destructive label in plain white in both schemes.
+        QasaButtonKind.Destructive -> Color.White
+        QasaButtonKind.Plain -> c.accent
+    }
+    Row(
+        modifier = modifier
+            .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
+            .height(QasaDimens.buttonHeight)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                this.alpha = alpha
+            }
+            .background(fill, shape)
+            .then(if (kind == QasaButtonKind.Secondary) Modifier.border(StrokeWidth, c.stroke, shape) else Modifier)
+            .clip(shape)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .padding(horizontal = QasaDimens.buttonHorizontal),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = label, modifier = Modifier.size(QasaDimens.buttonIconGlyph))
+            Spacer(Modifier.width(QasaDimens.buttonIconGap))
+        }
+        Text(title, color = label, style = qasaText.button, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/**
+ * `PrimaryButton` — `Components.swift`: a full-width [QasaButton], `danger` fill when
+ * [destructive]. Disabled callers pass `enabled = false`, never hand-roll an opacity.
  */
 @Composable
 fun PrimaryButton(
@@ -109,46 +188,14 @@ fun PrimaryButton(
     icon: ImageVector? = null,
     destructive: Boolean = false,
 ) {
-    val c = qasaColors
-    val fill = if (destructive) c.danger else c.accent
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
-    val interaction = remember { MutableInteractionSource() }
-    val scale = rememberPressScale(interaction)
-    Button(
+    QasaButton(
+        title = title,
         onClick = onClick,
+        modifier = modifier,
+        kind = if (destructive) QasaButtonKind.Destructive else QasaButtonKind.Primary,
         enabled = enabled,
-        interactionSource = interaction,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(QasaDimens.buttonHeight)
-            .scale(scale)
-            .then(
-                if (enabled) {
-                    Modifier.shadow(
-                        QasaDimens.contentGap,
-                        shape,
-                        ambientColor = fill.copy(alpha = 0.3f),
-                        spotColor = fill.copy(alpha = 0.3f),
-                    )
-                } else {
-                    Modifier
-                },
-            ),
-        shape = shape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = fill,
-            contentColor = c.onAccent,
-            disabledContainerColor = fill.copy(alpha = 0.4f),
-            disabledContentColor = c.onAccent.copy(alpha = 0.75f),
-        ),
-        contentPadding = ButtonContentPadding,
-    ) {
-        if (icon != null) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(QasaIconSize.md))
-            Spacer(Modifier.width(QasaDimens.contentGap))
-        }
-        Text(title, style = qasaText.ctaLabel, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
+        icon = icon,
+    )
 }
 
 /**
@@ -163,33 +210,30 @@ fun CardContainer(
     modifier: Modifier = Modifier,
     background: Color? = null,
     borderColor: Color? = null,
+    padding: Dp = QasaDimens.cardPadding,
+    cornerRadius: Dp = QasaDimens.cornerRadius,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    val shape = RoundedCornerShape(cornerRadius)
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(background ?: c.cardBackground, shape)
             .border(StrokeWidth, borderColor ?: c.stroke, shape)
-            .padding(QasaDimens.cardPadding),
+            .padding(padding),
         content = content,
     )
 }
 
-/**
- * `SectionLabel` — `Components.swift:119`. Uppercased for `en` only; mono + 0.6
- * tracking for `en`, semibold + 0 tracking for ckb/ar; `textSecondary`.
- *
- * The mono/uppercase decision lives in [QasaText], not at 5 copy-pasted ternaries.
- */
+/** `SectionLabel` — `Components.swift`: `type.sectionLabel` (12 semibold), `textSecondary`, every language. */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {
     val c = qasaColors
     Text(
         text = qasaText.label(text),
         color = c.textSecondary,
-        style = if (qasaText.arabicScript) qasaText.sectionLabelSemibold else qasaText.sectionLabel,
+        style = qasaText.tokenSectionLabel,
         modifier = modifier,
     )
 }
@@ -243,12 +287,9 @@ fun MintFab(
     }
 }
 
-/** No vertical padding: the fixed [QasaDimens.buttonHeight] centers the label. */
-private val ButtonContentPadding = PaddingValues(horizontal = QasaDimens.gap)
-
 /**
- * Android-only. Same [QasaDimens.buttonHeight] as [PrimaryButton], `cardBackgroundLight`,
- * 1pt `stroke` border, 16 semibold; `danger` label when [destructive].
+ * `.qasaSecondary` — a full-width [QasaButton] of kind Secondary: `cardBackground` fill,
+ * 1dp `stroke`, `textPrimary` label; `danger` label when [destructive] (Android-only).
  */
 @Composable
 fun SecondaryButton(
@@ -259,39 +300,20 @@ fun SecondaryButton(
     destructive: Boolean = false,
     icon: ImageVector? = null,
 ) {
-    val c = qasaColors
-    val interaction = remember { MutableInteractionSource() }
-    val scale = rememberPressScale(interaction)
-    val content = if (destructive) c.danger else c.textPrimary
-    Button(
+    QasaButton(
+        title = title,
         onClick = onClick,
+        modifier = modifier,
+        kind = QasaButtonKind.Secondary,
         enabled = enabled,
-        interactionSource = interaction,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(QasaDimens.buttonHeight)
-            .scale(scale),
-        shape = RoundedCornerShape(QasaDimens.cornerRadius),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = c.cardBackgroundLight,
-            contentColor = content,
-            disabledContainerColor = c.cardBackgroundLight.copy(alpha = 0.6f),
-            disabledContentColor = content.copy(alpha = 0.45f),
-        ),
-        border = BorderStroke(StrokeWidth, c.stroke),
-        contentPadding = ButtonContentPadding,
-    ) {
-        if (icon != null) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(QasaIconSize.md))
-            Spacer(Modifier.width(QasaDimens.contentGap))
-        }
-        Text(title, style = qasaText.rowTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-    }
+        icon = icon,
+        labelColor = if (destructive) qasaColors.danger else null,
+    )
 }
 
 /**
- * Destructive action. Android-only on iOS; there it was a bare `Text` with no
- * indication at all. Now a `Button` with a role, a ripple, and a 48dp target.
+ * A quiet red text action (not full width): the plain kind's press and disabled states,
+ * `danger` label, at least a 48dp target.
  */
 @Composable
 fun DestructiveTextButton(
@@ -300,25 +322,15 @@ fun DestructiveTextButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val c = qasaColors
-    val interaction = remember { MutableInteractionSource() }
-    val scale = rememberPressScale(interaction)
-    Button(
+    QasaButton(
+        title = title,
         onClick = onClick,
+        modifier = modifier,
+        kind = QasaButtonKind.Plain,
         enabled = enabled,
-        interactionSource = interaction,
-        contentPadding = PaddingValues(horizontal = QasaDimens.contentGap),
-        shape = RoundedCornerShape(QasaDimens.radiusSmall),
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = c.danger,
-            disabledContentColor = c.danger.copy(alpha = 0.45f),
-        ),
-        modifier = modifier
-            .heightIn(min = QasaDimens.touchTarget)
-            .scale(scale),
-    ) {
-        Text(title, style = qasaText.bodySemibold15)
-    }
+        fullWidth = false,
+        labelColor = qasaColors.danger,
+    )
 }
 
 // ---------------------------------------------------------------------------
@@ -328,4 +340,4 @@ fun DestructiveTextButton(
 /** Animates a color so state changes read as transitions rather than cuts. */
 @Composable
 fun animateQasaColor(target: Color): Color =
-    animateColorAsState(target, tween(QasaMotion.FAST), label = "qasaColor").value
+    animateColorAsState(target, QasaMotion.fastTween(), label = "qasaColor").value

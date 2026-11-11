@@ -17,7 +17,6 @@ import { account, refreshUnread } from '@/account/store'
 import { isApiError, localized, type InboxNotification } from '@/account/types'
 import { prefs, useT } from '@/prefs'
 import { displayDate } from '@/vault/present'
-import SheetHeader from '../settings/SheetHeader.vue'
 
 defineEmits<{ back: [] }>()
 const t = useT()
@@ -213,7 +212,7 @@ async function remove(n: InboxNotification) {
               </span>
             </button>
             <Menu :label="t('a11y.moreActions')" :items="[{ label: t('common.delete'), destructive: true, action: () => remove(n) }]">
-              <EllipsisVertical :size="18" />
+              <EllipsisVertical :size="17" />
             </Menu>
           </div>
         </template>
@@ -224,8 +223,7 @@ async function remove(n: InboxNotification) {
     <p v-if="errorKey" class="error" role="alert">{{ t(errorKey) }}</p>
 
     <template #overlay>
-      <Sheet :open="!!selected" :label="t('notifications.detailTitle')" @close="selected = null">
-        <SheetHeader :title="t('notifications.detailTitle')" :cancel-label="t('common.close')" @cancel="selected = null" />
+      <Sheet :open="!!selected" :label="t('notifications.detailTitle')" :title="t('notifications.detailTitle')" @close="selected = null">
         <div v-if="selected" class="detail">
           <h3>{{ text(selected).title }}</h3>
           <span class="date">{{ date(selected.created_at) }}</span>
@@ -240,7 +238,7 @@ async function remove(n: InboxNotification) {
 .mark-all {
   padding: 6px 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--radius-control) - 2px);
   background: transparent;
   color: var(--accent);
   font-size: 12px;
@@ -260,7 +258,7 @@ async function remove(n: InboxNotification) {
   margin: 0;
   margin-inline-start: 36px;
   border: 0;
-  border-top: 1px solid var(--stroke);
+  border-top: var(--size-stroke) solid var(--stroke);
 }
 
 .row {
@@ -309,18 +307,18 @@ async function remove(n: InboxNotification) {
 }
 
 .title {
-  font-size: 15px;
+  font-size: var(--type-row-title-size);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .body {
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   color: var(--text-secondary);
 }
 
 .date {
-  font-size: 11px;
+  font-size: var(--type-field-error-size);
   color: var(--text-tertiary);
 }
 
@@ -347,12 +345,13 @@ async function remove(n: InboxNotification) {
 
 .empty strong {
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--type-sheet-title-size);
+  font-weight: 700;
 }
 
 .error {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   color: var(--danger);
   text-align: center;
 }
@@ -361,7 +360,7 @@ async function remove(n: InboxNotification) {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: var(--screen-padding);
+  padding: var(--space-screen-padding);
   overflow-y: auto;
   user-select: text;
 }
@@ -374,12 +373,12 @@ async function remove(n: InboxNotification) {
 }
 
 .detail .date {
-  font-size: 12px;
+  font-size: var(--type-caption-size);
 }
 
 .detail p {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--type-bar-button-size);
   color: var(--text-secondary);
   white-space: pre-wrap;
 }

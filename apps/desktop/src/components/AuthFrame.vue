@@ -52,7 +52,7 @@ defineProps<{ wash?: boolean }>()
   width: 100%;
   max-width: 560px;
   margin-inline: auto;
-  padding-inline: var(--screen-padding);
+  padding-inline: var(--space-screen-padding);
   display: flex;
   flex-direction: column;
   padding-top: 24px;

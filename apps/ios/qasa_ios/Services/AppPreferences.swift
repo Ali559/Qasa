@@ -106,6 +106,8 @@ final class AppPreferences {
         self.theme = themePref
         self.autoLockMinutes = min(60, max(1, storedLock))
         self.hasCompletedWelcome = defaults.bool(forKey: welcomeKey)
+        // Persist an inferred first pick too, so every reader sees the same language.
+        defaults.set(lang.rawValue, forKey: langKey)
         defaults.set([lang.rawValue], forKey: "AppleLanguages")
         UserDefaults(suiteName: AppGroup.identifier)?.set(lang.rawValue, forKey: langKey)
         AppTypography.applyChromeFonts(for: lang)

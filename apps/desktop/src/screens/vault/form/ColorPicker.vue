@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// iOS `NoteColorPicker`: six 28pt swatches; the selected one gets a ring.
+// iOS `NoteColorPicker`: a `SectionLabel` 8 above six 28pt swatches (3 padding each, 12
+// apart); the selected one gets a 2pt text-primary stroke on its edge.
 import { useT } from '@/prefs'
 import { NOTE_COLORS, NOTE_COLOR_VALUE } from '@/vault/present'
 import type { NoteColor } from '@/vault/types'
@@ -33,12 +34,12 @@ const t = useT()
 .color-picker {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
 .label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
   color: var(--text-secondary);
 }
 
@@ -50,16 +51,17 @@ const t = useT()
 .swatch {
   width: 28px;
   height: 28px;
+  margin: 3px;
   padding: 0;
   border: 0;
   border-radius: 50%;
   cursor: pointer;
-  transition: box-shadow var(--motion-fast);
 }
 
+/* SwiftUI's `stroke` is centered on the edge: 1 outside, 1 inside. */
 .swatch.selected {
   box-shadow:
-    0 0 0 2px var(--background),
-    0 0 0 4px var(--text-primary);
+    0 0 0 1px var(--text-primary),
+    inset 0 0 0 1px var(--text-primary);
 }
 </style>

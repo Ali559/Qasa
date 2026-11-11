@@ -218,13 +218,7 @@ struct VaultFormChrome<Content: View>: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(title)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("common.cancel", locale: locale), action: onCancel)
-                }
-            }
+            .sheetHeader(title)
             // Save is the page's main action: pinned to the bottom, always in reach.
             .bottomActionBar {
                 Button(

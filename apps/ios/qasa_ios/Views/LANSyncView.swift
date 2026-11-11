@@ -43,13 +43,7 @@ struct LANSyncView: View {
                     }
                 }
             }
-            .navigationTitle(L10n.tr("lan.title", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("common.close", locale: locale)) { dismiss() }
-                }
-            }
+            .sheetHeader(L10n.tr("lan.title", locale: locale))
         }
         .onChange(of: mode) { _, newMode in
             sync.stop()

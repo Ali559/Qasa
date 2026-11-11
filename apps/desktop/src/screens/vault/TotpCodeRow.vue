@@ -35,7 +35,7 @@ const CIRC = 2 * Math.PI * R
   <div v-if="code" class="totp" role="button" tabindex="0" @click="emit('copy', code.code, code.secondsRemaining)" @keydown.enter="emit('copy', code.code, code.secondsRemaining)">
     <div class="head">
       <span class="label">{{ t('field.totp') }}</span>
-      <Copy :size="15" class="accent" :aria-label="t('copy.totp')" />
+      <Copy :size="14" class="accent" :aria-label="t('copy.totp')" />
     </div>
     <div class="body">
       <span class="code">{{ code.grouped }}</span>
@@ -72,7 +72,7 @@ const CIRC = 2 * Math.PI * R
 }
 
 .label {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-secondary);
 }
 

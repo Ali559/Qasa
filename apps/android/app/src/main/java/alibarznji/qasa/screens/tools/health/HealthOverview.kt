@@ -181,7 +181,7 @@ private fun HealthStatCard(
                     Icon(Icons.Outlined.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.x4l))
                 }
             } else {
-                Text("$value", color = accent, style = qasaText.hero)
+                Text(java.text.NumberFormat.getIntegerInstance().format(value), color = accent, style = qasaText.hero)
             }
             Text(
                 title,

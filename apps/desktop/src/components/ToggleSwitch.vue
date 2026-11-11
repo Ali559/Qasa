@@ -29,7 +29,7 @@ const model = defineModel<boolean>({ required: true })
   border-radius: 999px;
   background: var(--stroke);
   cursor: pointer;
-  transition: background-color var(--motion-standard) ease-in-out;
+  transition: background-color var(--motion-standard);
 }
 
 .switch[aria-checked='true'] {
@@ -37,7 +37,7 @@ const model = defineModel<boolean>({ required: true })
 }
 
 .switch:disabled {
-  opacity: 0.5;
+  opacity: var(--motion-disabled-opacity);
   cursor: default;
 }
 
@@ -49,8 +49,8 @@ const model = defineModel<boolean>({ required: true })
   height: 27px;
   border-radius: 50%;
   background: var(--knob);
-  box-shadow: 0 2px 4px var(--shadow-color);
-  transition: transform var(--motion-standard) ease-in-out;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 15%), 0 1px 1px rgb(0 0 0 / 16%);
+  transition: transform var(--motion-toggle);
 }
 
 .switch[aria-checked='true'] .knob {

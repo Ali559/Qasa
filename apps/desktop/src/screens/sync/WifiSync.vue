@@ -79,10 +79,7 @@ const failure = computed(() => {
 
 <template>
   <PageFrame :title="t('lan.title')" back :gap="16" @back="$emit('back')">
-    <template v-if="!premium">
-      <p class="muted">{{ t('lan.requiresPremium') }}</p>
-      <PrimaryButton :title="t('nav.upgrade')" :icon="Crown" @click="openPage('premiumUpgrade')" />
-    </template>
+    <p v-if="!premium" class="intro">{{ t('lan.requiresPremium') }}</p>
 
     <template v-else>
       <h2 class="title">{{ t('lan.secureTitle') }}</h2>
@@ -97,121 +94,155 @@ const failure = computed(() => {
         </button>
       </div>
 
-      <CardContainer v-if="result" :padding="20">
+      <!-- iOS `WiFiHostPanel`: one card, 12 apart. -->
+      <CardContainer v-if="mode === 'host'">
+        <div class="host">
+          <h3 class="panel-title">{{ t('sync.hostTitle') }}</h3>
+          <p class="muted">{{ t('sync.hostBody') }}</p>
+          <template v-if="hosting">
+            <output class="code" dir="ltr">{{ event?.stage === 'waiting' ? event.code.replace(/(\d{3})(\d{3})/, '$1 $2') : '··· ···' }}</output>
+            <span class="expires">{{ t('sync.codeExpires', secondsLeft) }}</span>
+            <span class="status"><span class="spinner" aria-hidden="true" />{{ event?.stage === 'connecting' ? t('sync.connecting') : t('sync.waiting') }}</span>
+            <button type="button" class="qasa-button secondary" @click="stop"><span>{{ t('lan.stop') }}</span></button>
+          </template>
+          <PrimaryButton v-else :title="t('lan.startHost')" :icon="Wifi" @click="startHost" />
+        </div>
+      </CardContainer>
+      <JoinPanel v-else @done="finished" />
+
+      <!-- iOS `SyncOutcomeView`. -->
+      <div v-if="result" class="outcome" role="status">
         <h3 class="done-title">{{ t('sync.doneTitle', result.peerName) }}</h3>
         <p class="muted">{{ t('sync.doneBody', result.received, result.sent) }}</p>
-      </CardContainer>
+      </div>
+      <p v-else-if="failure && mode === 'host'" class="error" role="alert">{{ failure }}</p>
+    </template>
 
-      <template v-if="mode === 'host'">
-        <CardContainer v-if="hosting" :padding="24" class="code-card">
-          <span class="label">{{ t('sync.hostTitle') }}</span>
-          <output class="code" dir="ltr">{{ event?.stage === 'waiting' ? event.code.replace(/(\d{3})(\d{3})/, '$1 $2') : '··· ···' }}</output>
-          <span class="muted small">{{ event?.stage === 'connecting' ? t('sync.connecting') : t('sync.waiting') }}</span>
-          <span class="muted small">{{ t('sync.codeExpires', secondsLeft) }}</span>
-          <p class="muted small center">{{ t('sync.hostBody') }}</p>
-        </CardContainer>
-        <p v-if="failure" class="error" role="alert">{{ failure }}</p>
-        <PrimaryButton v-if="!hosting" :title="t('lan.startHost')" :icon="Wifi" @click="startHost" />
-        <button v-else type="button" class="stop" @click="stop">{{ t('lan.stop') }}</button>
-      </template>
-
-      <template v-else>
-        <p class="muted">{{ t('sync.joinBody') }}</p>
-        <JoinPanel @done="finished" />
-      </template>
+    <template v-if="!premium" #actions>
+      <PrimaryButton :title="t('nav.upgrade')" :icon="Crown" @click="openPage('premiumUpgrade')" />
     </template>
   </PageFrame>
 </template>
 
 <style scoped>
-.title {
+p,
+h2,
+h3 {
   margin: 0;
+}
+
+.intro {
+  font-size: var(--type-body-size);
+  color: var(--text-secondary);
+}
+
+.title {
   font-size: 22px;
   font-weight: 700;
 }
 
 .muted {
-  margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.small {
-  font-size: 13px;
-}
-
-.center {
-  text-align: center;
-}
-
+/* The iOS segmented `Picker`: 32 tall, a raised card-filled thumb on a muted track. */
 .segmented {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border-radius: 10px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 9px;
   background: var(--card-muted);
 }
 
 .segmented button {
-  padding: 8px;
+  padding: 0 8px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 7px;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-primary);
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   cursor: pointer;
+  transition: background-color var(--motion-fast);
 }
 
 .segmented button.on {
   background: var(--card-background);
-  color: var(--text-primary);
   font-weight: 600;
-  box-shadow: 0 1px 3px var(--shadow-color);
+  box-shadow: 0 3px 8px rgb(0 0 0 / 12%), 0 3px 1px rgb(0 0 0 / 4%);
 }
 
-.code-card {
-  align-items: center;
-  gap: 8px;
-  text-align: center;
+.host {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
+.panel-title {
+  font-size: var(--type-sheet-title-size);
+  font-weight: var(--type-sheet-title-weight);
+  color: var(--text-primary);
 }
 
+/* iOS `kasoMono(44, .bold)`, accent, 8 above and below. */
 .code {
+  padding-block: 8px;
   font-family: var(--font-mono);
-  font-size: 40px;
+  font-size: 44px;
   font-weight: 700;
-  letter-spacing: 4px;
   color: var(--accent);
+  text-align: center;
   user-select: all;
 }
 
+/* `Font.qasaLabel(12)`: 13 medium. */
+.expires {
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
+  color: var(--text-secondary);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-tertiary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .done-title {
-  margin: 0 0 6px;
   font-size: 18px;
-  font-weight: 600;
-  color: var(--success);
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .error {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);
-}
-
-.stop {
-  padding: 10px;
-  border: 0;
-  background: transparent;
-  color: var(--danger);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
 }
 </style>

@@ -3,10 +3,11 @@
 // the health bar card, the VPN card and the breached-passwords card. The page wash turns
 // warm when nothing needs attention and cool when something does. On desktop the VPN card
 // points to the phone (no VPN in v1), and the notifications bell arrives with the inbox.
-import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldCheck, ShieldHalf } from 'lucide-vue-next'
+import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaMark from '@/components/QasaMark.vue'
 import { account } from '@/account/store'
 import { backupApi } from '@/backup/api'
 import { bridgeApi } from '@/bridge/api'
@@ -137,7 +138,7 @@ const health = computed(() => {
           <span class="name">{{ t('session.qasaUser') }}</span>
         </div>
         <button type="button" class="bell" :aria-label="t('nav.notifications')" :title="t('nav.notifications')" @click="openPage('notifications')">
-          <Bell :size="18" />
+          <Bell :size="18" aria-hidden="true" />
           <span v-if="account.unread > 0" class="badge">{{ account.unread > 99 ? '99+' : account.unread }}</span>
         </button>
       </div>
@@ -145,15 +146,13 @@ const health = computed(() => {
       <!-- No browser connected yet: the desktop's autofill is the browser extension. -->
       <div v-if="askBrowser" class="home-card static prompt" role="region" :aria-label="t('autofill.prompt.desktopTitle')">
         <div class="card-row">
-          <span class="mark" aria-hidden="true"><ShieldCheck :size="22" /></span>
-          <span class="card-text">
-            <span class="card-title">{{ t('autofill.prompt.desktopTitle') }}</span>
-            <span class="card-line">{{ t('autofill.prompt.desktopBody') }}</span>
-          </span>
+          <span class="mark" aria-hidden="true"><QasaMark :size="24" /></span>
+          <span class="card-title">{{ t('autofill.prompt.desktopTitle') }}</span>
         </div>
-        <div class="card-actions">
-          <button type="button" class="card-action primary" @click="openPage('browserExtension')">{{ t('autofill.prompt.activate') }}</button>
-          <button type="button" class="card-action" @click="snoozeBrowserPrompt">{{ t('autofill.prompt.notNow') }}</button>
+        <span class="card-line">{{ t('autofill.prompt.desktopBody') }}</span>
+        <div class="prompt-actions">
+          <button type="button" class="qasa-button" @click="openPage('browserExtension')"><span>{{ t('autofill.prompt.activate') }}</span></button>
+          <button type="button" class="qasa-button plain inline" @click="snoozeBrowserPrompt"><span>{{ t('autofill.prompt.notNow') }}</span></button>
         </div>
       </div>
 
@@ -161,7 +160,7 @@ const health = computed(() => {
         <div class="disc">
           <div class="inner">
             <span v-if="status === 'loading'" class="spinner" aria-hidden="true" />
-            <component :is="hero.icon" v-else :size="40" :class="status === 'allGood' ? 'good' : 'accent'" />
+            <component :is="hero.icon" v-else :size="40" :class="status === 'allGood' ? 'good' : 'accent'" aria-hidden="true" />
           </div>
         </div>
         <h1 class="hero-title">{{ hero.title }}</h1>
@@ -173,16 +172,16 @@ const health = computed(() => {
 
       <!-- Backup reminder: the vault is only on this computer (spec: backups §7). -->
       <div v-if="backup.status?.remind" class="home-card static" role="region" :aria-label="t('backup.reminder.title')">
-        <div class="card-row">
-          <span class="tile"><DatabaseBackup :size="18" /></span>
+        <div class="card-row top">
+          <span class="tile" aria-hidden="true"><DatabaseBackup :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('backup.reminder.title') }}</span>
             <span class="card-line">{{ t('backup.reminder.body') }}</span>
           </span>
         </div>
         <div class="card-actions">
-          <button type="button" class="card-action primary" @click="openPage('backups')">{{ t('backup.reminder.action') }}</button>
-          <button type="button" class="card-action" @click="snoozeBackupReminder">{{ t('backup.reminder.dismiss') }}</button>
+          <button type="button" class="pill-button" @click="openPage('backups')"><span class="pill muted">{{ t('backup.reminder.action') }}</span></button>
+          <button type="button" class="text-button" @click="snoozeBackupReminder">{{ t('backup.reminder.dismiss') }}</button>
         </div>
       </div>
 
@@ -203,7 +202,7 @@ const health = computed(() => {
 
       <div class="home-card static">
         <div class="card-row">
-          <span class="tile"><ShieldHalf :size="18" /></span>
+          <span class="tile" aria-hidden="true"><ShieldHalf :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('nav.vpn') }}</span>
             <span class="card-line">{{ t('home.vpnDesktop') }}</span>
@@ -213,7 +212,7 @@ const health = computed(() => {
 
       <button type="button" class="home-card" @click="premium ? selectTab('alerts') : openPage('premiumUpgrade')">
         <div class="card-row">
-          <span class="tile"><ShieldAlert v-if="premium" :size="18" /><Lock v-else :size="18" /></span>
+          <span class="tile" aria-hidden="true"><ShieldAlert v-if="premium" :size="18" /><Lock v-else :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t(premium ? 'nav.breachedPasswords' : 'breached.lockedTitle') }}</span>
             <span class="card-line">{{ t(premium ? 'home.breachedBody' : 'breached.lockedBody') }}</span>
@@ -226,10 +225,11 @@ const health = computed(() => {
 </template>
 
 <style scoped>
+/* The wash crossfades over 0.4s ease-in-out, as iOS (proposed token: `motion.wash`). */
 .home {
   height: 100%;
   overflow-y: auto;
-  transition: background 400ms ease-in-out;
+  transition: background 400ms var(--ease-ease-in-out);
 }
 
 .home.warm {
@@ -243,10 +243,10 @@ const health = computed(() => {
 .column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
   max-width: 720px;
   margin-inline: auto;
-  padding: 16px var(--screen-padding) 40px;
+  padding: 16px var(--space-screen-padding) 40px;
 }
 
 .greeting-row {
@@ -255,12 +255,14 @@ const health = computed(() => {
   justify-content: space-between;
 }
 
+/* iOS: 44pt card-filled square, radius 14, 18 medium bell; the badge 11 semibold, 4 in. */
 .bell {
   position: relative;
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
+  padding: 0;
   border: 0;
   border-radius: 14px;
   background: var(--card-background);
@@ -272,33 +274,34 @@ const health = computed(() => {
   position: absolute;
   top: 4px;
   inset-inline-end: 4px;
-  min-width: 16px;
   padding: 0 4px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 11px;
+  font-size: var(--type-field-error-size);
   font-weight: 600;
-  line-height: 16px;
   text-align: center;
 }
 
 .greeting {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-height: 44px;
-  justify-content: center;
+  gap: var(--space-row-text-gap);
+  min-width: 0;
 }
 
 .hello {
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .name {
   font-size: 22px;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hero {
@@ -337,9 +340,9 @@ const health = computed(() => {
 }
 
 .spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  width: 20px;
+  height: 20px;
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 900ms linear infinite;
@@ -359,17 +362,17 @@ const health = computed(() => {
 
 .hero-body {
   margin: 0;
-  max-width: 420px;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .hero-action {
   width: 100%;
-  max-width: 360px;
   padding-top: 10px;
 }
 
+/* iOS `HomeCard`: card fill, radius 20, padding 17, 8 between its lines, no stroke. */
 .home-card {
   display: flex;
   flex-direction: column;
@@ -378,19 +381,21 @@ const health = computed(() => {
   width: 100%;
   padding: 17px;
   border: 0;
-  border-radius: var(--corner-radius);
+  border-radius: var(--radius-card);
   background: var(--card-background);
+  color: var(--text-primary);
   text-align: start;
   cursor: pointer;
-  transition: transform var(--motion-press) ease-out;
-}
-
-.home-card:active:not(.static) {
-  transform: scale(0.99);
 }
 
 .home-card.static {
   cursor: default;
+}
+
+/* The autofill prompt (iOS `HomeAutofillPromptCard`): 12 apart, with a 1px stroke. */
+.home-card.prompt {
+  gap: 12px;
+  border: var(--size-stroke) solid var(--stroke);
 }
 
 .card-row {
@@ -399,10 +404,16 @@ const health = computed(() => {
   gap: 12px;
 }
 
+.card-row.top {
+  align-items: flex-start;
+}
+
 .card-text {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
+  min-width: 0;
 }
 
 .card-title {
@@ -411,7 +422,8 @@ const health = computed(() => {
 }
 
 .card-line {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
   color: var(--text-secondary);
 }
 
@@ -421,27 +433,35 @@ const health = computed(() => {
 
 .card-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-inline-start: 52px;
+  align-items: center;
+  gap: 12px;
 }
 
-.card-action {
-  padding: 8px 14px;
+.prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.prompt-actions .qasa-button:not(.inline) {
+  flex: 1;
+}
+
+.pill-button,
+.text-button {
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  background: var(--card-muted);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
+  background: transparent;
   cursor: pointer;
 }
 
-.card-action.primary {
-  background: var(--accent);
-  color: var(--on-accent);
+.text-button {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
 }
 
+/* iOS `HomeIconTile`: 40pt, radius 12, cardMuted, 18 medium accent glyph. */
 .tile {
   display: grid;
   place-items: center;
@@ -453,7 +473,9 @@ const health = computed(() => {
   color: var(--accent);
 }
 
+/* iOS `HomePill`: capsule, 13 medium, padding 12 × 4. */
 .pill {
+  display: inline-block;
   align-self: flex-start;
   padding: 4px 12px;
   border-radius: 999px;
@@ -485,7 +507,7 @@ const health = computed(() => {
   background: var(--stroke);
 }
 
-/* The browser prompt carries the Qasa mark instead of an icon tile. */
+/* The Qasa mark, 24, in a 44pt accent circle. */
 .prompt .mark {
   display: grid;
   place-items: center;

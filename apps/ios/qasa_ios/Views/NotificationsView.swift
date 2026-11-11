@@ -111,16 +111,11 @@ struct NotificationsView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
-        .navigationTitle(isEmbedded ? "" : L10n.tr("notifications.title", locale: locale))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if !isEmbedded {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("common.done", locale: locale)) { dismiss() }
-                }
-                ToolbarItem(placement: .topBarTrailing) { markAllButton }
-            }
-        }
+        .modifier(NotificationsSheetHeader(
+            isEmbedded: isEmbedded,
+            title: L10n.tr("notifications.title", locale: locale),
+            markAll: AnyView(markAllButton)
+        ))
         .task {
             await service.fetchList()
             if let deepLinkId {
@@ -151,16 +146,11 @@ struct NotificationsView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Theme.background.ignoresSafeArea())
-                .navigationTitle(L10n.tr("notifications.detailTitle", locale: locale))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(L10n.tr("common.close", locale: locale)) { selected = nil }
-                    }
-                }
+                .sheetHeader(L10n.tr("notifications.detailTitle", locale: locale))
             }
             .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
+            .qasaSheetPresentation()
+            .appLocalization()
         }
         .tint(Theme.accent)
     }
@@ -243,4 +233,19 @@ private extension ISO8601DateFormatter {
         f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return f
     }()
+}
+
+/// As a sheet (not embedded in the shell): the shared sheet header, Mark all read trailing.
+private struct NotificationsSheetHeader: ViewModifier {
+    let isEmbedded: Bool
+    let title: String
+    let markAll: AnyView
+
+    func body(content: Content) -> some View {
+        if isEmbedded {
+            content.toolbar(.hidden, for: .navigationBar)
+        } else {
+            content.sheetHeader(title) { markAll }
+        }
+    }
 }

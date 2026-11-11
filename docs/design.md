@@ -1,5 +1,11 @@
 # Qasa — Design System & Platform Parity Spec
 
+> **Superseded for values (2026-11-11).** Sizes, radii, gaps, type, motion and colors now live
+> in [`design/tokens.json`](../design/tokens.json), generated into every app by
+> `design/generate.py`; the rules are in [`design/README.md`](../design/README.md). The color,
+> type-scale and radius tables below predate the redesign and are stale. The behaviour notes
+> are still useful history.
+
 Normative reference for the Qasa visual design system **and** the behavioural contract that
 `apps/android/` must satisfy. Companion to [`ARCHITECTURE.md`](../ARCHITECTURE.md) (what exists) and
 `application-flow.md` (what happens).

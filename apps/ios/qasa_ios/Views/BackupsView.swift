@@ -47,13 +47,7 @@ struct BackupsView: View {
                 }
                 .disabled(service.isBackingUp)
             }
-            .navigationTitle(L10n.tr("backup.title", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("common.close", locale: locale)) { dismiss() }
-                }
-            }
+            .sheetHeader(L10n.tr("backup.title", locale: locale))
         }
         .fileImporter(isPresented: $showFolderPicker, allowedContentTypes: [.folder], allowsMultipleSelection: false) { result in
             let thenBackUp = backUpAfterPick

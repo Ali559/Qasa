@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -12,7 +14,6 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import alibarznji.qasa.R
 import alibarznji.qasa.prefs.AppLanguage
-import kotlin.math.roundToInt
 
 /**
  * IBM Plex Sans Arabic (SIL OFL — `licenses/IBMPlexSansArabic-OFL.txt`) for every
@@ -65,15 +66,91 @@ class QasaText internal constructor(
         weight: FontWeight = FontWeight.Normal,
         tracking: androidx.compose.ui.unit.TextUnit = 0.sp,
         monospaced: Boolean = false,
-        lineHeight: Int = (size * LINE_HEIGHT_RATIO).roundToInt(),
     ): TextStyle = TextStyle(
         fontFamily = if (monospaced) mono else body,
         fontWeight = weight,
         fontSize = size.sp,
-        lineHeight = lineHeight.sp,
+        // The font's own line height (ascent + descent = 1.5 × size), which is what iOS
+        // lays text out with: centered, untrimmed, no extra font padding.
+        lineHeight = (size * QasaTokens.Typography.LINE_HEIGHT_MULTIPLE).sp,
+        lineHeightStyle = QasaLineHeightStyle,
+        platformStyle = QasaPlatformTextStyle,
         // Letter spacing breaks cursive joining in Arabic script, so ckb/ar gets zero.
         letterSpacing = if (arabicScript) 0.sp else tracking,
     )
+
+    /** A named style from `design/tokens.json` `type` ([QasaTokens.Typography]). */
+    private fun token(t: QasaTokenText): TextStyle = TextStyle(
+        fontFamily = body,
+        fontWeight = t.weight,
+        fontSize = t.size,
+        lineHeight = t.lineHeight,
+        lineHeightStyle = QasaLineHeightStyle,
+        platformStyle = QasaPlatformTextStyle,
+        letterSpacing = 0.sp,
+    )
+
+    // ---- Named styles (`design/tokens.json` `type`, the iOS values) -------
+
+    /** 34 bold — `type.largeTitle`. */
+    val tokenLargeTitle get() = token(QasaTokens.Typography.largeTitle)
+
+    /** 20 bold — `type.pageTitle`: the [AppMenuHeader] title. */
+    val headerTitle get() = token(QasaTokens.Typography.pageTitle)
+
+    /** 17 semibold — `type.sheetTitle`: every bottom sheet's centered title. */
+    val sheetTitle get() = token(QasaTokens.Typography.sheetTitle)
+
+    /** 17 semibold — `type.navTitle`. */
+    val navTitle get() = token(QasaTokens.Typography.navTitle)
+
+    /** 17 regular — `type.barButton`. */
+    val barButton get() = token(QasaTokens.Typography.barButton)
+
+    /** 19 semibold — `type.dialogTitle`: confirmation sheet title. */
+    val dialogTitle get() = token(QasaTokens.Typography.dialogTitle)
+
+    /** 15 regular — `type.dialogMessage`: confirmation sheet message. */
+    val dialogMessage get() = token(QasaTokens.Typography.dialogMessage)
+
+    /** 16 regular — `type.field`: text typed into fields and notes, and their placeholders. */
+    val field get() = token(QasaTokens.Typography.field)
+
+    /** 12 semibold — `type.fieldLabel`. */
+    val fieldLabel get() = token(QasaTokens.Typography.fieldLabel)
+
+    /** 11 regular — `type.fieldError`. */
+    val fieldError get() = token(QasaTokens.Typography.fieldError)
+
+    /** 16 semibold — `type.button`: every [PrimaryButton] / [SecondaryButton] label. */
+    val button get() = token(QasaTokens.Typography.button)
+
+    /** 15 medium — `type.rowTitle`: settings / navigation row title. */
+    val settingsRowTitle get() = token(QasaTokens.Typography.rowTitle)
+
+    /** 12 regular — `type.rowSubtitle`. */
+    val rowSubtitle get() = token(QasaTokens.Typography.rowSubtitle)
+
+    /** 13 regular — `type.rowValue`: trailing row value. */
+    val rowValue get() = token(QasaTokens.Typography.rowValue)
+
+    /** 12 semibold — `type.sectionLabel`: `SectionLabel`, every language. */
+    val tokenSectionLabel get() = token(QasaTokens.Typography.sectionLabel)
+
+    /** 13 medium — `type.pill`. */
+    val pill get() = token(QasaTokens.Typography.pill)
+
+    /** 14 semibold — `type.toast`. */
+    val toast get() = token(QasaTokens.Typography.toast)
+
+    /** 10 medium — `type.tabLabel`. */
+    val tabLabel get() = token(QasaTokens.Typography.tabLabel)
+
+    /** 15 regular — `type.body`. */
+    val body15 get() = token(QasaTokens.Typography.body)
+
+    /** 12 regular — `type.caption`. */
+    val caption get() = token(QasaTokens.Typography.caption)
 
     /**
      * Labels keep the case they were written in. The redesign dropped the all-caps
@@ -247,16 +324,6 @@ class QasaText internal constructor(
     val glyphLarge get() = style(36, FontWeight.Medium)
 
     companion object {
-        /**
-         * iOS leaves line height to the system, which lands around 1.3x. Setting it
-         * explicitly keeps the vertical rhythm instead of inheriting the M3 default
-         * of 24sp for every size (`docs/design.md` §3.2).
-         */
-        const val LINE_HEIGHT_RATIO = 1.36f
-
-        /** The legal body is the one line-height override in the app (§3.3). */
-        const val LEGAL_LINE_HEIGHT = 4
-
         fun forLanguage(language: AppLanguage): QasaText {
             val arabicScript = language == AppLanguage.CKB || language == AppLanguage.AR
             // Latin monospace has no Arabic glyphs worth showing, so ckb/ar keep the body face.
@@ -265,6 +332,15 @@ class QasaText internal constructor(
         }
     }
 }
+
+/** Text centered in its 1.5× line box, nothing trimmed — iOS's own placement. */
+private val QasaLineHeightStyle = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None,
+)
+
+/** No Android font padding on top of the line height, so metrics match iOS. */
+private val QasaPlatformTextStyle = PlatformTextStyle(includeFontPadding = false)
 
 val LocalQasaText = staticCompositionLocalOf { QasaText.forLanguage(AppLanguage.EN) }
 

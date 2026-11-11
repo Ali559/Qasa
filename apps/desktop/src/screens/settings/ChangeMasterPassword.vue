@@ -1,17 +1,18 @@
 <script setup lang="ts">
 // iOS `ChangeMasterPasswordView`: current, new and confirm fields behind one shared eye
-// toggle, an inline error or success line, and the update button. The Rust core
+// toggle, an inline 13pt error or success line, and the update button in the sheet's
+// `BottomActionBar`. The Rust core
 // re-encrypts and re-indexes every item; on success the sheet closes after 700 ms.
 import { Eye, EyeOff, Lock } from 'lucide-vue-next'
 import { computed, nextTick, ref, watch } from 'vue'
 
+import BottomActionBar from '@/components/BottomActionBar.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import Sheet from '@/components/Sheet.vue'
 import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { isCommandError } from '@/vault/types'
-import SheetHeader from './SheetHeader.vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -38,7 +39,7 @@ watch(
     passwordVisible.value = false
     errorMessage.value = null
     didSucceed.value = false
-    // Sheet focuses its first control (the Cancel button); start in the first field instead.
+    // Start in the first field.
     nextTick(() => requestAnimationFrame(() => form.value?.querySelector('input')?.focus()))
   },
   { immediate: true },
@@ -90,53 +91,56 @@ function close() {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('settings.changeMasterPassword')" :width="520" placement="bottom" @close="close">
-    <SheetHeader :title="t('settings.changeMasterPassword')" :cancel-label="t('settings.cancel')" @cancel="close" />
-    <form ref="form" class="body" @submit.prevent="save">
-      <p class="subtitle">{{ t('settings.changeMasterSubtitle') }}</p>
+  <Sheet :open="open" :label="t('settings.changeMasterPassword')" :title="t('settings.changeMasterPassword')" :width="520" placement="bottom" @close="close">
+    <form ref="form" class="form" @submit.prevent="save">
+      <div class="body">
+        <p class="subtitle">{{ t('settings.changeMasterSubtitle') }}</p>
 
-      <div v-for="field in fields" :key="field.key" class="field-group">
-        <SectionLabel :text="field.title" />
-        <TextField
-          v-model="field.model.value"
-          :icon="Lock"
-          :placeholder="field.title"
-          :secure="!passwordVisible"
-        >
-          <template #trailing>
-            <button
-              type="button"
-              class="reveal"
-              :aria-label="passwordVisible ? t('a11y.hidePassword') : t('a11y.showPassword')"
-              :aria-pressed="passwordVisible"
-              @click.prevent="passwordVisible = !passwordVisible"
-            >
-              <EyeOff v-if="passwordVisible" :size="18" aria-hidden="true" />
-              <Eye v-else :size="18" aria-hidden="true" />
-            </button>
-          </template>
-        </TextField>
+        <div v-for="field in fields" :key="field.key" class="field-group">
+          <SectionLabel :text="field.title" />
+          <TextField v-model="field.model.value" :icon="Lock" :placeholder="field.title" :secure="!passwordVisible">
+            <template #trailing>
+              <button
+                type="button"
+                class="reveal"
+                :aria-label="passwordVisible ? t('a11y.hidePassword') : t('a11y.showPassword')"
+                :aria-pressed="passwordVisible"
+                @click.prevent="passwordVisible = !passwordVisible"
+              >
+                <EyeOff v-if="passwordVisible" :stroke-width="2.5" aria-hidden="true" />
+                <Eye v-else :stroke-width="2.5" aria-hidden="true" />
+              </button>
+            </template>
+          </TextField>
+        </div>
+
+        <p v-if="errorMessage" class="message error" role="alert">{{ errorMessage }}</p>
+        <p v-if="didSucceed" class="message success" role="status">{{ t('settings.masterPasswordChanged') }}</p>
       </div>
 
-      <p v-if="errorMessage" class="message error" role="alert">{{ errorMessage }}</p>
-      <p v-if="didSucceed" class="message success" role="status">{{ t('settings.masterPasswordChanged') }}</p>
-
-      <button type="submit" class="save" :disabled="!canSave">
-        <span v-if="isSaving" class="spinner" aria-hidden="true" />
-        <span>{{ t('settings.saveMasterPassword') }}</span>
-      </button>
+      <BottomActionBar>
+        <button type="submit" class="qasa-button" :disabled="!canSave">
+          <span v-if="isSaving" class="spinner" aria-hidden="true" />
+          <span>{{ t('settings.saveMasterPassword') }}</span>
+        </button>
+      </BottomActionBar>
     </form>
   </Sheet>
 </template>
 
 <style scoped>
+.form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .body {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: var(--screen-padding);
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
   overflow-y: auto;
-  background: var(--background);
 }
 
 .subtitle {
@@ -148,28 +152,30 @@ function close() {
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
+/* iOS `FieldIconButton`: 32 square, 16 semibold glyph, secondary. */
 .reveal {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
-.reveal:hover {
-  background: var(--card-muted);
+.reveal svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 
 .message {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
 }
 
 .error {
@@ -180,46 +186,19 @@ function close() {
   color: var(--success);
 }
 
-.save {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 0;
-  border-radius: var(--button-radius);
-  background: var(--accent);
-  color: var(--on-accent-chip);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.save:disabled {
-  background: color-mix(in srgb, var(--accent) 35%, transparent);
-  cursor: default;
-}
-
 .spinner {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
   border: 2px solid currentColor;
   border-inline-end-color: transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 900ms linear infinite;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 2.4s;
   }
 }
 </style>

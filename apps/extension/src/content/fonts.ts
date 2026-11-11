@@ -2,7 +2,8 @@
 // apps. The page can't load them from the extension (that would need
 // web_accessible_resources, which lets any site detect Qasa by probing URLs), so the
 // service worker reads the bundled files and hands over the bytes. Loaded once per
-// document, the first time a menu opens. Until they arrive the menu uses system fonts.
+// document, the first time a menu opens; the menu stays hidden until they arrive (at most
+// layout.ts `FONT_WAIT_MS`), so it never paints in a system face.
 
 import { FONT_WEIGHTS, type FontWeight } from '@ext/shared/fonts'
 

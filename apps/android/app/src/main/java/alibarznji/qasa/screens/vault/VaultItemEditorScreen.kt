@@ -10,9 +10,9 @@ import alibarznji.qasa.screens.vault.editor.EditorValidation
 import alibarznji.qasa.screens.vault.editor.LocalEditorValidation
 import alibarznji.qasa.screens.vault.editor.typeLabelRes
 import alibarznji.qasa.theme.PrimaryButton
-import alibarznji.qasa.theme.QasaConfirmDialog
+import alibarznji.qasa.theme.QasaConfirmSheet
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.LocalQasaToast
 import alibarznji.qasa.theme.StickyBottomBar
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +29,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.text.style.TextAlign
 import uniffi.qasa_ffi.FfiField
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -132,36 +136,38 @@ fun VaultItemEditorSheetContent(
     )
 
     Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
-        SheetChromeHeader(
-            title = stringResource(
+        // iOS `VaultFormChrome.sheetHeader(title)`: no Cancel; drag, scrim or back closes.
+        QasaSheetHeader(
+            stringResource(
                 if (isEditing) R.string.vault_editfmt else R.string.vault_newfmt,
                 stringResource(initial.typeLabelRes()),
             ),
-            onDismiss = onDone,
-            dismissLabel = stringResource(R.string.common_cancel),
         )
         Column(
             Modifier
                 .weight(1f, fill = false)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
+                // iOS `.padding(Theme.screenPadding)`; every field block already ends with
+                // the 16dp form gap, so the bottom pad makes up the rest of the 20.
                 .padding(horizontal = QasaDimens.screenPadding)
-                .padding(top = QasaDimens.contentGap, bottom = QasaDimens.gap),
+                .padding(top = QasaDimens.screenPadding, bottom = QasaDimens.screenPadding - QasaDimens.formGap),
         ) {
+            if (saveAttempted && issues.isNotEmpty()) {
+                // iOS: "Fix the highlighted fields" heads the form, 13 semibold danger.
+                Text(
+                    stringResource(R.string.validation_fixtosave),
+                    color = qasaColors.danger,
+                    style = qasaText.bodySmallSemibold,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(QasaDimens.formGap))
+            }
             CompositionLocalProvider(LocalEditorValidation provides validation) {
                 EditorFields(payload = payload, env = env, onChange = { payload = it })
             }
         }
-        StickyBottomBar { Column(Modifier.fillMaxWidth()) {
-            if (saveAttempted && issues.isNotEmpty()) {
-                Text(
-                    stringResource(R.string.validation_fixtosave),
-                    color = qasaColors.danger,
-                    style = qasaText.errorDetail,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = QasaDimens.contentGap),
-                )
-            }
+        StickyBottomBar {
             PrimaryButton(
                 title = stringResource(if (isEditing) R.string.common_update else R.string.common_save),
                 // Always tappable: a Save with issues shows every field's message (a required
@@ -190,7 +196,7 @@ fun VaultItemEditorSheetContent(
                     }
                 },
             )
-        } }
+        }
     }
 
     if (showGenerator) {
@@ -205,7 +211,7 @@ fun VaultItemEditorSheetContent(
 
     saveError?.let { message ->
         // iOS `.alert("vault.couldNotSave")` with a single OK.
-        QasaConfirmDialog(
+        QasaConfirmSheet(
             title = stringResource(R.string.vault_couldnotsave),
             message = message,
             confirmLabel = stringResource(R.string.common_ok),
@@ -213,6 +219,7 @@ fun VaultItemEditorSheetContent(
             onDismiss = { saveError = null },
             dismissLabel = null,
             destructive = false,
+            icon = Icons.Outlined.WarningAmber,
         )
     }
 }

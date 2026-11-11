@@ -21,7 +21,7 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
   <AuthFrame>
     <div class="content">
       <button v-if="!done" type="button" class="back" @click="emit('back')">
-        <ChevronLeft class="mirror-rtl" :size="18" />{{ t('common.back') }}
+        <ChevronLeft class="mirror-rtl" :size="17" :stroke-width="2.75" />{{ t('common.back') }}
       </button>
 
       <template v-if="!done">
@@ -47,7 +47,7 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
 .content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-form-gap);
 }
 
 .back {
@@ -59,8 +59,8 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-button-weight);
   cursor: pointer;
 }
 

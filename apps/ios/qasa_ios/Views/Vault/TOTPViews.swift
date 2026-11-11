@@ -195,13 +195,7 @@ struct TOTPScannerSheet: View {
             }
             .padding(Theme.screenPadding)
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(L10n.tr("totp.scanTitle"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("common.cancel")) { dismiss() }
-                }
-            }
+            .sheetHeader(L10n.tr("totp.scanTitle"))
         }
         .task { access = await Self.requestAccess() }
     }

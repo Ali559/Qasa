@@ -82,14 +82,18 @@ async function decideSave(accept: boolean) {
 </script>
 
 <template>
+  <!-- Each prompt is iOS `ConfirmSheetContent`: a centered 19 semibold title and 15 message
+       10 apart, then 20 below the confirm button over the secondary one, 10 apart. -->
   <Sheet :open="pair !== null" :label="pair ? t('bridge.pairTitle', pair.client) : ''" :width="400" placement="bottom" @close="decidePair(false)">
     <div v-if="pair" class="prompt">
-      <h2>{{ t('bridge.pairTitle', pair.client) }}</h2>
-      <output class="code" dir="ltr">{{ pair.code.replace(/(\d{3})(\d{3})/, '$1 $2') }}</output>
-      <p>{{ t('bridge.pairBody') }}</p>
+      <div class="text">
+        <h2>{{ t('bridge.pairTitle', pair.client) }}</h2>
+        <output class="code" dir="ltr">{{ pair.code.replace(/(\d{3})(\d{3})/, '$1 $2') }}</output>
+        <p>{{ t('bridge.pairBody') }}</p>
+      </div>
       <div class="actions">
-        <button type="button" class="secondary" @click="decidePair(false)">{{ t('bridge.deny') }}</button>
-        <button type="button" class="primary" @click="decidePair(true)">{{ t('bridge.allow') }}</button>
+        <button type="button" class="qasa-button" @click="decidePair(true)"><span>{{ t('bridge.allow') }}</span></button>
+        <button type="button" class="qasa-button secondary" @click="decidePair(false)"><span>{{ t('bridge.deny') }}</span></button>
       </div>
     </div>
   </Sheet>
@@ -98,33 +102,36 @@ async function decideSave(accept: boolean) {
     :open="pair === null && saves.length > 0"
     :label="saves[0] ? t(saves[0].kind === 'save' ? 'bridge.saveTitle' : 'bridge.updateTitle') : ''"
     :width="420"
+    placement="bottom"
     @close="decideSave(false)"
   >
     <div v-if="saves[0]" class="prompt">
-      <h2>{{ t(saves[0].kind === 'save' ? 'bridge.saveTitle' : 'bridge.updateTitle') }}</h2>
-      <p>{{ t('bridge.saveBody', saves[0].client) }}</p>
+      <div class="text">
+        <h2>{{ t(saves[0].kind === 'save' ? 'bridge.saveTitle' : 'bridge.updateTitle') }}</h2>
+        <p>{{ t('bridge.saveBody', saves[0].client) }}</p>
+      </div>
       <dl class="fields">
         <div v-if="saves[0].itemTitle" class="field">
-          <KeyRound :size="18" aria-hidden="true" />
+          <KeyRound aria-hidden="true" />
           <dt>{{ t('vault.type.login') }}</dt>
           <dd>{{ saves[0].itemTitle }}</dd>
         </div>
         <div class="field">
-          <Globe :size="18" aria-hidden="true" />
+          <Globe aria-hidden="true" />
           <dt>{{ t('bridge.website') }}</dt>
           <dd dir="ltr">{{ saves[0].website }}</dd>
         </div>
         <div v-if="saves[0].username" class="field">
-          <User :size="18" aria-hidden="true" />
+          <User aria-hidden="true" />
           <dt>{{ t('bridge.username') }}</dt>
           <dd dir="ltr">{{ saves[0].username }}</dd>
         </div>
       </dl>
       <div class="actions">
-        <button type="button" class="secondary" :disabled="busy" @click="decideSave(false)">{{ t('bridge.notNow') }}</button>
-        <button type="button" class="primary" :disabled="busy" @click="decideSave(true)">
-          {{ t(saves[0].kind === 'save' ? 'bridge.save' : 'bridge.update') }}
+        <button type="button" class="qasa-button" :disabled="busy" @click="decideSave(true)">
+          <span>{{ t(saves[0].kind === 'save' ? 'bridge.save' : 'bridge.update') }}</span>
         </button>
+        <button type="button" class="qasa-button secondary" :disabled="busy" @click="decideSave(false)"><span>{{ t('bridge.notNow') }}</span></button>
       </div>
     </div>
   </Sheet>
@@ -133,11 +140,14 @@ async function decideSave(accept: boolean) {
     :open="pair === null && confirm !== null"
     :label="confirm ? t('bridge.confirmTitle', confirm.itemTitle) : ''"
     :width="400"
+    placement="bottom"
     @close="decideConfirm(false)"
   >
     <div v-if="confirm" class="prompt">
-      <h2>{{ t('bridge.confirmTitle', confirm.itemTitle) }}</h2>
-      <p>{{ t('bridge.confirmBody', confirm.client) }}</p>
+      <div class="text">
+        <h2>{{ t('bridge.confirmTitle', confirm.itemTitle) }}</h2>
+        <p>{{ t('bridge.confirmBody', confirm.client) }}</p>
+      </div>
       <TextField
         v-model="confirmPassword"
         :icon="Lock"
@@ -151,42 +161,52 @@ async function decideSave(accept: boolean) {
       />
       <p v-if="confirmError" class="error" role="alert">{{ confirmError }}</p>
       <div class="actions">
-        <button type="button" class="secondary" :disabled="busy" @click="decideConfirm(false)">{{ t('common.cancel') }}</button>
-        <button type="button" class="primary" :disabled="busy || !confirmPassword" @click="decideConfirm(true)">
-          {{ t('bridge.confirm') }}
+        <button type="button" class="qasa-button" :disabled="busy || !confirmPassword" @click="decideConfirm(true)">
+          <span>{{ t('bridge.confirm') }}</span>
         </button>
+        <button type="button" class="qasa-button secondary" :disabled="busy" @click="decideConfirm(false)"><span>{{ t('common.cancel') }}</span></button>
       </div>
     </div>
   </Sheet>
 </template>
 
 <style scoped>
-.error {
-  color: var(--danger);
-}
-
 .prompt {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 24px;
+  gap: var(--space-sheet-actions-gap);
+  padding: var(--space-sheet-content-top) var(--space-screen-padding) var(--space-sheet-content-bottom);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sheet-text-gap);
   text-align: center;
 }
 
 h2 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--type-dialog-title-size);
+  font-weight: var(--type-dialog-title-weight);
+  color: var(--text-primary);
 }
 
 p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--type-dialog-message-size);
+  font-weight: var(--type-dialog-message-weight);
   color: var(--text-secondary);
 }
 
+p.error {
+  margin-top: calc(var(--space-sheet-text-gap) - var(--space-sheet-actions-gap));
+  font-size: var(--type-row-value-size);
+  color: var(--danger);
+}
+
+/* The pairing code: as iOS `LANSyncView`'s code (`kasoMono(44, .bold)`), accent. */
 .code {
-  margin: 6px 0;
   font-family: var(--font-mono);
   font-size: 36px;
   font-weight: 700;
@@ -197,35 +217,41 @@ p {
 .fields {
   display: flex;
   flex-direction: column;
-  margin: 8px 0 0;
-  border: 1px solid var(--stroke);
-  border-radius: 14px;
+  margin: 0;
+  padding: 0 var(--space-section-inset-horizontal);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
-  text-align: start;
 }
 
 .field {
   display: grid;
-  grid-template-columns: 18px auto 1fr;
+  grid-template-columns: var(--size-field-icon-glyph) auto 1fr;
   gap: 10px;
   align-items: center;
-  padding: 12px 14px;
+  min-height: 44px;
+  padding: var(--space-row-vertical) 0;
   color: var(--text-secondary);
 }
 
+.field svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
+}
+
 .field + .field {
-  border-top: 1px solid var(--stroke);
+  border-top: var(--size-stroke) solid var(--stroke);
 }
 
 dt {
-  font-size: 14px;
+  font-size: var(--type-row-value-size);
 }
 
 dd {
   overflow: hidden;
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
   color: var(--text-primary);
   text-align: end;
   text-overflow: ellipsis;
@@ -234,34 +260,7 @@ dd {
 
 .actions {
   display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.actions button {
-  flex: 1;
-  height: var(--button-height);
-  padding: 0 16px;
-  border-radius: var(--button-radius);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.actions button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.secondary {
-  border: 1px solid var(--stroke);
-  background: var(--card-background);
-  color: var(--text-primary);
-}
-
-.primary {
-  border: 0;
-  background: var(--accent);
-  color: var(--on-accent);
+  flex-direction: column;
+  gap: var(--space-sheet-button-gap);
 }
 </style>

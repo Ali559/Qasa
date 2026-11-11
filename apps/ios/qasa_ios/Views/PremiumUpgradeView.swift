@@ -127,28 +127,9 @@ struct PremiumUpgradeView: View {
         }
     }
 
+    /// Shown as a sheet: the shared sheet header (closes by dragging down).
     private func sheetChrome(title: String) -> some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                    .frame(width: 32, height: 32)
-            }
-            .accessibilityLabel(L10n.tr("common.cancel", locale: locale))
-            Spacer()
-            Text(title)
-                .font(.qasa(20, weight: .bold))
-                .foregroundColor(Theme.textOnChrome)
-            Spacer()
-            Color.clear.frame(width: 32, height: 32)
-        }
-        .padding(.horizontal, 16)
-        .frame(height: 64)
-        .background(Theme.chrome)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.strokeChrome).frame(height: 1)
-        }
+        SheetHeader(title: title)
     }
 
     /// Paged horizontal scroll rather than a `.page` TabView: inside this screen's vertical
@@ -396,7 +377,7 @@ struct PremiumUpgradeView: View {
                     ?? L10n.tr("premium.paymentFailed", locale: locale)
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 }

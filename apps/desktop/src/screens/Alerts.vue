@@ -137,12 +137,14 @@ function openItem(id: string) {
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .muted {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
@@ -158,6 +160,20 @@ function openItem(id: string) {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
+}
+
+/* iOS `PressableStyle`. */
+.again:active:not(:disabled) {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
+}
+
+.again:disabled {
+  opacity: var(--motion-disabled-opacity);
+  cursor: default;
 }
 
 .checking {
@@ -166,6 +182,7 @@ function openItem(id: string) {
   gap: 12px;
   padding-block: 8px;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
@@ -198,7 +215,7 @@ function openItem(id: string) {
 
 .seen {
   padding-inline-start: 64px;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);
 }

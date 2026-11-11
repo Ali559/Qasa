@@ -1,9 +1,11 @@
 <script setup lang="ts">
-// iOS `FormTextField`: section label over a `--field-height` card field (base.css; notes
-// grow), with the field-rule message (if any) underneath.
+// iOS `FormTextField`: a `SectionLabel` 8 above a `QasaFieldChrome` field (`.qasa-field`,
+// base.css), or for notes a `QasaNotesChrome` box that starts at 112 and grows
+// (`.qasa-notes`), with the field-rule message (if any) underneath.
 import { ref } from 'vue'
 
 import FieldError from './FieldError.vue'
+import { vAutoGrow } from '@/components/autoGrow'
 
 defineProps<{
   label: string
@@ -25,27 +27,27 @@ const focused = ref(false)
 <template>
   <div class="form-field">
     <label :for="id" class="label">{{ label }}</label>
-    <div class="box" :class="{ focused, invalid: !!error, multiline, 'has-trailing': !multiline && !!$slots.trailing }">
-      <textarea
-        v-if="multiline"
-        :id="id"
-        v-model="model"
-        rows="3"
-        :placeholder="placeholder"
-        :maxlength="maxlength"
-        :aria-invalid="!!error"
-        :aria-describedby="error ? errorId : undefined"
-        @focus="focused = true"
-        @blur="focused = false"
-      />
+    <textarea
+      v-if="multiline"
+      :id="id"
+      v-model="model"
+      v-auto-grow
+      class="qasa-notes notes"
+      :class="{ invalid: !!error }"
+      rows="1"
+      :placeholder="placeholder ?? label"
+      :maxlength="maxlength"
+      :aria-invalid="!!error"
+      :aria-describedby="error ? errorId : undefined"
+    />
+    <div v-else class="qasa-field box" :class="{ focused, invalid: !!error, 'has-trailing': !!$slots.trailing }">
       <input
-        v-else
         :id="id"
         v-model="model"
         :type="secure ? 'password' : 'text'"
         :inputmode="inputmode"
         :class="{ mono }"
-        :placeholder="placeholder"
+        :placeholder="placeholder ?? label"
         :maxlength="maxlength"
         :aria-invalid="!!error"
         :aria-describedby="error ? errorId : undefined"
@@ -65,58 +67,26 @@ const focused = ref(false)
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
+/* iOS `FormFieldLabel` = `SectionLabel`: 12 semibold, secondary. */
 .label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
   color: var(--text-secondary);
 }
 
-:root:lang(ar) .label,
-:root:lang(ckb) .label {
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: var(--field-height);
-  padding-block: 0;
-  padding-inline: var(--field-padding-inline);
-  border: 1px solid var(--stroke);
-  border-radius: var(--field-radius);
-  background: var(--card-background);
-  transition: border-color var(--motion-fast);
+  gap: var(--space-button-icon-gap);
 }
 
+/* Trailing `FieldIconButton`s (32 wide) sit 8 from the stroke. */
 .box.has-trailing {
-  padding-inline-end: 4px;
+  padding-inline-end: calc(var(--space-field-horizontal) - (var(--size-field-icon-button) - var(--size-field-icon-glyph)) / 2);
 }
 
-.box.multiline {
-  height: auto;
-  align-items: stretch;
-}
-
-.box.focused {
-  border-color: var(--accent);
-}
-
-.box.invalid {
-  border-color: var(--danger);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: var(--text-tertiary);
-}
-
-input,
-textarea {
+input {
   flex: 1;
   min-width: 0;
   height: 100%;
@@ -125,19 +95,21 @@ textarea {
   border: 0;
   outline: none;
   background: transparent;
-  color: var(--text-primary);
+  color: inherit;
   font: inherit;
-  font-size: var(--field-font-size);
   caret-color: var(--accent);
   user-select: text;
 }
 
-textarea {
-  height: auto;
-  padding-block: 10px;
-  resize: vertical;
-  min-height: 72px;
-  line-height: 1.4;
+input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* iOS adds 6 inside the notes chrome's 8 (`FormTextField`), and stops growing at 12 lines. */
+.notes {
+  padding-block: calc(var(--space-notes-vertical) + 6px);
+  max-height: calc(12lh + 2 * (var(--space-notes-vertical) + 6px) + 2 * var(--size-stroke));
+  user-select: text;
 }
 
 .mono {

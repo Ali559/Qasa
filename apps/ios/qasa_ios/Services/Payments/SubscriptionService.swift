@@ -5,7 +5,7 @@ enum SubscriptionServiceError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notFound: return "No subscription found."
+        case .notFound: return L10n.tr("sub.notFound")
         }
     }
 }

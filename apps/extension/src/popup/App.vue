@@ -143,7 +143,7 @@ onBeforeUnmount(() => clearInterval(poll))
     <BrandHeader>
       <template #trailing>
         <button v-if="state === 'unlocked'" type="button" class="header-button" :title="t('ext.openQasa')" :aria-label="t('ext.openQasa')" @click="openQasa">
-          <AppWindow :size="18" />
+          <AppWindow :stroke-width="2.5" aria-hidden="true" />
         </button>
       </template>
     </BrandHeader>
@@ -154,8 +154,8 @@ onBeforeUnmount(() => clearInterval(poll))
       <StateCard v-else-if="state === 'appNotRunning'" :icon="MonitorX" :title="t('ext.appNotRunningTitle')" :body="t('ext.appNotRunningBody')" tone="gold">
         <PrimaryButton :title="t('ext.tryAgain')" :icon="RefreshCw" @click="refresh" />
         <p class="hint">{{ t('ext.notInstalled') }}</p>
-        <a class="link-button" :href="DOWNLOAD_URL" target="_blank" rel="noopener">
-          <Download :size="16" aria-hidden="true" />{{ t('ext.download') }}
+        <a class="qasa-button secondary" :href="DOWNLOAD_URL" target="_blank" rel="noopener">
+          <Download :stroke-width="2.5" aria-hidden="true" /><span>{{ t('ext.download') }}</span>
         </a>
       </StateCard>
 
@@ -241,19 +241,26 @@ onBeforeUnmount(() => clearInterval(poll))
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 4px 16px 16px;
+  padding: 4px var(--space-screen-padding) var(--space-screen-padding);
 }
 
+/* An accent icon badge (iOS `IconBadge`: 36, radius 10, tint at 12%). */
 .header-button {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  padding: 0;
   border: 0;
-  border-radius: 10px;
-  background: var(--card-muted);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
   cursor: pointer;
+}
+
+.header-button svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .chips {
@@ -261,9 +268,11 @@ onBeforeUnmount(() => clearInterval(poll))
   gap: 8px;
 }
 
+/* The pairing code, as iOS LAN sync's code (`kasoMono(44, bold)`), at the popup's width. */
 .code {
   display: block;
   margin: 4px 0;
+  font-family: var(--font-mono);
   font-size: 40px;
   font-weight: 700;
   letter-spacing: 4px;
@@ -275,6 +284,7 @@ onBeforeUnmount(() => clearInterval(poll))
 .empty {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
@@ -285,46 +295,31 @@ onBeforeUnmount(() => clearInterval(poll))
 .notice {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   background: var(--danger-background);
   color: var(--danger-text);
   font-size: 14px;
-}
-
-.link-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--button-radius);
-  background: var(--card-background-light);
-  color: var(--accent-dark);
-  font-weight: 600;
-  text-decoration: none;
 }
 
 .footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
-  padding: 8px 16px;
-  border-top: 1px solid var(--stroke);
+  padding: 8px var(--space-screen-padding);
+  border-top: var(--size-stroke) solid var(--stroke);
   background: var(--chrome);
-  color: var(--text-tertiary);
 }
 
 .language select {
-  padding: 4px 8px;
-  border: 1px solid var(--stroke);
-  border-radius: 8px;
+  height: var(--size-field-icon-button);
+  padding: 0 8px;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-control);
   background: var(--card-background);
   color: var(--text-secondary);
-  font: inherit;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
+  cursor: pointer;
 }
 
 .visually-hidden {

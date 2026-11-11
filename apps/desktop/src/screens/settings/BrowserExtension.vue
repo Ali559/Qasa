@@ -8,6 +8,8 @@ import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
+import SettingsSection from '@/components/SettingsSection.vue'
 import { bridgeApi, type BridgeClient } from '@/bridge/api'
 import { prefs, useT } from '@/prefs'
 
@@ -36,35 +38,37 @@ async function remove() {
 </script>
 
 <template>
-  <PageFrame :title="t('bridge.settingsRow')" back :gap="16" @back="$emit('back')">
+  <PageFrame :title="t('bridge.settingsRow')" back @back="$emit('back')">
     <p class="muted">{{ t('bridge.pageBody') }}</p>
 
-    <section class="group">
-      <SectionLabel :text="t('bridge.allowedBrowsers')" />
-      <CardContainer v-if="clients.length === 0" :padding="20" class="empty">
+    <section v-if="clients.length === 0" class="group">
+      <span class="label"><SectionLabel :text="t('bridge.allowedBrowsers')" /></span>
+      <CardContainer :padding="20" class="empty">
         <Puzzle :size="28" aria-hidden="true" />
         <p class="muted">{{ t('bridge.noClients') }}</p>
       </CardContainer>
-      <CardContainer v-else :padding="0">
-        <template v-for="(c, i) in clients" :key="c.id">
-          <hr v-if="i > 0" class="divider" />
-          <div class="row">
-            <span class="tile" aria-hidden="true"><Globe :size="18" /></span>
-            <div class="text">
-              <span class="name">{{ c.name }}</span>
-              <span class="sub">{{ c.lastUsedAt ? t('bridge.lastUsed', formatDate(c.lastUsedAt)) : t('bridge.neverUsed') }}</span>
-            </div>
-            <button type="button" class="remove" @click="pendingRemove = c">{{ t('bridge.remove') }}</button>
-          </div>
-        </template>
-      </CardContainer>
     </section>
+    <!-- One `SettingsRow` per browser, with Remove as the trailing control. -->
+    <SettingsSection v-else :title="t('bridge.allowedBrowsers')">
+      <SettingsRow
+        v-for="c in clients"
+        :key="c.id"
+        :icon="Globe"
+        :title="c.name"
+        :subtitle="c.lastUsedAt ? t('bridge.lastUsed', formatDate(c.lastUsedAt)) : t('bridge.neverUsed')"
+      >
+        <template #trailing>
+          <button type="button" class="remove" @click="pendingRemove = c">{{ t('bridge.remove') }}</button>
+        </template>
+      </SettingsRow>
+    </SettingsSection>
 
     <ConfirmDialog
       :open="pendingRemove !== null"
       :title="pendingRemove ? t('bridge.removeTitle', pendingRemove.name) : ''"
       :message="t('bridge.removeMessage')"
       :confirm-label="t('bridge.remove')"
+      :cancel-label="t('settings.cancel')"
       destructive
       @confirm="remove"
       @cancel="pendingRemove = null"
@@ -82,7 +86,11 @@ async function remove() {
 .group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-section-label-gap);
+}
+
+.label {
+  padding-inline: 4px;
 }
 
 .empty {
@@ -92,55 +100,24 @@ async function remove() {
   color: var(--text-secondary);
 }
 
-.row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 14px 16px;
-}
-
-.tile {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--card-muted);
-  color: var(--accent);
-}
-
-.text {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.name {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.sub {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
+/* A compact secondary control (iOS `PressableStyle` feedback). */
 .remove {
+  flex-shrink: 0;
   padding: 6px 12px;
-  border: 1px solid var(--stroke);
-  border-radius: 10px;
-  background: transparent;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-control);
+  background: var(--card-background);
   color: var(--danger);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
 }
 
-.divider {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--stroke);
+.remove:active {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 </style>

@@ -10,6 +10,8 @@ import alibarznji.qasa.screens.vault.subtypeIcon
 import alibarznji.qasa.screens.vault.websiteUrl
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaRowIconButton
+import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.VaultItemRow
@@ -88,14 +90,12 @@ internal fun VaultListItemRow(
         copyContentDescription = stringResource(R.string.a11y_copy),
         trailing = {
             Box {
-                IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(QasaDimens.touchTarget)) {
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.a11y_moreactions),
-                        tint = c.textSecondary,
-                        modifier = Modifier.size(QasaIconSize.md),
-                    )
-                }
+                // iOS: `ellipsis` rotated 90° in a 36pt frame.
+                QasaRowIconButton(
+                    icon = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.a11y_moreactions),
+                    onClick = { menuOpen = true },
+                )
                 DropdownMenu(
                     expanded = menuOpen,
                     onDismissRequest = { menuOpen = false },
@@ -159,7 +159,7 @@ private fun MenuItem(
     val c = qasaColors
     val tint = if (destructive) c.danger else c.textPrimary
     DropdownMenuItem(
-        text = { Text(title, color = tint) },
+        text = { Text(title, color = tint, style = qasaText.bodyLarge) },
         leadingIcon = { Icon(icon, contentDescription = null, tint = tint) },
         onClick = onClick,
     )

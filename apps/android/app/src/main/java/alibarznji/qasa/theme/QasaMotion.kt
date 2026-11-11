@@ -1,7 +1,8 @@
 package alibarznji.qasa.theme
 
 import android.provider.Settings
-import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -15,42 +16,74 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 
-/** iOS uses five durations; Android had none (`docs/design.md` §8.1). */
+/**
+ * The named timings of `design/tokens.json` `motion`, read from [QasaTokens.Motion] so they
+ * match iOS: `press` 120ms ease-out, `standard` 220ms ease-out, `fast` 180ms ease-in-out,
+ * `fade` 200ms ease-in-out, springs `toggle` / `toast`. Curves are the iOS ones
+ * ([QasaTokens.Easings]), never M3's default `FastOutSlowIn`.
+ */
 object QasaMotion {
-    /** 180ms — selection, language/theme change. */
-    const val FAST = 180
+    /** 180ms ease-in-out — selection, color changes, language/theme change. */
+    val FAST: Int = QasaTokens.Motion.fast.millis
 
-    /** 200ms — drawer close, plan dot, plan page. */
-    const val STANDARD = 200
+    /** 220ms ease-out — sheet-sized transitions, drawer. */
+    val STANDARD: Int = QasaTokens.Motion.standard.millis
 
-    /** 220ms — drawer open. */
-    const val DRAWER = 220
+    /** 220ms — drawer open (same as [STANDARD]). */
+    val DRAWER: Int = QasaTokens.Motion.standard.millis
 
-    /** `CheckToggle` thumb spring. */
-    const val TOGGLE_RESPONSE = 0.25f
-    const val TOGGLE_DAMPING = 0.8f
+    /** 200ms ease-in-out — the reduce-motion replacement for slides. */
+    val FADE: Int = QasaTokens.Motion.fade.millis
 
-    /** 1100ms — health gauge trim + score count-up. */
-    const val GAUGE = 1100
+    /** `CheckToggle` thumb spring (SwiftUI `response` / `dampingFraction`). */
+    val TOGGLE_RESPONSE: Float = QasaTokens.Motion.toggle.response
+    val TOGGLE_DAMPING: Float = QasaTokens.Motion.toggle.dampingFraction
 
-    /** 120ms — press-scale feedback. */
-    const val PRESS = 120
+    /** 1100ms ease-out — health gauge trim + score count-up. */
+    val GAUGE: Int = QasaTokens.Motion.gauge.millis
 
-    const val PRESS_SCALE = 0.97f
+    /** 120ms ease-out — press feedback. */
+    val PRESS: Int = QasaTokens.Motion.press.millis
+
+    /** 0.98 — pressed buttons scale to this. */
+    const val PRESS_SCALE: Float = QasaTokens.Motion.pressScale
+
+    /** 0.85 — pressed buttons fade to this. */
+    const val PRESSED_OPACITY: Float = QasaTokens.Motion.pressedOpacity
+
+    /** 0.45 — disabled buttons. */
+    const val DISABLED_OPACITY: Float = QasaTokens.Motion.disabledOpacity
+
+    /** 0.06 — `textPrimary` wash behind a pressed row (`RowButtonStyle`). */
+    const val ROW_PRESSED_OPACITY: Float = QasaTokens.Motion.rowPressedOpacity
 
     /** 2500ms — how long a [QasaToast] stays up. */
-    const val TOAST_VISIBLE = 2500L
+    const val TOAST_VISIBLE: Long = QasaTokens.Motion.toastVisibleMillis
 
-    fun toggleSpring() = spring<Float>(Spring.DampingRatioNoBouncy, TOGGLE_RESPONSE, TOGGLE_DAMPING)
+    fun <T> pressTween() = QasaTokens.Motion.press.spec<T>()
 
-    fun fastTween() = tween<Float>(FAST)
+    fun <T> fastTween() = QasaTokens.Motion.fast.spec<T>()
 
-    fun standardTween() = tween<Float>(STANDARD)
+    fun <T> standardTween() = QasaTokens.Motion.standard.spec<T>()
 
-    fun drawerTween() = tween<Float>(DRAWER)
+    fun <T> fadeTween() = QasaTokens.Motion.fade.spec<T>()
 
-    fun gaugeTween() = tween<Float>(GAUGE)
+    fun <T> drawerTween() = QasaTokens.Motion.standard.spec<T>()
+
+    fun <T> gaugeTween() = QasaTokens.Motion.gauge.spec<T>()
+
+    /** SwiftUI `.spring(response: 0.25, dampingFraction: 0.8)`. */
+    fun <T> toggleSpring() = QasaTokens.Motion.toggle.spec<T>()
+
+    /** SwiftUI `.spring(response: 0.35, dampingFraction: 0.85)`. */
+    fun <T> toastSpring() = QasaTokens.Motion.toast.spec<T>()
 }
+
+/** This timing as a Compose tween on its iOS curve. */
+fun <T> QasaTokenTween.spec(): TweenSpec<T> = tween(durationMillis = millis, easing = easing)
+
+/** This SwiftUI spring as a Compose spring (same stiffness and damping ratio). */
+fun <T> QasaTokenSpring.spec(): SpringSpec<T> = spring(dampingRatio = dampingRatio, stiffness = stiffness)
 
 /**
  * Honours `Settings.Global.ANIMATOR_DURATION_SCALE` / iOS
@@ -86,9 +119,10 @@ fun ProvideQasaMotion(content: @Composable () -> Unit) {
 }
 
 /**
- * Press-scale value for a tappable surface. 1f when motion is reduced or [enabled] is
- * false. Buttons and the FAB scale (§8.3); list rows pass `enabled = false` because iOS
- * defines no `ButtonStyle`, so its rows only highlight and never shrink on tap.
+ * Press-scale value for a tappable surface: [QasaMotion.PRESS_SCALE] while pressed, over
+ * `motion.press` (120ms ease-out), as iOS `QasaButtonStyle` / `PressableStyle`. 1f when
+ * motion is reduced or [enabled] is false: list rows pass `enabled = false` because iOS
+ * rows (`RowButtonStyle`) only wash and never shrink.
  */
 @Composable
 fun rememberPressScale(interactionSource: MutableInteractionSource, enabled: Boolean = true): Float {
@@ -96,7 +130,20 @@ fun rememberPressScale(interactionSource: MutableInteractionSource, enabled: Boo
     val reduce = qasaReduceMotion.enabled
     return animateFloatAsState(
         targetValue = if (enabled && pressed && !reduce) QasaMotion.PRESS_SCALE else 1f,
-        animationSpec = tween(QasaMotion.PRESS),
+        animationSpec = QasaMotion.pressTween(),
         label = "qasaPressScale",
     ).value
+}
+
+/**
+ * Opacity of a button: [QasaMotion.DISABLED_OPACITY] when disabled, else
+ * [QasaMotion.PRESSED_OPACITY] while pressed, over `motion.press`. iOS animates only the
+ * pressed change; the disabled value applies at once.
+ */
+@Composable
+fun rememberPressOpacity(interactionSource: MutableInteractionSource, enabled: Boolean = true): Float {
+    val pressed by interactionSource.collectIsPressedAsState()
+    val target = if (pressed && enabled) QasaMotion.PRESSED_OPACITY else 1f
+    val animated = animateFloatAsState(target, QasaMotion.pressTween(), label = "qasaPressOpacity").value
+    return if (enabled) animated else QasaMotion.DISABLED_OPACITY
 }

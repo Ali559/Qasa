@@ -1,9 +1,6 @@
 package alibarznji.qasa.theme
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -15,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,8 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -115,11 +115,13 @@ fun QasaToastHost(state: QasaToastState, modifier: Modifier = Modifier) {
             targetState = message,
             contentKey = { it?.id },
             transitionSpec = {
+                // iOS: `.move(edge: .bottom) + .opacity` on the toast spring; with reduce
+                // motion, a 200ms ease-in-out fade only (`motion.fade`).
                 if (reduceMotion) {
-                    EnterTransition.None togetherWith ExitTransition.None
+                    fadeIn(QasaMotion.fadeTween()) togetherWith fadeOut(QasaMotion.fadeTween())
                 } else {
-                    (fadeIn(tween(QasaMotion.STANDARD)) + slideInVertically(tween(QasaMotion.STANDARD)) { it / 2 }) togetherWith
-                        (fadeOut(tween(QasaMotion.FAST)) + slideOutVertically(tween(QasaMotion.FAST)) { it / 2 })
+                    (fadeIn(QasaMotion.toastSpring()) + slideInVertically(QasaMotion.toastSpring()) { it }) togetherWith
+                        (fadeOut(QasaMotion.toastSpring()) + slideOutVertically(QasaMotion.toastSpring()) { it })
                 }
             },
             contentAlignment = Alignment.BottomCenter,
@@ -130,21 +132,30 @@ fun QasaToastHost(state: QasaToastState, modifier: Modifier = Modifier) {
     }
 }
 
-/** Accent pill with a check: the toast's look, on its own for previews. */
+/**
+ * iOS `ToastView`: accent fill, [QasaDimens.controlRadius] corners, 16 × 12 padding, at
+ * least 44dp tall, a 17dp check 10dp before `type.toast` (14 semibold) `onAccent` text on up
+ * to two lines, and a soft black 18% shadow 6dp down (`shadow.toast`).
+ */
 @Composable
 fun QasaToast(text: String, modifier: Modifier = Modifier) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
     Row(
         modifier = modifier
-            .shadow(
-                elevation = QasaDimens.contentGap,
+            .dropShadow(
                 shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.2f),
-                spotColor = Color.Black.copy(alpha = 0.2f),
+                shadow = Shadow(
+                    // SwiftUI's shadow radius is half the CSS-style blur Compose takes
+                    // (tokens.css draws the same shadow with a 28px blur).
+                    radius = QasaTokens.Shadow.toastRadius * 2,
+                    color = QasaTokens.Shadow.toastColor,
+                    offset = DpOffset(QasaTokens.Shadow.toastOffsetX, QasaTokens.Shadow.toastOffsetY),
+                ),
             )
             .background(c.accent, shape)
-            .padding(horizontal = QasaDimens.gap, vertical = QasaDimens.gapSmall)
+            .heightIn(min = TOAST_MIN_HEIGHT)
+            .padding(horizontal = QasaDimens.toastHorizontal, vertical = QasaDimens.toastVertical)
             // One node, announced politely once it appears (Material's snackbar does the same).
             .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,
@@ -154,15 +165,18 @@ fun QasaToast(text: String, modifier: Modifier = Modifier) {
             Icons.Filled.CheckCircle,
             contentDescription = null,
             tint = c.onAccent,
-            modifier = Modifier.size(QasaIconSize.xl),
+            modifier = Modifier.size(QasaIconSize.menu),
         )
         Text(
             text,
             color = c.onAccent,
-            style = qasaText.bodyMediumSemibold,
+            style = qasaText.toast,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false),
         )
     }
 }
+
+/** iOS `ToastView.frame(minHeight:)`. */
+private val TOAST_MIN_HEIGHT = QasaTokens.Size.toastMinHeight

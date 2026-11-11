@@ -89,7 +89,7 @@ internal fun TotpDetailRow(uri: String, onCopy: (String) -> Unit) {
                     strokeWidth = QasaDimens.stroke * 2,
                     modifier = Modifier.size(CountdownSize),
                 )
-                Text("$remaining", color = c.textSecondary, style = qasaText.bodySmall)
+                Text(java.text.NumberFormat.getIntegerInstance().format(remaining), color = c.textSecondary, style = qasaText.bodySmall)
             }
         }
     }

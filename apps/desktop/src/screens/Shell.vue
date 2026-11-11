@@ -60,7 +60,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   <div class="shell">
     <nav class="sidebar" :aria-label="t('nav.openMenu')">
       <div class="brand">
-        <QasaMark :size="20" />
+        <QasaMark :size="22" />
         <span>{{ t('brand.name') }}</span>
       </div>
       <button
@@ -77,7 +77,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </button>
       <span class="grow" />
       <button type="button" class="tab lock" @click="emit('lock')">
-        <Lock :size="18" aria-hidden="true" />
+        <Lock :size="20" aria-hidden="true" />
         <span>{{ t('shell.lock') }}</span>
       </button>
     </nav>
@@ -118,7 +118,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   width: 220px;
   flex-shrink: 0;
   padding: 0 12px 16px;
-  border-inline-end: 1px solid var(--stroke);
+  border-inline-end: var(--size-stroke) solid var(--stroke);
   background: var(--chrome);
 }
 
@@ -126,12 +126,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 64px;
-  padding-inline: 8px;
+  height: var(--size-header-height);
+  padding-inline: 4px;
   color: var(--accent);
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: 700;
+  font-family: var(--font-family);
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
 }
 
 .tab {
@@ -139,13 +139,14 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 10px 12px;
+  min-height: var(--size-field-height);
+  padding: 0 12px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
   text-align: start;
   cursor: pointer;
   transition:
@@ -168,8 +169,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   flex: 1;
 }
 
-.lock {
-  font-size: 14px;
+.tab :deep(svg) {
+  flex-shrink: 0;
 }
 
 .content {
@@ -186,8 +187,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
    mid-animation). Pages slide in from the trailing edge over 220 ms, as on iOS. */
 .page-enter-active {
   transition:
-    opacity var(--motion-page) ease-out,
-    transform var(--motion-page) ease-out;
+    opacity var(--motion-standard),
+    transform var(--motion-standard);
 }
 
 .page-leave-active {
@@ -201,6 +202,18 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 :root[dir='rtl'] .page-enter-from {
   transform: translateX(-12px);
+}
+
+/* Reduce motion: the slide becomes a fade (`motion.fade`). */
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active {
+    transition: opacity var(--motion-fade);
+  }
+
+  .page-enter-from,
+  :root[dir='rtl'] .page-enter-from {
+    transform: none;
+  }
 }
 
 </style>

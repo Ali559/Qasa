@@ -1,15 +1,17 @@
 <script setup lang="ts">
-// iOS `AutoLockSettingsView`: a 1–60 minute stepper with its help footer, then the presets
-// with a checkmark on the current value. Edits `prefs.autoLockMinutes`, which the Rust core
+// iOS `AutoLockSettingsView`: a `SettingsSection` row (clock badge, "N minutes") with the
+// 1–60 stepper and its 12pt help footer, then the presets (timer badges, a check on the
+// current value). A pick applies at once; the sheet has no Done (design/README.md rule 4). Edits `prefs.autoLockMinutes`, which the Rust core
 // reads for its timer.
-import { Minus, Plus } from 'lucide-vue-next'
+import { Clock, Minus, Plus, Timer } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
+import SettingsSection from '@/components/SettingsSection.vue'
 import Sheet from '@/components/Sheet.vue'
 import { prefs, useT } from '@/prefs'
-import SheetHeader from './SheetHeader.vue'
 
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -24,7 +26,7 @@ function setMinutes(value: number) {
 }
 
 const presetChoices = computed<Choice<string>[]>(() =>
-  PRESETS.map((minutes) => ({ value: String(minutes), label: t('settings.autoLockMinutesFmt', minutes) })),
+  PRESETS.map((minutes) => ({ value: String(minutes), label: t('settings.autoLockMinutesFmt', minutes), icon: Timer })),
 )
 
 const presetModel = computed<string>({
@@ -43,50 +45,52 @@ function onStepperKey(e: KeyboardEvent) {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('settings.autoLock')" :width="460" placement="bottom" @close="emit('close')">
-    <SheetHeader :title="t('settings.autoLock')" :done-label="t('settings.done')" @done="emit('close')" />
+  <Sheet :open="open" :label="t('settings.autoLock')" :title="t('settings.autoLock')" :width="460" placement="bottom" @close="emit('close')">
     <div class="body">
       <section class="group">
-        <div
-          class="stepper"
-          role="spinbutton"
-          tabindex="0"
-          :aria-label="t('settings.autoLock')"
-          :aria-valuemin="MIN"
-          :aria-valuemax="MAX"
-          :aria-valuenow="prefs.autoLockMinutes"
-          :aria-valuetext="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
-          @keydown="onStepperKey"
-        >
-          <span class="value">{{ t('settings.autoLockMinutesFmt', prefs.autoLockMinutes) }}</span>
-          <span class="buttons">
-            <button
-              type="button"
-              tabindex="-1"
-              :aria-label="t('common.decrease')"
-              :disabled="prefs.autoLockMinutes <= MIN"
-              @click="setMinutes(prefs.autoLockMinutes - 1)"
-            >
-              <Minus :size="16" :stroke-width="2.5" aria-hidden="true" />
-            </button>
-            <span class="separator" />
-            <button
-              type="button"
-              tabindex="-1"
-              :aria-label="t('common.increase')"
-              :disabled="prefs.autoLockMinutes >= MAX"
-              @click="setMinutes(prefs.autoLockMinutes + 1)"
-            >
-              <Plus :size="16" :stroke-width="2.5" aria-hidden="true" />
-            </button>
-          </span>
-        </div>
+        <SettingsSection>
+          <SettingsRow :icon="Clock" :title="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)">
+            <template #trailing>
+              <span
+                class="stepper"
+                role="spinbutton"
+                tabindex="0"
+                :aria-label="t('settings.autoLock')"
+                :aria-valuemin="MIN"
+                :aria-valuemax="MAX"
+                :aria-valuenow="prefs.autoLockMinutes"
+                :aria-valuetext="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
+                @keydown="onStepperKey"
+              >
+                <button
+                  type="button"
+                  tabindex="-1"
+                  :aria-label="t('common.decrease')"
+                  :disabled="prefs.autoLockMinutes <= MIN"
+                  @click="setMinutes(prefs.autoLockMinutes - 1)"
+                >
+                  <Minus :stroke-width="2.5" aria-hidden="true" />
+                </button>
+                <span class="separator" />
+                <button
+                  type="button"
+                  tabindex="-1"
+                  :aria-label="t('common.increase')"
+                  :disabled="prefs.autoLockMinutes >= MAX"
+                  @click="setMinutes(prefs.autoLockMinutes + 1)"
+                >
+                  <Plus :stroke-width="2.5" aria-hidden="true" />
+                </button>
+              </span>
+            </template>
+          </SettingsRow>
+        </SettingsSection>
         <p class="footer">{{ t('settings.autoLockHelp') }}</p>
       </section>
 
       <section class="group">
-        <SectionLabel :text="t('settings.autoLockPresets')" />
-        <ChoiceList v-model="presetModel" class="presets" :choices="presetChoices" :label="t('settings.autoLockPresets')" />
+        <span class="label"><SectionLabel :text="t('settings.autoLockPresets')" /></span>
+        <ChoiceList v-model="presetModel" :choices="presetChoices" :label="t('settings.autoLockPresets')" />
       </section>
     </div>
   </Sheet>
@@ -97,75 +101,62 @@ function onStepperKey(e: KeyboardEvent) {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 20px;
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
   overflow-y: auto;
 }
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-section-label-gap);
 }
 
+.label {
+  padding-inline: 4px;
+}
+
+/* The iOS `Stepper`: 94 × 32, two halves on a muted fill, a hairline between them. */
 .stepper {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
-  background: var(--card-background);
-}
-
-.value {
-  flex: 1;
-  font-size: 16px;
-  color: var(--text-primary);
-}
-
-.buttons {
-  display: flex;
-  align-items: center;
-  border-radius: 9px;
+  border-radius: 8px;
   background: var(--card-muted);
 }
 
-.buttons button {
+.stepper button {
   display: grid;
   place-items: center;
-  width: 46px;
+  width: 47px;
   height: 32px;
+  padding: 0;
   border: 0;
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
 }
 
-.buttons button:disabled {
+.stepper button svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
+}
+
+.stepper button:disabled {
   color: var(--text-tertiary);
   cursor: default;
 }
 
 .separator {
-  width: 1px;
+  width: var(--size-stroke);
   height: 18px;
   background: var(--stroke);
-}
-
-/* iOS list rows: plain 16pt text, not the Welcome picker's 17 semibold. */
-.presets :deep(.choice) {
-  padding-block: 12px;
-}
-
-.presets :deep(.choice-label) {
-  font-size: 16px;
-  font-weight: 400;
 }
 
 .footer {
   margin: 0;
   padding-inline: 4px;
-  font-size: 13px;
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
   color: var(--text-secondary);
 }
 </style>

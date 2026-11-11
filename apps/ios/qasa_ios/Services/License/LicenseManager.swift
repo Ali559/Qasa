@@ -103,7 +103,7 @@ final class LicenseManager {
             _ = await LicenseTokenVerifier.refreshVerifyingKey()
             return applyToken(response.license_token)
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
             return false
         }
     }

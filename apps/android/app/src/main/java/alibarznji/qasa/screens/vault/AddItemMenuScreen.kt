@@ -2,18 +2,19 @@ package alibarznji.qasa.screens.vault
 
 import alibarznji.qasa.theme.qasaSheetMaxHeight
 import alibarznji.qasa.R
-import alibarznji.qasa.theme.CardContainer
-import alibarznji.qasa.theme.NavChevronRow
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.QasaRow
+import alibarznji.qasa.theme.QasaRowPressable
+import alibarznji.qasa.theme.QasaSheetHeader
+import alibarznji.qasa.theme.RowChevron
+import alibarznji.qasa.theme.RowDivider
+import alibarznji.qasa.theme.SettingsSection
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultPayload
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -27,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 
 /** One add-menu entry — iOS `VaultSubtype` + the empty payload it creates. */
 private data class AddOption(@StringRes val title: Int, val icon: ImageVector, val payload: VaultPayload)
@@ -103,35 +103,35 @@ fun AddItemMenuSheetContent(
     }
 
     Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
-        // A drilled-in list gets "Back" in the leading slot, like the iOS navigation bar.
-        SheetChromeHeader(
+        // iOS `.sheetHeader("Add New")`; the pushed subtype page keeps the sheet and gets a
+        // back circle (iOS pushes it in the sheet's NavigationStack). No Cancel.
+        QasaSheetHeader(
             title = stringResource(drilled?.addTitle ?: R.string.vault_addnew),
-            onDismiss = { if (drilled != null) drilled = null else onCancel() },
-            dismissLabel = stringResource(if (drilled != null) R.string.a11y_back else R.string.common_cancel),
+            onBack = if (drilled != null) ({ drilled = null }) else null,
         )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = QasaDimens.screenPadding)
-                .padding(top = QasaDimens.contentGap, bottom = QasaDimens.sectionGap),
+                .padding(QasaDimens.screenPadding),
         ) {
-            CardContainer {
+            // iOS `SettingsSection` of `SettingsRow`s with `RowDivider`s; a chevron only on
+            // the kinds that drill into subtypes.
+            SettingsSection {
                 options.forEachIndexed { index, option ->
-                    NavChevronRow(
-                        title = stringResource(option.title),
-                        icon = option.icon,
+                    if (index > 0) RowDivider()
+                    val kind = if (shownKind == null) VaultItemKind.entries.getOrNull(index) else null
+                    val drills = kind != null && kind.directAddPayload() == null
+                    QasaRowPressable(
                         onClick = {
-                            val kind = VaultItemKind.entries.getOrNull(index)
-                            if (shownKind == null && kind != null && kind.directAddPayload() == null) {
-                                drilled = kind
-                            } else {
-                                onSelect(option.payload)
-                            }
+                            if (drills) drilled = kind else onSelect(option.payload)
                         },
-                    )
-                    if (index < options.lastIndex) {
-                        Spacer(Modifier.height(QasaDimens.spaceMicro))
+                    ) {
+                        QasaRow(
+                            title = stringResource(option.title),
+                            icon = option.icon,
+                            trailing = if (drills) ({ RowChevron() }) else null,
+                        )
                     }
                 }
             }

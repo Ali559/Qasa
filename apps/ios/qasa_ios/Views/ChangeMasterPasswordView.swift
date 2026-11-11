@@ -72,13 +72,7 @@ struct ChangeMasterPasswordView: View {
                 .buttonStyle(.qasaPrimary)
                 .disabled(!canSave)
             }
-            .navigationTitle(L10n.tr("settings.changeMasterPassword", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("settings.cancel", locale: locale)) { dismiss() }
-                }
-            }
+            .sheetHeader(L10n.tr("settings.changeMasterPassword", locale: locale))
         }
     }
 
@@ -139,7 +133,7 @@ struct ChangeMasterPasswordView: View {
         } catch let error as VaultCryptoError {
             errorMessage = localized(error)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -150,7 +144,7 @@ struct ChangeMasterPasswordView: View {
         case .weakPassword:
             return L10n.tr("settings.weakMasterPassword", locale: locale)
         default:
-            return error.localizedDescription
+            return L10n.message(for: error)
         }
     }
 }

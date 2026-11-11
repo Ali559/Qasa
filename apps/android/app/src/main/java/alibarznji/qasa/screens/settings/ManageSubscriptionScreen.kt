@@ -17,6 +17,12 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaModalBottomSheet
+import alibarznji.qasa.theme.QasaButton
+import alibarznji.qasa.theme.QasaButtonKind
+import alibarznji.qasa.theme.QasaNotesField
+import alibarznji.qasa.theme.StickyBottomBar
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
@@ -308,39 +314,38 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
     }
 
     if (showCancelReason) {
-        QasaModalBottomSheet(onDismissRequest = { if (!isCancelling) showCancelReason = false }) {
-            Column(Modifier.padding(horizontal = QasaDimens.screenPadding)) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        stringResource(R.string.sub_cancelreasontitle),
-                        color = c.textPrimary,
-                        style = qasaText.rowTitle,
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(onClick = { confirmCancel() }, enabled = !isCancelling) {
-                        Text(stringResource(R.string.sub_skip), color = c.accent)
-                    }
-                }
-                Spacer(Modifier.height(QasaDimens.contentGap))
-                Text(stringResource(R.string.sub_cancelreasonprompt), color = c.textSecondary, style = qasaText.bodyLegal)
-                Spacer(Modifier.height(QasaDimens.contentGap))
-                ThemedTextField(
+        // iOS `cancelReasonSheet`: sheet header (no Skip: the button confirms without a
+        // reason), prompt, a notes box, the optional hint, then the destructive confirm.
+        QasaModalBottomSheet(
+            onDismissRequest = { if (!isCancelling) showCancelReason = false },
+            title = stringResource(R.string.sub_cancelreasontitle),
+        ) {
+            Column(
+                Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+                    .padding(QasaDimens.screenPadding),
+                verticalArrangement = Arrangement.spacedBy(QasaDimens.formGap),
+            ) {
+                Text(stringResource(R.string.sub_cancelreasonprompt), color = c.textSecondary, style = qasaText.dialogMessage)
+                QasaNotesField(
                     value = reason,
                     onValueChange = { reason = it },
-                    placeholder = stringResource(R.string.sub_cancelreasontitle),
+                    placeholder = "",
+                    label = stringResource(R.string.sub_cancelreasontitle),
                 )
-                Spacer(Modifier.height(QasaDimens.spaceSmall))
-                Text(stringResource(R.string.sub_cancelreasonoptional), color = c.textSecondary, style = qasaText.bodySmall)
-                Spacer(Modifier.height(QasaDimens.screenPadding))
-                PrimaryButton(
+                Text(stringResource(R.string.sub_cancelreasonoptional), color = c.textSecondary, style = qasaText.fieldError)
+            }
+            StickyBottomBar {
+                QasaButton(
                     title = stringResource(
                         if (isCancelling) R.string.sub_cancellingprogress else R.string.sub_confirmcancel,
                     ),
+                    kind = QasaButtonKind.Destructive,
                     enabled = !isCancelling,
                     icon = Icons.Outlined.Cancel,
                     onClick = { confirmCancel() },
                 )
-                Spacer(Modifier.height(QasaDimens.screenPadding))
             }
         }
     }

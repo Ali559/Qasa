@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="V extends string | null">
-// iOS menu `Picker` in a card: label above, native select styled like a field.
+// iOS `FormPickerField`: a `SectionLabel` 8 above a menu `Picker` on `QasaFieldChrome`
+// (48 tall, control radius, 1px stroke); the value and chevron in accent.
 import { ChevronDown } from 'lucide-vue-next'
 
 import FieldError from './FieldError.vue'
@@ -12,11 +13,11 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
 <template>
   <div class="select-field">
     <label :for="id" class="label">{{ label }}</label>
-    <div class="box" :class="{ invalid: !!error }">
+    <div class="qasa-field box" :class="{ invalid: !!error }">
       <select :id="id" v-model="model" :aria-invalid="!!error">
         <option v-for="o in options" :key="String(o.value)" :value="o.value">{{ o.label }}</option>
       </select>
-      <ChevronDown :size="16" class="chevron" aria-hidden="true" />
+      <ChevronDown :stroke-width="2.5" class="chevron" aria-hidden="true" />
       <slot name="trailing" />
     </div>
     <FieldError :message="error" />
@@ -27,34 +28,19 @@ const id = `s-${Math.random().toString(36).slice(2, 9)}`
 .select-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
   min-width: 0;
 }
 
 .label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
   color: var(--text-secondary);
 }
 
 .box {
   position: relative;
-  display: flex;
-  align-items: center;
   gap: 8px;
-  height: var(--field-height);
-  padding-inline: var(--field-padding-inline);
-  border: 1px solid var(--stroke);
-  border-radius: var(--field-radius);
-  background: var(--card-background);
-}
-
-.box:focus-within {
-  border-color: var(--accent);
-}
-
-.box.invalid {
-  border-color: var(--danger);
 }
 
 select {
@@ -63,29 +49,31 @@ select {
   height: 100%;
   margin: 0;
   padding: 0;
-  padding-inline-end: 20px;
+  padding-inline-end: calc(var(--size-row-chevron-glyph) + 8px);
   border: 0;
   outline: none;
   appearance: none;
   background: transparent;
   color: var(--accent);
   font: inherit;
-  font-size: var(--field-font-size);
   cursor: pointer;
 }
 
 .chevron {
   position: absolute;
-  inset-inline-end: var(--field-padding-inline);
+  inset-inline-end: var(--space-field-horizontal);
+  width: var(--size-row-chevron-glyph);
+  height: var(--size-row-chevron-glyph);
   color: var(--accent);
   pointer-events: none;
 }
 
+/* With a trailing `FieldIconButton` (32 wide) the box ends 8 from the stroke. */
 .box:has(> :nth-child(3)) {
-  padding-inline-end: 4px;
+  padding-inline-end: calc(var(--space-field-horizontal) - (var(--size-field-icon-button) - var(--size-field-icon-glyph)) / 2);
 }
 
 .box:has(> :nth-child(3)) .chevron {
-  inset-inline-end: 44px;
+  inset-inline-end: calc(var(--size-field-icon-button) + 14px);
 }
 </style>

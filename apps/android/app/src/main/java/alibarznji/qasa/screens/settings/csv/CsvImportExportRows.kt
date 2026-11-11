@@ -10,7 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
-import androidx.compose.material3.HorizontalDivider
+import alibarznji.qasa.theme.RowDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +84,7 @@ fun CsvImportExportRows(onStatus: (String) -> Unit) {
         icon = Icons.Outlined.FileDownload,
         onClick = { importLauncher.launch(IMPORT_MIME_TYPES) },
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     NavChevronRow(
         title = stringResource(R.string.settings_exportcsv),
         icon = Icons.Outlined.FileUpload,

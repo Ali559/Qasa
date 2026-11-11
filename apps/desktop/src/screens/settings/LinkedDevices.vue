@@ -5,7 +5,7 @@
 // Not here yet: the pairing code and "Sync on this network" rows (Wi‑Fi pairing, phase 4).
 // Signing out or unlinking THIS computer is "Clear local data" on desktop (server unlink
 // + local wipe), so it is handed to the parent as `logout` instead of done here.
-import { Info, Link2Off, Star } from 'lucide-vue-next'
+import { Info, Link, Link2Off, LogOut, RefreshCw, Star, Unlink } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -143,7 +143,7 @@ function upgrade() {
     </template>
 
     <button v-if="!premium" type="button" class="upgrade-hint" @click="upgrade">
-      <span class="star"><Star :size="18" fill="currentColor" /></span>
+      <span class="star"><Star fill="currentColor" :stroke-width="2.5" /></span>
       <span class="hint-text">
         <strong>{{ t('devices.needMore') }}</strong>
         <span>{{ t('devices.upgradeHint') }}</span>
@@ -158,11 +158,11 @@ function upgrade() {
       <button
         v-else-if="restoreKeyStatus === 'replaceable'"
         type="button"
-        class="replace"
+        class="qasa-button secondary replace"
         :disabled="isActing || account.replace.busy"
         @click="offerReplace"
       >
-        {{ t('backup.replace.button') }}
+        <RefreshCw :stroke-width="2.5" aria-hidden="true" /><span>{{ t('backup.replace.button') }}</span>
       </button>
     </div>
 
@@ -189,13 +189,13 @@ function upgrade() {
         @blocked="errorMessage = () => t('devices.cannotUnlinkPrimary')"
       />
 
-      <button v-if="canUnlinkOthers" type="button" class="unlink-all" :disabled="isActing" @click="showUnlinkAllConfirm = true">
-        <Link2Off :size="16" />{{ t('devices.unlinkAllOthers') }}
+      <button v-if="canUnlinkOthers" type="button" class="qasa-button destructive" :disabled="isActing" @click="showUnlinkAllConfirm = true">
+        <Link2Off :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlinkAllOthers') }}</span>
       </button>
     </section>
 
     <div class="info-note">
-      <Info class="info-icon" :size="18" />
+      <Info class="info-icon" :size="18" fill="currentColor" stroke="var(--card-muted)" />
       <span>{{ t('devices.infoNote') }}</span>
     </div>
 
@@ -203,8 +203,10 @@ function upgrade() {
       <ConfirmDialog
         :open="!!pendingUnlink"
         :title="t('devices.unlinkTitle')"
+        :icon="Link"
         :message="pendingUnlink ? t('devices.unlinkMessage', pendingUnlink.device_name) : undefined"
         :confirm-label="t('devices.unlink')"
+        :cancel-label="t('settings.cancel')"
         destructive
         @confirm="pendingUnlink && unlink(pendingUnlink)"
         @cancel="pendingUnlink = null"
@@ -212,8 +214,10 @@ function upgrade() {
       <ConfirmDialog
         :open="!!pendingLogout"
         :title="t('devices.logoutTitle')"
+        :icon="LogOut"
         :message="pendingLogout ? t('devices.logoutMessage', pendingLogout.device_name) : undefined"
         :confirm-label="t('devices.logout')"
+        :cancel-label="t('settings.cancel')"
         destructive
         @confirm="pendingLogout && unlink(pendingLogout)"
         @cancel="pendingLogout = null"
@@ -221,8 +225,10 @@ function upgrade() {
       <ConfirmDialog
         :open="showUnlinkAllConfirm"
         :title="t('devices.unlinkAllTitle')"
+        :icon="Unlink"
         :message="t('devices.unlinkAllMessage')"
         :confirm-label="t('devices.unlinkAllOthers')"
+        :cancel-label="t('settings.cancel')"
         destructive
         @confirm="unlinkOthers"
         @cancel="showUnlinkAllConfirm = false"
@@ -232,13 +238,14 @@ function upgrade() {
 </template>
 
 <style scoped>
+/* iOS `upgradeHintBanner`: gold wash, 21 padding, star `IconBadge` 16 from the text. */
 .upgrade-hint {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   padding: 21px;
-  border: 1px solid color-mix(in srgb, var(--gold) 20%, transparent);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid color-mix(in srgb, var(--gold) 20%, transparent);
+  border-radius: var(--radius-card);
   background: linear-gradient(
     to bottom right,
     color-mix(in srgb, var(--gold) 10%, transparent),
@@ -246,17 +253,30 @@ function upgrade() {
   );
   text-align: start;
   cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
+}
+
+.upgrade-hint:active {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
 .star {
   display: grid;
   flex-shrink: 0;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
   background: color-mix(in srgb, var(--gold) 20%, transparent);
   color: var(--gold);
+}
+
+.star svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .hint-text {
@@ -266,9 +286,13 @@ function upgrade() {
   min-width: 0;
 }
 
-.hint-text strong {
-  font-size: 16px;
+.hint-text strong,
+.limit-banner strong {
+  font-size: var(--type-field-size);
   font-weight: 700;
+}
+
+.hint-text strong {
   color: var(--gold);
 }
 
@@ -283,38 +307,23 @@ function upgrade() {
   flex-direction: column;
   gap: 8px;
   padding: 17px;
-  border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid color-mix(in srgb, var(--danger) 40%, transparent);
+  border-radius: var(--radius-card);
   background: color-mix(in srgb, var(--danger-background) 20%, transparent);
 }
 
 .replace {
-  align-self: flex-start;
-  padding: 10px 14px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--danger);
-  color: var(--on-danger);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.replace:disabled {
-  opacity: 0.6;
-  cursor: default;
+  margin-top: 4px;
 }
 
 .limit-banner strong {
-  font-size: 16px;
-  font-weight: 700;
   color: var(--danger);
 }
 
 .devices {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
 }
 
 .heading {
@@ -326,7 +335,7 @@ function upgrade() {
 
 .heading h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--type-page-title-size);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -345,39 +354,15 @@ function upgrade() {
   color: var(--text-secondary);
 }
 
-.unlink-all {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
-  border-radius: var(--button-radius);
-  background: transparent;
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.unlink-all:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--danger) 6%, transparent);
-}
-
-.unlink-all:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
+/* iOS `infoNote`: muted fill, strokeChrome, control radius, 17 padding, 8 above. */
 .info-note {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   margin-top: 8px;
   padding: 17px;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 8px;
+  border: var(--size-stroke) solid var(--stroke-chrome);
+  border-radius: var(--radius-control);
   background: var(--card-muted);
   font-size: 14px;
   color: var(--text-secondary);
@@ -391,8 +376,8 @@ function upgrade() {
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
-  border-top-color: var(--accent);
+  border: 2px solid var(--text-tertiary);
+  border-top-color: transparent;
   border-radius: 50%;
   animation: spin 900ms linear infinite;
 }
@@ -400,12 +385,6 @@ function upgrade() {
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 2.4s;
   }
 }
 </style>

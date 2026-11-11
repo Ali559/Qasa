@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // iOS `WelcomePreferencesView`: language and theme, chosen before the vault is created.
-import { ArrowRight, Contrast, Moon, Sun } from 'lucide-vue-next'
+import { ArrowRight, Contrast, Languages, Moon, Sun } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -17,6 +17,7 @@ const languageChoices = computed<Choice<Language>[]>(() =>
   LANGUAGES.map((language) => ({
     value: language,
     label: LANGUAGE_NAMES[language],
+    icon: Languages,
     dir: isRtl(language) ? 'rtl' : 'ltr',
     lang: language,
   })),
@@ -43,12 +44,12 @@ function finish() {
       </div>
 
       <section class="group">
-        <SectionLabel :text="t('onboarding.language')" />
+        <span class="label"><SectionLabel :text="t('onboarding.language')" /></span>
         <ChoiceList v-model="prefs.language" :choices="languageChoices" :label="t('onboarding.language')" />
       </section>
 
       <section class="group">
-        <SectionLabel :text="t('onboarding.theme')" />
+        <span class="label"><SectionLabel :text="t('onboarding.theme')" /></span>
         <ChoiceList v-model="prefs.theme" :choices="themeChoices" :label="t('onboarding.theme')" />
       </section>
     </div>
@@ -60,6 +61,7 @@ function finish() {
 </template>
 
 <style scoped>
+/* iOS: VStack(spacing: 28), 28 from the header (AuthFrame's 24 + 4). */
 .content {
   display: flex;
   flex-direction: column;
@@ -67,13 +69,24 @@ function finish() {
   padding-top: 4px;
 }
 
-.intro,
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sheet-text-gap);
+}
+
+/* iOS `SettingsSection`: label 4 in, 8 above the card. */
 .group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-section-label-gap);
 }
 
+.label {
+  padding-inline: 4px;
+}
+
+/* iOS 28 heavy; 700 is the heaviest bundled weight. */
 .headline {
   margin: 0;
   font-size: 28px;
@@ -83,7 +96,8 @@ function finish() {
 
 .subtitle {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
   color: var(--text-secondary);
 }
 </style>

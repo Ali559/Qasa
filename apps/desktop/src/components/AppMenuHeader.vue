@@ -13,7 +13,7 @@ const t = useT()
 <template>
   <header class="menu-header">
     <button v-if="back" type="button" class="back" :aria-label="t('common.back')" @click="emit('back')">
-      <ChevronLeft class="mirror-rtl" :size="20" :stroke-width="2.5" />
+      <ChevronLeft class="mirror-rtl" :stroke-width="2.75" />
     </button>
     <h1 class="title">{{ title }}</h1>
     <span class="spacer" />
@@ -26,17 +26,20 @@ const t = useT()
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 64px;
-  padding-inline: 16px;
+  height: var(--size-header-height);
+  padding-inline: var(--space-header-horizontal);
   background: var(--chrome);
   flex-shrink: 0;
 }
 
+/* iOS `HeaderBackButton`: a 40pt card-filled circle, 17 semibold chevron. */
 .back {
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   width: 40px;
   height: 40px;
+  padding: 0;
   border: 0;
   border-radius: 50%;
   background: var(--card-background);
@@ -44,14 +47,16 @@ const t = useT()
   cursor: pointer;
 }
 
-.back:hover {
-  background: var(--card-muted);
+.back svg {
+  width: 17px;
+  height: 17px;
 }
 
 .title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  line-height: var(--line-height);
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;

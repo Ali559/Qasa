@@ -58,14 +58,14 @@ watch(options, regenerate)
       <div class="card-head">
         <SectionLabel :text="t('gen.generatedPassword')" />
         <button type="button" class="regen" :aria-label="t('gen.regenerate')" :title="t('gen.regenerate')" @click="regenerate">
-          <RefreshCw :size="18" />
+          <RefreshCw :stroke-width="2.5" />
         </button>
       </div>
       <output class="password" dir="ltr">{{ password || ' ' }}</output>
-      <button type="button" class="copy" :disabled="!password" @click="copy">
-        <Check v-if="copied" :size="16" />
-        <Copy v-else :size="16" />
-        {{ copied ? t('gen.copied') : t('gen.copyPassword') }}
+      <button type="button" class="qasa-button secondary" :disabled="!password" @click="copy">
+        <Check v-if="copied" :stroke-width="2.5" />
+        <Copy v-else :stroke-width="2.5" />
+        <span>{{ copied ? t('gen.copied') : t('gen.copyPassword') }}</span>
       </button>
     </div>
 
@@ -113,8 +113,8 @@ watch(options, regenerate)
   display: flex;
   flex-direction: column;
   padding: 25px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius-large);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card-large);
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
     var(--card-background);
@@ -135,20 +135,22 @@ watch(options, regenerate)
   margin-bottom: 12px;
 }
 
+/* iOS `FieldIconButton("arrow.clockwise", tint: accent)`. */
 .regen {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
-  color: var(--cyan);
+  color: var(--accent);
   cursor: pointer;
 }
 
-.regen:hover {
-  background: var(--card-muted);
+.regen svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 
 .password {
@@ -171,23 +173,8 @@ watch(options, regenerate)
   letter-spacing: 1.5px;
 }
 
-.copy {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: var(--button-radius);
-  background: color-mix(in srgb, var(--accent-dark) 20%, transparent);
-  color: var(--accent);
-  font-size: 14px;
-  cursor: pointer;
-}
-
 .large-radius {
-  border-radius: var(--corner-radius-large);
+  border-radius: var(--radius-card-large);
 }
 
 .strength-head {
@@ -198,6 +185,7 @@ watch(options, regenerate)
 
 .strength-label {
   font-size: 14px;
+  font-weight: 400;
   color: var(--accent);
 }
 
@@ -225,12 +213,13 @@ watch(options, regenerate)
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .length-value {
   padding: 5px 13px;
-  border: 1px solid var(--stroke);
+  border: var(--size-stroke) solid var(--stroke);
   border-radius: 8px;
   background: var(--card-muted);
   color: var(--accent);
@@ -247,7 +236,7 @@ hr {
   width: 100%;
   margin: 0;
   border: 0;
-  border-top: 1px solid var(--stroke);
+  border-top: var(--size-stroke) solid var(--stroke);
 }
 
 .toggles {

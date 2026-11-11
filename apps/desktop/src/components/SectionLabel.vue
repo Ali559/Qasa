@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// iOS `SectionLabel`: sentence case, 13 medium (12 semibold in Arabic and Kurdish), secondary text.
+// iOS `SectionLabel`: sentence case, 12 semibold, secondary text, in every language.
 defineProps<{ text: string }>()
 </script>
 
@@ -10,14 +10,9 @@ defineProps<{ text: string }>()
 <style scoped>
 .section-label {
   margin: 0;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
+  line-height: var(--line-height);
   color: var(--text-secondary);
-}
-
-:root:lang(ar) .section-label,
-:root:lang(ckb) .section-label {
-  font-size: 12px;
-  font-weight: 600;
 }
 </style>

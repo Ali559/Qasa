@@ -3,13 +3,14 @@
 // sealed for this vault. With biometrics on, the prompt starts by itself (once each time the
 // screen appears or the window comes back), unless the main password is due again: then
 // only the password is offered, and the screen says why.
-import { ChevronRight, Fingerprint, KeyRound, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
+import { Fingerprint, KeyRound, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
@@ -142,26 +143,25 @@ async function unlock() {
         />
         <p v-if="error" class="error" role="alert">{{ error }}</p>
         <p v-else-if="passwordDue" class="due">
-          <KeyRound :size="16" class="due-icon" aria-hidden="true" />
+          <KeyRound :stroke-width="2.75" class="due-icon" aria-hidden="true" />
           <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
         </p>
       </div>
 
-      <button v-if="showBiometric" type="button" class="bio" :disabled="busy" @click="unlockWithBiometrics">
-        <span class="bio-icon">
-          <ScanFace v-if="bio?.kind === 'windowsHello'" :size="22" />
-          <Fingerprint v-else :size="22" />
-        </span>
-        <span class="bio-text">
-          <span class="bio-title">{{ t('auth.unlock.biometrics') }}</span>
-          <span class="bio-hint">{{ t('auth.unlock.biometricsHint') }}</span>
-        </span>
-        <ChevronRight class="mirror-rtl chevron" :size="16" />
-      </button>
+      <!-- iOS: a `SettingsRow` with a chevron in a stroked card, 14 in, `PressableStyle`. -->
+      <div v-if="showBiometric" class="bio">
+        <SettingsRow
+          :icon="bio?.kind === 'windowsHello' ? ScanFace : Fingerprint"
+          :title="t('auth.unlock.biometrics')"
+          :subtitle="t('auth.unlock.biometricsHint')"
+          :disabled="busy"
+          @click="unlockWithBiometrics"
+        />
+      </div>
 
       <CardContainer muted class="local-only">
         <div class="lo-title">
-          <Shield :size="16" class="accent" fill="currentColor" />
+          <Shield :size="17" class="accent" fill="currentColor" aria-hidden="true" />
           <span>{{ t('auth.unlock.localOnly') }}</span>
         </div>
         <p class="lo-body">{{ t('auth.unlock.localOnlyBody') }}</p>
@@ -183,14 +183,14 @@ async function unlock() {
 .content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
 }
 
 .intro,
 .group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
 .title {
@@ -202,12 +202,13 @@ async function unlock() {
 .subtitle {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .error {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);
 }
@@ -217,66 +218,37 @@ async function unlock() {
   align-items: flex-start;
   gap: 8px;
   margin: 0;
-  font-size: 13px;
-  font-weight: 500;
+  padding-top: 2px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
   color: var(--text-secondary);
 }
 
 .due-icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  width: 13px;
+  height: calc(var(--type-row-value-size) * var(--line-height));
   color: var(--accent);
 }
 
 .bio {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   margin-top: 4px;
-  padding: 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  padding-inline: var(--space-section-inset-horizontal);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
-  text-align: start;
-  cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
 }
 
-.bio:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--stroke));
+.bio:has(.settings-row:active:not(:disabled)) {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
-.bio-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--card-background-light);
-  color: var(--accent);
-}
-
-.bio-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.bio-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.bio-hint {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.chevron {
-  color: var(--text-tertiary);
+.bio :deep(.settings-row::after) {
+  display: none;
 }
 
 .local-only {
@@ -293,12 +265,14 @@ async function unlock() {
 }
 
 .accent {
+  flex-shrink: 0;
   color: var(--accent);
 }
 
 .lo-body {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 </style>

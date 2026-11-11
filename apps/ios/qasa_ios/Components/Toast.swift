@@ -63,22 +63,22 @@ struct ToastView: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: toast.systemImage)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: QasaTokens.Size.toastGlyph, weight: .semibold))
                 .accessibilityHidden(true)
             Text(toast.message)
-                .font(.qasa(14, weight: .semibold))
+                .font(.qasa(QasaTokens.Typography.toast.size, weight: QasaTokens.Typography.toast.weight))
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
         .foregroundColor(theme.onAccent)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(minHeight: 44)
+        .padding(.horizontal, QasaTokens.Space.toastHorizontal)
+        .padding(.vertical, QasaTokens.Space.toastVertical)
+        .frame(minHeight: QasaTokens.Size.toastMinHeight)
         .background(
             RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
                 .fill(theme.accent)
         )
-        .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 6)
+        .shadow(color: QasaTokens.Shadow.toast.color, radius: QasaTokens.Shadow.toast.radius, x: QasaTokens.Shadow.toast.x, y: QasaTokens.Shadow.toast.y)
         .accessibilityElement(children: .combine)
     }
 }

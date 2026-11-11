@@ -1,13 +1,15 @@
 <script setup lang="ts">
-// iOS `VaultItemEditor` + `VaultFormChrome`: Cancel / "New Login" / Save (Update when
-// editing), every field of all 13 types, the password generator, 2FA, folders, colours,
+// iOS `VaultItemEditor` + `VaultFormChrome`: the shared sheet header ("New Login", no
+// Cancel: Esc or a click outside closes), Save (Update when editing) pinned at the bottom,
+// fields 16 apart with 20 padding, every field of all 13 types, the password generator, 2FA, folders, colours,
 // countries and dates. Field rules come from the core (`validate_item`): checked live,
 // shown under each field the user changed (every field after a Save attempt, and on an
 // existing item), and Save refuses while any remain — as the core does on its side.
-import { Eye, EyeOff, WandSparkles } from 'lucide-vue-next'
+import { Eye, EyeOff, TriangleAlert, WandSparkles } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import BottomActionBar from '@/components/BottomActionBar.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
@@ -44,6 +46,7 @@ const saveError = ref<string | null>(null)
 const showGenerator = ref(false)
 const passwordVisible = ref(false)
 const busy = ref(false)
+const phoneInputId = `phone-${Math.random().toString(36).slice(2, 9)}`
 
 // MARK: field rules
 
@@ -187,17 +190,11 @@ function onKey(e: KeyboardEvent) {
 </script>
 
 <template>
-  <Sheet :open="true" :label="title" :width="600" @close="emit('close')">
+  <Sheet :open="true" :label="title" :title="title" :width="600" @close="emit('close')">
     <div class="editor" @keydown="onKey">
-      <header class="head">
-        <button type="button" class="link" @click="emit('close')">{{ t('common.cancel') }}</button>
-        <h2>{{ title }}</h2>
-        <span aria-hidden="true" />
-      </header>
-
       <div v-if="payload" class="scroll">
-        <p v-if="showFixToSave" class="fix-banner" role="alert">{{ t('validation.fixToSave') }}</p>
         <div class="fields">
+          <p v-if="showFixToSave" class="fix-banner" role="alert">{{ t('validation.fixToSave') }}</p>
           <!-- Login -->
           <template v-if="payload.variant === 'login'">
             <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
@@ -206,7 +203,7 @@ function onKey(e: KeyboardEvent) {
             <FormField v-model="payload.fields.password" :label="t('field.password')" :secure="!passwordVisible" mono :error="err('password')">
               <template #trailing>
                 <button type="button" class="field-icon accent" :aria-label="t('vault.generatePassword')" :title="t('vault.generatePassword')" @click="showGenerator = true">
-                  <WandSparkles :size="17" />
+                  <WandSparkles :stroke-width="2.5" />
                 </button>
                 <button
                   type="button"
@@ -214,8 +211,8 @@ function onKey(e: KeyboardEvent) {
                   :aria-label="passwordVisible ? t('vault.hidePassword') : t('vault.showPassword')"
                   @click="passwordVisible = !passwordVisible"
                 >
-                  <EyeOff v-if="passwordVisible" :size="17" />
-                  <Eye v-else :size="17" />
+                  <EyeOff v-if="passwordVisible" :stroke-width="2.5" />
+                  <Eye v-else :stroke-width="2.5" />
                 </button>
               </template>
             </FormField>
@@ -304,11 +301,26 @@ function onKey(e: KeyboardEvent) {
               <SelectField v-model="payload.fields.type" :label="t('field.type')" :options="phoneOptions" :error="err('type')" />
               <SelectField v-model="payload.fields.countryCode" :label="t('vault.country')" :options="phoneCountryOptions" :error="err('countryCode')" />
             </div>
-            <FormField v-model="payload.fields.number" :label="t('field.phoneNumber')" inputmode="tel" :error="err('number')">
-              <template #trailing>
-                <span class="dial" dir="ltr">{{ dialCode(payload.fields.countryCode) }}</span>
-              </template>
-            </FormField>
+            <!-- iOS: the dial code in its own field box, 8 before the number's. -->
+            <div class="phone-field">
+              <label :for="phoneInputId" class="field-label">{{ t('field.phoneNumber') }}</label>
+              <div class="phone-row">
+                <span class="qasa-field dial" dir="ltr">{{ dialCode(payload.fields.countryCode) }}</span>
+                <div class="qasa-field phone-box" :class="{ invalid: !!err('number') }">
+                  <input
+                    :id="phoneInputId"
+                    v-model="payload.fields.number"
+                    type="text"
+                    inputmode="tel"
+                    :placeholder="t('field.phoneNumber')"
+                    :aria-invalid="!!err('number')"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                </div>
+              </div>
+              <FieldError :message="err('number')" />
+            </div>
           </template>
 
           <!-- Address -->
@@ -362,13 +374,16 @@ function onKey(e: KeyboardEvent) {
 
     <PasswordGeneratorSheet :open="showGenerator" @use="usePassword" @close="showGenerator = false" />
 
-    <Sheet :open="!!saveError" :label="t('vault.couldNotSave')" :width="380" placement="bottom" @close="saveError = null">
-      <div class="alert">
-        <h3>{{ t('vault.couldNotSave') }}</h3>
-        <p>{{ saveError }}</p>
-        <button type="button" @click="saveError = null">{{ t('common.ok') }}</button>
-      </div>
-    </Sheet>
+    <ConfirmDialog
+      :open="!!saveError"
+      :title="t('vault.couldNotSave')"
+      :icon="TriangleAlert"
+      :message="saveError ?? undefined"
+      :confirm-label="t('common.ok')"
+      no-cancel
+      @confirm="saveError = null"
+      @cancel="saveError = null"
+    />
   </Sheet>
 </template>
 
@@ -376,39 +391,8 @@ function onKey(e: KeyboardEvent) {
 .editor {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
-  max-height: min(92vh, 860px);
-}
-
-.head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  height: 56px;
-  padding-inline: 16px;
-  border-bottom: 1px solid var(--stroke);
-  flex-shrink: 0;
-}
-
-.head h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.link {
-  justify-self: start;
-  padding: 6px 4px;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.link:disabled {
-  color: var(--text-tertiary);
-  cursor: default;
 }
 
 .scroll {
@@ -418,103 +402,116 @@ function onKey(e: KeyboardEvent) {
   background: var(--background);
 }
 
+/* iOS `VaultFormChrome`: a VStack 16 apart (`space.formGap`), 20 padding. */
 .fields {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: var(--screen-padding);
+  gap: var(--space-form-gap);
+  padding: var(--space-screen-padding);
 }
 
-.pair {
+.pair,
+.card-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
 }
 
+/* Expiry and security code on one row; the code is the narrower box (96…150). */
+.card-pair {
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 150px);
+}
+
+/* iOS `FieldIconButton`: 32 square, 16 semibold glyph, secondary (accent for generate). */
 .field-icon {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
   border: 0;
-  border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+}
+
+.field-icon svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 
 .field-icon.accent {
   color: var(--accent);
 }
 
+.phone-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-field-label-gap);
+}
+
+.field-label {
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
+  color: var(--text-secondary);
+}
+
+.phone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dial {
-  order: -1;
-  padding-inline-end: 10px;
-  border-inline-end: 1px solid var(--stroke);
+  flex-shrink: 0;
+  width: auto;
+  min-width: calc(56px + 2 * var(--space-field-horizontal));
+  justify-content: center;
   color: var(--accent);
   font-weight: 600;
 }
 
+.phone-box input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  user-select: text;
+}
+
+.phone-box input::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* iOS: "Fix the fields below to save", 13 semibold danger, above the fields. */
 .fix-banner {
-  margin: var(--screen-padding) var(--screen-padding) 0;
-  padding: 12px 14px;
-  border-radius: var(--corner-radius);
-  background: var(--danger-background);
-  color: var(--danger-text);
-  font-size: 14px;
-  font-weight: 500;
+  margin: 0;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .with-error {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
+/* iOS `Toggle` with a 15 medium label. */
 .toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 16px;
-}
-
-.alert {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 24px;
-  text-align: center;
-}
-
-.alert h3 {
-  margin: 0;
-  font-size: 17px;
-}
-
-.alert p {
-  margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.alert button {
-  margin-top: 8px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 0;
-  border-radius: var(--button-radius);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Expiry and security code on one row; the code is the narrower box. */
-.card-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   gap: 12px;
-  align-items: start;
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
 }
 </style>

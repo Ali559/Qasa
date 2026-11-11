@@ -3,7 +3,7 @@
 // account (as a device joining over Wi‑Fi sync does) and the core unlocks it with the
 // password just typed. Continue then enters the app like any unlock, which registers this
 // computer under the restored account.
-import { ArrowRight, CheckCircle2, ChevronLeft } from 'lucide-vue-next'
+import { Check, ChevronLeft } from 'lucide-vue-next'
 import { ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -21,24 +21,17 @@ const done = ref<RestoreOutcome | null>(null)
   <AuthFrame>
     <div class="content">
       <button v-if="!done" type="button" class="back" @click="emit('back')">
-        <ChevronLeft class="mirror-rtl" :size="18" />{{ t('common.back') }}
+        <ChevronLeft class="mirror-rtl" :size="17" :stroke-width="2.75" />{{ t('common.back') }}
       </button>
 
-      <template v-if="!done">
-        <h1 class="title">{{ t('backup.restore.title') }}</h1>
-        <p class="muted">{{ t('backup.restoreSubtitle') }}</p>
-        <RestorePanel @restored="(o) => (done = o)" />
-      </template>
-
-      <template v-else>
-        <CheckCircle2 :size="48" class="ok" />
-        <h1 class="title">{{ t('backup.restore.title') }}</h1>
-        <p class="muted" role="status">{{ t('backup.restore.doneFmt', done.itemsInBackup) }}</p>
-      </template>
+      <h1 class="title">{{ t('backup.restore.title') }}</h1>
+      <p class="muted">{{ t('backup.restoreSubtitle') }}</p>
+      <RestorePanel v-if="!done" @restored="(o) => (done = o)" />
+      <p v-else class="done" role="status">{{ t('backup.restore.doneFmt', done.itemsInBackup) }}</p>
     </div>
 
     <template #footer>
-      <PrimaryButton v-if="done" :title="t('common.continue')" :icon="ArrowRight" mirror-icon @click="emit('restored')" />
+      <PrimaryButton v-if="done" :title="t('pair.done')" :icon="Check" @click="emit('restored')" />
     </template>
   </AuthFrame>
 </template>
@@ -47,7 +40,7 @@ const done = ref<RestoreOutcome | null>(null)
 .content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-form-gap);
 }
 
 .back {
@@ -59,8 +52,8 @@ const done = ref<RestoreOutcome | null>(null)
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-button-weight);
   cursor: pointer;
 }
 
@@ -76,7 +69,11 @@ const done = ref<RestoreOutcome | null>(null)
   color: var(--text-secondary);
 }
 
-.ok {
-  color: var(--success);
+/* iOS `doneBody`: 18 bold, accent. */
+.done {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
 }
 </style>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-// The one list row for settings-style cards (iOS `NavChevronRow` and the toggle rows): a
-// fixed-height row with the icon in a rounded-square badge, title and optional subtitle,
-// then trailing text and a chevron (mirrored in RTL), or whatever the `trailing` slot holds
-// (a switch). Rows in the same card draw a hairline between them. With a `trailing` slot
-// the row is not a button itself, so the switch stays the one control.
+// iOS `SettingsRow` / `NavChevronRow` / `ToggleRow`: at least 60 tall, 10 vertical padding,
+// a 36 icon badge (radius 10, 16 glyph, tint at 12%) 14 from the text; title 15 medium,
+// subtitle 12 regular 2 below; then trailing value (13, secondary) and a 13 chevron 8 apart,
+// or whatever the `trailing` slot holds (a switch). Rows sit in a `SettingsSection` card
+// (14 × 4 inset) with an iOS `RowDivider` between them, inset to the text. Pressed (and,
+// on desktop, hovered) = `RowButtonStyle`: a 6% text-primary wash, radius 10, 8 past the
+// row on each side. With a `trailing` slot the row is not a button itself.
 import { ChevronRight } from 'lucide-vue-next'
 import { computed, useSlots, type Component } from 'vue'
 
@@ -34,7 +36,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     @click="interactive && !disabled && $emit('click')"
   >
     <span class="badge" :style="badgeStyle" aria-hidden="true">
-      <component :is="icon" :size="18" :stroke-width="2" />
+      <component :is="icon" :stroke-width="2.5" />
     </span>
     <span class="text">
       <span class="title">{{ title }}</span>
@@ -42,7 +44,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     </span>
     <span v-if="trailingText" class="trailing-text">{{ trailingText }}</span>
     <slot name="trailing" />
-    <ChevronRight v-if="interactive && !destructive" class="chevron mirror-rtl" :size="16" aria-hidden="true" />
+    <ChevronRight v-if="interactive && !destructive" class="chevron mirror-rtl" :stroke-width="2.5" aria-hidden="true" />
   </component>
 </template>
 
@@ -52,40 +54,48 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-row-icon-gap);
   width: 100%;
-  min-height: var(--row-height);
+  min-height: var(--size-row-min-height);
   margin: 0;
-  padding-block: 8px;
-  padding-inline: 16px;
+  padding: var(--space-row-vertical) 0;
   border: 0;
   background: transparent;
   color: var(--text-primary);
   font: inherit;
   text-align: start;
-  transition: background-color var(--motion-fast) ease-out;
 }
 
-/* A hairline between rows in one card, starting under the text like iOS grouped lists. */
+/* iOS `RowButtonStyle`'s wash, drawn 8 past the row on both sides. */
+.settings-row::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: -8px;
+  border-radius: var(--radius-row-press);
+  background: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-press);
+}
+
+/* iOS `RowDivider`: 1px stroke from the text's leading edge (badge 36 + gap 14). */
 .settings-row + .settings-row::before {
   content: '';
   position: absolute;
   top: 0;
-  inset-inline-start: calc(16px + var(--row-badge-size) + 12px);
+  inset-inline-start: calc(var(--size-icon-badge) + var(--space-row-icon-gap));
   inset-inline-end: 0;
-  border-top: 1px solid var(--stroke);
+  border-top: var(--size-stroke) solid var(--stroke);
 }
 
 .settings-row.interactive {
   cursor: pointer;
 }
 
-.settings-row.interactive:hover:not(:disabled) {
-  background: var(--card-muted);
-}
-
-.settings-row.interactive:active:not(:disabled) {
-  background: color-mix(in srgb, var(--accent) 12%, var(--card-muted));
+.settings-row.interactive:hover:not(:disabled)::after,
+.settings-row.interactive:active:not(:disabled)::after {
+  opacity: var(--motion-row-pressed-opacity);
 }
 
 .settings-row.interactive:focus-visible {
@@ -95,7 +105,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
 
 .settings-row:disabled,
 .settings-row[aria-disabled='true'] {
-  opacity: 0.5;
+  opacity: var(--motion-disabled-opacity);
   cursor: default;
 }
 
@@ -103,11 +113,16 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: var(--row-badge-size);
-  height: var(--row-badge-size);
-  border-radius: var(--row-badge-radius);
-  background: color-mix(in srgb, var(--badge-color) 14%, transparent);
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--badge-color) 12%, transparent);
   color: var(--badge-color);
+}
+
+.badge :deep(svg) {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .text {
@@ -115,19 +130,18 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
   flex: 1;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
   min-width: 0;
 }
 
 .title {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.3;
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
 }
 
 .subtitle {
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: var(--type-row-subtitle-size);
+  font-weight: var(--type-row-subtitle-weight);
   color: var(--text-secondary);
 }
 
@@ -135,14 +149,22 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
   flex-shrink: 0;
   max-width: 40%;
   overflow: hidden;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
   color: var(--text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Value and chevron sit 8 apart (iOS `NavChevronRow`), 14 from the text. */
+.trailing-text + .chevron {
+  margin-inline-start: calc(var(--space-button-icon-gap) - var(--space-row-icon-gap));
+}
+
 .chevron {
   flex-shrink: 0;
+  width: var(--size-row-chevron-glyph);
+  height: var(--size-row-chevron-glyph);
   color: var(--text-tertiary);
 }
 

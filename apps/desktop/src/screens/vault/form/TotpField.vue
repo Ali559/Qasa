@@ -5,8 +5,7 @@
 import { Image, Keyboard, Plus, ShieldCheck } from 'lucide-vue-next'
 import { onBeforeUnmount, ref, watch } from 'vue'
 
-import Sheet from '@/components/Sheet.vue'
-import TextField from '@/components/TextField.vue'
+import PromptSheet from './PromptSheet.vue'
 import { useT } from '@/prefs'
 import { isCommandError } from '@/vault/types'
 import { toolsApi, type TotpCode, type TotpSetup } from '@/vault/tools'
@@ -89,9 +88,9 @@ function openKey() {
     <span class="label">{{ t('field.totp') }}</span>
     <template v-if="!model">
       <div class="add-wrap">
-        <button type="button" class="add" :aria-expanded="showMenu" @click="showMenu = !showMenu">
-          <Plus :size="18" />
-          {{ t('totp.add') }}
+        <button type="button" class="qasa-button add" :aria-expanded="showMenu" @click="showMenu = !showMenu">
+          <Plus :stroke-width="2.5" />
+          <span>{{ t('totp.add') }}</span>
         </button>
         <div v-if="showMenu" class="menu" role="menu">
           <button type="button" role="menuitem" @click="fromImage"><Image :size="16" />{{ t('totp.scanImage') }}</button>
@@ -101,7 +100,7 @@ function openKey() {
       <span class="hint">{{ t('totp.hint') }}</span>
     </template>
     <div v-else class="set">
-      <ShieldCheck :size="18" class="accent" />
+      <ShieldCheck class="accent shield" :stroke-width="2.25" />
       <span class="text">
         <span class="issuer">{{ setup?.issuer ?? setup?.accountName ?? t('field.totp') }}</span>
         <span v-if="code" class="code">{{ code.grouped }}</span>
@@ -110,17 +109,18 @@ function openKey() {
     </div>
     <span v-if="error" class="error" role="alert">{{ error }}</span>
 
-    <Sheet :open="showKey" :label="t('totp.enterKey')" :width="420" placement="bottom" @close="showKey = false">
-      <div class="key-sheet">
-        <h2>{{ t('totp.enterKey') }}</h2>
-        <p>{{ t('totp.hint') }}</p>
-        <TextField v-model="key" :placeholder="t('totp.keyPlaceholder')" mono autofocus @submit="applyKey" />
-        <div class="actions">
-          <button type="button" @click="showKey = false">{{ t('common.cancel') }}</button>
-          <button type="button" class="primary" :disabled="!key.trim()" @click="applyKey">{{ t('totp.add') }}</button>
-        </div>
-      </div>
-    </Sheet>
+    <PromptSheet
+      v-model="key"
+      :open="showKey"
+      :title="t('totp.enterKey')"
+      :message="t('totp.hint')"
+      :placeholder="t('totp.keyPlaceholder')"
+      :confirm-label="t('totp.add')"
+      :cancel-label="t('common.cancel')"
+      mono
+      @confirm="applyKey"
+      @cancel="showKey = false"
+    />
   </div>
 </template>
 
@@ -128,12 +128,13 @@ function openKey() {
 .totp-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-field-label-gap);
 }
 
+/* iOS `FormFieldLabel` = `SectionLabel`. */
 .label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-section-label-size);
+  font-weight: var(--type-section-label-weight);
   color: var(--text-secondary);
 }
 
@@ -141,21 +142,11 @@ function openKey() {
   position: relative;
 }
 
+/* iOS: card fill, accent 40% stroke, accent 16 semibold title with a plus. */
 .add {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
-  border-radius: var(--button-radius);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
   background: var(--card-background);
   color: var(--accent);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .menu {
@@ -166,8 +157,8 @@ function openKey() {
   display: flex;
   flex-direction: column;
   padding: 6px;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 14px;
+  border: var(--size-stroke) solid var(--stroke-chrome);
+  border-radius: var(--radius-control);
   background: var(--chrome);
   box-shadow: 0 12px 32px var(--shadow-color);
 }
@@ -178,30 +169,42 @@ function openKey() {
   gap: 10px;
   padding: 10px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--radius-control) - 4px);
   background: transparent;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--type-body-size);
   text-align: start;
   cursor: pointer;
+}
+
+.menu button svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 
 .menu button:hover {
   background: var(--card-muted);
 }
 
-.hint {
-  font-size: 12px;
+.hint,
+.error {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
   color: var(--text-secondary);
 }
 
+.error {
+  color: var(--danger);
+}
+
+/* iOS `setRow`: 14 padding, card radius 20, 1px stroke, 12 gap. */
 .set {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
 }
 
@@ -209,17 +212,23 @@ function openKey() {
   color: var(--accent);
 }
 
+.shield {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
 .text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
   flex: 1;
   min-width: 0;
 }
 
 .issuer {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -234,65 +243,12 @@ function openKey() {
 }
 
 .remove {
+  padding: 0;
   border: 0;
   background: transparent;
   color: var(--danger);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.error {
-  font-size: 12px;
-  color: var(--danger);
-}
-
-.key-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 24px;
-}
-
-.key-sheet h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.key-sheet p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.actions button {
-  flex: 1;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--button-radius);
-  background: var(--card-background);
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.actions .primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.actions .primary:disabled {
-  opacity: 0.45;
 }
 </style>

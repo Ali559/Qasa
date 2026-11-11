@@ -11,7 +11,7 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -69,11 +69,8 @@ fun LANSyncScreen(
 
     ScreenScaffold(
         header = {
-            SheetChromeHeader(
-                title = stringResource(R.string.lan_title),
-                onDismiss = onDone,
-                dismissLabel = stringResource(R.string.common_close),
-            )
+            // Shown in a sheet: the shared sheet header, no Close (iOS `.sheetHeader`).
+            QasaSheetHeader(stringResource(R.string.lan_title))
         },
         stickyBottom = if (isPremium) {
             null

@@ -6337,6 +6337,28 @@
         }
       }
     },
+    "error.generic": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong. Try again."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حدث خطأ ما. حاول مرة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەڵەیەک ڕوویدا. دووبارە هەوڵ بدەوە."
+          }
+        }
+      }
+    },
     "error.invalidURL": {
       "localizations": {
         "en": {
@@ -6355,6 +6377,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "URLی API هەڵەیە."
+          }
+        }
+      }
+    },
+    "error.network": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't reach Qasa. Check your internet connection."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناتوانرێت بگاتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە."
           }
         }
       }
@@ -13835,6 +13879,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "هیچ بەشدارییەکی چالاک نەدۆزرایەوە."
+          }
+        }
+      }
+    },
+    "sub.notFound": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No subscription found."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يُعثر على اشتراك."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هیچ بەشدارییەک نەدۆزرایەوە."
           }
         }
       }

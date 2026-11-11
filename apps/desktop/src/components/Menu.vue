@@ -90,7 +90,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocDown))
   width: 36px;
   height: 36px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
@@ -109,8 +109,8 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocDown))
   flex-direction: column;
   min-width: 220px;
   padding: 6px;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 14px;
+  border: var(--size-stroke) solid var(--stroke-chrome);
+  border-radius: var(--radius-control);
   background: var(--chrome);
   box-shadow: 0 12px 32px var(--shadow-color);
 }
@@ -118,10 +118,11 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocDown))
 .item {
   padding: 9px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(var(--radius-control) - 4px);
   background: transparent;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
   text-align: start;
   white-space: nowrap;
   cursor: pointer;
@@ -142,6 +143,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocDown))
   transition:
     opacity var(--motion-fast),
     transform var(--motion-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-enter-from,
+  .menu-leave-to {
+    transform: none;
+  }
 }
 
 .menu-enter-from,

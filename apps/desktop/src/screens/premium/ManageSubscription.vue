@@ -2,13 +2,14 @@
 // iOS `ManageSubscriptionView` (embedded in the shell): the details card, the renewal link
 // card when one is out, auto-renew with "Remove saved payment method", and one cancel
 // button behind a confirm, then the reason sheet.
-import { Lock, RefreshCw, XCircle } from 'lucide-vue-next'
+import { CircleX, CreditCard, Lock, RefreshCw, XCircle } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
 import { refreshAccount, refreshLicense } from '@/account/store'
 import type { Subscription } from '@/account/types'
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
+import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
@@ -16,13 +17,11 @@ import TextField from '@/components/TextField.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { openUrl } from '@/opener'
 import { useT } from '@/prefs'
-import SheetHeader from '@/screens/settings/SheetHeader.vue'
 import AlertDialog from './AlertDialog.vue'
-import { errorText, formatDate, formatIqd, gatewayName, pollUntilComplete, subscriptionFrom, useTr } from './shared'
+import { errorText, formatDate, formatIqd, gatewayName, pollUntilComplete, subscriptionFrom } from './shared'
 
 defineEmits<{ back: [] }>()
 const t = useT()
-const tr = useTr()
 
 const subscription = ref<Subscription | null>(null)
 const autoRenew = ref(true)
@@ -83,7 +82,7 @@ async function load() {
   try {
     apply(await accountApi.subscription())
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isLoading.value = false
   }
@@ -102,7 +101,7 @@ async function updateAutoRenew(enabled: boolean) {
     statusMessage.value = enabled ? t('sub.autoRenewEnabled') : t('sub.autoRenewDisabled')
   } catch (e) {
     autoRenew.value = subscription.value?.auto_renew ?? true
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isSaving.value = false
   }
@@ -118,7 +117,7 @@ async function removePaymentMethod() {
     apply(await accountApi.subscription())
     statusMessage.value = t('sub.paymentMethodRemoved')
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isRemovingPaymentMethod.value = false
   }
@@ -137,7 +136,7 @@ async function payRenewal() {
       return
     }
     await openUrl(link.url)
-    const result = await pollUntilComplete(link.payment_id, { cancelled: () => unmounted, tr })
+    const result = await pollUntilComplete(link.payment_id, { cancelled: () => unmounted, t })
     if (unmounted) return
     if (result.outcome === 'success') {
       await refreshLicense().catch((e) => console.error('License refresh failed', e))
@@ -151,7 +150,7 @@ async function payRenewal() {
       else errorMessage.value = (result.outcome === 'timeout' ? result.error : null) ?? t('premium.paymentFailed')
     }
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isPayingRenewal.value = false
   }
@@ -179,7 +178,7 @@ async function confirmCancel(reason: string) {
     statusMessage.value = t('sub.cancelledUntil', formatDate(subscription.value?.expires_at))
     await refreshAccount().catch(() => {})
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isCancelling.value = false
   }
@@ -228,7 +227,6 @@ async function confirmCancel(reason: string) {
               {{ t('sub.renewalLinkReady', formatIqd(subscription.renewal.link.amount_iqd), formatDate(subscription.renewal.link.pay_by)) }}
             </p>
             <PrimaryButton
-              class="small-radius"
               :title="isPayingRenewal ? t('premium.processing') : t('sub.payRenewal')"
               :icon="Lock"
               :disabled="isPayingRenewal"
@@ -239,7 +237,7 @@ async function confirmCancel(reason: string) {
           <!-- Auto-renew -->
           <div class="row-card">
             <div class="renew-row">
-              <RefreshCw :size="18" class="accent" aria-hidden="true" />
+              <RefreshCw :size="18" :stroke-width="2" class="accent" aria-hidden="true" />
               <div class="row-text">
                 <span class="row-title">{{ t('sub.autoRenew') }}</span>
                 <span class="row-detail">{{ autoRenewSubtitle }}</span>
@@ -262,8 +260,8 @@ async function confirmCancel(reason: string) {
             </button>
           </div>
 
-          <button v-if="!isCancelled" type="button" class="cancel-button" :disabled="isCancelling" @click="askCancel">
-            {{ t('sub.cancelSubscription') }}
+          <button v-if="!isCancelled" type="button" class="qasa-button secondary cancel-button" :disabled="isCancelling" @click="askCancel">
+            <span>{{ t('sub.cancelSubscription') }}</span>
           </button>
         </template>
 
@@ -277,6 +275,7 @@ async function confirmCancel(reason: string) {
     <AlertDialog
       :open="showCancelConfirm"
       :title="t('sub.cancelConfirmTitle')"
+      :icon="CircleX"
       :message="t('sub.cancelConfirmMessage', formatDate(subscription?.expires_at))"
       :cancel-label="t('sub.keepPremium')"
       :confirm-label="t('sub.continue')"
@@ -288,28 +287,40 @@ async function confirmCancel(reason: string) {
     <ConfirmDialog
       :open="showRemovePaymentConfirm"
       :title="t('sub.removePaymentMethod')"
+      :icon="CreditCard"
       :message="t('sub.removePaymentMethodConfirm')"
       :confirm-label="t('sub.removePaymentMethod')"
+      :cancel-label="t('common.cancel')"
       destructive
       @cancel="showRemovePaymentConfirm = false"
       @confirm="removePaymentMethod"
     />
 
-    <Sheet :open="showCancelReason" :label="t('sub.cancelReasonTitle')" :width="520" placement="bottom" @close="showCancelReason = false">
-      <SheetHeader :title="t('sub.cancelReasonTitle')" :cancel-label="t('sub.skip')" @cancel="confirmCancel('')" />
+    <!-- iOS `cancelReasonSheet`: the prompt, the notes box and the optional note 16 apart;
+         the destructive confirm in the bottom bar. No Skip: that button confirms without a reason. -->
+    <Sheet
+      :open="showCancelReason"
+      :label="t('sub.cancelReasonTitle')"
+      :title="t('sub.cancelReasonTitle')"
+      :width="520"
+      placement="bottom"
+      @close="!isCancelling && (showCancelReason = false)"
+    >
       <div class="reason">
         <p class="prompt">{{ t('sub.cancelReasonPrompt') }}</p>
         <TextField v-model="cancelReason" multiline :label="t('sub.cancelReasonTitle')" :disabled="isCancelling" />
         <p class="optional">{{ t('sub.cancelReasonOptional') }}</p>
         <p v-if="errorMessage && showCancelReason" class="error" role="alert">{{ errorMessage }}</p>
+      </div>
+      <BottomActionBar>
         <PrimaryButton
-          class="small-radius"
+          kind="destructive"
           :title="isCancelling ? t('sub.cancellingProgress') : t('sub.confirmCancel')"
           :icon="XCircle"
           :disabled="isCancelling"
           @click="confirmCancel(cancelReason)"
         />
-      </div>
+      </BottomActionBar>
     </Sheet>
   </div>
 </template>
@@ -331,11 +342,15 @@ async function confirmCancel(reason: string) {
 .column {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
-  padding: 20px var(--screen-padding) 40px;
+  padding: var(--space-screen-padding) var(--space-screen-padding) 40px;
+}
+
+p {
+  margin: 0;
 }
 
 .loading {
@@ -359,28 +374,21 @@ async function confirmCancel(reason: string) {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 2.4s;
-  }
-}
-
 .none {
-  margin: 0;
   padding-top: 40px;
   text-align: center;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-/* Details card */
+/* iOS `detailsCard`: light card, 20 padding, 16 apart. */
 .details {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
   padding: 20px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background-light);
 }
 
@@ -397,13 +405,14 @@ async function confirmCancel(reason: string) {
   color: var(--text-primary);
 }
 
+/* 11 semibold capsule, accent (gold when cancelling). */
 .badge {
   padding: 4px 8px;
-  border: 1px solid var(--accent);
+  border: var(--size-stroke) solid var(--accent);
   border-radius: 999px;
   color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--type-field-error-size);
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -412,17 +421,11 @@ async function confirmCancel(reason: string) {
   color: var(--gold);
 }
 
-:root:lang(ar) .badge,
-:root:lang(ckb) .badge {
-  font-family: var(--font-body);
-  font-weight: 600;
-}
-
 .detail-row {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
 }
 
 .detail-row .label {
@@ -436,20 +439,19 @@ async function confirmCancel(reason: string) {
 }
 
 .note {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-secondary);
 }
 
-/* Row cards */
+/* iOS `autoRenewCard` / `renewalLinkCard`: card fill, card radius, 16 padding, 12 apart. */
 .row-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  border: 1px solid var(--stroke);
-  border-radius: 8px;
-  background: var(--chrome);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
+  background: var(--card-background);
 }
 
 .link-card {
@@ -457,8 +459,7 @@ async function confirmCancel(reason: string) {
 }
 
 .link-text {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-primary);
 }
 
@@ -477,18 +478,18 @@ async function confirmCancel(reason: string) {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
   min-width: 0;
 }
 
 .row-title {
-  font-size: 15px;
+  font-size: var(--type-row-title-size);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .row-detail {
-  font-size: 12px;
+  font-size: var(--type-row-subtitle-size);
   color: var(--text-secondary);
 }
 
@@ -498,44 +499,32 @@ async function confirmCancel(reason: string) {
   border: 0;
   background: transparent;
   color: var(--danger);
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 600;
   cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
+}
+
+.remove:active:not(:disabled) {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
 .remove:disabled {
-  opacity: 0.5;
+  opacity: var(--motion-disabled-opacity);
   cursor: default;
 }
 
+/* `qasaSecondary` with danger text. */
 .cancel-button {
-  width: 100%;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
-  border-radius: var(--button-radius);
-  background: color-mix(in srgb, var(--danger) 8%, transparent);
   color: var(--danger);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.cancel-button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.column .small-radius,
-.reason .small-radius {
-  border-radius: 8px;
-}
-
-/* Messages */
 .status,
 .error {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
 }
 
 .status {
@@ -550,36 +539,18 @@ async function confirmCancel(reason: string) {
 .reason {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: var(--screen-padding);
+  gap: var(--space-form-gap);
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
+  overflow-y: auto;
 }
 
 .prompt {
-  margin: 0;
-  font-size: 15px;
+  font-size: var(--type-body-size);
   color: var(--text-secondary);
-}
-
-.reason :deep(.field) {
-  min-height: 140px;
-  border-radius: 8px;
-  background: var(--card-background-light);
-}
-
-.reason :deep(textarea) {
-  min-height: 108px;
-  font-size: 15px;
 }
 
 .optional {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--type-field-error-size);
   color: var(--text-secondary);
-}
-
-:root:lang(ar) .optional,
-:root:lang(ckb) .optional {
-  font-family: var(--font-body);
 }
 </style>

@@ -62,7 +62,7 @@ private fun LoginFields(p: VaultPayload.Login, env: EditorEnv, onChange: (VaultP
     PasswordFormField(p.password, { onChange(p.copy(password = it)) }, env.onGeneratePassword)
     TotpFormField(p.totp) { onChange(p.copy(totp = it)) }
     FormTextField(R.string.field_website, p.website, FfiField.WEBSITE, keyboardType = KeyboardType.Uri) { onChange(p.copy(website = it)) }
-    FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
+    FormTextField(R.string.field_note, p.note, FfiField.NOTE, multiline = true) { onChange(p.copy(note = it)) }
     CollectionPickerField(p.collectionId, env.collections, { onChange(p.copy(collectionId = it)) }, env.onCreateCollection)
 }
 
@@ -71,7 +71,7 @@ private fun LoginFields(p: VaultPayload.Login, env: EditorEnv, onChange: (VaultP
 @Composable
 private fun SecureNoteFields(p: VaultPayload.SecureNote, env: EditorEnv, onChange: (VaultPayload) -> Unit) {
     FormTextField(R.string.field_title, p.title, FfiField.TITLE) { onChange(p.copy(title = it)) }
-    FormTextField(R.string.field_content, p.content, FfiField.CONTENT) { onChange(p.copy(content = it)) }
+    FormTextField(R.string.field_content, p.content, FfiField.CONTENT, multiline = true) { onChange(p.copy(content = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Mint)) { onChange(p.copy(color = it.raw)) }
     ToggleRow(
         title = stringResource(R.string.vault_protectitem),
@@ -102,7 +102,7 @@ private fun CardFields(p: VaultPayload.Card, onChange: (VaultPayload) -> Unit) {
             modifier = Modifier.weight(1f),
         ) { onChange(p.copy(securityCode = it.filter(Char::isDigit).take(4))) }
     }
-    FormTextField(R.string.field_note, p.note, FfiField.NOTE) { onChange(p.copy(note = it)) }
+    FormTextField(R.string.field_note, p.note, FfiField.NOTE, multiline = true) { onChange(p.copy(note = it)) }
     NoteColorPicker(NoteColor.fromRaw(p.color, NoteColor.Blue)) { onChange(p.copy(color = it.raw)) }
 }
 

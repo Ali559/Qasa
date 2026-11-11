@@ -49,6 +49,8 @@ struct AutofillTests {
         AutofillIndexEntry(id: UUID(), kind: kind, title: "T", subtitle: user, websiteHost: host, last4: nil, encryptedSecrets: Data(), hasTOTP: totp)
     }
 
+    // One-time-code identities exist from iOS 18; the app still runs on 17.
+    @available(iOS 18.0, *)
     @Test func passwordAndCodeIdentitiesOnlyForLogins() {
         let entries = [
             entry(.login, host: "github.com", user: "octo", totp: true),

@@ -40,7 +40,7 @@ final class NotificationService {
             lastError = nil
             return items
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
             return items
         }
     }

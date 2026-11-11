@@ -1,13 +1,13 @@
 <script setup lang="ts">
-// iOS `CollectionPickerField`: None or a folder, plus a button to make a new one.
+// iOS `CollectionPickerField`: None or a folder, plus a `FieldIconButton` (accent) that opens
+// the New collection `textPromptSheet`.
 import { FolderPlus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
-import Sheet from '@/components/Sheet.vue'
-import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { reloadCollections, session } from '@/vault/session'
+import PromptSheet from './PromptSheet.vue'
 import SelectField from './SelectField.vue'
 
 const model = defineModel<string | undefined>()
@@ -40,74 +40,39 @@ async function create() {
   <SelectField v-model="selected" :label="t('vault.collection')" :options="options">
     <template #trailing>
       <button type="button" class="new" :aria-label="t('vault.newCollection')" :title="t('vault.newCollection')" @click="showNew = true">
-        <FolderPlus :size="18" />
+        <FolderPlus :stroke-width="2.5" />
       </button>
     </template>
   </SelectField>
-  <Sheet :open="showNew" :label="t('vault.newCollection')" :width="400" placement="bottom" @close="showNew = false">
-    <div class="new-sheet">
-      <h2>{{ t('vault.newCollection') }}</h2>
-      <TextField v-model="newName" :placeholder="t('common.name')" autofocus @submit="create" />
-      <div class="actions">
-        <button type="button" @click="showNew = false">{{ t('common.cancel') }}</button>
-        <button type="button" class="primary" :disabled="!newName.trim()" @click="create">{{ t('common.create') }}</button>
-      </div>
-    </div>
-  </Sheet>
+  <PromptSheet
+    v-model="newName"
+    :open="showNew"
+    :title="t('vault.newCollection')"
+    :placeholder="t('common.name')"
+    :confirm-label="t('common.create')"
+    :cancel-label="t('common.cancel')"
+    @confirm="create"
+    @cancel="showNew = false"
+  />
 </template>
 
 <style scoped>
+/* iOS `FieldIconButton`: 32 square, 16 semibold glyph. */
 .new {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  flex-shrink: 0;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
   border: 0;
-  border-radius: 8px;
   background: transparent;
   color: var(--accent);
   cursor: pointer;
 }
 
-.new-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-}
-
-h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.actions button {
-  flex: 1;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--button-radius);
-  background: var(--card-background);
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.actions .primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.actions .primary:disabled {
-  opacity: 0.45;
+.new svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 </style>

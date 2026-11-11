@@ -20,4 +20,11 @@ object LocaleContext {
         config.setLayoutDirection(if (language.isRtl) Locale("ar") else Locale.ENGLISH)
         return base.createConfigurationContext(config)
     }
+
+    /**
+     * [context] in the language picked in the app's settings, read now. For strings built
+     * outside an activity (services, the autofill UI, application-context singletons), whose
+     * own resources follow the device language.
+     */
+    fun forApp(context: Context): Context = wrap(context, AppPreferences.storedLanguage(context))
 }

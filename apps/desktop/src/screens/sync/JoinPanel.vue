@@ -1,9 +1,14 @@
 <script setup lang="ts">
+// iOS `WiFiJoinPanel`: one card with the 17 semibold title, the live list of devices showing
+// a code (`SettingsRow`s with a selection circle), the code field and Sync, 12 apart.
 // Find a device showing a code on this Wi‑Fi, type the code, sync. Used by Sync on this
 // network (join) and by "I already have Qasa on another device" on Create vault.
-import { Laptop, Monitor, Smartphone, Wifi } from 'lucide-vue-next'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { Circle, CircleCheck, Hash, Laptop, Monitor, RefreshCw, Smartphone } from 'lucide-vue-next'
+import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 
+import CardContainer from '@/components/CardContainer.vue'
+import SectionLabel from '@/components/SectionLabel.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
@@ -33,7 +38,9 @@ onBeforeUnmount(() => {
   syncApi.stop()
 })
 
-const ICON = { ios: Smartphone, android: Smartphone, macos: Laptop, windows: Monitor, linux: Monitor } as Record<string, unknown>
+/** iOS `WiFiJoinPanel.icon(for:)`. */
+const ICON = { ios: Smartphone, android: Smartphone, macos: Laptop, windows: Monitor, linux: Monitor } as Record<string, Component>
+
 
 async function sync() {
   if (!selected.value || code.value.replace(/\D/g, '').length !== 6 || busy.value) return
@@ -55,42 +62,52 @@ async function sync() {
 </script>
 
 <template>
-  <div class="join">
-    <div class="peers" role="radiogroup" :aria-label="t('sync.joinTitle')">
-      <p v-if="peers.length === 0" class="searching"><span class="spinner" />{{ t('sync.searching') }}</p>
-      <button
-        v-for="p in peers"
-        :key="p.address"
-        type="button"
-        role="radio"
-        class="peer"
-        :class="{ selected: selected?.address === p.address }"
-        :aria-checked="selected?.address === p.address"
-        @click="selected = p"
-      >
-        <component :is="ICON[p.platform] ?? Wifi" :size="20" class="peer-icon" />
-        <span class="peer-name">{{ p.name }}</span>
-      </button>
-    </div>
-    <p v-if="peers.length === 0" class="hint">{{ t('sync.noPeers') }}</p>
+  <CardContainer>
+    <div class="join">
+      <h3 class="title">{{ t('sync.joinTitle') }}</h3>
+      <template v-if="peers.length === 0">
+        <p class="searching"><span class="spinner" aria-hidden="true" />{{ t('sync.searching') }}</p>
+        <p class="hint">{{ t('sync.noPeers') }}</p>
+      </template>
+      <div v-else class="peers" role="radiogroup" :aria-label="t('sync.joinTitle')">
+        <button
+          v-for="p in peers"
+          :key="p.address"
+          type="button"
+          role="radio"
+          class="peer"
+          :aria-checked="selected?.address === p.address"
+          @click="selected = p"
+        >
+          <SettingsRow :icon="ICON[p.platform] ?? Monitor" :title="p.name">
+            <template #trailing>
+              <CircleCheck v-if="selected?.address === p.address" class="mark on" fill="currentColor" stroke="var(--card-background)" aria-hidden="true" />
+              <Circle v-else class="mark" aria-hidden="true" />
+            </template>
+          </SettingsRow>
+        </button>
+      </div>
 
-    <TextField
-      v-model="code"
-      :placeholder="t('pair.codePlaceholder')"
-      :label="t('pair.codeLabel')"
-      mono
-      :disabled="!selected"
-      :invalid="!!error"
-      @submit="sync"
-    />
-    <p v-if="error" class="error" role="alert">{{ error }}</p>
-    <PrimaryButton
-      :title="busy ? t('sync.connecting') : t('sync.syncButton')"
-      :icon="Wifi"
-      :disabled="!selected || code.replace(/\D/g, '').length !== 6 || busy"
-      @click="sync"
-    />
-  </div>
+      <SectionLabel :text="t('pair.codeLabel')" />
+      <TextField
+        v-model="code"
+        :icon="Hash"
+        :placeholder="t('pair.codePlaceholder')"
+        :label="t('pair.codeLabel')"
+        mono
+        :disabled="!selected"
+        :invalid="!!error"
+        @submit="sync"
+      />
+      <p v-if="error" class="error" role="alert">{{ error }}</p>
+      <PrimaryButton
+        :title="busy ? t('sync.connecting') : t('sync.syncButton')"
+        :icon="busy ? undefined : RefreshCw"
+        :disabled="!selected || code.replace(/\D/g, '').length !== 6 || busy"
+        @click="sync"
+      />
+    </div>
+  </CardContainer>
 </template>
 
 <style scoped>
@@ -100,56 +117,90 @@ async function sync() {
   gap: 12px;
 }
 
+p,
+.title {
+  margin: 0;
+}
+
+.title {
+  font-size: var(--type-sheet-title-size);
+  font-weight: var(--type-sheet-title-weight);
+  color: var(--text-primary);
+}
+
 .peers {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
-  background: var(--card-background);
 }
 
+/* iOS `RowButtonStyle` around each `SettingsRow`, `RowDivider`s between them. */
 .peer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text-primary);
-  font-size: 16px;
-  font-weight: 600;
+  color: inherit;
   text-align: start;
   cursor: pointer;
 }
 
-.peer + .peer {
-  border-top: 1px solid var(--stroke);
+.peer::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: -8px;
+  border-radius: var(--radius-row-press);
+  background: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-press);
 }
 
-.peer.selected {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+.peer:hover::after,
+.peer:active::after {
+  opacity: var(--motion-row-pressed-opacity);
 }
 
-.peer-icon {
+.peer + .peer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: calc(var(--size-icon-badge) + var(--space-row-icon-gap));
+  inset-inline-end: 0;
+  border-top: var(--size-stroke) solid var(--stroke);
+}
+
+.peer:focus-visible {
+  outline-offset: -2px;
+}
+
+.mark {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--text-tertiary);
+}
+
+.mark.on {
   color: var(--accent);
 }
 
 .searching {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 16px;
+  gap: 8px;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
 .spinner {
+  flex-shrink: 0;
   width: 16px;
   height: 16px;
-  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
-  border-top-color: var(--accent);
+  border: 2px solid var(--text-tertiary);
+  border-top-color: transparent;
   border-radius: 50%;
   animation: spin 900ms linear infinite;
 }
@@ -161,14 +212,12 @@ async function sync() {
 }
 
 .hint {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-caption-size);
   color: var(--text-secondary);
 }
 
 .error {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);
 }

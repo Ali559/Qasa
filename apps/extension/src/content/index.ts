@@ -7,7 +7,7 @@
 // (about:blank, srcdoc, written by script) share their creator's origin, and the parent's
 // copy handles them through detect.ts's same-origin traversal, with the parent's URL.
 import type { BgResponse, BridgeStatus, ContentRequest, FillValues, IdentityItem, LoginMatch, TabRequest } from '@ext/shared/messages'
-import { loadLanguage } from '@ext/shared/language'
+import { LANGUAGE_KEY, loadLanguage } from '@ext/shared/language'
 import { isWebUrl } from '@ext/shared/protocol'
 import { detect, FRAME_MARK, groupOf, iconFields, identityGroupOf, isOtpField, type Detection, type FieldGroup } from './detect'
 import { setFieldValue, setSelectValue } from './fill'
@@ -27,6 +27,16 @@ if (ownsDocument) (window as MarkedWindow)[FRAME_MARK] = true
 
 let language: ContentLanguage = 'en'
 void loadLanguage().then((l) => (language = l))
+// The popup's language picker: follow it at once (the next menu, and an open one's next
+// state, use it) instead of keeping the language this page loaded with.
+try {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    const next = changes[LANGUAGE_KEY]?.newValue
+    if (area === 'local' && (next === 'en' || next === 'ar' || next === 'ckb')) language = next
+  })
+} catch {
+  // Storage events unavailable: the language stays as loaded.
+}
 
 let detection: Detection = { groups: [], otpFields: [], identity: [] }
 /** One overlay per document we handle (ours, plus script-less same-origin frames). */
@@ -126,7 +136,7 @@ function openMenuFor(field: HTMLInputElement): void {
   const context = contextOf(field)
   if (!context) return
   const overlay = overlayFor(field.ownerDocument)
-  void loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
+  const fonts = loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
   overlay.openMenu(field, {
     onPick: (item) => {
       if (context.kind === 'identity') {
@@ -139,6 +149,7 @@ function openMenuFor(field: HTMLInputElement): void {
       else void fillGroup(context.group, item.id, overlay.element)
     },
   })
+  overlay.revealAfter(fonts)
   void loadMenu(overlay, context)
 }
 

@@ -3,7 +3,7 @@
 // wallet rows and the pinned pay button. Desktop change (plan §7): Wayl's hosted page opens
 // in the browser; a wallet app link (`fib://…`) is shown as a QR code to scan with the
 // phone. Then the payment is polled 30 × 2 s, with "Check again" after a timeout.
-import { ArrowLeftRight, Circle, Lock, RefreshCw } from 'lucide-vue-next'
+import { ArrowLeftRight, Circle, Clock, Lock, RefreshCw } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
@@ -13,17 +13,17 @@ import AppMenuHeader from '@/components/AppMenuHeader.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import SettingsRow from '@/components/SettingsRow.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { openUrl } from '@/opener'
 import { useT } from '@/prefs'
 import FeatureRow from './FeatureRow.vue'
 import FilledCheck from './FilledCheck.vue'
-import { errorText, FALLBACK_PLANS, formatIqd, isYearly, pollUntilComplete, useTr } from './shared'
+import { errorText, FALLBACK_PLANS, formatIqd, isYearly, pollUntilComplete } from './shared'
 import WalletQr from './WalletQr.vue'
 
 defineEmits<{ back: [] }>()
 const t = useT()
-const tr = useTr()
 const isDev = import.meta.env.DEV
 
 interface PaymentMethod {
@@ -123,7 +123,7 @@ function onTrackKey(e: KeyboardEvent) {
 }
 
 async function finish(paymentId: string, attempts: number, intervalMs: number) {
-  const result = await pollUntilComplete(paymentId, { attempts, intervalMs, cancelled: () => unmounted, tr })
+  const result = await pollUntilComplete(paymentId, { attempts, intervalMs, cancelled: () => unmounted, t })
   if (unmounted) return
   if (result.outcome === 'success') {
     try {
@@ -148,7 +148,7 @@ async function finish(paymentId: string, attempts: number, intervalMs: number) {
     result.error ??
     (result.outcome === 'failed'
       ? t('premium.paymentFailed')
-      : tr('premium.timedOut', 'Payment timed out. Check your wallet and try again.'))
+      : t('premium.timedOut'))
   if (result.outcome === 'failed') {
     qrLink.value = null
     stubIntent.value = null
@@ -186,7 +186,7 @@ async function startPayment() {
     statusMessage.value = t('premium.completeInWallet', method.badgeText)
     await finish(intent.payment_id, 30, 2000)
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   } finally {
     isPaying.value = false
   }
@@ -217,7 +217,7 @@ async function simulateStub() {
     stubIntent.value = null
     if (!isPaying.value && recheckPaymentId.value) await checkAgain()
   } catch (e) {
-    errorMessage.value = errorText(tr, e)
+    errorMessage.value = errorText(t, e)
   }
 }
 </script>
@@ -276,14 +276,13 @@ async function simulateStub() {
           </div>
         </div>
 
-        <!-- Auto-renew -->
+        <!-- Auto-renew: iOS `ToggleRow` in a card, 14 in. -->
         <div class="row-card">
-          <RefreshCw :size="18" class="accent" aria-hidden="true" />
-          <div class="row-text">
-            <span class="row-title">{{ t('premium.autoRenew') }}</span>
-            <span class="row-detail">{{ autoRenewDetail }}</span>
-          </div>
-          <ToggleSwitch v-model="autoRenew" :label="t('premium.autoRenew')" :disabled="isPaying" />
+          <SettingsRow :icon="RefreshCw" :title="t('premium.autoRenew')" :subtitle="autoRenewDetail">
+            <template #trailing>
+              <ToggleSwitch v-model="autoRenew" :label="t('premium.autoRenew')" :disabled="isPaying" />
+            </template>
+          </SettingsRow>
         </div>
 
         <!-- Payment method -->
@@ -306,8 +305,8 @@ async function simulateStub() {
                 <span class="method-name">{{ method.name }}</span>
                 <span class="method-sub">{{ method.subtitle }}</span>
               </span>
-              <FilledCheck v-if="method.gateway === selectedGateway" :size="20" />
-              <Circle v-else :size="20" class="unchecked" aria-hidden="true" />
+              <FilledCheck v-if="method.gateway === selectedGateway" :size="22" />
+              <Circle v-else :size="22" class="unchecked" aria-hidden="true" />
             </button>
           </div>
         </section>
@@ -318,15 +317,16 @@ async function simulateStub() {
         <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
         <div v-if="recheckPaymentId && !isPaying" class="secondary-actions">
-          <button type="button" class="secondary" @click="checkAgain">
-            <RefreshCw :size="15" aria-hidden="true" />
-            {{ tr('premium.checkAgain', 'Check again') }}
+          <button type="button" class="qasa-button secondary" @click="checkAgain">
+            <RefreshCw :stroke-width="2.5" aria-hidden="true" />
+            <span>{{ t('premium.checkAgain') }}</span>
           </button>
         </div>
         <div v-if="isDev && stubIntent" class="secondary-actions">
-          <button type="button" class="secondary dev" @click="simulateStub">
-            <ArrowLeftRight :size="15" aria-hidden="true" />
-            Simulate payment (dev)
+          <!-- Dev builds only, never shipped: not translated. -->
+          <button type="button" class="qasa-button secondary dev" @click="simulateStub">
+            <ArrowLeftRight :stroke-width="2.5" aria-hidden="true" />
+            <span>Simulate payment (dev)</span>
           </button>
         </div>
       </div>
@@ -335,12 +335,13 @@ async function simulateStub() {
     <BottomActionBar stack :max-width="680">
       <PrimaryButton :title="payTitle" :icon="Lock" :disabled="isPaying || premium" @click="onPay" />
       <p v-if="premium" class="footnote success">{{ t('premium.alreadyPremium') }}</p>
-      <p v-else class="footnote">{{ tr('premium.opensWalletDesktop', 'Opens checkout in your browser, or a code to scan with your phone. We\'ll refresh your license when payment completes.') }}</p>
+      <p v-else class="footnote">{{ t('premium.opensWalletDesktop') }}</p>
     </BottomActionBar>
 
     <ConfirmDialog
       :open="comingSoon"
       :title="t('premium.comingSoonTitle')"
+      :icon="Clock"
       :message="t('premium.comingSoonBody')"
       :confirm-label="t('common.ok')"
       no-cancel
@@ -371,7 +372,7 @@ async function simulateStub() {
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
-  padding: 20px var(--screen-padding) 40px;
+  padding: 20px var(--space-screen-padding) 40px;
 }
 
 .accent {
@@ -379,7 +380,7 @@ async function simulateStub() {
   flex-shrink: 0;
 }
 
-/* Carousel */
+/* Carousel (iOS `planCarousel`: cards then 7pt dots, 12 apart) */
 .carousel {
   display: flex;
   flex-direction: column;
@@ -397,7 +398,7 @@ async function simulateStub() {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  border-radius: var(--corner-radius);
+  border-radius: var(--radius-card);
   outline: none;
 }
 
@@ -420,8 +421,8 @@ async function simulateStub() {
   padding: 25px;
   overflow: hidden;
   scroll-snap-align: start;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background-light);
   cursor: pointer;
 }
@@ -450,9 +451,10 @@ async function simulateStub() {
   text-align: center;
 }
 
+/* `Font.qasaLabel(12)` (13 medium), tracking 1.2. */
 .eyebrow {
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   letter-spacing: 1.2px;
   color: var(--gold);
 }
@@ -475,20 +477,14 @@ async function simulateStub() {
 }
 
 .plan-title {
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--type-field-error-size);
+  font-weight: 600;
   color: var(--accent);
 }
 
 :root:lang(ar) .eyebrow,
 :root:lang(ckb) .eyebrow {
   letter-spacing: 0;
-}
-
-:root:lang(ar) .plan-title,
-:root:lang(ckb) .plan-title {
-  font-family: var(--font-body);
-  font-weight: 600;
 }
 
 .features {
@@ -511,7 +507,7 @@ async function simulateStub() {
   border-radius: 50%;
   background: var(--stroke);
   cursor: pointer;
-  transition: background-color var(--motion-standard) ease-in-out;
+  transition: background-color var(--motion-fade);
 }
 
 .dot.on {
@@ -520,35 +516,13 @@ async function simulateStub() {
 
 /* Auto-renew row */
 .row-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--stroke);
-  border-radius: 8px;
-  background: var(--chrome);
+  padding-inline: var(--space-section-inset-horizontal);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
+  background: var(--card-background);
 }
 
-.row-text {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.row-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.row-detail {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-/* Wallet rows */
+/* Wallet rows (iOS `paymentSection` / `paymentRow`) */
 .payment {
   display: flex;
   flex-direction: column;
@@ -571,29 +545,34 @@ async function simulateStub() {
 .method {
   display: flex;
   align-items: center;
-  /* One gap on both sides of the text: the trailing check sits as far from it as the
-     leading badge does, and the row's padding mirrors them at the edges. */
-  gap: 16px;
+  gap: 0;
   width: 100%;
-  padding: 17px;
-  border: 1px solid var(--stroke);
-  border-radius: 8px;
-  background: var(--chrome);
+  min-height: var(--size-row-min-height);
+  padding: 12px 16px;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
+  background: var(--card-background);
   color: inherit;
   font: inherit;
   text-align: start;
   cursor: pointer;
   transition:
-    border-color var(--motion-fast) ease-in-out,
-    background-color var(--motion-fast) ease-in-out;
+    opacity var(--motion-press),
+    transform var(--motion-press);
 }
 
 .method.selected {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 5%, var(--chrome));
+  background: color-mix(in srgb, var(--accent) 6%, var(--card-background));
+}
+
+.method:active:not(:disabled) {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
 .method:disabled {
+  opacity: var(--motion-disabled-opacity);
   cursor: default;
 }
 
@@ -603,12 +582,13 @@ async function simulateStub() {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--accent) 12%, var(--chrome));
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  margin-inline-end: var(--space-row-icon-gap);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
-  font-size: 16px;
+  font-size: var(--type-field-size);
   font-weight: 700;
 }
 
@@ -616,8 +596,9 @@ async function simulateStub() {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
   min-width: 0;
+  margin-inline-end: 12px;
 }
 
 .method-name {
@@ -626,15 +607,16 @@ async function simulateStub() {
   color: var(--text-primary);
 }
 
+/* `Font.qasaLabel(12)`. */
 .method-sub {
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   color: var(--text-secondary);
 }
 
 .unchecked {
   flex-shrink: 0;
-  color: var(--stroke);
+  color: var(--text-tertiary);
 }
 
 /* Messages */
@@ -656,34 +638,16 @@ async function simulateStub() {
   display: flex;
 }
 
-.secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.secondary.dev {
+.qasa-button.dev {
   border-style: dashed;
   border-color: var(--gold);
   color: var(--gold);
 }
 
-/* Pinned footer */
-
-
-
 .footnote {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   text-align: center;
   color: var(--text-secondary);
 }

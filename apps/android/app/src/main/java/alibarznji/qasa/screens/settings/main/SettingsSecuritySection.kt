@@ -25,7 +25,7 @@ import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.HorizontalDivider
+import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +60,7 @@ internal fun SecurityRows(
         title = stringResource(R.string.settings_changemasterpassword),
         onClick = onChangePassword,
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     ToggleRow(
         icon = Icons.Filled.Fingerprint,
         title = stringResource(R.string.settings_biometricunlock),
@@ -79,7 +79,7 @@ internal fun SecurityRows(
             vm.session.setBiometricsEnabled(it)
         },
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     NavChevronRow(
         icon = Icons.Filled.TextFields,
         title = stringResource(R.string.settings_autofill),
@@ -88,7 +88,7 @@ internal fun SecurityRows(
         subtitle = stringResource(R.string.settings_autofillsubtitleandroid),
         onClick = { alibarznji.qasa.credentials.AutofillSettings.openPicker(context) },
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     val confirmEveryFill by vm.prefs.autofillConfirmEveryFill.collectAsState()
     ToggleRow(
         icon = Icons.Filled.VerifiedUser,
@@ -97,7 +97,7 @@ internal fun SecurityRows(
         checked = confirmEveryFill,
         onCheckedChange = vm.prefs::setAutofillConfirmEveryFill,
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     NavChevronRow(
         icon = Icons.Outlined.Schedule,
         title = stringResource(R.string.settings_autolock),
@@ -144,7 +144,7 @@ internal fun LinkedDevicesSection(
             subtitle = stringResource(R.string.settings_thisdevice),
             onClick = onDevices,
         )
-        HorizontalDivider(color = c.stroke)
+        RowDivider()
         NavChevronRow(
             icon = Icons.Filled.Wifi,
             title = stringResource(R.string.settings_syncnetwork),

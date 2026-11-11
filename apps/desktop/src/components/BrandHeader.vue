@@ -23,8 +23,8 @@ const t = useT()
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  height: 64px;
-  padding-inline: 16px;
+  height: var(--size-header-height);
+  padding-inline: var(--space-header-horizontal);
   background: var(--chrome);
   flex-shrink: 0;
 }
@@ -40,10 +40,11 @@ const t = useT()
   flex: none;
 }
 
-/* The wordmark in the app face too, at its heaviest bundled weight. */
+/* iOS `KasoBrandHeader`: the wordmark 24 bold, in the app face. */
 .wordmark {
-  font-family: var(--font-body);
+  font-family: var(--font-family);
   font-size: 24px;
   font-weight: 700;
+  line-height: var(--line-height);
 }
 </style>

@@ -54,12 +54,12 @@ function onPick() {
     <template #below>
       <div class="below">
         <button type="button" class="pick" @click="picking ? (picking = false) : openPicker()">
-          <Calendar :size="14" />
-          {{ picking ? t('date.done') : t('date.pick') }}
+          <Calendar v-if="!picking" :stroke-width="2.5" />
+          <span>{{ picking ? t('date.done') : t('date.pick') }}</span>
         </button>
         <span v-if="parsed && !error" class="reading">{{ formatCivilDate(parsed, prefs.language) }}</span>
       </div>
-      <input v-if="picking" v-model="picked" type="date" class="calendar" :aria-label="t('date.pick')" @change="onPick" />
+      <input v-if="picking" v-model="picked" type="date" class="qasa-field calendar" :aria-label="t('date.pick')" @change="onPick" />
     </template>
   </FormField>
 </template>
@@ -72,6 +72,7 @@ function onPick() {
   gap: 8px;
 }
 
+/* iOS: `Label("Pick date", systemImage: "calendar")`, 13 semibold accent. */
 .pick {
   display: flex;
   align-items: center;
@@ -80,29 +81,27 @@ function onPick() {
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 600;
   cursor: pointer;
 }
 
+.pick svg {
+  width: var(--type-row-value-size);
+  height: var(--type-row-value-size);
+}
+
+/* iOS: the date as read, 13 regular secondary. */
 .reading {
-  font-size: 12px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
   color: var(--text-secondary);
   text-align: end;
 }
 
 .calendar {
   align-self: flex-start;
-  height: var(--field-height);
-  margin: 0;
-  padding-block: 0;
-  padding-inline: var(--field-padding-inline);
-  border: 1px solid var(--stroke);
-  border-radius: var(--field-radius);
-  background: var(--card-background);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: var(--field-font-size);
+  width: auto;
   accent-color: var(--accent);
 }
 </style>

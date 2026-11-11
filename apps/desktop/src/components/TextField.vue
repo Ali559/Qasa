@@ -1,9 +1,12 @@
 <script setup lang="ts">
-// iOS `ThemedTextField`: leading icon, card fill, 1pt stroke, `--field-height` tall (base.css).
-// Secure fields get the eye toggle the screens add on iOS.
+// iOS `ThemedTextField` on `QasaFieldChrome`: optional leading icon (20 wide, 12 from the
+// text), card fill, 1px stroke, control radius, `--size-field-height` tall, 14 horizontal
+// padding, 16 regular. Secure fields get the 32pt eye button (`FieldIconButton`).
+// `multiline` is `QasaNotesChrome`: at least 112 tall, padding 10 × 8, growing with the text.
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { computed, ref, type Component } from 'vue'
 
+import { vAutoGrow } from './autoGrow'
 import { useT } from '@/prefs'
 
 const props = withDefaults(
@@ -31,23 +34,27 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
 </script>
 
 <template>
-  <label class="field" :class="{ multiline, disabled, invalid, 'has-trailing': !multiline && ((secure && revealable) || !!$slots.trailing) }">
-    <component :is="icon" v-if="icon" class="icon" :size="18" aria-hidden="true" />
-    <textarea
-      v-if="multiline"
-      v-model="model"
-      :placeholder="placeholder"
-      :aria-label="label ?? placeholder"
-      :disabled="disabled"
-      rows="4"
-    />
+  <textarea
+    v-if="multiline"
+    v-model="model"
+    v-auto-grow
+    class="qasa-notes notes"
+    :class="{ invalid, disabled }"
+    :placeholder="placeholder"
+    :aria-label="label ?? placeholder"
+    :aria-invalid="invalid || undefined"
+    :disabled="disabled"
+    rows="1"
+  />
+  <label v-else class="qasa-field field" :class="{ disabled, invalid, 'has-trailing': (secure && revealable) || !!$slots.trailing }">
+    <component :is="icon" v-if="icon" class="icon" aria-hidden="true" />
     <input
-      v-else
       v-model="model"
       :type="inputType"
       :class="{ mono }"
       :placeholder="placeholder"
       :aria-label="label ?? placeholder"
+      :aria-invalid="invalid || undefined"
       :autofocus="autofocus"
       :disabled="disabled"
       autocomplete="off"
@@ -64,92 +71,67 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
       :aria-label="revealed ? t('a11y.hidePassword') : t('a11y.showPassword')"
       @click.prevent="revealed = !revealed"
     >
-      <EyeOff v-if="revealed" :size="17" />
-      <Eye v-else :size="17" />
+      <EyeOff v-if="revealed" :stroke-width="2.5" />
+      <Eye v-else :stroke-width="2.5" />
     </button>
   </label>
 </template>
 
 <style scoped>
 .field {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: var(--field-height);
-  padding-block: 0;
-  padding-inline: var(--field-padding-inline);
-  background: var(--card-background);
-  border: 1px solid var(--stroke);
-  border-radius: var(--field-radius);
+  gap: 12px;
   cursor: text;
-  transition: border-color var(--motion-fast) ease-in-out;
 }
 
-.field:focus-within {
-  border-color: var(--accent);
-}
-
-.field.invalid {
-  border-color: var(--danger);
-}
-
+/* The trailing icon buttons sit inside the padding: 32 wide, 8 from the stroke. */
 .field.has-trailing {
-  padding-inline-end: 4px;
+  padding-inline-end: calc(var(--space-field-horizontal) - (var(--size-field-icon-button) - var(--size-field-icon-glyph)) / 2);
 }
 
-.field.multiline {
-  height: auto;
-  align-items: flex-start;
-  padding-block: 10px;
+.field.disabled,
+.notes.disabled {
+  opacity: var(--motion-disabled-opacity);
 }
 
 .trailing-slot {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 2px;
-}
-
-.field.disabled {
-  opacity: 0.6;
 }
 
 .icon {
   flex-shrink: 0;
-  width: 18px;
+  width: 20px;
+  height: var(--size-field-icon-glyph);
   color: var(--text-secondary);
 }
 
-input,
-textarea {
+input {
   flex: 1;
   min-width: 0;
-  border: 0;
-  outline: none;
   height: 100%;
   margin: 0;
   padding: 0;
+  border: 0;
+  outline: none;
   background: transparent;
-  color: var(--text-primary);
+  color: inherit;
   font: inherit;
-  font-size: var(--field-font-size);
   caret-color: var(--accent);
   user-select: text;
 }
 
-textarea {
-  height: auto;
-  resize: vertical;
-  min-height: 88px;
-  line-height: 1.4;
+.notes {
+  /* Grows to 12 lines, then scrolls (iOS `lineLimit(4...12)`). */
+  max-height: calc(12lh + 2 * var(--space-notes-vertical) + 2 * var(--size-stroke));
+  user-select: text;
 }
 
 input.mono {
   font-family: var(--font-mono);
 }
 
-input::placeholder,
-textarea::placeholder {
+input::placeholder {
   color: var(--text-placeholder);
 }
 
@@ -157,18 +139,21 @@ textarea::placeholder {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
+.reveal svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
+}
+
 .reveal:hover {
-  background: var(--card-muted);
   color: var(--text-primary);
 }
 

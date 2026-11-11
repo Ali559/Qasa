@@ -57,8 +57,9 @@ fun rememberTouch(field: FfiField?): () -> Unit {
 @Composable
 fun FieldErrorText(message: String?) {
     if (message == null) return
-    Spacer(Modifier.height(QasaDimens.spaceSmall))
-    Text(message, color = qasaColors.danger, style = qasaText.errorDetail)
+    // iOS `FormTextField`: label, field and message share one 8pt-spaced stack.
+    Spacer(Modifier.height(QasaDimens.fieldLabelGap))
+    Text(message, color = qasaColors.danger, style = qasaText.fieldError)
 }
 
 /**
@@ -72,6 +73,7 @@ fun FormattedTextField(
     label: String,
     format: (String) -> String,
     keyboardType: KeyboardType,
+    isError: Boolean = false,
     onChange: (String) -> Unit,
 ) {
     var field by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
@@ -87,6 +89,7 @@ fun FormattedTextField(
         placeholder = placeholder,
         label = label,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        isError = isError,
     )
 }
 

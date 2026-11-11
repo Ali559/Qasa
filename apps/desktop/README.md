@@ -17,9 +17,9 @@ Releases, signing, the updater and the nm-host sidecar: [`docs/desktop-release.m
 
 - **Keys never reach the webview.** Vault crypto runs in Rust (`core/qasa-vault`); the
   interface asks for decrypted items one screen at a time.
-- **The iOS app is the design reference.** Colors come from
-  `apps/ios/qasa_ios/Theme/Theme.swift` through `bun run tokens`; never hand-edit
-  `src/theme/tokens.css`. `bun run tokens:check` fails when it is stale.
+- **The iOS app is the design reference.** Colors, sizes, radii, type and timings come
+  from `design/tokens.json` through `bun run tokens` (`design/generate.py`); never
+  hand-edit `src/theme/tokens.css`. `bun run tokens:check` fails when it is stale.
 - **Strings come from `l10n/strings.json`.** Run `python3 l10n/generate.py`; never edit
   `src/i18n/*.json`. Desktop-only strings go in `l10n/platform/desktop.json`.
 - **New Tauri commands** must also be added to the allow-list in `isolation/index.js`.

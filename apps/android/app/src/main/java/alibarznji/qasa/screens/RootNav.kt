@@ -2,7 +2,6 @@ package alibarznji.qasa.screens
 
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
@@ -177,8 +176,8 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
             // already blanks the Recents snapshot, so the short fade-in exposes nothing.
             AnimatedVisibility(
                 visible = shielded,
-                enter = fadeIn(tween(QasaMotion.FAST)),
-                exit = fadeOut(tween(QasaMotion.FAST)),
+                enter = fadeIn(QasaMotion.fastTween()),
+                exit = fadeOut(QasaMotion.fastTween()),
             ) {
                 VaultPrivacyShield(onReveal = vm.autoLock::dismissShield)
             }

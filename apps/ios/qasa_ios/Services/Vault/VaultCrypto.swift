@@ -60,15 +60,14 @@ enum VaultCryptoError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .encryptionFailed: return "Encryption failed"
-        case .invalidCiphertext: return "Invalid ciphertext"
-        case .vaultLocked: return "Vault is locked"
-        case .itemNotFound: return "Item not found"
-        case .wrongPassword: return "Wrong master password"
-        case .weakPassword: return "Password must be at least 8 characters"
-        case .keyDerivationFailed: return "Key derivation failed"
-        case .unsupportedKdfVersion: return "Vault was created by a newer version of Qasa. Update the app to open it."
-        case .invalidSalt: return "Vault key material is corrupt"
+        // Shown to the user, so in the app's language; the case name says what went wrong.
+        case .wrongPassword: return L10n.tr("auth.unlock.wrongPassword")
+        case .weakPassword: return L10n.tr("settings.weakMasterPassword")
+        case .unsupportedKdfVersion(let version):
+            return String(format: L10n.tr("error.vaultNewerKdf"), version)
+        case .encryptionFailed, .invalidCiphertext, .vaultLocked, .itemNotFound,
+             .keyDerivationFailed, .invalidSalt:
+            return L10n.tr("error.generic")
         }
     }
 }

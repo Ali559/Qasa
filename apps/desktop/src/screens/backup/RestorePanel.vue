@@ -2,7 +2,7 @@
 // Restore from a backup file: pick it (any file type), show whose and when, ask for the
 // main password the vault had then, restore. Used during setup (RestoreSetup) and in
 // Settings → Backups (RestoreBackupSheet). The file is read and kept by the core.
-import { ArchiveRestore, FolderOpen, Laptop, Lock, Monitor, Smartphone } from 'lucide-vue-next'
+import { ArchiveRestore, FileUp, Lock } from 'lucide-vue-next'
 import { onBeforeUnmount, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
@@ -21,8 +21,6 @@ const picking = ref(false)
 const busy = ref(false)
 const errorKey = ref<string | null>(null)
 let restored = false
-
-const ICON = { ios: Smartphone, android: Smartphone, macos: Laptop, windows: Monitor, linux: Monitor } as Record<string, unknown>
 
 async function pick() {
   if (picking.value || busy.value) return
@@ -66,21 +64,10 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="restore">
-    <template v-if="!info">
-      <PrimaryButton :title="t('backup.restore')" :icon="FolderOpen" :disabled="picking" @click="pick" />
-    </template>
-
-    <template v-else>
-      <CardContainer>
-        <button type="button" class="file" :disabled="busy" @click="pick">
-          <span class="tile"><component :is="ICON[info.platform] ?? ArchiveRestore" :size="18" /></span>
-          <span class="file-text">{{ t('backup.restore.fromFmt', info.deviceName, formatBackupDate(info.createdAtMs)) }}</span>
-          <FolderOpen class="change" :size="16" aria-hidden="true" />
-        </button>
-      </CardContainer>
-
-      <p class="muted">{{ t('backup.restore.passwordPrompt') }}</p>
-      <div class="group">
+    <CardContainer v-if="info">
+      <div class="card-body">
+        <p class="from">{{ t('backup.restore.fromFmt', info.deviceName, formatBackupDate(info.createdAtMs)) }}</p>
+        <p class="muted">{{ t('backup.restore.passwordPrompt') }}</p>
         <SectionLabel :text="t('auth.unlock.masterPassword')" />
         <TextField
           v-model="password"
@@ -94,79 +81,79 @@ onBeforeUnmount(() => {
           :invalid="errorKey === 'backup.error.wrongPassword'"
           @submit="restore"
         />
+        <p v-if="busy" class="working" role="status"><span class="spinner" aria-hidden="true" />{{ t('backup.restore.working') }}</p>
+        <button v-else type="button" class="qasa-button secondary" :disabled="picking" @click="pick">
+          <span>{{ t('backup.restore') }}</span>
+        </button>
       </div>
-    </template>
+    </CardContainer>
 
     <p v-if="errorKey" class="error" role="alert">{{ t(errorKey) }}</p>
 
     <PrimaryButton
       v-if="info"
       :title="busy ? t('backup.restore.working') : t('backup.restore.button')"
-      :icon="ArchiveRestore"
+      :icon="busy ? undefined : ArchiveRestore"
       :disabled="!password || busy"
       @click="restore"
     />
+    <PrimaryButton v-else :title="t('backup.restore')" :icon="FileUp" :disabled="picking" @click="pick" />
   </div>
 </template>
 
 <style scoped>
+/* iOS `BackupRestoreView`: 16 between blocks; the password card stacks 12 apart. */
 .restore {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-form-gap);
 }
 
-.group {
+.card-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.file {
-  display: flex;
-  align-items: center;
   gap: 12px;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 600;
-  text-align: start;
-  cursor: pointer;
 }
 
-.tile {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--card-muted);
-  color: var(--accent);
-}
-
-.file-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.change {
-  flex-shrink: 0;
-  color: var(--text-secondary);
-}
-
-.muted {
+p {
   margin: 0;
+}
+
+.from {
+  font-size: var(--type-field-size);
+  font-weight: var(--type-button-weight);
+  color: var(--text-primary);
+}
+
+.muted,
+.working {
   font-size: 14px;
   color: var(--text-secondary);
 }
 
+.working {
+  display: flex;
+  align-items: center;
+  gap: var(--space-button-icon-gap);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .error {
-  margin: 0;
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);
 }
