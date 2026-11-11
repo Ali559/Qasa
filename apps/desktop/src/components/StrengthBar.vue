@@ -23,6 +23,6 @@ withDefaults(defineProps<{ segments: number; filled: number; color?: string; hei
 .segment {
   flex: 1;
   border-radius: 999px;
-  transition: background-color var(--motion-standard) ease-in-out;
+  transition: background-color var(--motion-standard);
 }
 </style>

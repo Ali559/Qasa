@@ -1,14 +1,15 @@
 <script setup lang="ts">
 // Settings → Backups → Restore: merges a backup into this vault (newest change wins, as
 // Wi‑Fi sync), then reloads the list the same way Wi‑Fi sync does.
+import { Check } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 
+import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
 import type { RestoreOutcome } from '@/backup/api'
 import { useT } from '@/prefs'
 import { loadVault } from '@/vault/session'
 import RestorePanel from '../backup/RestorePanel.vue'
-import SheetHeader from './SheetHeader.vue'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
@@ -29,22 +30,16 @@ async function restored(outcome: RestoreOutcome) {
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('backup.restore.title')" :width="520" placement="bottom" @close="emit('close')">
-    <SheetHeader
-      :title="t('backup.restore.title')"
-      :cancel-label="result ? undefined : t('common.cancel')"
-      :done-label="result ? t('settings.done') : undefined"
-      @cancel="emit('close')"
-      @done="emit('close')"
-    />
+  <Sheet :open="open" :label="t('backup.restore.title')" :title="t('backup.restore.title')" :width="520" placement="bottom" @close="emit('close')">
     <div class="body">
-      <p v-if="result" class="message" role="status">
-        {{ result.written === 0 ? t('backup.restore.upToDate') : t('backup.restore.mergedFmt', result.written) }}
-      </p>
-      <template v-else>
-        <p class="muted">{{ t('backup.restoreHelp') }}</p>
-        <RestorePanel @restored="restored" />
+      <p class="muted">{{ t('backup.restoreHelp') }}</p>
+      <template v-if="result">
+        <p class="message" role="status">
+          {{ result.written === 0 ? t('backup.restore.upToDate') : t('backup.restore.mergedFmt', result.written) }}
+        </p>
+        <PrimaryButton :title="t('pair.done')" :icon="Check" @click="emit('close')" />
       </template>
+      <RestorePanel v-else @restored="restored" />
     </div>
   </Sheet>
 </template>
@@ -53,21 +48,24 @@ async function restored(outcome: RestoreOutcome) {
 .body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: var(--screen-padding);
+  gap: var(--space-form-gap);
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
   overflow-y: auto;
-  background: var(--background);
+}
+
+p {
+  margin: 0;
 }
 
 .muted {
-  margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
+/* iOS `doneBody`: 18 bold, accent. */
 .message {
-  margin: 0;
-  font-size: 15px;
-  color: var(--success);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
 }
 </style>

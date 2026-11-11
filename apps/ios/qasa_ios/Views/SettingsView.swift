@@ -340,7 +340,7 @@ struct SettingsView: View {
                 } catch {
                     statusMessage = String(
                         format: L10n.tr("settings.importFailed", locale: locale),
-                        error.localizedDescription
+                        L10n.message(for: error)
                     )
                 }
             }
@@ -504,7 +504,7 @@ struct SettingsView: View {
             if let firstError, added == 0 {
                 statusMessage = String(
                     format: L10n.tr("settings.importFailed", locale: locale),
-                    firstError.localizedDescription
+                    L10n.message(for: firstError)
                 )
             } else if skipped > 0 {
                 statusMessage = String(
@@ -528,7 +528,7 @@ struct SettingsView: View {
         } catch {
             statusMessage = String(
                 format: L10n.tr("settings.importFailed", locale: locale),
-                error.localizedDescription
+                L10n.message(for: error)
             )
         }
     }

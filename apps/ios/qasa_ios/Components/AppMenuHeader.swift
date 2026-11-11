@@ -65,7 +65,7 @@ struct BrandMenuHeader: View {
 
 /// 40pt circle with a back chevron. The side menu became bottom tabs, so pages one level
 /// below a tab get this instead of the menu button; the chevron flips in RTL.
-private struct HeaderBackButton: View {
+struct HeaderBackButton: View {
     @Environment(\.themePalette) private var theme
     @Environment(AppPreferences.self) private var prefs
     var action: () -> Void
@@ -73,9 +73,9 @@ private struct HeaderBackButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "chevron.backward")
-                .font(.qasa(17, weight: .semibold))
+                .font(.qasa(QasaTokens.Size.headerBackGlyph, weight: .semibold))
                 .foregroundColor(theme.textPrimary)
-                .frame(width: 40, height: 40)
+                .frame(width: QasaTokens.Size.headerBackButton, height: QasaTokens.Size.headerBackButton)
                 .background(theme.cardBackground)
                 .clipShape(Circle())
         }

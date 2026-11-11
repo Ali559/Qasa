@@ -67,13 +67,8 @@ struct AutoLockSettingsView: View {
                 .padding(Theme.screenPadding)
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(L10n.tr("settings.autoLock", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.tr("settings.done", locale: locale)) { dismiss() }
-                }
-            }
+            // A pick applies at once; the sheet closes by dragging it down.
+            .sheetHeader(L10n.tr("settings.autoLock", locale: locale))
         }
     }
 }

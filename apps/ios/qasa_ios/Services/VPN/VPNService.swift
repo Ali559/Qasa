@@ -24,7 +24,7 @@ final class VPNService {
             assignedIP = status.assigned_ip
             lastError = nil
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
         }
     }
 
@@ -39,7 +39,7 @@ final class VPNService {
             )
             await refreshStatus()
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
             connected = false
         }
     }
@@ -59,7 +59,7 @@ final class VPNService {
             assignedIP = nil
             lastError = nil
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
         }
     }
 }

@@ -52,20 +52,22 @@ defineProps<{ icon: Component; title: string; body: string; tone?: 'accent' | 'g
 
 .title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-sheet-title-weight);
 }
 
 .body {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
   color: var(--text-secondary);
 }
 
+/* The actions stack 10 apart, as `BottomActionBar`. */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-bottom-bar-gap);
   width: 100%;
   margin-top: 8px;
 }

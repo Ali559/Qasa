@@ -124,7 +124,7 @@ function openItem(id: string) {
         </div>
       </div>
       <span class="label">{{ scoreLabel }}</span>
-      <p v-if="breachLocked" class="muted center">{{ t('health.breachedLocked') }}</p>
+      <p v-if="breachLocked" class="muted small center">{{ t('health.breachedLocked') }}</p>
     </div>
 
     <div class="stats">
@@ -151,7 +151,7 @@ function openItem(id: string) {
     </div>
 
     <BreachLockedCard v-if="breachLocked" />
-    <p v-else-if="report?.breachCheckFailed" class="muted">{{ t('breached.offline') }}</p>
+    <p v-else-if="report?.breachCheckFailed" class="muted small">{{ t('breached.offline') }}</p>
 
     <CardContainer>
       <div class="stack">
@@ -228,8 +228,8 @@ function openItem(id: string) {
   align-items: center;
   gap: 8px;
   padding: 18px 0;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
   cursor: pointer;
 }
@@ -282,6 +282,10 @@ function openItem(id: string) {
   color: var(--text-secondary);
 }
 
+.muted.small {
+  font-size: var(--type-row-value-size);
+}
+
 .center {
   text-align: center;
 }
@@ -303,12 +307,13 @@ function openItem(id: string) {
 
 .empty strong {
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--type-sheet-title-size);
+  font-weight: 700;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .value {
-    transition: stroke 300ms;
+    transition: stroke var(--motion-standard);
   }
 }
 </style>

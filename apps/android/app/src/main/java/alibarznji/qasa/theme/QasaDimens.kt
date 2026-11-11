@@ -14,43 +14,118 @@ import androidx.compose.ui.unit.dp
  * `docs/design.md` §4.1 — every raw `N.dp` outside this object is a defect.
  */
 object QasaDimens {
-    // ---- Shape: rounder than iOS Theme.swift:157-159 for the calm + personal redesign ----
-    val cornerRadius: Dp = 20.dp
-    val cornerRadiusLarge: Dp = 24.dp
-    val screenPadding: Dp = 20.dp
+    // ---- Shape (`design/tokens.json` radius.*) ----
+    /** 20 — cards (`radius.card`). */
+    val cornerRadius: Dp = QasaTokens.Radius.card
+    /** 24 — large cards, the FAB (`radius.cardLarge`). */
+    val cornerRadiusLarge: Dp = QasaTokens.Radius.cardLarge
+    /** 10 — every field, notes box and full-width button (`radius.control`). */
+    val controlRadius: Dp = QasaTokens.Radius.control
+    /** 10 — the soft wash behind a pressed row (`radius.rowPress`). */
+    val rowPressRadius: Dp = QasaTokens.Radius.rowPress
+    /** 28 — bottom sheet top corners (`radius.sheet`). */
+    val sheetRadius: Dp = QasaTokens.Radius.sheet
+    val screenPadding: Dp = QasaTokens.Space.screenPadding
 
     /** 4 — `PillBadge`. */
     val radiusTiny: Dp = 4.dp
 
-    /** 8 — chips, text-field-adjacent surfaces, icon tiles. */
+    /** 12 — chips, icon tiles. Not for fields or buttons: those take [controlRadius]. */
     val radiusSmall: Dp = 12.dp
 
-    /** 10 — drawer rows, folder tiles. */
+    /** 14 — drawer rows, folder tiles. */
     val radiusMedium: Dp = 14.dp
 
     // ---- Layout ----
-    val headerHeight: Dp = 64.dp
+    val headerHeight: Dp = QasaTokens.Size.headerHeight
+
+    /** 16 — header side padding (`space.headerHorizontal`). */
+    val headerHorizontal: Dp = QasaTokens.Space.headerHorizontal
 
     /**
      * 48 — the one height of every single-line input: text, password, search, date,
      * dropdown-as-field. Multi-line fields grow from it.
      */
-    val fieldHeight: Dp = 48.dp
+    val fieldHeight: Dp = QasaTokens.Size.fieldHeight
+
+    /** 112 — minimum height of a multi-line notes box, which grows from it. */
+    val notesMinHeight: Dp = QasaTokens.Size.notesMinHeight
+
+    /** 14 — a field's side padding (`space.fieldHorizontal`). */
+    val fieldHorizontal: Dp = QasaTokens.Space.fieldHorizontal
+
+    /** 10 × 8 — the notes box padding (`space.notesHorizontal` / `notesVertical`). */
+    val notesHorizontal: Dp = QasaTokens.Space.notesHorizontal
+    val notesVertical: Dp = QasaTokens.Space.notesVertical
+
+    /** 8 — label above a field (`space.fieldLabelGap`). */
+    val fieldLabelGap: Dp = QasaTokens.Space.fieldLabelGap
+
+    /** 16 — between form fields (`space.formGap`). */
+    val formGap: Dp = QasaTokens.Space.formGap
 
     /** 48 — the one height of every full-width action button (primary and secondary). */
-    val buttonHeight: Dp = 48.dp
+    val buttonHeight: Dp = QasaTokens.Size.buttonHeight
 
-    /** 40 — trailing icon buttons inside a [fieldHeight] field (reveal, generate, clear). */
-    val fieldIconButton: Dp = 40.dp
+    /** 20 — a button's side padding (`space.buttonHorizontal`). */
+    val buttonHorizontal: Dp = QasaTokens.Space.buttonHorizontal
+
+    /** 8 — leading icon to label (`space.buttonIconGap`). */
+    val buttonIconGap: Dp = QasaTokens.Space.buttonIconGap
+
+    /** 12 / 10 — bottom action bar vertical padding and button gap. */
+    val bottomBarVertical: Dp = QasaTokens.Space.bottomBarVertical
+    val bottomBarGap: Dp = QasaTokens.Space.bottomBarGap
+
+    /** 32 — trailing icon buttons inside a [fieldHeight] field (reveal, generate, clear). */
+    val fieldIconButton: Dp = QasaTokens.Size.fieldIconButton
+
+    /** 16 — the glyph inside a [fieldIconButton]. */
+    val fieldIconGlyph: Dp = QasaTokens.Size.fieldIconGlyph
+
+    /** 15 — a button's leading glyph. */
+    val buttonIconGlyph: Dp = QasaTokens.Size.buttonIconGlyph
 
     /** 36 — the rounded-square icon badge on settings and list rows. */
-    val rowIconBadge: Dp = 36.dp
+    val rowIconBadge: Dp = QasaTokens.Size.iconBadge
+
+    /** 16 — the glyph inside [rowIconBadge]. */
+    val rowIconBadgeGlyph: Dp = QasaTokens.Size.iconBadgeGlyph
+
+    /** 13 — the trailing row chevron. */
+    val rowChevronGlyph: Dp = QasaTokens.Size.rowChevronGlyph
 
     /** 10 — corner radius of [rowIconBadge]. */
-    val rowIconBadgeRadius: Dp = 10.dp
+    val rowIconBadgeRadius: Dp = QasaTokens.Radius.iconBadge
 
-    /** 56 — minimum height of a settings / navigation row. */
-    val rowMinHeight: Dp = 56.dp
+    /** 60 — minimum height of a settings / navigation row. */
+    val rowMinHeight: Dp = QasaTokens.Size.rowMinHeight
+
+    /** Row padding: 10 vertical, 14 badge-to-text, 2 title-to-subtitle. */
+    val rowVertical: Dp = QasaTokens.Space.rowVertical
+    val rowIconGap: Dp = QasaTokens.Space.rowIconGap
+    val rowTextGap: Dp = QasaTokens.Space.rowTextGap
+
+    /** `SettingsSection`: 8 label-to-card, card inset 14 × 4. */
+    val sectionLabelGap: Dp = QasaTokens.Space.sectionLabelGap
+    val sectionInsetHorizontal: Dp = QasaTokens.Space.sectionInsetHorizontal
+    val sectionInsetVertical: Dp = QasaTokens.Space.sectionInsetVertical
+
+    // ---- Bottom sheets (`design/README.md` rule 4) ----
+    val sheetGrabberWidth: Dp = QasaTokens.Size.sheetGrabberWidth
+    val sheetGrabberHeight: Dp = QasaTokens.Size.sheetGrabberHeight
+    val sheetGrabberTop: Dp = QasaTokens.Space.sheetGrabberTop
+    val sheetTitleTop: Dp = QasaTokens.Space.sheetTitleTop
+    val sheetTitleBottom: Dp = QasaTokens.Space.sheetTitleBottom
+    val sheetContentTop: Dp = QasaTokens.Space.sheetContentTop
+    val sheetContentBottom: Dp = QasaTokens.Space.sheetContentBottom
+    val sheetTextGap: Dp = QasaTokens.Space.sheetTextGap
+    val sheetActionsGap: Dp = QasaTokens.Space.sheetActionsGap
+    val sheetButtonGap: Dp = QasaTokens.Space.sheetButtonGap
+
+    // ---- Toast ----
+    val toastHorizontal: Dp = QasaTokens.Space.toastHorizontal
+    val toastVertical: Dp = QasaTokens.Space.toastVertical
 
     /** 17 — the single most-repeated magic number in the codebase. */
     val cardPadding: Dp = 17.dp
@@ -119,7 +194,7 @@ object QasaDimens {
     val ringStroke: Dp = 2.dp
 
     /** 1 — hairline borders and dividers. */
-    val stroke: Dp = 1.dp
+    val stroke: Dp = QasaTokens.Size.stroke
 
     /** 7 — the plan-value dot diameter. */
     val planDot: Dp = 7.dp

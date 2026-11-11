@@ -43,7 +43,9 @@ jobs:
       - name: Generated files are current (strings, theme tokens)
         run: |
           python3 l10n/generate.py --check
-          cd apps/desktop && bun install --frozen-lockfile && bun run tokens:check
+          python3 design/generate.py --check
+          python3 design/check.py
+          cd apps/desktop && bun install --frozen-lockfile
       - name: Interface type check
         working-directory: apps/desktop
         run: bunx vue-tsc -b

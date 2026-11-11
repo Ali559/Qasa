@@ -8,7 +8,7 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
-import android.widget.Toast
+import alibarznji.qasa.theme.LocalQasaToast
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -70,13 +70,15 @@ class DeviceReplaceViewModel @Inject constructor(
 @Composable
 fun DeviceReplaceHost(vm: DeviceReplaceViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    // The app's own toast (iOS `ToastCenter` look), not the system one.
+    val qasaToast = LocalQasaToast.current
     val prompt by vm.devices.replacePrompt.collectAsState()
     val replaced by vm.devices.replacedNotice.collectAsState()
 
     replaced?.let { name ->
         val text = stringResource(R.string.backup_replace_donefmt, name)
         LaunchedEffect(name) {
-            Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+            qasaToast.show(text)
             vm.devices.consumeReplacedNotice()
         }
     }

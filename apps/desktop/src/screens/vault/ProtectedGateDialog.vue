@@ -1,5 +1,8 @@
 <script setup lang="ts">
-// The main-password prompt for protected notes (see vault/protectedGate.ts).
+// The main-password prompt for protected notes (see vault/protectedGate.ts). iOS asks the
+// device owner through the system prompt; here it is a `confirmSheet`-style prompt sheet: an
+// `IconBadge` (×1.2, 4 below), 19 semibold title and 15 message 10 apart, the field, then
+// Unlock over Cancel 10 apart, 20 between blocks, 20 from the top.
 import { LockOpen, Lock } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 
@@ -38,23 +41,29 @@ async function confirm() {
 <template>
   <Sheet :open="protectedGate.open" :label="t('vault.unlockProtectedNote')" :width="420" placement="bottom" @close="finishProtectedAccess(false)">
     <div class="gate">
-      <span class="icon"><Lock :size="22" /></span>
-      <h2>{{ t('vault.unlockProtectedNote') }}</h2>
-      <p>{{ t('protected.title') }}</p>
-      <TextField
-        v-model="password"
-        :icon="Lock"
-        :placeholder="t('auth.unlock.placeholder')"
-        :label="t('auth.unlock.masterPassword')"
-        secure
-        revealable
-        autofocus
-        :invalid="error"
-        @submit="confirm"
-      />
-      <p v-if="error" class="error" role="alert">{{ t('auth.unlock.wrongPassword') }}</p>
-      <PrimaryButton :title="t('auth.unlock.button')" :icon="LockOpen" :disabled="!password || busy" @click="confirm" />
-      <button type="button" class="cancel" @click="finishProtectedAccess(false)">{{ t('common.cancel') }}</button>
+      <div class="text">
+        <span class="badge" aria-hidden="true"><Lock :stroke-width="2.5" /></span>
+        <h2>{{ t('vault.unlockProtectedNote') }}</h2>
+        <p>{{ t('protected.title') }}</p>
+      </div>
+      <div class="field">
+        <TextField
+          v-model="password"
+          :icon="Lock"
+          :placeholder="t('auth.unlock.placeholder')"
+          :label="t('auth.unlock.masterPassword')"
+          secure
+          revealable
+          autofocus
+          :invalid="error"
+          @submit="confirm"
+        />
+        <p v-if="error" class="error" role="alert">{{ t('auth.unlock.wrongPassword') }}</p>
+      </div>
+      <div class="actions">
+        <PrimaryButton :title="t('auth.unlock.button')" :icon="LockOpen" :disabled="!password || busy" @click="confirm" />
+        <PrimaryButton kind="secondary" :title="t('common.cancel')" @click="finishProtectedAccess(false)" />
+      </div>
     </div>
   </Sheet>
 </template>
@@ -63,47 +72,64 @@ async function confirm() {
 .gate {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  padding: 24px;
+  gap: var(--space-sheet-actions-gap);
+  padding: var(--space-sheet-content-top) var(--space-screen-padding) var(--space-sheet-content-bottom);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sheet-text-gap);
   text-align: center;
 }
 
-.icon {
+/* iOS `IconBadge` scaled 1.2 with 4 below. */
+.badge {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  margin-inline: auto;
-  border-radius: 50%;
-  background: var(--card-muted);
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  margin: 4px 0 8px;
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
+  transform: scale(1.2);
+}
+
+.badge svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--type-dialog-title-size);
+  font-weight: var(--type-dialog-title-weight);
 }
 
 p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--type-dialog-message-size);
+  font-weight: var(--type-dialog-message-weight);
   color: var(--text-secondary);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-field-label-gap);
 }
 
 .error {
   color: var(--danger);
-  font-weight: 500;
+  font-size: var(--type-field-error-size);
+  font-weight: var(--type-field-error-weight);
 }
 
-.cancel {
-  padding: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sheet-button-gap);
 }
 </style>

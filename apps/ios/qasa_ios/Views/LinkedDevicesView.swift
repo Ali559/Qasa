@@ -182,30 +182,15 @@ struct LinkedDevicesView: View {
         }
     }
 
+    /// Shown as a sheet: the shared sheet header, the plan pill trailing.
     private var header: some View {
-        HStack(spacing: 16) {
-            Button { dismiss() } label: {
-                Image(systemName: "chevron.backward")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Theme.textPrimary)
-                    .frame(width: 32, height: 32)
-            }
-            Text(L10n.tr("devices.title", locale: locale))
-                .font(.qasa(20, weight: .semibold))
-                .foregroundColor(Theme.textOnChrome)
-            Spacer()
+        SheetHeader(title: L10n.tr("devices.title", locale: locale)) {
             StatusPill(
                 text: tierLabel,
                 dotColor: session.isPremium ? Theme.success : Theme.goldMuted,
                 textColor: Theme.textSecondary,
                 background: Theme.cardBackgroundLight
             )
-        }
-        .padding(.horizontal, 16)
-        .frame(height: 64)
-        .background(Theme.chrome)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.strokeChrome).frame(height: 1)
         }
     }
 
@@ -224,7 +209,7 @@ struct LinkedDevicesView: View {
             if let limit = registration.lastLimitError?.devices {
                 devices = limit
             }
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -239,7 +224,7 @@ struct LinkedDevicesView: View {
             }
             await loadDevices()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -257,7 +242,7 @@ struct LinkedDevicesView: View {
             try await registration.unlinkDevice(id: device.id)
             await loadDevices()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -289,7 +274,7 @@ struct LinkedDevicesView: View {
             }
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 

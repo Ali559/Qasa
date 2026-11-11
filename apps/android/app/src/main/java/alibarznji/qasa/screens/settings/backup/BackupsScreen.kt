@@ -14,7 +14,7 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
-import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -180,7 +180,8 @@ fun BackupsScreen(
             vm = restore,
             setup = false,
             header = {
-                SheetChromeHeader(title = stringResource(R.string.backup_restore_title), onDismiss = close)
+                // Pushed inside the Backups sheet: a back circle returns to Backups.
+                QasaSheetHeader(stringResource(R.string.backup_restore_title), onBack = close)
             },
             onPickFile = pickRestoreFile,
             onClose = close,
@@ -190,15 +191,8 @@ fun BackupsScreen(
 
     ScreenScaffold(
         header = {
-            if (inSheet) {
-                SheetChromeHeader(
-                    title = stringResource(R.string.backup_title),
-                    onDismiss = onDone,
-                    dismissLabel = stringResource(R.string.common_close),
-                )
-            } else {
-                AppMenuHeader(title = stringResource(R.string.backup_title), onMenu = onDone, applyStatusBars = false)
-            }
+            // In a sheet this draws the shared sheet header (no Close).
+            AppMenuHeader(title = stringResource(R.string.backup_title), onMenu = onDone, applyStatusBars = false)
         },
         stickyBottom = {
             StickyBottomBar {
@@ -278,7 +272,7 @@ fun BackupsScreen(
         Spacer(Modifier.height(QasaDimens.contentGap))
         CardContainer {
             FrequencyOptions.forEachIndexed { index, (frequency, label) ->
-                if (index > 0) HorizontalDivider(color = c.stroke)
+                if (index > 0) HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
                 QasaPressable(onClick = { vm.setFrequency(frequency) }, modifier = Modifier.fillMaxWidth()) {
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = QasaDimens.gapSmall),

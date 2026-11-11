@@ -297,7 +297,7 @@ struct BreachMonitorView: View {
             monitorEmail = ""
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 

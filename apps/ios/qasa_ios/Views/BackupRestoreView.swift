@@ -58,14 +58,11 @@ struct BackupRestoreView: View {
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background.ignoresSafeArea())
             .bottomActionBar { bottomAction }
-            .navigationTitle(L10n.tr("backup.restore.title", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr(outcome == nil ? "common.cancel" : "common.close", locale: locale)) { dismiss() }
-                        .disabled(isWorking)
-                }
-            }
+            // As a sheet it closes by dragging; set up from the welcome flow it is full screen.
+            .sheetHeader(
+                L10n.tr("backup.restore.title", locale: locale),
+                onBack: mode == .setup && !isWorking ? { dismiss() } : nil
+            )
         }
         .interactiveDismissDisabled(isWorking)
         .fileImporter(isPresented: $showPicker, allowedContentTypes: [.item], allowsMultipleSelection: false) { result in

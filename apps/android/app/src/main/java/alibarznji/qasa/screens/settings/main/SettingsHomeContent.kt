@@ -22,7 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.PersonRemove
-import androidx.compose.material3.HorizontalDivider
+import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -97,9 +97,9 @@ fun SettingsHomeContent(
                 subtitle = stringResource(R.string.backup_subtitle),
                 onClick = onBackups,
             )
-            HorizontalDivider(color = c.stroke)
+            RowDivider()
             CsvImportExportRows(onStatus = { statusMessage = it })
-            HorizontalDivider(color = c.stroke)
+            RowDivider()
             NavChevronRow(
                 icon = Icons.Outlined.DeleteForever,
                 title = stringResource(R.string.settings_clearlocaldata),
@@ -107,7 +107,7 @@ fun SettingsHomeContent(
                 onClick = { showClear = true },
             )
             if (accountRegistered) {
-                HorizontalDivider(color = c.stroke)
+                RowDivider()
                 NavChevronRow(
                     icon = Icons.Outlined.PersonRemove,
                     title = stringResource(R.string.settings_deleteaccount),
@@ -115,7 +115,7 @@ fun SettingsHomeContent(
                     onClick = { if (!deletingAccount) showDeleteAccount = true },
                 )
             }
-            HorizontalDivider(color = c.stroke)
+            RowDivider()
             NavChevronRow(
                 icon = Icons.AutoMirrored.Filled.Logout,
                 title = stringResource(R.string.settings_logout),
@@ -183,12 +183,10 @@ fun SettingsHomeContent(
     }
 }
 
-/** iOS `settingsSection(title:content:)`: label, 8pt, card. */
+/** iOS `settingsSection(title:content:)`: the shared [alibarznji.qasa.theme.SettingsSection]. */
 @Composable
 internal fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
-    SectionLabel(title)
-    Spacer(Modifier.height(QasaDimens.contentGap))
-    CardContainer(content = content)
+    alibarznji.qasa.theme.SettingsSection(title = title, content = content)
 }
 
 /** iOS VStack spacing 24 between sections. */

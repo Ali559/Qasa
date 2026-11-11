@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.screens.vault.VaultDates
 import alibarznji.qasa.theme.FieldIconButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaNotesField
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.ValidatedDateField
@@ -55,10 +56,10 @@ fun FieldBlock(
 ) {
     Column(modifier.fillMaxWidth()) {
         SectionLabel(label)
-        Spacer(Modifier.height(QasaDimens.contentGap))
+        Spacer(Modifier.height(QasaDimens.fieldLabelGap))
         content()
         FieldErrorText(error)
-        Spacer(Modifier.height(QasaDimens.gap))
+        Spacer(Modifier.height(QasaDimens.formGap))
     }
 }
 
@@ -74,13 +75,27 @@ fun FormTextField(
     secure: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     modifier: Modifier = Modifier,
+    /** Notes / content: a growing [QasaNotesField] (min 112dp) instead of one line. */
+    multiline: Boolean = false,
     onChange: (String) -> Unit,
 ) {
     val label = stringResource(labelRes)
     var visible by remember { mutableStateOf(false) }
     val touch = rememberTouch(field)
-    FieldBlock(label, modifier, error = fieldError(field)) {
+    val error = fieldError(field)
+    FieldBlock(label, modifier, error = error) {
+        if (multiline) {
+            QasaNotesField(
+                value = value,
+                onValueChange = { touch(); onChange(it) },
+                placeholder = label,
+                isError = error != null,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            )
+            return@FieldBlock
+        }
         ThemedTextField(
+            isError = error != null,
             value = value,
             onValueChange = { touch(); onChange(it) },
             placeholder = label,
@@ -118,8 +133,10 @@ fun FormDateField(@StringRes labelRes: Int, value: String, field: FfiField, onCh
 fun CardNumberField(value: String, onChange: (String) -> Unit) {
     val label = stringResource(R.string.field_number)
     val touch = rememberTouch(FfiField.NUMBER)
-    FieldBlock(label, error = fieldError(FfiField.NUMBER)) {
+    val error = fieldError(FfiField.NUMBER)
+    FieldBlock(label, error = error) {
         FormattedTextField(
+            isError = error != null,
             value = value,
             placeholder = label,
             label = label,
@@ -134,8 +151,10 @@ fun CardNumberField(value: String, onChange: (String) -> Unit) {
 fun CardExpiryField(value: String, modifier: Modifier = Modifier, onChange: (String) -> Unit) {
     val label = stringResource(R.string.field_expirydate)
     val touch = rememberTouch(FfiField.EXPIRY_DATE)
-    FieldBlock(label, modifier, error = fieldError(FfiField.EXPIRY_DATE)) {
+    val error = fieldError(FfiField.EXPIRY_DATE)
+    FieldBlock(label, modifier, error = error) {
         FormattedTextField(
+            isError = error != null,
             value = value,
             placeholder = stringResource(R.string.field_expiryplaceholder),
             label = label,
@@ -155,8 +174,10 @@ fun PasswordFormField(value: String, onChange: (String) -> Unit, onGenerate: () 
     val label = stringResource(R.string.field_password)
     var visible by remember { mutableStateOf(false) }
     val touch = rememberTouch(FfiField.PASSWORD)
-    FieldBlock(label, error = fieldError(FfiField.PASSWORD)) {
+    val error = fieldError(FfiField.PASSWORD)
+    FieldBlock(label, error = error) {
         ThemedTextField(
+            isError = error != null,
             value = value,
             onValueChange = { touch(); onChange(it) },
             placeholder = label,
@@ -184,9 +205,10 @@ fun PasswordFormField(value: String, onChange: (String) -> Unit, onGenerate: () 
 fun PhoneNumberField(dialCode: String, value: String, onChange: (String) -> Unit) {
     val c = qasaColors
     val label = stringResource(R.string.field_phonenumber)
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
     val touch = rememberTouch(FfiField.NUMBER)
-    FieldBlock(label, error = fieldError(FfiField.NUMBER)) {
+    val error = fieldError(FfiField.NUMBER)
+    FieldBlock(label, error = error) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
@@ -205,6 +227,7 @@ fun PhoneNumberField(dialCode: String, value: String, onChange: (String) -> Unit
                 onValueChange = { touch(); onChange(it) },
                 placeholder = label,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                isError = error != null,
                 modifier = Modifier.weight(1f),
             )
         }

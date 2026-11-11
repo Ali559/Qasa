@@ -1,11 +1,16 @@
 <script setup lang="ts">
-// The iOS `.sheet` on desktop, on the chrome surface over a scrim, with Esc or a scrim click
-// to close and focus kept inside while open. `placement="bottom"` is the bottom sheet
-// (confirmations, short forms): full width up to `width`, sliding up from the bottom edge
-// of the window or popup. The default is a centered dialog for the long editors.
+// The iOS `.sheet` on desktop (design/README.md rule 4): the page background, `--radius-sheet`
+// (28) corners, no stroke and no elevation tint, over a scrim. It closes with Esc or a click
+// outside (no Cancel / Close / Done in the header: nothing to drag on desktop, so no grabber
+// either); focus stays inside while open. `title` draws the shared `SheetHeader`: 17
+// semibold, centered, 20 from the top edge, 16 to the content. Content sizes to fit, at most
+// 92% of the window. `placement="bottom"` slides up from the bottom edge of the window or
+// popup (confirmations, short forms); the default is a centered dialog for the long editors.
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
-const props = withDefaults(defineProps<{ open: boolean; label: string; width?: number; placement?: 'center' | 'bottom' }>(), {
+import SheetHeader from './SheetHeader.vue'
+
+const props = withDefaults(defineProps<{ open: boolean; label: string; title?: string; width?: number; placement?: 'center' | 'bottom' }>(), {
   width: 560,
   placement: 'center',
 })
@@ -67,7 +72,7 @@ onBeforeUnmount(() => restoreFocus?.focus?.())
     <Transition :name="placement === 'bottom' ? 'bottom-sheet' : 'sheet'">
       <div v-if="open" class="scrim" :class="placement" @mousedown.self="emit('close')" @keydown="onKey">
         <div ref="panel" class="panel" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" :style="{ maxWidth: `${width}px` }">
-          <span v-if="placement === 'bottom'" class="grabber" aria-hidden="true" />
+          <SheetHeader v-if="title" :title="title"><template v-if="$slots['header-trailing']" #trailing><slot name="header-trailing" /></template></SheetHeader>
           <slot />
         </div>
       </div>
@@ -82,61 +87,45 @@ onBeforeUnmount(() => restoreFocus?.focus?.())
   z-index: 50;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: var(--space-screen-padding);
   background: var(--scrim);
 }
 
 .scrim.bottom {
   place-items: end center;
   padding: 0;
-  padding-top: 24px;
 }
 
 .panel {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-height: min(92vh, 860px);
+  max-height: 92vh;
   overflow: hidden;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 20px;
-  background: var(--chrome);
-  box-shadow: 0 24px 64px var(--shadow-color);
+  border-radius: var(--radius-sheet);
+  background: var(--background);
+  color: var(--text-primary);
   outline: none;
 }
 
+/* Attached to the bottom edge: only the top corners round, as an iOS sheet. */
 .bottom .panel {
-  max-height: calc(100vh - 24px);
-  border-bottom: 0;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -12px 40px var(--shadow-color);
-}
-
-.grabber {
-  flex-shrink: 0;
-  align-self: center;
-  width: 36px;
-  height: 4px;
-  margin-top: 8px;
-  border-radius: 999px;
-  background: var(--stroke-chrome);
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .sheet-enter-active,
 .sheet-leave-active,
 .bottom-sheet-enter-active,
 .bottom-sheet-leave-active {
-  transition: opacity var(--motion-standard) ease-out;
+  transition: opacity var(--motion-standard);
 }
 
 .sheet-enter-active .panel,
-.sheet-leave-active .panel {
-  transition: transform var(--motion-standard) ease-out;
-}
-
+.sheet-leave-active .panel,
 .bottom-sheet-enter-active .panel,
 .bottom-sheet-leave-active .panel {
-  transition: transform var(--motion-page) cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform var(--motion-standard);
 }
 
 .sheet-enter-from,
@@ -148,11 +137,28 @@ onBeforeUnmount(() => restoreFocus?.focus?.())
 
 .sheet-enter-from .panel,
 .sheet-leave-to .panel {
-  transform: translateY(12px) scale(0.98);
+  transform: scale(var(--motion-press-scale));
 }
 
 .bottom-sheet-enter-from .panel,
 .bottom-sheet-leave-to .panel {
   transform: translateY(100%);
+}
+
+/* Reduce motion: slides become fades (`motion.fade`). */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-enter-active,
+  .sheet-leave-active,
+  .bottom-sheet-enter-active,
+  .bottom-sheet-leave-active {
+    transition: opacity var(--motion-fade);
+  }
+
+  .sheet-enter-from .panel,
+  .sheet-leave-to .panel,
+  .bottom-sheet-enter-from .panel,
+  .bottom-sheet-leave-to .panel {
+    transform: none;
+  }
 }
 </style>

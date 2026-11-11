@@ -21,7 +21,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -67,7 +74,7 @@ private fun HeaderChrome(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(QasaDimens.headerHeight)
-                .padding(horizontal = QasaDimens.gap),
+                .padding(horizontal = QasaDimens.headerHorizontal),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (leading != null) {
@@ -98,7 +105,8 @@ private fun BrandLockup(titleSize: Int, gap: Dp) {
         painterResource(R.drawable.ic_qasa_mark),
         contentDescription = null,
         tint = c.accent,
-        modifier = Modifier.size(QasaIconSize.lg),
+        // iOS `QasaMark(size: 22)`.
+        modifier = Modifier.size(QasaIconSize.xxl),
     )
     Spacer(Modifier.width(gap))
     Text(
@@ -114,7 +122,7 @@ private fun PageTitle(title: String) {
     Text(
         title,
         color = qasaColors.textPrimary,
-        style = qasaText.pageTitle.copy(fontWeight = FontWeight.Bold),
+        style = qasaText.headerTitle,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -148,7 +156,7 @@ fun BrandMenuHeader(
 ) {
     HeaderChrome(
         applyStatusBars = applyStatusBars,
-        leading = onMenu?.let { back -> { BackButton(back) } },
+        leading = onMenu?.let { back -> { HeaderBackButton(back) } },
         title = { BrandLockup(titleSize, gap = QasaDimens.gapMedium) },
         trailing = trailing,
     )
@@ -166,18 +174,24 @@ fun AppMenuHeader(
     applyStatusBars: Boolean = true,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
+    // Inside a sheet the page header is the sheet's header (iOS `.sheetHeader`): centered
+    // 17 semibold, no back / Cancel (the sheet closes by drag, scrim tap or back).
+    if (LocalSheetDismiss.current != null) {
+        QasaSheetHeader(title, trailing = trailing?.asSheetTrailing())
+        return
+    }
     HeaderChrome(
         applyStatusBars = applyStatusBars,
-        leading = onMenu?.let { back -> { BackButton(back) } },
+        leading = onMenu?.let { back -> { HeaderBackButton(back) } },
         title = { PageTitle(title) },
         trailing = trailing,
     )
 }
 
 /**
- * `ToolbarItem(placement: .cancellationAction)` for pushed screens. iOS pairs this
- * with a `navigationTitle`, so Android's variant shares the 20 bold title
- * slot instead of inventing an 18pt one.
+ * A pushed page's header: the [HeaderBackButton] circle, then the 20 bold title (iOS
+ * `AppMenuHeader(onMenu:)`). Inside a sheet it becomes the sheet's [QasaSheetHeader]; with
+ * [backInSheet] (a page pushed inside the sheet) it keeps a back circle there.
  */
 @Composable
 fun BackChromeHeader(
@@ -185,80 +199,65 @@ fun BackChromeHeader(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     applyStatusBars: Boolean = true,
+    backInSheet: Boolean = false,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
+    if (LocalSheetDismiss.current != null) {
+        QasaSheetHeader(
+            title,
+            modifier = modifier,
+            onBack = if (backInSheet) onBack else null,
+            trailing = trailing?.asSheetTrailing(),
+        )
+        return
+    }
     HeaderChrome(
         applyStatusBars = applyStatusBars,
-        leading = { CancelAction(onClick = onBack) },
+        leading = { HeaderBackButton(onBack) },
         title = { PageTitle(title) },
         trailing = trailing,
         modifier = modifier,
     )
 }
 
-/** Sheet cancellation + inline title. Same slot as `BackChromeHeader` on purpose. */
-@Composable
-fun SheetChromeHeader(
-    title: String,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-    dismissLabel: String? = null,
-    trailing: (@Composable RowScope.() -> Unit)? = null,
-) {
-    HeaderChrome(
-        applyStatusBars = false,
-        leading = {
-            CancelAction(onClick = onDismiss, label = dismissLabel ?: stringResource(R.string.common_cancel))
-        },
-        title = { PageTitle(title) },
-        trailing = trailing,
-        modifier = modifier,
-    )
+/** A header's `RowScope` trailing slot, for the sheet header's plain slot. */
+private fun (@Composable RowScope.() -> Unit).asSheetTrailing(): @Composable () -> Unit = {
+    Row(verticalAlignment = Alignment.CenterVertically) { this@asSheetTrailing(this) }
 }
 
 /**
- * 40x40 circle, `cardBackground` fill, 17pt glyph. The menu drawer became bottom tabs, so
- * pages one level below a tab get a back arrow here (mirrored in RTL); tab roots pass no
- * `onMenu` and show no leading control.
+ * iOS `HeaderBackButton`: a 40dp `cardBackground` circle with a 17dp `textPrimary` back
+ * chevron (mirrored in RTL). Pages one level below a tab and drilled-in sheet pages.
  */
 @Composable
-private fun BackButton(onClick: () -> Unit) {
+internal fun HeaderBackButton(onClick: () -> Unit) {
     val c = qasaColors
-    QasaPressable(
-        onClick = onClick,
-        contentDescription = stringResource(R.string.common_back),
-        modifier = Modifier.size(BACK_BUTTON_SIZE).clip(CircleShape),
-    ) {
-        // The circle fills the whole button, with the arrow centred, so it lines up with
-        // the title. It used to wrap only the icon, sitting at the top-start corner.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(c.cardBackground, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = c.textPrimary,
-                modifier = Modifier.size(QasaIconSize.menu),
+    val interaction = remember { MutableInteractionSource() }
+    val alpha = rememberPressOpacity(interaction)
+    val label = stringResource(R.string.common_back)
+    Box(
+        Modifier
+            .size(BACK_BUTTON_SIZE)
+            .alpha(alpha)
+            .background(c.cardBackground, CircleShape)
+            .clip(CircleShape)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
             )
-        }
-    }
-}
-
-/** A little roomier than the 40pt iOS circle, so the arrow doesn't crowd its edge. */
-private val BACK_BUTTON_SIZE = 44.dp
-
-/** Mint cancellation action at the 17 semibold chrome-button slot. */
-@Composable
-private fun CancelAction(onClick: () -> Unit, label: String? = null) {
-    val c = qasaColors
-    val text = label ?: stringResource(R.string.common_cancel)
-    QasaPressable(
-        onClick = onClick,
-        contentDescription = text,
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
     ) {
-        Text(text, color = c.accent, style = qasaText.ctaLabel)
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowBackIos,
+            contentDescription = null,
+            tint = c.textPrimary,
+            modifier = Modifier.size(QasaIconSize.menu),
+        )
     }
 }
+
+/** iOS `HeaderBackButton` frame. */
+private val BACK_BUTTON_SIZE = QasaTokens.Size.headerBackButton

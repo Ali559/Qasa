@@ -15,7 +15,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
+import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,7 +63,7 @@ internal fun AppearanceRows(prefs: AppPreferences) {
         label = { it.nativeName },
         onSelect = prefs::setLanguage,
     )
-    HorizontalDivider(color = c.stroke)
+    RowDivider()
     MenuRow(
         icon = Icons.Filled.DarkMode,
         title = stringResource(R.string.settings_theme),

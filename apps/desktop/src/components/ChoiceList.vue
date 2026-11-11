@@ -1,7 +1,8 @@
 <script setup lang="ts" generic="T extends string">
-// The divided, bordered row group used by Welcome (and later Settings pickers):
-// iOS card with `Divider().background(stroke)` between rows, a checkmark on the selected
-// row and an 8% accent wash behind it.
+// A one-choice group as iOS draws it (Welcome's language and theme rows, the settings
+// pickers): a `SettingsSection` card of `SettingsRow`s, the badge tinted accent when
+// selected and secondary otherwise, a trailing 15 bold check that fades and scales in
+// (0.6 → 1, `motion.fast`), `RowDivider`s between rows and the `RowButtonStyle` wash.
 import { Check } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
@@ -19,7 +20,7 @@ const model = defineModel<T>({ required: true })
 </script>
 
 <template>
-  <div class="choice-list" role="radiogroup" :aria-label="label">
+  <div class="choice-list settings-list" role="radiogroup" :aria-label="label">
     <button
       v-for="choice in choices"
       :key="choice.value"
@@ -30,19 +31,12 @@ const model = defineModel<T>({ required: true })
       :aria-checked="model === choice.value"
       @click="model = choice.value"
     >
-      <component
-        :is="choice.icon"
-        v-if="choice.icon"
-        class="choice-icon"
-        :size="18"
-        :stroke-width="2.25"
-        aria-hidden="true"
-      />
+      <span v-if="choice.icon" class="badge" aria-hidden="true">
+        <component :is="choice.icon" :stroke-width="2.5" />
+      </span>
       <span class="choice-label" :dir="choice.dir" :lang="choice.lang">{{ choice.label }}</span>
       <span class="spacer" />
-      <Transition name="check">
-        <Check v-if="model === choice.value" class="check" :size="15" :stroke-width="3" aria-hidden="true" />
-      </Transition>
+      <Check class="check" :stroke-width="3" aria-hidden="true" />
     </button>
   </div>
 </template>
@@ -51,58 +45,90 @@ const model = defineModel<T>({ required: true })
 .choice-list {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  padding: var(--card-padding);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
 }
 
 .choice {
+  --badge-color: var(--text-secondary);
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-row-icon-gap);
   width: 100%;
-  padding: 16px;
+  min-height: var(--size-row-min-height);
+  padding: var(--space-row-vertical) 0;
   border: 0;
   background: transparent;
+  color: var(--text-primary);
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--motion-fast) ease-in-out;
-}
-
-.choice + .choice {
-  border-top: 1px solid var(--stroke);
-}
-
-.choice:hover {
-  background: color-mix(in srgb, var(--accent) 4%, transparent);
 }
 
 .choice.selected {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  --badge-color: var(--accent);
+}
+
+.choice::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline: -8px;
+  border-radius: var(--radius-row-press);
+  background: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-press);
+}
+
+.choice:hover::after,
+.choice:active::after {
+  opacity: var(--motion-row-pressed-opacity);
+}
+
+.choice + .choice::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: calc(var(--size-icon-badge) + var(--space-row-icon-gap));
+  inset-inline-end: 0;
+  border-top: var(--size-stroke) solid var(--stroke);
+}
+
+.choice:not(:has(.badge)) + .choice::before {
+  inset-inline-start: 0;
 }
 
 .choice:focus-visible {
   outline-offset: -2px;
 }
 
-.choice-icon {
-  width: 28px;
+.badge {
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  color: var(--text-secondary);
-  transition: color var(--motion-fast) ease-in-out;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--badge-color) 12%, transparent);
+  color: var(--badge-color);
+  transition:
+    color var(--motion-fast),
+    background-color var(--motion-fast);
 }
 
-.selected .choice-icon {
-  color: var(--accent);
+.badge :deep(svg) {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 /* The label keeps its own width so a language name in its own direction still sits at
    the row's start; the spacer takes the rest. */
 .choice-label {
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--type-row-title-size);
+  font-weight: var(--type-row-title-weight);
 }
 
 .spacer {
@@ -112,19 +138,18 @@ const model = defineModel<T>({ required: true })
 
 .check {
   flex-shrink: 0;
+  width: 15px;
+  height: 15px;
   color: var(--accent);
-}
-
-.check-enter-active,
-.check-leave-active {
-  transition:
-    opacity var(--motion-fast) ease-in-out,
-    transform var(--motion-fast) ease-in-out;
-}
-
-.check-enter-from,
-.check-leave-to {
   opacity: 0;
-  transform: scale(0.5);
+  transform: scale(0.6);
+  transition:
+    opacity var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.selected .check {
+  opacity: 1;
+  transform: none;
 }
 </style>

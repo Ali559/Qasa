@@ -291,7 +291,9 @@
     <string name="error_apihostmisconfigured">لا يمكن لهذا الإصدار الوصول إلى خادم قاصة (%s). الميزات عبر الإنترنت غير متاحة.</string>
     <string name="error_decoding">استجابة خادم غير متوقعة.</string>
     <string name="error_forbidden">هذه الميزة تتطلب اشتراك بريميوم.</string>
+    <string name="error_generic">حدث خطأ ما. حاول مرة أخرى.</string>
     <string name="error_invalidurl">عنوان API غير صالح.</string>
+    <string name="error_network">تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت.</string>
     <string name="error_server">خطأ في الخادم (%d).</string>
     <string name="error_unauthorized">انتهت الجلسة. افتح خزنتك مرة أخرى.</string>
     <string name="error_vaultcreatetitle">تعذّر إنشاء الخزنة</string>
@@ -632,6 +634,7 @@
     <string name="sub_managetitle">إدارة الاشتراك</string>
     <string name="sub_noneactive">لا يوجد اشتراك نشط.</string>
     <string name="sub_nonefound">لم يُعثر على اشتراك نشط.</string>
+    <string name="sub_notfound">لم يُعثر على اشتراك.</string>
     <string name="sub_paymentmethodremoved">تمت إزالة طريقة الدفع المحفوظة.</string>
     <string name="sub_payrenewal">ادفع التجديد</string>
     <string name="sub_plan">الخطة</string>

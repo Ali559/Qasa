@@ -1,14 +1,10 @@
 <script setup lang="ts">
-// iOS `CardContainer`: card fill, 1pt stroke, 20pt radius, 17pt padding. Flat.
-withDefaults(defineProps<{ padding?: number; muted?: boolean; borderColor?: string }>(), { padding: 17 })
+// iOS `CardContainer`: card fill, 1pt stroke, `--radius-card` (20) corners, 17pt padding. Flat.
+defineProps<{ padding?: number; muted?: boolean; borderColor?: string }>()
 </script>
 
 <template>
-  <div
-    class="card"
-    :class="{ muted }"
-    :style="{ padding: `${padding}px`, borderColor: borderColor }"
-  >
+  <div class="card" :class="{ muted }" :style="{ '--card-padding': padding === undefined ? undefined : `${padding}px`, borderColor: borderColor }">
     <slot />
   </div>
 </template>
@@ -17,9 +13,10 @@ withDefaults(defineProps<{ padding?: number; muted?: boolean; borderColor?: stri
 .card {
   display: flex;
   flex-direction: column;
+  padding: var(--card-padding, 17px);
   background: var(--card-background);
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
 }
 
 .card.muted {

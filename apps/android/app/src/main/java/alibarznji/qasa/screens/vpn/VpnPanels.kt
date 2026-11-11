@@ -8,7 +8,6 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.SecondaryButton
-import alibarznji.qasa.theme.SheetChromeHeader
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import android.content.Intent
@@ -49,18 +48,11 @@ internal fun VpnServerSheet(
     onDismiss: () -> Unit,
 ) {
     val c = qasaColors
-    QasaModalBottomSheet(onDismissRequest = onDismiss) {
-        SheetChromeHeader(
-            title = stringResource(R.string.vpn_chooseserver),
-            onDismiss = onDismiss,
-            dismissLabel = stringResource(R.string.settings_done),
-        )
+    QasaModalBottomSheet(onDismissRequest = onDismiss, title = stringResource(R.string.vpn_chooseserver)) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = QasaDimens.screenPadding)
-                .padding(bottom = QasaDimens.scrollTail)
-                .navigationBarsPadding(),
+                .padding(QasaDimens.screenPadding),
         ) {
             CardContainer {
                 ServerRow(
@@ -70,10 +62,11 @@ internal fun VpnServerSheet(
                     onClick = { onSelect(null) },
                 )
                 nodes.forEach { node ->
-                    HorizontalDivider(color = c.stroke)
+                    HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)
                     ServerRow(
                         title = "${node.city} — ${node.name}",
-                        subtitle = "${stringResource(R.string.vpn_serverload)} ${node.load_pct}%",
+                        // Digits and the percent sign in the app language (Locale.setDefault follows it).
+                        subtitle = "${stringResource(R.string.vpn_serverload)} ${java.text.NumberFormat.getPercentInstance().format(node.load_pct / 100.0)}",
                         selected = node.id == selectedId,
                         onClick = { onSelect(node.id) },
                     )

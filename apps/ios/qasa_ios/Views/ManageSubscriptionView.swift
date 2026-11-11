@@ -39,26 +39,7 @@ struct ManageSubscriptionView: View {
             if embedded, let onOpenMenu {
                 AppMenuHeader(title: L10n.tr("settings.subscription", locale: locale), onMenu: onOpenMenu)
             } else {
-                HStack {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Theme.textPrimary)
-                            .frame(width: 32, height: 32)
-                    }
-                    Spacer()
-                    Text(L10n.tr("sub.manageTitle", locale: locale))
-                        .font(.qasa(18, weight: .bold))
-                        .foregroundColor(Theme.textOnChrome)
-                    Spacer()
-                    Color.clear.frame(width: 32, height: 32)
-                }
-                .padding(.horizontal, 16)
-                .frame(height: 64)
-                .background(Theme.chrome)
-                .overlay(alignment: .bottom) {
-                    Rectangle().fill(Theme.strokeChrome).frame(height: 1)
-                }
+                SheetHeader(title: L10n.tr("sub.manageTitle", locale: locale))
             }
 
             ScrollView {
@@ -356,16 +337,8 @@ struct ManageSubscriptionView: View {
                 .buttonStyle(.qasaDestructive)
                 .disabled(isCancelling)
             }
-            .navigationTitle(L10n.tr("sub.cancelReasonTitle", locale: locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10n.tr("sub.skip", locale: locale)) {
-                        Task { await confirmCancel() }
-                    }
-                    .disabled(isCancelling)
-                }
-            }
+            // The bottom button already confirms without a reason, so no Skip in the header.
+            .sheetHeader(L10n.tr("sub.cancelReasonTitle", locale: locale))
         }
         .presentationDetents([.medium, .large])
     }
@@ -379,7 +352,7 @@ struct ManageSubscriptionView: View {
             subscription = sub
             autoRenew = sub?.auto_renew ?? true
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -397,7 +370,7 @@ struct ManageSubscriptionView: View {
                 : L10n.tr("sub.autoRenewDisabled", locale: locale)
         } catch {
             autoRenew = subscription?.auto_renew ?? true
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -413,7 +386,7 @@ struct ManageSubscriptionView: View {
             autoRenew = sub?.auto_renew ?? true
             statusMessage = L10n.tr("sub.paymentMethodRemoved", locale: locale)
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -449,7 +422,7 @@ struct ManageSubscriptionView: View {
                 }
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 
@@ -471,7 +444,7 @@ struct ManageSubscriptionView: View {
                 session.syncFromLicense()
             }
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 

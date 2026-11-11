@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The inline message under a field that breaks a rule (core `validate.rs`), in the
-// danger style DateField always used.
+// danger style: iOS `InlineFieldError`, 11 regular.
 defineProps<{ message: string | null | undefined; id?: string }>()
 </script>
 
@@ -10,8 +10,8 @@ defineProps<{ message: string | null | undefined; id?: string }>()
 
 <style scoped>
 .field-error {
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: var(--type-field-error-size);
+  font-weight: var(--type-field-error-weight);
   color: var(--danger);
 }
 </style>

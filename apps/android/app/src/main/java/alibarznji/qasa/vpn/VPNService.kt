@@ -2,6 +2,7 @@ package alibarznji.qasa.vpn
 
 import alibarznji.qasa.BuildConfig
 import alibarznji.qasa.R
+import alibarznji.qasa.prefs.LocaleContext
 import alibarznji.qasa.config.QasaConfig
 import alibarznji.qasa.network.QasaApiClient
 import alibarznji.qasa.network.QasaApiException
@@ -120,7 +121,7 @@ class VPNService @Inject constructor(
     fun needsPermission(): Boolean = VpnService.prepare(context) != null
 
     fun reportPermissionDenied() {
-        _lastError.value = context.getString(R.string.vpn_permissiondenied)
+        _lastError.value = LocaleContext.forApp(context).getString(R.string.vpn_permissiondenied)
     }
 
     suspend fun connect(nodeId: String? = prefs.vpnNodeId.value): VpnConnectResult = withContext(Dispatchers.IO) {
@@ -272,7 +273,7 @@ class VPNService @Inject constructor(
         } else {
             _phase.value = VpnPhase.Connecting
             if (now - maxOf(tunnelUpSince, lastHandshake) > NO_HANDSHAKE_WARN_MS) {
-                _lastError.value = context.getString(R.string.vpn_nohandshake)
+                _lastError.value = LocaleContext.forApp(context).getString(R.string.vpn_nohandshake)
             }
         }
     }
@@ -312,7 +313,7 @@ class VPNService @Inject constructor(
         lock.withLock {
             setTunnelDown()
             clearSession()
-            _lastError.value = context.getString(messageRes)
+            _lastError.value = LocaleContext.forApp(context).getString(messageRes)
         }
     }
 
@@ -371,8 +372,8 @@ class VPNService @Inject constructor(
 
     private fun describe(e: Exception): String = when (e) {
         is QasaApiException.HttpStatus ->
-            if (e.code == 400) context.getString(R.string.vpn_noservers) else e.message.orEmpty()
-        is QasaApiException.Network -> context.getString(R.string.vpn_networkerror)
+            if (e.code == 400) LocaleContext.forApp(context).getString(R.string.vpn_noservers) else e.message.orEmpty()
+        is QasaApiException.Network -> LocaleContext.forApp(context).getString(R.string.vpn_networkerror)
         else -> e.message ?: e.javaClass.simpleName
     }
 

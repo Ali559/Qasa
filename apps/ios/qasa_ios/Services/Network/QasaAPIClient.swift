@@ -24,8 +24,8 @@ enum QasaAPIError: LocalizedError, Sendable {
             return body.message
         case .forbidden:
             return L10n.tr("error.forbidden", locale: locale)
-        case .network(let error):
-            return error.localizedDescription
+        case .network:
+            return L10n.tr("error.network", locale: locale)
         }
     }
 }

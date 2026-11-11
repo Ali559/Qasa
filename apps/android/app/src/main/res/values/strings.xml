@@ -291,7 +291,9 @@
     <string name="error_apihostmisconfigured">This build cannot reach the Qasa server (%s). Online features are unavailable.</string>
     <string name="error_decoding">Unexpected server response.</string>
     <string name="error_forbidden">This feature requires a Premium subscription.</string>
+    <string name="error_generic">Something went wrong. Try again.</string>
     <string name="error_invalidurl">Invalid API URL.</string>
+    <string name="error_network">Can\'t reach Qasa. Check your internet connection.</string>
     <string name="error_server">Server error (%d).</string>
     <string name="error_unauthorized">Session expired. Unlock your vault again.</string>
     <string name="error_vaultcreatetitle">Could not create vault</string>
@@ -632,6 +634,7 @@
     <string name="sub_managetitle">Manage Subscription</string>
     <string name="sub_noneactive">No active subscription found.</string>
     <string name="sub_nonefound">No active subscription found.</string>
+    <string name="sub_notfound">No subscription found.</string>
     <string name="sub_paymentmethodremoved">Saved payment method removed.</string>
     <string name="sub_payrenewal">Pay renewal</string>
     <string name="sub_plan">Plan</string>

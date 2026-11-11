@@ -1,14 +1,13 @@
 <script setup lang="ts">
 // The iOS Language and Theme `Menu`s on Settings, as a small sheet with the Welcome
 // `ChoiceList`. Picking an option applies it at once and closes, as a menu does.
-import { Contrast, Moon, Sun } from 'lucide-vue-next'
+import { Contrast, Languages, Moon, Sun } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
 import Sheet from '@/components/Sheet.vue'
 import { isRtl, LANGUAGE_NAMES, LANGUAGES, type Language } from '@/i18n'
 import { prefs, useT, type ThemePreference } from '@/prefs'
-import SheetHeader from './SheetHeader.vue'
 
 const props = defineProps<{ kind: 'language' | 'theme' | null }>()
 const emit = defineEmits<{ close: [] }>()
@@ -31,6 +30,7 @@ const languageChoices = computed<Choice<Language>[]>(() =>
     label: LANGUAGE_NAMES[language],
     dir: isRtl(language) ? 'rtl' : 'ltr',
     lang: language,
+    icon: Languages,
   })),
 )
 
@@ -58,8 +58,7 @@ const theme = computed<ThemePreference>({
 </script>
 
 <template>
-  <Sheet :open="kind !== null" :label="title" :width="420" placement="bottom" @close="emit('close')">
-    <SheetHeader :title="title" :done-label="t('settings.done')" @done="emit('close')" />
+  <Sheet :open="kind !== null" :label="title" :title="title" :width="420" placement="bottom" @close="emit('close')">
     <div class="body">
       <ChoiceList v-if="shown === 'language'" v-model="language" :choices="languageChoices" :label="title" />
       <ChoiceList v-else v-model="theme" :choices="themeChoices" :label="title" />
@@ -69,7 +68,7 @@ const theme = computed<ThemePreference>({
 
 <style scoped>
 .body {
-  padding: 20px;
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
   overflow-y: auto;
 }
 </style>

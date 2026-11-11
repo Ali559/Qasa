@@ -358,6 +358,77 @@ extension ButtonStyle where Self == RowButtonStyle {
     static var qasaRow: RowButtonStyle { RowButtonStyle() }
 }
 
+// MARK: - Sheet header
+
+/// The header of every sheet (design/README.md rule 4): the system grabber above, then the
+/// title centered `QasaTokens.Space.sheetTitleTop` from the sheet's top edge. No Cancel: a
+/// sheet closes by dragging it down. `trailing` is for a rare extra (Mark all read).
+struct SheetHeader<Trailing: View>: View {
+    @Environment(\.themePalette) private var theme
+    let title: String
+    /// Only for a page shown full screen (nothing to drag down): a leading back button.
+    var onBack: (() -> Void)? = nil
+    @ViewBuilder var trailing: Trailing
+
+    var body: some View {
+        Text(title)
+            .font(.qasa(QasaTokens.Typography.sheetTitle.size, weight: QasaTokens.Typography.sheetTitle.weight))
+            .foregroundColor(theme.textPrimary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
+            .multilineTextAlignment(.center)
+            // Room for `trailing` on both sides keeps the title centered on the sheet.
+            .padding(.horizontal, Theme.screenPadding + QasaTokens.Space.sheetTitleSideInset)
+            .frame(maxWidth: .infinity)
+            .overlay(alignment: .trailing) {
+                trailing.padding(.trailing, Theme.screenPadding)
+            }
+            .overlay(alignment: .leading) {
+                if let onBack {
+                    HeaderBackButton(action: onBack).padding(.leading, Theme.screenPadding)
+                }
+            }
+            .padding(.top, QasaTokens.Space.sheetTitleTop)
+            .padding(.bottom, QasaTokens.Space.sheetTitleBottom)
+            .background(theme.background)
+            .accessibilityAddTraits(.isHeader)
+            // Every sheet with this header gets the same grabber and corners.
+            .qasaSheetPresentation()
+    }
+}
+
+extension SheetHeader where Trailing == EmptyView {
+    init(title: String) {
+        self.init(title: title) { EmptyView() }
+    }
+}
+
+extension View {
+    /// Puts `SheetHeader` above this sheet's content and hides the navigation bar (and with it
+    /// any Cancel / Close / Done button). Apply to the sheet's root page.
+    func sheetHeader(_ title: String, onBack: (() -> Void)? = nil) -> some View {
+        sheetHeader(title, onBack: onBack) { EmptyView() }
+    }
+
+    func sheetHeader<Trailing: View>(
+        _ title: String,
+        onBack: (() -> Void)? = nil,
+        @ViewBuilder trailing: () -> Trailing
+    ) -> some View {
+        let header = SheetHeader(title: title, onBack: onBack, trailing: trailing)
+        return self
+            .toolbar(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top, spacing: 0) { header }
+    }
+
+    /// Presentation every sheet shares: visible grabber, `QasaTokens.Radius.sheet` corners.
+    func qasaSheetPresentation() -> some View {
+        self
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(QasaTokens.Radius.sheet)
+    }
+}
+
 // MARK: - Confirmation / message sheets
 
 /// Bottom sheet that sizes itself to its content (replaces alerts and confirmation dialogs).
@@ -374,14 +445,14 @@ struct SelfSizingSheet<Content: View>: View {
         content
             .environment(\.themePalette, theme)
             .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 28)
-            .padding(.bottom, 16)
+            .padding(.top, QasaTokens.Space.sheetContentTop)
+            .padding(.bottom, QasaTokens.Space.sheetContentBottom)
             .frame(maxWidth: .infinity)
             .fixedSize(horizontal: false, vertical: true)
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
             .presentationDetents([.height(height)])
             .presentationDragIndicator(.visible)
-            .presentationCornerRadius(28)
+            .presentationCornerRadius(QasaTokens.Radius.sheet)
             .presentationBackground(theme.background)
             .appLocalization()
     }

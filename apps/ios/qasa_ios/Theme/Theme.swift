@@ -4,7 +4,8 @@ import UIKit
 /// Semantic color palette for light and dark appearance, built from the brand palette
 /// #722F99 (purple: actions), #C5C1C1 (grey: strokes, secondary text), #FEE7C8 (beige:
 /// canvas, warm wash, gold) and #FF9292 (peach: VPN accent, danger in dark).
-/// Byte-identical to Android `QasaColors` and the generated web `tokens.css`.
+/// Values come from `design/tokens.json` (`ThemePalette+Tokens.swift`), like Android `QasaColors`
+/// and the desktop `tokens.css`.
 struct ThemePalette: Equatable {
     let background: Color
     let chrome: Color
@@ -43,65 +44,7 @@ struct ThemePalette: Equatable {
     /// Cool wash behind the Home status when something does.
     let calm: Color
 
-    static let dark = ThemePalette(
-        background: Color(hex: "17111D"),
-        chrome: Color(hex: "17111D"),
-        cardBackground: Color(hex: "231A2B"),
-        cardBackgroundLight: Color(hex: "2B2134"),
-        cardMuted: Color(hex: "33243F"),
-        stroke: Color(hex: "352B3D"),
-        strokeChrome: Color(hex: "3F3448"),
-        accent: Color(hex: "B67FDB"),
-        accentDark: Color(hex: "722F99"),
-        onAccent: Color(hex: "22102F"),
-        onAccentChip: Color(hex: "F1E3FA"),
-        gold: Color(hex: "FEE7C8"),
-        goldMuted: Color(hex: "F0C48C"),
-        cyan: Color(hex: "FF9292"),
-        info: Color(hex: "C9A3E6"),
-        success: Color(hex: "5CCB97"),
-        danger: Color(hex: "FF6B6B"),
-        dangerBackground: Color(hex: "4A1F28"),
-        dangerText: Color(hex: "FFC0C0"),
-        dangerTextMuted: Color(hex: "FFD9D9"),
-        textPrimary: Color(hex: "F2EDF4"),
-        textSecondary: Color(hex: "C5C1C1"),
-        textTertiary: Color(hex: "8A8290"),
-        textPlaceholder: Color(hex: "8A8290"),
-        textOnChrome: Color(hex: "D9D3DD"),
-        warm: Color(hex: "3E2B2F"),
-        calm: Color(hex: "2A2430")
-    )
-
-    static let light = ThemePalette(
-        background: Color(hex: "FBF6F0"),
-        chrome: Color(hex: "FBF6F0"),
-        cardBackground: Color(hex: "FFFFFF"),
-        cardBackgroundLight: Color(hex: "FFF3E3"),
-        cardMuted: Color(hex: "F3EAF7"),
-        stroke: Color(hex: "E6E1E1"),
-        strokeChrome: Color(hex: "DCD7D7"),
-        accent: Color(hex: "722F99"),
-        accentDark: Color(hex: "5C2580"),
-        onAccent: Color(hex: "FFFFFF"),
-        onAccentChip: Color(hex: "4A1A66"),
-        gold: Color(hex: "B7701E"),
-        goldMuted: Color(hex: "94591A"),
-        cyan: Color(hex: "E2707A"),
-        info: Color(hex: "8A4FB3"),
-        success: Color(hex: "2F9E6C"),
-        danger: Color(hex: "C8323C"),
-        dangerBackground: Color(hex: "FFE6E6"),
-        dangerText: Color(hex: "9E2F35"),
-        dangerTextMuted: Color(hex: "B83C44"),
-        textPrimary: Color(hex: "2A1F33"),
-        textSecondary: Color(hex: "6E6475"),
-        textTertiary: Color(hex: "A39DA3"),
-        textPlaceholder: Color(hex: "A39DA3"),
-        textOnChrome: Color(hex: "3E3346"),
-        warm: Color(hex: "FEE7C8"),
-        calm: Color(hex: "EDE9E9")
-    )
+    // `dark` and `light` are generated from design/tokens.json: ThemePalette+Tokens.swift.
 
     static func resolved(for scheme: ColorScheme) -> ThemePalette {
         scheme == .dark ? .dark : .light
@@ -171,31 +114,31 @@ enum Theme {
     static let lightTextPrimary = textPrimary
     static let lightTextSecondary = textSecondary
 
-    // Rounder than before for the calm + personal redesign (matches Android QasaDimens).
-    static let cornerRadius: CGFloat = 20
-    static let cornerRadiusLarge: CGFloat = 24
-    static let screenPadding: CGFloat = 20
+    // Sizes come from design/tokens.json (`QasaTokens`), shared with Android and the desktop.
+    static let cornerRadius: CGFloat = QasaTokens.Radius.card
+    static let cornerRadiusLarge: CGFloat = QasaTokens.Radius.cardLarge
+    static let screenPadding: CGFloat = QasaTokens.Space.screenPadding
 
     // MARK: Control sizes (one height for every field and every full-width action button).
     /// Every single-line input: text, secure, search, date and picker-styled fields.
-    static let fieldHeight: CGFloat = QasaMetrics.fieldHeight
+    static let fieldHeight: CGFloat = QasaTokens.Size.fieldHeight
     /// Every full-width primary / secondary / destructive action button.
-    static let buttonHeight: CGFloat = QasaMetrics.buttonHeight
+    static let buttonHeight: CGFloat = QasaTokens.Size.buttonHeight
     /// Corner radius shared by fields and action buttons.
-    static let controlCornerRadius: CGFloat = QasaMetrics.controlCornerRadius
+    static let controlCornerRadius: CGFloat = QasaTokens.Radius.control
     /// Horizontal inset of text inside a field.
-    static let fieldHorizontalPadding: CGFloat = 14
+    static let fieldHorizontalPadding: CGFloat = QasaTokens.Space.fieldHorizontal
     /// Minimum height of a multi-line notes area (exempt from `fieldHeight`).
-    static let notesMinHeight: CGFloat = 112
+    static let notesMinHeight: CGFloat = QasaTokens.Size.notesMinHeight
     /// Gap between a field's label and its box, and between stacked form fields.
-    static let fieldLabelSpacing: CGFloat = 8
-    static let formSpacing: CGFloat = 16
+    static let fieldLabelSpacing: CGFloat = QasaTokens.Space.fieldLabelGap
+    static let formSpacing: CGFloat = QasaTokens.Space.formGap
 
     // MARK: Settings / list rows.
-    static let rowMinHeight: CGFloat = 60
-    static let iconBadgeSize: CGFloat = 36
-    static let iconBadgeCornerRadius: CGFloat = 10
-    static let iconBadgeGlyphSize: CGFloat = 16
+    static let rowMinHeight: CGFloat = QasaTokens.Size.rowMinHeight
+    static let iconBadgeSize: CGFloat = QasaTokens.Size.iconBadge
+    static let iconBadgeCornerRadius: CGFloat = QasaTokens.Radius.iconBadge
+    static let iconBadgeGlyphSize: CGFloat = QasaTokens.Size.iconBadgeGlyph
 }
 
 extension Color {

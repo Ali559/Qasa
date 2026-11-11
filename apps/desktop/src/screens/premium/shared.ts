@@ -5,18 +5,6 @@ import { isApiError } from '@/account/types'
 import type { PricingPlan, Subscription } from '@/account/types'
 import { prefs, useT } from '@/prefs'
 
-/**
- * `t` with an English fallback for desktop strings that may not be in the catalog yet
- * (the runtime returns the key itself when a string is missing).
- */
-export function useTr() {
-  const t = useT()
-  return (key: string, fallback: string, ...args: Array<string | number>) => {
-    const text = t(key, ...args)
-    return text === key ? fallback.replace(/\{(\d+)\}/g, (m, i: string) => String(args[Number(i)] ?? m)) : text
-  }
-}
-
 /** iOS `amount.formatted(.number.grouping(.automatic).locale(…))`. */
 export function formatIqd(amount: number): string {
   try {
@@ -65,21 +53,21 @@ export function gatewayName(t: ReturnType<typeof useT>, gateway: string | null |
 }
 
 /** The account error as a sentence (iOS `error.localizedDescription`). */
-export function errorText(tr: ReturnType<typeof useTr>, e: unknown): string {
+export function errorText(t: ReturnType<typeof useT>, e: unknown): string {
   if (isApiError(e)) {
     switch (e.code) {
       case 'offline':
-        return tr('error.offline', "You're offline. Check your connection and try again.")
+        return t('error.offline')
       case 'unauthorized':
-        return tr('error.unauthorized', 'Session expired. Unlock your vault again.')
+        return t('error.unauthorized')
       case 'server':
-        return e.server ?? tr('error.server', 'Server error ({0}).', e.status)
+        return e.server ?? t('error.server', e.status)
       case 'decode':
-        return tr('error.decoding', 'Unexpected server response.')
+        return t('error.decoding')
       case 'misconfigured':
-        return tr('error.apiHostMisconfigured', 'This build cannot reach the Qasa server ({0}). Online features are unavailable.', '—')
+        return t('error.apiHostMisconfigured', '—')
       default:
-        return tr('premium.paymentFailed', 'Payment did not complete. Try again.')
+        return t('premium.paymentFailed')
     }
   }
   return e instanceof Error ? e.message : String(e)
@@ -94,9 +82,9 @@ export type PollResult = { outcome: 'success' } | { outcome: 'failed' | 'timeout
  */
 export async function pollUntilComplete(
   paymentId: string,
-  opts: { attempts?: number; intervalMs?: number; cancelled?: () => boolean; tr: ReturnType<typeof useTr> },
+  opts: { attempts?: number; intervalMs?: number; cancelled?: () => boolean; t: ReturnType<typeof useT> },
 ): Promise<PollResult> {
-  const { attempts = 30, intervalMs = 2000, cancelled = () => false, tr } = opts
+  const { attempts = 30, intervalMs = 2000, cancelled = () => false, t } = opts
   let lastError: string | null = null
   for (let i = 0; i < attempts; i++) {
     if (cancelled()) return { outcome: 'timeout', error: null }
@@ -106,7 +94,7 @@ export async function pollUntilComplete(
       if (s === 'success') return { outcome: 'success' }
       if (s === 'failed') return { outcome: 'failed', error: null }
     } catch (e) {
-      lastError = errorText(tr, e)
+      lastError = errorText(t, e)
     }
     if (i < attempts - 1) await new Promise((r) => setTimeout(r, intervalMs))
   }

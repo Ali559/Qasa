@@ -1,7 +1,10 @@
 <script setup lang="ts">
-// iOS `PasswordGeneratorModal`: the generator in a sheet with "Use Password" pinned below.
+// iOS `PasswordGeneratorModal`: the shared sheet header ("Password generator", no Cancel),
+// the generator 8 below it with 20 at the sides, and "Use Password" in a `BottomActionBar`.
 import { ref } from 'vue'
 
+import BottomActionBar from '@/components/BottomActionBar.vue'
+import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
 import { useT } from '@/prefs'
 import GeneratorContent from '../tools/GeneratorContent.vue'
@@ -13,43 +16,23 @@ const password = ref('')
 </script>
 
 <template>
-  <Sheet :open="open" :label="t('gen.title')" :width="480" placement="bottom" @close="emit('close')">
+  <Sheet :open="open" :label="t('gen.title')" :title="t('gen.title')" :width="480" placement="bottom" @close="emit('close')">
     <div class="scroll">
       <GeneratorContent v-if="open" v-model="password" />
     </div>
-    <footer class="bar">
-      <button type="button" class="use" :disabled="!password" @click="emit('use', password)">{{ t('gen.usePassword') }}</button>
-    </footer>
+    <BottomActionBar>
+      <PrimaryButton :title="t('gen.usePassword')" :disabled="!password" @click="emit('use', password)" />
+    </BottomActionBar>
   </Sheet>
 </template>
 
 <style scoped>
+/* iOS: padding 20 at the sides, 8 on top (under the header), 12 at the bottom. */
 .scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 20px var(--screen-padding) 12px;
+  padding: 8px var(--space-screen-padding) var(--space-bottom-bar-vertical);
   background: var(--background);
-}
-
-.bar {
-  padding: 12px var(--screen-padding) 20px;
-  border-top: 1px solid var(--stroke);
-  background: var(--chrome);
-}
-
-.use {
-  width: 100%;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 0;
-  border-radius: var(--button-radius);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.use:disabled {
-  opacity: 0.45;
 }
 </style>

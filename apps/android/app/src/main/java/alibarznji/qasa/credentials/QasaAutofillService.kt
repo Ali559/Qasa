@@ -2,6 +2,7 @@ package alibarznji.qasa.credentials
 
 import alibarznji.qasa.MainActivity
 import alibarznji.qasa.R
+import alibarznji.qasa.prefs.LocaleContext
 import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.vault.VaultPayload
 import android.annotation.SuppressLint
@@ -51,6 +52,8 @@ class QasaAutofillService : AutofillService() {
         if (!form.hasLogin && !form.hasCard && !form.hasIdentity) return callback.onSuccess(null)
 
         val entries = indexStore.read()
+        // A service's resources follow the device language; the dataset labels follow the app's.
+        val l10n = LocaleContext.forApp(this)
         val inline = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) InlineSpecs(request) else null
         val response = FillResponse.Builder()
         var added = 0
@@ -63,7 +66,7 @@ class QasaAutofillService : AutofillService() {
                 added++
             }
             // Always last: search the whole vault (and unlock first when locked).
-            response.addDataset(dataset(ids, group, null, getString(R.string.autofill_searchqasa), getString(R.string.autofill_title), inline))
+            response.addDataset(dataset(ids, group, null, l10n.getString(R.string.autofill_searchqasa), l10n.getString(R.string.autofill_title), inline))
             added++
         }
 

@@ -23,7 +23,7 @@ test('the menu uses IBM Plex Sans Arabic, loaded from the extension into the pag
   await page.goto(`${env.servers.main}/login.html`)
   await fillVia(page, page.locator('#username'), 0)
   const faces = await page.evaluate(() => [...document.fonts].filter((f) => f.family.replace(/"/g, '').startsWith('qasa-')).map((f) => [f.family.replace(/"/g, '').split('-')[1], f.weight, f.status]))
-  expect(faces.sort()).toEqual([['plex', '400', 'loaded'], ['plex', '600', 'loaded'], ['plex', '700', 'loaded']])
+  expect(faces.sort()).toEqual([['plex', '400', 'loaded'], ['plex', '500', 'loaded'], ['plex', '600', 'loaded'], ['plex', '700', 'loaded']])
 })
 
 test('second row fills the second login', async ({ env }) => {

@@ -6,9 +6,9 @@ import { computed, type Component } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
+import SettingsSection from '@/components/SettingsSection.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
 import { account } from '@/account/store'
 import { openPage, type AppPage } from '@/nav'
 import { openUrl } from '@/opener'
@@ -52,7 +52,7 @@ const premium = computed(() => account.status?.isPremium ?? false)
     <CardContainer>
       <div class="profile-card">
         <div class="profile">
-          <span class="avatar"><User :size="26" fill="currentColor" /></span>
+          <span class="avatar"><User :size="26" fill="currentColor" aria-hidden="true" /></span>
           <div class="who">
             <span class="name">{{ t('session.qasaUser') }}</span>
             <span class="plan">{{ t(premium ? 'settings.premiumAccount' : 'settings.freeAccount') }}</span>
@@ -62,19 +62,16 @@ const premium = computed(() => account.status?.isPremium ?? false)
       </div>
     </CardContainer>
 
-    <section v-for="group in groups" :key="group.label" class="group">
-      <SectionLabel :text="group.label" />
-      <CardContainer :padding="0" class="settings-list">
-        <SettingsRow
-          v-for="page in group.pages"
-          :key="page"
-          :icon="ROWS[page]!.icon"
-          :title="t(ROWS[page]!.key)"
-          :trailing-text="page === 'notifications' && account.unread > 0 ? String(account.unread) : undefined"
-          @click="openRow(page)"
-        />
-      </CardContainer>
-    </section>
+    <SettingsSection v-for="group in groups" :key="group.label" :title="group.label">
+      <SettingsRow
+        v-for="page in group.pages"
+        :key="page"
+        :icon="ROWS[page]!.icon"
+        :title="t(ROWS[page]!.key)"
+        :trailing-text="page === 'notifications' && account.unread > 0 ? String(account.unread) : undefined"
+        @click="openRow(page)"
+      />
+    </SettingsSection>
   </PageFrame>
 </template>
 
@@ -97,6 +94,7 @@ const premium = computed(() => account.status?.isPremium ?? false)
   width: 56px;
   height: 56px;
   border: 2px solid var(--accent);
+  flex-shrink: 0;
   border-radius: 50%;
   color: var(--text-secondary);
 }
@@ -113,13 +111,8 @@ const premium = computed(() => account.status?.isPremium ?? false)
 }
 
 .plan {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
+  font-weight: var(--type-row-value-weight);
   color: var(--text-secondary);
-}
-
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 </style>

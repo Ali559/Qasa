@@ -38,27 +38,30 @@ onMounted(regenerate)
     <div class="card-head">
       <SectionLabel :text="t('gen.generatedPassword')" />
       <button type="button" class="regen" :aria-label="t('gen.regenerate')" :title="t('gen.regenerate')" @click="regenerate">
-        <RefreshCw :size="18" />
+        <RefreshCw :stroke-width="2.5" />
       </button>
     </div>
     <output class="password" dir="ltr" data-testid="generated">{{ password || ' ' }}</output>
-    <button type="button" class="copy" :disabled="!password" @click="copy">
-      <Check v-if="copied" :size="16" />
-      <Copy v-else :size="16" />
-      {{ copied ? t('gen.copied') : t('gen.copyPassword') }}
+    <button type="button" class="qasa-button secondary" :disabled="!password" @click="copy">
+      <Check v-if="copied" :stroke-width="2.5" aria-hidden="true" />
+      <Copy v-else :stroke-width="2.5" aria-hidden="true" />
+      <span>{{ copied ? t('gen.copied') : t('gen.copyPassword') }}</span>
     </button>
   </div>
 </template>
 
 <style scoped>
+/* iOS `generatedPasswordCard` (compact): large card radius, 1px stroke, an accent 10%
+   wash from the top-leading corner, padding 18; the label row 12 above the password
+   (22 bold mono, tracking 1.5, one line), 16 above the secondary Copy button. */
 .password-card {
   display: flex;
   flex-direction: column;
-  padding: 21px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius-large);
+  padding: 18px;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card-large);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%),
+    linear-gradient(to bottom right, color-mix(in srgb, var(--accent) 10%, transparent), transparent),
     var(--card-background);
 }
 
@@ -66,47 +69,38 @@ onMounted(regenerate)
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 12px;
 }
 
+/* iOS `FieldIconButton` tinted accent. */
 .regen {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: var(--card-muted);
+  background: transparent;
   color: var(--accent);
   cursor: pointer;
 }
 
+.regen svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
+}
+
 .password {
   display: block;
-  margin: 16px 0 20px;
+  margin-bottom: 16px;
+  overflow: hidden;
   font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 600;
-  word-break: break-all;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   user-select: text;
-}
-
-.copy {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 0;
-  border-radius: var(--button-radius);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.copy:disabled {
-  opacity: 0.45;
 }
 </style>

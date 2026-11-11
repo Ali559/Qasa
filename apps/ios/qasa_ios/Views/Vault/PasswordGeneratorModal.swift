@@ -18,6 +18,7 @@ struct PasswordGeneratorModal: View {
             .padding(.bottom, 12)
         }
         .background(Theme.background.ignoresSafeArea())
+        .sheetHeader(L10n.tr("gen.title"))
         .bottomActionBar {
             Button(L10n.tr("gen.usePassword")) {
                 onUsePassword(model.password)

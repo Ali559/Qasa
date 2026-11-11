@@ -24,7 +24,7 @@ final class PricingService {
             lastError = nil
             return sorted
         } catch {
-            lastError = error.localizedDescription
+            lastError = L10n.message(for: error)
             if plans.isEmpty {
                 plans = Self.fallbackPlans
             }

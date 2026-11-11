@@ -10,15 +10,16 @@ import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
 import { PLEX } from './fonts'
 import TOKENS from '@/theme/tokens.css?raw'
-import { ICON_INSET, ICON_SIZE, MENU_ARM_MS, MENU_GAP, MENU_HEADER, MENU_PADDING, MENU_WIDTH, ROW_HEIGHT } from './layout'
+import { FONT_WAIT_MS, ICON_INSET, ICON_SIZE, MENU_ARM_MS, MENU_GAP, MENU_HEADER, MENU_PADDING, MENU_WIDTH, ROW_HEIGHT } from './layout'
 
 export type MenuState =
   | { kind: 'loading' }
   | { kind: 'items'; items: LoginMatch[] }
   | { kind: 'message'; key: string; args?: Array<string | number>; action?: { key: string; run: () => void } }
 
-/** The app's colour tokens (tokens.css, generated from iOS) as declarations for the shadow
- *  root, so the in-page menu follows the same palette in light and dark. */
+/** The app's tokens (tokens.css, generated from design/tokens.json, the iOS values) as
+ *  declarations for the shadow root: sizes, type, motion and shadows from the first `:root`
+ *  block, and the light / dark palettes, so the in-page menu uses the same values. */
 function tokenBlock(selector: string): string {
   const start = TOKENS.indexOf(`${selector} {`)
   if (start < 0) return ''
@@ -29,6 +30,7 @@ function tokenBlock(selector: string): string {
     .filter((line) => line.startsWith('--'))
     .join(' ')
 }
+const METRICS = tokenBlock(':root')
 const LIGHT = tokenBlock(':root[data-theme="light"]')
 const DARK = tokenBlock(':root[data-theme="dark"]')
 
@@ -36,45 +38,78 @@ const CSS = `
 :host { all: initial; }
 * { box-sizing: border-box; }
 .icon, .menu {
+  ${METRICS}
   ${LIGHT}
-  --shadow: rgb(0 0 0 / 0.18);
-  font-family: '${PLEX}', system-ui, -apple-system, 'Segoe UI', 'Noto Naskh Arabic', 'Geeza Pro', sans-serif;
+  /* The per-document Plex face (fonts.ts): the page's own "IBM Plex Sans Arabic" can't
+     stand in for it. */
+  --font-family: '${PLEX}', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-family: var(--font-family);
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--line-height);
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
 }
 @media (prefers-color-scheme: dark) {
-  .icon, .menu { ${DARK} --shadow: rgb(0 0 0 / 0.45); }
+  .icon, .menu { ${DARK} }
 }
 .icon {
   position: fixed; width: ${ICON_SIZE}px; height: ${ICON_SIZE}px; padding: 0; margin: 0;
   border: 0; border-radius: 6px; background: transparent; color: var(--accent);
   display: grid; place-items: center; cursor: pointer; pointer-events: auto;
 }
-.icon:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.icon:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .icon svg { width: 16px; height: 18px; }
+/* A card (iOS \`CardContainer\`: card fill, 1px stroke, card radius) holding a
+   \`SettingsSection\`-style list, lifted off the page with the toast shadow. */
 .menu {
   position: fixed; width: ${MENU_WIDTH}px; padding: ${MENU_PADDING}px; margin: 0;
-  background: var(--card-background); color: var(--text-primary); border: 1px solid var(--stroke); border-radius: 16px;
-  box-shadow: 0 10px 30px var(--shadow); pointer-events: auto; font-size: 14px; line-height: 1.3;
+  background: var(--card-background); color: var(--text-primary);
+  border: var(--size-stroke) solid var(--stroke); border-radius: var(--radius-card);
+  box-shadow: var(--shadow-toast); pointer-events: auto;
 }
-.head { height: ${MENU_HEADER}px; display: flex; align-items: center; gap: 8px; padding-inline: 10px; color: var(--accent); font-weight: 700; font-size: 15px; }
-.head svg { width: 14px; height: 16px; }
+.head {
+  height: ${MENU_HEADER}px; display: flex; align-items: center; gap: 8px; padding-inline: 10px;
+  color: var(--accent); font-size: var(--type-row-title-size); font-weight: 700;
+}
+.head svg { width: 14px; height: 16px; flex-shrink: 0; }
+/* iOS \`SettingsRow\`: 60 tall, a 36 badge (radius 10) 14 from a 15 medium title and a 12
+   subtitle 2 below; \`RowButtonStyle\`'s 6% wash on hover and press, radius 10. */
 .row {
-  height: ${ROW_HEIGHT}px; width: 100%; display: flex; align-items: center; gap: 12px; padding: 0 10px;
-  border: 0; border-radius: 12px; background: transparent; color: inherit; font: inherit; text-align: start; cursor: pointer;
+  position: relative; height: ${ROW_HEIGHT}px; width: 100%; display: flex; align-items: center;
+  gap: var(--space-row-icon-gap); padding: var(--space-row-vertical) 10px; margin: 0;
+  border: 0; border-radius: var(--radius-row-press); background: transparent; color: inherit;
+  font: inherit; text-align: start; cursor: pointer;
 }
-.row:hover { background: var(--card-muted); }
-.row:focus-visible { background: var(--card-muted); outline: 2px solid var(--accent); outline-offset: -2px; }
-.row:active { background: color-mix(in srgb, var(--accent) 14%, var(--card-muted)); }
-.tile { width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; }
+.row::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--text-primary);
+  opacity: 0; pointer-events: none; transition: opacity var(--motion-press);
+}
+.row:hover::after, .row:active::after { opacity: var(--motion-row-pressed-opacity); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tile {
+  width: var(--size-icon-badge); height: var(--size-icon-badge); flex-shrink: 0; border-radius: var(--radius-icon-badge);
+  display: grid; place-items: center; color: #fff; font-weight: 700; font-size: calc(var(--size-icon-badge) * 0.375);
+}
 .tile.site { background: var(--card-muted); color: var(--text-primary); }
-.tile.site svg { width: 16px; height: 16px; }
-.text { display: flex; flex-direction: column; min-width: 0; }
+.tile.site svg { width: var(--size-icon-badge-glyph); height: var(--size-icon-badge-glyph); }
+.text { display: flex; flex-direction: column; gap: var(--space-row-text-gap); min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.title { font-weight: 600; }
-.sub { color: var(--text-secondary); font-size: 13px; }
+.title { font-size: var(--type-row-title-size); font-weight: var(--type-row-title-weight); }
+.sub { color: var(--text-secondary); font-size: var(--type-row-subtitle-size); font-weight: var(--type-row-subtitle-weight); }
 .msg { padding: 8px 10px 10px; color: var(--text-secondary); }
-.action { margin: 0 10px 8px; padding: 8px 14px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 600; cursor: pointer; }
-.action:hover { filter: brightness(1.05); }
+/* iOS \`QasaButtonStyle(.primary)\`. */
+.action {
+  display: flex; align-items: center; justify-content: center;
+  width: calc(100% - 20px); height: var(--size-button-height); margin: 0 10px 10px; padding: 0 var(--space-button-horizontal);
+  border: 0; border-radius: var(--radius-control); background: var(--accent); color: var(--on-accent);
+  font: inherit; font-size: var(--type-button-size); font-weight: var(--type-button-weight); white-space: nowrap; cursor: pointer;
+  transition: opacity var(--motion-press), transform var(--motion-press);
+}
+.action:active { opacity: var(--motion-pressed-opacity); transform: scale(var(--motion-press-scale)); }
 .action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Hidden until the Plex faces are in, so the menu never paints in a system font. */
+.menu.pending { visibility: hidden; }
 `
 
 /** A filled 24×24 icon from one path. Built with DOM calls (no innerHTML), so pages with
@@ -234,6 +269,21 @@ export class Overlay {
       this.observer.observe(el)
     }
     el.addEventListener('click', (e) => this.onMenuClick(e))
+  }
+
+  /** Keeps the open menu hidden until `fonts` settles (at most `FONT_WAIT_MS`), then shows
+   *  it and restarts the click arming from the moment it became visible. */
+  revealAfter(fonts: Promise<void>): void {
+    const menu = this.menu
+    if (!menu) return
+    menu.el.classList.add('pending')
+    const reveal = () => {
+      if (this.menu !== menu || !menu.el.classList.contains('pending')) return
+      menu.el.classList.remove('pending')
+      menu.shownAt = performance.now()
+    }
+    void fonts.finally(reveal)
+    setTimeout(reveal, FONT_WAIT_MS)
   }
 
   isMenuOpen(): boolean {

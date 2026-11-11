@@ -119,7 +119,7 @@ async function create() {
 
       <p v-if="error" class="error" role="alert">{{ error }}</p>
 
-      <CardContainer v-if="bio && bio.kind !== 'none'" :padding="0" class="biometric settings-list">
+      <CardContainer v-if="bio && bio.kind !== 'none'" class="biometric settings-list">
         <SettingsRow
           :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
           :title="t('auth.create.enableBiometrics')"
@@ -134,7 +134,7 @@ async function create() {
       <CardContainer muted class="zero-knowledge">
         <Shield class="watermark" :size="88" fill="currentColor" aria-hidden="true" />
         <div class="zk-title">
-          <Lock :size="16" class="accent" fill="currentColor" />
+          <Lock :size="17" class="accent" aria-hidden="true" />
           <span>{{ t('auth.create.zeroKnowledge') }}</span>
         </div>
         <p class="zk-body">{{ t('auth.create.zeroKnowledgeBody') }}</p>
@@ -175,6 +175,7 @@ async function create() {
 .subtitle {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
@@ -194,14 +195,13 @@ async function create() {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  margin-top: 0;
+  gap: var(--space-row-text-gap);
   text-align: start;
 }
 
 .pair-subtitle {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   color: var(--text-secondary);
 }
 
@@ -225,8 +225,8 @@ async function create() {
 .strength-row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   color: var(--text-secondary);
 }
 
@@ -244,10 +244,6 @@ async function create() {
 .biometric {
   margin-top: 12px;
 }
-
-
-
-
 
 
 .zero-knowledge {
@@ -282,6 +278,7 @@ async function create() {
   position: relative;
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 </style>

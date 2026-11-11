@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -32,7 +32,7 @@ private val NoInsets = WindowInsets(0, 0, 0, 0)
  *     ScrollView { Column(spacing 16|24) { ... }
  *         .padding(horizontal = screenPadding)
  *         .padding(top = 24, bottom = scrollTail) }
- *     StickyBottomBar?                  // chrome, 1dp strokeChrome top hairline
+ *     StickyBottomBar?                  // chrome, 1px stroke top hairline
  * }
  * .background(background)
  * ```
@@ -71,7 +71,11 @@ fun ScreenScaffold(
             .fillMaxWidth()
             .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
             .padding(horizontal = QasaDimens.screenPadding)
-            .padding(top = QasaDimens.sectionGap, bottom = QasaDimens.scrollTail)
+            // In a sheet: iOS pads the page by screenPadding under the sheet header.
+            .padding(
+                top = if (inSheet) QasaDimens.screenPadding else QasaDimens.sectionGap,
+                bottom = if (inSheet) QasaDimens.screenPadding else QasaDimens.scrollTail,
+            )
             .windowInsetsPadding(tailInset)
         Column(modifier = bodyMod, content = content)
         stickyBottom?.invoke()
@@ -79,11 +83,11 @@ fun ScreenScaffold(
 }
 
 /**
- * The one bottom action bar: every page's primary submit / save / continue sits here,
- * fixed below the scrolling body. Solid `chrome` fill, 1dp `strokeChrome` hairline on
- * top, `screenPadding` sides, and the navigation-bar + IME insets so the action stays
- * above the gesture bar and the keyboard. Stacked buttons (primary, then secondary) are
- * spaced by `contentGap`; each is [QasaDimens.buttonHeight] tall.
+ * iOS `BottomActionBar` (`Controls.swift`): every page's primary submit / save / continue,
+ * fixed below the scrolling body. Solid `chrome` fill, a one-pixel `stroke` hairline on
+ * top (`1 / displayScale`), [QasaDimens.screenPadding] sides, 12dp above and below, buttons
+ * 10dp apart, plus the navigation-bar + IME insets so the action stays above the gesture
+ * bar and the keyboard.
  */
 @Composable
 fun StickyBottomBar(content: @Composable ColumnScope.() -> Unit) {
@@ -92,15 +96,18 @@ fun StickyBottomBar(content: @Composable ColumnScope.() -> Unit) {
         Modifier
             .fillMaxWidth()
             .background(c.chrome)
+            .drawBehind {
+                // Exactly one physical pixel, like iOS's `1 / displayScale`.
+                drawRect(c.stroke, size = androidx.compose.ui.geometry.Size(size.width, 1f))
+            }
             .navigationBarsPadding()
             .imePadding(),
     ) {
-        HorizontalDivider(color = c.strokeChrome, thickness = QasaDimens.stroke)
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.gapSmall),
-            verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
+                .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.bottomBarVertical),
+            verticalArrangement = Arrangement.spacedBy(QasaDimens.bottomBarGap),
             content = content,
         )
     }

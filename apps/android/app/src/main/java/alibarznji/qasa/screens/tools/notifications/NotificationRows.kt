@@ -4,7 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.network.AppNotificationDTO
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
-import alibarznji.qasa.theme.SheetChromeHeader
+import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -126,7 +126,7 @@ internal fun SwipeToDeleteRow(onDelete: () -> Unit, content: @Composable () -> U
     ) { content() }
 }
 
-/** iOS detail `.sheet(item: $selected)`: title, date, body, Close. */
+/** iOS detail `.sheet(item: $selected)`: the shared sheet header, then title, date and body. */
 @Composable
 internal fun NotificationDetailSheetContent(
     note: AppNotificationDTO,
@@ -135,11 +135,7 @@ internal fun NotificationDetailSheetContent(
     onClose: () -> Unit,
 ) {
     val c = qasaColors
-    SheetChromeHeader(
-        title = stringResource(R.string.notifications_detailtitle),
-        onDismiss = onClose,
-        dismissLabel = stringResource(R.string.common_close),
-    )
+    QasaSheetHeader(stringResource(R.string.notifications_detailtitle))
     Column(
         Modifier
             .fillMaxWidth()

@@ -58,7 +58,7 @@ function onUnlink() {
       :class="{ tappable: !premium }"
       @click="!premium && emit('upgrade')"
     >
-      <component :is="icon" class="platform" :size="28" />
+      <span class="platform" aria-hidden="true"><component :is="icon" :stroke-width="2.5" /></span>
       <span class="text">
         <span class="title-line">
           <span class="name">{{ device.device_name }}</span>
@@ -66,7 +66,7 @@ function onUnlink() {
           <PillBadge v-if="device.is_primary" :text="t('devices.primary')" color="var(--gold-muted)" />
         </span>
         <span class="meta">{{ device.platform.toUpperCase() }}</span>
-        <span v-if="location" class="meta location"><MapPin :size="13" />{{ location }}</span>
+        <span v-if="location" class="meta location"><MapPin :size="13" aria-hidden="true" />{{ location }}</span>
         <span v-if="activated" class="activated">{{ t('devices.activatedAt', activated) }}</span>
       </span>
       <Lock v-if="!premium" class="lock" :size="12" :stroke-width="2.5" />
@@ -74,7 +74,7 @@ function onUnlink() {
 
     <div v-if="premium" class="chips">
       <button type="button" class="chip" :disabled="busy" @click="emit('logout')">
-        <LogOut :size="15" />{{ t('devices.logout') }}
+        <LogOut :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.logout') }}</span>
       </button>
       <button
         type="button"
@@ -84,11 +84,11 @@ function onUnlink() {
         :disabled="busy"
         @click="onUnlink"
       >
-        <Link :size="15" />{{ t('devices.unlink') }}
+        <Link :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlink') }}</span>
       </button>
     </div>
-    <button v-else-if="!isCurrent" type="button" class="free-unlink" :disabled="busy" @click="emit('unlink')">
-      <Link :size="16" />{{ t('devices.unlink') }}
+    <button v-else-if="!isCurrent" type="button" class="qasa-button secondary" :disabled="busy" @click="emit('unlink')">
+      <Link :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlink') }}</span>
     </button>
   </article>
 </template>
@@ -101,8 +101,8 @@ function onUnlink() {
   gap: 14px;
   padding: 21px;
   overflow: hidden;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
 }
 
@@ -123,6 +123,7 @@ function onUnlink() {
   padding-inline-start: 8px;
   border: 0;
   background: transparent;
+  color: inherit;
   text-align: start;
 }
 
@@ -130,10 +131,21 @@ function onUnlink() {
   cursor: pointer;
 }
 
+/* iOS `IconBadge`. */
 .platform {
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  width: 40px;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
+}
+
+.platform svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .text {
@@ -152,13 +164,13 @@ function onUnlink() {
 }
 
 .name {
-  font-size: 16px;
+  font-size: var(--type-field-size);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .meta {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-secondary);
 }
 
@@ -168,9 +180,10 @@ function onUnlink() {
   gap: 4px;
 }
 
+/* iOS `Font.qasaLabel(12)`: 13 medium. */
 .activated {
-  font-size: 12px;
-  letter-spacing: var(--label-tracking);
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   color: var(--text-tertiary);
 }
 
@@ -184,27 +197,44 @@ function onUnlink() {
   gap: 10px;
 }
 
-.chip,
-.free-unlink {
+/* iOS `actionChip`: 48 tall, card fill, 1px stroke (danger 35% when destructive), control
+   radius, 14 semibold, `PressableStyle`. */
+.chip {
   display: inline-flex;
   flex: 1;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 9px;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
+  gap: var(--space-button-icon-gap);
+  min-width: 0;
+  height: var(--size-button-height);
+  padding: 0 8px;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-control);
+  background: var(--card-background);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
+  transition:
+    opacity var(--motion-press),
+    transform var(--motion-press);
 }
 
-.free-unlink {
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 400;
+.chip svg {
+  flex-shrink: 0;
+  width: var(--size-button-icon-glyph);
+  height: var(--size-button-icon-glyph);
+}
+
+.chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip:active:not(:disabled) {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
 .chip.destructive {
@@ -216,14 +246,8 @@ function onUnlink() {
   color: var(--text-tertiary);
 }
 
-.chip:hover:not(:disabled),
-.free-unlink:hover:not(:disabled) {
-  background: var(--card-background-light);
-}
-
-.chip:disabled,
-.free-unlink:disabled {
+.chip:disabled {
   cursor: default;
-  opacity: 0.6;
+  opacity: var(--motion-disabled-opacity);
 }
 </style>

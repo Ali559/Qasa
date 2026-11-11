@@ -50,13 +50,7 @@ struct AddItemMenuView: View {
                 .padding(Theme.screenPadding)
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(L10n.tr("vault.addNew", locale: AppPreferences.shared.locale))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("common.cancel", action: onCancel)
-                }
-            }
+            .sheetHeader(L10n.tr("vault.addNew", locale: AppPreferences.shared.locale))
             .navigationDestination(for: AddRoute.self) { route in
                 switch route {
                 case .subtypes(let kind):

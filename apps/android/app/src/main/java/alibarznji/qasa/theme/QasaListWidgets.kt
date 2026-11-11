@@ -5,6 +5,15 @@ import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +32,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
@@ -41,8 +50,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 
 /**
- * The rounded-square icon badge every settings / list row leads with: a fixed
- * [QasaDimens.rowIconBadge] square, `tint @ 12%` fill (or [background]), 20dp glyph.
+ * iOS `IconBadge`: a [QasaDimens.rowIconBadge] (36) square, [QasaDimens.rowIconBadgeRadius]
+ * (10) corners, `tint @ 12%` fill (or [background]), 16dp glyph.
  */
 @Composable
 fun RowIconBadge(icon: ImageVector, tint: Color, background: Color? = null) {
@@ -50,19 +59,22 @@ fun RowIconBadge(icon: ImageVector, tint: Color, background: Color? = null) {
     Box(
         modifier = Modifier
             .size(QasaDimens.rowIconBadge)
-            .clip(shape)
-            .background(background ?: tint.copy(alpha = 0.12f), shape),
+            .background(background ?: tint.copy(alpha = ICON_BADGE_FILL_ALPHA), shape),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = tint, modifier = Modifier.size(QasaIconSize.xl))
+        Icon(icon, null, tint = tint, modifier = Modifier.size(QasaDimens.rowIconBadgeGlyph))
     }
 }
 
+/** iOS `IconBadge` fill: the tint at 12%. */
+private const val ICON_BADGE_FILL_ALPHA = 0.12f
+
 /**
- * The one row layout behind [NavChevronRow] and [ToggleRow]: at least
- * [QasaDimens.rowMinHeight] tall, optional [RowIconBadge], title 16 medium and subtitle
- * 13 stacked and vertically centered against the badge, then the [trailing] slot
- * (chevron, value, switch) centered on the same line. Start/end only, so it mirrors in RTL.
+ * iOS `SettingsRow` — the one row layout behind [NavChevronRow] and [ToggleRow]: at least
+ * [QasaDimens.rowMinHeight] (60) tall with 10dp vertical padding, optional [RowIconBadge],
+ * 14dp gaps, title `type.rowTitle` (15 medium) and subtitle `type.rowSubtitle` (12) 2dp
+ * apart, then the [trailing] slot centered on the same line. Start/end only, so it mirrors
+ * in RTL.
  */
 @Composable
 fun QasaRow(
@@ -80,33 +92,152 @@ fun QasaRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = QasaDimens.rowMinHeight)
-            .padding(vertical = QasaDimens.contentGap),
+            .padding(vertical = QasaDimens.rowVertical),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             RowIconBadge(icon, tint = iconColor ?: c.accent, background = iconBackground)
-            Spacer(Modifier.width(QasaDimens.drawerGap))
+            Spacer(Modifier.width(QasaDimens.rowIconGap))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-            Text(title, color = titleColor ?: c.textPrimary, style = qasaText.rowTitleMedium)
+            Text(title, color = titleColor ?: c.textPrimary, style = qasaText.settingsRowTitle)
             if (!subtitle.isNullOrEmpty()) {
-                Spacer(Modifier.height(QasaDimens.spaceMicro))
-                Text(subtitle, color = c.textSecondary, style = qasaText.bodySmall)
+                Spacer(Modifier.height(QasaDimens.rowTextGap))
+                Text(subtitle, color = c.textSecondary, style = qasaText.rowSubtitle)
             }
         }
         if (trailing != null) {
-            Spacer(Modifier.width(QasaDimens.gapSmall))
+            Spacer(Modifier.width(QasaDimens.rowIconGap))
             trailing()
         }
     }
 }
 
+/** iOS `RowChevron`: a 13dp `textTertiary` forward chevron (mirrored in RTL). */
+@Composable
+fun RowChevron() {
+    Icon(
+        Icons.AutoMirrored.Filled.ArrowForwardIos,
+        contentDescription = null,
+        tint = qasaColors.textTertiary,
+        modifier = Modifier.size(QasaDimens.rowChevronGlyph),
+    )
+}
+
+/** iOS `RowValue`: trailing value text, `type.rowValue` (13), `textSecondary`, one line. */
+@Composable
+fun RowValue(text: String) {
+    Text(
+        text,
+        color = qasaColors.textSecondary,
+        style = qasaText.rowValue,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+/** iOS `RowDivider`: a 1dp `stroke` line inset to the row text (badge 36 + gap 14). */
+@Composable
+fun RowDivider(modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .fillMaxWidth()
+            .padding(start = QasaDimens.rowIconBadge + QasaDimens.rowIconGap)
+            .height(QasaDimens.stroke)
+            .background(qasaColors.stroke),
+    )
+}
+
 /**
- * `NavChevronRow` — `Components.swift:257`, on the shared [QasaRow]: badge, title,
- * subtitle, optional trailing value, then a 16dp `textTertiary` chevron (hidden when
- * destructive; the title and badge take `danger` instead).
- *
- * The chevron is `AutoMirrored` so it points the right way in RTL (§5).
+ * iOS `SettingsSection`: an optional [SectionLabel] (inset 4) 8dp above a
+ * [CardContainer] with no padding of its own, its rows inset 14 × 4.
+ */
+@Composable
+fun SettingsSection(
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    trailingTitle: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier.fillMaxWidth()) {
+        if (title != null || trailingTitle != null) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = QasaDimens.spaceSmall),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (title != null) SectionLabel(title)
+                Spacer(Modifier.weight(1f))
+                trailingTitle?.invoke()
+            }
+            Spacer(Modifier.height(QasaDimens.sectionLabelGap))
+        }
+        CardContainer(padding = 0.dp) {
+            Column(
+                Modifier.padding(
+                    horizontal = QasaDimens.sectionInsetHorizontal,
+                    vertical = QasaDimens.sectionInsetVertical,
+                ),
+                content = content,
+            )
+        }
+    }
+}
+
+/**
+ * iOS `RowButtonStyle`: a tappable row whose press shows a soft `textPrimary @ 6%` wash
+ * ([QasaDimens.rowPressRadius] corners, 8dp wider than the row on each side) over
+ * `motion.press`, instead of a ripple. Never scales.
+ */
+@Composable
+fun QasaRowPressable(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    role: Role? = Role.Button,
+    content: @Composable () -> Unit,
+) {
+    val c = qasaColors
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val wash by animateFloatAsState(
+        if (pressed && enabled) QasaMotion.ROW_PRESSED_OPACITY else 0f,
+        QasaMotion.pressTween(),
+        label = "qasaRowWash",
+    )
+    val shape = RoundedCornerShape(QasaDimens.rowPressRadius)
+    Box(
+        modifier = modifier
+            .drawBehind {
+                if (wash > 0f) {
+                    val inset = ROW_WASH_OUTSET.toPx()
+                    val radius = QasaDimens.rowPressRadius.toPx()
+                    drawRoundRect(
+                        color = c.textPrimary.copy(alpha = wash),
+                        topLeft = androidx.compose.ui.geometry.Offset(-inset, 0f),
+                        size = androidx.compose.ui.geometry.Size(size.width + inset * 2, size.height),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius, radius),
+                    )
+                }
+            }
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                enabled = enabled,
+                role = role,
+                onClick = onClick,
+            ),
+    ) {
+        content()
+    }
+}
+
+/** iOS `RowButtonStyle` pads its wash by −8 on both sides. */
+private val ROW_WASH_OUTSET = 8.dp
+
+/**
+ * `NavChevronRow` — `Components.swift`, on the shared [QasaRow]: badge, title, subtitle,
+ * optional [RowValue], then [RowChevron] 8dp after it (hidden when destructive; the title
+ * and badge take `danger` instead). Pressed: the [QasaRowPressable] wash.
  */
 @Composable
 fun NavChevronRow(
@@ -120,39 +251,26 @@ fun NavChevronRow(
     iconColor: Color? = null,
 ) {
     val c = qasaColors
-    QasaPressable(
+    QasaRowPressable(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
     ) {
         QasaRow(
             title = title,
             icon = icon,
-            iconColor = iconColor ?: if (destructive) c.danger else null,
+            iconColor = if (destructive) c.danger else iconColor,
             subtitle = subtitle,
             titleColor = if (destructive) c.danger else null,
             trailing = if (trailingText == null && destructive) {
                 null
             } else {
                 {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (trailingText != null) {
-                            Text(
-                                trailingText,
-                                color = c.textSecondary,
-                                style = qasaText.bodyMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        if (!destructive) {
-                            if (trailingText != null) Spacer(Modifier.width(QasaDimens.spaceSmall))
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = c.textTertiary,
-                                modifier = Modifier.size(QasaIconSize.xl),
-                            )
-                        }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
+                    ) {
+                        if (trailingText != null) RowValue(trailingText)
+                        if (!destructive) RowChevron()
                     }
                 }
             },
@@ -233,19 +351,21 @@ fun StatBox(
     val c = qasaColors
     CardContainer(modifier = modifier) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, null, tint = iconColor, modifier = Modifier.size(QasaIconSize.lg))
+            // iOS: icon 16 semibold, then label and value, all 8 apart.
+            Icon(icon, null, tint = iconColor, modifier = Modifier.size(QasaIconSize.md))
             Spacer(Modifier.height(QasaDimens.contentGap))
             Text(
                 qasaText.label(label),
                 color = c.textSecondary,
                 style = qasaText.sectionLabel,
             )
-            Spacer(Modifier.height(QasaDimens.spaceMicro))
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text(value, color = c.textPrimary, style = qasaText.statValue)
+            Spacer(Modifier.height(QasaDimens.contentGap))
+            // iOS `HStack(alignment: .firstTextBaseline, spacing: 4)`.
+            Row {
+                Text(value, color = c.textPrimary, style = qasaText.statValue, modifier = Modifier.alignByBaseline())
                 if (unit.isNotEmpty()) {
                     Spacer(Modifier.width(QasaDimens.spaceSmall))
-                    Text(unit, color = c.textSecondary, style = qasaText.bodyMedium)
+                    Text(unit, color = c.textSecondary, style = qasaText.bodyMedium, modifier = Modifier.alignByBaseline())
                 }
             }
         }
@@ -311,6 +431,7 @@ fun VaultItemRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                Spacer(Modifier.height(QasaDimens.rowTextGap))
                 Text(
                     subtitle,
                     color = c.textSecondary,
@@ -319,18 +440,14 @@ fun VaultItemRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            // iOS `Spacer(minLength: 8)` before the row's buttons.
+            Spacer(Modifier.width(QasaDimens.contentGap))
             if (onCopy != null) {
-                IconButton(
+                QasaRowIconButton(
+                    icon = Icons.Default.ContentCopy,
+                    contentDescription = copyContentDescription,
                     onClick = onCopy,
-                    modifier = Modifier.size(QasaDimens.touchTarget),
-                ) {
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        contentDescription = copyContentDescription,
-                        tint = c.textSecondary,
-                        modifier = Modifier.size(QasaIconSize.md),
-                    )
-                }
+                )
             }
             trailing?.invoke()
         }
@@ -358,14 +475,8 @@ fun CheckToggle(
         // Thumb rides ±12 from the centre like iOS (`Components.swift` CheckToggle); the
         // off state used +1, which parked the thumb in the middle of the track.
         targetValue = if (checked) QasaDimens.gapSmall else -QasaDimens.gapSmall,
-        animationSpec = if (qasaReduceMotion.enabled) {
-            androidx.compose.animation.core.tween(QasaMotion.FAST)
-        } else {
-            androidx.compose.animation.core.spring(
-                dampingRatio = QasaMotion.TOGGLE_DAMPING,
-                stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
-            )
-        },
+        // iOS `.spring(response: 0.25, dampingFraction: 0.8)` (`motion.toggle`).
+        animationSpec = if (qasaReduceMotion.enabled) QasaMotion.fadeTween() else QasaMotion.toggleSpring(),
         label = "qasaCheckToggle",
     )
     val trackColor = animateQasaColor(if (checked) c.accent else c.stroke)
@@ -386,19 +497,46 @@ fun CheckToggle(
                     .offset(x = track)
                     .size(QasaIconSize.x3l)
                     .clip(CircleShape)
-                    .background(if (checked) c.info else c.stroke),
+                    // iOS: a card-colored thumb with an accent check when on, textTertiary off.
+                    .background(if (checked) c.cardBackground else c.textTertiary),
                 contentAlignment = Alignment.Center,
             ) {
                 if (checked) {
                     Icon(
                         Icons.Default.Check,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = c.accent,
                         modifier = Modifier.size(QasaIconSize.xxxs),
                     )
                 }
             }
         }
+    }
+}
+
+/**
+ * iOS `VaultItemRow`'s plain 36dp icon buttons (copy, ⋯): a 17dp `textSecondary` glyph,
+ * dimmed while pressed, no ripple and no 48dp layout inflation.
+ */
+@Composable
+fun QasaRowIconButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    tint: Color = qasaColors.textSecondary,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val alpha = rememberPressOpacity(interaction)
+    Box(
+        modifier
+            .size(QasaDimens.rowIconBadge)
+            .graphicsLayer { this.alpha = alpha }
+            .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
+            .semanticsRoleButton(contentDescription),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaIconSize.menu))
     }
 }
 

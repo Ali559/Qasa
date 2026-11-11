@@ -4157,5 +4157,20 @@
     "en": "Paying with Iraqi wallets is almost ready. Premium will open up here as soon as it is.",
     "ar": "الدفع عبر المحافظ العراقية على وشك الجاهزية. سيُتاح الاشتراك المميز من هنا فور جاهزيته.",
     "ckb": "پارەدان بە جزدانە عێراقییەکان خەریکە ئامادە دەبێت. هەر کە ئامادە بوو، پرێمیەم لێرەوە بەردەست دەبێت."
+  },
+  "error.generic": {
+    "en": "Something went wrong. Try again.",
+    "ar": "حدث خطأ ما. حاول مرة أخرى.",
+    "ckb": "هەڵەیەک ڕوویدا. دووبارە هەوڵ بدەوە."
+  },
+  "error.network": {
+    "en": "Can't reach Qasa. Check your internet connection.",
+    "ar": "تعذّر الوصول إلى قاصة. تحقق من اتصالك بالإنترنت.",
+    "ckb": "ناتوانرێت بگاتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە."
+  },
+  "sub.notFound": {
+    "en": "No subscription found.",
+    "ar": "لم يُعثر على اشتراك.",
+    "ckb": "هیچ بەشدارییەک نەدۆزرایەوە."
   }
 }

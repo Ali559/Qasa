@@ -1,7 +1,8 @@
 <script setup lang="ts">
-// iOS `CheckToggleStyle` (generator options): a 48 × 24 capsule with a 24pt knob holding
-// a check. iOS hard-codes the knob blue (a defect, design.md §2.2 rule 6); this uses
-// accentDark.
+// iOS `CheckToggleStyle` + `LocalizedToggleRow` (generator options): 14 regular title, 8
+// vertical padding; a 48 × 24 capsule (accent on, stroke off) with a 24pt knob (card fill
+// with an 11 bold accent check on, tertiary text off) moving 24 on the `toggle` spring.
+// Disabled: opacity .7 and a tertiary title.
 import { Check } from 'lucide-vue-next'
 
 defineProps<{ label: string; disabled?: boolean }>()
@@ -12,7 +13,7 @@ const model = defineModel<boolean>({ required: true })
   <button type="button" role="switch" class="row" :aria-checked="model" :disabled="disabled" @click="model = !model">
     <span class="title">{{ label }}</span>
     <span class="track" :class="{ on: model }">
-      <span class="knob"><Check :size="11" :stroke-width="3.5" /></span>
+      <span class="knob"><Check :stroke-width="3.5" /></span>
     </span>
   </button>
 </template>
@@ -38,7 +39,12 @@ const model = defineModel<boolean>({ required: true })
 
 .title {
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-primary);
+}
+
+.row:disabled .title {
+  color: var(--text-tertiary);
 }
 
 .track {
@@ -48,7 +54,6 @@ const model = defineModel<boolean>({ required: true })
   height: 24px;
   border-radius: 999px;
   background: var(--stroke);
-  transition: background-color var(--motion-standard);
 }
 
 .track.on {
@@ -64,26 +69,27 @@ const model = defineModel<boolean>({ required: true })
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--stroke);
-  color: transparent;
-  transition:
-    transform 250ms cubic-bezier(0.34, 1.3, 0.64, 1),
-    background-color var(--motion-standard);
+  background: var(--text-tertiary);
+  color: var(--accent);
+  transition: transform var(--motion-toggle);
+}
+
+.knob svg {
+  width: 11px;
+  height: 11px;
+  opacity: 0;
 }
 
 .track.on .knob {
   transform: translateX(24px);
-  background: var(--accent-dark);
-  color: var(--knob);
+  background: var(--card-background);
+}
+
+.track.on .knob svg {
+  opacity: 1;
 }
 
 :root[dir='rtl'] .track.on .knob {
   transform: translateX(-24px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .knob {
-    transition: none;
-  }
 }
 </style>

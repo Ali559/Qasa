@@ -2,6 +2,7 @@ package alibarznji.qasa.theme
 
 import alibarznji.qasa.R
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,17 +24,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -40,6 +43,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
  * The 1dp stroke every outlined surface in the app renders. `Modifier.border` draws
@@ -48,9 +53,11 @@ import androidx.compose.ui.text.style.TextOverflow
 private val StrokeWidth = QasaDimens.stroke
 
 /**
- * The one frame every single-line input draws: exactly [QasaDimens.fieldHeight] tall,
- * `cardBackground` fill, 1dp border (`accent` while focused), `cornerRadius`, an optional
- * 20dp leading icon and a trailing slot for [FieldIconButton]s. Content is centered
+ * iOS `QasaFieldChrome` (`Controls.swift`): the one frame every single-line input draws.
+ * Exactly [QasaDimens.fieldHeight] tall, `cardBackground` fill, 1dp `stroke` border
+ * (`danger` when [isError]; focus does not recolor it, as on iOS), [QasaDimens.controlRadius]
+ * corners, [QasaDimens.fieldHorizontal] padding on both sides, an optional 20dp leading icon
+ * 12dp before the text, and a trailing slot for [FieldIconButton]s. Content is centered
  * vertically, so the 48dp height never clips the text.
  *
  * Also used by fields that are not text inputs (a dropdown shown as a field, a dial-code
@@ -59,25 +66,24 @@ private val StrokeWidth = QasaDimens.stroke
 @Composable
 fun QasaFieldFrame(
     modifier: Modifier = Modifier,
-    focused: Boolean = false,
+    @Suppress("UNUSED_PARAMETER") focused: Boolean = false,
     leadingIcon: ImageVector? = null,
+    isError: Boolean = false,
+    horizontalPadding: Dp = QasaDimens.fieldHorizontal,
     trailing: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
-    val border = animateQasaColor(if (focused) c.accent else c.stroke)
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
+    val border = animateQasaColor(if (isError) c.danger else c.stroke)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(QasaDimens.fieldHeight)
+            // Fill first, then the stroke on top (iOS `.background` + `.overlay(stroke)`).
             .background(c.cardBackground, shape)
             .border(StrokeWidth, border, shape)
-            .padding(
-                start = QasaDimens.gap,
-                // Trailing icon buttons bring their own 10dp of inner space.
-                end = if (trailing != null) QasaDimens.spaceSmall else QasaDimens.gap,
-            ),
+            .padding(horizontal = horizontalPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leadingIcon != null) {
@@ -96,7 +102,11 @@ fun QasaFieldFrame(
     }
 }
 
-/** A 40dp icon button sized to sit inside a [QasaFieldFrame] trailing slot. */
+/**
+ * iOS `FieldIconButton`: a [QasaDimens.fieldIconButton] (32) square with a 16dp glyph,
+ * `textSecondary` unless tinted, plain press (dims, no ripple, no 48dp layout inflation,
+ * so it fits the 48dp field like on iOS).
+ */
 @Composable
 fun FieldIconButton(
     icon: ImageVector,
@@ -104,8 +114,22 @@ fun FieldIconButton(
     onClick: () -> Unit,
     tint: androidx.compose.ui.graphics.Color = qasaColors.textSecondary,
 ) {
-    IconButton(onClick = onClick, modifier = Modifier.size(QasaDimens.fieldIconButton)) {
-        Icon(icon, contentDescription = contentDescription, tint = tint, modifier = Modifier.size(QasaIconSize.xl))
+    val interaction = remember { MutableInteractionSource() }
+    val alpha = rememberPressOpacity(interaction)
+    Box(
+        modifier = Modifier
+            .size(QasaDimens.fieldIconButton)
+            .alpha(alpha)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaDimens.fieldIconGlyph))
     }
 }
 
@@ -115,7 +139,7 @@ private fun FieldPlaceholder(text: String) {
     Text(
         text,
         color = qasaColors.textPlaceholder,
-        style = qasaText.bodyLarge,
+        style = qasaText.field,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -143,6 +167,7 @@ fun ThemedTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     imeAction: ImeAction = ImeAction.Default,
+    isError: Boolean = false,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val c = qasaColors
@@ -171,7 +196,7 @@ fun ThemedTextField(
                 trailing?.invoke(this)
             }
         }
-    QasaFieldFrame(modifier, focused = focused, leadingIcon = leadingIcon, trailing = trailingSlot) {
+    QasaFieldFrame(modifier, focused = focused, leadingIcon = leadingIcon, isError = isError, trailing = trailingSlot) {
         BasicTextField(
             value = value,
             onValueChange = {
@@ -179,7 +204,7 @@ fun ThemedTextField(
                 onValueChange(it)
             },
             singleLine = true,
-            textStyle = qasaText.bodyLarge.copy(color = c.textPrimary),
+            textStyle = qasaText.field.copy(color = c.textPrimary),
             cursorBrush = SolidColor(c.accent),
             visualTransformation = if (isSecure && !passwordVisible) {
                 PasswordVisualTransformation()
@@ -214,12 +239,13 @@ fun ThemedTextField(
     modifier: Modifier = Modifier,
     label: String = placeholder,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    isError: Boolean = false,
 ) {
     val c = qasaColors
     val activity = LocalUserActivity.current
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
-    QasaFieldFrame(modifier, focused = focused) {
+    QasaFieldFrame(modifier, focused = focused, isError = isError) {
         BasicTextField(
             value = value,
             onValueChange = {
@@ -227,7 +253,7 @@ fun ThemedTextField(
                 onValueChange(it)
             },
             singleLine = true,
-            textStyle = qasaText.bodyLarge.copy(color = c.textPrimary),
+            textStyle = qasaText.field.copy(color = c.textPrimary),
             cursorBrush = SolidColor(c.accent),
             keyboardOptions = keyboardOptions,
             interactionSource = interaction,
@@ -243,6 +269,69 @@ fun ThemedTextField(
         )
     }
 }
+
+/**
+ * iOS `FormTextField(multiline: true)` in `QasaNotesChrome` (`Controls.swift`): a multi-line
+ * notes box at least [QasaDimens.notesMinHeight] (112) tall that grows with its text. Same
+ * fill, 1dp stroke (`danger` when [isError]) and [QasaDimens.controlRadius] as a field;
+ * padding [QasaDimens.notesHorizontal] × [QasaDimens.notesVertical] plus the text view's own
+ * [NotesTextInset] above and below; 4 to 12 lines (`lineLimit(4...12)`), then it scrolls.
+ */
+@Composable
+fun QasaNotesField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    label: String = placeholder,
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+) {
+    val c = qasaColors
+    val activity = LocalUserActivity.current
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
+    val border = animateQasaColor(if (isError) c.danger else c.stroke)
+    BasicTextField(
+        value = value,
+        onValueChange = {
+            activity.noteActivity()
+            onValueChange(it)
+        },
+        singleLine = false,
+        minLines = NOTES_MIN_LINES,
+        maxLines = NOTES_MAX_LINES,
+        textStyle = qasaText.field.copy(color = c.textPrimary),
+        cursorBrush = SolidColor(c.accent),
+        keyboardOptions = keyboardOptions,
+        modifier = modifier
+            .fillMaxWidth()
+            .semanticsFieldLabel(label),
+        decorationBox = { inner ->
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = QasaDimens.notesMinHeight)
+                    .background(c.cardBackground, shape)
+                    .border(StrokeWidth, border, shape)
+                    .padding(horizontal = QasaDimens.notesHorizontal, vertical = QasaDimens.notesVertical)
+                    .padding(vertical = NotesTextInset),
+                contentAlignment = Alignment.TopStart,
+            ) {
+                if (value.isEmpty()) {
+                    Text(placeholder, color = c.textPlaceholder, style = qasaText.field)
+                }
+                inner()
+            }
+        },
+    )
+}
+
+/** iOS `FormTextField` pads its vertical `TextField` by this inside the notes chrome. */
+private val NotesTextInset = QasaTokens.Space.notesTextInset
+
+/** iOS `lineLimit(4...12)`. */
+private const val NOTES_MIN_LINES = 4
+private const val NOTES_MAX_LINES = 12
 
 /** Attaches the field name as the accessibility label. Android has no native
  *  field label for `BasicTextField`, and the visible placeholder is a sibling node. */

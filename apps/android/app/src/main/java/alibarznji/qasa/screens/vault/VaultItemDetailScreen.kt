@@ -27,7 +27,7 @@ import alibarznji.qasa.vault.totp.TotpClipboard
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
+import alibarznji.qasa.theme.LocalQasaToast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -92,6 +92,8 @@ fun VaultItemDetailScreen(
     val c = qasaColors
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    // The app's own toast (iOS `ToastCenter` look), not the system one.
+    val qasaToast = LocalQasaToast.current
     val haptics = LocalHapticFeedback.current
     var payload by remember { mutableStateOf<VaultPayload?>(null) }
     var gateItemId by remember { mutableStateOf<String?>(null) }
@@ -128,7 +130,7 @@ fun VaultItemDetailScreen(
         }
         // iOS `VaultClipboard.copy` fires a light impact.
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        Toast.makeText(context, context.getString(R.string.vault_copiedfmt, label), Toast.LENGTH_SHORT).show()
+        qasaToast.show(context.getString(R.string.vault_copiedfmt, label))
         scope.launch { vm.repo.markUsed(itemId) }
     }
 
@@ -136,7 +138,7 @@ fun VaultItemDetailScreen(
         // Same as the password row's copy, flagged sensitive (see TotpClipboard).
         TotpClipboard.copy(context, code)
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        Toast.makeText(context, context.getString(R.string.totp_copied), Toast.LENGTH_SHORT).show()
+        qasaToast.show(context.getString(R.string.totp_copied))
         scope.launch { vm.repo.markUsed(itemId) }
     }
 

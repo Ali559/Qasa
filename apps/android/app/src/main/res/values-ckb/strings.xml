@@ -291,7 +291,9 @@
     <string name="error_apihostmisconfigured">ئەم وەرزەکە ناتوانێت بگات بۆ ڕاژەی قاسە (%s). تایبەتمەندییە ئۆنلاین بەردەست نین.</string>
     <string name="error_decoding">وەڵامی سێرڤەر چاوەڕوانکراو نەبوو.</string>
     <string name="error_forbidden">ئەم تایبەتمەندییە پێویستی بە بەشداری پرێمیەم هەیە.</string>
+    <string name="error_generic">هەڵەیەک ڕوویدا. دووبارە هەوڵ بدەوە.</string>
     <string name="error_invalidurl">URLی API هەڵەیە.</string>
+    <string name="error_network">ناتوانرێت بگاتە قاسە. پەیوەندی ئینتەرنێتەکەت بپشکنە.</string>
     <string name="error_server">هەڵەی سێرڤەر (%d).</string>
     <string name="error_unauthorized">دانیشتن بەسەرچوو. دووبارە کۆگا بکەرەوە.</string>
     <string name="error_vaultcreatetitle">دەستپێکردنی کۆگا سەرکەوتوو نەبوو</string>
@@ -632,6 +634,7 @@
     <string name="sub_managetitle">بەڕێوەبردنی بەشداری</string>
     <string name="sub_noneactive">هیچ بەشدارییەکی چالاک نەدۆزرایەوە.</string>
     <string name="sub_nonefound">هیچ بەشدارییەکی چالاک نەدۆزرایەوە.</string>
+    <string name="sub_notfound">هیچ بەشدارییەک نەدۆزرایەوە.</string>
     <string name="sub_paymentmethodremoved">ڕێگای پارەدانی پاشەکەوتکراو لابرا.</string>
     <string name="sub_payrenewal">پارەی نوێکردنەوە بدە</string>
     <string name="sub_plan">پلان</string>

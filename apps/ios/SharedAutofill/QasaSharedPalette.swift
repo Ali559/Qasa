@@ -2,16 +2,16 @@ import SwiftUI
 import UIKit
 
 /// The brand palette for the extensions (AutoFill, payment notification), which do not link
-/// the app's `Theme`. Values are byte-identical to `ThemePalette` in `qasa_ios/Theme/Theme.swift`.
+/// the app's `Theme`. Values come from `QasaTokens` (design/tokens.json), like the app's `ThemePalette`.
 enum QasaSharedPalette {
-    static let accent = adaptive(light: 0x722F99, dark: 0xB67FDB)
-    static let onAccent = adaptive(light: 0xFFFFFF, dark: 0x22102F)
-    static let danger = adaptive(light: 0xC8323C, dark: 0xFF6B6B)
-    static let background = adaptive(light: 0xFBF6F0, dark: 0x17111D)
-    static let card = adaptive(light: 0xFFFFFF, dark: 0x231A2B)
-    static let stroke = adaptive(light: 0xE6E1E1, dark: 0x352B3D)
-    static let textPrimary = adaptive(light: 0x2A1F33, dark: 0xF2EDF4)
-    static let textSecondary = adaptive(light: 0x6E6475, dark: 0xC5C1C1)
+    static let accent = adaptive(light: QasaTokens.Light.accent, dark: QasaTokens.Dark.accent)
+    static let onAccent = adaptive(light: QasaTokens.Light.onAccent, dark: QasaTokens.Dark.onAccent)
+    static let danger = adaptive(light: QasaTokens.Light.danger, dark: QasaTokens.Dark.danger)
+    static let background = adaptive(light: QasaTokens.Light.background, dark: QasaTokens.Dark.background)
+    static let card = adaptive(light: QasaTokens.Light.cardBackground, dark: QasaTokens.Dark.cardBackground)
+    static let stroke = adaptive(light: QasaTokens.Light.stroke, dark: QasaTokens.Dark.stroke)
+    static let textPrimary = adaptive(light: QasaTokens.Light.textPrimary, dark: QasaTokens.Dark.textPrimary)
+    static let textSecondary = adaptive(light: QasaTokens.Light.textSecondary, dark: QasaTokens.Dark.textSecondary)
 
     private static func adaptive(light: UInt32, dark: UInt32) -> Color {
         Color(uiColor: UIColor { traits in
@@ -32,9 +32,9 @@ enum QasaSharedPalette {
 /// Control sizes shared by the app (`Theme.fieldHeight`, `Theme.buttonHeight`) and the
 /// extensions, so every field and every action button is the same height everywhere.
 enum QasaMetrics {
-    static let fieldHeight: CGFloat = 48
-    static let buttonHeight: CGFloat = 48
-    static let controlCornerRadius: CGFloat = 14
+    static let fieldHeight: CGFloat = QasaTokens.Size.fieldHeight
+    static let buttonHeight: CGFloat = QasaTokens.Size.buttonHeight
+    static let controlCornerRadius: CGFloat = QasaTokens.Radius.control
 }
 
 extension View {
@@ -44,7 +44,7 @@ extension View {
             .font(QasaFontFace.font(size: 16))
             .foregroundStyle(QasaSharedPalette.textPrimary)
             .tint(QasaSharedPalette.accent)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, QasaTokens.Space.fieldHorizontal)
             .frame(maxWidth: .infinity, minHeight: QasaMetrics.fieldHeight, maxHeight: QasaMetrics.fieldHeight)
             .background(QasaSharedPalette.card)
             .clipShape(RoundedRectangle(cornerRadius: QasaMetrics.controlCornerRadius, style: .continuous))

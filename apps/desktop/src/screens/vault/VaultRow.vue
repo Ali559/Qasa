@@ -2,7 +2,7 @@
 // iOS `VaultItemRow`: tile, name and subtitle, a copy button for the primary value and
 // the ⋯ menu (copy actions, 2FA code, open website, edit, delete). Clicking the row
 // selects it for the detail pane.
-import { Copy, EllipsisVertical } from 'lucide-vue-next'
+import { Copy, EllipsisVertical, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -100,6 +100,7 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
     <ConfirmDialog
       :open="confirmDelete"
       :title="t('vault.deleteItemTitle')"
+      :icon="Trash2"
       :message="t('vault.deleteItemMessage', row.displayName)"
       :confirm-label="t('common.delete')"
       destructive
@@ -115,8 +116,8 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
   align-items: center;
   gap: 16px;
   padding: 17px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
   cursor: pointer;
   transition:
@@ -165,7 +166,7 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
   width: 36px;
   height: 36px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;

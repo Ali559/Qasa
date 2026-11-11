@@ -2,20 +2,19 @@
 // iOS `CollectionsView` + `CollectionDetailView` ("Folders"): folder cards with an item
 // count and an Edit / Delete menu, + to create, and each folder's items one level in.
 // Deleting a folder moves its items out of it (they are never deleted).
-import { EllipsisVertical, Folder, Inbox, Plus } from 'lucide-vue-next'
+import { EllipsisVertical, Folder, Inbox, Plus, Trash2 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import Fab from '@/components/Fab.vue'
 import Menu from '@/components/Menu.vue'
 import PageFrame from '@/components/PageFrame.vue'
-import Sheet from '@/components/Sheet.vue'
-import TextField from '@/components/TextField.vue'
 import { nav, selectTab } from '@/nav'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { loadVault, reloadCollections, session, sortByName } from '@/vault/session'
 import type { Collection } from '@/vault/types'
+import PromptSheet from '../vault/form/PromptSheet.vue'
 import VaultRow from '../vault/VaultRow.vue'
 
 defineEmits<{ back: [] }>()
@@ -85,7 +84,7 @@ function openItem(id: string) {
       <span>{{ t('collections.empty') }}</span>
     </div>
     <div v-for="c in sorted" :key="c.id" class="folder" role="button" tabindex="0" @click="open = c" @keydown.enter.self="open = c">
-      <span class="icon"><Folder :size="18" fill="currentColor" /></span>
+      <span class="icon" aria-hidden="true"><Folder fill="currentColor" :stroke-width="2.5" /></span>
       <span class="text">
         <span class="name">{{ c.name }}</span>
         <span class="count">{{ countLabel(c) }}</span>
@@ -97,27 +96,26 @@ function openItem(id: string) {
           { label: t('common.delete'), destructive: true, action: () => (deleting = c) },
         ]"
       >
-        <EllipsisVertical :size="18" />
+        <EllipsisVertical :size="17" />
       </Menu>
     </div>
 
     <template #overlay>
       <div class="fab"><Fab :icon="Plus" :label="t('collections.createTitle')" @click="startCreate" /></div>
-      <Sheet :open="!!nameSheet" :label="t('collections.createTitle')" :width="400" placement="bottom" @close="nameSheet = null">
-        <div class="name-sheet">
-          <h2>{{ nameSheet?.mode === 'rename' ? t('collections.rename') : t('collections.createTitle') }}</h2>
-          <TextField v-model="name" :placeholder="t('common.name')" autofocus @submit="submitName" />
-          <div class="actions">
-            <button type="button" @click="nameSheet = null">{{ t('common.cancel') }}</button>
-            <button type="button" class="primary" :disabled="!name.trim()" @click="submitName">
-              {{ nameSheet?.mode === 'rename' ? t('common.save') : t('common.create') }}
-            </button>
-          </div>
-        </div>
-      </Sheet>
+      <PromptSheet
+        v-model="name"
+        :open="!!nameSheet"
+        :title="nameSheet?.mode === 'rename' ? t('collections.rename') : t('collections.createTitle')"
+        :placeholder="t('common.name')"
+        :confirm-label="nameSheet?.mode === 'rename' ? t('common.save') : t('common.create')"
+        :cancel-label="t('common.cancel')"
+        @confirm="submitName"
+        @cancel="nameSheet = null"
+      />
       <ConfirmDialog
         :open="!!deleting"
         :title="t('collections.deleteTitle')"
+        :icon="Trash2"
         :message="t('collections.deleteMessage')"
         :confirm-label="t('common.delete')"
         destructive
@@ -129,13 +127,16 @@ function openItem(id: string) {
 </template>
 
 <style scoped>
+/* iOS `collectionCard`: an `IconBadge` 14 from 16 semibold name and 13 count 4 apart; padding
+   16 × 10, at least 60 tall, card fill, radius 20, 1px stroke. Cards are 12 apart. */
 .folder {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--corner-radius);
+  gap: var(--space-row-icon-gap);
+  min-height: var(--size-row-min-height);
+  padding: 10px 16px;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: var(--radius-card);
   background: var(--card-background);
   cursor: pointer;
 }
@@ -147,12 +148,17 @@ function openItem(id: string) {
 .icon {
   display: grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--stroke-chrome);
-  border-radius: 10px;
-  background: var(--chrome);
+  flex-shrink: 0;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
+}
+
+.icon svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .text {
@@ -169,7 +175,7 @@ function openItem(id: string) {
 }
 
 .count {
-  font-size: 13px;
+  font-size: var(--type-row-value-size);
   color: var(--text-secondary);
 }
 
@@ -185,54 +191,13 @@ function openItem(id: string) {
 
 .empty strong {
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--type-sheet-title-size);
+  font-weight: 700;
 }
 
 .fab {
   position: absolute;
   bottom: 24px;
-  inset-inline-end: var(--screen-padding);
-}
-
-.name-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-}
-
-.name-sheet h2 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.actions button {
-  flex: 1;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 1px solid var(--stroke);
-  border-radius: var(--button-radius);
-  background: var(--card-background);
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.actions .primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.actions .primary:disabled {
-  opacity: 0.45;
+  inset-inline-end: var(--space-screen-padding);
 }
 </style>

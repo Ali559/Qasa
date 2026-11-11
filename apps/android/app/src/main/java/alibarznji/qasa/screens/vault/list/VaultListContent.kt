@@ -18,7 +18,7 @@ import alibarznji.qasa.vault.VaultPayload
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
+import alibarznji.qasa.theme.LocalQasaToast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -70,6 +70,8 @@ internal fun VaultListContent(
 ) {
     val c = qasaColors
     val context = LocalContext.current
+    // The app's own toast (iOS `ToastCenter` look), not the system one.
+    val qasaToast = LocalQasaToast.current
     val haptics = LocalHapticFeedback.current
     val rows by vm.rows.collectAsState()
     val index by vm.autofillEntries.collectAsState()
@@ -106,11 +108,7 @@ internal fun VaultListContent(
         vm.markUsed(rowId)
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         // iOS flashes "Copied <label>" on the row.
-        Toast.makeText(
-            context,
-            context.getString(R.string.vault_copiedfmt, context.getString(target.labelRes)),
-            Toast.LENGTH_SHORT,
-        ).show()
+        qasaToast.show(context.getString(R.string.vault_copiedfmt, context.getString(target.labelRes)))
     }
 
     val rowContent: LazyListScope.(String, List<VaultListRow>) -> Unit = { keyPrefix, sectionRows ->

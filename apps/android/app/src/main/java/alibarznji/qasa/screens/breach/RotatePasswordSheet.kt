@@ -18,7 +18,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.PersistableBundle
-import android.widget.Toast
+import alibarznji.qasa.theme.LocalQasaToast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -84,6 +84,8 @@ fun RotatePasswordSheet(
 ) {
     val c = qasaColors
     val context = LocalContext.current
+    // The app's own toast (iOS `ToastCenter` look), not the system one.
+    val qasaToast = LocalQasaToast.current
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     var candidates by remember { mutableStateOf<List<RotateCandidate>?>(null) }
@@ -107,15 +109,15 @@ fun RotatePasswordSheet(
         selected = found.singleOrNull()
     }
 
-    QasaModalBottomSheet(onDismissRequest = onDismiss) {
+    // iOS `.sheetHeader("breach.rotateTitle")`.
+    QasaModalBottomSheet(onDismissRequest = onDismiss, title = stringResource(R.string.breach_rotatetitle)) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.gap),
+                .padding(QasaDimens.screenPadding),
             verticalArrangement = Arrangement.spacedBy(QasaDimens.gap),
         ) {
-            Text(stringResource(R.string.breach_rotatetitle), color = c.textPrimary, style = qasaText.sectionHeadline)
             val list = candidates
             when {
                 list == null -> CircularProgressIndicator(color = c.accent, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -137,7 +139,7 @@ fun RotatePasswordSheet(
                         onCopy = {
                             copyPassword(context, password)
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            Toast.makeText(context, context.getString(R.string.gen_copied), Toast.LENGTH_SHORT).show()
+                            qasaToast.show(context.getString(R.string.gen_copied))
                         },
                     )
                     Text(stringResource(R.string.breach_rotatehint), color = c.textSecondary, style = qasaText.bodySmall)

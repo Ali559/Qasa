@@ -70,14 +70,14 @@ final class PaymentService {
                     _ = await LicenseManager.shared.refresh()
                     return true
                 case "failed":
-                    lastError = "Payment failed."
+                    lastError = L10n.tr("premium.paymentFailed")
                     pendingPaymentId = nil
                     return false
                 default:
                     break
                 }
             } catch {
-                lastError = error.localizedDescription
+                lastError = L10n.message(for: error)
             }
             try? await Task.sleep(nanoseconds: intervalSeconds * 1_000_000_000)
         }

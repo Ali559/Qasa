@@ -3,26 +3,7 @@
 // Appearance, Data & Account,
 // with the same rows, order, alerts and status line. The profile card, biometric unlock,
 // Autofill, Linked Devices (pairing code, sync network) and Premium arrive in later phases.
-import {
-  Clock,
-  Crown,
-  DatabaseBackup,
-  Download,
-  Ellipsis,
-  Fingerprint,
-  Globe,
-  Laptop,
-  LogOut,
-  Moon,
-  Puzzle,
-  RefreshCw,
-  ScanFace,
-  Trash2,
-  Upload,
-  User,
-  UserX,
-  Wifi,
-} from 'lucide-vue-next'
+import { Clock, Crown, DatabaseBackup, Download, Ellipsis, Fingerprint, Globe, Laptop, LogOut, Moon, Puzzle, RefreshCw, ScanFace, Trash2, Upload, User, UserX, Wifi } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
@@ -31,8 +12,9 @@ import { forgetBackup } from '@/backup/store'
 import CardContainer from '@/components/CardContainer.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
+import SettingsSection from '@/components/SettingsSection.vue'
 import PageFrame from '@/components/PageFrame.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
+import PrimaryButton from '@/components/PrimaryButton.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { LANGUAGE_NAMES } from '@/i18n'
 import { openSubPage } from '@/nav'
@@ -201,31 +183,30 @@ function logout() {
 
 <template>
   <PageFrame :title="t('settings.title')" back @back="emit('back')">
-    <!-- iOS profileCard: plan badge, then Upgrade or Manage Subscription. -->
+    <!-- iOS profileCard: 56 avatar ring 12 from the name (16 bold) and the plan capsule (13
+         medium, 3 × 8), then Upgrade (primary, crown) or Manage Subscription (secondary) 14 below. -->
     <CardContainer>
       <div class="profile">
-        <span class="avatar"><User :size="24" fill="currentColor" /></span>
+        <span class="avatar"><User fill="currentColor" :stroke-width="0" /></span>
         <span class="who">
           <span class="name">{{ t('session.qasaUser') }}</span>
           <span class="plan" :class="{ premium: account.status?.isPremium }">
-            <Crown v-if="account.status?.isPremium" :size="11" />
-            <User v-else :size="11" />
+            <Crown v-if="account.status?.isPremium" fill="currentColor" />
+            <User v-else />
             {{ t(account.status?.isPremium ? 'settings.premiumAccount' : 'settings.freeAccount') }}
           </span>
         </span>
       </div>
-      <button
-        type="button"
+      <PrimaryButton
         class="plan-button"
+        :kind="account.status?.isPremium ? 'secondary' : 'primary'"
+        :icon="account.status?.isPremium ? undefined : Crown"
+        :title="t(account.status?.isPremium ? 'settings.manageSubscription' : 'settings.upgradePremium')"
         @click="openSubPage(account.status?.isPremium ? 'manageSubscription' : 'premiumUpgrade', 'settings')"
-      >
-        {{ t(account.status?.isPremium ? 'settings.manageSubscription' : 'settings.upgradePremium') }}
-      </button>
+      />
     </CardContainer>
 
-    <section class="group">
-      <SectionLabel :text="t('settings.security')" />
-      <CardContainer :padding="0" class="settings-list">
+    <SettingsSection :title="t('settings.security')">
         <SettingsRow
           :icon="Ellipsis"
           :title="t('settings.changeMasterPassword')"
@@ -235,6 +216,7 @@ function logout() {
           <SettingsRow
             :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
             :title="t('settings.biometricUnlock')"
+            icon-color="var(--text-primary)"
             :subtitle="bioSubtitle || undefined"
           >
             <template #trailing>
@@ -248,15 +230,10 @@ function logout() {
           :trailing-text="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
           @click="showAutoLock = true"
         />
-      </CardContainer>
-    </section>
+      </SettingsSection>
 
-    <section class="group">
-      <div class="label-row">
-        <SectionLabel :text="t('settings.linkedDevices')" />
-        <span class="active-count">{{ t('settings.activeCount', account.status?.devicesUsed ?? 1) }}</span>
-      </div>
-      <CardContainer :padding="0" class="settings-list">
+    <SettingsSection :title="t('settings.linkedDevices')">
+        <template #title-trailing><span class="active-count">{{ t('settings.activeCount', account.status?.devicesUsed ?? 1) }}</span></template>
         <SettingsRow
           :icon="Laptop"
           :title="t('settings.thisComputer')"
@@ -271,12 +248,9 @@ function logout() {
           @click="openSubPage('wifiSync', 'settings')"
         />
         <SettingsRow :icon="Puzzle" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
-      </CardContainer>
-    </section>
+      </SettingsSection>
 
-    <section class="group">
-      <SectionLabel :text="t('settings.appearance')" />
-      <CardContainer :padding="0" class="settings-list">
+    <SettingsSection :title="t('settings.appearance')">
         <SettingsRow
           :icon="Globe"
           :title="t('settings.language')"
@@ -291,12 +265,9 @@ function logout() {
           aria-haspopup="dialog"
           @click="appearanceSheet = 'theme'"
         />
-      </CardContainer>
-    </section>
+      </SettingsSection>
 
-    <section class="group">
-      <SectionLabel :text="t('settings.dataAccount')" />
-      <CardContainer :padding="0" class="settings-list">
+    <SettingsSection :title="t('settings.dataAccount')">
         <SettingsRow
           :icon="DatabaseBackup"
           :title="t('backup.title')"
@@ -319,12 +290,9 @@ function logout() {
           :disabled="busy || !account.status?.accountId"
           @click="showDeleteAccount = true"
         />
-      </CardContainer>
-    </section>
+      </SettingsSection>
 
-    <section class="group">
-      <SectionLabel :text="t('update.section')" />
-      <CardContainer :padding="0" class="settings-list">
+    <SettingsSection :title="t('update.section')">
         <SettingsRow
           :icon="RefreshCw"
           :title="t('update.check')"
@@ -333,8 +301,7 @@ function logout() {
           :disabled="updater.stage === 'checking' || updater.stage === 'downloading'"
           @click="checkNow"
         />
-      </CardContainer>
-    </section>
+      </SettingsSection>
 
     <p v-if="statusMessage" class="status" role="status">{{ statusMessage() }}</p>
 
@@ -345,7 +312,9 @@ function logout() {
       <ConfirmDialog
         :open="showClearDataAlert"
         :title="t('settings.clearAlertTitle')"
+        :icon="Trash2"
         :message="t('settings.clearAlertMessage')"
+        :cancel-label="t('settings.cancel')"
         :confirm-label="t('settings.clear')"
         destructive
         @confirm="clearLocalData"
@@ -354,8 +323,9 @@ function logout() {
       <ConfirmDialog
         :open="showDeleteAccount"
         :title="t('settings.deleteAccountTitle')"
+        :icon="UserX"
         :message="t('settings.deleteAccountMessage')"
-        :confirm-label="t('common.delete')"
+        :confirm-label="t('settings.deleteAccount')"
         destructive
         @confirm="deleteAccount"
         @cancel="showDeleteAccount = false"
@@ -363,7 +333,9 @@ function logout() {
       <ConfirmDialog
         :open="showLogoutConfirm"
         :title="t('settings.lockAlertTitle')"
+        :icon="LogOut"
         :message="t('settings.lockAlertMessage')"
+        :cancel-label="t('settings.cancel')"
         :confirm-label="t('settings.logout')"
         destructive
         @confirm="logout"
@@ -383,11 +355,17 @@ function logout() {
 .avatar {
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   width: 56px;
   height: 56px;
   border: 2px solid var(--accent);
   border-radius: 50%;
   color: var(--text-secondary);
+}
+
+.avatar svg {
+  width: 22px;
+  height: 22px;
 }
 
 .who {
@@ -398,7 +376,7 @@ function logout() {
 }
 
 .name {
-  font-size: 16px;
+  font-size: var(--type-field-size);
   font-weight: 700;
 }
 
@@ -407,11 +385,16 @@ function logout() {
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border: 1px solid var(--stroke);
+  border: var(--size-stroke) solid var(--stroke);
   border-radius: 999px;
   color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
+}
+
+.plan svg {
+  width: 10px;
+  height: 10px;
 }
 
 .plan.premium {
@@ -420,45 +403,19 @@ function logout() {
 }
 
 .plan-button {
-  margin-top: 12px;
-  height: var(--button-height);
-  padding: 0 16px;
-  border: 0;
-  border-radius: var(--button-radius);
-  background: var(--card-background-light);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
+  margin-top: 14px;
 }
 
-
-
-
-
-
-.label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
+/* iOS: `Font.qasaLabel(12)` (13 medium), accent. */
 .active-count {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
   color: var(--accent);
 }
 
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-
 .status {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   color: var(--accent);
 }
 </style>

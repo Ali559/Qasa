@@ -66,7 +66,7 @@ fun <T> MenuPicker(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
+    val shape = RoundedCornerShape(QasaDimens.controlRadius)
     var expanded by remember { mutableStateOf(false) }
     Box(modifier.fillMaxWidth()) {
         Row(
@@ -77,13 +77,13 @@ fun <T> MenuPicker(
                 .background(c.cardBackground, shape)
                 .border(QasaDimens.stroke, c.stroke, shape)
                 .clickable(role = Role.DropdownList) { expanded = true }
-                .padding(start = QasaDimens.gap, end = QasaDimens.spaceSmall),
+                .padding(start = QasaDimens.fieldHorizontal, end = QasaDimens.spaceSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 selectedLabel,
                 color = c.accent,
-                style = qasaText.bodyLarge,
+                style = qasaText.field,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
@@ -99,7 +99,7 @@ fun <T> MenuPicker(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(optionLabel(option), color = c.textPrimary, style = qasaText.bodyLarge) },
+                    text = { Text(optionLabel(option), color = c.textPrimary, style = qasaText.field) },
                     onClick = {
                         expanded = false
                         onSelect(option)

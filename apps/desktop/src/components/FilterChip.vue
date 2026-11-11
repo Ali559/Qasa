@@ -15,17 +15,24 @@ defineEmits<{ click: [] }>()
 .chip {
   flex-shrink: 0;
   padding: 7px 17px;
-  border: 1px solid var(--stroke);
+  border: var(--size-stroke) solid var(--stroke);
   border-radius: 999px;
   background: var(--card-background);
   color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 400;
+  line-height: var(--line-height);
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color var(--motion-fast),
-    color var(--motion-fast),
-    border-color var(--motion-fast);
+    opacity var(--motion-press),
+    transform var(--motion-press);
+}
+
+/* iOS `PressableStyle`. */
+.chip:active {
+  opacity: var(--motion-pressed-opacity);
+  transform: scale(var(--motion-press-scale));
 }
 
 .chip.selected {

@@ -14,7 +14,7 @@ import alibarznji.qasa.vault.VaultPayload
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
+import alibarznji.qasa.theme.LocalQasaToast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +57,8 @@ internal fun CollectionDetailContent(
 ) {
     val c = qasaColors
     val context = LocalContext.current
+    // The app's own toast (iOS `ToastCenter` look), not the system one.
+    val qasaToast = LocalQasaToast.current
     val haptics = LocalHapticFeedback.current
     val rows by vm.rows.collectAsState()
     // iOS `collectionItems`: filter by collection, `localizedCaseInsensitiveCompare` on name.
@@ -87,11 +89,7 @@ internal fun CollectionDetailContent(
         }
         vm.markUsed(rowId)
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        Toast.makeText(
-            context,
-            context.getString(R.string.vault_copiedfmt, context.getString(target.labelRes)),
-            Toast.LENGTH_SHORT,
-        ).show()
+        qasaToast.show(context.getString(R.string.vault_copiedfmt, context.getString(target.labelRes)))
     }
 
     Column(

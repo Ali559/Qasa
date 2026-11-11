@@ -115,8 +115,6 @@ struct VaultItemEditor: View {
             }
             .appLocalization()
             .presentationDetents([.fraction(0.92), .large])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(20)
         }
     }
 
@@ -713,7 +711,7 @@ struct VaultItemEditor: View {
                 payload = loaded
             }
         } catch {
-            loadError = error.localizedDescription
+            loadError = L10n.message(for: error)
         }
     }
 
@@ -780,7 +778,7 @@ struct VaultItemEditor: View {
             issueMessages = VaultValidation.messages(refused.issues)
             attemptedSave = true
         } catch {
-            saveError = error.localizedDescription
+            saveError = L10n.message(for: error)
         }
     }
 }

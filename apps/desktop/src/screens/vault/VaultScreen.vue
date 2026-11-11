@@ -4,7 +4,7 @@
 // Search, filter chips, Most Recent (filtered tab with over 10 items), letter sections,
 // the + button and the tab-aware add flow match iOS. The Suggested section is left out:
 // on iOS it comes from a mock context provider; on desktop the extension will supply it.
-import { Inbox, Plus, Search } from 'lucide-vue-next'
+import { CircleX, Inbox, Plus, Search } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
@@ -110,9 +110,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <AppMenuHeader :title="t('vault.titleYours')" />
       <div class="scroll">
         <div class="list">
-          <label class="search">
-            <Search :size="18" aria-hidden="true" />
+          <label class="qasa-field search" :class="{ 'has-clear': !!query }">
+            <Search class="search-icon" :stroke-width="2.5" aria-hidden="true" />
             <input ref="searchInput" v-model="query" type="search" :placeholder="t('vault.searchPlaceholder')" :aria-label="t('vault.search')" />
+            <button v-if="query" type="button" class="clear" :aria-label="t('common.cancel')" @click.prevent="query = ''">
+              <CircleX :stroke-width="2.5" />
+            </button>
           </label>
 
           <div class="chips" role="toolbar">
@@ -204,7 +207,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   flex-direction: column;
   width: 400px;
   flex-shrink: 0;
-  border-inline-end: 1px solid var(--stroke);
+  border-inline-end: var(--size-stroke) solid var(--stroke);
   background: var(--background);
 }
 
@@ -226,24 +229,46 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 8px var(--screen-padding) 100px;
+  padding: 24px var(--space-screen-padding) 100px;
 }
 
 .search {
-  display: flex;
-  align-items: center;
+  flex-shrink: 0;
   gap: 10px;
-  height: var(--field-height);
-  padding-block: 0;
-  padding-inline: var(--field-padding-inline);
-  border: 1px solid var(--stroke);
-  border-radius: var(--field-radius);
-  background: var(--card-background);
+}
+
+.search.has-clear {
+  padding-inline-end: calc(var(--space-field-horizontal) - (var(--size-field-icon-button) - var(--size-field-icon-glyph)) / 2);
+}
+
+.search-icon {
+  flex-shrink: 0;
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
   color: var(--text-secondary);
 }
 
-.search:focus-within {
-  border-color: var(--accent);
+/* iOS `FieldIconButton("xmark.circle.fill")`, tertiary. */
+.clear {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--size-field-icon-button);
+  height: var(--size-field-icon-button);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.clear svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
+}
+
+.search input::-webkit-search-cancel-button {
+  appearance: none;
 }
 
 .search input {
@@ -257,7 +282,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   background: transparent;
   color: var(--text-primary);
   font: inherit;
-  font-size: var(--field-font-size);
   caret-color: var(--accent);
   user-select: text;
 }
@@ -302,7 +326,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .fab {
   position: absolute;
   bottom: 24px;
-  inset-inline-end: var(--screen-padding);
+  inset-inline-end: var(--space-screen-padding);
 }
 
 .placeholder {
@@ -310,7 +334,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   place-items: center;
   height: 100%;
   color: var(--text-tertiary);
-  font-size: 15px;
+  font-size: var(--type-body-size);
 }
 
 /* Narrow windows: one pane at a time, like the phone. */

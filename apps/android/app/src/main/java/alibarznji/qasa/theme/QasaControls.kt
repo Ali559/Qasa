@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -93,7 +92,7 @@ fun FilterChipButton(
     }
     Box(
         modifier = modifier
-            .defaultMinSize(minHeight = QasaDimens.touchTarget)
+            // iOS sizes the chip to its 17 × 7 padding (no 48dp minimum).
             .clip(shape)
             .background(bg)
             .border(StrokeWidth, if (selected) c.accent else c.stroke, shape)

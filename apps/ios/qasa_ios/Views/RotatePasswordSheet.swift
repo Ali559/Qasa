@@ -28,16 +28,10 @@ struct RotatePasswordSheet: View {
                     emptyState
                 } else {
                     content
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button(L10n.tr("common.cancel")) { dismiss() }
-                            }
-                        }
                 }
             }
             .background(Theme.background.ignoresSafeArea())
-            .navigationTitle(L10n.tr("breach.rotateTitle"))
-            .navigationBarTitleDisplayMode(.inline)
+            .sheetHeader(L10n.tr("breach.rotateTitle"))
         }
         .confirmSheet(
             isPresented: $showConfirm,
@@ -217,7 +211,7 @@ struct RotatePasswordSheet: View {
             onSaved(selected.name)
             dismiss()
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = L10n.message(for: error)
         }
     }
 

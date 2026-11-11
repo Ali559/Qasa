@@ -23,10 +23,11 @@ defineProps<{ text: string; color: string; solid?: boolean }>()
 .badge {
   display: inline-block;
   padding: 2px 8px;
-  border: 1px solid;
+  border: var(--size-stroke) solid;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--type-pill-size);
+  font-weight: var(--type-pill-weight);
+  line-height: var(--line-height);
   white-space: nowrap;
 }
 </style>

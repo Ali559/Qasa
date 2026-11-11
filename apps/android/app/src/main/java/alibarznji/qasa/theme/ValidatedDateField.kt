@@ -61,14 +61,15 @@ fun ValidatedDateField(
 
     Column(modifier.fillMaxWidth()) {
         SectionLabel(title)
-        Spacer(Modifier.height(QasaDimens.contentGap))
+        Spacer(Modifier.height(QasaDimens.fieldLabelGap))
         ThemedTextField(
             value = text,
             onValueChange = onTextChange,
             placeholder = placeholder,
             label = title,
+            isError = error != null,
         )
-        Spacer(Modifier.height(QasaDimens.contentGap))
+        Spacer(Modifier.height(QasaDimens.fieldLabelGap))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Row(
                 Modifier.clickable { showPicker = true }.padding(vertical = QasaDimens.spaceSmall),
@@ -83,7 +84,7 @@ fun ValidatedDateField(
                 error != null -> Text(
                     error,
                     color = c.danger,
-                    style = qasaText.errorDetail,
+                    style = qasaText.fieldError,
                     textAlign = TextAlign.End,
                 )
                 localized != null && localized != text.trim() -> Text(

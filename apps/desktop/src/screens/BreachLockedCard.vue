@@ -13,7 +13,7 @@ const t = useT()
 <template>
   <CardContainer :padding="20">
     <div class="stack">
-      <h2 class="title"><ShieldAlert :size="20" aria-hidden="true" />{{ t('breached.lockedTitle') }}</h2>
+      <h2 class="title"><ShieldAlert :size="18" :stroke-width="2.5" aria-hidden="true" />{{ t('breached.lockedTitle') }}</h2>
       <p class="body">{{ t('breached.lockedBody') }}</p>
       <div class="button"><PrimaryButton :title="t('breached.unlock')" :icon="Crown" @click="openPage('premiumUpgrade')" /></div>
     </div>
@@ -39,14 +39,11 @@ const t = useT()
 .body {
   margin: 0;
   font-size: 14px;
+  font-weight: 400;
   color: var(--text-secondary);
 }
 
 .button {
   padding-top: 6px;
-}
-
-.button :deep(.primary-button) {
-  border-radius: 8px;
 }
 </style>
