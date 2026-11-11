@@ -14,11 +14,11 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.StatusPill
 import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.StrengthBar
-import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -53,7 +53,6 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -255,17 +254,22 @@ fun CreateVaultScreen(
         }
         RestoreFromBackupOption(onClick = { restoreLauncher.launch(arrayOf("*/*")) })
         Spacer(Modifier.height(QasaDimens.contentGap))
-        SectionLabel(stringResource(R.string.auth_unlock_masterpassword))
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        ThemedTextField(
-            value = password,
-            onValueChange = { password = it; error = null },
-            placeholder = stringResource(R.string.auth_unlock_placeholder),
-            leadingIcon = Icons.Default.Lock,
-            isSecure = true,
-            passwordVisible = visible,
-            onToggleVisibility = { visible = !visible },
-        )
+        QasaFieldGroup {
+            QasaSecureRow(
+                label = stringResource(R.string.auth_unlock_masterpassword),
+                value = password,
+                onValueChange = { password = it; error = null },
+                error = error?.takeIf { it == tooShortMessage },
+                revealed = visible,
+                onToggleReveal = { visible = !visible },
+            )
+            QasaSecureRow(
+                label = stringResource(R.string.auth_create_confirmpassword),
+                value = confirm,
+                onValueChange = { confirm = it; error = null },
+                error = error?.takeIf { it != tooShortMessage },
+            )
+        }
         if (password.isNotEmpty()) {
             Spacer(Modifier.height(QasaDimens.contentGap))
             Row(Modifier.fillMaxWidth()) {
@@ -275,21 +279,6 @@ fun CreateVaultScreen(
             }
             Spacer(Modifier.height(QasaDimens.spaceSmall))
             StrengthBar(segments = 3, filled = filled, color = strengthColor)
-        }
-        Spacer(Modifier.height(QasaDimens.gap))
-        SectionLabel(stringResource(R.string.auth_create_confirmpassword))
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        ThemedTextField(
-            value = confirm,
-            onValueChange = { confirm = it; error = null },
-            placeholder = stringResource(R.string.auth_create_reenter),
-            // iOS `lock.rotation`.
-            leadingIcon = Icons.Default.LockReset,
-            isSecure = true,
-        )
-        error?.let {
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(it, color = c.danger, style = qasaText.bodySmallMedium)
         }
         Spacer(Modifier.height(QasaDimens.gap))
         CardContainer {

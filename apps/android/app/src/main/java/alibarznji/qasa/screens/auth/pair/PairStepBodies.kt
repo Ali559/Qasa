@@ -5,8 +5,8 @@ import alibarznji.qasa.screens.sync.JoinPanel
 import alibarznji.qasa.screens.sync.WifiSyncViewModel
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
-import alibarznji.qasa.theme.SectionLabel
-import alibarznji.qasa.theme.ThemedTextField
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
@@ -65,21 +64,18 @@ internal fun PairAccountIdBody(
     val c = qasaColors
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
         Text(stringResource(R.string.pair_adoptbody), color = c.textSecondary, style = qasaText.bodyMedium)
-        SectionLabel(stringResource(R.string.pair_accountlabel))
-        ThemedTextField(
-            value = accountId,
-            onValueChange = onAccountIdChange,
-            placeholder = stringResource(R.string.pair_accountplaceholder),
-            label = stringResource(R.string.pair_accountlabel),
-            leadingIcon = Icons.Default.Key,
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.None,
-                autoCorrectEnabled = false,
-                keyboardType = KeyboardType.Ascii,
-            ),
-        )
-        if (errorMessage != null) {
-            Text(errorMessage, color = c.danger, style = qasaText.bodySmallMedium)
+        QasaFieldGroup {
+            QasaTextRow(
+                label = stringResource(R.string.pair_accountlabel),
+                value = accountId,
+                onValueChange = onAccountIdChange,
+                error = errorMessage,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrectEnabled = false,
+                    keyboardType = KeyboardType.Ascii,
+                ),
+            )
         }
     }
 }

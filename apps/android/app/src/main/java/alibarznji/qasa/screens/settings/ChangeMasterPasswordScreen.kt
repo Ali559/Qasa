@@ -6,9 +6,9 @@ import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.StickyBottomBar
-import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -152,37 +152,35 @@ fun ChangeMasterPasswordScreen(onDone: () -> Unit, vm: ChangePwViewModel = hiltV
             style = qasaText.bodyMedium,
         )
         Spacer(Modifier.height(QasaDimens.screenPadding))
-        SectionLabel(stringResource(R.string.settings_currentmasterpassword))
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        ThemedTextField(
-            value = current,
-            onValueChange = { current = it; error = null },
-            placeholder = stringResource(R.string.settings_currentmasterpassword),
-            isSecure = true,
-            passwordVisible = currentVisible,
-            onToggleVisibility = { currentVisible = !currentVisible },
-        )
-        Spacer(Modifier.height(QasaDimens.screenPadding))
-        SectionLabel(stringResource(R.string.settings_newmasterpassword))
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        ThemedTextField(
-            value = next,
-            onValueChange = { next = it; error = null },
-            placeholder = stringResource(R.string.settings_newmasterpassword),
-            isSecure = true,
-            passwordVisible = nextVisible,
-            onToggleVisibility = { nextVisible = !nextVisible },
-        )
-        Spacer(Modifier.height(QasaDimens.gapSmall))
-        ThemedTextField(
-            value = confirm,
-            onValueChange = { confirm = it; error = null },
-            placeholder = stringResource(R.string.settings_confirmmasterpassword),
-            isSecure = true,
-            passwordVisible = confirmVisible,
-            onToggleVisibility = { confirmVisible = !confirmVisible },
-        )
-        error?.let {
+        // Each known failure marks its own row; anything else shows under the card.
+        val rowError = error.takeIf { it == wrongPassword || it == weakPassword || it == mismatch }
+        QasaFieldGroup {
+            QasaSecureRow(
+                label = stringResource(R.string.settings_currentmasterpassword),
+                value = current,
+                onValueChange = { current = it; error = null },
+                error = rowError?.takeIf { it == wrongPassword },
+                revealed = currentVisible,
+                onToggleReveal = { currentVisible = !currentVisible },
+            )
+            QasaSecureRow(
+                label = stringResource(R.string.settings_newmasterpassword),
+                value = next,
+                onValueChange = { next = it; error = null },
+                error = rowError?.takeIf { it == weakPassword },
+                revealed = nextVisible,
+                onToggleReveal = { nextVisible = !nextVisible },
+            )
+            QasaSecureRow(
+                label = stringResource(R.string.settings_confirmmasterpassword),
+                value = confirm,
+                onValueChange = { confirm = it; error = null },
+                error = rowError?.takeIf { it == mismatch },
+                revealed = confirmVisible,
+                onToggleReveal = { confirmVisible = !confirmVisible },
+            )
+        }
+        error?.takeIf { rowError == null }?.let {
             Spacer(Modifier.height(QasaDimens.gapSmall))
             Text(it, color = c.danger, style = qasaText.bodySmall)
         }

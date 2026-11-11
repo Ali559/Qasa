@@ -9,87 +9,34 @@ enum VaultClipboard {
     }
 }
 
-struct FormFieldLabel: View {
-    let text: String
-    var body: some View {
-        SectionLabel(text: text)
-    }
-}
-
-/// A field's rule message (`VaultValidation.message`), shown under the field.
-struct InlineFieldError: View {
-    let message: String?
-
-    var body: some View {
-        if let message {
-            Text(message)
-                .font(.qasa(11))
-                .foregroundColor(Theme.danger)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .multilineTextAlignment(.leading)
-                .accessibilityLabel(message)
-        }
-    }
-}
-
+/// An editor field. Single-line: a row of the enclosing `FieldGroup`. `multiline`: its own
+/// notes card, placed after the group.
 struct FormTextField: View {
     let title: String
     @Binding var text: String
     var isSecure: Bool = false
-    /// Placeholder text; the title when `nil`.
+    /// An example of what to type ("MM/YY"), never the title again.
     var placeholder: String? = nil
     var keyboard: UIKeyboardType = .default
-    /// The field's rule message, shown under it in red.
+    /// The field's rule message: the row turns red and the message is listed under the group.
     var error: String? = nil
-    /// Notes / content: a growing text area (`Theme.notesMinHeight`) instead of one line.
+    /// Notes / content: a growing card (`Theme.notesMinHeight`) instead of a row.
     var multiline: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-            FormFieldLabel(text: title)
-            Group {
-                if multiline {
-                    TextField(placeholder ?? title, text: $text, axis: .vertical)
-                        .lineLimit(4...12)
-                        .keyboardType(keyboard)
-                        .multilineTextAlignment(.leading)
-                        .padding(.vertical, 6)
-                        .qasaNotesField(isError: error != nil)
-                } else {
-                    Group {
-                        if isSecure {
-                            SecureField(placeholder ?? title, text: $text)
-                        } else {
-                            TextField(placeholder ?? title, text: $text)
-                        }
-                    }
-                    .keyboardType(keyboard)
-                    .multilineTextAlignment(.leading)
-                    .qasaField(isError: error != nil)
-                }
-            }
-            InlineFieldError(message: error)
+        if multiline {
+            NotesFieldCard(label: title, text: $text, hint: placeholder, error: error)
+        } else {
+            TextFieldRow(
+                label: title,
+                text: $text,
+                hint: placeholder,
+                isSecure: isSecure,
+                isPlain: isSecure || keyboard == .emailAddress || keyboard == .URL,
+                keyboard: keyboard,
+                error: error
+            )
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-/// A labelled menu picker drawn as a field (`Theme.fieldHeight`).
-struct FormPickerField<Content: View>: View {
-    let title: String
-    var error: String? = nil
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-            FormFieldLabel(text: title)
-            content
-                .pickerStyle(.menu)
-                .labelsHidden()
-                .qasaField(isError: error != nil, horizontalPadding: 4)
-            InlineFieldError(message: error)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -99,14 +46,19 @@ struct CountryPickerField: View {
     var showsDialCode: Bool = false
     var error: String? = nil
 
+    private var value: String {
+        Country.all.first { $0.code == countryCode }?.pickerLabel(showsDialCode: showsDialCode)
+            ?? L10n.tr("common.none", locale: AppLanguage.current.locale)
+    }
+
     var body: some View {
-        FormPickerField(title: L10n.tr("vault.country", locale: AppLanguage.current.locale), error: error) {
+        PickerFieldRow(label: L10n.tr("vault.country", locale: AppLanguage.current.locale), value: value, error: error) {
             CountryMenuPicker(countryCode: $countryCode, showsDialCode: showsDialCode)
         }
     }
 }
 
-/// Reusable country menu — with or without dial codes.
+/// The country choices, with or without dial codes, for a `PickerFieldRow` menu.
 struct CountryMenuPicker: View {
     @Binding var countryCode: String
     var showsDialCode: Bool = false
@@ -117,12 +69,10 @@ struct CountryMenuPicker: View {
                 Text(country.pickerLabel(showsDialCode: showsDialCode)).tag(country.code)
             }
         }
-        .pickerStyle(.menu)
-        .labelsHidden()
-        .tint(Theme.accent)
     }
 }
 
+/// The item's collection: its own one-row group, with a button to make a new one.
 struct CollectionPickerField: View {
     @Query(filter: VaultCollection.live, sort: \VaultCollection.createdAt) private var storedCollections: [VaultCollection]
 
@@ -134,36 +84,38 @@ struct CollectionPickerField: View {
     @State private var newName = ""
     @State private var showNew = false
 
+    private var locale: Locale { AppLanguage.current.locale }
+
+    private var value: String {
+        collections.first { $0.id == collectionId }?.name ?? L10n.tr("common.none", locale: locale)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-            FormFieldLabel(text: L10n.tr("vault.collection", locale: AppLanguage.current.locale))
-            HStack(spacing: 4) {
-                Picker(L10n.tr("vault.collection", locale: AppLanguage.current.locale), selection: $collectionId) {
-                    Text(L10n.tr("common.none", locale: AppLanguage.current.locale)).tag(UUID?.none)
+        FieldGroup {
+            PickerFieldRow(label: L10n.tr("vault.collection", locale: locale), value: value) {
+                Picker(L10n.tr("vault.collection", locale: locale), selection: $collectionId) {
+                    Text(L10n.tr("common.none", locale: locale)).tag(UUID?.none)
                     ForEach(collections) { c in
                         Text(c.name).tag(Optional(c.id))
                     }
                 }
-                .pickerStyle(.menu)
-                .labelsHidden()
-                Spacer(minLength: 0)
+            } extra: {
                 FieldIconButton(
                     systemImage: "folder.badge.plus",
                     tint: Theme.accent,
-                    accessibilityLabel: L10n.tr("vault.newCollection", locale: AppLanguage.current.locale)
+                    accessibilityLabel: L10n.tr("vault.newCollection", locale: locale)
                 ) {
                     showNew = true
                 }
             }
-            .qasaField(horizontalPadding: 4)
         }
         .textPromptSheet(
             isPresented: $showNew,
-            title: L10n.tr("vault.newCollection", locale: AppLanguage.current.locale),
-            placeholder: L10n.tr("common.name", locale: AppLanguage.current.locale),
+            title: L10n.tr("vault.newCollection", locale: locale),
+            placeholder: L10n.tr("common.name", locale: locale),
             text: $newName,
-            confirmTitle: L10n.tr("common.create", locale: AppLanguage.current.locale),
-            cancelTitle: L10n.tr("common.cancel", locale: AppLanguage.current.locale),
+            confirmTitle: L10n.tr("common.create", locale: locale),
+            cancelTitle: L10n.tr("common.cancel", locale: locale),
             onCancel: { newName = "" }
         ) {
             let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -179,8 +131,8 @@ struct NoteColorPicker: View {
     @Binding var color: NoteColor
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: L10n.tr("vault.color", locale: AppLanguage.current.locale))
+        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
+            SectionLabel(text: L10n.tr("vault.color", locale: AppLanguage.current.locale))
             HStack(spacing: 12) {
                 ForEach(NoteColor.allCases, id: \.self) { c in
                     Circle()

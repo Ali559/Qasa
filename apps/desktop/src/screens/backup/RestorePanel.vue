@@ -2,13 +2,13 @@
 // Restore from a backup file: pick it (any file type), show whose and when, ask for the
 // main password the vault had then, restore. Used during setup (RestoreSetup) and in
 // Settings → Backups (RestoreBackupSheet). The file is read and kept by the core.
-import { ArchiveRestore, FileUp, Lock } from 'lucide-vue-next'
+import { ArchiveRestore, FileUp } from 'lucide-vue-next'
 import { onBeforeUnmount, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
-import TextField from '@/components/TextField.vue'
+import FieldGroup from '@/components/FieldGroup.vue'
+import FieldRow from '@/components/FieldRow.vue'
 import { backupApi, formatBackupDate, restoreErrorKey, type BackupFileInfo, type RestoreOutcome } from '@/backup/api'
 import { useT } from '@/prefs'
 
@@ -68,19 +68,18 @@ onBeforeUnmount(() => {
       <div class="card-body">
         <p class="from">{{ t('backup.restore.fromFmt', info.deviceName, formatBackupDate(info.createdAtMs)) }}</p>
         <p class="muted">{{ t('backup.restore.passwordPrompt') }}</p>
-        <SectionLabel :text="t('auth.unlock.masterPassword')" />
-        <TextField
-          v-model="password"
-          :icon="Lock"
-          :placeholder="t('auth.unlock.placeholder')"
-          :label="t('auth.unlock.masterPassword')"
-          secure
-          revealable
-          autofocus
-          :disabled="busy"
-          :invalid="errorKey === 'backup.error.wrongPassword'"
-          @submit="restore"
-        />
+        <FieldGroup>
+          <FieldRow
+            v-model="password"
+            :label="t('auth.unlock.masterPassword')"
+            secure
+            revealable
+            autofocus
+            :disabled="busy"
+            :error="errorKey === 'backup.error.wrongPassword' ? t(errorKey) : null"
+            @submit="restore"
+          />
+        </FieldGroup>
         <p v-if="busy" class="working" role="status"><span class="spinner" aria-hidden="true" />{{ t('backup.restore.working') }}</p>
         <button v-else type="button" class="qasa-button secondary" :disabled="picking" @click="pick">
           <span>{{ t('backup.restore') }}</span>
@@ -88,7 +87,7 @@ onBeforeUnmount(() => {
       </div>
     </CardContainer>
 
-    <p v-if="errorKey" class="error" role="alert">{{ t(errorKey) }}</p>
+    <p v-if="errorKey && errorKey !== 'backup.error.wrongPassword'" class="error" role="alert">{{ t(errorKey) }}</p>
 
     <PrimaryButton
       v-if="info"

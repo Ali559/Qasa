@@ -36,7 +36,42 @@ A change that only one app picks up is not done.
    (112) and grow; same fill, stroke and radius as a field, padding `space.notesHorizontal` ×
    `space.notesVertical`. Buttons: `type.button` (16 semibold); pressed = opacity 0.85 and
    scale 0.98 over `motion.press`; disabled = opacity 0.45.
-4. **Bottom sheets** (every platform, every sheet):
+4. **Labelled fields are rows in a grouped card** (chosen 2026-11-11, like iOS Contacts).
+   No label above a field and no separate box per field:
+   - **Group**: the fields of one form section share one card: `cardBackground` fill, 1pt
+     `stroke`, `radius.group` (20). Between rows a 1pt `stroke` divider, inset
+     `space.groupDividerInset` (14) on the leading side, running to the trailing edge. Groups
+     are `space.formGap` (16) apart. A screen with one field has a group of one row.
+   - **Row**: at least `size.groupRowMinHeight` (60) tall, `space.groupRowVertical` (8) top
+     and bottom, `space.groupRowHorizontal` (14) sideways. Inside, top to bottom, with no gap:
+     the label, `type.groupLabel` (12 semibold) `textSecondary`, always visible; then the value,
+     `type.groupValue` (16 regular) `textPrimary`, with an example hint ("name@example.com",
+     never the label repeated) in `textPlaceholder` while empty. While the row is focused its
+     label is `accent`. No leading icons. Tapping anywhere in the row focuses its input.
+   - **Trailing controls** (reveal, generate, copy, scan, remove) sit at the row's trailing
+     edge, vertically centered, `size.fieldIconButton` (32), `space.groupRowTrailingGap` (8)
+     after the value.
+   - **Errors about one field go on that field's row**: wrong or too-short password, passwords
+     that don't match (on the confirm row), a wrong pairing code or account ID. Only messages
+     about the whole form (a newer vault, no connection) stay as a line under the group.
+   - **2FA row**: empty, the value is the accent "Add 2FA code" menu (scan, or type the setup
+     key in the one-field prompt sheet) with the help text as a 12 caption; set, the value is
+     the live code (mono 16), the issuer is a 12 caption, and a ✕ trailing removes it.
+   - **Not rows**: the note colour swatches and the protect toggle keep their own layout
+     (label above the swatches).
+   - **Pickers, menus and dates** are rows too: label on top, the chosen value under it, a
+     13pt chevron (`RowChevron`) trailing; tapping the row opens the menu or picker.
+   - **Errors**: the row's label turns `danger` and a `size.groupErrorStripe` (3) `danger` bar
+     runs down the row's leading edge (it mirrors in RTL). The message, `type.fieldError`
+     (11) `danger`, sits `space.fieldErrorGap` (6) under the card, prefixed with the field's
+     label when the group has more than one row ("Email: Enter an email like …").
+   - **Notes / multi-line** fields get their own card below the group: `radius.control`
+     corners, the label inside at top `space.groupNotesLabelTop` (9), text under it, min
+     height `size.notesMinHeight` (112), growing.
+   - Screen readers read each row's label as the input's name.
+   - Not grouped: search fields and one-field prompt sheets with no label keep a plain
+     48-tall box with a placeholder.
+5. **Bottom sheets** (every platform, every sheet):
    - Corner radius `radius.sheet` (28), background `background`, no elevation tint.
    - Grabber: `size.sheetGrabberWidth` × `size.sheetGrabberHeight` (36 × 5), fully rounded,
      `textTertiary`, `space.sheetGrabberTop` (5) from the top edge.
@@ -48,13 +83,13 @@ A change that only one app picks up is not done.
      full-width button at the bottom of the sheet. Confirmation sheets (title, message,
      confirm / cancel buttons) keep their buttons: they are the dialog's two answers.
    - Content sized to fit, never taller than 92% of the window.
-5. **Rows.** `size.rowMinHeight` (60), icon badge 36 with radius 10, gap 14, title
+6. **Rows.** `size.rowMinHeight` (60), icon badge 36 with radius 10, gap 14, title
    `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13.
-6. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
+7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default
    `FastOutSlowIn`. With reduce motion on, slides become fades (`motion.fade`).
-7. **Color.** The brand palette is four colors: purple `#722F99`, grey `#C5C1C1`, beige
+8. **Color.** The brand palette is four colors: purple `#722F99`, grey `#C5C1C1`, beige
    `#FEE7C8`, peach `#FF9292`. `tokens.json` derives every light and dark token from them
    (table in `docs/design.md` §2.1); no app writes a hex of its own. The only exceptions are
    other brands' logo colors (site icons, payment wallets) and the six note colors, which
@@ -62,6 +97,6 @@ A change that only one app picks up is not done.
    `surfaceTint` included, so no Material default (lavender, tonal tint) shows through. Each
    app follows the system light/dark setting unless the user picks one in Settings, so two
    phones in different modes show the two halves of the palette.
-8. **Language.** Every string comes from `l10n/strings.json` and follows the language picked
+9. **Language.** Every string comes from `l10n/strings.json` and follows the language picked
    in the app's settings, at once, on every screen, sheet, alert and toast, without a restart.
    Never the device's language when the user picked another one.

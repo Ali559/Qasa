@@ -9,6 +9,7 @@ enum QasaTokens {
     enum Radius {
         static let card: CGFloat = 20
         static let cardLarge: CGFloat = 24
+        static let group: CGFloat = 20
         static let control: CGFloat = 10
         static let iconBadge: CGFloat = 10
         static let rowPress: CGFloat = 10
@@ -18,6 +19,8 @@ enum QasaTokens {
 
     enum Size {
         static let fieldHeight: CGFloat = 48
+        static let groupRowMinHeight: CGFloat = 60
+        static let groupErrorStripe: CGFloat = 3
         static let buttonHeight: CGFloat = 48
         static let notesMinHeight: CGFloat = 112
         static let fieldIconButton: CGFloat = 32
@@ -48,6 +51,12 @@ enum QasaTokens {
         static let buttonHorizontal: CGFloat = 20
         static let buttonIconGap: CGFloat = 8
         static let fieldLabelGap: CGFloat = 8
+        static let groupRowVertical: CGFloat = 8
+        static let groupRowHorizontal: CGFloat = 14
+        static let groupDividerInset: CGFloat = 14
+        static let groupRowTrailingGap: CGFloat = 8
+        static let groupNotesLabelTop: CGFloat = 9
+        static let fieldErrorGap: CGFloat = 6
         static let formGap: CGFloat = 16
         static let bottomBarVertical: CGFloat = 12
         static let bottomBarGap: CGFloat = 10
@@ -87,6 +96,8 @@ enum QasaTokens {
         static let dialogMessage = TextStyle(size: 15, weight: .regular)
         static let field = TextStyle(size: 16, weight: .regular)
         static let fieldLabel = TextStyle(size: 12, weight: .semibold)
+        static let groupLabel = TextStyle(size: 12, weight: .semibold)
+        static let groupValue = TextStyle(size: 16, weight: .regular)
         static let fieldError = TextStyle(size: 11, weight: .regular)
         static let button = TextStyle(size: 16, weight: .semibold)
         static let rowTitle = TextStyle(size: 15, weight: .medium)

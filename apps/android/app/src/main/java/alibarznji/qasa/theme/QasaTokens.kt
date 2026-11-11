@@ -34,6 +34,7 @@ object QasaTokens {
     object Radius {
         val card: Dp = 20.dp
         val cardLarge: Dp = 24.dp
+        val group: Dp = 20.dp
         val control: Dp = 10.dp
         val iconBadge: Dp = 10.dp
         val rowPress: Dp = 10.dp
@@ -43,6 +44,8 @@ object QasaTokens {
 
     object Size {
         val fieldHeight: Dp = 48.dp
+        val groupRowMinHeight: Dp = 60.dp
+        val groupErrorStripe: Dp = 3.dp
         val buttonHeight: Dp = 48.dp
         val notesMinHeight: Dp = 112.dp
         val fieldIconButton: Dp = 32.dp
@@ -73,6 +76,12 @@ object QasaTokens {
         val buttonHorizontal: Dp = 20.dp
         val buttonIconGap: Dp = 8.dp
         val fieldLabelGap: Dp = 8.dp
+        val groupRowVertical: Dp = 8.dp
+        val groupRowHorizontal: Dp = 14.dp
+        val groupDividerInset: Dp = 14.dp
+        val groupRowTrailingGap: Dp = 8.dp
+        val groupNotesLabelTop: Dp = 9.dp
+        val fieldErrorGap: Dp = 6.dp
         val formGap: Dp = 16.dp
         val bottomBarVertical: Dp = 12.dp
         val bottomBarGap: Dp = 10.dp
@@ -106,6 +115,8 @@ object QasaTokens {
         val dialogMessage = QasaTokenText(15.sp, FontWeight.Normal, 22.5.sp)
         val field = QasaTokenText(16.sp, FontWeight.Normal, 24.sp)
         val fieldLabel = QasaTokenText(12.sp, FontWeight.SemiBold, 18.sp)
+        val groupLabel = QasaTokenText(12.sp, FontWeight.SemiBold, 18.sp)
+        val groupValue = QasaTokenText(16.sp, FontWeight.Normal, 24.sp)
         val fieldError = QasaTokenText(11.sp, FontWeight.Normal, 16.5.sp)
         val button = QasaTokenText(16.sp, FontWeight.SemiBold, 24.sp)
         val rowTitle = QasaTokenText(15.sp, FontWeight.Medium, 22.5.sp)

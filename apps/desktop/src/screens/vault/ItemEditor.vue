@@ -1,15 +1,20 @@
 <script setup lang="ts">
 // iOS `VaultItemEditor` + `VaultFormChrome`: the shared sheet header ("New Login", no
 // Cancel: Esc or a click outside closes), Save (Update when editing) pinned at the bottom,
-// fields 16 apart with 20 padding, every field of all 13 types, the password generator, 2FA, folders, colours,
+// fields in grouped cards 16 apart with 20 padding (design/README.md rule 4), every field of all 13 types, the password generator, 2FA, folders, colours,
 // countries and dates. Field rules come from the core (`validate_item`): checked live,
 // shown under each field the user changed (every field after a Save attempt, and on an
 // existing item), and Save refuses while any remain — as the core does on its side.
-import { Eye, EyeOff, TriangleAlert, WandSparkles } from 'lucide-vue-next'
+import { TriangleAlert, WandSparkles } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import FieldGroup from '@/components/FieldGroup.vue'
+import FieldIconButton from '@/components/FieldIconButton.vue'
+import FieldRow from '@/components/FieldRow.vue'
+import NotesCard from '@/components/NotesCard.vue'
+import PickerRow from '@/components/PickerRow.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
@@ -31,9 +36,6 @@ import { isCommandError, type ItemSummary, type Variant, type VaultPayload } fro
 import CollectionPicker from './form/CollectionPicker.vue'
 import ColorPicker from './form/ColorPicker.vue'
 import DateField from './form/DateField.vue'
-import FieldError from './form/FieldError.vue'
-import FormField from './form/FormField.vue'
-import SelectField from './form/SelectField.vue'
 import TotpField from './form/TotpField.vue'
 import PasswordGeneratorSheet from './PasswordGeneratorSheet.vue'
 
@@ -44,9 +46,7 @@ const t = useT()
 const payload = ref<VaultPayload | null>(props.variant ? emptyPayload(props.variant) : null)
 const saveError = ref<string | null>(null)
 const showGenerator = ref(false)
-const passwordVisible = ref(false)
 const busy = ref(false)
-const phoneInputId = `phone-${Math.random().toString(36).slice(2, 9)}`
 
 // MARK: field rules
 
@@ -197,38 +197,28 @@ function onKey(e: KeyboardEvent) {
           <p v-if="showFixToSave" class="fix-banner" role="alert">{{ t('validation.fixToSave') }}</p>
           <!-- Login -->
           <template v-if="payload.variant === 'login'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <FormField v-model="payload.fields.email" :label="t('field.email')" inputmode="email" :error="err('email')" />
-            <FormField v-model="payload.fields.username" :label="t('field.username')" :error="err('username')" />
-            <FormField v-model="payload.fields.password" :label="t('field.password')" :secure="!passwordVisible" mono :error="err('password')">
-              <template #trailing>
-                <button type="button" class="field-icon accent" :aria-label="t('vault.generatePassword')" :title="t('vault.generatePassword')" @click="showGenerator = true">
-                  <WandSparkles :stroke-width="2.5" />
-                </button>
-                <button
-                  type="button"
-                  class="field-icon"
-                  :aria-label="passwordVisible ? t('vault.hidePassword') : t('vault.showPassword')"
-                  @click="passwordVisible = !passwordVisible"
-                >
-                  <EyeOff v-if="passwordVisible" :stroke-width="2.5" />
-                  <Eye v-else :stroke-width="2.5" />
-                </button>
-              </template>
-            </FormField>
-            <div class="with-error">
-              <TotpField v-model="payload.fields.totp" />
-              <FieldError :message="err('totp')" />
-            </div>
-            <FormField v-model="payload.fields.website" :label="t('field.website')" inputmode="url" :error="err('website')" />
-            <FormField v-model="payload.fields.note" :label="t('field.note')" multiline :error="err('note')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <FieldRow v-model="payload.fields.email" :label="t('field.email')" :placeholder="t('field.emailPlaceholder')" inputmode="email" :error="err('email')" />
+              <FieldRow v-model="payload.fields.username" :label="t('field.username')" :error="err('username')" />
+              <FieldRow v-model="payload.fields.password" :label="t('field.password')" secure revealable mono :error="err('password')">
+                <template #trailing>
+                  <FieldIconButton :icon="WandSparkles" :label="t('vault.generatePassword')" accent @click="showGenerator = true" />
+                </template>
+              </FieldRow>
+              <TotpField v-model="payload.fields.totp" :error="err('totp')" />
+              <FieldRow v-model="payload.fields.website" :label="t('field.website')" :placeholder="t('field.websitePlaceholder')" inputmode="url" :error="err('website')" />
+            </FieldGroup>
+            <NotesCard v-model="payload.fields.note" :label="t('field.note')" :error="err('note')" />
             <CollectionPicker v-model="payload.fields.collectionId" />
           </template>
 
           <!-- Secure note -->
           <template v-else-if="payload.variant === 'secureNote'">
-            <FormField v-model="payload.fields.title" :label="t('field.title')" :error="err('title')" />
-            <FormField v-model="payload.fields.content" :label="t('field.content')" multiline :error="err('content')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.title" :label="t('field.title')" :error="err('title')" />
+            </FieldGroup>
+            <NotesCard v-model="payload.fields.content" :label="t('field.content')" :error="err('content')" />
             <ColorPicker v-model="payload.fields.color" />
             <div class="toggle-row">
               <span>{{ t('vault.protectItem') }}</span>
@@ -237,14 +227,13 @@ function onKey(e: KeyboardEvent) {
             <CollectionPicker v-model="payload.fields.collectionId" />
           </template>
 
-          <!-- Card -->
+          <!-- Card: expiry and security code are rows of their own, like every other field. -->
           <template v-else-if="payload.variant === 'card'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <FormField v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />
-            <FormField v-model="payload.fields.number" :label="t('field.number')" inputmode="numeric" :maxlength="23" mono :error="err('number')" />
-            <!-- Expiry and security code side by side, as printed on the card. -->
-            <div class="card-pair">
-              <FormField
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <FieldRow v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />
+              <FieldRow v-model="payload.fields.number" :label="t('field.number')" inputmode="numeric" :maxlength="23" mono :error="err('number')" />
+              <FieldRow
                 v-model="payload.fields.expiryDate"
                 :label="t('field.expiryDate')"
                 :placeholder="t('field.expiryPlaceholder')"
@@ -253,7 +242,7 @@ function onKey(e: KeyboardEvent) {
                 mono
                 :error="err('expiryDate')"
               />
-              <FormField
+              <FieldRow
                 v-model="payload.fields.securityCode"
                 :label="t('field.securityCode')"
                 secure
@@ -261,108 +250,107 @@ function onKey(e: KeyboardEvent) {
                 :maxlength="4"
                 :error="err('securityCode')"
               />
-            </div>
-            <FormField v-model="payload.fields.note" :label="t('field.note')" multiline :error="err('note')" />
+            </FieldGroup>
+            <NotesCard v-model="payload.fields.note" :label="t('field.note')" :error="err('note')" />
             <ColorPicker v-model="payload.fields.color" />
           </template>
 
           <!-- Bank account -->
           <template v-else-if="payload.variant === 'bankAccount'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <FormField v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />
-            <FormField v-model="payload.fields.accountNumber" :label="t('field.accountNumber')" mono :error="err('accountNumber')" />
-            <FormField v-model="payload.fields.routingNumber" :label="t('field.routingNumber')" mono :error="err('routingNumber')" />
-            <SelectField v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
-            <FormField v-model="payload.fields.bankName" :label="t('field.bankName')" :error="err('bankName')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <FieldRow v-model="payload.fields.accountHolder" :label="t('field.accountHolder')" :error="err('accountHolder')" />
+              <FieldRow v-model="payload.fields.accountNumber" :label="t('field.accountNumber')" mono :error="err('accountNumber')" />
+              <FieldRow v-model="payload.fields.routingNumber" :label="t('field.routingNumber')" mono :error="err('routingNumber')" />
+              <PickerRow v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
+              <FieldRow v-model="payload.fields.bankName" :label="t('field.bankName')" :error="err('bankName')" />
+            </FieldGroup>
           </template>
 
           <!-- Name -->
           <template v-else-if="payload.variant === 'name'">
-            <SelectField v-model="payload.fields.type" :label="t('field.type')" :options="honorificOptions" :error="err('type')" />
-            <FormField v-model="payload.fields.firstName" :label="t('field.firstName')" :error="err('firstName')" />
-            <FormField v-model="payload.fields.middleName" :label="t('field.middleName')" :error="err('middleName')" />
-            <FormField v-model="payload.fields.lastName" :label="t('field.lastName')" :error="err('lastName')" />
-            <FormField v-model="payload.fields.defaultUsername" :label="t('field.defaultUsername')" :error="err('defaultUsername')" />
-            <DateField v-model="payload.fields.birthDate" :label="t('field.birthDate')" :error="err('birthDate')" />
-            <FormField v-model="payload.fields.birthPlace" :label="t('field.birthPlace')" :error="err('birthPlace')" />
+            <FieldGroup>
+              <PickerRow v-model="payload.fields.type" :label="t('field.type')" :options="honorificOptions" :error="err('type')" />
+              <FieldRow v-model="payload.fields.firstName" :label="t('field.firstName')" :error="err('firstName')" />
+              <FieldRow v-model="payload.fields.middleName" :label="t('field.middleName')" :error="err('middleName')" />
+              <FieldRow v-model="payload.fields.lastName" :label="t('field.lastName')" :error="err('lastName')" />
+              <FieldRow v-model="payload.fields.defaultUsername" :label="t('field.defaultUsername')" :error="err('defaultUsername')" />
+              <DateField v-model="payload.fields.birthDate" :label="t('field.birthDate')" :error="err('birthDate')" />
+              <FieldRow v-model="payload.fields.birthPlace" :label="t('field.birthPlace')" :error="err('birthPlace')" />
+            </FieldGroup>
           </template>
 
           <!-- Email -->
           <template v-else-if="payload.variant === 'personalEmail'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <SelectField v-model="payload.fields.type" :label="t('field.type')" :options="emailOptions" :error="err('type')" />
-            <FormField v-model="payload.fields.email" :label="t('field.email')" inputmode="email" :error="err('email')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <PickerRow v-model="payload.fields.type" :label="t('field.type')" :options="emailOptions" :error="err('type')" />
+              <FieldRow v-model="payload.fields.email" :label="t('field.email')" :placeholder="t('field.emailPlaceholder')" inputmode="email" :error="err('email')" />
+            </FieldGroup>
           </template>
 
-          <!-- Phone -->
+          <!-- Phone: the number's value line starts with the country's dial code. -->
           <template v-else-if="payload.variant === 'phone'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <div class="pair">
-              <SelectField v-model="payload.fields.type" :label="t('field.type')" :options="phoneOptions" :error="err('type')" />
-              <SelectField v-model="payload.fields.countryCode" :label="t('vault.country')" :options="phoneCountryOptions" :error="err('countryCode')" />
-            </div>
-            <!-- iOS: the dial code in its own field box, 8 before the number's. -->
-            <div class="phone-field">
-              <label :for="phoneInputId" class="field-label">{{ t('field.phoneNumber') }}</label>
-              <div class="phone-row">
-                <span class="qasa-field dial" dir="ltr">{{ dialCode(payload.fields.countryCode) }}</span>
-                <div class="qasa-field phone-box" :class="{ invalid: !!err('number') }">
-                  <input
-                    :id="phoneInputId"
-                    v-model="payload.fields.number"
-                    type="text"
-                    inputmode="tel"
-                    :placeholder="t('field.phoneNumber')"
-                    :aria-invalid="!!err('number')"
-                    autocomplete="off"
-                    spellcheck="false"
-                  />
-                </div>
-              </div>
-              <FieldError :message="err('number')" />
-            </div>
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <PickerRow v-model="payload.fields.type" :label="t('field.type')" :options="phoneOptions" :error="err('type')" />
+              <PickerRow v-model="payload.fields.countryCode" :label="t('vault.country')" :options="phoneCountryOptions" :error="err('countryCode')" />
+              <FieldRow v-model="payload.fields.number" :label="t('field.phoneNumber')" inputmode="tel" :error="err('number')">
+                <template #prefix>
+                  <span class="dial" dir="ltr">{{ dialCode(payload.fields.countryCode) }}</span>
+                </template>
+              </FieldRow>
+            </FieldGroup>
           </template>
 
           <!-- Address -->
           <template v-else-if="payload.variant === 'address'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <FormField v-model="payload.fields.address" :label="t('field.address')" :error="err('address')" />
-            <FormField v-model="payload.fields.city" :label="t('field.city')" :error="err('city')" />
-            <FormField v-model="payload.fields.zipCode" :label="t('field.zipCode')" :error="err('zipCode')" />
-            <SelectField v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
-            <FormField v-model="payload.fields.recipient" :label="t('field.recipient')" :error="err('recipient')" />
-            <FormField v-model="payload.fields.building" :label="t('field.building')" :error="err('building')" />
-            <FormField v-model="payload.fields.floor" :label="t('field.floor')" :error="err('floor')" />
-            <FormField v-model="payload.fields.apartment" :label="t('field.apartment')" :error="err('apartment')" />
-            <FormField v-model="payload.fields.doorCode" :label="t('field.doorCode')" :error="err('doorCode')" />
-            <SelectField
-              :model-value="payload.fields.phoneItemId ?? null"
-              :label="t('field.phoneNumber')"
-              :options="phoneItems"
-              @update:model-value="(v) => payload?.variant === 'address' && (payload.fields.phoneItemId = v ?? undefined)"
-            />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <FieldRow v-model="payload.fields.address" :label="t('field.address')" :error="err('address')" />
+              <FieldRow v-model="payload.fields.city" :label="t('field.city')" :error="err('city')" />
+              <FieldRow v-model="payload.fields.zipCode" :label="t('field.zipCode')" :error="err('zipCode')" />
+              <PickerRow v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
+              <FieldRow v-model="payload.fields.recipient" :label="t('field.recipient')" :error="err('recipient')" />
+              <FieldRow v-model="payload.fields.building" :label="t('field.building')" :error="err('building')" />
+              <FieldRow v-model="payload.fields.floor" :label="t('field.floor')" :error="err('floor')" />
+              <FieldRow v-model="payload.fields.apartment" :label="t('field.apartment')" :error="err('apartment')" />
+              <FieldRow v-model="payload.fields.doorCode" :label="t('field.doorCode')" :error="err('doorCode')" />
+              <PickerRow
+                :model-value="payload.fields.phoneItemId ?? null"
+                :label="t('field.phoneNumber')"
+                :options="phoneItems"
+                @update:model-value="(v) => payload?.variant === 'address' && (payload.fields.phoneItemId = v ?? undefined)"
+              />
+            </FieldGroup>
           </template>
 
           <!-- Company -->
           <template v-else-if="payload.variant === 'company'">
-            <FormField v-model="payload.fields.companyName" :label="t('field.companyName')" :error="err('companyName')" />
-            <FormField v-model="payload.fields.jobTitle" :label="t('field.jobTitle')" :error="err('jobTitle')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.companyName" :label="t('field.companyName')" :error="err('companyName')" />
+              <FieldRow v-model="payload.fields.jobTitle" :label="t('field.jobTitle')" :error="err('jobTitle')" />
+            </FieldGroup>
           </template>
 
           <!-- Website -->
           <template v-else-if="payload.variant === 'website'">
-            <FormField v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
-            <FormField v-model="payload.fields.websiteURL" :label="t('field.websiteURL')" inputmode="url" :error="err('websiteURL')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.itemName" :label="t('field.itemName')" :error="err('itemName')" />
+              <FieldRow v-model="payload.fields.websiteURL" :label="t('field.websiteURL')" :placeholder="t('field.websitePlaceholder')" inputmode="url" :error="err('websiteURL')" />
+            </FieldGroup>
           </template>
 
           <!-- ID documents -->
           <template v-else>
-            <FormField v-model="payload.fields.name" :label="t('field.name')" :error="err('name')" />
-            <SelectField v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
-            <FormField v-model="payload.fields.number" :label="t('field.number')" mono :error="err('number')" />
-            <DateField v-model="payload.fields.issueDate" :label="t('field.issueDate')" :error="err('issueDate')" />
-            <FormField v-if="payload.variant === 'passport'" v-model="payload.fields.issuePlace" :label="t('field.issuePlace')" :error="err('issuePlace')" />
-            <DateField v-model="payload.fields.expiryDate" :label="t('field.expiryDate')" :error="err('expiryDate')" />
+            <FieldGroup>
+              <FieldRow v-model="payload.fields.name" :label="t('field.name')" :error="err('name')" />
+              <PickerRow v-model="payload.fields.countryCode" :label="t('vault.country')" :options="countryOptions" :error="err('countryCode')" />
+              <FieldRow v-model="payload.fields.number" :label="t('field.number')" mono :error="err('number')" />
+              <DateField v-model="payload.fields.issueDate" :label="t('field.issueDate')" :error="err('issueDate')" />
+              <FieldRow v-if="payload.variant === 'passport'" v-model="payload.fields.issuePlace" :label="t('field.issuePlace')" :error="err('issuePlace')" />
+              <DateField v-model="payload.fields.expiryDate" :label="t('field.expiryDate')" :error="err('expiryDate')" />
+            </FieldGroup>
           </template>
         </div>
       </div>
@@ -410,85 +398,11 @@ function onKey(e: KeyboardEvent) {
   padding: var(--space-screen-padding);
 }
 
-.pair,
-.card-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  align-items: start;
-}
-
-/* Expiry and security code on one row; the code is the narrower box (96…150). */
-.card-pair {
-  grid-template-columns: minmax(0, 1fr) minmax(96px, 150px);
-}
-
-/* iOS `FieldIconButton`: 32 square, 16 semibold glyph, secondary (accent for generate). */
-.field-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: var(--size-field-icon-button);
-  height: var(--size-field-icon-button);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.field-icon svg {
-  width: var(--size-field-icon-glyph);
-  height: var(--size-field-icon-glyph);
-}
-
-.field-icon.accent {
-  color: var(--accent);
-}
-
-.phone-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-field-label-gap);
-}
-
-.field-label {
-  font-size: var(--type-section-label-size);
-  font-weight: var(--type-section-label-weight);
-  color: var(--text-secondary);
-}
-
-.phone-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+/* The phone number's dial code: a non-editable accent prefix on the value line. */
 .dial {
   flex-shrink: 0;
-  width: auto;
-  min-width: calc(56px + 2 * var(--space-field-horizontal));
-  justify-content: center;
   color: var(--accent);
-  font-weight: 600;
-}
-
-.phone-box input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  user-select: text;
-}
-
-.phone-box input::placeholder {
-  color: var(--text-placeholder);
+  font-weight: var(--type-button-weight);
 }
 
 /* iOS: "Fix the fields below to save", 13 semibold danger, above the fields. */
@@ -497,12 +411,6 @@ function onKey(e: KeyboardEvent) {
   color: var(--danger);
   font-size: 13px;
   font-weight: 600;
-}
-
-.with-error {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-field-label-gap);
 }
 
 /* iOS `Toggle` with a 15 medium label. */

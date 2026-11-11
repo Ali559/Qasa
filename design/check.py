@@ -20,7 +20,7 @@ RULES: list[tuple[Path, str, re.Pattern[str], str]] = [
         IOS,
         ".swift",
         re.compile(r"ToolbarItem\(placement:\s*\.(cancellationAction|confirmationAction)\)"),
-        "sheets have no Cancel/Done in the header: use .sheetHeader(title) (rule 4)",
+        "sheets have no Cancel/Done in the header: use .sheetHeader(title) (design/README.md, Bottom sheets)",
     ),
     (
         IOS,
@@ -32,13 +32,13 @@ RULES: list[tuple[Path, str, re.Pattern[str], str]] = [
         IOS,
         ".swift",
         re.compile(r"\b\w*[eE]rror\.localizedDescription"),
-        "system errors arrive in the device's language: use L10n.message(for:) (rule 7)",
+        "system errors arrive in the device's language: use L10n.message(for:) (design/README.md, Language)",
     ),
     (
         IOS,
         ".swift",
         re.compile(r'UserDefaults\.standard\.string\(forKey:\s*"qasa\.language"\)'),
-        "read the language through AppPreferences / AppLanguage.current so views update (rule 7)",
+        "read the language through AppPreferences / AppLanguage.current so views update (design/README.md, Language)",
     ),
 ]
 

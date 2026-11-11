@@ -5,8 +5,8 @@ struct CreateVaultView: View {
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     @State private var biometricsEnabled = true
-    @State private var passwordVisible = false
-    @State private var errorMessage: String?
+    @State private var passwordError: String?
+    @State private var confirmError: String?
     var onVaultCreated: (String, Bool) -> Void
     var onPairExisting: (() -> Void)? = nil
     var onRestoreBackup: (() -> Void)? = nil
@@ -72,24 +72,20 @@ struct CreateVaultView: View {
                     .padding(.bottom, 4)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: L10n.tr("auth.unlock.masterPassword", locale: locale))
-                        ThemedTextField(
-                            icon: "lock.fill",
-                            placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
-                            text: $password,
-                            isSecure: !passwordVisible,
-                            isPassword: true,
-                            trailing: AnyView(
-                                FieldIconButton(
-                                    systemImage: passwordVisible ? "eye.slash" : "eye",
-                                    accessibilityLabel: passwordVisible
-                                        ? L10n.tr("vault.hidePassword", locale: locale)
-                                        : L10n.tr("vault.showPassword", locale: locale)
-                                ) {
-                                    passwordVisible.toggle()
-                                }
+                        FieldGroup {
+                            PasswordFieldRow(
+                                label: L10n.tr("auth.unlock.masterPassword", locale: locale),
+                                text: $password,
+                                contentType: .newPassword,
+                                error: passwordError
                             )
-                        )
+                            PasswordFieldRow(
+                                label: L10n.tr("auth.create.confirmPassword", locale: locale),
+                                text: $confirmPassword,
+                                contentType: .newPassword,
+                                error: confirmError
+                            )
+                        }
 
                         if !password.isEmpty {
                             VStack(spacing: 4) {
@@ -108,23 +104,6 @@ struct CreateVaultView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: L10n.tr("auth.create.confirmPassword", locale: locale))
-                        ThemedTextField(
-                            icon: "lock.rotation",
-                            placeholder: L10n.tr("auth.create.reenter", locale: locale),
-                            text: $confirmPassword,
-                            isSecure: true,
-                            isPassword: true
-                        )
-                    }
-                    .padding(.top, 4)
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.qasa(13, weight: .medium))
-                            .foregroundColor(Theme.danger)
-                    }
 
                     SettingsSection {
                         ToggleRow(
@@ -189,15 +168,19 @@ struct CreateVaultView: View {
     }
 
     private func createVault() {
+        // Each message on the row it is about (design/README.md, "Labelled fields").
+        passwordError = nil
+        confirmError = nil
         guard canCreate else {
-            errorMessage = password.isEmpty
-                ? L10n.tr("auth.create.enterPassword", locale: locale)
-                : password.count < 8
-                    ? L10n.tr("settings.weakMasterPassword", locale: locale)
-                    : L10n.tr("auth.create.mismatch", locale: locale)
+            if password.isEmpty {
+                passwordError = L10n.tr("auth.create.enterPassword", locale: locale)
+            } else if password.count < 8 {
+                passwordError = L10n.tr("settings.weakMasterPassword", locale: locale)
+            } else {
+                confirmError = L10n.tr("auth.create.mismatch", locale: locale)
+            }
             return
         }
-        errorMessage = nil
         onVaultCreated(password, biometricsEnabled)
     }
 }

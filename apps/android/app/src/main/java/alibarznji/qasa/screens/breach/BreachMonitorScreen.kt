@@ -3,7 +3,6 @@ package alibarznji.qasa.screens.breach
 import alibarznji.qasa.R
 import alibarznji.qasa.breach.BreachCheckResult
 import alibarznji.qasa.theme.AppMenuHeader
-import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.FilterChipButton
 import alibarznji.qasa.theme.PremiumGate
 import alibarznji.qasa.theme.PrimaryButton
@@ -12,7 +11,8 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.StatusPill
-import alibarznji.qasa.theme.ThemedTextField
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.db.MonitoredEmailEntity
@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -163,7 +162,7 @@ private fun SlotsHeader(used: Int) {
     }
 }
 
-/** iOS `addEmailCard`: label inside the card, "@" field, "+ Add to Monitoring" / "Saving…". */
+/** iOS `addEmailCard`: a one-row "Add Email" group, then "+ Add to Monitoring" / "Saving…". */
 @Composable
 private fun AddEmailCard(
     email: String,
@@ -171,17 +170,17 @@ private fun AddEmailCard(
     isChecking: Boolean,
     onAdd: () -> Unit,
 ) {
-    CardContainer {
-        SectionLabel(stringResource(R.string.breach_addemail))
-        Spacer(Modifier.height(QasaDimens.drawerGap))
-        ThemedTextField(
-            value = email,
-            onValueChange = onEmailChange,
-            placeholder = stringResource(R.string.breach_emailplaceholder),
-            leadingIcon = Icons.Default.AlternateEmail,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
-        )
-        Spacer(Modifier.height(QasaDimens.drawerGap))
+    Column(Modifier.fillMaxWidth()) {
+        QasaFieldGroup {
+            QasaTextRow(
+                label = stringResource(R.string.breach_addemail),
+                value = email,
+                onValueChange = onEmailChange,
+                placeholder = stringResource(R.string.field_emailplaceholder),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, autoCorrectEnabled = false),
+            )
+        }
+        Spacer(Modifier.height(QasaDimens.formGap))
         PrimaryButton(
             title = stringResource(if (isChecking) R.string.breach_saving else R.string.breach_addtomonitoring),
             icon = Icons.Default.Add,

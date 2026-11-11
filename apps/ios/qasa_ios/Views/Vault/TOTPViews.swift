@@ -7,29 +7,29 @@ import VisionKit
 /// once set, the row shows the issuer and the live code, with a way to remove it.
 struct TOTPEditorField: View {
     @Binding var totp: String?
+    /// The editor's rule message for the code, listed under the group.
+    var error: String? = nil
 
     @State private var showScanner = false
     @State private var showKeyEntry = false
     @State private var keyInput = ""
-    @State private var error: String?
+    /// A scanned or typed key that isn't a 2FA setup.
+    @State private var parseError: String?
 
+    /// A row of the login editor's `FieldGroup`: "Add" (scan / type the key) while empty,
+    /// the issuer and live code once set.
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormFieldLabel(text: L10n.tr("field.totp"))
-
+        FieldRow(label: L10n.tr("field.totp"), error: parseError ?? error) {
             if (totp ?? "").isEmpty {
-                addMenu
-                Text(L10n.tr("totp.hint"))
-                    .font(.qasa(12))
-                    .foregroundColor(Theme.textSecondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    addMenu
+                    Text(L10n.tr("totp.hint"))
+                        .font(.qasa(12))
+                        .foregroundColor(Theme.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             } else {
                 setRow(TOTP(stored: totp))
-            }
-
-            if let error {
-                Text(error)
-                    .font(.qasa(12))
-                    .foregroundColor(Theme.danger)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -49,7 +49,7 @@ struct TOTPEditorField: View {
             TOTPScannerSheet(
                 onScanned: { uri in
                     totp = uri
-                    error = nil
+                    parseError = nil
                     showScanner = false
                 },
                 onEnterKey: {
@@ -65,7 +65,7 @@ struct TOTPEditorField: View {
     private var addMenu: some View {
         Menu {
             Button {
-                error = nil
+                parseError = nil
                 showScanner = true
             } label: {
                 Label(L10n.tr("totp.scan"), systemImage: "qrcode.viewfinder")
@@ -79,70 +79,45 @@ struct TOTPEditorField: View {
             QasaButtonLabel(title: L10n.tr("totp.add"), icon: "plus")
                 .font(.qasa(16, weight: .semibold))
                 .foregroundColor(Theme.accent)
-                .frame(maxWidth: .infinity)
-                .frame(height: Theme.buttonHeight)
-                .background(Theme.cardBackground)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
-                        .stroke(Theme.accent.opacity(0.4), lineWidth: 1)
-                )
         }
     }
 
+    /// Set: the live code as the value, the issuer as a caption, remove trailing.
     private func setRow(_ config: TOTP?) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: "checkmark.shield.fill")
-                .font(.qasa(18, weight: .medium))
-                .foregroundColor(Theme.accent)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(config?.issuer ?? config?.accountName ?? L10n.tr("field.totp"))
-                    .font(.qasa(15, weight: .medium))
-                    .foregroundColor(Theme.textPrimary)
-                    .lineLimit(1)
+        HStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: 0) {
                 if let config {
                     TimelineView(.periodic(from: .now, by: 1)) { context in
                         Text(TOTP.grouped(config.code(at: context.date)))
-                            .font(.kasoMono(15))
-                            .foregroundColor(Theme.textSecondary)
+                            .font(.kasoMono(QasaTokens.Typography.groupValue.size))
+                            .foregroundColor(Theme.textPrimary)
                     }
                 }
+                Text(config?.issuer ?? config?.accountName ?? L10n.tr("field.totp"))
+                    .font(.qasa(12))
+                    .foregroundColor(Theme.textSecondary)
+                    .lineLimit(1)
             }
-
             Spacer(minLength: 8)
-
-            Button(role: .destructive) {
+            FieldIconButton(systemImage: "xmark", accessibilityLabel: L10n.tr("totp.remove")) {
                 totp = nil
-                error = nil
-            } label: {
-                Text(L10n.tr("totp.remove"))
-                    .font(.qasa(14, weight: .semibold))
-                    .foregroundColor(Theme.danger)
+                parseError = nil
             }
-            .buttonStyle(.plain)
         }
-        .padding(14)
-        .background(Theme.cardBackground)
-        .cornerRadius(Theme.cornerRadius)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                .stroke(Theme.stroke, lineWidth: 1)
-        )
     }
 
     private func openKeyEntry() {
         keyInput = ""
-        error = nil
+        parseError = nil
         showKeyEntry = true
     }
 
     private func applyKey(_ input: String) {
         do {
             totp = try TOTP.parse(input).uri
-            error = nil
+            parseError = nil
         } catch {
-            self.error = L10n.tr("totp.invalid")
+            parseError = L10n.tr("totp.invalid")
         }
     }
 }

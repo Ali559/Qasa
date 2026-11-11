@@ -7,9 +7,12 @@ struct ChangeMasterPasswordView: View {
     @State private var currentPassword = ""
     @State private var newPassword = ""
     @State private var confirmPassword = ""
-    @State private var passwordVisible = false
     @State private var isSaving = false
     @State private var errorMessage: String?
+    /// Messages shown on their rows.
+    @State private var currentError: String?
+    @State private var newError: String?
+    @State private var confirmError: String?
     @State private var didSucceed = false
 
     private var locale: Locale { prefs.locale }
@@ -31,18 +34,25 @@ struct ChangeMasterPasswordView: View {
                         .foregroundColor(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    field(
-                        title: L10n.tr("settings.currentMasterPassword", locale: locale),
-                        text: $currentPassword
-                    )
-                    field(
-                        title: L10n.tr("settings.newMasterPassword", locale: locale),
-                        text: $newPassword
-                    )
-                    field(
-                        title: L10n.tr("settings.confirmMasterPassword", locale: locale),
-                        text: $confirmPassword
-                    )
+                    FieldGroup {
+                        PasswordFieldRow(
+                            label: L10n.tr("settings.currentMasterPassword", locale: locale),
+                            text: $currentPassword,
+                            error: currentError
+                        )
+                        PasswordFieldRow(
+                            label: L10n.tr("settings.newMasterPassword", locale: locale),
+                            text: $newPassword,
+                            contentType: .newPassword,
+                            error: newError
+                        )
+                        PasswordFieldRow(
+                            label: L10n.tr("settings.confirmMasterPassword", locale: locale),
+                            text: $confirmPassword,
+                            contentType: .newPassword,
+                            error: confirmError
+                        )
+                    }
 
                     if let errorMessage {
                         Text(errorMessage)
@@ -76,34 +86,14 @@ struct ChangeMasterPasswordView: View {
         }
     }
 
-    private func field(title: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-            SectionLabel(text: title)
-            ThemedTextField(
-                icon: "lock.fill",
-                placeholder: title,
-                text: text,
-                isSecure: !passwordVisible,
-                            isPassword: true,
-                trailing: AnyView(
-                    FieldIconButton(
-                        systemImage: passwordVisible ? "eye.slash" : "eye",
-                        accessibilityLabel: passwordVisible
-                            ? L10n.tr("vault.hidePassword", locale: locale)
-                            : L10n.tr("vault.showPassword", locale: locale)
-                    ) {
-                        passwordVisible.toggle()
-                    }
-                )
-            )
-        }
-    }
-
     @MainActor
     private func save() async {
         errorMessage = nil
+        currentError = nil
+        newError = nil
+        confirmError = nil
         guard newPassword == confirmPassword else {
-            errorMessage = L10n.tr("settings.passwordMismatch", locale: locale)
+            confirmError = L10n.tr("settings.passwordMismatch", locale: locale)
             return
         }
         isSaving = true
@@ -130,6 +120,10 @@ struct ChangeMasterPasswordView: View {
             didSucceed = true
             try? await Task.sleep(nanoseconds: 700_000_000)
             dismiss()
+        } catch VaultCryptoError.wrongPassword {
+            currentError = localized(.wrongPassword)
+        } catch VaultCryptoError.weakPassword {
+            newError = localized(.weakPassword)
         } catch let error as VaultCryptoError {
             errorMessage = localized(error)
         } catch {

@@ -3,14 +3,14 @@
 // a code (`SettingsRow`s with a selection circle), the code field and Sync, 12 apart.
 // Find a device showing a code on this Wi‑Fi, type the code, sync. Used by Sync on this
 // network (join) and by "I already have Qasa on another device" on Create vault.
-import { Circle, CircleCheck, Hash, Laptop, Monitor, RefreshCw, Smartphone } from 'lucide-vue-next'
+import { Circle, CircleCheck, Laptop, Monitor, RefreshCw, Smartphone } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
+import FieldGroup from '@/components/FieldGroup.vue'
+import FieldRow from '@/components/FieldRow.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
-import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
 import { failureKey, syncApi, type Peer, type SyncEvent } from '@/sync/api'
 
@@ -88,18 +88,9 @@ async function sync() {
         </button>
       </div>
 
-      <SectionLabel :text="t('pair.codeLabel')" />
-      <TextField
-        v-model="code"
-        :icon="Hash"
-        :placeholder="t('pair.codePlaceholder')"
-        :label="t('pair.codeLabel')"
-        mono
-        :disabled="!selected"
-        :invalid="!!error"
-        @submit="sync"
-      />
-      <p v-if="error" class="error" role="alert">{{ error }}</p>
+      <FieldGroup>
+        <FieldRow v-model="code" :label="t('pair.codeLabel')" mono :disabled="!selected" :error="error" @submit="sync" />
+      </FieldGroup>
       <PrimaryButton
         :title="busy ? t('sync.connecting') : t('sync.syncButton')"
         :icon="busy ? undefined : RefreshCw"
@@ -216,9 +207,4 @@ p,
   color: var(--text-secondary);
 }
 
-.error {
-  font-size: var(--type-row-value-size);
-  font-weight: 500;
-  color: var(--danger);
-}
 </style>

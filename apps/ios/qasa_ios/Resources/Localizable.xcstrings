@@ -6997,6 +6997,28 @@
         }
       }
     },
+    "field.emailPlaceholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.com"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.com"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.com"
+          }
+        }
+      }
+    },
     "field.expiryDate": {
       "localizations": {
         "en": {
@@ -7521,6 +7543,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "ماڵپەڕ"
+          }
+        }
+      }
+    },
+    "field.websitePlaceholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "example.com"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "example.com"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "example.com"
           }
         }
       }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// iOS `SheetHeader` (design/README.md rule 4): the sheet's title, `type.sheetTitle` (17
+// iOS `SheetHeader` (design/README.md`, "Bottom sheets"): the sheet's title, `type.sheetTitle` (17
 // semibold), centered, `space.sheetTitleTop` (20) from the sheet's top edge and
 // `space.sheetTitleBottom` (16) above the content. No Cancel / Close / Done: a sheet closes
 // with Esc or a click outside, and its own action stays at the bottom. `trailing` is for a

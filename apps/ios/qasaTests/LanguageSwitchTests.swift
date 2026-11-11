@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import qasa
 
-/// Every screen's text follows Settings → Language at once (design/README.md rule 7).
+/// Every screen's text follows Settings → Language at once (design/README.md, "Language").
 /// Password health once stayed Arabic: its strings read the language from `UserDefaults`
 /// instead of `AppPreferences`, so they missed changes made in the app.
 @MainActor

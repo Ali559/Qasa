@@ -2,11 +2,13 @@ package alibarznji.qasa.screens.vault.editor
 
 import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
+import alibarznji.qasa.theme.FieldIconButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaMenuRow
 import alibarznji.qasa.theme.QasaTextInputSheet
+import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.qasaColors
-import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.Country
 import alibarznji.qasa.vault.VaultCollection
 import androidx.compose.foundation.background
@@ -14,126 +16,49 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /** A vault Phone item offered by iOS `AddressPhonePicker` (VaultItemEditor.swift:730). */
 data class PhoneOption(val id: String, val displayName: String)
 
-/**
- * The Android stand-in for iOS' `.pickerStyle(.menu)` pickers: a field-styled anchor that
- * opens a Material `DropdownMenu`. `trailing` sits inside the box (the collection picker's
- * "new collection" button, as on iOS).
- */
+/** iOS `CountryPickerField` / `CountryMenuPicker` (FormHelpers.swift:49-85) as a group row. */
 @Composable
-fun <T> MenuPicker(
-    selectedLabel: String,
-    options: List<T>,
-    optionLabel: @Composable (T) -> String,
-    onSelect: (T) -> Unit,
-    modifier: Modifier = Modifier,
-    trailing: (@Composable () -> Unit)? = null,
-) {
-    val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.controlRadius)
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier.fillMaxWidth()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(QasaDimens.fieldHeight)
-                .clip(shape)
-                .background(c.cardBackground, shape)
-                .border(QasaDimens.stroke, c.stroke, shape)
-                .clickable(role = Role.DropdownList) { expanded = true }
-                .padding(start = QasaDimens.fieldHorizontal, end = QasaDimens.spaceSmall),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                selectedLabel,
-                color = c.accent,
-                style = qasaText.field,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(Icons.Default.ArrowDropDown, null, tint = c.accent, modifier = Modifier.size(QasaIconSize.x3l))
-            trailing?.invoke()
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = c.cardBackground,
-            modifier = Modifier.heightIn(max = 360.dp),
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(optionLabel(option), color = c.textPrimary, style = qasaText.field) },
-                    onClick = {
-                        expanded = false
-                        onSelect(option)
-                    },
-                )
-            }
-        }
-    }
-}
-
-/** iOS `CountryPickerField` / `CountryMenuPicker` (FormHelpers.swift:49-85). */
-@Composable
-fun CountryMenuPicker(countryCode: String, onChange: (String) -> Unit, showsDialCode: Boolean = false, modifier: Modifier = Modifier) {
+fun CountryPickerField(countryCode: String, showsDialCode: Boolean = false, onChange: (String) -> Unit) {
+    val touch = rememberTouch(FfiField.COUNTRY_CODE)
     val selected = Country.all.firstOrNull { it.code == countryCode }
-    MenuPicker(
+    QasaMenuRow(
+        label = stringResource(R.string.vault_country),
         selectedLabel = selected?.pickerLabel(showsDialCode) ?: countryCode,
         options = Country.all,
         optionLabel = { it.pickerLabel(showsDialCode) },
-        onSelect = { onChange(it.code) },
-        modifier = modifier,
+        onSelect = { touch(); onChange(it.code) },
+        error = fieldError(FfiField.COUNTRY_CODE),
     )
-}
-
-@Composable
-fun CountryPickerField(countryCode: String, onChange: (String) -> Unit) {
-    val touch = rememberTouch(FfiField.COUNTRY_CODE)
-    FieldBlock(stringResource(R.string.vault_country), error = fieldError(FfiField.COUNTRY_CODE)) {
-        CountryMenuPicker(countryCode, { touch(); onChange(it) })
-    }
 }
 
 /**
  * iOS `CollectionPickerField` (FormHelpers.swift:87): "None" + collections sorted by name,
- * and a folder button that creates a collection and selects it.
+ * and a folder button beside the chevron that creates a collection and selects it.
  */
 @Composable
 fun CollectionPickerField(
@@ -146,24 +71,21 @@ fun CollectionPickerField(
     val none = stringResource(R.string.common_none)
     val sorted = remember(collections) { collections.sortedBy { it.name.lowercase() } }
     var showNew by remember { mutableStateOf(false) }
-    FieldBlock(stringResource(R.string.vault_collection)) {
-        MenuPicker(
-            selectedLabel = sorted.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name ?: none,
-            options = listOf<VaultCollection?>(null) + sorted,
-            optionLabel = { it?.name ?: none },
-            onSelect = { onChange(it?.id) },
-            trailing = {
-                IconButton(onClick = { showNew = true }, modifier = Modifier.size(QasaDimens.fieldIconButton)) {
-                    Icon(
-                        Icons.Default.CreateNewFolder,
-                        contentDescription = stringResource(R.string.vault_newcollection),
-                        tint = c.accent,
-                        modifier = Modifier.size(QasaIconSize.xl),
-                    )
-                }
-            },
-        )
-    }
+    QasaMenuRow(
+        label = stringResource(R.string.vault_collection),
+        selectedLabel = sorted.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name ?: none,
+        options = listOf<VaultCollection?>(null) + sorted,
+        optionLabel = { it?.name ?: none },
+        onSelect = { onChange(it?.id) },
+        trailing = {
+            FieldIconButton(
+                icon = Icons.Default.CreateNewFolder,
+                contentDescription = stringResource(R.string.vault_newcollection),
+                onClick = { showNew = true },
+                tint = c.accent,
+            )
+        },
+    )
     if (showNew) {
         NewCollectionDialog(
             onDismiss = { showNew = false },
@@ -192,7 +114,9 @@ private fun NewCollectionDialog(onDismiss: () -> Unit, onCreate: (String) -> Uni
 @Composable
 fun NoteColorPicker(color: NoteColor, onChange: (NoteColor) -> Unit) {
     val c = qasaColors
-    FieldBlock(stringResource(R.string.vault_color)) {
+    // Not a field: the swatches keep their label above them.
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(QasaDimens.fieldLabelGap)) {
+        SectionLabel(stringResource(R.string.vault_color))
         Row(horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall)) {
             NoteColor.entries.forEach { option ->
                 val label = stringResource(option.label)
@@ -213,18 +137,21 @@ fun NoteColorPicker(color: NoteColor, onChange: (NoteColor) -> Unit) {
     }
 }
 
-/** Shared "Type" picker used by name honorific, email kind and phone kind. */
+/** Shared "Type" picker row used by name honorific, email kind and phone kind. */
 @Composable
 fun <T> KindPicker(
     selected: T,
     options: List<T>,
     label: @Composable (T) -> String,
     onChange: (T) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    FieldBlock(stringResource(R.string.field_type), modifier) {
-        MenuPicker(selectedLabel = label(selected), options = options, optionLabel = label, onSelect = onChange)
-    }
+    QasaMenuRow(
+        label = stringResource(R.string.field_type),
+        selectedLabel = label(selected),
+        options = options,
+        optionLabel = label,
+        onSelect = onChange,
+    )
 }
 
 /**
@@ -238,13 +165,11 @@ fun AddressPhonePicker(phoneItemId: String?, phones: List<PhoneOption>?, onChang
         if (phones != null && phoneItemId != null && phones.none { it.id == phoneItemId }) onChange(null)
     }
     val list = phones.orEmpty()
-    FieldBlock(stringResource(R.string.field_phonenumber)) {
-        MenuPicker(
-            selectedLabel = list.firstOrNull { it.id == phoneItemId }?.displayName ?: none,
-            options = listOf<PhoneOption?>(null) + list,
-            optionLabel = { it?.displayName ?: none },
-            onSelect = { onChange(it?.id) },
-        )
-    }
+    QasaMenuRow(
+        label = stringResource(R.string.field_phonenumber),
+        selectedLabel = list.firstOrNull { it.id == phoneItemId }?.displayName ?: none,
+        options = listOf<PhoneOption?>(null) + list,
+        optionLabel = { it?.displayName ?: none },
+        onSelect = { onChange(it?.id) },
+    )
 }
-

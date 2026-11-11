@@ -1,15 +1,10 @@
 package alibarznji.qasa.screens.vault.editor
 
 import alibarznji.qasa.R
-import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaFieldGroup
 import alibarznji.qasa.vault.Country
 import alibarznji.qasa.vault.VaultPayload
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import uniffi.qasa_ffi.FfiField
@@ -17,7 +12,7 @@ import uniffi.qasa_ffi.FfiField
 // MARK: - Name (VaultItemEditor.swift:244)
 
 @Composable
-internal fun NameFields(p: VaultPayload.Name, onChange: (VaultPayload) -> Unit) {
+internal fun NameFields(p: VaultPayload.Name, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     KindPicker(
         selected = Honorific.fromRaw(p.type),
         options = Honorific.entries,
@@ -35,7 +30,7 @@ internal fun NameFields(p: VaultPayload.Name, onChange: (VaultPayload) -> Unit) 
 // MARK: - Email (VaultItemEditor.swift:269)
 
 @Composable
-internal fun EmailFields(p: VaultPayload.PersonalEmail, onChange: (VaultPayload) -> Unit) {
+internal fun EmailFields(p: VaultPayload.PersonalEmail, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
     KindPicker(
         selected = EmailKind.fromRaw(p.type),
@@ -43,36 +38,31 @@ internal fun EmailFields(p: VaultPayload.PersonalEmail, onChange: (VaultPayload)
         label = { stringResource(it.label) },
         onChange = { onChange(p.copy(type = it.iosRaw)) },
     )
-    FormTextField(R.string.field_email, p.email, FfiField.EMAIL, keyboardType = KeyboardType.Email) { onChange(p.copy(email = it)) }
+    FormTextField(
+        R.string.field_email, p.email, FfiField.EMAIL,
+        keyboardType = KeyboardType.Email, placeholderRes = R.string.field_emailplaceholder,
+    ) { onChange(p.copy(email = it)) }
 }
 
 // MARK: - Phone (VaultItemEditor.swift:289)
 
 @Composable
-internal fun PhoneFields(p: VaultPayload.Phone, onChange: (VaultPayload) -> Unit) {
+internal fun PhoneFields(p: VaultPayload.Phone, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
-    // iOS puts Type and Country side by side, each half the width.
-    Row(verticalAlignment = Alignment.Top) {
-        KindPicker(
-            selected = PhoneKind.fromRaw(p.type),
-            options = PhoneKind.entries,
-            label = { stringResource(it.label) },
-            onChange = { onChange(p.copy(type = it.iosRaw)) },
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(Modifier.width(QasaDimens.gapSmall))
-        val touchCountry = rememberTouch(FfiField.COUNTRY_CODE)
-        FieldBlock(stringResource(R.string.vault_country), Modifier.weight(1f), error = fieldError(FfiField.COUNTRY_CODE)) {
-            CountryMenuPicker(p.countryCode, { touchCountry(); onChange(p.copy(countryCode = it)) }, showsDialCode = true)
-        }
-    }
+    KindPicker(
+        selected = PhoneKind.fromRaw(p.type),
+        options = PhoneKind.entries,
+        label = { stringResource(it.label) },
+        onChange = { onChange(p.copy(type = it.iosRaw)) },
+    )
+    CountryPickerField(p.countryCode, showsDialCode = true) { onChange(p.copy(countryCode = it)) }
     PhoneNumberField(Country.dialCode(p.countryCode), p.number) { onChange(p.copy(number = it)) }
 }
 
 // MARK: - Address (VaultItemEditor.swift:363)
 
 @Composable
-internal fun AddressFields(p: VaultPayload.Address, env: EditorEnv, onChange: (VaultPayload) -> Unit) {
+internal fun AddressFields(p: VaultPayload.Address, env: EditorEnv, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
     FormTextField(R.string.field_address, p.address, FfiField.ADDRESS) { onChange(p.copy(address = it)) }
     FormTextField(R.string.field_city, p.city, FfiField.CITY) { onChange(p.copy(city = it)) }
@@ -89,17 +79,18 @@ internal fun AddressFields(p: VaultPayload.Address, env: EditorEnv, onChange: (V
 // MARK: - Company / Website / ID (VaultItemEditor.swift:381)
 
 @Composable
-internal fun CompanyFields(p: VaultPayload.Company, onChange: (VaultPayload) -> Unit) {
+internal fun CompanyFields(p: VaultPayload.Company, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_companyname, p.companyName, FfiField.COMPANY_NAME) { onChange(p.copy(companyName = it)) }
     FormTextField(R.string.field_jobtitle, p.jobTitle, FfiField.JOB_TITLE) { onChange(p.copy(jobTitle = it)) }
 }
 
 @Composable
-internal fun WebsiteFields(p: VaultPayload.Website, onChange: (VaultPayload) -> Unit) {
+internal fun WebsiteFields(p: VaultPayload.Website, onChange: (VaultPayload) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_itemname, p.itemName, FfiField.ITEM_NAME) { onChange(p.copy(itemName = it)) }
-    FormTextField(R.string.field_websiteurl, p.websiteURL, FfiField.WEBSITE_URL, keyboardType = KeyboardType.Uri) {
-        onChange(p.copy(websiteURL = it))
-    }
+    FormTextField(
+        R.string.field_websiteurl, p.websiteURL, FfiField.WEBSITE_URL,
+        keyboardType = KeyboardType.Uri, placeholderRes = R.string.field_websiteplaceholder,
+    ) { onChange(p.copy(websiteURL = it)) }
 }
 
 /** iOS `IDDocumentFields`, shared by ID card, passport and driver licence. */
@@ -114,11 +105,10 @@ internal data class IdDoc(
 
 /**
  * iOS `idFields`: name, country, number, issue date, issue place (passport only), expiry.
- * iOS uses plain text fields for the two dates; we use the validated date field (same
- * free-text entry, plus the picker and format hint) as the parity plan asks.
+ * The two dates are date rows: free-text entry with the format hint, plus the calendar.
  */
 @Composable
-internal fun IdDocumentFields(d: IdDoc, showIssuePlace: Boolean, onChange: (IdDoc) -> Unit) {
+internal fun IdDocumentFields(d: IdDoc, showIssuePlace: Boolean, onChange: (IdDoc) -> Unit) = QasaFieldGroup {
     FormTextField(R.string.field_name, d.name, FfiField.NAME) { onChange(d.copy(name = it)) }
     CountryPickerField(d.countryCode) { onChange(d.copy(countryCode = it)) }
     FormTextField(R.string.field_number, d.number, FfiField.NUMBER) { onChange(d.copy(number = it)) }

@@ -21,7 +21,6 @@ struct BackupRestoreView: View {
     @State private var file: Data?
     @State private var info: FfiBackupInfo?
     @State private var password = ""
-    @State private var passwordVisible = false
     @State private var isWorking = false
     @State private var errorKey: String?
     @State private var outcome: FfiRestoreOutcome?
@@ -44,7 +43,7 @@ struct BackupRestoreView: View {
                         if let info {
                             passwordCard(info)
                         }
-                        if let errorKey {
+                        if let errorKey, errorKey != "backup.error.wrongPassword" {
                             Text(L10n.tr(errorKey, locale: locale))
                                 .font(.qasa(13, weight: .medium))
                                 .foregroundColor(Theme.danger)
@@ -117,27 +116,16 @@ struct BackupRestoreView: View {
                     .foregroundColor(Theme.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                SectionLabel(text: L10n.tr("auth.unlock.masterPassword", locale: locale))
-                ThemedTextField(
-                    icon: "lock.fill",
-                    placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
-                    text: $password,
-                    isSecure: !passwordVisible,
-                            isPassword: true,
-                    trailing: AnyView(
-                        FieldIconButton(
-                            systemImage: passwordVisible ? "eye.slash" : "eye",
-                            accessibilityLabel: passwordVisible
-                                ? L10n.tr("vault.hidePassword", locale: locale)
-                                : L10n.tr("vault.showPassword", locale: locale)
-                        ) {
-                            passwordVisible.toggle()
-                        }
+                FieldGroup {
+                    PasswordFieldRow(
+                        label: L10n.tr("auth.unlock.masterPassword", locale: locale),
+                        text: $password,
+                        // A wrong password belongs on the row; other restore errors stay below.
+                        error: errorKey == "backup.error.wrongPassword" ? L10n.tr("backup.error.wrongPassword", locale: locale) : nil,
+                        onSubmit: restore
                     )
-                )
-                .textContentType(.password)
-                .submitLabel(.go)
-                .onSubmit(restore)
+                    .submitLabel(.go)
+                }
 
                 if isWorking {
                     HStack(spacing: 8) {

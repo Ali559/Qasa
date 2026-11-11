@@ -13,7 +13,6 @@ struct VaultItemEditor: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var payload: VaultPayload
-    @State private var passwordVisible = false
     @State private var showPasswordGenerator = false
     @State private var loadError: String?
     @State private var saveError: String?
@@ -147,62 +146,48 @@ struct VaultItemEditor: View {
     }
 
     // MARK: - Login
+    // Each item type: one `FieldGroup` of its single-line fields and pickers, in order, then
+    // its notes card (design/README.md, "Labelled fields").
 
     private var loginFields: some View {
-        Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: loginBinding(\.itemName), error: error("itemName"))
-            FormTextField(title: L10n.tr("field.email"), text: loginBinding(\.email), keyboard: .emailAddress, error: error("email"))
-            FormTextField(title: L10n.tr("field.username"), text: loginBinding(\.username), error: error("username"))
-            passwordField
-            InlineFieldError(message: error("password"))
-            TOTPEditorField(totp: loginTOTPBinding)
-            InlineFieldError(message: error("totp"))
-            FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website), keyboard: .URL, error: error("website"))
+        VStack(alignment: .leading, spacing: Theme.formSpacing) {
+            FieldGroup {
+                FormTextField(title: L10n.tr("field.itemName"), text: loginBinding(\.itemName), error: error("itemName"))
+                FormTextField(title: L10n.tr("field.email"), text: loginBinding(\.email), placeholder: L10n.tr("field.emailPlaceholder"), keyboard: .emailAddress, error: error("email"))
+                FormTextField(title: L10n.tr("field.username"), text: loginBinding(\.username), error: error("username"))
+                passwordField
+                TOTPEditorField(totp: loginTOTPBinding, error: error("totp"))
+                FormTextField(title: L10n.tr("field.website"), text: loginBinding(\.website), placeholder: L10n.tr("field.websitePlaceholder"), keyboard: .URL, error: error("website"))
+            }
             FormTextField(title: L10n.tr("field.note"), text: loginBinding(\.note), error: error("note"), multiline: true)
             CollectionPickerField(collectionId: loginCollectionBinding)
         }
     }
 
     private var passwordField: some View {
-        VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-            FormFieldLabel(text: L10n.tr("field.password"))
-            HStack(spacing: 4) {
-                Group {
-                    if passwordVisible {
-                        TextField(L10n.tr("field.password"), text: loginBinding(\.password))
-                            .font(.kasoMono(16, weight: .regular))
-                    } else {
-                        SecureField(L10n.tr("field.password"), text: loginBinding(\.password))
-                    }
-                }
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .multilineTextAlignment(.leading)
-
-                FieldIconButton(
-                    systemImage: "wand.and.stars",
-                    tint: Theme.accent,
-                    accessibilityLabel: L10n.tr("vault.generatePassword")
-                ) {
-                    showPasswordGenerator = true
-                }
-
-                FieldIconButton(
-                    systemImage: passwordVisible ? "eye.slash" : "eye",
-                    accessibilityLabel: passwordVisible ? L10n.tr("vault.hidePassword") : L10n.tr("vault.showPassword")
-                ) {
-                    passwordVisible.toggle()
-                }
+        PasswordFieldRow(
+            label: L10n.tr("field.password"),
+            text: loginBinding(\.password),
+            contentType: .newPassword,
+            error: error("password")
+        ) {
+            FieldIconButton(
+                systemImage: "wand.and.stars",
+                tint: Theme.accent,
+                accessibilityLabel: L10n.tr("vault.generatePassword")
+            ) {
+                showPasswordGenerator = true
             }
-            .qasaField(isError: error("password") != nil, horizontalPadding: Theme.fieldHorizontalPadding - 4)
         }
     }
 
     // MARK: - Secure note
 
     private var secureNoteFields: some View {
-        Group {
-            FormTextField(title: L10n.tr("field.title"), text: noteBinding(\.title), error: error("title"))
+        VStack(alignment: .leading, spacing: Theme.formSpacing) {
+            FieldGroup {
+                FormTextField(title: L10n.tr("field.title"), text: noteBinding(\.title), error: error("title"))
+            }
             FormTextField(title: L10n.tr("field.content"), text: noteBinding(\.content), error: error("content"), multiline: true)
             NoteColorPicker(color: noteColorBinding)
             Toggle(isOn: noteProtectBinding) {
@@ -218,13 +203,11 @@ struct VaultItemEditor: View {
     // MARK: - Card
 
     private var cardFields: some View {
-        Group {
-            FormTextField(title: L10n.tr("field.itemName"), text: cardBinding(\.itemName), error: error("itemName"))
-            FormTextField(title: L10n.tr("field.accountHolder"), text: cardBinding(\.accountHolder), error: error("accountHolder"))
-            FormTextField(title: L10n.tr("field.number"), text: cardNumberBinding, keyboard: .numberPad, error: error("number"))
-            // Expiry and security code side by side, as printed on the card; the code (at
-            // most 4 digits) gets the narrower box.
-            HStack(alignment: .top, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.formSpacing) {
+            FieldGroup {
+                FormTextField(title: L10n.tr("field.itemName"), text: cardBinding(\.itemName), error: error("itemName"))
+                FormTextField(title: L10n.tr("field.accountHolder"), text: cardBinding(\.accountHolder), error: error("accountHolder"))
+                FormTextField(title: L10n.tr("field.number"), text: cardNumberBinding, keyboard: .numberPad, error: error("number"))
                 // MM/YY, its own format (not a calendar date).
                 FormTextField(
                     title: L10n.tr("field.expiryDate"),
@@ -233,9 +216,7 @@ struct VaultItemEditor: View {
                     keyboard: .numberPad,
                     error: error("expiryDate")
                 )
-                .frame(maxWidth: .infinity)
                 FormTextField(title: L10n.tr("field.securityCode"), text: cardSecurityCodeBinding, isSecure: true, keyboard: .numberPad, error: error("securityCode"))
-                    .frame(minWidth: 96, maxWidth: 150)
             }
             FormTextField(title: L10n.tr("field.note"), text: cardBinding(\.note), error: error("note"), multiline: true)
             NoteColorPicker(color: cardColorBinding)
@@ -245,7 +226,7 @@ struct VaultItemEditor: View {
     // MARK: - Bank
 
     private var bankFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: bankBinding(\.itemName), error: error("itemName"))
             FormTextField(title: L10n.tr("field.accountHolder"), text: bankBinding(\.accountHolder), error: error("accountHolder"))
             FormTextField(title: L10n.tr("field.accountNumber"), text: bankBinding(\.accountNumber), error: error("accountNumber"))
@@ -258,8 +239,8 @@ struct VaultItemEditor: View {
     // MARK: - Name
 
     private var nameFields: some View {
-        Group {
-            FormPickerField(title: L10n.tr("field.type")) {
+        FieldGroup {
+            PickerFieldRow(label: L10n.tr("field.type"), value: nameHonorificBinding.wrappedValue.displayName) {
                 Picker(L10n.tr("field.type"), selection: nameHonorificBinding) {
                     ForEach(Honorific.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
@@ -276,61 +257,44 @@ struct VaultItemEditor: View {
     // MARK: - Email
 
     private var emailFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: emailBinding(\.itemName), error: error("itemName"))
-            FormPickerField(title: L10n.tr("field.type")) {
+            PickerFieldRow(label: L10n.tr("field.type"), value: emailKindBinding.wrappedValue.displayName) {
                 Picker(L10n.tr("field.type"), selection: emailKindBinding) {
                     ForEach(EmailKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
             }
-            FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email), keyboard: .emailAddress, error: error("email"))
+            FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email), placeholder: L10n.tr("field.emailPlaceholder"), keyboard: .emailAddress, error: error("email"))
         }
     }
 
     // MARK: - Phone
 
     private var phoneFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: phoneBinding(\.itemName), error: error("itemName"))
-
-            HStack(alignment: .top, spacing: 12) {
-                FormPickerField(title: L10n.tr("field.type")) {
-                    Picker(L10n.tr("field.type"), selection: phoneKindBinding) {
-                        ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                    }
+            PickerFieldRow(label: L10n.tr("field.type"), value: phoneKindBinding.wrappedValue.displayName) {
+                Picker(L10n.tr("field.type"), selection: phoneKindBinding) {
+                    ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
                 }
-                .frame(maxWidth: .infinity)
-
-                FormPickerField(title: L10n.tr("vault.country"), error: error("countryCode")) {
-                    CountryMenuPicker(countryCode: phoneCountryBinding, showsDialCode: true)
-                }
-                .frame(maxWidth: .infinity)
             }
-
-            VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
-                FormFieldLabel(text: L10n.tr("field.phoneNumber"))
-                HStack(alignment: .center, spacing: 8) {
-                    Text(Country.dialCode(for: phoneCountryBinding.wrappedValue))
-                        .font(.qasa(16, weight: .semibold))
-                        .foregroundColor(Theme.accent)
-                        .frame(minWidth: 56)
-                        .qasaField()
-                        .fixedSize(horizontal: true, vertical: false)
-
-                    TextField(L10n.tr("field.phoneNumber"), text: phoneBinding(\.number))
-                        .keyboardType(.phonePad)
-                        .multilineTextAlignment(.leading)
-                        .qasaField(isError: error("number") != nil)
-                }
-                InlineFieldError(message: error("number"))
-            }
+            CountryPickerField(countryCode: phoneCountryBinding, showsDialCode: true, error: error("countryCode"))
+            // The dial code as fixed text before the number, in the row's value line.
+            TextFieldRow(
+                label: L10n.tr("field.phoneNumber"),
+                text: phoneBinding(\.number),
+                keyboard: .phonePad,
+                contentType: .telephoneNumber,
+                prefix: Country.dialCode(for: phoneCountryBinding.wrappedValue),
+                error: error("number")
+            )
         }
     }
 
     // MARK: - Address
 
     private var addressFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: addressBinding(\.itemName), error: error("itemName"))
             FormTextField(title: L10n.tr("field.address"), text: addressBinding(\.address), error: error("address"))
             FormTextField(title: L10n.tr("field.city"), text: addressBinding(\.city), error: error("city"))
@@ -348,21 +312,21 @@ struct VaultItemEditor: View {
     // MARK: - Company / Website / ID
 
     private var companyFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.companyName"), text: companyBinding(\.companyName), error: error("companyName"))
             FormTextField(title: L10n.tr("field.jobTitle"), text: companyBinding(\.jobTitle), error: error("jobTitle"))
         }
     }
 
     private var websiteFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: websiteBinding(\.itemName), error: error("itemName"))
-            FormTextField(title: L10n.tr("field.websiteURL"), text: websiteBinding(\.websiteURL), keyboard: .URL, error: error("websiteURL"))
+            FormTextField(title: L10n.tr("field.websiteURL"), text: websiteBinding(\.websiteURL), placeholder: L10n.tr("field.websitePlaceholder"), keyboard: .URL, error: error("websiteURL"))
         }
     }
 
     private var idFields: some View {
-        Group {
+        FieldGroup {
             FormTextField(title: L10n.tr("field.name"), text: idBinding(\.name), error: error("name"))
             CountryPickerField(countryCode: idCountryBinding, error: error("countryCode"))
             FormTextField(title: L10n.tr("field.number"), text: idBinding(\.number), error: error("number"))
@@ -793,8 +757,12 @@ struct AddressPhonePicker: View {
         }
     }
 
+    private var value: String {
+        phones.first { $0.id == phoneItemId }?.displayName ?? L10n.tr("common.none")
+    }
+
     var body: some View {
-        FormPickerField(title: L10n.tr("field.phoneNumber")) {
+        PickerFieldRow(label: L10n.tr("field.phoneNumber"), value: value) {
             Picker(L10n.tr("field.phoneNumber"), selection: $phoneItemId) {
                 Text(L10n.tr("common.none")).tag(Optional<UUID>.none)
                 ForEach(phones) { row in

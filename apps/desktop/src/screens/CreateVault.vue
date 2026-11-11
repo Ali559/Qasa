@@ -1,16 +1,16 @@
 <script setup lang="ts">
 // iOS `CreateVaultView`. The biometrics card shows when the computer has Touch ID or
 // Windows Hello; "I already have Qasa on another device" joins a vault over Wi‑Fi.
-import { Fingerprint, KeyRound, Lock, LockKeyhole, ScanFace, Shield } from 'lucide-vue-next'
+import { Fingerprint, KeyRound, Lock, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
+import FieldGroup from '@/components/FieldGroup.vue'
+import FieldRow from '@/components/FieldRow.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import StrengthBar from '@/components/StrengthBar.vue'
-import TextField from '@/components/TextField.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { useT } from '@/prefs'
@@ -22,7 +22,10 @@ const t = useT()
 
 const password = ref('')
 const confirm = ref('')
+/** Form-wide failures; a problem with one field goes on its row. */
 const error = ref<string | null>(null)
+const passwordError = ref<string | null>(null)
+const confirmError = ref<string | null>(null)
 const busy = ref(false)
 const bio = ref<BiometricStatus | null>(null)
 /** iOS defaults the toggle on. */
@@ -46,15 +49,15 @@ const strength = computed(() => {
 const canCreate = computed(() => length.value >= 8 && password.value === confirm.value)
 
 async function create() {
+  error.value = null
+  passwordError.value = null
+  confirmError.value = null
   if (!canCreate.value) {
-    error.value = !password.value
-      ? t('auth.create.enterPassword')
-      : length.value < 8
-        ? t('settings.weakMasterPassword')
-        : t('auth.create.mismatch')
+    if (!password.value) passwordError.value = t('auth.create.enterPassword')
+    else if (length.value < 8) passwordError.value = t('settings.weakMasterPassword')
+    else confirmError.value = t('auth.create.mismatch')
     return
   }
-  error.value = null
   busy.value = true
   try {
     await vaultApi.create(password.value, biometrics.value && bio.value?.kind !== 'none' && !!bio.value)
@@ -62,7 +65,8 @@ async function create() {
     confirm.value = ''
     emit('created')
   } catch (e) {
-    error.value = isCommandError(e) && e.code === 'weakPassword' ? t('settings.weakMasterPassword') : t('error.vaultCreateTitle')
+    if (isCommandError(e) && e.code === 'weakPassword') passwordError.value = t('settings.weakMasterPassword')
+    else error.value = t('error.vaultCreateTitle')
   } finally {
     busy.value = false
   }
@@ -85,17 +89,10 @@ async function create() {
       </div>
 
       <div class="group">
-        <SectionLabel :text="t('auth.unlock.masterPassword')" />
-        <TextField
-          v-model="password"
-          :icon="Lock"
-          :placeholder="t('auth.unlock.placeholder')"
-          :label="t('auth.unlock.masterPassword')"
-          secure
-          revealable
-          autofocus
-          @submit="create"
-        />
+        <FieldGroup>
+          <FieldRow v-model="password" :label="t('auth.unlock.masterPassword')" secure revealable autofocus :error="passwordError" @submit="create" />
+          <FieldRow v-model="confirm" :label="t('auth.create.confirmPassword')" secure :error="confirmError" @submit="create" />
+        </FieldGroup>
         <div v-if="password" class="strength">
           <div class="strength-row">
             <span>{{ t('auth.create.strength') }}</span>
@@ -103,18 +100,6 @@ async function create() {
           </div>
           <StrengthBar :segments="3" :filled="strength.filled" :color="strength.color" />
         </div>
-      </div>
-
-      <div class="group confirm">
-        <SectionLabel :text="t('auth.create.confirmPassword')" />
-        <TextField
-          v-model="confirm"
-          :icon="LockKeyhole"
-          :placeholder="t('auth.create.reenter')"
-          :label="t('auth.create.confirmPassword')"
-          secure
-          @submit="create"
-        />
       </div>
 
       <p v-if="error" class="error" role="alert">{{ error }}</p>
@@ -209,10 +194,6 @@ async function create() {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.confirm {
-  padding-top: 4px;
 }
 
 .strength {

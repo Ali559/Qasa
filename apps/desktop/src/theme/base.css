@@ -209,12 +209,12 @@ p {
   width: auto;
 }
 
-/* ---- iOS `QasaFieldChrome` / `QasaNotesChrome` ---------------------------------------
+/* ---- iOS `QasaFieldChrome`: the plain field box ------------------------------------
    `.qasa-field`: 48 tall, card fill, 1px stroke (danger when `.invalid`, accent while
-   focused), control radius, 14 horizontal padding, 16 regular text. `.qasa-notes`: the
-   same chrome, at least 112 tall and growing, padding 10 × 8. */
-.qasa-field,
-.qasa-notes {
+   focused), control radius, 14 horizontal padding, 16 regular text. Only for what
+   design/README.md rule 4 leaves ungrouped (search, one-field prompts with no label);
+   labelled fields are `FieldGroup` rows and `NotesCard`s (components/). */
+.qasa-field {
   display: flex;
   align-items: center;
   width: 100%;
@@ -238,34 +238,17 @@ p {
   padding: 0 var(--space-field-horizontal);
 }
 
-.qasa-notes {
-  align-items: flex-start;
-  min-height: var(--size-notes-min-height);
-  padding: var(--space-notes-vertical) var(--space-notes-horizontal);
-}
-
-textarea.qasa-notes {
-  display: block;
-  resize: none;
-  field-sizing: content;
-}
-
-.qasa-field:focus-within,
-.qasa-notes:focus-within {
+.qasa-field:focus-within {
   border-color: var(--accent);
 }
 
 .qasa-field.invalid,
-.qasa-notes.invalid,
-.qasa-field[aria-invalid='true'],
-.qasa-notes[aria-invalid='true'] {
+.qasa-field[aria-invalid='true'] {
   border-color: var(--danger);
 }
 
 input.qasa-field::placeholder,
-textarea.qasa-notes::placeholder,
-.qasa-field input::placeholder,
-.qasa-notes textarea::placeholder {
+.qasa-field input::placeholder {
   color: var(--text-placeholder);
 }
 

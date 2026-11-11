@@ -13,7 +13,7 @@ import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import Sheet from '@/components/Sheet.vue'
-import TextField from '@/components/TextField.vue'
+import NotesCard from '@/components/NotesCard.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { openUrl } from '@/opener'
 import { useT } from '@/prefs'
@@ -308,7 +308,7 @@ async function confirmCancel(reason: string) {
     >
       <div class="reason">
         <p class="prompt">{{ t('sub.cancelReasonPrompt') }}</p>
-        <TextField v-model="cancelReason" multiline :label="t('sub.cancelReasonTitle')" :disabled="isCancelling" />
+        <NotesCard v-model="cancelReason" :label="t('sub.cancelReasonTitle')" :disabled="isCancelling" />
         <p class="optional">{{ t('sub.cancelReasonOptional') }}</p>
         <p v-if="errorMessage && showCancelReason" class="error" role="alert">{{ errorMessage }}</p>
       </div>

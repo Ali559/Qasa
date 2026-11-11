@@ -3,12 +3,15 @@
 :root {
   --radius-card: 20px;
   --radius-card-large: 24px;
+  --radius-group: 20px;
   --radius-control: 10px;
   --radius-icon-badge: 10px;
   --radius-row-press: 10px;
   --radius-sheet: 28px;
   --radius-sheet-grabber: 2.5px;
   --size-field-height: 48px;
+  --size-group-row-min-height: 60px;
+  --size-group-error-stripe: 3px;
   --size-button-height: 48px;
   --size-notes-min-height: 112px;
   --size-field-icon-button: 32px;
@@ -36,6 +39,12 @@
   --space-button-horizontal: 20px;
   --space-button-icon-gap: 8px;
   --space-field-label-gap: 8px;
+  --space-group-row-vertical: 8px;
+  --space-group-row-horizontal: 14px;
+  --space-group-divider-inset: 14px;
+  --space-group-row-trailing-gap: 8px;
+  --space-group-notes-label-top: 9px;
+  --space-field-error-gap: 6px;
   --space-form-gap: 16px;
   --space-bottom-bar-vertical: 12px;
   --space-bottom-bar-gap: 10px;
@@ -80,6 +89,10 @@
   --type-field-weight: 400;
   --type-field-label-size: 12px;
   --type-field-label-weight: 600;
+  --type-group-label-size: 12px;
+  --type-group-label-weight: 600;
+  --type-group-value-size: 16px;
+  --type-group-value-weight: 400;
   --type-field-error-size: 11px;
   --type-field-error-weight: 400;
   --type-button-size: 16px;

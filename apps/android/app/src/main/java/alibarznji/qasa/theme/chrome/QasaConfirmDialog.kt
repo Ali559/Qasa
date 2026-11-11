@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
 /**
  * iOS `confirmSheet` (`SelfSizingSheet` + `ConfirmSheetContent`): a [QasaModalBottomSheet]
@@ -165,7 +166,8 @@ fun QasaConfirmDialog(
 }
 
 /**
- * A [QasaConfirmSheet] around one text field: "New collection", "Rename collection".
+ * A [QasaConfirmSheet] around one text field: "New collection", "Rename collection",
+ * "Enter setup key".
  * [onConfirm] receives the trimmed text; the confirm button is disabled while it is blank.
  */
 @Composable
@@ -176,12 +178,15 @@ fun QasaTextInputSheet(
     confirmLabel: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
+    /** Optional help text under the title (the 2FA setup-key prompt). */
+    message: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     var text by rememberSaveable { mutableStateOf(initial) }
     val trimmed = text.trim()
     QasaConfirmSheet(
         title = title,
-        message = null,
+        message = message,
         confirmLabel = confirmLabel,
         onConfirm = { if (trimmed.isNotEmpty()) onConfirm(trimmed) },
         onDismiss = onDismiss,
@@ -193,6 +198,7 @@ fun QasaTextInputSheet(
             value = text,
             onValueChange = { text = it },
             placeholder = placeholder,
+            keyboardOptions = keyboardOptions,
             imeAction = ImeAction.Done,
             keyboardActions = KeyboardActions(onDone = { if (trimmed.isNotEmpty()) onConfirm(trimmed) }),
         )

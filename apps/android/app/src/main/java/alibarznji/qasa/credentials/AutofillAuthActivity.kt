@@ -8,7 +8,8 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaTheme
 import alibarznji.qasa.theme.SecondaryButton
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -47,7 +48,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -360,20 +360,15 @@ internal fun ColumnScope.AutofillUnlockPane(
     Spacer(Modifier.height(QasaDimens.contentGap))
     Text(stringResource(R.string.autofill_fillinto, callerLabel), color = c.textSecondary, style = qasaText.bodyMedium)
     Spacer(Modifier.height(QasaDimens.screenPadding))
-    SectionLabel(stringResource(R.string.auth_unlock_masterpassword))
-    Spacer(Modifier.height(QasaDimens.contentGap))
-    ThemedTextField(
-        value = password,
-        onValueChange = { password = it; error = null },
-        placeholder = stringResource(R.string.auth_unlock_placeholder),
-        leadingIcon = Icons.Default.Lock,
-        isSecure = true,
-        passwordVisible = visible,
-        onToggleVisibility = { visible = !visible },
-    )
-    error?.let {
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        Text(it, color = c.danger, style = qasaText.bodySmallMedium)
+    QasaFieldGroup {
+        QasaSecureRow(
+            label = stringResource(R.string.auth_unlock_masterpassword),
+            value = password,
+            onValueChange = { password = it; error = null },
+            error = error,
+            revealed = visible,
+            onToggleReveal = { visible = !visible },
+        )
     }
     if (showMasterPasswordDue) {
         Spacer(Modifier.height(QasaDimens.contentGap))

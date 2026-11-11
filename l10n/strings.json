@@ -4172,5 +4172,15 @@
     "en": "No subscription found.",
     "ar": "لم يُعثر على اشتراك.",
     "ckb": "هیچ بەشدارییەک نەدۆزرایەوە."
+  },
+  "field.emailPlaceholder": {
+    "en": "name@example.com",
+    "ar": "name@example.com",
+    "ckb": "name@example.com"
+  },
+  "field.websitePlaceholder": {
+    "en": "example.com",
+    "ar": "example.com",
+    "ckb": "example.com"
   }
 }

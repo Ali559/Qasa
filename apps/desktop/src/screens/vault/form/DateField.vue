@@ -1,15 +1,18 @@
 <script setup lang="ts">
-// A vault date (birth, issue, ID expiry), stored as ISO `YYYY-MM-DD` (core `validate.rs`).
-// Type it, or "Pick date" for a calendar that writes ISO. Underneath: the date as Qasa
-// reads it, in the UI language, or the field-rule message. Reading is the core's
+// A vault date (birth, issue, ID expiry) as a date row of the item's `FieldGroup`
+// (design/README.md rule 4), stored as ISO `YYYY-MM-DD` (core `validate.rs`). Type it (the
+// format hint shows while empty), or the trailing calendar button opens a calendar inline
+// in the row, under the input, that writes ISO. While the typed value is a date, the date
+// as Qasa reads it, in the UI language, is a 12 secondary caption inside the row. Reading is the core's
 // `parse_date`, so a legacy stored form ("Nov 6, 2000") shows its date too until the
 // next save rewrites it.
-import { Calendar } from 'lucide-vue-next'
+import { Calendar, CalendarCheck } from 'lucide-vue-next'
 import { onBeforeUnmount, ref, watch } from 'vue'
 
 import { prefs, useT } from '@/prefs'
 import { fieldsApi, formatCivilDate, isoDate, type CivilDate } from '@/vault/fields'
-import FormField from './FormField.vue'
+import FieldIconButton from '@/components/FieldIconButton.vue'
+import FieldRow from '@/components/FieldRow.vue'
 
 defineProps<{ label: string; error?: string | null }>()
 const model = defineModel<string>({ required: true })
@@ -50,58 +53,40 @@ function onPick() {
 </script>
 
 <template>
-  <FormField v-model="model" :label="label" :placeholder="t('field.datePlaceholder')" :error="error">
-    <template #below>
-      <div class="below">
-        <button type="button" class="pick" @click="picking ? (picking = false) : openPicker()">
-          <Calendar v-if="!picking" :stroke-width="2.5" />
-          <span>{{ picking ? t('date.done') : t('date.pick') }}</span>
-        </button>
-        <span v-if="parsed && !error" class="reading">{{ formatCivilDate(parsed, prefs.language) }}</span>
-      </div>
-      <input v-if="picking" v-model="picked" type="date" class="qasa-field calendar" :aria-label="t('date.pick')" @change="onPick" />
+  <FieldRow v-model="model" :label="label" :placeholder="t('field.datePlaceholder')" :error="error">
+    <template #trailing>
+      <FieldIconButton
+        :icon="picking ? CalendarCheck : Calendar"
+        :label="picking ? t('date.done') : t('date.pick')"
+        :pressed="picking"
+        accent
+        @click="picking ? (picking = false) : openPicker()"
+      />
     </template>
-  </FormField>
+    <template #below>
+      <span v-if="parsed && !error" class="reading">{{ formatCivilDate(parsed, prefs.language) }}</span>
+      <input v-if="picking" v-model="picked" type="date" class="calendar" :aria-label="t('date.pick')" @change="onPick" />
+    </template>
+  </FieldRow>
 </template>
 
 <style scoped>
-.below {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-/* iOS: `Label("Pick date", systemImage: "calendar")`, 13 semibold accent. */
-.pick {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font-size: var(--type-row-value-size);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.pick svg {
-  width: var(--type-row-value-size);
-  height: var(--type-row-value-size);
-}
-
-/* iOS: the date as read, 13 regular secondary. */
+/* The date as read: 12 regular secondary, under the input. */
 .reading {
-  font-size: var(--type-row-value-size);
-  font-weight: var(--type-row-value-weight);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--line-height);
   color: var(--text-secondary);
-  text-align: end;
 }
 
 .calendar {
   align-self: flex-start;
-  width: auto;
+  margin-block-start: var(--space-group-row-vertical);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
   accent-color: var(--accent);
 }
 </style>
