@@ -321,6 +321,7 @@
     <string name="field_defaultusername">اسم المستخدم الافتراضي</string>
     <string name="field_doorcode">رمز الباب</string>
     <string name="field_email">البريد الإلكتروني</string>
+    <string name="field_emailplaceholder">name@example.com</string>
     <string name="field_expirydate">تاريخ الانتهاء</string>
     <string name="field_expiryplaceholder">شهر/سنة</string>
     <string name="field_firstname">الاسم الأول</string>
@@ -345,6 +346,7 @@
     <string name="field_type">النوع</string>
     <string name="field_username">اسم المستخدم</string>
     <string name="field_website">الموقع</string>
+    <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">رابط الموقع</string>
     <string name="field_zipcode">الرمز البريدي</string>
     <string name="gen_copied">تم النسخ!</string>

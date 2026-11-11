@@ -5,7 +5,7 @@
 // Saves queue up and are shown one at a time; nothing is written until Save is clicked.
 // Third: "Confirm to fill <card>", the master password for a card fill when Touch ID /
 // Hello isn't set up (docs/autofill-plan.md §3.2).
-import { Globe, KeyRound, Lock, User } from 'lucide-vue-next'
+import { Globe, KeyRound, User } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 
 import Sheet from '@/components/Sheet.vue'
@@ -150,7 +150,6 @@ async function decideSave(accept: boolean) {
       </div>
       <TextField
         v-model="confirmPassword"
-        :icon="Lock"
         :placeholder="t('auth.unlock.placeholder')"
         :label="t('auth.unlock.masterPassword')"
         secure

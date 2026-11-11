@@ -148,10 +148,8 @@ fun VaultItemEditorSheetContent(
                 .weight(1f, fill = false)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                // iOS `.padding(Theme.screenPadding)`; every field block already ends with
-                // the 16dp form gap, so the bottom pad makes up the rest of the 20.
-                .padding(horizontal = QasaDimens.screenPadding)
-                .padding(top = QasaDimens.screenPadding, bottom = QasaDimens.screenPadding - QasaDimens.formGap),
+                // iOS `.padding(Theme.screenPadding)`.
+                .padding(QasaDimens.screenPadding),
         ) {
             if (saveAttempted && issues.isNotEmpty()) {
                 // iOS: "Fix the highlighted fields" heads the form, 13 semibold danger.

@@ -3,16 +3,16 @@
 // sealed for this vault. With biometrics on, the prompt starts by itself (once each time the
 // screen appears or the window comes back), unless the main password is due again: then
 // only the password is offered, and the screen says why.
-import { Fingerprint, KeyRound, LockOpen, Lock, ScanFace, Shield } from 'lucide-vue-next'
+import { Fingerprint, KeyRound, LockOpen, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
-import SectionLabel from '@/components/SectionLabel.vue'
+import FieldGroup from '@/components/FieldGroup.vue'
+import FieldRow from '@/components/FieldRow.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import StatusPill from '@/components/StatusPill.vue'
-import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { session } from '@/vault/session'
@@ -129,20 +129,10 @@ async function unlock() {
       </div>
 
       <div class="group">
-        <SectionLabel :text="t('auth.unlock.masterPassword')" />
-        <TextField
-          v-model="password"
-          :icon="Lock"
-          :placeholder="t('auth.unlock.placeholder')"
-          :label="t('auth.unlock.masterPassword')"
-          secure
-          revealable
-          autofocus
-          :invalid="!!error"
-          @submit="unlock"
-        />
-        <p v-if="error" class="error" role="alert">{{ error }}</p>
-        <p v-else-if="passwordDue" class="due">
+        <FieldGroup>
+          <FieldRow v-model="password" :label="t('auth.unlock.masterPassword')" secure revealable autofocus :error="error" @submit="unlock" />
+        </FieldGroup>
+        <p v-if="!error && passwordDue" class="due">
           <KeyRound :stroke-width="2.75" class="due-icon" aria-hidden="true" />
           <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
         </p>
@@ -204,13 +194,6 @@ async function unlock() {
   font-size: 14px;
   font-weight: 400;
   color: var(--text-secondary);
-}
-
-.error {
-  margin: 0;
-  font-size: var(--type-row-value-size);
-  font-weight: 500;
-  color: var(--danger);
 }
 
 .due {

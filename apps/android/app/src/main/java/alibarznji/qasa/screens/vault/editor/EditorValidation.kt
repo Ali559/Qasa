@@ -1,21 +1,14 @@
 package alibarznji.qasa.screens.vault.editor
 
-import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.ThemedTextField
-import alibarznji.qasa.theme.qasaColors
-import alibarznji.qasa.theme.qasaText
+import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.vault.VaultValidation
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,33 +46,25 @@ fun rememberTouch(field: FfiField?): () -> Unit {
     return { if (field != null) validation?.onTouch?.invoke(field) }
 }
 
-/** The rule message under a field: danger colour, the date field's error style. */
-@Composable
-fun FieldErrorText(message: String?) {
-    if (message == null) return
-    // iOS `FormTextField`: label, field and message share one 8pt-spaced stack.
-    Spacer(Modifier.height(QasaDimens.fieldLabelGap))
-    Text(message, color = qasaColors.danger, style = qasaText.fieldError)
-}
-
 /**
- * A text field that reformats as you type ([format]: `formatCardNumber`,
+ * A group text row that reformats as you type ([format]: `formatCardNumber`,
  * `formatCardExpiry`) and keeps the cursor after the same digit it followed.
  */
 @Composable
 fun FormattedTextField(
-    value: String,
-    placeholder: String,
     label: String,
+    value: String,
     format: (String) -> String,
     keyboardType: KeyboardType,
-    isError: Boolean = false,
+    placeholder: String = "",
+    error: String? = null,
     onChange: (String) -> Unit,
 ) {
     var field by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
     // The payload changed from outside (normalize on open, a reset): follow it.
     if (field.text != value) field = TextFieldValue(value, TextRange(value.length))
-    ThemedTextField(
+    QasaTextRow(
+        label = label,
         value = field,
         onValueChange = { typed ->
             val next = reformat(field, typed, format)
@@ -87,9 +72,8 @@ fun FormattedTextField(
             if (next.text != value) onChange(next.text)
         },
         placeholder = placeholder,
-        label = label,
+        error = error,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        isError = isError,
     )
 }
 

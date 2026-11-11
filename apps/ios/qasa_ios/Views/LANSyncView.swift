@@ -75,7 +75,8 @@ struct LANSyncView: View {
                 WiFiJoinPanel(sync: sync, container: modelContext.container)
             }
 
-            SyncOutcomeView(stage: sync.stage)
+            // Joining, a failure belongs on the code row; hosting has no field, so it gets the line.
+            SyncOutcomeView(stage: sync.stage, showsFailure: mode == .host)
         }
     }
 }
@@ -186,14 +187,17 @@ struct WiFiJoinPanel: View {
                     }
                 }
 
-                SectionLabel(text: L10n.tr("pair.codeLabel", locale: locale))
-                ThemedTextField(
-                    icon: "number",
-                    placeholder: L10n.tr("pair.codePlaceholder", locale: locale),
-                    text: $code
-                )
-                .keyboardType(.numberPad)
-                .textContentType(.oneTimeCode)
+                FieldGroup {
+                    TextFieldRow(
+                        label: L10n.tr("pair.codeLabel", locale: locale),
+                        text: $code,
+                        hint: L10n.tr("pair.codePlaceholder", locale: locale),
+                        isPlain: true,
+                        keyboard: .numberPad,
+                        contentType: .oneTimeCode,
+                        error: joinFailure
+                    )
+                }
                 .onChange(of: code) { _, new in
                     let digits = String(new.filter(\.isNumber).prefix(6))
                     if digits != new { code = digits }
@@ -218,6 +222,12 @@ struct WiFiJoinPanel: View {
         }
     }
 
+    /// A failed join, shown on the code row.
+    private var joinFailure: String? {
+        if case .failed(let failure) = sync.stage { return failure.message(locale: locale) }
+        return nil
+    }
+
     private func peerRow(_ peer: WiFiSyncController.Peer) -> some View {
         SettingsRow(icon: Self.icon(for: peer.platform), title: peer.name) {
             Image(systemName: selected == peer ? "checkmark.circle.fill" : "circle")
@@ -238,6 +248,7 @@ struct WiFiJoinPanel: View {
 /// The success or failure line under either panel.
 struct SyncOutcomeView: View {
     let stage: WiFiSyncController.Stage
+    var showsFailure: Bool = true
 
     @Environment(AppPreferences.self) private var prefs
     private var locale: Locale { prefs.locale }
@@ -259,7 +270,7 @@ struct SyncOutcomeView: View {
                 .foregroundColor(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             }
-        case .failed(let failure):
+        case .failed(let failure) where showsFailure:
             Text(failure.message(locale: locale))
                 .font(.qasa(13, weight: .medium))
                 .foregroundColor(Theme.danger)

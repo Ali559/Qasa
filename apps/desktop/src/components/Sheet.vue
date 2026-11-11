@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The iOS `.sheet` on desktop (design/README.md rule 4): the page background, `--radius-sheet`
+// The iOS `.sheet` on desktop (design/README.md`, "Bottom sheets"): the page background, `--radius-sheet`
 // (28) corners, no stroke and no elevation tint, over a scrim. It closes with Esc or a click
 // outside (no Cancel / Close / Done in the header: nothing to drag on desktop, so no grabber
 // either); focus stays inside while open. `title` draws the shared `SheetHeader`: 17

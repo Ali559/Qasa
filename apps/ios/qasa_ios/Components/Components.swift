@@ -120,6 +120,9 @@ struct CardContainer<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             content
         }
+        // Full width whatever the text: a short (often Arabic or Sorani) line left the card
+        // narrower than its neighbours.
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(padding)
         .background(background ?? theme.cardBackground)
         .cornerRadius(cornerRadius)
@@ -142,41 +145,6 @@ struct SectionLabel: View {
 }
 
 // MARK: - Text field chrome
-struct ThemedTextField: View {
-    @Environment(\.themePalette) private var theme
-    let icon: String
-    let placeholder: String
-    @Binding var text: String
-    var isSecure: Bool = false
-    /// A password, even while revealed: no autocorrect, auto-capitalisation or spell check,
-    /// which would otherwise change what was typed (e.g. "qasa…" becoming "Qasa…").
-    var isPassword: Bool = false
-    var trailing: AnyView? = nil
-    /// Return key action (for example "unlock").
-    var onSubmit: (() -> Void)? = nil
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundColor(theme.textSecondary)
-                .frame(width: 20)
-            Group {
-                if isSecure {
-                    SecureField(placeholder, text: $text)
-                } else {
-                    TextField(placeholder, text: $text)
-                }
-            }
-            .textInputAutocapitalization(isPassword ? .never : nil)
-            .autocorrectionDisabled(isPassword)
-            .onSubmit { onSubmit?() }
-            .multilineTextAlignment(.leading)
-            if let trailing { trailing }
-        }
-        .qasaField()
-    }
-}
-
 // MARK: - Segmented strength bar
 struct StrengthBar: View {
     @Environment(\.themePalette) private var theme

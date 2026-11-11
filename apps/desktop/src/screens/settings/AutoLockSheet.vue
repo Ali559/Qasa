@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // iOS `AutoLockSettingsView`: a `SettingsSection` row (clock badge, "N minutes") with the
 // 1–60 stepper and its 12pt help footer, then the presets (timer badges, a check on the
-// current value). A pick applies at once; the sheet has no Done (design/README.md rule 4). Edits `prefs.autoLockMinutes`, which the Rust core
+// current value). A pick applies at once; the sheet has no Done (design/README.md`, "Bottom sheets"). Edits `prefs.autoLockMinutes`, which the Rust core
 // reads for its timer.
 import { Clock, Minus, Plus, Timer } from 'lucide-vue-next'
 import { computed } from 'vue'

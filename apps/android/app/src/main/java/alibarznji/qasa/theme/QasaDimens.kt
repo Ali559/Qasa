@@ -111,7 +111,7 @@ object QasaDimens {
     val sectionInsetHorizontal: Dp = QasaTokens.Space.sectionInsetHorizontal
     val sectionInsetVertical: Dp = QasaTokens.Space.sectionInsetVertical
 
-    // ---- Bottom sheets (`design/README.md` rule 4) ----
+    // ---- Bottom sheets (`design/README.md`, "Bottom sheets") ----
     val sheetGrabberWidth: Dp = QasaTokens.Size.sheetGrabberWidth
     val sheetGrabberHeight: Dp = QasaTokens.Size.sheetGrabberHeight
     val sheetGrabberTop: Dp = QasaTokens.Space.sheetGrabberTop

@@ -49,7 +49,6 @@ async function confirm() {
       <div class="field">
         <TextField
           v-model="password"
-          :icon="Lock"
           :placeholder="t('auth.unlock.placeholder')"
           :label="t('auth.unlock.masterPassword')"
           secure

@@ -321,6 +321,7 @@
     <string name="field_defaultusername">ناوی بەکارهێنەری بنەڕەتی</string>
     <string name="field_doorcode">کۆدی دەرگا</string>
     <string name="field_email">ئیمەیڵ</string>
+    <string name="field_emailplaceholder">name@example.com</string>
     <string name="field_expirydate">بەرواری بەسەرچوون</string>
     <string name="field_expiryplaceholder">مانگ/ساڵ</string>
     <string name="field_firstname">ناوی یەکەم</string>
@@ -345,6 +346,7 @@
     <string name="field_type">جۆر</string>
     <string name="field_username">ناوی بەکارهێنەر</string>
     <string name="field_website">ماڵپەڕ</string>
+    <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">بەستەری وێبسایت</string>
     <string name="field_zipcode">کۆدی پۆستە</string>
     <string name="gen_copied">لەبەرگیرایەوە!</string>

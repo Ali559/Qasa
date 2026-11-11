@@ -7,10 +7,10 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.StatusPill
 import alibarznji.qasa.theme.StickyBottomBar
-import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -34,7 +34,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -248,20 +247,16 @@ fun UnlockScreen(
             style = qasaText.bodyMedium
         )
         Spacer(Modifier.height(QasaDimens.screenPadding))
-        SectionLabel(stringResource(R.string.auth_unlock_masterpassword))
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        ThemedTextField(
-            value = password,
-            onValueChange = { password = it; error = null },
-            placeholder = stringResource(R.string.auth_unlock_placeholder),
-            leadingIcon = Icons.Default.Lock,
-            isSecure = true,
-            passwordVisible = visible,
-            onToggleVisibility = { visible = !visible },
-        )
-        error?.let {
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(it, color = c.danger, style = qasaText.bodySmallMedium)
+        QasaFieldGroup {
+            QasaSecureRow(
+                label = stringResource(R.string.auth_unlock_masterpassword),
+                value = password,
+                onValueChange = { password = it; error = null },
+                // The wrong-password message: danger label and stripe, the text under the card.
+                error = error,
+                revealed = visible,
+                onToggleReveal = { visible = !visible },
+            )
         }
         if (showMasterPasswordDue) {
             Spacer(Modifier.height(QasaDimens.contentGap))

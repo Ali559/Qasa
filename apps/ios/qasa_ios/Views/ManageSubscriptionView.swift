@@ -312,8 +312,7 @@ struct ManageSubscriptionView: View {
                     .font(.qasa(15))
                     .foregroundColor(Theme.textSecondary)
 
-                TextEditor(text: $cancelReason)
-                    .qasaNotesField()
+                NotesFieldCard(label: L10n.tr("sub.reasonTitle", locale: locale), text: $cancelReason)
 
                 Text(L10n.tr("sub.cancelReasonOptional", locale: locale))
                     .font(.qasa(11))

@@ -23,48 +23,49 @@ struct ValidatedDateField: View {
         return VaultValidation.displayDate(trimmed, locale: locale)
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormTextField(
-                title: title,
-                text: $text,
-                placeholder: L10n.tr("field.datePlaceholder", locale: locale),
-                keyboard: .numbersAndPunctuation,
-                error: error
-            )
+    @FocusState private var focused: Bool
 
-            HStack {
-                Button {
-                    if let d = VaultValidation.date(fromStored: text) { picked = d }
-                    showPicker = true
-                } label: {
-                    Label(L10n.tr("date.pick", locale: locale), systemImage: "calendar")
+    /// A row of the enclosing `FieldGroup`: typed date, calendar button trailing; the readable
+    /// date and the calendar open inside the row.
+    var body: some View {
+        FieldRow(label: title, error: error, isFocused: focused, onTap: { focused = true }) {
+            VStack(alignment: .leading, spacing: 2) {
+                TextField(
+                    "",
+                    text: $text,
+                    prompt: Text(L10n.tr("field.datePlaceholder", locale: locale)).foregroundColor(Theme.textPlaceholder)
+                )
+                .keyboardType(.numbersAndPunctuation)
+                .focused($focused)
+                .multilineTextAlignment(.leading)
+
+                if let localized {
+                    Text(localized)
+                        .font(.qasa(12))
+                        .foregroundColor(Theme.textSecondary)
+                }
+
+                if showPicker {
+                    DatePicker("", selection: $picked, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .environment(\.locale, locale)
+                        .tint(Theme.accent)
+                        .onChange(of: picked) { _, newValue in
+                            text = VaultValidation.isoDate(from: newValue)
+                        }
+                    Button(L10n.tr("date.done", locale: locale)) { showPicker = false }
                         .font(.qasa(13, weight: .semibold))
                         .foregroundColor(Theme.accent)
                 }
-                Spacer()
-                if let localized {
-                    Text(localized)
-                        .font(.qasa(13))
-                        .foregroundColor(Theme.textSecondary)
-                }
             }
-
-            if showPicker {
-                DatePicker(
-                    "",
-                    selection: $picked,
-                    displayedComponents: .date
-                )
-                .datePickerStyle(.graphical)
-                .environment(\.locale, locale)
-                .tint(Theme.accent)
-                .onChange(of: picked) { _, newValue in
-                    text = VaultValidation.isoDate(from: newValue)
-                }
-                Button(L10n.tr("date.done", locale: locale)) { showPicker = false }
-                    .font(.qasa(13, weight: .semibold))
-                    .foregroundColor(Theme.accent)
+        } trailing: {
+            FieldIconButton(
+                systemImage: "calendar",
+                tint: Theme.accent,
+                accessibilityLabel: L10n.tr("date.pick", locale: locale)
+            ) {
+                if let d = VaultValidation.date(fromStored: text) { picked = d }
+                showPicker.toggle()
             }
         }
     }

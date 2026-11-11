@@ -1,16 +1,24 @@
 <script setup lang="ts">
-// iOS `TOTPEditorField`: "Add 2FA code" (enter a setup key, or — the desktop's stand-in
-// for the camera — read the QR code from an image), then the issuer with a live code and
-// Remove. The secret itself is never shown.
-import { Image, Keyboard, Plus, ShieldCheck } from 'lucide-vue-next'
-import { onBeforeUnmount, ref, watch } from 'vue'
+// iOS `TOTPEditorField` as the "2FA code" row of the login's `FieldGroup` (design/README.md
+// rule 4). While empty the value line is "Add 2FA code" (enter a setup key, or — the
+// desktop's stand-in for the camera — read the QR code from an image) with the help hint as
+// a 12 secondary caption; once set, the live code with the issuer as the caption and a
+// trailing Remove button. The secret itself is never shown.
+import { Image, Keyboard, Plus, X } from 'lucide-vue-next'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
+import FieldIconButton from '@/components/FieldIconButton.vue'
+import GroupRow from '@/components/GroupRow.vue'
+import { rowId } from '@/components/fieldGroup'
 import PromptSheet from './PromptSheet.vue'
 import { useT } from '@/prefs'
 import { isCommandError } from '@/vault/types'
 import { toolsApi, type TotpCode, type TotpSetup } from '@/vault/tools'
 
+/** The editor's field-rule message for the 2FA code, if any. */
+const props = defineProps<{ error?: string | null }>()
 const model = defineModel<string | undefined>()
+const id = rowId('totp')
 const t = useT()
 const error = ref<string | null>(null)
 const showMenu = ref(false)
@@ -18,6 +26,7 @@ const showKey = ref(false)
 const key = ref('')
 const setup = ref<TotpSetup | null>(null)
 const code = ref<TotpCode | null>(null)
+const rowError = computed(() => error.value ?? props.error)
 let timer: ReturnType<typeof setInterval> | undefined
 
 async function refreshCode() {
@@ -75,6 +84,10 @@ async function fromImage() {
   }
 }
 
+function closeMenu(e: FocusEvent) {
+  if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) showMenu.value = false
+}
+
 function openKey() {
   showMenu.value = false
   key.value = ''
@@ -84,75 +97,70 @@ function openKey() {
 </script>
 
 <template>
-  <div class="totp-field">
-    <span class="label">{{ t('field.totp') }}</span>
-    <template v-if="!model">
-      <div class="add-wrap">
-        <button type="button" class="qasa-button add" :aria-expanded="showMenu" @click="showMenu = !showMenu">
-          <Plus :stroke-width="2.5" />
-          <span>{{ t('totp.add') }}</span>
-        </button>
-        <div v-if="showMenu" class="menu" role="menu">
-          <button type="button" role="menuitem" @click="fromImage"><Image :size="16" />{{ t('totp.scanImage') }}</button>
-          <button type="button" role="menuitem" @click="openKey"><Keyboard :size="16" />{{ t('totp.enterKey') }}</button>
-        </div>
+  <GroupRow :id="id" :label="t('field.totp')" :error="rowError" :control="false">
+    <div v-if="!model" class="add-wrap" @focusout="closeMenu">
+      <button type="button" class="add" :aria-expanded="showMenu" aria-haspopup="menu" @click="showMenu = !showMenu">
+        <Plus :stroke-width="2.5" aria-hidden="true" />
+        <span>{{ t('totp.add') }}</span>
+      </button>
+      <div v-if="showMenu" class="menu" role="menu">
+        <button type="button" role="menuitem" @click="fromImage"><Image :size="16" aria-hidden="true" />{{ t('totp.scanImage') }}</button>
+        <button type="button" role="menuitem" @click="openKey"><Keyboard :size="16" aria-hidden="true" />{{ t('totp.enterKey') }}</button>
       </div>
-      <span class="hint">{{ t('totp.hint') }}</span>
-    </template>
-    <div v-else class="set">
-      <ShieldCheck class="accent shield" :stroke-width="2.25" />
-      <span class="text">
-        <span class="issuer">{{ setup?.issuer ?? setup?.accountName ?? t('field.totp') }}</span>
-        <span v-if="code" class="code">{{ code.grouped }}</span>
-      </span>
-      <button type="button" class="remove" @click="model = undefined">{{ t('totp.remove') }}</button>
     </div>
-    <span v-if="error" class="error" role="alert">{{ error }}</span>
+    <span v-else class="code" dir="ltr">{{ code?.grouped ?? '' }}</span>
+    <template #below>
+      <span v-if="!model" class="caption">{{ t('totp.hint') }}</span>
+      <span v-else class="caption issuer">{{ setup?.issuer ?? setup?.accountName ?? t('field.totp') }}</span>
+    </template>
+    <template v-if="model" #trailing>
+      <FieldIconButton :icon="X" :label="t('totp.remove')" @click="model = undefined" />
+    </template>
+  </GroupRow>
 
-    <PromptSheet
-      v-model="key"
-      :open="showKey"
-      :title="t('totp.enterKey')"
-      :message="t('totp.hint')"
-      :placeholder="t('totp.keyPlaceholder')"
-      :confirm-label="t('totp.add')"
-      :cancel-label="t('common.cancel')"
-      mono
-      @confirm="applyKey"
-      @cancel="showKey = false"
-    />
-  </div>
+  <PromptSheet
+    v-model="key"
+    :open="showKey"
+    :title="t('totp.enterKey')"
+    :message="t('totp.hint')"
+    :placeholder="t('totp.keyPlaceholder')"
+    :confirm-label="t('totp.add')"
+    :cancel-label="t('common.cancel')"
+    mono
+    @confirm="applyKey"
+    @cancel="showKey = false"
+  />
 </template>
 
 <style scoped>
-.totp-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-field-label-gap);
-}
-
-/* iOS `FormFieldLabel` = `SectionLabel`. */
-.label {
-  font-size: var(--type-section-label-size);
-  font-weight: var(--type-section-label-weight);
-  color: var(--text-secondary);
-}
-
 .add-wrap {
   position: relative;
+  display: flex;
 }
 
-/* iOS: card fill, accent 40% stroke, accent 16 semibold title with a plus. */
+/* The value line's action: 16 semibold accent with a plus, no chrome. */
 .add {
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-  background: var(--card-background);
+  display: flex;
+  align-items: center;
+  gap: var(--space-button-icon-gap);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--accent);
+  font: inherit;
+  font-weight: var(--type-button-weight);
+  cursor: pointer;
+}
+
+.add svg {
+  width: var(--size-field-icon-glyph);
+  height: var(--size-field-icon-glyph);
 }
 
 .menu {
   position: absolute;
   top: calc(100% + 4px);
-  inset-inline: 0;
+  inset-inline-start: 0;
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -174,6 +182,7 @@ function openKey() {
   color: var(--text-primary);
   font-size: var(--type-body-size);
   text-align: start;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -186,69 +195,22 @@ function openKey() {
   background: var(--card-muted);
 }
 
-.hint,
-.error {
-  font-size: var(--type-caption-size);
-  font-weight: var(--type-caption-weight);
-  color: var(--text-secondary);
-}
-
-.error {
-  color: var(--danger);
-}
-
-/* iOS `setRow`: 14 padding, card radius 20, 1px stroke, 12 gap. */
-.set {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border: var(--size-stroke) solid var(--stroke);
-  border-radius: var(--radius-card);
-  background: var(--card-background);
-}
-
-.accent {
-  color: var(--accent);
-}
-
-.shield {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-}
-
-.text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-row-text-gap);
-  flex: 1;
-  min-width: 0;
-}
-
-.issuer {
-  font-size: var(--type-row-title-size);
-  font-weight: var(--type-row-title-weight);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+/* The live code, as the editor's value: mono, left to right in every language. */
 .code {
   font-family: var(--font-mono);
-  font-size: 15px;
-  color: var(--text-secondary);
-  direction: ltr;
   text-align: start;
 }
 
-.remove {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--danger);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
+.caption {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--line-height);
+  color: var(--text-secondary);
+}
+
+.issuer {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

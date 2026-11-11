@@ -55,7 +55,7 @@ val LocalSheetDismiss = staticCompositionLocalOf<(() -> Unit)?> { null }
 fun rememberSheetDismiss(fallback: () -> Unit): () -> Unit = LocalSheetDismiss.current ?: fallback
 
 /**
- * The one sheet presentation for the whole app (`design/README.md` rule 4):
+ * The one sheet presentation for the whole app (`design/README.md`, "Bottom sheets"):
  *
  * - [QasaDimens.sheetRadius] (28) top corners, `background` fill, no tonal tint or shadow.
  * - A 36 × 5 fully rounded `textTertiary` grabber, 5dp from the top edge (drawn here; M3's

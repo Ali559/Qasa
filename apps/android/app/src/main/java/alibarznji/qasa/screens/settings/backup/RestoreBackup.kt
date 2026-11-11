@@ -10,9 +10,9 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SecondaryButton
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.StickyBottomBar
-import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultSession
@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -228,17 +226,14 @@ fun RestoreBackupPage(
                         style = qasaText.rowTitle,
                     )
                     Text(stringResource(R.string.backup_restore_passwordprompt), color = c.textSecondary, style = qasaText.bodyMedium)
-                    Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap)) {
-                        SectionLabel(stringResource(R.string.auth_unlock_masterpassword))
-                        ThemedTextField(
+                    QasaFieldGroup {
+                        QasaSecureRow(
+                            label = stringResource(R.string.auth_unlock_masterpassword),
                             value = vm.password,
                             onValueChange = vm::updatePassword,
-                            placeholder = stringResource(R.string.auth_unlock_placeholder),
-                            label = stringResource(R.string.auth_unlock_masterpassword),
-                            leadingIcon = Icons.Default.Lock,
-                            isSecure = true,
-                            passwordVisible = visible,
-                            onToggleVisibility = { visible = !visible },
+                            error = vm.error?.takeIf { it == R.string.backup_error_wrongpassword }?.let { stringResource(it) },
+                            revealed = visible,
+                            onToggleReveal = { visible = !visible },
                             imeAction = ImeAction.Done,
                         )
                     }
@@ -254,7 +249,7 @@ fun RestoreBackupPage(
                     Text(text, color = c.success, style = qasaText.cardTitle)
                 }
             }
-            vm.error?.let { Text(stringResource(it), color = c.danger, style = qasaText.bodySmallMedium) }
+            vm.error?.takeIf { it != R.string.backup_error_wrongpassword || step !is RestoreStep.Ready }?.let { Text(stringResource(it), color = c.danger, style = qasaText.bodySmallMedium) }
         }
     }
 }

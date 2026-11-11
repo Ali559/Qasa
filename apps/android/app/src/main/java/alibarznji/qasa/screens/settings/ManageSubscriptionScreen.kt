@@ -19,12 +19,11 @@ import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.QasaButton
 import alibarznji.qasa.theme.QasaButtonKind
-import alibarznji.qasa.theme.QasaNotesField
+import alibarznji.qasa.theme.QasaNotesCard
 import alibarznji.qasa.theme.StickyBottomBar
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import android.content.Intent
@@ -328,11 +327,10 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
                 verticalArrangement = Arrangement.spacedBy(QasaDimens.formGap),
             ) {
                 Text(stringResource(R.string.sub_cancelreasonprompt), color = c.textSecondary, style = qasaText.dialogMessage)
-                QasaNotesField(
+                QasaNotesCard(
+                    label = stringResource(R.string.sub_cancelreasontitle),
                     value = reason,
                     onValueChange = { reason = it },
-                    placeholder = "",
-                    label = stringResource(R.string.sub_cancelreasontitle),
                 )
                 Text(stringResource(R.string.sub_cancelreasonoptional), color = c.textSecondary, style = qasaText.fieldError)
             }

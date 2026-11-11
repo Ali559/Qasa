@@ -9,8 +9,9 @@ struct LoginView: View {
     @Environment(AppPreferences.self) private var prefs
     @Environment(\.scenePhase) private var scenePhase
     @State private var password = ""
-    @State private var passwordVisible = false
     @State private var errorMessage: String?
+    /// Wrong password: shown on the password row itself.
+    @State private var passwordError: String?
     /// Biometrics are on for this vault (Keychain, so not observable: refreshed on appear
     /// and on every return to the foreground).
     @State private var biometricsEnabled = VaultKeychainStore.biometricsEnabled
@@ -50,25 +51,15 @@ struct LoginView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        SectionLabel(text: L10n.tr("auth.unlock.masterPassword", locale: locale))
-                        ThemedTextField(
-                            icon: "lock.fill",
-                            placeholder: L10n.tr("auth.unlock.placeholder", locale: locale),
-                            text: $password,
-                            isSecure: !passwordVisible,
-                            isPassword: true,
-                            trailing: AnyView(
-                                FieldIconButton(
-                                    systemImage: passwordVisible ? "eye.slash" : "eye",
-                                    accessibilityLabel: passwordVisible
-                                        ? L10n.tr("vault.hidePassword", locale: locale)
-                                        : L10n.tr("vault.showPassword", locale: locale)
-                                ) {
-                                    passwordVisible.toggle()
-                                }
-                            ),
-                            onSubmit: attemptUnlock
-                        )
+                        FieldGroup {
+                            PasswordFieldRow(
+                                label: L10n.tr("auth.unlock.masterPassword", locale: locale),
+                                text: $password,
+                                error: passwordError,
+                                onSubmit: attemptUnlock
+                            )
+                        }
+                        .onChange(of: password) { _, _ in passwordError = nil }
 
                         if let errorMessage {
                             Text(errorMessage)
@@ -217,12 +208,14 @@ struct LoginView: View {
         for candidate in [password, trimmed] where !candidate.isEmpty {
             if VaultAuthStore.verifyMasterPassword(candidate) {
                 errorMessage = nil
+                passwordError = nil
                 onUnlocked(candidate, false)
                 return
             }
             if candidate == trimmed { break }
         }
-        errorMessage = L10n.tr("auth.unlock.wrongPassword", locale: locale)
+        errorMessage = nil
+        passwordError = L10n.tr("auth.unlock.wrongPassword", locale: locale)
     }
 
     /// `automatic`: the prompt started on its own. A cancel or failure then stays quiet;

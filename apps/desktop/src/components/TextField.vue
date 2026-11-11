@@ -1,12 +1,12 @@
 <script setup lang="ts">
-// iOS `ThemedTextField` on `QasaFieldChrome`: optional leading icon (20 wide, 12 from the
-// text), card fill, 1px stroke, control radius, `--size-field-height` tall, 14 horizontal
-// padding, 16 regular. Secure fields get the 32pt eye button (`FieldIconButton`).
-// `multiline` is `QasaNotesChrome`: at least 112 tall, padding 10 × 8, growing with the text.
+// iOS `ThemedTextField` on `QasaFieldChrome`: the plain 48-tall box with a placeholder, for
+// what design/README.md rule 4 leaves ungrouped — search fields (with their leading icon)
+// and one-field prompt sheets with no visible label (`label` is then the accessible name).
+// Card fill, 1px stroke, control radius, 14 horizontal padding, 16 regular. Secure fields
+// get the 32pt eye button (`FieldIconButton`). Labelled fields are `FieldRow`s instead.
 import { Eye, EyeOff } from 'lucide-vue-next'
 import { computed, ref, type Component } from 'vue'
 
-import { vAutoGrow } from './autoGrow'
 import { useT } from '@/prefs'
 
 const props = withDefaults(
@@ -18,7 +18,6 @@ const props = withDefaults(
     revealable?: boolean
     autofocus?: boolean
     label?: string
-    multiline?: boolean
     mono?: boolean
     disabled?: boolean
     invalid?: boolean
@@ -34,19 +33,7 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
 </script>
 
 <template>
-  <textarea
-    v-if="multiline"
-    v-model="model"
-    v-auto-grow
-    class="qasa-notes notes"
-    :class="{ invalid, disabled }"
-    :placeholder="placeholder"
-    :aria-label="label ?? placeholder"
-    :aria-invalid="invalid || undefined"
-    :disabled="disabled"
-    rows="1"
-  />
-  <label v-else class="qasa-field field" :class="{ disabled, invalid, 'has-trailing': (secure && revealable) || !!$slots.trailing }">
+  <label class="qasa-field field" :class="{ disabled, invalid, 'has-trailing': (secure && revealable) || !!$slots.trailing }">
     <component :is="icon" v-if="icon" class="icon" aria-hidden="true" />
     <input
       v-model="model"
@@ -88,8 +75,7 @@ const inputType = computed(() => (props.secure && !revealed.value ? 'password' :
   padding-inline-end: calc(var(--space-field-horizontal) - (var(--size-field-icon-button) - var(--size-field-icon-glyph)) / 2);
 }
 
-.field.disabled,
-.notes.disabled {
+.field.disabled {
   opacity: var(--motion-disabled-opacity);
 }
 
@@ -118,12 +104,6 @@ input {
   color: inherit;
   font: inherit;
   caret-color: var(--accent);
-  user-select: text;
-}
-
-.notes {
-  /* Grows to 12 lines, then scrolls (iOS `lineLimit(4...12)`). */
-  max-height: calc(12lh + 2 * var(--space-notes-vertical) + 2 * var(--size-stroke));
   user-select: text;
 }
 

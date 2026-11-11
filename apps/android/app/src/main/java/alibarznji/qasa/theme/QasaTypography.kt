@@ -119,6 +119,12 @@ class QasaText internal constructor(
     /** 12 semibold — `type.fieldLabel`. */
     val fieldLabel get() = token(QasaTokens.Typography.fieldLabel)
 
+    /** 12 semibold — `type.groupLabel`: the label on top of a grouped-card row. */
+    val groupLabel get() = token(QasaTokens.Typography.groupLabel)
+
+    /** 16 regular — `type.groupValue`: the value (and its hint) in a grouped-card row. */
+    val groupValue get() = token(QasaTokens.Typography.groupValue)
+
     /** 11 regular — `type.fieldError`. */
     val fieldError get() = token(QasaTokens.Typography.fieldError)
 

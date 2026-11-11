@@ -13,7 +13,8 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaPressable
-import alibarznji.qasa.theme.ThemedTextField
+import alibarznji.qasa.theme.QasaFieldGroup
+import alibarznji.qasa.theme.QasaTextRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -31,7 +32,6 @@ import androidx.compose.material.icons.filled.DesktopWindows
 import androidx.compose.material.icons.filled.Laptop
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PhoneIphone
-import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -245,15 +245,16 @@ internal fun JoinPanel(vm: WifiSyncViewModel) {
         if (peers.isEmpty()) {
             Text(stringResource(R.string.sync_nopeers), color = c.textSecondary, style = qasaText.bodySmall)
         }
-        ThemedTextField(
-            value = vm.code,
-            onValueChange = vm::updateCode,
-            placeholder = stringResource(R.string.pair_codeplaceholder),
-            label = stringResource(R.string.pair_codelabel),
-            leadingIcon = Icons.Filled.Tag,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, autoCorrectEnabled = false),
-        )
-        vm.joinFailure?.let { FailureText(syncFailureText(it)) }
+        QasaFieldGroup {
+            QasaTextRow(
+                label = stringResource(R.string.pair_codelabel),
+                value = vm.code,
+                onValueChange = vm::updateCode,
+                // A failed join shows on the code row: danger label and stripe, text under the card.
+                error = vm.joinFailure?.let { syncFailureText(it) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, autoCorrectEnabled = false),
+            )
+        }
         PrimaryButton(
             title = stringResource(if (vm.joining) R.string.sync_connecting else R.string.sync_syncbutton),
             icon = if (vm.joining) null else Icons.Filled.Wifi,

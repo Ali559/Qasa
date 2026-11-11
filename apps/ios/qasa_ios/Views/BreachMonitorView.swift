@@ -149,16 +149,16 @@ struct BreachMonitorView: View {
         CardContainer(padding: 20) {
             VStack(alignment: .leading, spacing: 14) {
                 SectionLabel(text: L10n.tr("breach.addEmail"))
-                HStack(spacing: 12) {
-                    Image(systemName: "at")
-                        .foregroundColor(Theme.textSecondary)
-                    TextField(L10n.tr("breach.emailPlaceholder"), text: $monitorEmail)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.emailAddress)
-                        .autocorrectionDisabled()
-                        .multilineTextAlignment(.leading)
+                FieldGroup {
+                    TextFieldRow(
+                        label: L10n.tr("field.email"),
+                        text: $monitorEmail,
+                        hint: L10n.tr("field.emailPlaceholder"),
+                        isPlain: true,
+                        keyboard: .emailAddress,
+                        contentType: .emailAddress
+                    )
                 }
-                .qasaField()
 
                 PrimaryButton(
                     title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"),

@@ -29,38 +29,10 @@ struct QasaFieldChrome: ViewModifier {
     }
 }
 
-/// Multi-line notes box: same chrome, grows from `Theme.notesMinHeight`.
-struct QasaNotesChrome: ViewModifier {
-    @Environment(\.themePalette) private var theme
-    var isError: Bool = false
-
-    func body(content: Content) -> some View {
-        content
-            .font(.qasa(16))
-            .foregroundColor(theme.textPrimary)
-            .tint(theme.accent)
-            .scrollContentBackground(.hidden)
-            .padding(.horizontal, Theme.fieldHorizontalPadding - 4)
-            .padding(.vertical, 8)
-            .frame(maxWidth: .infinity, minHeight: Theme.notesMinHeight, alignment: .topLeading)
-            .background(theme.cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.controlCornerRadius, style: .continuous)
-                    .stroke(isError ? theme.danger : theme.stroke, lineWidth: 1)
-            )
-    }
-}
-
 extension View {
     /// Fixed-height (`Theme.fieldHeight`) input box.
     func qasaField(isError: Bool = false, horizontalPadding: CGFloat = Theme.fieldHorizontalPadding) -> some View {
         modifier(QasaFieldChrome(isError: isError, horizontalPadding: horizontalPadding))
-    }
-
-    /// Multi-line notes box (exempt from the fixed field height).
-    func qasaNotesField(isError: Bool = false) -> some View {
-        modifier(QasaNotesChrome(isError: isError))
     }
 }
 
@@ -360,7 +332,7 @@ extension ButtonStyle where Self == RowButtonStyle {
 
 // MARK: - Sheet header
 
-/// The header of every sheet (design/README.md rule 4): the system grabber above, then the
+/// The header of every sheet (design/README.md`, "Bottom sheets"): the system grabber above, then the
 /// title centered `QasaTokens.Space.sheetTitleTop` from the sheet's top edge. No Cancel: a
 /// sheet closes by dragging it down. `trailing` is for a rare extra (Mark all read).
 struct SheetHeader<Trailing: View>: View {

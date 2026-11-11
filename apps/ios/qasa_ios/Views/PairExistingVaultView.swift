@@ -140,20 +140,15 @@ struct PairExistingVaultView: View {
                 .foregroundColor(Theme.textSecondary)
                 .multilineTextAlignment(.leading)
 
-            ThemedTextField(
-                icon: "person.badge.key",
-                placeholder: L10n.tr("pair.accountPlaceholder", locale: locale),
-                text: $accountIdText
-            )
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.qasa(13, weight: .medium))
-                    .foregroundColor(Theme.danger)
-                    .multilineTextAlignment(.leading)
+            FieldGroup {
+                TextFieldRow(
+                    label: L10n.tr("pair.accountLabel", locale: locale),
+                    text: $accountIdText,
+                    isPlain: true,
+                    error: errorMessage
+                )
             }
+
         }
     }
 
