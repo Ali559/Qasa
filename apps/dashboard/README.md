@@ -1,6 +1,6 @@
 # KASO Admin Dashboard
 
-Vue 3 + TypeScript admin dashboard with **shadcn-vue** (Nova style), dark emerald theme, and motion transitions.
+Vue 3 + TypeScript admin dashboard with **shadcn-vue** (Nova style), the Qasa brand palette (purple `#722F99`, grey, beige, peach; light and dark, values from `design/tokens.json`), and motion transitions.
 
 ## Stack
 

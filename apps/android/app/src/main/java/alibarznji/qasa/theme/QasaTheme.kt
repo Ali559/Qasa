@@ -204,6 +204,19 @@ fun QasaTheme(
             errorContainer = colors.dangerBackground,
             onErrorContainer = colors.dangerText,
             scrim = colors.scrim,
+            // Every remaining Material role from the palette too: an unset role falls back
+            // to Material's stock lavender, and `surfaceTint` (default: primary) washes
+            // raised surfaces — menus, dialogs, sheets — in purple that iOS never shows.
+            surfaceTint = colors.cardBackground,
+            surfaceBright = colors.cardBackground,
+            surfaceDim = colors.background,
+            onError = Color.White, // iOS: white on a danger fill in both themes
+            onTertiary = colors.onAccent,
+            tertiaryContainer = colors.cardMuted,
+            onTertiaryContainer = colors.onAccentChip,
+            inversePrimary = colors.accentDark,
+            inverseSurface = colors.textPrimary,
+            inverseOnSurface = colors.background,
         )
     } else {
         lightColorScheme(
@@ -233,6 +246,19 @@ fun QasaTheme(
             errorContainer = colors.dangerBackground,
             onErrorContainer = colors.dangerText,
             scrim = colors.scrim,
+            // Every remaining Material role from the palette too: an unset role falls back
+            // to Material's stock lavender, and `surfaceTint` (default: primary) washes
+            // raised surfaces — menus, dialogs, sheets — in purple that iOS never shows.
+            surfaceTint = colors.cardBackground,
+            surfaceBright = colors.cardBackground,
+            surfaceDim = colors.background,
+            onError = Color.White, // iOS: white on a danger fill in both themes
+            onTertiary = colors.onAccent,
+            tertiaryContainer = colors.cardMuted,
+            onTertiaryContainer = colors.onAccentChip,
+            inversePrimary = colors.accentDark,
+            inverseSurface = colors.textPrimary,
+            inverseOnSurface = colors.background,
         )
     }
 

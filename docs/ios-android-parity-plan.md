@@ -109,7 +109,7 @@ System back / predictive back, Material bottom sheets and AlertDialogs vs iOS sh
 - **Breach:** "Email Monitoring" header; Unresolved/Resolved chips and a ported `BreachCard`; rescan when the screen appears. The Android-only At Risk card was dropped (open decision 3 resolved toward iOS).
 - **Collections:** a detail stack (list → collection → item) with Rename/Delete in a ⋮ menu. Rename is a new `repo.renameCollection`, which keeps `createdAt`.
 - **Notifications:** "From Qasa" and "On this device" sections with dates. Tapping a server notification opens a detail sheet; `GET /v1/notifications/{id}` marks it read on the server. Mark All Read and swipe-to-delete apply to local notifications only.
-- **Premium:** feature rows; mint border on the selected card; plans sorted by `sort_order` with last-good caching; FIB/FastPay/SuperQi badges with a trailing check; "Pay 10,000 IQD via FIB" with locale grouping; the page stays open after activation on the drawer page and only closes when shown as a sheet.
+- **Premium:** feature rows; accent border on the selected card; plans sorted by `sort_order` with last-good caching; FIB/FastPay/SuperQi badges with a trailing check; "Pay 10,000 IQD via FIB" with locale grouping; the page stays open after activation on the drawer page and only closes when shown as a sheet.
 - **Bug fixed:** `QasaFirebaseMessagingService` navigated to Notifications whenever a push *arrived*. It now navigates only on tap, as on iOS.
 - **Product decisions open on both apps:**
   - The VPN kill switch and auto-connect toggles are not persisted or acted on, but the copy promises behaviour.
@@ -224,7 +224,7 @@ Today, choosing ckb/ar on Android only swaps the font (`A/MainActivity.kt` passe
 | Row copy button copies the **password** (`primaryCopy`), not the subtitle/email | `screens/vault/VaultListScreen.kt` |
 | Premium: disable Pay while processing (double tap can create two intents); only close when licence confirms premium; block when already premium | `screens/premium/PremiumUpgradeScreen.kt` |
 | Subscription load/actions wrapped in try/catch with an error state | `ManageSubscriptionScreen.kt` |
-| VPN dial: `contentAlignment = Center` (rings stack top-left); rings turn mint when connected; kill switch default **on**; `lastError`/busy as `StateFlow` | `theme/QasaHeroWidgets.kt`, `screens/vpn/VPNScreen.kt`, `vpn/VPNService.kt` |
+| VPN dial: `contentAlignment = Center` (rings stack top-left); rings turn accent when connected; kill switch default **on**; `lastError`/busy as `StateFlow` | `theme/QasaHeroWidgets.kt`, `screens/vpn/VPNScreen.kt`, `vpn/VPNService.kt` |
 | CheckToggle off-state thumb sits in the centre (offset 1dp → −12dp) | `theme/QasaListWidgets.kt` |
 | Editor password / security code shown as plain text → secure field + eye toggle | `screens/vault/VaultItemEditorScreen.kt` |
 | Detail screen can never reveal a secret → eye toggle | `VaultItemDetailScreen.kt` |
@@ -280,7 +280,7 @@ The Android payload model (`A/vault/VaultPayload.kt`) already stores every iOS f
 | Breach | Unresolved/Resolved chips + `BreachCard` composable (port `I/Views/BreachCard.swift`); rescan on appear; email validation + dedupe; slot-limit dialog; "Saving…" state; header "Email Monitoring" + "Premium" pill |
 | Collections | Collection detail screen (items in it), overflow with Rename + Delete |
 | Notifications | "From Qasa" + "On this device" sections, date per row, tap → detail sheet that marks read, Mark All Read, swipe to delete, deep link, error text |
-| Premium | Feature bullets with checks + mint border on selected plan; FIB/FastPay/SuperQi badges and iOS names, trailing check; "Pay 10,000 IQD via FIB" (grouped amount, short name); sort plans by `sort_order`; localized period/plan titles; header "Upgrade" / "Qasa Premium" with X when a sheet |
+| Premium | Feature bullets with checks + accent border on selected plan; FIB/FastPay/SuperQi badges and iOS names, trailing check; "Pay 10,000 IQD via FIB" (grouped amount, short name); sort plans by `sort_order`; localized period/plan titles; header "Upgrade" / "Qasa Premium" with X when a sheet |
 
 ---
 
@@ -301,7 +301,7 @@ The Android payload model (`A/vault/VaultPayload.kt`) already stores every iOS f
 
 ## P7 — Chrome polish
 
-- Drawer (`AppShellScreen.kt`): **remove the extra "Upgrade" row**; shield glyph + "Qasa" header fixed above the scroll; selected = `cardBackground` fill + `textPrimary` 16 semibold + mint icon; unselected = `textSecondary` 16 regular, ~18dp icon, 2dp row spacing; section label 12 semibold sans `textTertiary`; trailing 1dp `strokeChrome` edge; scrim 0.45; distinct Privacy icon; premium lock 11–12dp.
+- Drawer (`AppShellScreen.kt`): **remove the extra "Upgrade" row**; shield glyph + "Qasa" header fixed above the scroll; selected = `cardBackground` fill + `textPrimary` 16 semibold + accent icon; unselected = `textSecondary` 16 regular, ~18dp icon, 2dp row spacing; section label 12 semibold sans `textTertiary`; trailing 1dp `strokeChrome` edge; scrim 0.45; distinct Privacy icon; premium lock 11–12dp.
 - Page title 20 **bold** (`theme/chrome/AppChromeHeaders.kt`); brand lockup gap 12 / 10.
 - `NavChevronRow`: title 15 medium, subtitle/trailing 12 regular sans (not mono).
 - `VaultStoreErrorView`: `statusBarsPadding()`, spacing 24/20/12/8.
