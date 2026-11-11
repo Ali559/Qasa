@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
@@ -250,12 +249,8 @@ internal fun HeaderBackButton(onClick: () -> Unit) {
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = null,
-            tint = c.textPrimary,
-            modifier = Modifier.size(QasaIconSize.menu),
-        )
+        // iOS `chevron.backward` 17 semibold in its 13x18 frame, centred like SwiftUI does.
+        Icon(QasaGlyphs.ChevronBackward, contentDescription = null, tint = c.textPrimary)
     }
 }
 

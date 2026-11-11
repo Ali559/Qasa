@@ -3,7 +3,7 @@
 // on top, the chosen option under it (16 regular, primary), the 13 `RowChevron` trailing.
 // A native select covers the row, so a click anywhere opens the menu; `trailing` controls
 // (a "new collection" button) sit beside the chevron, above the select.
-import { ChevronRight } from 'lucide-vue-next'
+import Chevron from './Chevron.vue'
 import { computed } from 'vue'
 
 import GroupRow from './GroupRow.vue'
@@ -30,7 +30,7 @@ const chosen = computed(() => props.options.find((o) => o.value === model.value)
     </select>
     <template #trailing>
       <slot name="trailing" />
-      <ChevronRight class="chevron mirror-rtl" :stroke-width="2.5" aria-hidden="true" />
+      <Chevron dir="forward" class="chevron" />
     </template>
   </GroupRow>
 </template>
@@ -79,8 +79,6 @@ const chosen = computed(() => props.options.find((o) => o.value === model.value)
 
 .chevron {
   flex-shrink: 0;
-  width: var(--size-row-chevron-glyph);
-  height: var(--size-row-chevron-glyph);
   color: var(--text-tertiary);
 }
 

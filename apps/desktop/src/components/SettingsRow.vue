@@ -6,7 +6,7 @@
 // (14 × 4 inset) with an iOS `RowDivider` between them, inset to the text. Pressed (and,
 // on desktop, hovered) = `RowButtonStyle`: a 6% text-primary wash, radius 10, 8 past the
 // row on each side. With a `trailing` slot the row is not a button itself.
-import { ChevronRight } from 'lucide-vue-next'
+import Chevron from './Chevron.vue'
 import { computed, useSlots, type Component } from 'vue'
 
 const props = defineProps<{
@@ -44,7 +44,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     </span>
     <span v-if="trailingText" class="trailing-text">{{ trailingText }}</span>
     <slot name="trailing" />
-    <ChevronRight v-if="interactive && !destructive" class="chevron mirror-rtl" :stroke-width="2.5" aria-hidden="true" />
+    <Chevron v-if="interactive && !destructive" dir="forward" class="chevron" />
   </component>
 </template>
 
@@ -163,8 +163,6 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
 
 .chevron {
   flex-shrink: 0;
-  width: var(--size-row-chevron-glyph);
-  height: var(--size-row-chevron-glyph);
   color: var(--text-tertiary);
 }
 

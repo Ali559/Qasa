@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // iOS `AppMenuHeader`: 64pt, chrome surface, 20 bold title, optional 40pt back circle
 // whose chevron flips in RTL, trailing slot.
-import { ChevronLeft } from 'lucide-vue-next'
 
+import Chevron from '@/components/Chevron.vue'
 import { useT } from '@/prefs'
 
 defineProps<{ title: string; back?: boolean }>()
@@ -13,7 +13,7 @@ const t = useT()
 <template>
   <header class="menu-header">
     <button v-if="back" type="button" class="back" :aria-label="t('common.back')" @click="emit('back')">
-      <ChevronLeft class="mirror-rtl" :stroke-width="2.75" />
+      <Chevron dir="back" />
     </button>
     <h1 class="title">{{ title }}</h1>
     <span class="spacer" />
@@ -47,10 +47,6 @@ const t = useT()
   cursor: pointer;
 }
 
-.back svg {
-  width: 17px;
-  height: 17px;
-}
 
 .title {
   margin: 0;

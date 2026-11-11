@@ -3,7 +3,8 @@
 // drill into their subtypes); on a kind's tab, that kind's subtypes directly. The rows are
 // a `SettingsSection` card of `SettingsRow`s, 20 from the sheet's edges, under the shared
 // sheet header (no Cancel). A drilled page keeps iOS's navigation back button at the start.
-import { ChevronLeft, CreditCard, FileText, IdCard, KeyRound, User } from 'lucide-vue-next'
+import Chevron from '@/components/Chevron.vue'
+import {CreditCard, FileText, IdCard, KeyRound, User} from 'lucide-vue-next'
 import { computed, ref, watch, type Component } from 'vue'
 
 import SettingsRow from '@/components/SettingsRow.vue'
@@ -48,7 +49,7 @@ const rows = computed(() => {
     <div class="head">
       <SheetHeader :title="title" />
       <button v-if="drilled" type="button" class="back" :aria-label="t('common.back')" @click="drilled = null">
-        <ChevronLeft class="mirror-rtl" :stroke-width="2.75" />
+        <Chevron dir="back" />
       </button>
     </div>
     <div class="list">
@@ -100,10 +101,6 @@ const rows = computed(() => {
   cursor: pointer;
 }
 
-.back svg {
-  width: 17px;
-  height: 17px;
-}
 
 .list {
   overflow-y: auto;
