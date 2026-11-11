@@ -14,7 +14,7 @@ DESKTOP := $(ROOT)/apps/desktop
 CORE := $(ROOT)/core
 API_URL ?= http://127.0.0.1:8080
 
-.PHONY: help db api android env smoke worker dash desktop desktop-build nm-host core-test ios-ffi android-ffi
+.PHONY: help db api android android-phone env smoke worker dash desktop desktop-build nm-host core-test ios-ffi android-ffi
 
 help:
 	@echo "Qasa local commands"
@@ -23,6 +23,7 @@ help:
 	@echo "  make env      Ensure server/.env exists (from .env.example)"
 	@echo "  make api      Run qasa-api locally on :8080"
 	@echo "  make android  Build & install debug APK (needs emulator/device)"
+	@echo "  make android-phone  Debug APK against the live API, copied to ~/Desktop/Qasa-android.apk"
 	@echo "  make dev      Set up the database, then run the API"
 	@echo "  make smoke    Run server/scripts/smoke-api.sh"
 	@echo "  make worker   Run qasa-worker (needs QASA_ENV=prod)"
@@ -61,6 +62,16 @@ android:
 	cd $(ANDROID) && \
 		JAVA_HOME="$${JAVA_HOME:-/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home}" \
 		./gradlew :app:assembleDebug :app:installDebug
+
+# A debug APK for a real phone. Plain debug builds talk to 10.0.2.2 (the emulator's view of
+# this Mac), which a phone can't reach: every request hangs until it times out, so the
+# "Getting things ready" loader after unlock sits for seconds.
+android-phone:
+	cd $(ANDROID) && \
+		JAVA_HOME="$${JAVA_HOME:-/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home}" \
+		./gradlew :app:assembleDebug -PqasaApiUrl=https://api.qasa-app.com
+	cp $(ANDROID)/app/build/outputs/apk/debug/app-debug.apk $(HOME)/Desktop/Qasa-android.apk
+	@echo "~/Desktop/Qasa-android.apk (API: https://api.qasa-app.com)"
 
 dev: db api
 
