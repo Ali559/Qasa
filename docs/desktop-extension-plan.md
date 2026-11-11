@@ -9,8 +9,8 @@ owner): native desktop instead of a browser-hosted vault, so the rule in
 [`docs/design.md`](design.md), `apps/ios/qasa_ios/` wins when anything disagrees. Two
 warnings before using `design.md` as a reference:
 
-- **Its color table is out of date.** The "calm + personal" redesign moved the palette to
-  violet (`accent #A79BFF` in dark, see `Theme/Theme.swift`). Read tokens from `Theme.swift`.
+- **Colors come from `design/tokens.json`** (brand purple `#722F99`, grey `#C5C1C1`, beige
+  `#FEE7C8`, peach `#FF9292`), generated into every app by `design/generate.py`.
 - **Its shell section is out of date.** The app now has four tabs (Home, Passwords, Alerts,
   You) in `AppShellView.swift`, not a side menu.
 
@@ -376,9 +376,9 @@ checked by iOS and Android tests too, so all three cannot drift apart.
 
 ### 5.1 Tokens, type and icons
 
-- **A generator script** (`apps/desktop/scripts/tokens.py`) reads `Theme.swift` and writes
-  `src/theme/tokens.css` with light and dark values as CSS variables, so the palette cannot
-  drift. Same three spacing tokens (12 / 16 / 20) plus the derived ones from design.md §4.1.
+- **One generator** (`design/generate.py`) writes `src/theme/tokens.css` from
+  `design/tokens.json`, the same source as iOS and Android: colors in light and dark, sizes,
+  radii, gaps, type and motion as CSS variables, so nothing can drift.
 - **Fonts:** bundle IBM Plex Sans Arabic (400/500/600/700) for every language, in
   `src/assets/fonts/` (design.md §3.1). Follow the same rules as iOS: in ar/ckb, mono
   text falls back to the body font, letter spacing is zero, and nothing is uppercased.

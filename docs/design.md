@@ -53,37 +53,43 @@ files are **generated** — never hand-edited. `python3 l10n/generate.py --check
 
 ### 2.1 Tokens
 
-`ThemePalette` (`Theme.swift:5`) is one immutable struct of 25 semantic tokens, resolved per
-color scheme and injected once at the root. Android's `QasaColors` (`QasaTheme.kt:22`) is the
-same list; **24 of 25 are present and byte-exact.**
+The brand palette is four colors: **purple `#722F99`** (actions), **grey `#C5C1C1`** (strokes,
+secondary text), **beige `#FEE7C8`** (canvas, warm wash, gold) and **peach `#FF9292`** (VPN
+accent, danger in dark). Every token below is derived from them, in light and dark.
+
+The values live in [`design/tokens.json`](../design/tokens.json) and are generated into every
+app (`QasaTokens.swift` + `ThemePalette+Tokens.swift`, `QasaTokens.kt`, `tokens.css`); this table
+is copied from it. Change a color there, never here or in an app.
 
 | Token | Light | Dark | Role |
 | --- | --- | --- | --- |
-| `background` | `#F4F6FA` | `#0F172A` | App canvas. The only root background. |
-| `chrome` | `#FFFFFF` | `#131315` | Raised chrome: headers, sheets, sticky bars, drawer |
-| `cardBackground` | `#FFFFFF` | `#1E293B` | Card and text-field fill |
-| `cardBackgroundLight` | `#EEF2F7` | `#1F1F21` | Inset / secondary surface |
-| `cardMuted` | `#E8EEF6` | `#1B1B1D` | Recessed surface: badges, bars, muted cards |
-| `stroke` | `#D0D7E2` | `#334155` | Card and field border. Most-used token. |
-| `strokeChrome` | `#CBD5E1` | `#45464D` | Border on chrome surfaces, header underline |
-| `mint` | `#00A572` | `#4EDEA3` | Brand, primary action, focus, selection |
-| `mintDark` | `#008F63` | `#00A572` | Selected chip fill (dark), copy button |
-| `mintOnPrimary` | `#FFFFFF` | `#003824` | Content on a `mint` fill |
-| `mintOnChip` | `#00311F` | `#00311F` | Content on a `mintDark` / mint-tinted chip |
-| `gold` | `#D97706` | `#FBBF24` | Premium accent, best-value badge, lock icon |
-| `goldMuted` | `#B45309` | `#F59E0B` | Softer gold: warnings, "primary" badge |
-| `cyan` | `#0891B2` | `#4CD7F6` | VPN accent, generator regenerate |
-| `info` | `#2563EB` | `#60A5FA` | Informational banner |
-| `success` | `#059669` | `#10B981` | Connected, resolved, active |
-| `danger` | `#DC2626` | `#EF4444` | Destructive fill and text |
-| `dangerBackground` | `#FEE2E2` | `#93000A` | Danger banner fill, icon disc |
-| `dangerText` | `#991B1B` | `#FFB4AB` | Danger text on a light surface |
-| `dangerTextMuted` | `#B91C1C` | `#FFDAD6` | **Missing on Android** — add it |
-| `textPrimary` | `#0F172A` | `#E4E2E4` | Body and headings |
-| `textSecondary` | `#475569` | `#C6C6CD` | Sub-labels, descriptions, inactive rows |
-| `textTertiary` | `#94A3B8` | `#64748B` | Disabled, chevrons, timestamps, section labels |
-| `textPlaceholder` | `#94A3B8` | `#6B7280` | Placeholder text |
-| `textOnChrome` | `#334155` | `#BEC6E0` | Text drawn on `chrome` |
+| `background` | `#FBF6F0` | `#17111D` | App canvas. The only root background. |
+| `chrome` | `#FBF6F0` | `#17111D` | Headers, sheets, sticky bars (same as background since the redesign) |
+| `cardBackground` | `#FFFFFF` | `#231A2B` | Card and text-field fill |
+| `cardBackgroundLight` | `#FFF3E3` | `#2B2134` | Inset / secondary surface, warm beige in light |
+| `cardMuted` | `#F3EAF7` | `#33243F` | Recessed surface: badges, chips, icon tiles |
+| `stroke` | `#E6E1E1` | `#352B3D` | Card and field border. Most-used token. |
+| `strokeChrome` | `#DCD7D7` | `#3F3448` | Border on chrome surfaces |
+| `accent` | `#722F99` | `#B67FDB` | Brand purple: primary action, focus, selection, links |
+| `accentDark` | `#5C2580` | `#722F99` | Deeper accent: pressed / selected fills |
+| `onAccent` | `#FFFFFF` | `#22102F` | Text and icons on an `accent` fill |
+| `onAccentChip` | `#4A1A66` | `#F1E3FA` | Text on a pale `cardMuted` accent chip |
+| `gold` | `#B7701E` | `#FEE7C8` | Premium accent, best-value badge, lock icon (brand beige in dark) |
+| `goldMuted` | `#94591A` | `#F0C48C` | Softer gold: warnings, "primary" badge |
+| `cyan` | `#E2707A` | `#FF9292` | Brand peach: VPN accent, generator regenerate |
+| `info` | `#8A4FB3` | `#C9A3E6` | Informational banner |
+| `success` | `#2F9E6C` | `#5CCB97` | Connected, resolved, active |
+| `danger` | `#C8323C` | `#FF6B6B` | Destructive fill and text (text on it is white) |
+| `dangerBackground` | `#FFE6E6` | `#4A1F28` | Danger banner fill, icon disc |
+| `dangerText` | `#9E2F35` | `#FFC0C0` | Danger text on a light surface |
+| `dangerTextMuted` | `#B83C44` | `#FFD9D9` | Softer danger text |
+| `textPrimary` | `#2A1F33` | `#F2EDF4` | Body and headings |
+| `textSecondary` | `#6E6475` | `#C5C1C1` | Sub-labels, descriptions (brand grey in dark) |
+| `textTertiary` | `#A39DA3` | `#8A8290` | Disabled, chevrons, timestamps |
+| `textPlaceholder` | `#A39DA3` | `#8A8290` | Placeholder text |
+| `textOnChrome` | `#3E3346` | `#D9D3DD` | Text drawn on `chrome` |
+| `warm` | `#FEE7C8` | `#3E2B2F` | Warm wash behind Home when nothing needs attention (brand beige in light) |
+| `calm` | `#EDE9E9` | `#2A2430` | Cool wash behind Home when something does |
 
 ### 2.2 Rules
 
@@ -95,7 +101,7 @@ same list; **24 of 25 are present and byte-exact.**
 2. **MUST** resolve the palette exactly once at the root from the user's `SYSTEM | LIGHT |
    DARK` preference (`qasaApp.swift:136`, `QasaTheme.kt:136`). Never branch on
    `isSystemInDarkTheme()` inside a screen.
-3. **MUST** derive tints from tokens, not new literals: `mint.copy(alpha = 0.16f)`,
+3. **MUST** derive tints from tokens, not new literals: `accent.copy(alpha = 0.16f)`,
    `stroke.copy(alpha = 0.5f)`. Alphas in use: 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.3,
    0.35, 0.4, 0.45, 0.55, 0.7, 0.92, 0.95.
 4. **MUST** have a light and a dark value for every color. Third-party brand colors
@@ -105,7 +111,7 @@ same list; **24 of 25 are present and byte-exact.**
    `Color.black.opacity(0.45)` at `SideMenuView.swift:14`; this is a defect. Define
    `scrim` as a token and use it on both platforms.
 6. **DO NOT** carry iOS's four hardcoded escapes into Android: `Components.swift:334`
-   (`#2563EB` in a mint toggle), `LinkedDevicesView.swift:187` (`#2A2A2B`), `VPNView.swift:181`
+   (`#2563EB` in a accent toggle), `LinkedDevicesView.swift:187` (`#2A2A2B`), `VPNView.swift:181`
    (`#001B21`), `VaultEnums.swift:230` (`#3B82F6`, `#A855F7`). Android currently mirrors the
    first one at `QasaListWidgets.kt:239` — replace with a token.
 7. **MUST** use one root background token per screen. iOS flips between `Theme.background`
@@ -296,11 +302,11 @@ iOS uses elevation in exactly two places. Android should match both and add noth
 
 | Element | Recipe |
 | --- | --- |
-| `PrimaryButton` (mint only) | `shadow(color: mint @ 30%, radius: 10, y: 0)` — `Components.swift:90`, `QasaComponents.kt:87-92` ✅ |
-| `MintFab` | `shadow(color: black @ 20%, radius: 8, y: 4)` + 1dp `mint @ 50%` border + 56×56 — `Components.swift:440-447` |
+| `PrimaryButton` (accent only) | `shadow(color: accent @ 30%, radius: 10, y: 0)` — `Components.swift:90`, `QasaComponents.kt:87-92` ✅ |
+| `MintFab` | `shadow(color: black @ 20%, radius: 8, y: 4)` + 1dp `accent @ 50%` border + 56×56 — `Components.swift:440-447` |
 
 Android's `MintFab` (`QasaComponents.kt:246`) uses M3's `elevation(8.dp)`, which applies a
-tonal surface tint instead of a black shadow, and **omits the mint border entirely**. Fix it.
+tonal surface tint instead of a black shadow, and **omits the accent border entirely**. Fix it.
 
 Everything else — cards, chips, headers, drawer, sticky bar — is **flat**. No elevation.
 
@@ -342,7 +348,7 @@ Title: **20 semibold**, `textPrimary`, single line. Optional trailing slot.
 
 #### `BrandMenuHeader` — `AppMenuHeader.swift:41` / `AppChromeHeaders.kt:71` ✅
 Same chrome, title slot replaced by the Qasa mark (22pt, accent) + brand
-wordmark at `titleSize` (default 20) heavy, `mint`.
+wordmark at `titleSize` (default 20) heavy, `accent`.
 
 #### `KasoBrandHeader` — `Components.swift:4` / `AppChromeHeaders.kt:37` ✅
 Centered brand variant for auth screens, `titleSize` default 24.
@@ -359,7 +365,7 @@ cancellation. **Pick one approach and apply it to all four header variants.**
 **Android is missing the dot and the color overrides.**
 
 #### `MintFab` — `Components.swift:428` / `QasaComponents.kt:246` ⚠
-56×56, `cornerRadiusLarge`, `mint` fill, `mintOnPrimary` glyph at 18 bold, 1pt `mint @ 50%`
+56×56, `cornerRadiusLarge`, `accent` fill, `onAccent` glyph at 18 bold, 1pt `accent @ 50%`
 border, black-20% shadow r8 y4.
 **Android is missing the border and uses the wrong shadow; the icon is hardcoded to `Add`
 and there is no `modifier` parameter.**
@@ -371,7 +377,7 @@ primary action in Unlock, Create, ChangeMasterPassword and Pair.
 
 #### Drawer / `SideMenuView` — `SideMenuView.swift:3` / `AppShellScreen.kt:138-269` ⚠
 Scrim `black @ 45%`; panel 320pt wide, `chrome`, `strokeChrome` trailing 1pt border;
-header with brand at 22 heavy `mint`, display name 17 semibold, tier 13; three labelled
+header with brand at 22 heavy `accent`, display name 17 semibold, tier 13; three labelled
 sections (primary / tools / account); rows 12/12 padding, 10pt radius, 16pt icon in a 22pt
 slot, 14pt gap, 15pt label, gold lock glyph on premium-gated rows. Open/close
 `.easeOut(0.22 / 0.2)`.
@@ -387,7 +393,7 @@ taps.
 
 | Component | iOS | Android | Recipe |
 | --- | --- | --- | --- |
-| `PrimaryButton` | `Components.swift:64` | `QasaComponents.kt:71` | Full width, 16pt vertical padding, `cornerRadius`, `mint` fill, `mintOnPrimary` label **18 semibold**, optional 16 semibold leading icon, mint-30% glow r10 |
+| `PrimaryButton` | `Components.swift:64` | `QasaComponents.kt:71` | Full width, 16pt vertical padding, `cornerRadius`, `accent` fill, `onAccent` label **18 semibold**, optional 16 semibold leading icon, accent-30% glow r10 |
 | Secondary | **none** | `QasaComponents.kt:275` | Android-only. 56 tall, `cardBackgroundLight`, 1pt `stroke` border, 16 semibold |
 | Destructive | **none** | `QasaComponents.kt:296` | Android-only. `danger` text, 15 semibold, 8pt radius — **no ripple, no role, ~38dp target** |
 | Ghost | **none** | — | Bare button + colored text |
@@ -395,7 +401,7 @@ taps.
 
 **MUST** add a disabled state to `PrimaryButton` and **MUST NOT** let callers hand-roll
 `opacity(0.5)`. iOS has no disabled variant and 8 call sites fake it — Android's
-`mint @ 45%` is the right call; keep it and extend to every button.
+`accent @ 45%` is the right call; keep it and extend to every button.
 
 **MUST** give every button a `Button` (not a `Text` with `.clickable`) so ripples and roles
 work. `DestructiveTextButton` is a bare `Text` — it has no indication at all.
@@ -427,7 +433,7 @@ on the same baseline. iOS's copy is **dead code** (0 call sites) — Android act
 in `VPNScreen`. Keep Android's version, delete iOS's if it stays unused.
 
 #### `FeatureRow` — `PremiumUpgradeView.swift:398` ❌ **missing on Android**
-18pt mint checkmark-circle + 14pt text, 12pt gap. Android's `PremiumUpgradeScreen` has **no
+18pt accent checkmark-circle + 14pt text, 12pt gap. Android's `PremiumUpgradeScreen` has **no
 feature list at all** — it uses one hardcoded bullet string
 (`"${days}-day access · Multi-device · Breach · VPN"`, `PremiumUpgradeScreen.kt:221`).
 iOS shows per-plan localized bullets plus a yearly "Save" line. Port the component and the
@@ -437,8 +443,8 @@ per-plan bullets.
 
 #### `ThemedTextField` — `Components.swift:131` / `QasaComponents.kt:142` ✅
 16/18 padding, `cardBackground` fill, 1pt `stroke` border, `cornerRadius`, optional 20pt
-leading icon at 12pt gap, mint cursor, 16pt text.
-**Android is missing** the mint cursor on all fields other than by convention, an
+leading icon at 12pt gap, accent cursor, 16pt text.
+**Android is missing** the accent cursor on all fields other than by convention, an
 `imeAction`/`keyboardActions` wiring (0 call sites pass `keyboardOptions`), a `label`, and a
 `contentDescription`.
 
@@ -460,7 +466,7 @@ Android uses a plain text field for `Expiry` (`VaultItemEditorScreen.kt:106`). *
 
 #### `ToggleRow` — `Components.swift:219` / `QasaListWidgets.kt:80` ✅
 40×40 circular `iconColor @ 20%` disc with a 20pt icon, 12pt gap, title 16, subtitle 14,
-mint switch, 8pt vertical padding. iOS allows an `iconBackground` override; Android always
+accent switch, 8pt vertical padding. iOS allows an `iconBackground` override; Android always
 uses `@ 20%`, so the VPN kill-switch tile differs. **Add the parameter.**
 
 #### `LocalizedToggleRow` — `Components.swift:351` ❌ **missing on Android**
@@ -469,7 +475,7 @@ uses `@ 20%`, so the VPN kill-switch tile differs. **Add the parameter.**
 (`ToggleRow`, `CheckToggle`) but never the combination.
 
 #### `CheckToggle` — `Components.swift:321` / `QasaListWidgets.kt:220` ⚠
-48×24 track (mint on / `stroke` off), 24pt thumb, check glyph 11 bold.
+48×24 track (accent on / `stroke` off), 24pt thumb, check glyph 11 bold.
 **Android's `#2563EB` thumb is a port of an iOS defect — replace with a token.** Android
 also snaps with no animation; iOS uses
 `.spring(response: 0.25, dampingFraction: 0.8)`. **MUST** add the animation, and **MUST**
@@ -477,8 +483,8 @@ use `Modifier.toggleable` — Android uses `.clickable`, so TalkBack announces a
 on/off state.
 
 #### `FilterChip` — `Components.swift:387` / `QasaComponents.kt:219` ✅
-17/7 padding, capsule, 1pt border (`mint` selected / `stroke` unselected), 14pt label
-(semibold when selected). Selected fill: `mint @ 16%` light, `mintDark` dark.
+17/7 padding, capsule, 1pt border (`accent` selected / `stroke` unselected), 14pt label
+(semibold when selected). Selected fill: `accent @ 16%` light, `accentDark` dark.
 **MUST** add `Modifier.selectable` — Android uses `.clickable`, so selection is invisible to
 TalkBack.
 
@@ -489,12 +495,12 @@ Wrapping layout for chips. Android uses `Row` + `horizontalScroll` (clips, and s
 scrolled the wrong way in RTL) or a fixed 3-column `Row`. **Port it**; breach cards need it.
 
 #### `CountryPickerField` / `CountryMenuPicker` — `FormHelpers.swift:49,71` ❌ **missing**
-Label + menu picker, 12pt padding, card chrome, mint tint. Backed by `Models/Country.swift`
+Label + menu picker, 12pt padding, card chrome, accent tint. Backed by `Models/Country.swift`
 (60 lines of country/dial-code data). Android has **no country data at all** and uses a
 plain text field.
 
 #### `CollectionPickerField` — `FormHelpers.swift:87` ❌ **missing**
-Label + "none" picker + a mint `+` button, 12pt padding, card chrome, with an inline
+Label + "none" picker + a accent `+` button, 12pt padding, card chrome, with an inline
 create-collection alert. This is how items get assigned to a collection — **Android cannot
 assign an item to a collection.**
 
@@ -506,7 +512,7 @@ buttons with a 48dp target and a selected-state semantic.
 #### `PasswordGeneratorModal` — `PasswordGeneratorModal.swift:6` ❌ **missing on Android**
 Reachable from the vault editor, not just the standalone generator screen. Presented at
 `[.fraction(0.92), .large]` with a visible drag indicator and a 20pt corner radius. Contains
-the generated-password card (gradient `mint @ 10%` → clear, mono 22/28 bold, tracking
+the generated-password card (gradient `accent @ 10%` → clear, mono 22/28 bold, tracking
 1.5/2.8, single line, `minimumScaleFactor(0.4)`, copy button), the strength card and the
 settings card. Android has `GenerateScreen` only — **the editor has no generator entry
 point**, and the editor has no show/hide password toggle either.
@@ -525,7 +531,7 @@ radius, `chrome` fill, `strokeChrome` border, 18pt icon; 16pt gap; title 16 semi
 (1 line, ellipsis), subtitle 14 (1 line, ellipsis).
 Overflow: a 36×36 `ellipsis` glyph rotated 90° opening a `Menu` with **per-field copy
 actions**, "Open website" via `openURL`, Edit, and Delete behind a confirm alert. Copying
-shows a mint toast.
+shows a accent toast.
 
 **Android has one copy button and no menu, no edit, no delete, no website open, no toast.**
 Delete is unreachable from the row on both platforms — on iOS it is three taps deep, and
@@ -563,16 +569,16 @@ the API returns are never surfaced at all.
 (`BreachCard.swift:88-89`) — it is a `Button {}` with no body.
 
 **`HalfCircleGauge`**: iOS strokes the trimmed arc with an
-`AngularGradient([danger, gold, mint], 180°→360°)`, animates `.easeOut(1.1)`, and puts no
+`AngularGradient([danger, gold, accent], 180°→360°)`, animates `.easeOut(1.1)`, and puts no
 number inside. Android uses a **flat stepped color** (`≥80 success / ≥50 gold / else
 danger`), no animation, and a 42sp Black numeral inside. **Pick one.** iOS's gradient is the
 better design; Android's numeral is genuinely useful. Recommendation: gradient arc +
 animated trim + the numeral in `textPrimary`, plus a `contentDescription`.
 
 **`VpnPowerDial`**: iOS outer ring `cyan @ 30%` 1pt at 160, inner ring `cyan @ 55%` 1pt at
-140, **opaque** `cardBackground` core at 128 with a `mint @ 40%` r20 shadow when connected,
+140, **opaque** `cardBackground` core at 128 with a `accent @ 40%` r20 shadow when connected,
 `"power"` glyph at 36 medium, and a `ProgressView` busy state. Android uses 2dp/3dp rings,
-a translucent `mint @ 18%` core, no shadow, `PowerSettingsNew`, and prints `"ON"`/`"OFF"`
+a translucent `accent @ 18%` core, no shadow, `PowerSettingsNew`, and prints `"ON"`/`"OFF"`
 text. Also the iOS callout: the kill-switch and auto-connect toggles are **local `@State` and
 never persisted** (`VPNView.swift:10-11`) — a bug. **Persist them.**
 
@@ -610,7 +616,7 @@ export on either platform.**
 
 #### `VaultFormChrome` — `FormHelpers.swift:156` ❌ **missing on Android**
 `NavigationStack` + `ScrollView` + `screenPadding`, inline navigation title, cancel action
-and a save/update action disabled on `canSave` and tinted `mint`.
+and a save/update action disabled on `canSave` and tinted `accent`.
 
 ---
 
@@ -867,7 +873,7 @@ and add `values-night/colors.xml` for the XML-consumed tokens.
 (`QasaComponents.kt:222`). iOS uses `@Environment(\.colorScheme)`. **MUST** branch on the
 resolved scheme, not on a field inside the palette.
 
-`PrimaryButton`'s disabled state `mint @ 45%` composites differently over `background` in
+`PrimaryButton`'s disabled state `accent @ 45%` composites differently over `background` in
 light vs dark. Pick alphas that hold contrast in both.
 
 ---
@@ -1083,7 +1089,7 @@ to a stub webhook all match. Remaining Android gaps:
    good value.
 4. No "already premium" state — iOS disables the button and says so.
 5. `statusMessage` and `errorMessage` are conflated into one field; iOS separates them
-   (mint vs danger).
+   (accent vs danger).
 6. Feature bullets are one hardcoded string (§6.3).
 
 ### 12.11 Other services
@@ -1196,7 +1202,7 @@ Ordered by user impact. `docs/design.md` § references point at the rule that go
 | 14 | 99 raw `fontSize` bypass the type scale; no `lineHeight` anywhere | §3.2 |
 | 15 | 245 raw `.dp`; 5 `QasaDimens` tokens; `17.dp` magic number | §4.1 |
 | 16 | No Arabic-script mono-swap or tracking zeroing; `.uppercase()` forced on ckb/ar | §3.1 |
-| 17 | `MintFab` has no mint border and the wrong shadow; the icon is hardcoded | §6.1 |
+| 17 | `MintFab` has no accent border and the wrong shadow; the icon is hardcoded | §6.1 |
 | 18 | `CheckToggle` thumb is hardcoded `#2563EB`; no animation; no `toggleable` | §6.4 |
 | 19 | `HalfCircleGauge` is a flat stepped color, unanimated, number inside | §6.6 |
 | 20 | `VpnPowerDial` diverges in every dimension | §6.6 |

@@ -54,6 +54,14 @@ A change that only one app picks up is not done.
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default
    `FastOutSlowIn`. With reduce motion on, slides become fades (`motion.fade`).
-7. **Language.** Every string comes from `l10n/strings.json` and follows the language picked
+7. **Color.** The brand palette is four colors: purple `#722F99`, grey `#C5C1C1`, beige
+   `#FEE7C8`, peach `#FF9292`. `tokens.json` derives every light and dark token from them
+   (table in `docs/design.md` §2.1); no app writes a hex of its own. The only exceptions are
+   other brands' logo colors (site icons, payment wallets) and the six note colors, which
+   are user data. On Android every Material color role is mapped to a token (`QasaTheme.kt`),
+   `surfaceTint` included, so no Material default (lavender, tonal tint) shows through. Each
+   app follows the system light/dark setting unless the user picks one in Settings, so two
+   phones in different modes show the two halves of the palette.
+8. **Language.** Every string comes from `l10n/strings.json` and follows the language picked
    in the app's settings, at once, on every screen, sheet, alert and toast, without a restart.
    Never the device's language when the user picked another one.
