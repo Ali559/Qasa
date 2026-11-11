@@ -32,7 +32,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
@@ -116,12 +115,8 @@ fun QasaRow(
 /** iOS `RowChevron`: a 13dp `textTertiary` forward chevron (mirrored in RTL). */
 @Composable
 fun RowChevron() {
-    Icon(
-        Icons.AutoMirrored.Filled.ArrowForwardIos,
-        contentDescription = null,
-        tint = qasaColors.textTertiary,
-        modifier = Modifier.size(QasaDimens.rowChevronGlyph),
-    )
+    // The SF Symbol's own 11x14 frame: no size modifier.
+    Icon(QasaGlyphs.ChevronForward, contentDescription = null, tint = qasaColors.textTertiary)
 }
 
 /** iOS `RowValue`: trailing value text, `type.rowValue` (13), `textSecondary`, one line. */

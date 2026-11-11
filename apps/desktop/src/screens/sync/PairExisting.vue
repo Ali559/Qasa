@@ -3,7 +3,8 @@
 // thing: this computer joins the other device's vault over Wi‑Fi — the vault and account
 // arrive through the code-authenticated channel — then you unlock with the same main
 // password.
-import { ArrowRight, CheckCircle2, ChevronLeft } from 'lucide-vue-next'
+import Chevron from '@/components/Chevron.vue'
+import {ArrowRight, CheckCircle2} from 'lucide-vue-next'
 import { ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -21,7 +22,7 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
   <AuthFrame>
     <div class="content">
       <button v-if="!done" type="button" class="back" @click="emit('back')">
-        <ChevronLeft class="mirror-rtl" :size="17" :stroke-width="2.75" />{{ t('common.back') }}
+        <Chevron dir="back" />{{ t('common.back') }}
       </button>
 
       <template v-if="!done">
