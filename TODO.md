@@ -20,41 +20,122 @@ Any change to what a screen looks like also updates the landing page's app mocku
       `assets/icons` → every app (`generate.py`, checked in CI); SF Symbols, Material and
       Lucide are gone. Active navigation tabs show the filled glyph. Fingerprint and Wi-Fi
       come from Tabler at Solar's line weight. Credit under About on the You screen.
-- [ ] **Icons, follow-up:** walk each app side by side and make the same thing use the same
-      icon everywhere. Each app was converted separately, and a few were picked by judgement:
-      desktop "Delete account" uses `device-remove`, its add-item "Personal info" uses `person`,
-      and Auto-backup and Restore both show `history`. Wanted in the library: a puzzle
-      (browser extension), an "open app" window, an image (scan a QR from a picture) and a
-      vertical ellipsis. Not yet looked at on Android or desktop screens beyond the unlock
-      and create-vault screens.
-- [ ] **Suggest a strong password when the user signs up somewhere.** Check every app: when
-      autofill sees a new-account or new-password form (sign-up on a site or app), offer to
-      generate a strong password and save it as a new login. Very important.
-- [ ] **Item colours do nothing.** Picking a colour on an item must change how the item shows
-      (its tile and accents), with a light and a dark value for each colour. The picker must
-      also show which colour is selected.
-- [ ] **No Cancel when adding or renaming a folder.** The folder sheet closes by dragging down,
-      like every other sheet.
-- [ ] **Item options (the ⋯ button) and every dropdown use the app's own sheet**, not the
-      system menu: same sheet header, rows and colours on every app.
-- [ ] **Dark mode: the background is too close to the primary colour.** Make the dark
-      background a dark ash grey (reference: WhatsApp's text-field background in dark mode),
-      clearly apart from the purple accent. The Home screen may keep its warm/calm blend.
-- [ ] **Protected items:**
-  - Opening one shows only the main password / biometric sheet, on a plain cover: the item
-    must not be visible behind it.
-  - Once open, its contents stay hidden like a password, with the eye button (crossed /
-    uncrossed) to show each value.
-- [ ] **You → Tools: dividers between rows**, like the Security section in Settings.
+
+### How each phase runs
+
+1. Write the rule into `design/README.md` (and any values into `design/tokens.json` /
+   `assets/icons/icons.json`) first.
+2. Build it on iOS, then Android, the desktop and the extension: one branch and one PR per
+   phase, so no app is ever ahead of the others.
+3. Check it on screen on every app (light and dark, English and Arabic), and update the
+   landing page mockup of any screen that changed.
+
+### Phase 1: Small fixes (one PR)
+
+- [ ] **No Cancel when adding or renaming a folder.** The folder sheet uses the shared sheet
+      header and closes by dragging down (Esc / click outside on the desktop); its own action
+      (Create / Save) stays as the bottom button. Check every one-field prompt sheet for the
+      same Cancel.
+- [ ] **You → Tools: dividers between rows**, the same `RowDivider` inset as Settings →
+      Security, on every app.
 - [ ] **The Notifications page always says "Notifications"** in its header, never "Breached
       passwords". The Premium prompt for breached passwords inside it stays.
-- [ ] **First launch:**
-  - Screen 1: choose the language only (no theme picker).
-  - After "Get started": at most 5 carousel screens about the app's free features, in the
-    chosen language, with a sleek animated design.
-  - The last screen has "Let's get started" and a name field with a cheeky, short prompt
-    (along the lines of "What should we call you?").
-  - **Show previews before building it.**
+- [ ] **Icons follow-up:** walk the apps side by side and make the same thing use the same
+      icon everywhere. Known: the desktop's "Delete account" (`device-remove`) and add-item
+      "Personal info" (`person`); Auto-backup and Restore both show `history`. Add the icons the
+      desktop asked for (puzzle for the browser extension, an "open app" window, an image for
+      "scan a QR from a picture", a vertical ellipsis) to `assets/icons/icons.json`.
+
+Done when: all four apps show the same thing for each, in light and dark, LTR and RTL.
+
+### Phase 2: Colours (one PR)
+
+- [ ] **Dark mode background.** Today the dark background (#17111D) is too close to the purple
+      accent. Make it a dark ash grey, in the spirit of WhatsApp's dark text-field background,
+      clearly apart from the accent (#B67FDB). Adjust the cards, strokes and chrome that sit on it
+      so the steps between them stay visible. Keep the Home screen's warm/calm blend. Only
+      `design/tokens.json` changes, then `design/generate.py`. Show 2–3 candidate greys as a
+      preview before choosing.
+- [ ] **Item colours.** Picking a colour on an item does nothing today. Each of the six note
+      colours gets a light and a dark value in `tokens.json`. The item's tile (vault list and
+      detail hero) and its accent use the chosen colour on every app. The picker shows the
+      selected colour clearly in both themes.
+
+Done when: dark mode reads as grey with purple accents on all four apps, and a coloured item
+looks the same everywhere.
+
+### Phase 3: The app's own menus (one PR)
+
+- [ ] **Item options (⋯) and every dropdown use the app's own sheet**, not the system menu:
+      - An action sheet component on each app: the shared sheet header, settings-style rows with
+        icon, label and destructive red, and no Cancel.
+      - A picker sheet for dropdowns (type, country, collection, phone): rows with a check on the
+        current choice and search for long lists (countries).
+      - Replace every system `Menu` / `DropdownMenu` / `<select>` on all apps.
+      - This also fixes the oversized icons that iOS system menus draw.
+
+Done when: no screen in any app opens a system menu, except the system share sheet and the
+file pickers.
+
+### Phase 4: Protected items (one PR)
+
+- [ ] **The unlock sheet only.** Opening a protected item first shows a plain cover with the main
+      password / biometric sheet; the item is never drawn behind it. If the user cancels, they
+      go back to the list.
+- [ ] **Hidden values.** Once open, every value of a protected item is masked like a password,
+      each with the eye button (crossed / uncrossed). Copy works without revealing. Values hide
+      again when the user leaves the item or the app.
+
+Done when: on all apps a protected item's contents never show without the unlock and a tap on
+the eye. Add a test for each app's gate.
+
+### Phase 5: Suggest a strong password at sign-up (one PR per platform; very important)
+
+- [ ] **Audit what exists.**
+      - The extension's `detect.ts` already tells sign-up and change-password forms from
+        logins.
+      - Android's autofill service knows `newPassword` fields and can save.
+      - iOS has the AutoFill "insert text" entry point (`prepareInterfaceForUserChoosingTextToInsert`).
+
+      Write down, per platform, what the user sees today on a sign-up form.
+- [ ] **Browser extension:** on a sign-up or change-password form, the in-page menu offers
+      "Use a strong password". It fills both password fields with a password from the shared
+      generator, and once the form is submitted it offers to save a new login (site, username,
+      password).
+- [ ] **Android:** for a `newPassword` field, the autofill service returns a "Generate strong
+      password" dataset. Choosing it fills the generated password, and `onSaveRequest` saves the
+      login.
+- [ ] **iOS:** find what AutoFill allows a third-party provider on iOS 17 and 18+ (text
+      insertion of a generated password, the save prompt). Ship the best that's allowed, and
+      write down any limit Apple imposes.
+- [ ] **Desktop:** covered through the extension; make sure a login saved from the extension
+      shows up in the app straight away.
+
+Done when: signing up on a test site (and a test app on each phone) offers a strong password in
+one or two taps and ends with the login saved.
+
+### Phase 6: First launch (preview first, then one PR)
+
+- [ ] **Previews.** 2–3 directions for the welcome flow, animated, in the app's design and in
+      English and Arabic. The owner picks one before anything is built.
+- [ ] **Screen 1: language only.** Remove the theme picker; the app follows the system theme
+      until changed in Settings.
+- [ ] **Carousel.** After "Get started": at most 5 screens about the free features, in the
+      chosen language, with a sleek animated design (respecting reduce motion).
+- [ ] **Last screen.** "Let's get started" and a name field with a short, cheeky prompt
+      (something like "What should we call you?"). The name is stored on the device and used in
+      greetings.
+- [ ] Same flow, copy and timings on iOS, Android and the desktop; new strings in
+      `l10n/strings.json` (en/ar/ckb).
+
+Done when: a fresh install on every app goes language → carousel → name → create vault, in all
+three languages.
+
+### Phase 7: Wrap-up
+
+- [ ] **Landing page.** Re-take every app screenshot and mockup on `apps/landing` from the
+      updated apps (icons, fields, colours, dark mode, onboarding), in all three languages.
+- [ ] **Side-by-side audit.** Section 3 below, with screenshots kept in `design/parity/`.
 
 ## 1. One shared design spec
 
