@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // iOS `AppShellView` on desktop: the four bottom tabs become a sidebar with the same
 // entries, icons and order (on the right in RTL). Pages open in the content area with a
-// back button, and the sidebar stays. Tab icons are outlines, filled on the selected tab.
-import { CircleUser, House, KeyRound, Lock, ShieldAlert } from 'lucide-vue-next'
+// back button, and the sidebar stays. Tab icons are the linear glyphs, the filled glyph on the selected tab.
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 
 import ToastHost from '@/components/ToastHost.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import QasaMark from '@/components/QasaMark.vue'
-import { CircleUserFilled, HouseFilled, KeyRoundFilled, ShieldAlertFilled } from '@/icons'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import { back, nav, openPage, selectTab, type ShellTab } from '@/nav'
 import { useT } from '@/prefs'
 import Home from './Home.vue'
@@ -30,10 +30,10 @@ const emit = defineEmits<{ lock: []; logout: [] }>()
 const t = useT()
 
 const tabs = computed(() => [
-  { id: 'home' as ShellTab, label: t('tab.home'), icon: House, activeIcon: HouseFilled },
-  { id: 'passwords' as ShellTab, label: t('tab.passwords'), icon: KeyRound, activeIcon: KeyRoundFilled },
-  { id: 'alerts' as ShellTab, label: t('tab.alerts'), icon: ShieldAlert, activeIcon: ShieldAlertFilled },
-  { id: 'you' as ShellTab, label: t('tab.you'), icon: CircleUser, activeIcon: CircleUserFilled },
+  { id: 'home' as ShellTab, label: t('tab.home'), icon: 'home' as QasaIconName, activeIcon: 'home.fill' as QasaIconName },
+  { id: 'passwords' as ShellTab, label: t('tab.passwords'), icon: 'passwords' as QasaIconName, activeIcon: 'passwords.fill' as QasaIconName },
+  { id: 'alerts' as ShellTab, label: t('tab.alerts'), icon: 'alerts' as QasaIconName, activeIcon: 'alerts.fill' as QasaIconName },
+  { id: 'you' as ShellTab, label: t('tab.you'), icon: 'you' as QasaIconName, activeIcon: 'you.fill' as QasaIconName },
 ])
 
 // Desktop shortcuts (plan §5.2): ⌘/Ctrl+L lock, ⌘/Ctrl+G generator, ⌘/Ctrl+1…4 tabs.
@@ -72,12 +72,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :aria-current="nav.tab === tab.id ? 'page' : undefined"
         @click="selectTab(tab.id)"
       >
-        <component :is="nav.tab === tab.id && !nav.page ? tab.activeIcon : tab.icon" :size="20" aria-hidden="true" />
+        <QasaIcon :name="nav.tab === tab.id && !nav.page ? tab.activeIcon : tab.icon" :size="20" />
         <span>{{ tab.label }}</span>
       </button>
       <span class="grow" />
       <button type="button" class="tab lock" @click="emit('lock')">
-        <Lock :size="20" aria-hidden="true" />
+        <QasaIcon name="lock" :size="20" />
         <span>{{ t('shell.lock') }}</span>
       </button>
     </nav>

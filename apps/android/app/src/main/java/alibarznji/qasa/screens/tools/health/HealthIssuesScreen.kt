@@ -8,6 +8,7 @@ import alibarznji.qasa.screens.vault.list.VaultListItemRow
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.VaultListRow
@@ -28,10 +29,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -98,9 +95,9 @@ internal fun HealthIssuesScreen(
             BreachLockedCard(onUpgrade = onUpgrade, modifier = Modifier.padding(horizontal = QasaDimens.screenPadding))
         } else if (items.isEmpty()) {
             val (title, hint, icon) = when (selected) {
-                HealthIssueTab.REUSED -> Triple(R.string.health_noreusedtitle, R.string.health_noreusedbody, Icons.Default.Sync)
-                HealthIssueTab.WEAK -> Triple(R.string.health_noweaktitle, R.string.health_noweakbody, Icons.Default.Warning)
-                HealthIssueTab.BREACHED -> Triple(R.string.breached_none_title, R.string.breached_none_body, Icons.Default.Shield)
+                HealthIssueTab.REUSED -> Triple(R.string.health_noreusedtitle, R.string.health_noreusedbody, QasaIcons.Sync)
+                HealthIssueTab.WEAK -> Triple(R.string.health_noweaktitle, R.string.health_noweakbody, QasaIcons.Warning)
+                HealthIssueTab.BREACHED -> Triple(R.string.breached_none_title, R.string.breached_none_body, QasaIcons.Shield)
             }
             EmptyState(
                 title = stringResource(title),

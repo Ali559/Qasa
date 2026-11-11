@@ -3,10 +3,11 @@
 // the health bar card, the VPN card and the breached-passwords card. The page wash turns
 // warm when nothing needs attention and cool when something does. On desktop the VPN card
 // points to the phone (no VPN in v1), and the notifications bell arrives with the inbox.
-import { Bell, CheckCircle2, DatabaseBackup, KeyRound, Lightbulb, Lock, ShieldAlert, ShieldHalf } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import QasaMark from '@/components/QasaMark.vue'
 import { account } from '@/account/store'
 import { backupApi } from '@/backup/api'
@@ -96,14 +97,14 @@ const greetingKey = computed(() => {
   return 'home.greetingEvening'
 })
 
-const hero = computed(() => {
+const hero = computed((): { icon: QasaIconName | null; title: string; body: string | null } => {
   switch (status.value) {
     case 'allGood':
-      return { icon: CheckCircle2, title: t('home.allgoodTitle'), body: t('home.allgoodBody') }
+      return { icon: 'success', title: t('home.allgoodTitle'), body: t('home.allgoodBody') }
     case 'needsAttention':
-      return { icon: Lightbulb, title: t('home.attentionTitle'), body: t('home.attentionHint') }
+      return { icon: 'tip', title: t('home.attentionTitle'), body: t('home.attentionHint') }
     case 'empty':
-      return { icon: KeyRound, title: t('home.emptyTitle'), body: t('home.emptyBody') }
+      return { icon: 'login', title: t('home.emptyTitle'), body: t('home.emptyBody') }
     default:
       return { icon: null, title: t('home.checking'), body: null }
   }
@@ -138,7 +139,7 @@ const health = computed(() => {
           <span class="name">{{ t('session.qasaUser') }}</span>
         </div>
         <button type="button" class="bell" :aria-label="t('nav.notifications')" :title="t('nav.notifications')" @click="openPage('notifications')">
-          <Bell :size="18" aria-hidden="true" />
+          <QasaIcon name="alerts" :size="18" />
           <span v-if="account.unread > 0" class="badge">{{ account.unread > 99 ? '99+' : account.unread }}</span>
         </button>
       </div>
@@ -160,7 +161,7 @@ const health = computed(() => {
         <div class="disc">
           <div class="inner">
             <span v-if="status === 'loading'" class="spinner" aria-hidden="true" />
-            <component :is="hero.icon" v-else :size="40" :class="status === 'allGood' ? 'good' : 'accent'" aria-hidden="true" />
+            <QasaIcon v-else-if="hero.icon" :name="hero.icon" :size="40" :class="status === 'allGood' ? 'good' : 'accent'" aria-hidden="true" />
           </div>
         </div>
         <h1 class="hero-title">{{ hero.title }}</h1>
@@ -173,7 +174,7 @@ const health = computed(() => {
       <!-- Backup reminder: the vault is only on this computer (spec: backups §7). -->
       <div v-if="backup.status?.remind" class="home-card static" role="region" :aria-label="t('backup.reminder.title')">
         <div class="card-row top">
-          <span class="tile" aria-hidden="true"><DatabaseBackup :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon name="backup-problem" :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('backup.reminder.title') }}</span>
             <span class="card-line">{{ t('backup.reminder.body') }}</span>
@@ -202,7 +203,7 @@ const health = computed(() => {
 
       <div class="home-card static">
         <div class="card-row">
-          <span class="tile" aria-hidden="true"><ShieldHalf :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon name="vpn" :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('nav.vpn') }}</span>
             <span class="card-line">{{ t('home.vpnDesktop') }}</span>
@@ -212,7 +213,7 @@ const health = computed(() => {
 
       <button type="button" class="home-card" @click="premium ? selectTab('alerts') : openPage('premiumUpgrade')">
         <div class="card-row">
-          <span class="tile" aria-hidden="true"><ShieldAlert v-if="premium" :size="18" /><Lock v-else :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon :name="premium ? 'breach' : 'shield-lock'" :size="18" /></span>
           <span class="card-text">
             <span class="card-title">{{ t(premium ? 'nav.breachedPasswords' : 'breached.lockedTitle') }}</span>
             <span class="card-line">{{ t(premium ? 'home.breachedBody' : 'breached.lockedBody') }}</span>

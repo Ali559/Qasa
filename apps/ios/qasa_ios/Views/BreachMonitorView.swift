@@ -44,7 +44,7 @@ struct BreachMonitorView: View {
             ),
             title: L10n.tr("breach.removeEmailTitle"),
             message: pendingRemoval.map { String(format: L10n.tr("breach.removeEmailMessage"), $0.email) },
-            icon: "envelope.badge.shield.half.filled",
+            icon: .emailMonitor,
             confirmTitle: L10n.tr("common.remove"),
             cancelTitle: L10n.tr("common.cancel"),
             destructive: true
@@ -61,7 +61,7 @@ struct BreachMonitorView: View {
             isPresented: $showLimitAlert,
             title: L10n.tr("breach.slotLimitTitle"),
             message: String(format: L10n.tr("breach.slotLimitMessage", locale: AppLanguage.current.locale), maxSlots),
-            icon: "exclamationmark.circle",
+            icon: .error,
             confirmTitle: L10n.tr("common.ok")
         ) {}
         .sheet(item: $rotateTarget) { target in
@@ -81,7 +81,7 @@ struct BreachMonitorView: View {
             Text(L10n.tr("breach.upgradeHint"))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
-            PrimaryButton(title: L10n.tr("settings.upgradePremium"), icon: "star.fill") {
+            PrimaryButton(title: L10n.tr("settings.upgradePremium"), icon: .favorite) {
                 onUpgrade()
             }
             Spacer(minLength: 0)
@@ -162,7 +162,7 @@ struct BreachMonitorView: View {
 
                 PrimaryButton(
                     title: isChecking ? L10n.tr("breach.saving") : L10n.tr("breach.addToMonitoring"),
-                    icon: "plus"
+                    icon: .add
                 ) {
                     Task { await addEmail() }
                 }
@@ -201,8 +201,7 @@ struct BreachMonitorView: View {
             Button {
                 pendingRemoval = item
             } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                QasaIconImage(.close, size: 12)
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 32, height: 32)
                     .background(Theme.chrome)

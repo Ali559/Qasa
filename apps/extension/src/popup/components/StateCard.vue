@@ -2,17 +2,17 @@
 // A full-height message card for the states before the vault list: app not running, not
 // paired, locked, no vault. Same layout as the desktop's empty states: tinted icon disc,
 // title, body, then the actions in the slot.
-import type { Component } from 'vue'
-
 import CardContainer from '@/components/CardContainer.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
-defineProps<{ icon: Component; title: string; body: string; tone?: 'accent' | 'gold' | 'danger' }>()
+defineProps<{ icon: QasaIconName; title: string; body: string; tone?: 'accent' | 'gold' | 'danger' }>()
 </script>
 
 <template>
   <CardContainer :padding="21" class="state-card">
     <span class="disc" :class="tone ?? 'accent'">
-      <component :is="icon" :size="26" aria-hidden="true" />
+      <QasaIcon :name="icon" :size="26" />
     </span>
     <h1 class="title">{{ title }}</h1>
     <p class="body">{{ body }}</p>

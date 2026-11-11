@@ -2,7 +2,6 @@
 // iOS `LANSyncView` ("Sync on Wi‑Fi"), now real: Premium only; "This device has the vault"
 // shows a one-time code and waits; "Receive vault" finds the other device and takes the
 // code. Both directions merge (newest change wins), so either side can host.
-import { Crown, Wifi } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
@@ -105,7 +104,7 @@ const failure = computed(() => {
             <span class="status"><span class="spinner" aria-hidden="true" />{{ event?.stage === 'connecting' ? t('sync.connecting') : t('sync.waiting') }}</span>
             <button type="button" class="qasa-button secondary" @click="stop"><span>{{ t('lan.stop') }}</span></button>
           </template>
-          <PrimaryButton v-else :title="t('lan.startHost')" :icon="Wifi" @click="startHost" />
+          <PrimaryButton v-else :title="t('lan.startHost')" icon="wifi" @click="startHost" />
         </div>
       </CardContainer>
       <JoinPanel v-else @done="finished" />
@@ -119,7 +118,7 @@ const failure = computed(() => {
     </template>
 
     <template v-if="!premium" #actions>
-      <PrimaryButton :title="t('nav.upgrade')" :icon="Crown" @click="openPage('premiumUpgrade')" />
+      <PrimaryButton :title="t('nav.upgrade')" icon="premium" @click="openPage('premiumUpgrade')" />
     </template>
   </PageFrame>
 </template>

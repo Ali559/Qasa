@@ -16,8 +16,7 @@ struct HomeStatusHero: View {
                 if status == .loading {
                     ProgressView().tint(theme.accent)
                 } else {
-                    Image(systemName: icon)
-                        .font(.qasa(40, weight: .medium))
+                    QasaIconImage(icon, size: 40)
                         .foregroundColor(status == .allGood ? theme.success : theme.accent)
                 }
             }
@@ -40,11 +39,11 @@ struct HomeStatusHero: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var icon: String {
+    private var icon: QasaIcon {
         switch status {
-        case .allGood: return "checkmark.circle"
-        case .needsAttention: return "lightbulb.max"
-        case .empty, .loading: return "key"
+        case .allGood: return .success
+        case .needsAttention: return .tip
+        case .empty, .loading: return .login
         }
     }
 
@@ -141,7 +140,7 @@ struct HomeVPNCard: View {
         let l = prefs.locale
         HomeCard(onTap: onTap) {
             HStack(spacing: 12) {
-                HomeIconTile(systemImage: "network.badge.shield.half.filled")
+                HomeIconTile(icon: .vpn)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.tr("nav.vpn", locale: l))
                         .font(.qasa(16, weight: .semibold))
@@ -188,7 +187,7 @@ struct HomeBreachedCard: View {
         let l = prefs.locale
         HomeCard(onTap: onTap) {
             HStack(spacing: 12) {
-                HomeIconTile(systemImage: isPremium ? "exclamationmark.shield" : "lock.shield")
+                HomeIconTile(icon: isPremium ? .breach : .shieldLock)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.tr(isPremium ? "nav.breachedPasswords" : "breached.lockedTitle", locale: l))
                         .font(.qasa(16, weight: .semibold))
@@ -220,7 +219,7 @@ struct HomeBackupReminderCard: View {
         let l = prefs.locale
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
-                HomeIconTile(systemImage: "externaldrive.badge.exclamationmark")
+                HomeIconTile(icon: .backupProblem)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.tr("backup.reminder.title", locale: l))
                         .font(.qasa(16, weight: .semibold))
@@ -272,12 +271,11 @@ private struct HomeCard<Content: View>: View {
 }
 
 private struct HomeIconTile: View {
-    let systemImage: String
+    let icon: QasaIcon
     @Environment(\.themePalette) private var theme
 
     var body: some View {
-        Image(systemName: systemImage)
-            .font(.qasa(18, weight: .medium))
+        QasaIconImage(icon, size: 18)
             .foregroundColor(theme.accent)
             .frame(width: 40, height: 40)
             .background(theme.cardMuted)

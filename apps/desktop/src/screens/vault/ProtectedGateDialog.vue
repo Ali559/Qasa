@@ -3,10 +3,10 @@
 // device owner through the system prompt; here it is a `confirmSheet`-style prompt sheet: an
 // `IconBadge` (×1.2, 4 below), 19 semibold title and 15 message 10 apart, the field, then
 // Unlock over Cancel 10 apart, 20 between blocks, 20 from the top.
-import { LockOpen, Lock } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import Sheet from '@/components/Sheet.vue'
 import TextField from '@/components/TextField.vue'
 import { useT } from '@/prefs'
@@ -42,7 +42,7 @@ async function confirm() {
   <Sheet :open="protectedGate.open" :label="t('vault.unlockProtectedNote')" :width="420" placement="bottom" @close="finishProtectedAccess(false)">
     <div class="gate">
       <div class="text">
-        <span class="badge" aria-hidden="true"><Lock :stroke-width="2.5" /></span>
+        <span class="badge" aria-hidden="true"><QasaIcon name="lock" :size="16" /></span>
         <h2>{{ t('vault.unlockProtectedNote') }}</h2>
         <p>{{ t('protected.title') }}</p>
       </div>
@@ -60,7 +60,7 @@ async function confirm() {
         <p v-if="error" class="error" role="alert">{{ t('auth.unlock.wrongPassword') }}</p>
       </div>
       <div class="actions">
-        <PrimaryButton :title="t('auth.unlock.button')" :icon="LockOpen" :disabled="!password || busy" @click="confirm" />
+        <PrimaryButton :title="t('auth.unlock.button')" icon="unlock" :disabled="!password || busy" @click="confirm" />
         <PrimaryButton kind="secondary" :title="t('common.cancel')" @click="finishProtectedAccess(false)" />
       </div>
     </div>

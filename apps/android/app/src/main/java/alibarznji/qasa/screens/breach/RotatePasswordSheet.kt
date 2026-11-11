@@ -6,6 +6,7 @@ import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.SectionLabel
@@ -33,10 +34,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -196,7 +193,7 @@ private fun CandidateRow(item: RotateCandidate, isSelected: Boolean, onClick: ()
             }
         }
         if (isSelected) {
-            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.md))
+            Icon(QasaIcons.Success, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.md))
         }
     }
 }
@@ -214,8 +211,8 @@ private fun PasswordCard(password: String, onRegenerate: () -> Unit, onCopy: () 
         }
         Spacer(Modifier.size(QasaDimens.contentGap))
         Row(horizontalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
-            ActionLink(Icons.Default.Refresh, stringResource(R.string.gen_regenerate), onRegenerate)
-            ActionLink(Icons.Default.ContentCopy, stringResource(R.string.gen_copy), onCopy)
+            ActionLink(QasaIcons.Refresh, stringResource(R.string.gen_regenerate), onRegenerate)
+            ActionLink(QasaIcons.Copy, stringResource(R.string.gen_copy), onCopy)
         }
     }
 }

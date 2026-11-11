@@ -3,10 +3,10 @@
 // on top, the chosen option under it (16 regular, primary), the 13 `RowChevron` trailing.
 // A native select covers the row, so a click anywhere opens the menu; `trailing` controls
 // (a "new collection" button) sit beside the chevron, above the select.
-import Chevron from './Chevron.vue'
 import { computed } from 'vue'
 
 import GroupRow from './GroupRow.vue'
+import QasaIcon from './QasaIcon.vue'
 import { errorIdFor, rowId } from './fieldGroup'
 
 const props = defineProps<{ label: string; options: Array<{ value: V; label: string }>; error?: string | null; disabled?: boolean }>()
@@ -30,7 +30,7 @@ const chosen = computed(() => props.options.find((o) => o.value === model.value)
     </select>
     <template #trailing>
       <slot name="trailing" />
-      <Chevron dir="forward" class="chevron" />
+      <QasaIcon name="chevron-forward" :size="13" class="chevron" />
     </template>
   </GroupRow>
 </template>

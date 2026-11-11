@@ -5,11 +5,11 @@
 // Not here yet: the pairing code and "Sync on this network" rows (Wi‑Fi pairing, phase 4).
 // Signing out or unlinking THIS computer is "Clear local data" on desktop (server unlink
 // + local wipe), so it is handed to the parent as `logout` instead of done here.
-import { Info, Link, Link2Off, LogOut, RefreshCw, Star, Unlink } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import StatusPill from '@/components/StatusPill.vue'
 import { accountApi } from '@/account/api'
 import { account, isPremium, offerReplace, refreshAccount } from '@/account/store'
@@ -143,7 +143,7 @@ function upgrade() {
     </template>
 
     <button v-if="!premium" type="button" class="upgrade-hint" @click="upgrade">
-      <span class="star"><Star fill="currentColor" :stroke-width="2.5" /></span>
+      <span class="star"><QasaIcon name="favorite" :size="16" /></span>
       <span class="hint-text">
         <strong>{{ t('devices.needMore') }}</strong>
         <span>{{ t('devices.upgradeHint') }}</span>
@@ -162,7 +162,7 @@ function upgrade() {
         :disabled="isActing || account.replace.busy"
         @click="offerReplace"
       >
-        <RefreshCw :stroke-width="2.5" aria-hidden="true" /><span>{{ t('backup.replace.button') }}</span>
+        <QasaIcon name="sync" :size="15" /><span>{{ t('backup.replace.button') }}</span>
       </button>
     </div>
 
@@ -190,12 +190,12 @@ function upgrade() {
       />
 
       <button v-if="canUnlinkOthers" type="button" class="qasa-button destructive" :disabled="isActing" @click="showUnlinkAllConfirm = true">
-        <Link2Off :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlinkAllOthers') }}</span>
+        <QasaIcon name="unlink" :size="15" /><span>{{ t('devices.unlinkAllOthers') }}</span>
       </button>
     </section>
 
     <div class="info-note">
-      <Info class="info-icon" :size="18" fill="currentColor" stroke="var(--card-muted)" />
+      <QasaIcon name="info" :size="18" class="info-icon" />
       <span>{{ t('devices.infoNote') }}</span>
     </div>
 
@@ -203,7 +203,7 @@ function upgrade() {
       <ConfirmDialog
         :open="!!pendingUnlink"
         :title="t('devices.unlinkTitle')"
-        :icon="Link"
+        icon="link"
         :message="pendingUnlink ? t('devices.unlinkMessage', pendingUnlink.device_name) : undefined"
         :confirm-label="t('devices.unlink')"
         :cancel-label="t('settings.cancel')"
@@ -214,7 +214,7 @@ function upgrade() {
       <ConfirmDialog
         :open="!!pendingLogout"
         :title="t('devices.logoutTitle')"
-        :icon="LogOut"
+        icon="sign-out"
         :message="pendingLogout ? t('devices.logoutMessage', pendingLogout.device_name) : undefined"
         :confirm-label="t('devices.logout')"
         :cancel-label="t('settings.cancel')"
@@ -225,7 +225,7 @@ function upgrade() {
       <ConfirmDialog
         :open="showUnlinkAllConfirm"
         :title="t('devices.unlinkAllTitle')"
-        :icon="Unlink"
+        icon="unlink"
         :message="t('devices.unlinkAllMessage')"
         :confirm-label="t('devices.unlinkAllOthers')"
         :cancel-label="t('settings.cancel')"

@@ -3,7 +3,6 @@
 // behind one shared eye toggle, an inline 13pt error or success line, and the update button in the sheet's
 // `BottomActionBar`. The Rust core
 // re-encrypts and re-indexes every item; on success the sheet closes after 700 ms.
-import { Eye, EyeOff } from 'lucide-vue-next'
 import { computed, nextTick, ref, watch } from 'vue'
 
 import BottomActionBar from '@/components/BottomActionBar.vue'
@@ -105,7 +104,7 @@ function close() {
           <FieldRow v-for="field in fields" :key="field.key" v-model="field.model.value" :label="field.title" :secure="!passwordVisible" :error="field.error">
             <template #trailing>
               <FieldIconButton
-                :icon="passwordVisible ? EyeOff : Eye"
+                :icon="passwordVisible ? 'hide' : 'show'"
                 :label="passwordVisible ? t('a11y.hidePassword') : t('a11y.showPassword')"
                 :pressed="passwordVisible"
                 @click="passwordVisible = !passwordVisible"

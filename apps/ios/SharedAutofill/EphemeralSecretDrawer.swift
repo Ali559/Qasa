@@ -218,8 +218,7 @@ struct EphemeralSecretDrawer: View {
                 Button {
                     session.dismiss()
                 } label: {
-                    Image(systemName: "xmark")
-                        .font(QasaFontFace.font(size: 12, weight: .bold))
+                    QasaIconImage(.close, size: 12)
                         .foregroundColor(textSecondary)
                         .frame(width: 28, height: 28)
                         .background(Color(uiColor: .tertiarySystemFill))

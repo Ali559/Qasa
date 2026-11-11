@@ -34,8 +34,7 @@ struct VaultItemRow: View {
                 .background(logo.color)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         } else {
-            Image(systemName: (payload ?? fallbackPayload).systemImage)
-                .font(.qasa(18, weight: .medium))
+            QasaIconImage((payload ?? fallbackPayload).icon, size: 18)
                 .foregroundColor(Theme.accent)
                 .frame(width: 48, height: 48)
                 .background(Theme.cardMuted)
@@ -64,7 +63,7 @@ struct VaultItemRow: View {
                 Button {
                     copyPrimary()
                 } label: {
-                    Image(systemName: "doc.on.doc")
+                    QasaIconImage(.copy, size: 16)
                         .foregroundColor(Theme.textSecondary)
                         .frame(width: 36, height: 36)
                 }
@@ -75,7 +74,7 @@ struct VaultItemRow: View {
                     Button {
                         copyValue(action.value, label: action.label)
                     } label: {
-                        Label(action.label, systemImage: action.systemImage)
+                        Label { Text(action.label) } icon: { QasaIconImage(action.icon, size: 17) }
                     }
                 }
 
@@ -86,7 +85,7 @@ struct VaultItemRow: View {
                         try? VaultRepository.shared.markUsed(id: row.id)
                         flash(L10n.tr("totp.copied"))
                     } label: {
-                        Label(L10n.tr("copy.totp"), systemImage: "doc.on.doc")
+                        Label { Text(L10n.tr("copy.totp")) } icon: { QasaIconImage(.copy, size: 17) }
                     }
                 }
 
@@ -95,23 +94,23 @@ struct VaultItemRow: View {
                     Button {
                         openURL(url)
                     } label: {
-                        Label(L10n.tr("vault.openWebsite"), systemImage: "safari")
+                        Label { Text(L10n.tr("vault.openWebsite")) } icon: { QasaIconImage(.website, size: 17) }
                     }
                 }
 
                 Button {
                     onEdit()
                 } label: {
-                    Label(L10n.tr("vault.editItem"), systemImage: "pencil")
+                    Label { Text(L10n.tr("vault.editItem")) } icon: { QasaIconImage(.edit, size: 17) }
                 }
 
                 Button(role: .destructive) {
                     showDeleteConfirm = true
                 } label: {
-                    Label(L10n.tr("vault.deleteItem"), systemImage: "trash")
+                    Label { Text(L10n.tr("vault.deleteItem")) } icon: { QasaIconImage(.delete, size: 17) }
                 }
             } label: {
-                Image(systemName: "ellipsis")
+                QasaIconImage(.more, size: 16)
                     .rotationEffect(.degrees(90))
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
@@ -132,7 +131,7 @@ struct VaultItemRow: View {
             isPresented: $showDeleteConfirm,
             title: L10n.tr("vault.deleteItemTitle"),
             message: String(format: L10n.tr("vault.deleteItemMessage"), row.displayName),
-            icon: "trash",
+            icon: .delete,
             confirmTitle: L10n.tr("common.delete"),
             cancelTitle: L10n.tr("common.cancel"),
             destructive: true

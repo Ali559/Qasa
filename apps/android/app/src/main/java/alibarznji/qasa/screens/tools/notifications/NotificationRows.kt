@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.network.AppNotificationDTO
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -20,8 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -116,7 +115,7 @@ internal fun SwipeToDeleteRow(onDelete: () -> Unit, content: @Composable () -> U
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 Icon(
-                    Icons.Default.Delete,
+                    QasaIcons.Delete,
                     contentDescription = stringResource(R.string.common_delete),
                     tint = c.background,
                     modifier = Modifier.size(QasaIconSize.md),

@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.vpn
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
@@ -18,11 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.PanTool
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,9 +48,9 @@ internal fun VpnServerPill(city: String?, nodeName: String?, onClick: () -> Unit
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall),
     ) {
-        Icon(Icons.Default.Public, contentDescription = null, tint = c.cyan)
+        Icon(QasaIcons.Location, contentDescription = null, tint = c.cyan)
         Text(label, color = c.textPrimary, style = qasaText.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Icon(Icons.Default.ExpandMore, contentDescription = null, tint = c.textSecondary)
+        Icon(QasaIcons.ChevronDown, contentDescription = null, tint = c.textSecondary)
     } }
 }
 
@@ -108,7 +104,7 @@ internal fun VpnSecurityFeaturesCard(
                 subtitle = stringResource(R.string.vpn_killswitchsub),
                 checked = killSwitch,
                 onCheckedChange = onKillSwitch,
-                icon = Icons.Default.PanTool,
+                icon = QasaIcons.Privacy,
                 iconColor = c.danger,
                 iconBackground = c.dangerBackground.copy(alpha = 0.35f),
             )
@@ -118,7 +114,7 @@ internal fun VpnSecurityFeaturesCard(
                 subtitle = stringResource(R.string.vpn_autoconnectsub),
                 checked = autoConnect,
                 onCheckedChange = onAutoConnect,
-                icon = Icons.Default.Sync,
+                icon = QasaIcons.Sync,
                 iconColor = c.cyan,
                 iconBackground = c.cyan.copy(alpha = 0.15f),
             )

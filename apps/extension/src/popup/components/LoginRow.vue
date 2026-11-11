@@ -2,8 +2,7 @@
 // A login row like the desktop's `VaultRow` (iOS `VaultItemRow`): site icon or letter tile, title and
 // username, then the copy actions. The desktop does the copying and clears the clipboard;
 // the popup never holds the secret.
-import { KeyRound, ShieldCheck, User } from 'lucide-vue-next'
-
+import QasaIcon from '@/components/QasaIcon.vue'
 import { useT } from '@/prefs'
 import ItemTile from '@/screens/vault/ItemTile.vue'
 import type { CopyField, LoginMatch } from '@ext/shared/messages'
@@ -22,13 +21,13 @@ const t = useT()
     </span>
     <span class="actions">
       <button v-if="item.username" type="button" class="icon-button" :aria-label="t('copy.username')" :title="t('copy.username')" @click="emit('copy', 'username')">
-        <User :stroke-width="2.5" />
+        <QasaIcon name="person" :size="16" />
       </button>
       <button type="button" class="icon-button" :aria-label="t('copy.password')" :title="t('copy.password')" @click="emit('copy', 'password')">
-        <KeyRound :stroke-width="2.5" />
+        <QasaIcon name="login" :size="16" />
       </button>
       <button v-if="item.hasTotp" type="button" class="icon-button" :aria-label="t('copy.totp')" :title="t('copy.totp')" @click="emit('copy', 'totp')">
-        <ShieldCheck :stroke-width="2.5" />
+        <QasaIcon name="protected" :size="16" />
       </button>
       <button v-if="canFill" type="button" class="fill" @click="emit('fill')">{{ t('ext.fill') }}</button>
     </span>

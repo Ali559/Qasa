@@ -2,7 +2,6 @@
 // Restore from a backup file: pick it (any file type), show whose and when, ask for the
 // main password the vault had then, restore. Used during setup (RestoreSetup) and in
 // Settings → Backups (RestoreBackupSheet). The file is read and kept by the core.
-import { ArchiveRestore, FileUp } from 'lucide-vue-next'
 import { onBeforeUnmount, ref } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
@@ -92,11 +91,11 @@ onBeforeUnmount(() => {
     <PrimaryButton
       v-if="info"
       :title="busy ? t('backup.restore.working') : t('backup.restore.button')"
-      :icon="busy ? undefined : ArchiveRestore"
+      :icon="busy ? undefined : 'history'"
       :disabled="!password || busy"
       @click="restore"
     />
-    <PrimaryButton v-else :title="t('backup.restore')" :icon="FileUp" :disabled="picking" @click="pick" />
+    <PrimaryButton v-else :title="t('backup.restore')" icon="import" :disabled="picking" @click="pick" />
   </div>
 </template>
 

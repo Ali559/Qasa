@@ -32,7 +32,7 @@ struct GeneratorView: View {
         Button {
             onSaveToVault?(model.password)
         } label: {
-            QasaButtonLabel(title: L10n.tr("gen.saveToVault", locale: prefs.locale), icon: "key")
+            QasaButtonLabel(title: L10n.tr("gen.saveToVault", locale: prefs.locale), icon: .login)
         }
         .buttonStyle(.qasaPrimary)
         .disabled(model.password.isEmpty || onSaveToVault == nil)

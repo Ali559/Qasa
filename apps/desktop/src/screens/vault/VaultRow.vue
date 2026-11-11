@@ -2,11 +2,11 @@
 // iOS `VaultItemRow`: tile, name and subtitle, a copy button for the primary value and
 // the ⋯ menu (copy actions, 2FA code, open website, edit, delete). Clicking the row
 // selects it for the detail pane.
-import { Copy, EllipsisVertical, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import Menu, { type MenuItem } from '@/components/Menu.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { copySecret, PAYMENT_CLIPBOARD_MS } from '@/clipboard'
 import { useT } from '@/prefs'
 import { showToast } from '@/toast'
@@ -90,17 +90,17 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
       <span class="subtitle">{{ subtitle }}</span>
     </span>
     <button v-if="row.hasPrimaryCopy" type="button" class="icon-button" :aria-label="t('a11y.copy')" :title="t('a11y.copy')" @click.stop="copyPrimary">
-      <Copy :size="17" />
+      <QasaIcon name="copy" :size="17" />
     </button>
     <span @pointerdown.capture="prepareMenu" @keydown.enter.capture="prepareMenu">
       <Menu :items="menuItems" :label="t('a11y.moreActions')">
-        <EllipsisVertical :size="18" />
+        <QasaIcon name="more" :size="18" />
       </Menu>
     </span>
     <ConfirmDialog
       :open="confirmDelete"
       :title="t('vault.deleteItemTitle')"
-      :icon="Trash2"
+      icon="delete"
       :message="t('vault.deleteItemMessage', row.displayName)"
       :confirm-label="t('common.delete')"
       destructive

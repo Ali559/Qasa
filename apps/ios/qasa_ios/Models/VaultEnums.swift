@@ -34,13 +34,13 @@ enum VaultItemKind: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var systemImage: String {
+    var icon: QasaIcon {
         switch self {
-        case .login: return "person.badge.key.fill"
-        case .secureNote: return "note.text"
-        case .payment: return "creditcard.fill"
-        case .personalInfo: return "person.text.rectangle"
-        case .idDocument: return "person.text.rectangle.fill"
+        case .login: return .login
+        case .secureNote: return .note
+        case .payment: return .card
+        case .personalInfo: return .identity
+        case .idDocument: return .identity
         }
     }
 
@@ -408,21 +408,21 @@ enum VaultPayload: Codable, Equatable, Sendable {
         }
     }
 
-    var systemImage: String {
+    var icon: QasaIcon {
         switch self {
-        case .login: return "globe"
-        case .secureNote: return "note.text"
-        case .card: return "creditcard"
-        case .bankAccount: return "building.columns"
-        case .name: return "person"
-        case .personalEmail: return "envelope"
-        case .phone: return "phone"
-        case .address: return "mappin.and.ellipse"
-        case .company: return "briefcase"
-        case .website: return "link"
-        case .idCard: return "person.text.rectangle"
-        case .passport: return "globe.europe.africa"
-        case .driverLicense: return "car"
+        case .login: return .login
+        case .secureNote: return .note
+        case .card: return .card
+        case .bankAccount: return .bank
+        case .name: return .person
+        case .personalEmail: return .email
+        case .phone: return .phone
+        case .address: return .address
+        case .company: return .work
+        case .website: return .link
+        case .idCard: return .identity
+        case .passport: return .location
+        case .driverLicense: return .car
         }
     }
 
@@ -441,7 +441,7 @@ struct CopyAction: Identifiable {
     let id = UUID()
     let label: String
     let value: String
-    let systemImage: String
+    let icon: QasaIcon
 }
 
 extension VaultPayload {
@@ -473,56 +473,56 @@ extension VaultPayload {
         switch self {
         case .login(let f):
             return [
-                CopyAction(label: L10n.tr("copy.email"), value: f.email, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.username"), value: f.username, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.password"), value: f.password, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.website"), value: f.website, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.email"), value: f.email, icon: .copy),
+                CopyAction(label: L10n.tr("copy.username"), value: f.username, icon: .copy),
+                CopyAction(label: L10n.tr("copy.password"), value: f.password, icon: .copy),
+                CopyAction(label: L10n.tr("copy.website"), value: f.website, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .secureNote(let f):
             guard !f.content.isEmpty else { return [] }
-            return [CopyAction(label: L10n.tr("copy.content"), value: f.content, systemImage: "doc.on.doc")]
+            return [CopyAction(label: L10n.tr("copy.content"), value: f.content, icon: .copy)]
         case .card(let f):
             return [
-                CopyAction(label: L10n.tr("copy.number"), value: f.number, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.expiry"), value: f.expiryDate, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.securityCode"), value: f.securityCode, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.number"), value: f.number, icon: .copy),
+                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, icon: .copy),
+                CopyAction(label: L10n.tr("copy.expiry"), value: f.expiryDate, icon: .copy),
+                CopyAction(label: L10n.tr("copy.securityCode"), value: f.securityCode, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .bankAccount(let f):
             return [
-                CopyAction(label: L10n.tr("copy.accountNumber"), value: f.accountNumber, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.routingNumber"), value: f.routingNumber, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.accountNumber"), value: f.accountNumber, icon: .copy),
+                CopyAction(label: L10n.tr("copy.routingNumber"), value: f.routingNumber, icon: .copy),
+                CopyAction(label: L10n.tr("copy.accountHolder"), value: f.accountHolder, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .name(let f):
             let full = [f.firstName, f.middleName, f.lastName].filter { !$0.isEmpty }.joined(separator: " ")
             return [
-                CopyAction(label: L10n.tr("copy.name"), value: full, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.username"), value: f.defaultUsername, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.name"), value: full, icon: .copy),
+                CopyAction(label: L10n.tr("copy.username"), value: f.defaultUsername, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .personalEmail(let f):
-            return [CopyAction(label: L10n.tr("copy.email"), value: f.email, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
+            return [CopyAction(label: L10n.tr("copy.email"), value: f.email, icon: .copy)].filter { !$0.value.isEmpty }
         case .phone(let f):
             guard !f.number.isEmpty else { return [] }
             let full = "\(Country.dialCode(for: f.countryCode))\(f.number)"
-            return [CopyAction(label: L10n.tr("copy.phone"), value: full, systemImage: "doc.on.doc")]
+            return [CopyAction(label: L10n.tr("copy.phone"), value: full, icon: .copy)]
         case .address(let f):
             return [
-                CopyAction(label: L10n.tr("copy.address"), value: f.address, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.city"), value: f.city, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.zip"), value: f.zipCode, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.address"), value: f.address, icon: .copy),
+                CopyAction(label: L10n.tr("copy.city"), value: f.city, icon: .copy),
+                CopyAction(label: L10n.tr("copy.zip"), value: f.zipCode, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .company(let f):
             return [
-                CopyAction(label: L10n.tr("copy.company"), value: f.companyName, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.jobTitle"), value: f.jobTitle, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.company"), value: f.companyName, icon: .copy),
+                CopyAction(label: L10n.tr("copy.jobTitle"), value: f.jobTitle, icon: .copy)
             ].filter { !$0.value.isEmpty }
         case .website(let f):
-            return [CopyAction(label: L10n.tr("copy.website"), value: f.websiteURL, systemImage: "doc.on.doc")].filter { !$0.value.isEmpty }
+            return [CopyAction(label: L10n.tr("copy.website"), value: f.websiteURL, icon: .copy)].filter { !$0.value.isEmpty }
         case .idCard(let f), .passport(let f), .driverLicense(let f):
             return [
-                CopyAction(label: L10n.tr("copy.name"), value: f.name, systemImage: "doc.on.doc"),
-                CopyAction(label: L10n.tr("copy.number"), value: f.number, systemImage: "doc.on.doc")
+                CopyAction(label: L10n.tr("copy.name"), value: f.name, icon: .copy),
+                CopyAction(label: L10n.tr("copy.number"), value: f.number, icon: .copy)
             ].filter { !$0.value.isEmpty }
         }
     }

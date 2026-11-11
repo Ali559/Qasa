@@ -45,6 +45,7 @@ jobs:
           python3 l10n/generate.py --check
           python3 design/generate.py --check
           python3 design/check.py
+          python3 assets/icons/generate.py --check
           cd apps/desktop && bun install --frozen-lockfile
       - name: Interface type check
         working-directory: apps/desktop

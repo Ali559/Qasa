@@ -4,6 +4,7 @@
 // muted square.
 import { computed } from 'vue'
 
+import QasaIcon from '@/components/QasaIcon.vue'
 import { VARIANT_ICON } from '@/icons'
 import { siteLogo } from '@/vault/present'
 import { siteIconPath } from '@/vault/siteIcon'
@@ -31,7 +32,7 @@ const logo = computed(() => (props.variant === 'login' && !iconPath.value ? site
     >{{ logo.letter }}</span
   >
   <span v-else class="tile icon" :style="{ width: `${size}px`, height: `${size}px` }" aria-hidden="true">
-    <component :is="VARIANT_ICON[variant]" :size="size * 0.375" />
+    <QasaIcon :name="VARIANT_ICON[variant]" :size="size * 0.375" />
   </span>
 </template>
 

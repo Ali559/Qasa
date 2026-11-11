@@ -2,11 +2,11 @@
 // iOS `BreachedPasswordsView` (Alerts tab): saved passwords found in Pwned Passwords.
 // Premium only; checked from this computer, sending just a 5-character hash prefix.
 // Free accounts get the locked card and the check never runs.
-import { RefreshCw, ShieldCheck, WifiOff } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { account } from '@/account/store'
 import { nav, selectTab } from '@/nav'
 import { prefs, useT } from '@/prefs'
@@ -62,8 +62,8 @@ function openItem(id: string) {
     <template v-else-if="report && (!checking || report.breachedCount > 0)">
       <CardContainer v-if="report.breachCheckFailed" :padding="20">
         <div class="stack wide">
-          <span class="line"><WifiOff :size="16" />{{ t('breached.offline') }}</span>
-          <button type="button" class="again" :disabled="checking" @click="check"><RefreshCw :size="14" />{{ t('breached.checkAgain') }}</button>
+          <span class="line"><QasaIcon name="wifi-off" :size="16" />{{ t('breached.offline') }}</span>
+          <button type="button" class="again" :disabled="checking" @click="check"><QasaIcon name="refresh" :size="14" />{{ t('breached.checkAgain') }}</button>
         </div>
       </CardContainer>
       <CardContainer v-else-if="report.breachedCount > 0" :padding="20">
@@ -74,9 +74,9 @@ function openItem(id: string) {
       </CardContainer>
       <CardContainer v-else :padding="20">
         <div class="stack">
-          <h2 class="none"><ShieldCheck :size="20" fill="currentColor" stroke="var(--card-background)" />{{ t('breached.noneTitle') }}</h2>
+          <h2 class="none"><QasaIcon name="protected" :size="20" />{{ t('breached.noneTitle') }}</h2>
           <p class="muted">{{ t('breached.noneBody') }}</p>
-          <button type="button" class="again" :disabled="checking" @click="check"><RefreshCw :size="14" />{{ t('breached.checkAgain') }}</button>
+          <button type="button" class="again" :disabled="checking" @click="check"><QasaIcon name="refresh" :size="14" />{{ t('breached.checkAgain') }}</button>
         </div>
       </CardContainer>
     </template>

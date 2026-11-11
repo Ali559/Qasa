@@ -6,6 +6,7 @@ import alibarznji.qasa.prefs.LocaleContext
 import alibarznji.qasa.services.AutoLockMonitor
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaTheme
 import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.QasaFieldGroup
@@ -47,8 +48,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -381,7 +380,7 @@ internal fun ColumnScope.AutofillUnlockPane(
     Spacer(Modifier.height(QasaDimens.gap))
     PrimaryButton(
         title = stringResource(R.string.autofill_unlock),
-        icon = Icons.Default.LockOpen,
+        icon = QasaIcons.Unlock,
         enabled = password.isNotBlank() && !busy,
         onClick = ::submit,
         modifier = Modifier.fillMaxWidth(),

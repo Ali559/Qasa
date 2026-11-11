@@ -5,6 +5,7 @@ import alibarznji.qasa.network.RemoteDevice
 import alibarznji.qasa.theme.PillBadge
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -23,15 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Computer
-import androidx.compose.material.icons.filled.Laptop
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.PhoneIphone
-import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,10 +48,10 @@ import java.util.Locale
 internal fun platformIcon(platform: String): ImageVector {
     val p = platform.lowercase()
     return when {
-        "ios" in p || "iphone" in p || "ipad" in p -> Icons.Filled.PhoneIphone
-        "android" in p -> Icons.Filled.PhoneAndroid
-        "mac" in p -> Icons.Filled.Laptop
-        else -> Icons.Filled.Computer
+        "ios" in p || "iphone" in p || "ipad" in p -> QasaIcons.Device
+        "android" in p -> QasaIcons.Device
+        "mac" in p -> QasaIcons.Laptop
+        else -> QasaIcons.Desktop
     }
 }
 
@@ -159,7 +151,7 @@ internal fun DeviceCard(
                 location?.let {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Outlined.LocationOn,
+                            QasaIcons.Address,
                             contentDescription = null,
                             tint = c.textSecondary,
                             modifier = Modifier.size(QasaIconSize.sm),
@@ -178,7 +170,7 @@ internal fun DeviceCard(
             }
             if (!isPremium) {
                 Icon(
-                    Icons.Filled.Lock,
+                    QasaIcons.Lock,
                     contentDescription = null,
                     tint = c.goldMuted,
                     modifier = Modifier.size(QasaIconSize.tiny),
@@ -191,7 +183,7 @@ internal fun DeviceCard(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapMedium)) {
                 ActionChip(
                     title = stringResource(R.string.devices_logout),
-                    icon = Icons.AutoMirrored.Filled.Logout,
+                    icon = QasaIcons.SignOut,
                     color = c.textSecondary,
                     border = c.strokeChrome,
                     enabled = actionsEnabled,
@@ -199,7 +191,7 @@ internal fun DeviceCard(
                 )
                 ActionChip(
                     title = stringResource(R.string.devices_unlink),
-                    icon = Icons.Filled.Link,
+                    icon = QasaIcons.Link,
                     color = if (unlinkDisabled) c.textTertiary else c.danger,
                     border = c.danger.copy(alpha = 0.35f),
                     enabled = actionsEnabled && !unlinkDisabled,
@@ -212,7 +204,7 @@ internal fun DeviceCard(
             Row(Modifier.fillMaxWidth()) {
                 ActionChip(
                     title = stringResource(R.string.devices_unlink),
-                    icon = Icons.Filled.Link,
+                    icon = QasaIcons.Link,
                     color = c.textSecondary,
                     border = c.strokeChrome,
                     enabled = actionsEnabled,

@@ -18282,6 +18282,28 @@
           }
         }
       }
+    },
+    "you.iconsCredit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icons: Solar by 480 Design, CC BY 4.0"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icons: Solar by 480 Design, CC BY 4.0"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icons: Solar by 480 Design, CC BY 4.0"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

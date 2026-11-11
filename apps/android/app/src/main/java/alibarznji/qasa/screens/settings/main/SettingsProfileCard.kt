@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -20,10 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,7 +59,7 @@ internal fun SettingsProfileCard(
                 Modifier.size(QasaIconSize.x8l).border(QasaDimens.ringStroke, c.accent, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Filled.Person, null, tint = c.textSecondary, modifier = Modifier.size(QasaIconSize.x4l))
+                Icon(QasaIcons.Person, null, tint = c.textSecondary, modifier = Modifier.size(QasaIconSize.x4l))
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QasaDimens.spaceSmall)) {
                 Text(name, color = c.textPrimary, style = qasaText.rowTitle)
@@ -77,7 +74,7 @@ internal fun SettingsProfileCard(
                     horizontalArrangement = Arrangement.spacedBy(QasaDimens.spaceSmall),
                 ) {
                     Icon(
-                        if (isPremium) Icons.Filled.EmojiEvents else Icons.Outlined.Person,
+                        if (isPremium) QasaIcons.BestValue else QasaIcons.Person,
                         null,
                         tint = tint,
                         modifier = Modifier.size(QasaIconSize.xxs),

@@ -101,7 +101,7 @@ struct CollectionPickerField: View {
                 }
             } extra: {
                 FieldIconButton(
-                    systemImage: "folder.badge.plus",
+                    icon: .folderAdd,
                     tint: Theme.accent,
                     accessibilityLabel: L10n.tr("vault.newCollection", locale: locale)
                 ) {

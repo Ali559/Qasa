@@ -15,7 +15,7 @@ struct AutoLockSettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         SettingsSection {
                             SettingsRow(
-                                icon: "clock",
+                                icon: .autoLock,
                                 title: String(
                                     format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
                                     prefs.autoLockMinutes
@@ -46,15 +46,14 @@ struct AutoLockSettingsView: View {
                                 prefs.autoLockMinutes = minutes
                             } label: {
                                 SettingsRow(
-                                    icon: "timer",
+                                    icon: .timer,
                                     title: String(
                                         format: L10n.tr("settings.autoLockMinutesFmt", locale: locale),
                                         minutes
                                     ),
                                     iconColor: prefs.autoLockMinutes == minutes ? Theme.accent : Theme.textSecondary
                                 ) {
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 15, weight: .bold))
+                                    QasaIconImage(.check, size: 15)
                                         .foregroundColor(Theme.accent)
                                         .opacity(prefs.autoLockMinutes == minutes ? 1 : 0)
                                 }

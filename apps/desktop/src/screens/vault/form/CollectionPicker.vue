@@ -2,7 +2,6 @@
 // iOS `CollectionPickerField` as a one-row `FieldGroup` (design/README.md rule 4): a picker
 // row (None or a folder) with an accent `FieldIconButton` beside the chevron that opens the
 // New collection `textPromptSheet`.
-import { FolderPlus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
 import { useT } from '@/prefs'
@@ -43,7 +42,7 @@ async function create() {
   <FieldGroup>
     <PickerRow v-model="selected" :label="t('vault.collection')" :options="options">
       <template #trailing>
-        <FieldIconButton :icon="FolderPlus" :label="t('vault.newCollection')" accent @click="showNew = true" />
+        <FieldIconButton icon="folder-add" :label="t('vault.newCollection')" accent @click="showNew = true" />
       </template>
     </PickerRow>
   </FieldGroup>

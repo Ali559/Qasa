@@ -6,11 +6,13 @@
 // (14 × 4 inset) with an iOS `RowDivider` between them, inset to the text. Pressed (and,
 // on desktop, hovered) = `RowButtonStyle`: a 6% text-primary wash, radius 10, 8 past the
 // row on each side. With a `trailing` slot the row is not a button itself.
-import Chevron from './Chevron.vue'
-import { computed, useSlots, type Component } from 'vue'
+import { computed, useSlots } from 'vue'
+
+import QasaIcon from './QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 
 const props = defineProps<{
-  icon: Component
+  icon: QasaIconName
   title: string
   subtitle?: string
   trailingText?: string
@@ -36,7 +38,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     @click="interactive && !disabled && $emit('click')"
   >
     <span class="badge" :style="badgeStyle" aria-hidden="true">
-      <component :is="icon" :stroke-width="2.5" />
+      <QasaIcon :name="icon" :size="16" />
     </span>
     <span class="text">
       <span class="title">{{ title }}</span>
@@ -44,7 +46,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     </span>
     <span v-if="trailingText" class="trailing-text">{{ trailingText }}</span>
     <slot name="trailing" />
-    <Chevron v-if="interactive && !destructive" dir="forward" class="chevron" />
+    <QasaIcon v-if="interactive && !destructive" name="chevron-forward" :size="13" class="chevron" />
   </component>
 </template>
 

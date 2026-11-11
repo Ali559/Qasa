@@ -38,7 +38,7 @@ struct VPNView: View {
             Text(L10n.tr("settings.requiresPremium", locale: locale))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)
-            PrimaryButton(title: L10n.tr("settings.upgradePremium", locale: locale), icon: "star.fill") {
+            PrimaryButton(title: L10n.tr("settings.upgradePremium", locale: locale), icon: .favorite) {
                 onUpgrade()
             }
             Spacer(minLength: 0)
@@ -56,7 +56,7 @@ struct VPNView: View {
                         .foregroundColor(Theme.textPrimary)
 
                     HStack(spacing: 12) {
-                        Image(systemName: "globe")
+                        QasaIconImage(.location, size: 16)
                             .foregroundColor(Theme.cyan)
                         Text(serverLabel)
                             .font(.qasa(16))
@@ -80,13 +80,13 @@ struct VPNView: View {
                 }
 
                 metricCard(
-                    icon: "key.fill",
+                    icon: .login,
                     label: L10n.tr("vpn.virtualIP", locale: locale),
                     value: vpn.assignedIP ?? "—",
                     highlighted: false
                 )
                 metricCard(
-                    icon: "lock.shield.fill",
+                    icon: .shieldLock,
                     label: L10n.tr("vpn.encryption", locale: locale),
                     value: "WireGuard",
                     highlighted: true
@@ -128,8 +128,7 @@ struct VPNView: View {
                     if vpn.isBusy {
                         ProgressView()
                     } else {
-                        Image(systemName: "power")
-                            .font(.system(size: 36, weight: .medium))
+                        QasaIconImage(.power, size: 36)
                             .foregroundColor(vpn.connected ? Theme.accent : Theme.textSecondary)
                     }
                 }
@@ -166,7 +165,7 @@ struct VPNView: View {
                     }
 
                 ToggleRow(
-                    icon: "hand.raised.fill",
+                    icon: .privacy,
                     iconColor: Theme.danger,
                     title: L10n.tr("vpn.killSwitch", locale: locale),
                     subtitle: L10n.tr("vpn.killSwitchSub", locale: locale),
@@ -175,7 +174,7 @@ struct VPNView: View {
                 )
 
                 ToggleRow(
-                    icon: "arrow.triangle.2.circlepath",
+                    icon: .sync,
                     iconColor: Theme.cyan,
                     title: L10n.tr("vpn.autoConnect", locale: locale),
                     subtitle: L10n.tr("vpn.autoConnectSub", locale: locale),
@@ -193,9 +192,9 @@ struct VPNView: View {
         return L10n.tr("vpn.autoSelect", locale: locale)
     }
 
-    private func metricCard(icon: String, label: String, value: String, highlighted: Bool) -> some View {
+    private func metricCard(icon: QasaIcon, label: String, value: String, highlighted: Bool) -> some View {
         VStack(spacing: 8) {
-            Image(systemName: icon)
+            QasaIconImage(icon, size: 16)
                 .foregroundColor(Theme.accent)
             Text(label)
                 .font(.qasa(12, weight: .semibold))

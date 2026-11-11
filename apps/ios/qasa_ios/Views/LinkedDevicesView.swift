@@ -97,7 +97,7 @@ struct LinkedDevicesView: View {
                             } label: {
                                 QasaButtonLabel(
                                     title: L10n.tr("devices.unlinkAllOthers", locale: locale),
-                                    icon: "link.badge.minus"
+                                    icon: .unlink
                                 )
                             }
                             .buttonStyle(.qasaDestructive)
@@ -127,7 +127,7 @@ struct LinkedDevicesView: View {
             message: unlinkTarget.map {
                 String(format: L10n.tr("devices.unlinkMessage", locale: locale), $0.device_name)
             },
-            icon: "link",
+            icon: .link,
             confirmTitle: L10n.tr("devices.unlink", locale: locale),
             cancelTitle: L10n.tr("settings.cancel", locale: locale),
             destructive: true
@@ -145,7 +145,7 @@ struct LinkedDevicesView: View {
             message: logoutTarget.map {
                 String(format: L10n.tr("devices.logoutMessage", locale: locale), $0.device_name)
             },
-            icon: "rectangle.portrait.and.arrow.right",
+            icon: .signOut,
             confirmTitle: L10n.tr("devices.logout", locale: locale),
             cancelTitle: L10n.tr("settings.cancel", locale: locale),
             destructive: true
@@ -163,7 +163,7 @@ struct LinkedDevicesView: View {
             message: pendingReplace.map {
                 String(format: L10n.tr("backup.replace.bodyFmt", locale: locale), $0.device_name)
             },
-            icon: "arrow.triangle.2.circlepath",
+            icon: .sync,
             confirmTitle: L10n.tr("backup.replace.button", locale: locale),
             cancelTitle: L10n.tr("backup.reminder.dismiss", locale: locale)
         ) {
@@ -173,7 +173,7 @@ struct LinkedDevicesView: View {
             isPresented: $showUnlinkAllConfirm,
             title: L10n.tr("devices.unlinkAllTitle", locale: locale),
             message: L10n.tr("devices.unlinkAllMessage", locale: locale),
-            icon: "link.badge.minus",
+            icon: .unlink,
             confirmTitle: L10n.tr("devices.unlinkAllOthers", locale: locale),
             cancelTitle: L10n.tr("settings.cancel", locale: locale),
             destructive: true
@@ -290,7 +290,7 @@ struct LinkedDevicesView: View {
                 }
             } label: {
                 HStack(alignment: .top, spacing: 16) {
-                    IconBadge(systemImage: platformIcon(device.platform))
+                    IconBadge(icon: platformIcon(device.platform))
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
@@ -319,7 +319,7 @@ struct LinkedDevicesView: View {
                             .foregroundColor(Theme.textSecondary)
 
                         if let locationText, !locationText.isEmpty {
-                            Label(locationText, systemImage: "mappin.and.ellipse")
+                            Label { Text(locationText) } icon: { QasaIconImage(.address, size: 13) }
                                 .font(.qasa(13))
                                 .foregroundColor(Theme.textSecondary)
                         }
@@ -339,8 +339,7 @@ struct LinkedDevicesView: View {
                     Spacer(minLength: 0)
 
                     if !session.isPremium {
-                        Image(systemName: "lock.fill")
-                            .font(.qasa(12, weight: .semibold))
+                        QasaIconImage(.lock, size: 12)
                             .foregroundColor(Theme.goldMuted)
                     }
                 }
@@ -353,7 +352,7 @@ struct LinkedDevicesView: View {
                 HStack(spacing: 10) {
                     actionChip(
                         title: L10n.tr("devices.logout", locale: locale),
-                        systemImage: "rectangle.portrait.and.arrow.right",
+                        icon: .signOut,
                         destructive: false
                     ) {
                         pendingLogout = device
@@ -361,7 +360,7 @@ struct LinkedDevicesView: View {
 
                     actionChip(
                         title: L10n.tr("devices.unlink", locale: locale),
-                        systemImage: "link",
+                        icon: .link,
                         destructive: true,
                         disabled: device.isPrimary && devices.count > 1
                     ) {
@@ -377,7 +376,7 @@ struct LinkedDevicesView: View {
                 Button {
                     pendingUnlink = device
                 } label: {
-                    QasaButtonLabel(title: L10n.tr("devices.unlink", locale: locale), icon: "link")
+                    QasaButtonLabel(title: L10n.tr("devices.unlink", locale: locale), icon: .link)
                 }
                 .buttonStyle(.qasaSecondary)
             }
@@ -406,13 +405,13 @@ struct LinkedDevicesView: View {
 
     private func actionChip(
         title: String,
-        systemImage: String,
+        icon: QasaIcon,
         destructive: Bool,
         disabled: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            QasaButtonLabel(title: title, icon: systemImage)
+            QasaButtonLabel(title: title, icon: icon)
                 .font(.qasa(14, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -437,18 +436,18 @@ struct LinkedDevicesView: View {
         .disabled(disabled || isActing)
     }
 
-    private func platformIcon(_ platform: String) -> String {
+    private func platformIcon(_ platform: String) -> QasaIcon {
         let p = platform.lowercased()
         if p.contains("ios") || p.contains("iphone") || p.contains("ipad") {
-            return "iphone"
+            return .device
         }
         if p.contains("android") {
-            return "smartphone"
+            return .device
         }
         if p.contains("mac") {
-            return "laptopcomputer"
+            return .laptop
         }
-        return "desktopcomputer"
+        return .desktop
     }
 
     private func formatDate(_ date: Date?) -> String? {
@@ -490,7 +489,7 @@ struct LinkedDevicesView: View {
                 } label: {
                     QasaButtonLabel(
                         title: L10n.tr("backup.replace.button", locale: locale),
-                        icon: "arrow.triangle.2.circlepath"
+                        icon: .sync
                     )
                 }
                 .buttonStyle(.qasaSecondary)
@@ -517,7 +516,7 @@ struct LinkedDevicesView: View {
         Button { showPremium = true } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(alignment: .top, spacing: 16) {
-                    IconBadge(systemImage: "star.fill", tint: Theme.gold, background: Theme.gold.opacity(0.2))
+                    IconBadge(icon: .favorite, tint: Theme.gold, background: Theme.gold.opacity(0.2))
                     VStack(alignment: .leading, spacing: 4) {
                         Text(L10n.tr("devices.needMore", locale: locale))
                             .font(.qasa(16, weight: .bold))
@@ -550,9 +549,8 @@ struct LinkedDevicesView: View {
 
     private var infoNote: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "info.circle.fill")
+            QasaIconImage(.info, size: 18)
                 .foregroundColor(Theme.info)
-                .font(.system(size: 18))
             Text(L10n.tr("devices.infoNote", locale: locale))
                 .font(.qasa(14))
                 .foregroundColor(Theme.textSecondary)

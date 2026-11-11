@@ -5,6 +5,7 @@ import alibarznji.qasa.screens.PasswordHealthReport
 import alibarznji.qasa.screens.breach.BreachLockedCard
 import alibarznji.qasa.screens.vpn.VpnViewModel
 import alibarznji.qasa.screens.vpn.rememberVpnToggle
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.vpn.VpnPhase
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
@@ -27,13 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Backup
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.GppMaybe
-import androidx.compose.material.icons.outlined.TipsAndUpdates
-import androidx.compose.material.icons.outlined.TaskAlt
-import androidx.compose.material.icons.outlined.VpnLock
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -60,9 +54,9 @@ private val MeterHeight = 8.dp
 internal fun StatusHero(status: HomeStatus, onAddFirst: () -> Unit) {
     val c = qasaColors
     val (icon, tint) = when (status) {
-        HomeStatus.AllGood -> Icons.Outlined.TaskAlt to c.success
-        HomeStatus.NeedsAttention -> Icons.Outlined.TipsAndUpdates to c.accent
-        HomeStatus.Empty, HomeStatus.Loading -> Icons.Outlined.Key to c.accent
+        HomeStatus.AllGood -> QasaIcons.Success to c.success
+        HomeStatus.NeedsAttention -> QasaIcons.Tip to c.accent
+        HomeStatus.Empty, HomeStatus.Loading -> QasaIcons.Login to c.accent
     }
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
@@ -160,7 +154,7 @@ internal fun VpnCard(isPremium: Boolean, vm: VpnViewModel, onOpenVpn: () -> Unit
     val toggle = rememberVpnToggle(vm.vpn)
     HomeCard(onClick = onOpenVpn) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconTile(Icons.Outlined.VpnLock)
+            IconTile(QasaIcons.Vpn)
             Spacer(Modifier.size(QasaDimens.gapSmall))
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.nav_vpn), color = c.textPrimary, style = qasaText.rowTitle)
@@ -205,7 +199,7 @@ internal fun BreachedCard(locked: Boolean, onClick: () -> Unit, onUpgrade: () ->
     }
     HomeCard(onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconTile(Icons.Outlined.GppMaybe)
+            IconTile(QasaIcons.Breach)
             Spacer(Modifier.size(QasaDimens.gapSmall))
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.nav_breached_passwords), color = c.textPrimary, style = qasaText.rowTitle)
@@ -224,7 +218,7 @@ internal fun BackupReminderCard(onOpen: () -> Unit, onDismiss: () -> Unit) {
     val c = qasaColors
     HomeCard(onClick = onOpen) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconTile(Icons.Outlined.Backup)
+            IconTile(QasaIcons.Backup)
             Spacer(Modifier.size(QasaDimens.gapSmall))
             Text(
                 stringResource(R.string.backup_reminder_title),

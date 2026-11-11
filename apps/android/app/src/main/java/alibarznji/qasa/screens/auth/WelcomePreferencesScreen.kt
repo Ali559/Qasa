@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.BrandHeader
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
@@ -16,9 +17,6 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -34,9 +32,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -129,9 +124,9 @@ fun WelcomePreferencesScreen(
                             onClick = { vm.prefs.setThemeMode(t) },
                             // iOS `themeIcon`: circle.lefthalf.filled / sun.max / moon.
                             icon = when (t) {
-                                AppThemeMode.SYSTEM -> Icons.Default.Contrast
-                                AppThemeMode.LIGHT -> Icons.Default.LightMode
-                                AppThemeMode.DARK -> Icons.Default.DarkMode
+                                AppThemeMode.SYSTEM -> QasaIcons.ThemeSystem
+                                AppThemeMode.LIGHT -> QasaIcons.ThemeLight
+                                AppThemeMode.DARK -> QasaIcons.ThemeDark
                             },
                         )
                     }
@@ -141,7 +136,7 @@ fun WelcomePreferencesScreen(
             StickyBottomBar {
                 PrimaryButton(
                     title = stringResource(R.string.onboarding_continue),
-                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    icon = QasaIcons.Forward,
                     onClick = {
                         vm.prefs.hasCompletedWelcome = true
                         onContinue()
@@ -192,7 +187,7 @@ private fun SelectRow(title: String, selected: Boolean, onClick: () -> Unit, ico
         }
         Text(title, color = c.textPrimary, style = qasaText.ctaLabel, modifier = Modifier.weight(1f))
         if (selected) {
-            Icon(Icons.Default.Check, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.md))
+            Icon(QasaIcons.Check, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.md))
         }
     }
 }

@@ -6,6 +6,7 @@ import alibarznji.qasa.network.RenewalLinkDTO
 import alibarznji.qasa.screens.premium.gatewayDisplayName
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.ToggleRow
 import alibarznji.qasa.theme.qasaColors
@@ -21,9 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -165,7 +163,7 @@ internal fun AutoRenewCard(
             subtitle = subtitle,
             checked = checked,
             enabled = enabled,
-            icon = Icons.Filled.Autorenew,
+            icon = QasaIcons.Sync,
             iconColor = c.accent,
             onCheckedChange = onChange,
         )
@@ -206,7 +204,7 @@ internal fun RenewalLinkCard(link: RenewalLinkDTO, isConfirming: Boolean, onPay:
         )
         PrimaryButton(
             title = stringResource(if (isConfirming) R.string.premium_processing else R.string.sub_payrenewal),
-            icon = Icons.Filled.Lock,
+            icon = QasaIcons.Lock,
             enabled = !isConfirming,
             onClick = onPay,
         )

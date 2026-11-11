@@ -10,6 +10,7 @@ import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SecondaryButton
@@ -27,10 +28,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Key
-import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -84,7 +81,7 @@ fun BreachedPasswordsScreen(
                     EmptyState(
                         title = stringResource(R.string.breached_none_title),
                         hint = stringResource(R.string.breached_none_body),
-                        icon = Icons.Outlined.Shield,
+                        icon = QasaIcons.Shield,
                     )
                     SecondaryButton(title = stringResource(R.string.breached_check_again), onClick = vm::recheckBreaches)
                 }
@@ -131,7 +128,7 @@ private fun OfflineState(onRetry: () -> Unit) {
     val c = qasaColors
     Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gap)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.WifiOff, null, tint = c.textSecondary, modifier = Modifier.size(QasaIconSize.lg))
+            Icon(QasaIcons.WifiOff, null, tint = c.textSecondary, modifier = Modifier.size(QasaIconSize.lg))
             Spacer(Modifier.width(QasaDimens.gapSmall))
             Text(stringResource(R.string.breached_offline), color = c.textSecondary, style = qasaText.bodyMedium)
         }
@@ -156,7 +153,7 @@ private fun BreachedList(report: PasswordHealthReport, onOpen: (String) -> Unit)
             VaultItemRow(
                 title = row.displayName,
                 subtitle = stringResource(R.string.breached_seen_count, format.format(report.breachCounts[row.id] ?: 0)),
-                icon = Icons.Outlined.Key,
+                icon = QasaIcons.Login,
                 logo = siteLogoFor(row.displayName),
                 onClick = { onOpen(row.id) },
             )

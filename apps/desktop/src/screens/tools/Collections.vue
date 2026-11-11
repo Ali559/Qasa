@@ -2,13 +2,13 @@
 // iOS `CollectionsView` + `CollectionDetailView` ("Folders"): folder cards with an item
 // count and an Edit / Delete menu, + to create, and each folder's items one level in.
 // Deleting a folder moves its items out of it (they are never deleted).
-import { EllipsisVertical, Folder, Inbox, Plus, Trash2 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import Fab from '@/components/Fab.vue'
 import Menu from '@/components/Menu.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { nav, selectTab } from '@/nav'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
@@ -70,7 +70,7 @@ function openItem(id: string) {
 <template>
   <PageFrame v-if="open" :title="open.name" back :gap="12" @back="open = null">
     <div v-if="items.length === 0" class="empty">
-      <Inbox :size="40" />
+      <QasaIcon name="inbox" :size="40" />
       <strong>{{ t('collections.emptyCollectionTitle') }}</strong>
       <span>{{ t('collections.assignHint', open.name) }}</span>
     </div>
@@ -79,12 +79,12 @@ function openItem(id: string) {
 
   <PageFrame v-else :title="t('nav.collections')" back :gap="12" @back="$emit('back')">
     <div v-if="sorted.length === 0" class="empty">
-      <Folder :size="40" />
+      <QasaIcon name="folder" :size="40" />
       <strong>{{ t('collections.noneTitle') }}</strong>
       <span>{{ t('collections.empty') }}</span>
     </div>
     <div v-for="c in sorted" :key="c.id" class="folder" role="button" tabindex="0" @click="open = c" @keydown.enter.self="open = c">
-      <span class="icon" aria-hidden="true"><Folder fill="currentColor" :stroke-width="2.5" /></span>
+      <span class="icon" aria-hidden="true"><QasaIcon name="folder" :size="16" /></span>
       <span class="text">
         <span class="name">{{ c.name }}</span>
         <span class="count">{{ countLabel(c) }}</span>
@@ -96,12 +96,12 @@ function openItem(id: string) {
           { label: t('common.delete'), destructive: true, action: () => (deleting = c) },
         ]"
       >
-        <EllipsisVertical :size="17" />
+        <QasaIcon name="more" :size="17" />
       </Menu>
     </div>
 
     <template #overlay>
-      <div class="fab"><Fab :icon="Plus" :label="t('collections.createTitle')" @click="startCreate" /></div>
+      <div class="fab"><Fab icon="add" :label="t('collections.createTitle')" @click="startCreate" /></div>
       <PromptSheet
         v-model="name"
         :open="!!nameSheet"
@@ -115,7 +115,7 @@ function openItem(id: string) {
       <ConfirmDialog
         :open="!!deleting"
         :title="t('collections.deleteTitle')"
-        :icon="Trash2"
+        icon="delete"
         :message="t('collections.deleteMessage')"
         :confirm-label="t('common.delete')"
         destructive

@@ -2,6 +2,7 @@ package alibarznji.qasa.screens.home
 
 import alibarznji.qasa.R
 import alibarznji.qasa.backup.BackupService
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.notifications.NotificationBadgeViewModel
 import alibarznji.qasa.screens.AppPage
@@ -28,8 +29,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -177,7 +176,7 @@ private fun GreetingRow(displayName: String, unread: Int, onNotifications: () ->
                 Modifier.fillMaxSize().background(c.cardBackground, RoundedCornerShape(QasaDimens.radiusMedium)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Outlined.Notifications, null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.xl))
+                Icon(QasaIcons.Alerts, null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.xl))
                 // Unread badge: server inbox + "On this device" (NotificationBadgeViewModel).
                 if (unread > 0) {
                     Text(

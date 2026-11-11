@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.vault.detail
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.clickable
@@ -13,9 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -58,7 +56,7 @@ internal fun DetailFieldRow(
                 // A locked row's eye answers the gate first (handled by the caller).
                 IconButton(onClick = onToggleShown, modifier = Modifier.size(QasaIconSize.x3l)) {
                     Icon(
-                        if (hidden || locked) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        if (hidden || locked) QasaIcons.Show else QasaIcons.Hide,
                         contentDescription = stringResource(
                             if (hidden || locked) R.string.a11y_showpassword else R.string.a11y_hidepassword,
                         ),

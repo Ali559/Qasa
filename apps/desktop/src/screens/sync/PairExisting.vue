@@ -3,8 +3,7 @@
 // thing: this computer joins the other device's vault over Wi‑Fi — the vault and account
 // arrive through the code-authenticated channel — then you unlock with the same main
 // password.
-import Chevron from '@/components/Chevron.vue'
-import {ArrowRight, CheckCircle2} from 'lucide-vue-next'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
@@ -22,7 +21,7 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
   <AuthFrame>
     <div class="content">
       <button v-if="!done" type="button" class="back" @click="emit('back')">
-        <Chevron dir="back" />{{ t('common.back') }}
+        <QasaIcon name="chevron-back" :size="17" />{{ t('common.back') }}
       </button>
 
       <template v-if="!done">
@@ -32,14 +31,14 @@ const done = ref<Extract<SyncEvent, { stage: 'done' }> | null>(null)
       </template>
 
       <template v-else>
-        <CheckCircle2 :size="48" class="ok" />
+        <QasaIcon name="success" :size="48" class="ok" />
         <h1 class="title">{{ t('sync.adoptedTitle', done.peerName) }}</h1>
         <p class="muted">{{ t('sync.adoptedBody', done.peerName) }}</p>
       </template>
     </div>
 
     <template #footer>
-      <PrimaryButton v-if="done" :title="t('pair.done')" :icon="ArrowRight" mirror-icon @click="emit('paired')" />
+      <PrimaryButton v-if="done" :title="t('pair.done')" icon="forward" mirror-icon @click="emit('paired')" />
     </template>
   </AuthFrame>
 </template>

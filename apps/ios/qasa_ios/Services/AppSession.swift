@@ -147,19 +147,19 @@ enum AppPage: String, CaseIterable, Identifiable, Hashable {
         L10n.tr(localizationKey, locale: AppLanguage.current.locale)
     }
 
-    var systemImage: String {
+    var icon: QasaIcon {
         switch self {
-        case .vault: return "lock.shield.fill"
-        case .notifications: return "bell.fill"
-        case .generator: return "wand.and.stars"
-        case .passwordHealth: return "heart.text.square.fill"
-        case .breachedPasswords: return "exclamationmark.shield.fill"
-        case .vpn: return "network.badge.shield.half.filled"
-        case .collections: return "folder.fill"
-        case .settings: return "gearshape.fill"
-        case .terms: return "doc.text"
-        case .privacy: return "hand.raised.fill"
-        case .premiumUpgrade: return "crown.fill"
+        case .vault: return .shieldLock
+        case .notifications: return .alerts
+        case .generator: return .generate
+        case .passwordHealth: return .health
+        case .breachedPasswords: return .breach
+        case .vpn: return .vpn
+        case .collections: return .folder
+        case .settings: return .settings
+        case .terms: return .note
+        case .privacy: return .privacy
+        case .premiumUpgrade: return .premium
         }
     }
 

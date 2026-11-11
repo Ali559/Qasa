@@ -4,10 +4,10 @@
 // Edit and Delete in the header. Protected note content needs the main password first.
 // Stored dates show in the UI language; an item that breaks a field rule (made by an
 // older version, an import or a browser capture) gets the "needs attention" banner.
-import { Eye, EyeOff, Pencil, Trash2, TriangleAlert } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { copySecret, PAYMENT_CLIPBOARD_MS } from '@/clipboard'
 import { prefs, useT } from '@/prefs'
 import { showToast } from '@/toast'
@@ -126,10 +126,10 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
   <div class="detail">
     <header class="bar">
       <button type="button" class="icon-button accent" :aria-label="t('common.edit')" :title="t('common.edit')" @click="emit('edit')">
-        <Pencil :size="17" :stroke-width="2.5" />
+        <QasaIcon name="edit" :size="17" />
       </button>
       <button type="button" class="icon-button danger" :aria-label="t('common.delete')" :title="t('common.delete')" @click="confirmDelete = true">
-        <Trash2 :size="17" :stroke-width="2.5" />
+        <QasaIcon name="delete" :size="17" />
       </button>
     </header>
 
@@ -138,13 +138,13 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
         <div class="hero">
           <span class="hero-icon" aria-hidden="true">
             <svg v-if="heroSitePath" viewBox="0 0 24 24" width="36" height="36" fill="currentColor" focusable="false"><path :d="heroSitePath" /></svg>
-            <component :is="VARIANT_ICON[payload.variant]" v-else :size="36" :stroke-width="1.75" />
+            <QasaIcon v-else :name="VARIANT_ICON[payload.variant]" :size="36" />
           </span>
           <h1 class="name">{{ row?.displayName ?? t('vault.untitled') }}</h1>
         </div>
 
         <p v-if="needsAttention" class="attention" role="status">
-          <TriangleAlert class="attention-icon" :stroke-width="2.5" aria-hidden="true" />
+          <QasaIcon name="warning" :size="17" class="attention-icon" />
           <span>{{ t('validation.needsAttention') }}</span>
         </p>
 
@@ -163,8 +163,7 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
                     :aria-label="revealed.has(field.label) ? t('vault.hidePassword') : t('vault.showPassword')"
                     @click.stop="toggleReveal(field)"
                   >
-                    <EyeOff v-if="revealed.has(field.label)" :size="14" />
-                    <Eye v-else :size="14" />
+                    <QasaIcon :name="revealed.has(field.label) ? 'hide' : 'show'" :size="14" />
                   </button>
                 </div>
                 <span v-if="field.secret && !unlocked" class="field-value muted">{{ t('vault.lockedAuthenticate') }}</span>
@@ -217,7 +216,7 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
     <ConfirmDialog
       :open="confirmDelete"
       :title="t('vault.deleteItemTitle')"
-      :icon="Trash2"
+      icon="delete"
       :message="t('vault.deleteItemMessage', row?.displayName ?? t('vault.thisItem'))"
       :confirm-label="t('common.delete')"
       destructive

@@ -7,6 +7,7 @@ import alibarznji.qasa.screens.vault.list.VaultListItemRow
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.vault.BiometricGateEffect
 import alibarznji.qasa.vault.VaultItemKind
@@ -27,8 +28,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -103,7 +102,7 @@ internal fun CollectionDetailContent(
             EmptyState(
                 title = stringResource(R.string.collections_emptycollectiontitle),
                 hint = stringResource(R.string.collections_assignhint, collectionName),
-                icon = Icons.Default.Inbox,
+                icon = QasaIcons.Inbox,
             )
         } else {
             LazyColumn(

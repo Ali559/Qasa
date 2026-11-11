@@ -7,6 +7,7 @@ import alibarznji.qasa.theme.MintFab
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.QasaTextInputSheet
 import alibarznji.qasa.theme.qasaColors
@@ -27,11 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -73,7 +69,7 @@ internal fun CollectionsListContent(
                 EmptyState(
                     title = stringResource(R.string.collections_nonetitle),
                     hint = stringResource(R.string.collections_empty),
-                    icon = Icons.Default.Folder,
+                    icon = QasaIcons.Folder,
                 )
             } else {
                 collections.forEach { col ->
@@ -168,7 +164,7 @@ private fun CollectionCard(
                 .border(QasaDimens.stroke, c.strokeChrome, RoundedCornerShape(QasaDimens.radiusMedium)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Default.Folder, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
+            Icon(QasaIcons.Folder, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
         }
         Spacer(Modifier.width(QasaDimens.drawerGap))
         Column(modifier = Modifier.weight(1f)) {
@@ -185,7 +181,7 @@ private fun CollectionCard(
         }
         Box {
             IconButton(onClick = { menuOpen = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
+                Icon(QasaIcons.More, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
             }
             DropdownMenu(
                 expanded = menuOpen,
@@ -194,7 +190,7 @@ private fun CollectionCard(
             ) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.common_edit), color = c.textPrimary) },
-                    leadingIcon = { Icon(Icons.Default.Edit, null, tint = c.textPrimary) },
+                    leadingIcon = { Icon(QasaIcons.Edit, null, tint = c.textPrimary) },
                     onClick = {
                         menuOpen = false
                         onEdit()
@@ -202,7 +198,7 @@ private fun CollectionCard(
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.common_delete), color = c.danger) },
-                    leadingIcon = { Icon(Icons.Default.Delete, null, tint = c.danger) },
+                    leadingIcon = { Icon(QasaIcons.Delete, null, tint = c.danger) },
                     onClick = {
                         menuOpen = false
                         onDelete()

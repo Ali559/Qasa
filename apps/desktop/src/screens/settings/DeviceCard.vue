@@ -3,10 +3,11 @@
 // badges, platform, location, activation date, and the action row. Premium gets
 // Sign out + Unlink chips; Free gets a lock (the card opens Upgrade) and, on another
 // device, a single Unlink to free the slot. A 4pt accent bar marks this device.
-import { Computer, Laptop, Link, Lock, LogOut, MapPin, Monitor, Smartphone, TabletSmartphone, type LucideIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import PillBadge from '@/components/PillBadge.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import type { QasaIconName } from '@/icons/qasaIcons'
 import type { RemoteDevice } from '@/account/types'
 import { prefs, useT } from '@/prefs'
 
@@ -21,14 +22,12 @@ const props = defineProps<{
 const emit = defineEmits<{ upgrade: []; logout: []; unlink: []; blocked: [] }>()
 const t = useT()
 
-/** iOS `platformIcon`, plus the three desktop platforms (plan §5.3). */
-function platformIcon(platform: string): LucideIcon {
+/** iOS `platformIcon`: a phone for iOS and Android, a laptop for macOS, else a desktop. */
+function platformIcon(platform: string): QasaIconName {
   const p = platform.toLowerCase()
-  if (p.includes('ios') || p.includes('iphone') || p.includes('ipad')) return Smartphone
-  if (p.includes('android')) return TabletSmartphone
-  if (p.includes('mac')) return Laptop
-  if (p.includes('windows')) return Monitor
-  return Computer
+  if (p.includes('ios') || p.includes('iphone') || p.includes('ipad') || p.includes('android')) return 'device'
+  if (p.includes('mac')) return 'laptop'
+  return 'desktop'
 }
 
 const icon = computed(() => platformIcon(props.device.platform))
@@ -58,7 +57,7 @@ function onUnlink() {
       :class="{ tappable: !premium }"
       @click="!premium && emit('upgrade')"
     >
-      <span class="platform" aria-hidden="true"><component :is="icon" :stroke-width="2.5" /></span>
+      <span class="platform" aria-hidden="true"><QasaIcon :name="icon" :size="16" /></span>
       <span class="text">
         <span class="title-line">
           <span class="name">{{ device.device_name }}</span>
@@ -66,15 +65,15 @@ function onUnlink() {
           <PillBadge v-if="device.is_primary" :text="t('devices.primary')" color="var(--gold-muted)" />
         </span>
         <span class="meta">{{ device.platform.toUpperCase() }}</span>
-        <span v-if="location" class="meta location"><MapPin :size="13" aria-hidden="true" />{{ location }}</span>
+        <span v-if="location" class="meta location"><QasaIcon name="address" :size="13" />{{ location }}</span>
         <span v-if="activated" class="activated">{{ t('devices.activatedAt', activated) }}</span>
       </span>
-      <Lock v-if="!premium" class="lock" :size="12" :stroke-width="2.5" />
+      <QasaIcon v-if="!premium" name="lock" :size="12" class="lock" />
     </component>
 
     <div v-if="premium" class="chips">
       <button type="button" class="chip" :disabled="busy" @click="emit('logout')">
-        <LogOut :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.logout') }}</span>
+        <QasaIcon name="sign-out" :size="15" /><span>{{ t('devices.logout') }}</span>
       </button>
       <button
         type="button"
@@ -84,11 +83,11 @@ function onUnlink() {
         :disabled="busy"
         @click="onUnlink"
       >
-        <Link :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlink') }}</span>
+        <QasaIcon name="link" :size="15" /><span>{{ t('devices.unlink') }}</span>
       </button>
     </div>
     <button v-else-if="!isCurrent" type="button" class="qasa-button secondary" :disabled="busy" @click="emit('unlink')">
-      <Link :stroke-width="2.5" aria-hidden="true" /><span>{{ t('devices.unlink') }}</span>
+      <QasaIcon name="link" :size="15" /><span>{{ t('devices.unlink') }}</span>
     </button>
   </article>
 </template>

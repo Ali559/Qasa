@@ -107,7 +107,7 @@ struct CreateVaultView: View {
 
                     SettingsSection {
                         ToggleRow(
-                            icon: "touchid",
+                            icon: .fingerprint,
                             iconColor: Theme.accent,
                             title: L10n.tr("auth.create.enableBiometrics", locale: locale),
                             subtitle: L10n.tr("auth.create.biometricsHint", locale: locale),
@@ -119,8 +119,7 @@ struct CreateVaultView: View {
                     CardContainer(background: Theme.cardBackgroundLight) {
                         ZStack {
                             GeometryReader { geo in
-                                Image(systemName: "shield.fill")
-                                    .font(.qasa(88, weight: .bold))
+                                QasaIconImage(.shield, size: 88)
                                     .foregroundStyle(Theme.accent.opacity(0.14))
                                     // Pin to the physical trailing edge so RTL does not leave a hollow watermark on the leading side.
                                     .position(x: geo.size.width - 8, y: 28)
@@ -129,7 +128,7 @@ struct CreateVaultView: View {
 
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack(spacing: 8) {
-                                    Image(systemName: "lock.fill")
+                                    QasaIconImage(.lock, size: 16)
                                         .foregroundColor(Theme.accent)
                                     Text(L10n.tr("auth.create.zeroKnowledge", locale: locale))
                                         .font(.qasa(16, weight: .semibold))
@@ -159,7 +158,7 @@ struct CreateVaultView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .bottomActionBar {
-            PrimaryButton(title: L10n.tr("auth.create.buttonLocal", locale: locale), icon: "key.fill") {
+            PrimaryButton(title: L10n.tr("auth.create.buttonLocal", locale: locale), icon: .login) {
                 createVault()
             }
             .disabled(!canCreate)

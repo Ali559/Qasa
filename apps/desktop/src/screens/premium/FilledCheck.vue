@@ -1,13 +1,13 @@
 <script setup lang="ts">
-// SF Symbol `checkmark.circle.fill` (Lucide has only the outlined circle).
-import { Check } from 'lucide-vue-next'
+// SF Symbol `checkmark.circle.fill`: the library's check on a filled accent disc.
+import QasaIcon from '@/components/QasaIcon.vue'
 
 withDefaults(defineProps<{ size?: number }>(), { size: 20 })
 </script>
 
 <template>
   <span class="filled" :style="{ width: `${size}px`, height: `${size}px` }" aria-hidden="true">
-    <Check :size="Math.round(size * 0.6)" :stroke-width="3.5" />
+    <QasaIcon name="check" :size="Math.round(size * 0.6)" />
   </span>
 </template>
 

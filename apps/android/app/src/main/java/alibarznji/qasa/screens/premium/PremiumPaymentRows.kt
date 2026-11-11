@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.theme.MintSwitch
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.annotation.StringRes
@@ -20,10 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,7 +80,7 @@ internal fun PremiumAutoRenewRow(checked: Boolean, chargesWallet: Boolean, onChe
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall),
     ) {
-        Icon(Icons.Filled.Autorenew, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
+        Icon(QasaIcons.Sync, contentDescription = null, tint = c.accent, modifier = Modifier.size(QasaIconSize.lg))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QasaDimens.spaceMicro)) {
             Text(stringResource(R.string.premium_autorenew), color = c.textPrimary, style = qasaText.bodySemibold15)
             // Only a wallet the server can charge renews by itself; the rest get a payment link.
@@ -134,7 +131,7 @@ private fun PaymentRow(option: GatewayOption, selected: Boolean, onClick: () -> 
         }
         Spacer(Modifier.width(QasaDimens.gapSmall))
         Icon(
-            if (selected) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
+            if (selected) QasaIcons.Success else QasaIcons.Circle,
             contentDescription = null,
             tint = if (selected) c.accent else c.stroke,
             modifier = Modifier.size(QasaIconSize.xl),

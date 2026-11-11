@@ -3,13 +3,13 @@
 // Appearance, Data & Account,
 // with the same rows, order, alerts and status line. The profile card, biometric unlock,
 // Autofill, Linked Devices (pairing code, sync network) and Premium arrive in later phases.
-import { Clock, Crown, DatabaseBackup, Download, Ellipsis, Fingerprint, Globe, Laptop, LogOut, Moon, Puzzle, RefreshCw, ScanFace, Trash2, Upload, User, UserX, Wifi } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
 import { account, forgetAccount } from '@/account/store'
 import { forgetBackup } from '@/backup/store'
 import CardContainer from '@/components/CardContainer.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
@@ -187,12 +187,11 @@ function logout() {
          medium, 3 × 8), then Upgrade (primary, crown) or Manage Subscription (secondary) 14 below. -->
     <CardContainer>
       <div class="profile">
-        <span class="avatar"><User fill="currentColor" :stroke-width="0" /></span>
+        <span class="avatar"><QasaIcon name="person" :size="22" /></span>
         <span class="who">
           <span class="name">{{ t('session.qasaUser') }}</span>
           <span class="plan" :class="{ premium: account.status?.isPremium }">
-            <Crown v-if="account.status?.isPremium" fill="currentColor" />
-            <User v-else />
+            <QasaIcon :name="account.status?.isPremium ? 'best-value' : 'person'" :size="10" />
             {{ t(account.status?.isPremium ? 'settings.premiumAccount' : 'settings.freeAccount') }}
           </span>
         </span>
@@ -200,7 +199,7 @@ function logout() {
       <PrimaryButton
         class="plan-button"
         :kind="account.status?.isPremium ? 'secondary' : 'primary'"
-        :icon="account.status?.isPremium ? undefined : Crown"
+        :icon="account.status?.isPremium ? undefined : 'premium'"
         :title="t(account.status?.isPremium ? 'settings.manageSubscription' : 'settings.upgradePremium')"
         @click="openSubPage(account.status?.isPremium ? 'manageSubscription' : 'premiumUpgrade', 'settings')"
       />
@@ -208,13 +207,13 @@ function logout() {
 
     <SettingsSection :title="t('settings.security')">
         <SettingsRow
-          :icon="Ellipsis"
+          icon="login"
           :title="t('settings.changeMasterPassword')"
           @click="showChangeMasterPassword = true"
         />
         <template v-if="bio && (bio.kind !== 'none' || bio.enabled)">
           <SettingsRow
-            :icon="bio.kind === 'windowsHello' ? ScanFace : Fingerprint"
+            :icon="bio.kind === 'windowsHello' ? 'face' : 'fingerprint'"
             :title="t('settings.biometricUnlock')"
             icon-color="var(--text-primary)"
             :subtitle="bioSubtitle || undefined"
@@ -225,7 +224,7 @@ function logout() {
           </SettingsRow>
         </template>
         <SettingsRow
-          :icon="Clock"
+          icon="auto-lock"
           :title="t('settings.autoLock')"
           :trailing-text="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
           @click="showAutoLock = true"
@@ -235,31 +234,31 @@ function logout() {
     <SettingsSection :title="t('settings.linkedDevices')">
         <template #title-trailing><span class="active-count">{{ t('settings.activeCount', account.status?.devicesUsed ?? 1) }}</span></template>
         <SettingsRow
-          :icon="Laptop"
+          icon="device"
           :title="t('settings.thisComputer')"
           :subtitle="t('settings.thisDevice')"
           icon-color="var(--accent)"
           @click="openSubPage('linkedDevices', 'settings')"
         />
         <SettingsRow
-          :icon="Wifi"
+          icon="wifi"
           :title="t('settings.syncNetwork')"
           :subtitle="account.status?.isPremium ? t('settings.premiumLanSync') : t('settings.requiresPremium')"
           @click="openSubPage('wifiSync', 'settings')"
         />
-        <SettingsRow :icon="Puzzle" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
+        <SettingsRow icon="link" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
       </SettingsSection>
 
     <SettingsSection :title="t('settings.appearance')">
         <SettingsRow
-          :icon="Globe"
+          icon="website"
           :title="t('settings.language')"
           :trailing-text="LANGUAGE_NAMES[prefs.language]"
           aria-haspopup="dialog"
           @click="appearanceSheet = 'language'"
         />
         <SettingsRow
-          :icon="Moon"
+          icon="theme-dark"
           :title="t('settings.theme')"
           :trailing-text="t(`settings.theme.${prefs.theme}`)"
           aria-haspopup="dialog"
@@ -269,22 +268,22 @@ function logout() {
 
     <SettingsSection :title="t('settings.dataAccount')">
         <SettingsRow
-          :icon="DatabaseBackup"
+          icon="backup-done"
           :title="t('backup.title')"
           :subtitle="t('backup.subtitle')"
           @click="openSubPage('backups', 'settings')"
         />
-        <SettingsRow :icon="Download" :title="t('settings.importCsv')" :disabled="busy" @click="performImport" />
-        <SettingsRow :icon="Upload" :title="t('settings.exportCsv')" :disabled="busy" @click="performExport" />
+        <SettingsRow icon="import" :title="t('settings.importCsv')" :disabled="busy" @click="performImport" />
+        <SettingsRow icon="export" :title="t('settings.exportCsv')" :disabled="busy" @click="performExport" />
         <SettingsRow
-          :icon="Trash2"
+          icon="delete-forever"
           :title="t('settings.clearLocalData')"
           destructive
           @click="showClearDataAlert = true"
         />
-        <SettingsRow :icon="LogOut" :title="t('settings.logout')" @click="showLogoutConfirm = true" />
+        <SettingsRow icon="sign-out" :title="t('settings.logout')" @click="showLogoutConfirm = true" />
         <SettingsRow
-          :icon="UserX"
+          icon="device-remove"
           :title="t('settings.deleteAccount')"
           destructive
           :disabled="busy || !account.status?.accountId"
@@ -294,7 +293,7 @@ function logout() {
 
     <SettingsSection :title="t('update.section')">
         <SettingsRow
-          :icon="RefreshCw"
+          icon="refresh"
           :title="t('update.check')"
           :subtitle="updateStatus"
           :trailing-text="updater.current ? t('update.version', updater.current) : undefined"
@@ -312,7 +311,7 @@ function logout() {
       <ConfirmDialog
         :open="showClearDataAlert"
         :title="t('settings.clearAlertTitle')"
-        :icon="Trash2"
+        icon="delete-forever"
         :message="t('settings.clearAlertMessage')"
         :cancel-label="t('settings.cancel')"
         :confirm-label="t('settings.clear')"
@@ -323,7 +322,7 @@ function logout() {
       <ConfirmDialog
         :open="showDeleteAccount"
         :title="t('settings.deleteAccountTitle')"
-        :icon="UserX"
+        icon="device-remove"
         :message="t('settings.deleteAccountMessage')"
         :confirm-label="t('settings.deleteAccount')"
         destructive
@@ -333,7 +332,7 @@ function logout() {
       <ConfirmDialog
         :open="showLogoutConfirm"
         :title="t('settings.lockAlertTitle')"
-        :icon="LogOut"
+        icon="sign-out"
         :message="t('settings.lockAlertMessage')"
         :cancel-label="t('settings.cancel')"
         :confirm-label="t('settings.logout')"

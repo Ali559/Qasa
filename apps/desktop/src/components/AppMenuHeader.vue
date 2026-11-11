@@ -2,7 +2,7 @@
 // iOS `AppMenuHeader`: 64pt, chrome surface, 20 bold title, optional 40pt back circle
 // whose chevron flips in RTL, trailing slot.
 
-import Chevron from '@/components/Chevron.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { useT } from '@/prefs'
 
 defineProps<{ title: string; back?: boolean }>()
@@ -13,7 +13,7 @@ const t = useT()
 <template>
   <header class="menu-header">
     <button v-if="back" type="button" class="back" :aria-label="t('common.back')" @click="emit('back')">
-      <Chevron dir="back" />
+      <QasaIcon name="chevron-back" :size="17" />
     </button>
     <h1 class="title">{{ title }}</h1>
     <span class="spacer" />

@@ -116,7 +116,7 @@ struct PasswordGeneratorContent: View {
                     SectionLabel(text: L10n.tr("gen.generatedPassword"))
                     Spacer()
                     FieldIconButton(
-                        systemImage: "arrow.clockwise",
+                        icon: .refresh,
                         tint: Theme.accent,
                         accessibilityLabel: L10n.tr("gen.generatedPassword")
                     ) {
@@ -139,7 +139,7 @@ struct PasswordGeneratorContent: View {
                 } label: {
                     QasaButtonLabel(
                         title: model.copied ? L10n.tr("gen.copied") : L10n.tr("gen.copyPassword"),
-                        icon: model.copied ? "checkmark" : "doc.on.doc"
+                        icon: model.copied ? .check : .copy
                     )
                 }
                 .buttonStyle(.qasaSecondary)

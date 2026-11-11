@@ -16,6 +16,7 @@ import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.QasaButton
 import alibarznji.qasa.theme.QasaButtonKind
@@ -35,8 +36,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -341,7 +340,7 @@ fun ManageSubscriptionScreen(onDone: () -> Unit, vm: SubViewModel = hiltViewMode
                     ),
                     kind = QasaButtonKind.Destructive,
                     enabled = !isCancelling,
-                    icon = Icons.Outlined.Cancel,
+                    icon = QasaIcons.Close,
                     onClick = { confirmCancel() },
                 )
             }

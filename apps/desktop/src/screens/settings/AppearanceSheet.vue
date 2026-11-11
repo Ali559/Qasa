@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // The iOS Language and Theme `Menu`s on Settings, as a small sheet with the Welcome
 // `ChoiceList`. Picking an option applies it at once and closes, as a menu does.
-import { Contrast, Languages, Moon, Sun } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
@@ -30,14 +29,14 @@ const languageChoices = computed<Choice<Language>[]>(() =>
     label: LANGUAGE_NAMES[language],
     dir: isRtl(language) ? 'rtl' : 'ltr',
     lang: language,
-    icon: Languages,
+    icon: 'language',
   })),
 )
 
 const themeChoices = computed<Choice<ThemePreference>[]>(() => [
-  { value: 'system', label: t('settings.theme.system'), icon: Contrast },
-  { value: 'light', label: t('settings.theme.light'), icon: Sun },
-  { value: 'dark', label: t('settings.theme.dark'), icon: Moon },
+  { value: 'system', label: t('settings.theme.system'), icon: 'theme-system' },
+  { value: 'light', label: t('settings.theme.light'), icon: 'theme-light' },
+  { value: 'dark', label: t('settings.theme.dark'), icon: 'theme-dark' },
 ])
 
 const language = computed<Language>({

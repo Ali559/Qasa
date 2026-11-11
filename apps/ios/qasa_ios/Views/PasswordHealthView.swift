@@ -54,7 +54,7 @@ struct PasswordHealthView: View {
                         if breachLocked {
                             // Premium-only: no count on Free, the card opens the upgrade page.
                             Button(action: onUpgrade) {
-                                statCard(title: L10n.tr("health.breached"), systemImage: "lock.fill", accent: Theme.textSecondary)
+                                statCard(title: L10n.tr("health.breached"), icon: .lock, accent: Theme.textSecondary)
                             }
                             .buttonStyle(PressableStyle())
                         } else {
@@ -192,11 +192,10 @@ struct PasswordHealthView: View {
         }
     }
 
-    private func statCard(title: String, value: String = "", systemImage: String? = nil, accent: Color) -> some View {
+    private func statCard(title: String, value: String = "", icon: QasaIcon? = nil, accent: Color) -> some View {
         VStack(spacing: 8) {
-            if let systemImage {
-                Image(systemName: systemImage)
-                    .font(.system(size: 24, weight: .semibold))
+            if let icon {
+                QasaIconImage(icon, size: 24)
                     .foregroundColor(accent)
                     .frame(height: 34)
             } else {
@@ -254,14 +253,14 @@ struct PasswordHealthIssuesView: View {
 
     private var currentItems: [VaultListRow] { items(for: selectedTab) }
 
-    private var emptyCopy: (title: String, icon: String, body: String) {
+    private var emptyCopy: (title: String, icon: QasaIcon, body: String) {
         switch selectedTab {
         case .reused:
-            return (L10n.tr("health.noReusedTitle"), "arrow.triangle.2.circlepath", L10n.tr("health.noReusedBody"))
+            return (L10n.tr("health.noReusedTitle"), .sync, L10n.tr("health.noReusedBody"))
         case .weak:
-            return (L10n.tr("health.noWeakTitle"), "exclamationmark.triangle", L10n.tr("health.noWeakBody"))
+            return (L10n.tr("health.noWeakTitle"), .warning, L10n.tr("health.noWeakBody"))
         case .breached:
-            return (L10n.tr("breached.noneTitle"), "checkmark.shield", L10n.tr("breached.noneBody"))
+            return (L10n.tr("breached.noneTitle"), .protected, L10n.tr("breached.noneBody"))
         }
     }
 
@@ -310,7 +309,7 @@ struct PasswordHealthIssuesView: View {
                     } else if currentItems.isEmpty {
                         ContentUnavailableView(
                             emptyCopy.title,
-                            systemImage: emptyCopy.icon,
+                            icon: emptyCopy.icon,
                             description: Text(emptyCopy.body)
                         )
                         .padding(.top, 48)

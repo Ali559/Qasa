@@ -13,6 +13,7 @@ import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -43,10 +44,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -183,10 +180,10 @@ fun VaultItemDetailScreen(
             trailing = payload?.let { p ->
                 {
                     IconButton(onClick = { onEdit(p) }) {
-                        Icon(Icons.Default.Edit, stringResource(R.string.common_edit), tint = c.accent)
+                        Icon(QasaIcons.Edit, stringResource(R.string.common_edit), tint = c.accent)
                     }
                     IconButton(onClick = { showDeleteConfirm = true }) {
-                        Icon(Icons.Default.Delete, stringResource(R.string.common_delete), tint = c.danger)
+                        Icon(QasaIcons.Delete, stringResource(R.string.common_delete), tint = c.danger)
                     }
                 }
             },
@@ -335,7 +332,7 @@ private fun NeedsAttentionBanner() {
             .padding(QasaDimens.gap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Outlined.WarningAmber, contentDescription = null, tint = c.gold, modifier = Modifier.size(QasaIconSize.lg))
+        Icon(QasaIcons.Warning, contentDescription = null, tint = c.gold, modifier = Modifier.size(QasaIconSize.lg))
         Spacer(Modifier.width(QasaDimens.contentGap))
         Text(stringResource(R.string.validation_needsattention), color = c.textPrimary, style = qasaText.bodyMedium)
     }

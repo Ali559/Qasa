@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.FilterChipButton
 import alibarznji.qasa.theme.MintFab
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
@@ -34,9 +35,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -153,7 +151,7 @@ internal fun VaultListContent(
                         value = query,
                         onValueChange = { query = it },
                         placeholder = stringResource(R.string.vault_searchplaceholder),
-                        leadingIcon = Icons.Default.Search,
+                        leadingIcon = QasaIcons.Search,
                     )
                 }
                 item {
@@ -194,7 +192,7 @@ internal fun VaultListContent(
                             } else {
                                 stringResource(R.string.vault_nosearchmatches)
                             },
-                            icon = Icons.Default.Inbox,
+                            icon = QasaIcons.Inbox,
                         )
                     }
                 }

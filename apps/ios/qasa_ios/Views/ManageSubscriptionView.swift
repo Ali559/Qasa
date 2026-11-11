@@ -92,7 +92,7 @@ struct ManageSubscriptionView: View {
                 format: L10n.tr("sub.cancelConfirmMessage", locale: locale),
                 formattedDate(subscription?.expires_at)
             ),
-            icon: "xmark.circle",
+            icon: .close,
             confirmTitle: L10n.tr("sub.continue", locale: locale),
             cancelTitle: L10n.tr("sub.keepPremium", locale: locale),
             destructive: true
@@ -107,7 +107,7 @@ struct ManageSubscriptionView: View {
             isPresented: $showRemovePaymentConfirm,
             title: L10n.tr("sub.removePaymentMethod", locale: locale),
             message: L10n.tr("sub.removePaymentMethodConfirm", locale: locale),
-            icon: "creditcard",
+            icon: .card,
             confirmTitle: L10n.tr("sub.removePaymentMethod", locale: locale),
             cancelTitle: L10n.tr("common.cancel", locale: locale),
             destructive: true
@@ -218,9 +218,8 @@ struct ManageSubscriptionView: View {
     private var autoRenewCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                Image(systemName: "arrow.triangle.2.circlepath")
+                QasaIconImage(.sync, size: 18)
                     .foregroundColor(Theme.accent)
-                    .font(.qasa(18))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(L10n.tr("sub.autoRenew", locale: locale))
                         .font(.qasa(15, weight: .semibold))
@@ -279,7 +278,7 @@ struct ManageSubscriptionView: View {
                 title: isPayingRenewal
                     ? L10n.tr("premium.processing", locale: locale)
                     : L10n.tr("sub.payRenewal", locale: locale),
-                icon: "lock.fill"
+                icon: .lock
             ) {
                 Task { await payRenewal(link) }
             }
@@ -330,7 +329,7 @@ struct ManageSubscriptionView: View {
                         title: isCancelling
                             ? L10n.tr("sub.cancellingProgress", locale: locale)
                             : L10n.tr("sub.confirmCancel", locale: locale),
-                        icon: "xmark.circle"
+                        icon: .close
                     )
                 }
                 .buttonStyle(.qasaDestructive)

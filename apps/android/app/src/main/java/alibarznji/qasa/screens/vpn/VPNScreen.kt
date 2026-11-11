@@ -6,6 +6,7 @@ import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.PremiumGate
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.VpnPowerDial
 import alibarznji.qasa.theme.qasaColors
@@ -16,9 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -148,14 +146,14 @@ fun VPNScreen(
             }
             Spacer(Modifier.height(SectionSpacing))
             VpnMetricCard(
-                icon = Icons.Default.Key,
+                icon = QasaIcons.Login,
                 label = stringResource(R.string.vpn_virtualip),
                 value = assignedIP ?: "—",
                 highlighted = false,
             )
             Spacer(Modifier.height(SectionSpacing))
             VpnMetricCard(
-                icon = Icons.Default.Security,
+                icon = QasaIcons.ShieldLock,
                 label = stringResource(R.string.vpn_encryption),
                 // Protocol name, not translated on iOS either.
                 value = "WireGuard",

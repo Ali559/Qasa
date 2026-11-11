@@ -5,9 +5,9 @@
 // Saves queue up and are shown one at a time; nothing is written until Save is clicked.
 // Third: "Confirm to fill <card>", the master password for a card fill when Touch ID /
 // Hello isn't set up (docs/autofill-plan.md §3.2).
-import { Globe, KeyRound, User } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 
+import QasaIcon from '@/components/QasaIcon.vue'
 import Sheet from '@/components/Sheet.vue'
 import TextField from '@/components/TextField.vue'
 import { bridgeApi, type ConfirmPrompt, type PairPrompt, type SavePrompt } from '@/bridge/api'
@@ -112,17 +112,17 @@ async function decideSave(accept: boolean) {
       </div>
       <dl class="fields">
         <div v-if="saves[0].itemTitle" class="field">
-          <KeyRound aria-hidden="true" />
+          <QasaIcon name="login" :size="16" />
           <dt>{{ t('vault.type.login') }}</dt>
           <dd>{{ saves[0].itemTitle }}</dd>
         </div>
         <div class="field">
-          <Globe aria-hidden="true" />
+          <QasaIcon name="website" :size="16" />
           <dt>{{ t('bridge.website') }}</dt>
           <dd dir="ltr">{{ saves[0].website }}</dd>
         </div>
         <div v-if="saves[0].username" class="field">
-          <User aria-hidden="true" />
+          <QasaIcon name="person" :size="16" />
           <dt>{{ t('bridge.username') }}</dt>
           <dd dir="ltr">{{ saves[0].username }}</dd>
         </div>

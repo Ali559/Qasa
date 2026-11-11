@@ -29,7 +29,7 @@ struct CollectionsView: View {
                         if collections.isEmpty {
                             ContentUnavailableView(
                                 L10n.tr("collections.noneTitle"),
-                                systemImage: "folder",
+                                icon: .folder,
                                 description: Text(L10n.tr("collections.empty"))
                             )
                             .padding(.top, 48)
@@ -49,7 +49,7 @@ struct CollectionsView: View {
                 }
             }
 
-            MintFAB(systemImage: "plus") {
+            MintFAB(icon: .add) {
                 newName = ""
                 showCreate = true
             }
@@ -89,7 +89,7 @@ struct CollectionsView: View {
             ),
             title: L10n.tr("collections.deleteTitle"),
             message: L10n.tr("collections.deleteMessage"),
-            icon: "trash",
+            icon: .delete,
             confirmTitle: L10n.tr("common.delete"),
             cancelTitle: L10n.tr("common.cancel"),
             destructive: true
@@ -101,7 +101,7 @@ struct CollectionsView: View {
     private func collectionCard(_ collection: VaultCollection, name: String) -> some View {
         let count = cache.rows.filter { $0.collectionId == collection.id }.count
         return HStack(spacing: 14) {
-            IconBadge(systemImage: "folder.fill")
+            IconBadge(icon: .folder)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(name)
@@ -123,15 +123,15 @@ struct CollectionsView: View {
                     editing = collection
                     editName = name
                 } label: {
-                    Label(L10n.tr("common.edit"), systemImage: "pencil")
+                    Label { Text(L10n.tr("common.edit")) } icon: { QasaIconImage(.edit, size: 17) }
                 }
                 Button(role: .destructive) {
                     deleting = collection
                 } label: {
-                    Label(L10n.tr("common.delete"), systemImage: "trash")
+                    Label { Text(L10n.tr("common.delete")) } icon: { QasaIconImage(.delete, size: 17) }
                 }
             } label: {
-                Image(systemName: "ellipsis")
+                QasaIconImage(.more, size: 16)
                     .rotationEffect(.degrees(90))
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
@@ -199,7 +199,7 @@ struct CollectionDetailView: View {
                 if collectionItems.isEmpty {
                     ContentUnavailableView(
                         L10n.tr("collections.emptyCollectionTitle"),
-                        systemImage: "tray",
+                        icon: .inbox,
                         description: Text(String(
                             format: L10n.tr("collections.assignHint"),
                             name

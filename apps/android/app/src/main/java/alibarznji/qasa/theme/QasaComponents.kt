@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -250,7 +248,7 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier) {
 fun MintFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Default.Add,
+    icon: ImageVector = QasaIcons.Add,
     contentDescription: String? = null,
 ) {
     val c = qasaColors

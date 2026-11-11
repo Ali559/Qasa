@@ -44,8 +44,7 @@ struct VaultStoreErrorView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "lock.trianglebadge.exclamationmark.fill")
-                .font(.system(size: 40, weight: .semibold))
+            QasaIconImage(.breach, size: 40)
                 .foregroundColor(Theme.danger)
             Text(L10n.tr("error.vaultStoreTitle", locale: locale))
                 .font(.qasa(26, weight: .bold))

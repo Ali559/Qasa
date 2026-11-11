@@ -8,6 +8,54 @@ shortcuts: when an app differs from iOS, the other app changes.
 The rules are in [`design/README.md`](design/README.md). Per-app open items stay in
 `apps/<app>/TODO.md`; this file is for work that spans apps.
 
+**Every item below is a shared rule** for iOS, Android, the desktop app and the browser
+extension (where it applies). No app makes a design rule of its own: a rule goes into
+`design/README.md` (and its values into `design/tokens.json`) first, then into every app.
+Any change to what a screen looks like also updates the landing page's app mockups
+(`apps/landing`).
+
+## 0. Next (added 2026-11-12)
+
+- [x] **Icons: one Solar Linear library for every app** (2026-11-12, branch `solar-icons`).
+      `assets/icons` → every app (`generate.py`, checked in CI); SF Symbols, Material and
+      Lucide are gone. Active navigation tabs show the filled glyph. Fingerprint and Wi-Fi
+      come from Tabler at Solar's line weight. Credit under About on the You screen.
+- [ ] **Icons, follow-up:** walk each app side by side and make the same thing use the same
+      icon everywhere. Each app was converted separately, and a few were picked by judgement:
+      desktop "Delete account" uses `device-remove`, its add-item "Personal info" uses `person`,
+      and Auto-backup and Restore both show `history`. Wanted in the library: a puzzle
+      (browser extension), an "open app" window, an image (scan a QR from a picture) and a
+      vertical ellipsis. Not yet looked at on Android or desktop screens beyond the unlock
+      and create-vault screens.
+- [ ] **Suggest a strong password when the user signs up somewhere.** Check every app: when
+      autofill sees a new-account or new-password form (sign-up on a site or app), offer to
+      generate a strong password and save it as a new login. Very important.
+- [ ] **Item colours do nothing.** Picking a colour on an item must change how the item shows
+      (its tile and accents), with a light and a dark value for each colour. The picker must
+      also show which colour is selected.
+- [ ] **No Cancel when adding or renaming a folder.** The folder sheet closes by dragging down,
+      like every other sheet.
+- [ ] **Item options (the ⋯ button) and every dropdown use the app's own sheet**, not the
+      system menu: same sheet header, rows and colours on every app.
+- [ ] **Dark mode: the background is too close to the primary colour.** Make the dark
+      background a dark ash grey (reference: WhatsApp's text-field background in dark mode),
+      clearly apart from the purple accent. The Home screen may keep its warm/calm blend.
+- [ ] **Protected items:**
+  - Opening one shows only the main password / biometric sheet, on a plain cover: the item
+    must not be visible behind it.
+  - Once open, its contents stay hidden like a password, with the eye button (crossed /
+    uncrossed) to show each value.
+- [ ] **You → Tools: dividers between rows**, like the Security section in Settings.
+- [ ] **The Notifications page always says "Notifications"** in its header, never "Breached
+      passwords". The Premium prompt for breached passwords inside it stays.
+- [ ] **First launch:**
+  - Screen 1: choose the language only (no theme picker).
+  - After "Get started": at most 5 carousel screens about the app's free features, in the
+    chosen language, with a sleek animated design.
+  - The last screen has "Let's get started" and a name field with a cheeky, short prompt
+    (along the lines of "What should we call you?").
+  - **Show previews before building it.**
+
 ## 1. One shared design spec
 
 - [x] **Spec from iOS** (2026-11-11): `design/tokens.json` holds every color, radius, size,

@@ -4,12 +4,12 @@
 // per-row delete (the iOS swipe; a row menu or the Delete key here), the empty state, the
 // red action-failed line, and cursor paging that loads the next page when the end of the
 // list scrolls into view. Every change is optimistic and rolls back if the server refuses.
-import { BellOff, EllipsisVertical } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import CardContainer from '@/components/CardContainer.vue'
 import Menu from '@/components/Menu.vue'
 import PageFrame from '@/components/PageFrame.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import Sheet from '@/components/Sheet.vue'
 import { accountApi } from '@/account/api'
@@ -192,7 +192,7 @@ async function remove(n: InboxNotification) {
     <div v-if="items.length === 0 && firstLoad" class="loading"><span class="spinner" aria-hidden="true" /></div>
 
     <div v-else-if="items.length === 0" class="empty">
-      <BellOff :size="40" />
+      <QasaIcon name="notifications-off" :size="40" />
       <strong>{{ t('notifications.empty') }}</strong>
       <span>{{ t('notifications.emptyDesc') }}</span>
     </div>
@@ -212,7 +212,7 @@ async function remove(n: InboxNotification) {
               </span>
             </button>
             <Menu :label="t('a11y.moreActions')" :items="[{ label: t('common.delete'), destructive: true, action: () => remove(n) }]">
-              <EllipsisVertical :size="17" />
+              <QasaIcon name="more" :size="17" />
             </Menu>
           </div>
         </template>

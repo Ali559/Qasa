@@ -44,7 +44,7 @@ struct WelcomePreferencesView: View {
         }
         .background(welcomeBackground.ignoresSafeArea())
         .bottomActionBar {
-            PrimaryButton(title: L10n.tr("onboarding.continue", locale: locale), icon: "arrow.forward") {
+            PrimaryButton(title: L10n.tr("onboarding.continue", locale: locale), icon: .forward) {
                 prefs.markWelcomeCompleted()
                 onContinue()
             }
@@ -72,7 +72,7 @@ struct WelcomePreferencesView: View {
             }
         } label: {
             SettingsRow(
-                icon: "character.bubble",
+                icon: .language,
                 title: language.displayName,
                 iconColor: selected ? Theme.accent : Theme.textSecondary
             ) {
@@ -105,19 +105,18 @@ struct WelcomePreferencesView: View {
 
     /// Trailing check for the selected option (space kept so titles never shift).
     private func selectionMark(_ selected: Bool) -> some View {
-        Image(systemName: "checkmark")
-            .font(.system(size: 15, weight: .bold))
+        QasaIconImage(.check, size: 15)
             .foregroundColor(Theme.accent)
             .opacity(selected ? 1 : 0)
             .scaleEffect(selected ? 1 : 0.6)
             .accessibilityHidden(true)
     }
 
-    private func themeIcon(_ theme: AppThemePreference) -> String {
+    private func themeIcon(_ theme: AppThemePreference) -> QasaIcon {
         switch theme {
-        case .system: return "circle.lefthalf.filled"
-        case .light: return "sun.max"
-        case .dark: return "moon"
+        case .system: return .themeSystem
+        case .light: return .themeLight
+        case .dark: return .themeDark
         }
     }
 }

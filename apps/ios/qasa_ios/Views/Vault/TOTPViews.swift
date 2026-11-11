@@ -68,15 +68,15 @@ struct TOTPEditorField: View {
                 parseError = nil
                 showScanner = true
             } label: {
-                Label(L10n.tr("totp.scan"), systemImage: "qrcode.viewfinder")
+                Label { Text(L10n.tr("totp.scan")) } icon: { QasaIconImage(.qrScan, size: 17) }
             }
             Button {
                 openKeyEntry()
             } label: {
-                Label(L10n.tr("totp.enterKey"), systemImage: "keyboard")
+                Label { Text(L10n.tr("totp.enterKey")) } icon: { QasaIconImage(.keyboard, size: 17) }
             }
         } label: {
-            QasaButtonLabel(title: L10n.tr("totp.add"), icon: "plus")
+            QasaButtonLabel(title: L10n.tr("totp.add"), icon: .add)
                 .font(.qasa(16, weight: .semibold))
                 .foregroundColor(Theme.accent)
         }
@@ -99,7 +99,7 @@ struct TOTPEditorField: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
-            FieldIconButton(systemImage: "xmark", accessibilityLabel: L10n.tr("totp.remove")) {
+            FieldIconButton(icon: .close, accessibilityLabel: L10n.tr("totp.remove")) {
                 totp = nil
                 parseError = nil
             }
@@ -154,10 +154,10 @@ struct TOTPScannerSheet: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 case .denied:
                     VStack(alignment: .leading, spacing: 16) {
-                        Label(L10n.tr("totp.cameraDenied"), systemImage: "camera.fill")
+                        Label { Text(L10n.tr("totp.cameraDenied")) } icon: { QasaIconImage(.camera, size: 14) }
                             .font(.qasa(14))
                             .foregroundColor(Theme.textPrimary)
-                        PrimaryButton(title: L10n.tr("totp.enterKey"), icon: "keyboard", action: onEnterKey)
+                        PrimaryButton(title: L10n.tr("totp.enterKey"), icon: .keyboard, action: onEnterKey)
                     }
                     Spacer(minLength: 0)
                 }
@@ -268,8 +268,7 @@ struct TOTPCodeRow: View {
                     Button {
                         onCopy(totp.code())
                     } label: {
-                        Image(systemName: "doc.on.doc")
-                            .font(.qasa(14))
+                        QasaIconImage(.copy, size: 14)
                             .foregroundColor(Theme.accent)
                     }
                     .buttonStyle(.plain)

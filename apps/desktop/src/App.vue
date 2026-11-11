@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // App state machine, as iOS `qasaApp.RootView` (docs/design.md §12.1):
 // launching → welcome → create vault | unlock → shell, plus the store-error screen.
-import { Trash2 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
@@ -124,7 +123,7 @@ defineExpose({ session })
   <ConfirmDialog
     :open="confirmLogout"
     :title="t('settings.clearAlertTitle')"
-    :icon="Trash2"
+    icon="delete-forever"
     :message="t('settings.clearAlertMessage')"
     :confirm-label="t('settings.clear')"
     destructive

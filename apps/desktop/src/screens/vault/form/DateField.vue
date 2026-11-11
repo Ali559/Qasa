@@ -6,7 +6,6 @@
 // as Qasa reads it, in the UI language, is a 12 secondary caption inside the row. Reading is the core's
 // `parse_date`, so a legacy stored form ("Nov 6, 2000") shows its date too until the
 // next save rewrites it.
-import { Calendar, CalendarCheck } from 'lucide-vue-next'
 import { onBeforeUnmount, ref, watch } from 'vue'
 
 import { prefs, useT } from '@/prefs'
@@ -56,7 +55,7 @@ function onPick() {
   <FieldRow v-model="model" :label="label" :placeholder="t('field.datePlaceholder')" :error="error">
     <template #trailing>
       <FieldIconButton
-        :icon="picking ? CalendarCheck : Calendar"
+        :icon="picking ? 'check' : 'calendar'"
         :label="picking ? t('date.done') : t('date.pick')"
         :pressed="picking"
         accent

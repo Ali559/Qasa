@@ -3,6 +3,7 @@ package alibarznji.qasa.screens.settings
 import alibarznji.qasa.R
 import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.QasaRow
 import alibarznji.qasa.theme.QasaRowPressable
@@ -23,12 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -72,7 +67,7 @@ fun AutoLockSheet(prefs: AppPreferences, onDismiss: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap)) {
                 SettingsSection {
                     QasaRow(
-                        icon = Icons.Outlined.Schedule,
+                        icon = QasaIcons.AutoLock,
                         title = stringResource(R.string.settings_autolockminutesfmt, minutes),
                         trailing = {
                             MinutesStepper(
@@ -100,12 +95,12 @@ fun AutoLockSheet(prefs: AppPreferences, onDismiss: () -> Unit) {
                         modifier = Modifier.semantics { selected = isCurrent },
                     ) {
                         QasaRow(
-                            icon = Icons.Outlined.Timer,
+                            icon = QasaIcons.Timer,
                             iconColor = if (isCurrent) c.accent else c.textSecondary,
                             title = stringResource(R.string.settings_autolockminutesfmt, preset),
                             trailing = {
                                 Icon(
-                                    Icons.Filled.Check,
+                                    QasaIcons.Check,
                                     contentDescription = null,
                                     tint = c.accent,
                                     modifier = Modifier.size(PresetCheckSize).alpha(if (isCurrent) 1f else 0f),
@@ -143,9 +138,9 @@ private fun MinutesStepper(
             .background(c.calm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepperHalf(Icons.Filled.Remove, stringResource(R.string.common_decrease), canDecrease, onDecrease)
+        StepperHalf(QasaIcons.Minus, stringResource(R.string.common_decrease), canDecrease, onDecrease)
         Box(Modifier.width(QasaDimens.stroke).fillMaxHeight().padding(vertical = QasaDimens.contentGap).background(c.strokeChrome))
-        StepperHalf(Icons.Filled.Add, stringResource(R.string.common_increase), canIncrease, onIncrease)
+        StepperHalf(QasaIcons.Plus, stringResource(R.string.common_increase), canIncrease, onIncrease)
     }
 }
 

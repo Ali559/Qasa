@@ -100,7 +100,7 @@ struct VaultItemEditor: View {
             ),
             title: L10n.tr("vault.couldNotSave", locale: AppLanguage.current.locale),
             message: saveError,
-            icon: "exclamationmark.triangle",
+            icon: .warning,
             confirmTitle: L10n.tr("common.ok", locale: AppLanguage.current.locale)
         ) {
             saveError = nil
@@ -172,7 +172,7 @@ struct VaultItemEditor: View {
             error: error("password")
         ) {
             FieldIconButton(
-                systemImage: "wand.and.stars",
+                icon: .generate,
                 tint: Theme.accent,
                 accessibilityLabel: L10n.tr("vault.generatePassword")
             ) {

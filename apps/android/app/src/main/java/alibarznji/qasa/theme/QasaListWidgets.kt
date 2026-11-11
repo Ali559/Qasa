@@ -31,10 +31,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -116,7 +112,7 @@ fun QasaRow(
 @Composable
 fun RowChevron() {
     // The SF Symbol's own 11x14 frame: no size modifier.
-    Icon(QasaGlyphs.ChevronForward, contentDescription = null, tint = qasaColors.textTertiary)
+    Icon(QasaIcons.ChevronForward, contentDescription = null, tint = qasaColors.textTertiary)
 }
 
 /** iOS `RowValue`: trailing value text, `type.rowValue` (13), `textSecondary`, one line. */
@@ -439,7 +435,7 @@ fun VaultItemRow(
             Spacer(Modifier.width(QasaDimens.contentGap))
             if (onCopy != null) {
                 QasaRowIconButton(
-                    icon = Icons.Default.ContentCopy,
+                    icon = QasaIcons.Copy,
                     contentDescription = copyContentDescription,
                     onClick = onCopy,
                 )
@@ -498,7 +494,7 @@ fun CheckToggle(
             ) {
                 if (checked) {
                     Icon(
-                        Icons.Default.Check,
+                        QasaIcons.Check,
                         contentDescription = null,
                         tint = c.accent,
                         modifier = Modifier.size(QasaIconSize.xxxs),
@@ -541,7 +537,7 @@ fun EmptyState(
     title: String,
     hint: String,
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Default.Add,
+    icon: ImageVector = QasaIcons.Add,
 ) {
     val c = qasaColors
     Column(

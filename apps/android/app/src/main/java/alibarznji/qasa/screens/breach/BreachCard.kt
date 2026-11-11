@@ -4,6 +4,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.theme.PillBadge
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -22,10 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -109,7 +106,7 @@ fun BreachCard(breach: Breach, modifier: Modifier = Modifier, onRotatePassword: 
             }
             if (unresolved) {
                 ActionRow(
-                    icon = Icons.Default.Key,
+                    icon = QasaIcons.Login,
                     label = stringResource(R.string.breach_rotatepassword),
                     tint = c.danger,
                     background = c.chrome,
@@ -118,7 +115,7 @@ fun BreachCard(breach: Breach, modifier: Modifier = Modifier, onRotatePassword: 
                 )
             } else {
                 ActionRow(
-                    icon = Icons.Default.Check,
+                    icon = QasaIcons.Check,
                     label = stringResource(R.string.breach_actiontaken),
                     tint = c.textTertiary,
                     background = c.cardBackgroundLight,
@@ -177,4 +174,4 @@ private fun ActionRow(
 }
 
 /** The single "Emails" field iOS attaches to every scan result (`BreachMonitorView.breachList`). */
-val EmailsFieldIcon: ImageVector = Icons.Outlined.Email
+val EmailsFieldIcon: ImageVector = QasaIcons.Email

@@ -3,7 +3,7 @@ package alibarznji.qasa.theme
 import alibarznji.qasa.R
 import androidx.compose.ui.res.painterResource
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIconFrame
+import alibarznji.qasa.theme.QasaIconFrame import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
@@ -28,7 +27,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -250,7 +248,7 @@ internal fun HeaderBackButton(onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         // iOS `chevron.backward` 17 semibold in its 13x18 frame, centred like SwiftUI does.
-        Icon(QasaGlyphs.ChevronBackward, contentDescription = null, tint = c.textPrimary)
+        Icon(QasaIcons.ChevronBack, contentDescription = null, tint = c.textPrimary)
     }
 }
 

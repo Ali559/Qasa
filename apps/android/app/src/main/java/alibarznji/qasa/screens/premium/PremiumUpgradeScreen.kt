@@ -9,6 +9,7 @@ import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.StickyBottomBar
 import alibarznji.qasa.theme.qasaColors
@@ -20,8 +21,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -108,7 +107,7 @@ fun PremiumUpgradeScreen(
                                 selectedGateway.badge,
                             )
                         },
-                        icon = Icons.Filled.Lock,
+                        icon = QasaIcons.Lock,
                         enabled = !isPaying && !isPremium && selected != null,
                                 onClick = {
                                     // Wallet payments aren't open yet: show "Coming soon" and

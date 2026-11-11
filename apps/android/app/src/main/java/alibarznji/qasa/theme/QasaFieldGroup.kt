@@ -22,10 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DropdownMenu
@@ -504,7 +500,7 @@ fun QasaSecureRow(
         trailing = {
             trailing?.invoke(this)
             FieldIconButton(
-                icon = if (isRevealed) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                icon = if (isRevealed) QasaIcons.Hide else QasaIcons.Show,
                 contentDescription = stringResource(
                     if (isRevealed) R.string.a11y_hidepassword else R.string.a11y_showpassword,
                 ),
@@ -637,7 +633,7 @@ fun QasaDateRow(
         caption = localized?.takeIf { it != text.trim() },
         trailing = {
             FieldIconButton(
-                icon = Icons.Default.CalendarMonth,
+                icon = QasaIcons.Calendar,
                 contentDescription = stringResource(R.string.date_pick),
                 onClick = { open = !open },
                 tint = c.accent,

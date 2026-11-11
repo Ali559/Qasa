@@ -1,5 +1,6 @@
 package alibarznji.qasa.screens.vault.editor
 
+import alibarznji.qasa.theme.QasaIcons
 import uniffi.qasa_ffi.FfiField
 import alibarznji.qasa.R
 import alibarznji.qasa.theme.FieldIconButton
@@ -21,8 +22,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -79,7 +78,7 @@ fun CollectionPickerField(
         onSelect = { onChange(it?.id) },
         trailing = {
             FieldIconButton(
-                icon = Icons.Default.CreateNewFolder,
+                icon = QasaIcons.FolderAdd,
                 contentDescription = stringResource(R.string.vault_newcollection),
                 onClick = { showNew = true },
                 tint = c.accent,

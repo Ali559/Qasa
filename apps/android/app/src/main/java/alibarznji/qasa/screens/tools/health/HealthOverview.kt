@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.HalfCircleGauge
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.qasaColors
@@ -17,8 +18,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -178,7 +177,7 @@ private fun HealthStatCard(
         ) {
             if (locked) {
                 Box(Modifier.height(HEALTH_STAT_VALUE_HEIGHT), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.x4l))
+                    Icon(QasaIcons.Lock, null, tint = c.gold, modifier = Modifier.size(QasaIconSize.x4l))
                 }
             } else {
                 Text(java.text.NumberFormat.getIntegerInstance().format(value), color = accent, style = qasaText.hero)

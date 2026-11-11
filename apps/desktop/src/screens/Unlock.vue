@@ -3,12 +3,12 @@
 // sealed for this vault. With biometrics on, the prompt starts by itself (once each time the
 // screen appears or the window comes back), unless the main password is due again: then
 // only the password is offered, and the screen says why.
-import { Fingerprint, KeyRound, LockOpen, ScanFace, Shield } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import AuthFrame from '@/components/AuthFrame.vue'
 import CardContainer from '@/components/CardContainer.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import FieldGroup from '@/components/FieldGroup.vue'
 import FieldRow from '@/components/FieldRow.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
@@ -133,7 +133,7 @@ async function unlock() {
           <FieldRow v-model="password" :label="t('auth.unlock.masterPassword')" secure revealable autofocus :error="error" @submit="unlock" />
         </FieldGroup>
         <p v-if="!error && passwordDue" class="due">
-          <KeyRound :stroke-width="2.75" class="due-icon" aria-hidden="true" />
+          <QasaIcon name="login" :size="13" class="due-icon" />
           <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
         </p>
       </div>
@@ -141,7 +141,7 @@ async function unlock() {
       <!-- iOS: a `SettingsRow` with a chevron in a stroked card, 14 in, `PressableStyle`. -->
       <div v-if="showBiometric" class="bio">
         <SettingsRow
-          :icon="bio?.kind === 'windowsHello' ? ScanFace : Fingerprint"
+          :icon="bio?.kind === 'windowsHello' ? 'face' : 'fingerprint'"
           :title="t('auth.unlock.biometrics')"
           :subtitle="t('auth.unlock.biometricsHint')"
           :disabled="busy"
@@ -151,7 +151,7 @@ async function unlock() {
 
       <CardContainer muted class="local-only">
         <div class="lo-title">
-          <Shield :size="17" class="accent" fill="currentColor" aria-hidden="true" />
+          <QasaIcon name="shield" :size="17" class="accent" />
           <span>{{ t('auth.unlock.localOnly') }}</span>
         </div>
         <p class="lo-body">{{ t('auth.unlock.localOnlyBody') }}</p>
@@ -161,7 +161,7 @@ async function unlock() {
     <template #footer>
       <PrimaryButton
         :title="busy ? t('auth.securingVault') : t('auth.unlock.button')"
-        :icon="LockOpen"
+        icon="unlock"
         :disabled="!canUnlock"
         @click="unlock"
       />

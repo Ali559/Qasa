@@ -4,11 +4,11 @@
 // desktop's stand-in for the camera — read the QR code from an image) with the help hint as
 // a 12 secondary caption; once set, the live code with the issuer as the caption and a
 // trailing Remove button. The secret itself is never shown.
-import { Image, Keyboard, Plus, X } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import FieldIconButton from '@/components/FieldIconButton.vue'
 import GroupRow from '@/components/GroupRow.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import { rowId } from '@/components/fieldGroup'
 import PromptSheet from './PromptSheet.vue'
 import { useT } from '@/prefs'
@@ -100,12 +100,12 @@ function openKey() {
   <GroupRow :id="id" :label="t('field.totp')" :error="rowError" :control="false">
     <div v-if="!model" class="add-wrap" @focusout="closeMenu">
       <button type="button" class="add" :aria-expanded="showMenu" aria-haspopup="menu" @click="showMenu = !showMenu">
-        <Plus :stroke-width="2.5" aria-hidden="true" />
+        <QasaIcon name="add" :size="16" />
         <span>{{ t('totp.add') }}</span>
       </button>
       <div v-if="showMenu" class="menu" role="menu">
-        <button type="button" role="menuitem" @click="fromImage"><Image :size="16" aria-hidden="true" />{{ t('totp.scanImage') }}</button>
-        <button type="button" role="menuitem" @click="openKey"><Keyboard :size="16" aria-hidden="true" />{{ t('totp.enterKey') }}</button>
+        <button type="button" role="menuitem" @click="fromImage"><QasaIcon name="qr-scan" :size="16" />{{ t('totp.scanImage') }}</button>
+        <button type="button" role="menuitem" @click="openKey"><QasaIcon name="keyboard" :size="16" />{{ t('totp.enterKey') }}</button>
       </div>
     </div>
     <span v-else class="code" dir="ltr">{{ code?.grouped ?? '' }}</span>
@@ -114,7 +114,7 @@ function openKey() {
       <span v-else class="caption issuer">{{ setup?.issuer ?? setup?.accountName ?? t('field.totp') }}</span>
     </template>
     <template v-if="model" #trailing>
-      <FieldIconButton :icon="X" :label="t('totp.remove')" @click="model = undefined" />
+      <FieldIconButton icon="close" :label="t('totp.remove')" @click="model = undefined" />
     </template>
   </GroupRow>
 

@@ -13,6 +13,7 @@ import alibarznji.qasa.screens.tools.notifications.localizedTitle
 import alibarznji.qasa.theme.AppMenuHeader
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.SectionLabel
@@ -35,8 +36,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -203,7 +202,7 @@ fun NotificationsScreen(
             EmptyState(
                 title = stringResource(R.string.notifications_empty),
                 hint = stringResource(R.string.notifications_emptydesc),
-                icon = Icons.Default.NotificationsOff,
+                icon = QasaIcons.NotificationsOff,
             )
         } else {
             if (remote.isNotEmpty()) {

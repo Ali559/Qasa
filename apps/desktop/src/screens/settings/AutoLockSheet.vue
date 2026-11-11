@@ -3,10 +3,10 @@
 // 1–60 stepper and its 12pt help footer, then the presets (timer badges, a check on the
 // current value). A pick applies at once; the sheet has no Done (design/README.md`, "Bottom sheets"). Edits `prefs.autoLockMinutes`, which the Rust core
 // reads for its timer.
-import { Clock, Minus, Plus, Timer } from 'lucide-vue-next'
 import { computed } from 'vue'
 
 import ChoiceList, { type Choice } from '@/components/ChoiceList.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
@@ -26,7 +26,7 @@ function setMinutes(value: number) {
 }
 
 const presetChoices = computed<Choice<string>[]>(() =>
-  PRESETS.map((minutes) => ({ value: String(minutes), label: t('settings.autoLockMinutesFmt', minutes), icon: Timer })),
+  PRESETS.map((minutes) => ({ value: String(minutes), label: t('settings.autoLockMinutesFmt', minutes), icon: 'timer' as const })),
 )
 
 const presetModel = computed<string>({
@@ -49,7 +49,7 @@ function onStepperKey(e: KeyboardEvent) {
     <div class="body">
       <section class="group">
         <SettingsSection>
-          <SettingsRow :icon="Clock" :title="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)">
+          <SettingsRow icon="auto-lock" :title="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)">
             <template #trailing>
               <span
                 class="stepper"
@@ -69,7 +69,7 @@ function onStepperKey(e: KeyboardEvent) {
                   :disabled="prefs.autoLockMinutes <= MIN"
                   @click="setMinutes(prefs.autoLockMinutes - 1)"
                 >
-                  <Minus :stroke-width="2.5" aria-hidden="true" />
+                  <QasaIcon name="minus" :size="16" />
                 </button>
                 <span class="separator" />
                 <button
@@ -79,7 +79,7 @@ function onStepperKey(e: KeyboardEvent) {
                   :disabled="prefs.autoLockMinutes >= MAX"
                   @click="setMinutes(prefs.autoLockMinutes + 1)"
                 >
-                  <Plus :stroke-width="2.5" aria-hidden="true" />
+                  <QasaIcon name="plus" :size="16" />
                 </button>
               </span>
             </template>

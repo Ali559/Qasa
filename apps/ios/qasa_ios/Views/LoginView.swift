@@ -69,8 +69,7 @@ struct LoginView: View {
 
                         if biometricsEnabled && masterPasswordDue {
                             HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: "key.fill")
-                                    .font(.system(size: 13, weight: .semibold))
+                                QasaIconImage(.login, size: 13)
                                     .foregroundColor(Theme.accent)
                                     .accessibilityHidden(true)
                                 Text(
@@ -97,7 +96,7 @@ struct LoginView: View {
                             Task { await unlockWithBiometrics(automatic: false) }
                         } label: {
                             SettingsRow(
-                                icon: "touchid",
+                                icon: .fingerprint,
                                 title: L10n.tr("auth.unlock.biometrics", locale: locale),
                                 subtitle: L10n.tr("auth.unlock.biometricsHint", locale: locale)
                             ) {
@@ -119,7 +118,7 @@ struct LoginView: View {
                     CardContainer(background: Theme.cardBackgroundLight) {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 8) {
-                                Image(systemName: "shield.fill")
+                                QasaIconImage(.shield, size: 16)
                                     .foregroundColor(Theme.accent)
                                 Text(L10n.tr("auth.unlock.localOnly", locale: locale))
                                     .font(.qasa(16, weight: .semibold))
@@ -141,7 +140,7 @@ struct LoginView: View {
         }
         .background(Theme.background.ignoresSafeArea())
         .bottomActionBar {
-            PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: "lock.open.fill") {
+            PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: .unlock) {
                 attemptUnlock()
             }
             .disabled(!canUnlock)

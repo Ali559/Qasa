@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -208,7 +206,7 @@ fun VpnPowerDial(
                     CircularProgressIndicator(color = c.accent)
                 } else {
                     Icon(
-                        Icons.Default.PowerSettingsNew,
+                        QasaIcons.Power,
                         contentDescription = null,
                         tint = if (connected) c.accent else c.textSecondary,
                         modifier = Modifier.size(QasaIconSize.x5l),

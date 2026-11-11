@@ -17,8 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,7 +65,7 @@ fun VaultStoreErrorView(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.gapMedium)) {
                 Icon(
-                    Icons.Default.ReportProblem,
+                    QasaIcons.Warning,
                     contentDescription = null,
                     tint = c.danger,
                     modifier = Modifier.size(QasaIconSize.x6l),

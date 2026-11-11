@@ -3,13 +3,13 @@
 // wallet rows and the pinned pay button. Desktop change (plan §7): Wayl's hosted page opens
 // in the browser; a wallet app link (`fib://…`) is shown as a QR code to scan with the
 // phone. Then the payment is polled 30 × 2 s, with "Check again" after a timeout.
-import { ArrowLeftRight, Circle, Clock, Lock, RefreshCw } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { accountApi } from '@/account/api'
 import { account, isPremium, refreshLicense } from '@/account/store'
 import type { PaymentIntent, PricingPlan } from '@/account/types'
 import AppMenuHeader from '@/components/AppMenuHeader.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
 import BottomActionBar from '@/components/BottomActionBar.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
@@ -278,7 +278,7 @@ async function simulateStub() {
 
         <!-- Auto-renew: iOS `ToggleRow` in a card, 14 in. -->
         <div class="row-card">
-          <SettingsRow :icon="RefreshCw" :title="t('premium.autoRenew')" :subtitle="autoRenewDetail">
+          <SettingsRow icon="sync" :title="t('premium.autoRenew')" :subtitle="autoRenewDetail">
             <template #trailing>
               <ToggleSwitch v-model="autoRenew" :label="t('premium.autoRenew')" :disabled="isPaying" />
             </template>
@@ -306,7 +306,7 @@ async function simulateStub() {
                 <span class="method-sub">{{ method.subtitle }}</span>
               </span>
               <FilledCheck v-if="method.gateway === selectedGateway" :size="22" />
-              <Circle v-else :size="22" class="unchecked" aria-hidden="true" />
+              <QasaIcon v-else name="circle" :size="22" class="unchecked" />
             </button>
           </div>
         </section>
@@ -318,14 +318,14 @@ async function simulateStub() {
 
         <div v-if="recheckPaymentId && !isPaying" class="secondary-actions">
           <button type="button" class="qasa-button secondary" @click="checkAgain">
-            <RefreshCw :stroke-width="2.5" aria-hidden="true" />
+            <QasaIcon name="refresh" :size="15" />
             <span>{{ t('premium.checkAgain') }}</span>
           </button>
         </div>
         <div v-if="isDev && stubIntent" class="secondary-actions">
           <!-- Dev builds only, never shipped: not translated. -->
           <button type="button" class="qasa-button secondary dev" @click="simulateStub">
-            <ArrowLeftRight :stroke-width="2.5" aria-hidden="true" />
+            <QasaIcon name="sync" :size="15" />
             <span>Simulate payment (dev)</span>
           </button>
         </div>
@@ -333,7 +333,7 @@ async function simulateStub() {
     </div>
 
     <BottomActionBar stack :max-width="680">
-      <PrimaryButton :title="payTitle" :icon="Lock" :disabled="isPaying || premium" @click="onPay" />
+      <PrimaryButton :title="payTitle" icon="lock" :disabled="isPaying || premium" @click="onPay" />
       <p v-if="premium" class="footnote success">{{ t('premium.alreadyPremium') }}</p>
       <p v-else class="footnote">{{ t('premium.opensWalletDesktop') }}</p>
     </BottomActionBar>
@@ -341,7 +341,7 @@ async function simulateStub() {
     <ConfirmDialog
       :open="comingSoon"
       :title="t('premium.comingSoonTitle')"
-      :icon="Clock"
+      icon="auto-lock"
       :message="t('premium.comingSoonBody')"
       :confirm-label="t('common.ok')"
       no-cancel
