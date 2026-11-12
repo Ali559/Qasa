@@ -35,6 +35,8 @@ import kotlinx.coroutines.delay
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import alibarznji.qasa.theme.SheetAction
+import alibarznji.qasa.theme.QasaActionSheet
 
 /** Where the "2FA code" row is while no code is set. */
 private enum class TotpEntry { Closed, Choosing }
@@ -123,21 +125,28 @@ internal fun TotpFormField(value: String, onChange: (String) -> Unit) {
     }
 
     val hint = stringResource(R.string.totp_hint)
-    when (entry) {
-        TotpEntry.Closed -> QasaGroupRow(
-            label = label,
-            error = rowError,
-            onTap = { entry = TotpEntry.Choosing },
-            role = Role.Button,
-        ) {
-            RowAction(stringResource(R.string.totp_add))
-            QasaRowCaption(hint)
-        }
-        TotpEntry.Choosing -> QasaGroupRow(label = label, error = rowError) {
-            RowAction(stringResource(R.string.totp_scan), onClick = ::scan)
-            RowAction(stringResource(R.string.totp_enterkey), onClick = { error = null; enteringKey = true })
-            QasaRowCaption(hint)
-        }
+    QasaGroupRow(
+        label = label,
+        error = rowError,
+        onTap = { entry = TotpEntry.Choosing },
+        role = Role.Button,
+    ) {
+        RowAction(stringResource(R.string.totp_add))
+        QasaRowCaption(hint)
+    }
+    // iOS `addMenu`: "Add 2FA code" opens the app's own action sheet (scan, or type the key).
+    if (entry == TotpEntry.Choosing) {
+        QasaActionSheet(
+            title = stringResource(R.string.totp_add),
+            actions = listOf(
+                SheetAction(QasaIcons.QrScan, stringResource(R.string.totp_scan)) { scan() },
+                SheetAction(QasaIcons.Keyboard, stringResource(R.string.totp_enterkey)) {
+                    error = null
+                    enteringKey = true
+                },
+            ),
+            onDismiss = { entry = TotpEntry.Closed },
+        )
     }
 
     // iOS / desktop: the setup key is typed in the one-field prompt sheet, not in the row.

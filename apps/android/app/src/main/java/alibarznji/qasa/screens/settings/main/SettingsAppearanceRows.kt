@@ -10,8 +10,6 @@ import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import alibarznji.qasa.theme.RowDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import alibarznji.qasa.theme.PickerOption
+import alibarznji.qasa.theme.QasaPickerSheet
 
 /** Native names, never translated (iOS `AppLanguage.displayName`). */
 private val AppLanguage.nativeName: String
@@ -80,29 +80,16 @@ private fun <T> MenuRow(
     label: (T) -> String,
     onSelect: (T) -> Unit,
 ) {
-    val c = qasaColors
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        NavChevronRow(icon = icon, title = title, trailingText = label(selected), onClick = { expanded = true })
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            containerColor = c.cardBackground,
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(label(option), color = c.textPrimary, style = qasaText.bodyLarge) },
-                    trailingIcon = if (option == selected) {
-                        { Icon(QasaIcons.Check, null, tint = c.accent) }
-                    } else {
-                        null
-                    },
-                    onClick = {
-                        expanded = false
-                        onSelect(option)
-                    },
-                )
-            }
-        }
+    // iOS: the row opens the app's own picker sheet, titled with the row's title.
+    var open by remember { mutableStateOf(false) }
+    NavChevronRow(icon = icon, title = title, trailingText = label(selected), onClick = { open = true })
+    if (open) {
+        QasaPickerSheet(
+            title = title,
+            options = options.map { PickerOption(it, label(it)) },
+            selected = selected,
+            onSelect = onSelect,
+            onDismiss = { open = false },
+        )
     }
 }

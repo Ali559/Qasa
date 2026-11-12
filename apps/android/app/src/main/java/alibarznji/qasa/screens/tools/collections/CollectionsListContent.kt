@@ -28,8 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -42,6 +40,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import alibarznji.qasa.theme.SheetAction
+import alibarznji.qasa.theme.QasaActionSheet
 
 /**
  * iOS `CollectionsView` body: collection cards (tap → detail, ⋮ → Edit / Delete), the
@@ -179,33 +179,20 @@ private fun CollectionCard(
                 style = qasaText.bodySmall,
             )
         }
-        Box {
-            IconButton(onClick = { menuOpen = true }) {
-                Icon(QasaIcons.MoreVertical, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
-            }
-            DropdownMenu(
-                expanded = menuOpen,
-                onDismissRequest = { menuOpen = false },
-                containerColor = c.cardBackground,
-            ) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.common_edit), color = c.textPrimary) },
-                    leadingIcon = { Icon(QasaIcons.Edit, null, tint = c.textPrimary) },
-                    onClick = {
-                        menuOpen = false
-                        onEdit()
-                    },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.common_delete), color = c.danger) },
-                    leadingIcon = { Icon(QasaIcons.Delete, null, tint = c.danger) },
-                    onClick = {
-                        menuOpen = false
-                        onDelete()
-                    },
-                )
-            }
+        IconButton(onClick = { menuOpen = true }) {
+            Icon(QasaIcons.MoreVertical, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
         }
+    }
+    // iOS: the folder's ⋯ is the app's own action sheet, titled with the folder's name.
+    if (menuOpen) {
+        QasaActionSheet(
+            title = collection.name,
+            actions = listOf(
+                SheetAction(QasaIcons.Edit, stringResource(R.string.common_edit), action = onEdit),
+                SheetAction(QasaIcons.Delete, stringResource(R.string.common_delete), destructive = true, action = onDelete),
+            ),
+            onDismiss = { menuOpen = false },
+        )
     }
 }
 

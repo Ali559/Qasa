@@ -24,8 +24,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -557,7 +555,11 @@ fun QasaPickerRow(
     }
 }
 
-/** A [QasaPickerRow] that opens a menu of [options] under the row. */
+/**
+ * A [QasaPickerRow] that opens the app's own picker sheet ([QasaPickerSheet]) titled with
+ * [label]: [options] with a check on [selected]. [optionSearch] adds hidden search text
+ * (a country's dial code).
+ */
 @Composable
 fun <T> QasaMenuRow(
     label: String,
@@ -566,41 +568,32 @@ fun <T> QasaMenuRow(
     optionLabel: @Composable (T) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    selected: T? = null,
+    optionSearch: (T) -> String = { "" },
     error: String? = null,
     trailing: (@Composable RowScope.() -> Unit)? = null,
 ) {
-    val c = qasaColors
-    var expanded by remember { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
     QasaPickerRow(
         label = label,
         value = selectedLabel,
-        onClick = { expanded = true },
+        onClick = { open = true },
         modifier = modifier,
         error = error,
         trailing = trailing,
-        below = {
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                containerColor = c.cardBackground,
-                modifier = Modifier.heightIn(max = MenuMaxHeight),
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(optionLabel(option), color = c.textPrimary, style = qasaText.field) },
-                        onClick = {
-                            expanded = false
-                            onSelect(option)
-                        },
-                    )
-                }
-            }
-        },
     )
+    if (open) {
+        val labelled = options.map { PickerOption(it, optionLabel(it), optionSearch(it)) }
+        QasaPickerSheet(
+            title = label,
+            options = labelled,
+            // Without [selected], the option whose label is showing.
+            selected = selected ?: labelled.firstOrNull { it.label == selectedLabel }?.value,
+            onSelect = onSelect,
+            onDismiss = { open = false },
+        )
+    }
 }
-
-/** The menu's height cap (was `MenuPicker`'s). */
-private val MenuMaxHeight = 360.dp
 
 /**
  * A date as a group row: typed text with the date-format [placeholder], a trailing calendar

@@ -88,6 +88,26 @@ A change that only one app picks up is not done.
      (20) apart. No Cancel: they close by dragging down (Esc or a click outside on the
      desktop).
    - Content sized to fit, never taller than 92% of the window.
+6a. **Menus are the app's own sheets** (chosen 2026-11-12). No screen opens a system menu
+   (`Menu`, `DropdownMenu`, `<select>`, a hand-made popover), except the system share sheet
+   and file pickers. Segmented controls and date pickers are not menus and stay.
+   - **Action sheet** (an item's ⋯, a folder's ⋯, "Add 2FA code"): a bottom sheet with the
+     shared header (the item's or folder's name, or the action's own title), then one
+     `SettingsSection` of rows: icon badge, label, `RowDivider` between, no chevron. A
+     destructive row (Delete) has a `danger` badge and label and comes last. No Cancel row:
+     the sheet closes by dragging down (Esc / click outside on the desktop). Tapping a row
+     closes the sheet first, then runs the action (so a follow-up sheet, such as a delete
+     confirmation, opens after it).
+   - **Picker sheet** (every dropdown: type, country, collection, phone, language, theme,
+     auto-backup): a bottom sheet with the shared header (the field's label), then one card
+     of rows: the option's label (`type.rowTitle`), at least `size.rowMinHeight` (60) tall,
+     a `textPrimary` `check` (16) trailing on the current choice, a full-width 1pt `stroke`
+     divider inset 14 between rows. Tapping a row picks it and closes the sheet.
+   - **Long lists** (more than 8 options; countries) add a search field under the header:
+     the plain 48-tall field with the `common.search` placeholder, matching any word of the
+     label (and the dial code); with no match, `common.noMatches` in `textSecondary`. A long
+     list opens at full height and scrolls; a short one sizes to fit.
+   - **The row that opens a picker** keeps rule 4's look: label, chosen value, `RowChevron`.
 6. **Rows.** `size.rowMinHeight` (60), icon badge 36 with radius 10, gap 14, title
    `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13. Rows that share a card (Settings,
    You → Tools, Account, About) are a `SettingsSection` with a `RowDivider` between each two:

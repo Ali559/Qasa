@@ -4995,6 +4995,28 @@
         }
       }
     },
+    "common.noMatches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد نتائج"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هیچ ئەنجامێک نییە"
+          }
+        }
+      }
+    },
     "common.none": {
       "localizations": {
         "en": {
@@ -5079,6 +5101,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "پاشەکەوت"
+          }
+        }
+      }
+    },
+    "common.search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بحث"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "گەڕان"
           }
         }
       }

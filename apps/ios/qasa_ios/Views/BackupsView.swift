@@ -12,6 +12,7 @@ struct BackupsView: View {
     private var service = BackupService.shared
 
     @State private var showFolderPicker = false
+    @State private var showFrequencyPicker = false
     /// Back up now with no location yet: pick one, then back up.
     @State private var backUpAfterPick = false
     @State private var statusKey: String?
@@ -149,19 +150,23 @@ struct BackupsView: View {
     private var automaticSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             SettingsSection {
-                Menu {
-                    ForEach(BackupFrequency.allCases) { frequency in
-                        Button(L10n.tr(frequency.labelKey, locale: locale)) {
-                            backup.frequency = frequency
-                            BackupService.shared.runIfDue(container: modelContext.container)
-                        }
-                    }
-                } label: {
+                Button { showFrequencyPicker = true } label: {
                     NavChevronRow(
                         icon: .backupSchedule,
                         title: L10n.tr("backup.auto", locale: locale),
                         trailingText: L10n.tr(backup.frequency.labelKey, locale: locale)
                     )
+                }
+                .buttonStyle(.qasaRow)
+                .qasaPickerSheet(
+                    isPresented: $showFrequencyPicker,
+                    title: L10n.tr("backup.auto", locale: locale),
+                    selection: Binding(get: { backup.frequency }, set: { frequency in
+                        backup.frequency = frequency
+                        BackupService.shared.runIfDue(container: modelContext.container)
+                    })
+                ) {
+                    BackupFrequency.allCases.map { PickerOption(value: $0, label: L10n.tr($0.labelKey, locale: locale)) }
                 }
             }
             helpText("backup.autoHelp")

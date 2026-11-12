@@ -230,10 +230,12 @@
     <string name="common_mode">دۆخ</string>
     <string name="common_name">ناو</string>
     <string name="common_no">نەخێر</string>
+    <string name="common_nomatches">هیچ ئەنجامێک نییە</string>
     <string name="common_none">هیچ</string>
     <string name="common_ok">باشە</string>
     <string name="common_remove">لابردن</string>
     <string name="common_save">پاشەکەوت</string>
+    <string name="common_search">گەڕان</string>
     <string name="common_skip">تێپەڕاندن</string>
     <string name="common_update">نوێکردنەوە</string>
     <string name="common_yes">بەڵێ</string>

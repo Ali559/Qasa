@@ -1,11 +1,11 @@
 <script setup lang="ts">
 // iOS `VaultItemRow`: tile, name and subtitle, a copy button for the primary value and
-// the ⋯ menu (copy actions, 2FA code, open website, edit, delete). Clicking the row
-// selects it for the detail pane.
+// the ⋯ action sheet titled with the item's name (copy actions, 2FA code, open website,
+// edit, delete). Clicking the row selects it for the detail pane.
 import { computed, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
-import Menu, { type MenuItem } from '@/components/Menu.vue'
+import ActionSheet, { type ActionItem } from '@/components/ActionSheet.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import { copySecret, PAYMENT_CLIPBOARD_MS } from '@/clipboard'
 import { useT } from '@/prefs'
@@ -44,19 +44,22 @@ async function copyPrimary() {
   await copy(primary.value, !!primary.payment, t('vault.copiedFmt', props.row.displayName), isProtectedNote(p))
 }
 
-const menuItems = ref<MenuItem[]>([])
+const menuItems = ref<ActionItem[]>([])
+const showMenu = ref(false)
 
-/** Built when the menu opens, from the decrypted payload. */
-async function prepareMenu() {
+/** Built when the sheet opens, from the decrypted payload. */
+async function openMenu() {
   const p = await load()
-  const items: MenuItem[] = copyActions(p, t).map((a) => ({
+  const items: ActionItem[] = copyActions(p, t).map((a) => ({
     label: a.label,
+    icon: 'copy',
     action: () =>
       copy(a.value, !!a.payment, t('gen.copied'), isProtectedNote(p) && a.label === t('copy.content')),
   }))
   if (props.row.hasTotp) {
     items.push({
       label: t('copy.totp'),
+      icon: 'copy',
       action: async () => {
         const code = await toolsApi.totpCode(props.row.id)
         await copySecret(code.code, code.secondsRemaining * 1000)
@@ -66,10 +69,11 @@ async function prepareMenu() {
     })
   }
   const url = websiteUrl(p)
-  if (url) items.push({ label: t('vault.openWebsite'), action: () => openUrl(url) })
-  items.push({ label: t('vault.editItem'), action: () => emit('edit') })
-  items.push({ label: t('vault.deleteItem'), destructive: true, action: () => (confirmDelete.value = true) })
+  if (url) items.push({ label: t('vault.openWebsite'), icon: 'website', action: () => openUrl(url) })
+  items.push({ label: t('vault.editItem'), icon: 'edit', action: () => emit('edit') })
+  items.push({ label: t('vault.deleteItem'), icon: 'delete', destructive: true, action: () => (confirmDelete.value = true) })
   menuItems.value = items
+  showMenu.value = true
 }
 
 async function remove() {
@@ -92,11 +96,10 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
     <button v-if="row.hasPrimaryCopy" type="button" class="icon-button" :aria-label="t('a11y.copy')" :title="t('a11y.copy')" @click.stop="copyPrimary">
       <QasaIcon name="copy" :size="17" />
     </button>
-    <span @pointerdown.capture="prepareMenu" @keydown.enter.capture="prepareMenu">
-      <Menu :items="menuItems" :label="t('a11y.moreActions')">
-        <QasaIcon name="more-vertical" :size="16" />
-      </Menu>
-    </span>
+    <button type="button" class="icon-button" :aria-label="t('a11y.moreActions')" :title="t('a11y.moreActions')" aria-haspopup="dialog" @click.stop="openMenu">
+      <QasaIcon name="more-vertical" :size="16" />
+    </button>
+    <ActionSheet v-model:open="showMenu" :title="row.displayName" :items="menuItems" />
     <ConfirmDialog
       :open="confirmDelete"
       :title="t('vault.deleteItemTitle')"

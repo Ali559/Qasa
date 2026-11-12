@@ -18,6 +18,13 @@ struct CollectionsView: View {
     @State private var editing: VaultCollection?
     @State private var editName = ""
     @State private var deleting: VaultCollection?
+    /// The folder whose ⋯ sheet is open.
+    @State private var menuTarget: MenuTarget?
+
+    private struct MenuTarget {
+        let collection: VaultCollection
+        let name: String
+    }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -80,6 +87,24 @@ struct CollectionsView: View {
         ) {
             saveRename()
         }
+        .qasaActionSheet(
+            isPresented: Binding(
+                get: { menuTarget != nil },
+                set: { if !$0 { DispatchQueue.main.async { menuTarget = nil } } }
+            ),
+            title: menuTarget?.name ?? ""
+        ) {
+            guard let target = menuTarget else { return [] }
+            return [
+                SheetAction(icon: .edit, title: L10n.tr("common.edit")) {
+                    editing = target.collection
+                    editName = target.name
+                },
+                SheetAction(icon: .delete, title: L10n.tr("common.delete"), destructive: true) {
+                    deleting = target.collection
+                },
+            ]
+        }
         .confirmSheet(
             isPresented: Binding(
                 get: { deleting != nil },
@@ -116,23 +141,14 @@ struct CollectionsView: View {
 
             Spacer()
 
-            Menu {
-                Button {
-                    editing = collection
-                    editName = name
-                } label: {
-                    Label { Text(L10n.tr("common.edit")) } icon: { QasaIconImage(.edit, size: 17) }
-                }
-                Button(role: .destructive) {
-                    deleting = collection
-                } label: {
-                    Label { Text(L10n.tr("common.delete")) } icon: { QasaIconImage(.delete, size: 17) }
-                }
-            } label: {
+            Button { menuTarget = MenuTarget(collection: collection, name: name) } label: {
                 QasaIconImage(.moreVertical, size: 16)
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.tr("a11y.moreActions"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

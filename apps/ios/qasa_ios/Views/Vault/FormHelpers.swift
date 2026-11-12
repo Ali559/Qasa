@@ -46,27 +46,14 @@ struct CountryPickerField: View {
     var showsDialCode: Bool = false
     var error: String? = nil
 
-    private var value: String {
-        Country.all.first { $0.code == countryCode }?.pickerLabel(showsDialCode: showsDialCode)
-            ?? L10n.tr("common.none", locale: AppLanguage.current.locale)
-    }
-
     var body: some View {
-        PickerFieldRow(label: L10n.tr("vault.country", locale: AppLanguage.current.locale), value: value, error: error) {
-            CountryMenuPicker(countryCode: $countryCode, showsDialCode: showsDialCode)
-        }
-    }
-}
-
-/// The country choices, with or without dial codes, for a `PickerFieldRow` menu.
-struct CountryMenuPicker: View {
-    @Binding var countryCode: String
-    var showsDialCode: Bool = false
-
-    var body: some View {
-        Picker(L10n.tr("vault.country", locale: AppLanguage.current.locale), selection: $countryCode) {
-            ForEach(Country.all) { country in
-                Text(country.pickerLabel(showsDialCode: showsDialCode)).tag(country.code)
+        PickerFieldRow(
+            label: L10n.tr("vault.country", locale: AppLanguage.current.locale),
+            selection: $countryCode,
+            error: error
+        ) {
+            Country.all.map {
+                PickerOption(value: $0.code, label: $0.pickerLabel(showsDialCode: showsDialCode), search: Country.dialCode(for: $0.code))
             }
         }
     }
@@ -86,20 +73,12 @@ struct CollectionPickerField: View {
 
     private var locale: Locale { AppLanguage.current.locale }
 
-    private var value: String {
-        collections.first { $0.id == collectionId }?.name ?? L10n.tr("common.none", locale: locale)
-    }
-
     var body: some View {
         FieldGroup {
-            PickerFieldRow(label: L10n.tr("vault.collection", locale: locale), value: value) {
-                Picker(L10n.tr("vault.collection", locale: locale), selection: $collectionId) {
-                    Text(L10n.tr("common.none", locale: locale)).tag(UUID?.none)
-                    ForEach(collections) { c in
-                        Text(c.name).tag(Optional(c.id))
-                    }
-                }
-            } extra: {
+            PickerFieldRow(label: L10n.tr("vault.collection", locale: locale), selection: $collectionId, options: {
+                [PickerOption(value: UUID?.none, label: L10n.tr("common.none", locale: locale))]
+                    + collections.map { PickerOption(value: Optional($0.id), label: $0.name) }
+            }) {
                 FieldIconButton(
                     icon: .folderAdd,
                     tint: Theme.accent,

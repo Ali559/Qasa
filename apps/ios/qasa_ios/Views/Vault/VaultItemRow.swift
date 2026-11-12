@@ -7,6 +7,7 @@ struct VaultItemRow: View {
 
     @Environment(\.openURL) private var openURL
     @State private var showDeleteConfirm = false
+    @State private var showActions = false
     @State private var toast: String?
     @State private var payload: VaultPayload?
 
@@ -44,6 +45,30 @@ struct VaultItemRow: View {
         }
     }
 
+    /// The ⋯ sheet: copy actions, the 2FA code, open website, edit, then delete.
+    private var itemActions: [SheetAction] {
+        let current = payload ?? fallbackPayload
+        var actions = current.copyActions.map { action in
+            SheetAction(icon: action.icon, title: action.label) { copyValue(action.value, label: action.label) }
+        }
+        // Not a `CopyAction`: the code changes every period, so it's generated on tap.
+        if case .login(let login) = payload, let totp = TOTP(stored: login.totp) {
+            actions.append(SheetAction(icon: .copy, title: L10n.tr("copy.totp")) {
+                VaultClipboard.copy(totp.code())
+                try? VaultRepository.shared.markUsed(id: row.id)
+                flash(L10n.tr("totp.copied"))
+            })
+        }
+        if let urlString = current.websiteURL, let url = normalizedURL(urlString) {
+            actions.append(SheetAction(icon: .website, title: L10n.tr("vault.openWebsite")) { openURL(url) })
+        }
+        actions.append(SheetAction(icon: .edit, title: L10n.tr("vault.editItem")) { onEdit() })
+        actions.append(SheetAction(icon: .delete, title: L10n.tr("vault.deleteItem"), destructive: true) {
+            showDeleteConfirm = true
+        })
+        return actions
+    }
+
     var body: some View {
         HStack(spacing: 16) {
             tile
@@ -71,51 +96,14 @@ struct VaultItemRow: View {
                 }
             }
 
-            Menu {
-                ForEach((payload ?? fallbackPayload).copyActions) { action in
-                    Button {
-                        copyValue(action.value, label: action.label)
-                    } label: {
-                        Label { Text(action.label) } icon: { QasaIconImage(action.icon, size: 17) }
-                    }
-                }
-
-                // Not a `CopyAction`: the code changes every period, so it's generated on tap.
-                if case .login(let login) = payload, let totp = TOTP(stored: login.totp) {
-                    Button {
-                        VaultClipboard.copy(totp.code())
-                        try? VaultRepository.shared.markUsed(id: row.id)
-                        flash(L10n.tr("totp.copied"))
-                    } label: {
-                        Label { Text(L10n.tr("copy.totp")) } icon: { QasaIconImage(.copy, size: 17) }
-                    }
-                }
-
-                if let urlString = (payload ?? fallbackPayload).websiteURL,
-                   let url = normalizedURL(urlString) {
-                    Button {
-                        openURL(url)
-                    } label: {
-                        Label { Text(L10n.tr("vault.openWebsite")) } icon: { QasaIconImage(.website, size: 17) }
-                    }
-                }
-
-                Button {
-                    onEdit()
-                } label: {
-                    Label { Text(L10n.tr("vault.editItem")) } icon: { QasaIconImage(.edit, size: 17) }
-                }
-
-                Button(role: .destructive) {
-                    showDeleteConfirm = true
-                } label: {
-                    Label { Text(L10n.tr("vault.deleteItem")) } icon: { QasaIconImage(.delete, size: 17) }
-                }
-            } label: {
+            Button { showActions = true } label: {
                 QasaIconImage(.moreVertical, size: 16)
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L10n.tr("a11y.moreActions"))
         }
         .padding(17)
         .background(Theme.cardBackground)
@@ -128,6 +116,7 @@ struct VaultItemRow: View {
         .onChange(of: row.updatedAt) { _, _ in
             loadPayload()
         }
+        .qasaActionSheet(isPresented: $showActions, title: row.displayName) { itemActions }
         .confirmSheet(
             isPresented: $showDeleteConfirm,
             title: L10n.tr("vault.deleteItemTitle"),

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // iOS `NotificationsView`, server inbox only (the desktop keeps no on-device notes):
 // the "From Qasa" list with unread dots, the detail sheet, Mark All Read in the header,
-// per-row delete (the iOS swipe; a row menu or the Delete key here), the empty state, the
+// per-row delete (the iOS swipe; a row's ⋯ action sheet or the Delete key here), the empty state, the
 // red action-failed line, and cursor paging that loads the next page when the end of the
 // list scrolls into view. Every change is optimistic and rolls back if the server refuses.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import ActionSheet from '@/components/ActionSheet.vue'
 import CardContainer from '@/components/CardContainer.vue'
-import Menu from '@/components/Menu.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
@@ -211,9 +211,13 @@ async function remove(n: InboxNotification) {
                 <span class="date">{{ date(n.created_at) }}</span>
               </span>
             </button>
-            <Menu :label="t('a11y.moreActions')" :items="[{ label: t('common.delete'), destructive: true, action: () => remove(n) }]">
+            <ActionSheet
+              :label="t('a11y.moreActions')"
+              :title="text(n).title"
+              :items="[{ label: t('common.delete'), icon: 'delete', destructive: true, action: () => remove(n) }]"
+            >
               <QasaIcon name="more-vertical" :size="16" />
-            </Menu>
+            </ActionSheet>
           </div>
         </template>
         <div v-if="nextBefore" ref="sentinel" class="more"><span class="spinner" aria-hidden="true" /></div>

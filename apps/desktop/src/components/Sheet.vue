@@ -6,15 +6,16 @@
 // semibold, centered, 20 from the top edge, 16 to the content. Content sizes to fit, at most
 // 92% of the window. `placement="bottom"` slides up from the bottom edge of the window or
 // popup (confirmations, short forms); the default is a centered dialog for the long editors.
+// `fill` opens it at the full 92% (a long picker); `closed` fires once it has slid away.
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
 import SheetHeader from './SheetHeader.vue'
 
-const props = withDefaults(defineProps<{ open: boolean; label: string; title?: string; width?: number; placement?: 'center' | 'bottom' }>(), {
+const props = withDefaults(defineProps<{ open: boolean; label: string; title?: string; width?: number; placement?: 'center' | 'bottom'; fill?: boolean }>(), {
   width: 560,
   placement: 'center',
 })
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; closed: [] }>()
 const panel = ref<HTMLElement | null>(null)
 let restoreFocus: HTMLElement | null = null
 
@@ -55,7 +56,9 @@ watch(
     if (open) {
       restoreFocus = document.activeElement as HTMLElement | null
       await nextTick()
-      const first = panel.value?.querySelector<HTMLElement>('[autofocus], input, textarea, button, [tabindex="0"]')
+      // An `autofocus` control wins (a picker's current row), else the first control.
+      const first =
+        panel.value?.querySelector<HTMLElement>('[autofocus]') ?? panel.value?.querySelector<HTMLElement>('input, textarea, button, [tabindex="0"]')
       ;(first ?? panel.value)?.focus()
     } else {
       restoreFocus?.focus?.()
@@ -69,9 +72,9 @@ onBeforeUnmount(() => restoreFocus?.focus?.())
 
 <template>
   <Teleport to="body">
-    <Transition :name="placement === 'bottom' ? 'bottom-sheet' : 'sheet'">
+    <Transition :name="placement === 'bottom' ? 'bottom-sheet' : 'sheet'" @after-leave="emit('closed')">
       <div v-if="open" class="scrim" :class="placement" @mousedown.self="emit('close')" @keydown="onKey">
-        <div ref="panel" class="panel" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" :style="{ maxWidth: `${width}px` }">
+        <div ref="panel" class="panel" :class="{ fill }" role="dialog" aria-modal="true" :aria-label="label" tabindex="-1" :style="{ maxWidth: `${width}px` }">
           <SheetHeader v-if="title" :title="title"><template v-if="$slots['header-trailing']" #trailing><slot name="header-trailing" /></template></SheetHeader>
           <slot />
         </div>
@@ -106,6 +109,10 @@ onBeforeUnmount(() => restoreFocus?.focus?.())
   background: var(--background);
   color: var(--text-primary);
   outline: none;
+}
+
+.panel.fill {
+  height: 92vh;
 }
 
 /* Attached to the bottom edge: only the top corners round, as an iOS sheet. */

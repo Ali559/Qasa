@@ -54,6 +54,8 @@ fun CountryPickerField(countryCode: String, showsDialCode: Boolean = false, onCh
         options = Country.all,
         optionLabel = { it.pickerLabel(showsDialCode) },
         onSelect = { touch(); onChange(it.code) },
+        selected = selected,
+        optionSearch = { it.dialCode },
         error = fieldError(FfiField.COUNTRY_CODE),
     )
 }
