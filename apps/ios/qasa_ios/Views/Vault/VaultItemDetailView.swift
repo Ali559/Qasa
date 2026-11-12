@@ -7,13 +7,17 @@ struct VaultItemDetailView: View {
     var onDeleted: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @Query(filter: VaultCollection.live) private var collections: [VaultCollection]
     @Bindable private var cache = VaultRepository.shared.cache
 
     @State private var payload: VaultPayload = .login(LoginFields())
     @State private var showDeleteConfirm = false
     @State private var revealedSecrets: Set<String> = []
-    @State private var unlockedProtected = false
+    /// Rule 6b: what a protected note may show. `loaded` is false until the payload is read,
+    /// so nothing (not even the placeholder) is drawn before the gate knows the item.
+    @State private var gate = ProtectedItemGate(isProtected: false)
+    @State private var loaded = false
     @State private var toast: String?
     /// The stored payload fails a shared field rule (imported, or saved before the rules).
     @State private var needsAttention = false
@@ -29,6 +33,36 @@ struct VaultItemDetailView: View {
     }
 
     var body: some View {
+        Group {
+            if loaded && gate.showsItem {
+                content
+            } else {
+                ProtectedItemCover()
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { loaded && !gate.showsItem },
+            set: { shown in
+                // Dragged down while still locked: back to the list.
+                if !shown && !gate.showsItem { dismiss() }
+            }
+        )) {
+            SelfSizingSheet {
+                ProtectedUnlockSheet { gate.unlock() }
+            }
+        }
+        .onAppear {
+            loadItem()
+            try? VaultRepository.shared.markUsed(id: itemId)
+        }
+        .onDisappear { gate.leave() }
+        .onChange(of: row?.updatedAt) { _, _ in loadItem() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { gate.lock() }
+        }
+    }
+
+    private var content: some View {
         ScrollView {
             VStack(spacing: 24) {
                 heroIcon
@@ -102,22 +136,17 @@ struct VaultItemDetailView: View {
             onDeleted()
             dismiss()
         }
-        .onAppear {
-            loadItem()
-            try? VaultRepository.shared.markUsed(id: itemId)
-            unlockProtectedIfNeeded()
-        }
-        .onChange(of: row?.updatedAt) { _, _ in
-            loadItem()
-            unlockProtectedIfNeeded()
-        }
     }
 
     private func loadItem() {
-        if let loaded = try? VaultRepository.shared.payload(for: itemId) {
-            payload = loaded
-            needsAttention = !VaultValidation.issues(loaded).isEmpty
+        guard let item = try? VaultRepository.shared.payload(for: itemId) else { return }
+        payload = item
+        needsAttention = !VaultValidation.issues(item).isEmpty
+        // A first read, or the note's protection changed in the editor: decide again.
+        if !loaded || gate.isProtected != item.isProtectedNote {
+            gate = ProtectedItemGate(isProtected: item.isProtectedNote)
         }
+        loaded = true
     }
 
     private var attentionBanner: some View {
@@ -138,16 +167,6 @@ struct VaultItemDetailView: View {
                 .stroke(Theme.danger.opacity(0.4), lineWidth: 1)
         )
         .padding(.horizontal, Theme.screenPadding)
-    }
-
-    private func unlockProtectedIfNeeded() {
-        if payload.isProtectedNote {
-            unlockIfNeeded(protected: true) { ok in
-                unlockedProtected = ok
-            }
-        } else {
-            unlockedProtected = true
-        }
     }
 
     /// Same clipboard behaviour as copying the password.
@@ -310,8 +329,10 @@ struct VaultItemDetailView: View {
 
     @ViewBuilder
     private func detailRow(_ field: DetailField) -> some View {
-        let locked = field.isSecret && payload.isProtectedNote && !unlockedProtected
-        let hidden = field.isSecret && !revealedSecrets.contains(field.id) && !locked
+        // A protected note hides every value (rule 6b); other items hide their secrets.
+        let guarded = gate.isProtected && field.hiddenWhenProtected
+        let maskable = guarded || field.isSecret
+        let hidden = guarded ? gate.isHidden(field.id) : (field.isSecret && !revealedSecrets.contains(field.id))
 
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -319,9 +340,11 @@ struct VaultItemDetailView: View {
                     .font(.qasa(13))
                     .foregroundColor(Theme.textSecondary)
                 Spacer()
-                if field.isSecret && !locked {
+                if maskable {
                     Button {
-                        if revealedSecrets.contains(field.id) {
+                        if guarded {
+                            gate.toggle(field.id)
+                        } else if revealedSecrets.contains(field.id) {
                             revealedSecrets.remove(field.id)
                         } else {
                             revealedSecrets.insert(field.id)
@@ -331,17 +354,15 @@ struct VaultItemDetailView: View {
                             .foregroundColor(Theme.accent)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.tr(hidden ? "vault.showPassword" : "vault.hidePassword"))
                 }
             }
 
-            if locked {
-                Text(L10n.tr("vault.lockedAuthenticate"))
-                    .font(.qasa(15, weight: .medium))
-                    .foregroundColor(Theme.textSecondary)
-            } else if hidden {
+            if hidden {
                 Text(String(repeating: "•", count: min(max(field.value.count, 8), 16)))
                     .font(.kasoMono(15))
                     .foregroundColor(Theme.textPrimary)
+                    .accessibilityLabel(L10n.tr("vault.hidePassword"))
             } else {
                 Text(field.value)
                     .font(field.isSecret ? .kasoMono(15) : .system(size: 15, weight: .medium))
@@ -352,27 +373,17 @@ struct VaultItemDetailView: View {
         .padding(.vertical, 12)
         .contentShape(Rectangle())
         .onTapGesture {
-            guard !locked, !field.value.isEmpty else { return }
-            let value = field.value
-            let copyAction = {
-                if PaymentClipboard.copy(
-                    payload: payload,
-                    preferredFieldId: PaymentClipboard.preferredFieldId(forLabel: field.label)
-                ) {
-                    try? VaultRepository.shared.markUsed(id: itemId)
-                    return
-                }
-                VaultClipboard.copy(value)
+            // Copying works without revealing; the item is already unlocked to be drawn.
+            guard !field.value.isEmpty else { return }
+            if PaymentClipboard.copy(
+                payload: payload,
+                preferredFieldId: PaymentClipboard.preferredFieldId(forLabel: field.label)
+            ) {
                 try? VaultRepository.shared.markUsed(id: itemId)
+                return
             }
-            if field.isSecret && payload.isProtectedNote {
-                unlockIfNeeded(protected: true) { ok in
-                    guard ok else { return }
-                    copyAction()
-                }
-            } else {
-                copyAction()
-            }
+            VaultClipboard.copy(field.value)
+            try? VaultRepository.shared.markUsed(id: itemId)
         }
     }
 }

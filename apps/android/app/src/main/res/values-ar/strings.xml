@@ -531,6 +531,7 @@
     <string name="premium_wallethint">يفتح تطبيق المحفظة. سنحدّث رخصتك عند اكتمال الدفع.</string>
     <string name="premium_wayl">Wayl</string>
     <string name="premium_waylsub">ادفع عبر FIB أو Qi Card أو أي محفظة عراقية أخرى</string>
+    <string name="protected_title">أدخل كلمة مرورك الرئيسية</string>
     <string name="security_hidden">قاصة مخفية</string>
     <string name="session_qasauser">مستخدم قاصة</string>
     <string name="settings_activecount">%d نشط</string>

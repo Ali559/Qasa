@@ -1,10 +1,14 @@
 <script setup lang="ts">
 // iOS `VaultItemDetailView`, as the Passwords detail pane: hero tile, name, Details
 // (tap a row to copy, eye to reveal secrets, 2FA code), Organization and History, with
-// Edit and Delete in the header. Protected note content needs the main password first.
+// Edit and Delete in the header. A protected note (design/README.md rule 6b) draws only a
+// plain cover under the unlock sheet until it is unlocked; cancelling the sheet goes back
+// to the list. Once open every value but the "Protected" flag is dots with its own eye,
+// copying works without revealing, and the window going to the background (or the vault
+// locking) locks it again. Each opening asks again (the pane is keyed by the item).
 // Stored dates show in the UI language; an item that breaks a field rule (made by an
 // older version, an import or a browser capture) gets the "needs attention" banner.
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
@@ -23,15 +27,16 @@ import {
   vaultDates,
   type DetailField,
 } from '@/vault/present'
-import { protectedGate, requestProtectedAccess } from '@/vault/protectedGate'
+import { ProtectedItemGate } from '@/vault/protectedItemGate'
 import { removeItem, session } from '@/vault/session'
 import type { VaultPayload } from '@/vault/types'
 import { VARIANT_ICON } from '@/icons'
 import { siteIconPath } from '@/vault/siteIcon'
+import ProtectedUnlockSheet from './ProtectedUnlockSheet.vue'
 import TotpCodeRow from './TotpCodeRow.vue'
 
 const props = defineProps<{ itemId: string }>()
-const emit = defineEmits<{ edit: []; deleted: [] }>()
+const emit = defineEmits<{ edit: []; deleted: []; close: [] }>()
 const t = useT()
 
 const payload = ref<VaultPayload | null>(null)
@@ -40,6 +45,12 @@ const confirmDelete = ref(false)
 /** Stored date → the day it means (core `parse_date`), for showing it localized. */
 const dates = ref(new Map<string, CivilDate | null>())
 const needsAttention = ref(false)
+/** Rule 6b: what a protected note may show. `loaded` is false until the payload is read, so
+ * nothing of the item is drawn before the gate knows it. */
+const gate = ref(new ProtectedItemGate(false))
+const loaded = ref(false)
+const showsItem = computed(() => loaded.value && gate.value.showsItem)
+const locked = computed(() => loaded.value && !gate.value.showsItem)
 
 const row = computed(() => session.items.find((i) => i.id === props.itemId) ?? null)
 function showDate(raw: string): string {
@@ -47,8 +58,6 @@ function showDate(raw: string): string {
   return d ? formatCivilDate(d, prefs.language) : raw
 }
 const fields = computed(() => (payload.value ? detailFields(payload.value, t, showDate) : []))
-const isProtected = computed(() => !!payload.value && isProtectedNote(payload.value))
-const unlocked = computed(() => !isProtected.value || protectedGate.confirmed)
 const color = computed(() => (payload.value ? organizationColor(payload.value) : null))
 const collectionName = computed(() => {
   const id = row.value?.collectionId
@@ -58,13 +67,18 @@ const collectionName = computed(() => {
 async function load() {
   revealed.value = new Set()
   try {
-    payload.value = await vaultApi.get(props.itemId)
-    await inspect(payload.value)
+    const p = await vaultApi.get(props.itemId)
+    // A first read, or the note's protection changed in the editor: decide again.
+    if (!loaded.value || gate.value.isProtected !== isProtectedNote(p)) gate.value = new ProtectedItemGate(isProtectedNote(p))
+    payload.value = p
+    loaded.value = true
+    await inspect(p)
     await vaultApi.markUsed(props.itemId)
-    if (isProtected.value) await requestProtectedAccess()
   } catch (e) {
     console.error('Could not open the item', e)
     payload.value = null
+    gate.value = new ProtectedItemGate(false)
+    loaded.value = true
   }
 }
 
@@ -84,7 +98,37 @@ async function inspect(p: VaultPayload) {
 
 watch(() => [props.itemId, row.value?.updatedAt], load, { immediate: true })
 
+/** The window hidden (minimized, another space, the app hidden) is the background. */
+function onVisibility() {
+  if (document.visibilityState === 'hidden') gate.value.lock()
+}
+onMounted(() => document.addEventListener('visibilitychange', onVisibility))
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisibility)
+  gate.value.leave()
+})
+// The vault locking locks the item too (the pane normally goes with the vault screen).
+watch(
+  () => session.status?.unlocked,
+  (unlocked) => {
+    if (unlocked === false) gate.value.lock()
+  },
+)
+
+/** A protected note hides every value but the "Protected" flag; other items their secrets. */
+function guarded(field: DetailField) {
+  return gate.value.isProtected && !field.shownWhenProtected
+}
+
+function isHidden(field: DetailField) {
+  return guarded(field) ? gate.value.isHidden(field.label) : !!field.secret && !revealed.value.has(field.label)
+}
+
 function toggleReveal(field: DetailField) {
+  if (guarded(field)) {
+    gate.value.toggle(field.label)
+    return
+  }
   const next = new Set(revealed.value)
   if (next.has(field.label)) next.delete(field.label)
   else next.add(field.label)
@@ -94,8 +138,8 @@ function toggleReveal(field: DetailField) {
 const isPayment = computed(() => payload.value?.variant === 'card' || payload.value?.variant === 'bankAccount')
 
 async function copyField(field: DetailField) {
-  if (!field.value) return
-  if (field.secret && isProtected.value && !(await requestProtectedAccess())) return
+  // Copying works without revealing; the item is already unlocked to be drawn.
+  if (!field.value || !showsItem.value) return
   await copySecret(field.value, isPayment.value ? PAYMENT_CLIPBOARD_MS : undefined)
   await vaultApi.markUsed(props.itemId)
   showToast(t('vault.copiedFmt', field.label))
@@ -126,15 +170,22 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
 <template>
   <div class="detail">
     <header class="bar">
+      <template v-if="showsItem">
       <button type="button" class="icon-button accent" :aria-label="t('common.edit')" :title="t('common.edit')" @click="emit('edit')">
         <QasaIcon name="edit" :size="17" />
       </button>
       <button type="button" class="icon-button danger" :aria-label="t('common.delete')" :title="t('common.delete')" @click="confirmDelete = true">
         <QasaIcon name="delete" :size="17" />
       </button>
+      </template>
     </header>
 
-    <div v-if="payload" class="scroll">
+    <!-- iOS `ProtectedItemCover`: the background and the lock badge, nothing of the item. -->
+    <div v-if="locked" class="cover" role="img" :aria-label="t('vault.unlockProtectedNote')">
+      <span class="cover-badge" aria-hidden="true"><QasaIcon name="lock" :size="16" /></span>
+    </div>
+
+    <div v-else-if="payload && showsItem" class="scroll">
       <div class="column">
         <div class="hero">
           <span class="hero-icon" :class="{ tinted: !!color }" :style="color ? { background: NOTE_COLOR_TILE[color], color: NOTE_COLOR_VALUE[color] } : undefined" aria-hidden="true">
@@ -158,17 +209,16 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
                 <div class="field-head">
                   <span class="field-label">{{ field.label }}</span>
                   <button
-                    v-if="field.secret && unlocked"
+                    v-if="field.secret || guarded(field)"
                     type="button"
                     class="reveal"
-                    :aria-label="revealed.has(field.label) ? t('vault.hidePassword') : t('vault.showPassword')"
+                    :aria-label="isHidden(field) ? t('vault.showPassword') : t('vault.hidePassword')"
                     @click.stop="toggleReveal(field)"
                   >
-                    <QasaIcon :name="revealed.has(field.label) ? 'hide' : 'show'" :size="14" />
+                    <QasaIcon :name="isHidden(field) ? 'show' : 'hide'" :size="14" />
                   </button>
                 </div>
-                <span v-if="field.secret && !unlocked" class="field-value muted">{{ t('vault.lockedAuthenticate') }}</span>
-                <span v-else-if="field.secret && !revealed.has(field.label)" class="field-value mono">{{ masked(field.value) }}</span>
+                <span v-if="isHidden(field)" class="field-value mono">{{ masked(field.value) }}</span>
                 <span v-else class="field-value" :class="{ mono: field.secret, multiline: field.multiline }">{{ field.value }}</span>
               </div>
             </template>
@@ -224,6 +274,8 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
       @confirm="remove"
       @cancel="confirmDelete = false"
     />
+
+    <ProtectedUnlockSheet :open="locked" @unlocked="gate.unlock()" @close="emit('close')" />
   </div>
 </template>
 
@@ -266,6 +318,29 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
 
 .icon-button.danger {
   color: var(--danger);
+}
+
+.cover {
+  display: grid;
+  flex: 1;
+  place-items: center;
+}
+
+/* iOS `IconBadge(icon: .lock)` scaled 1.2. */
+.cover-badge {
+  display: grid;
+  place-items: center;
+  width: var(--size-icon-badge);
+  height: var(--size-icon-badge);
+  border-radius: var(--radius-icon-badge);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  transform: scale(1.2);
+}
+
+.cover-badge svg {
+  width: var(--size-icon-badge-glyph);
+  height: var(--size-icon-badge-glyph);
 }
 
 .scroll {

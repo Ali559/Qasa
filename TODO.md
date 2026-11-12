@@ -87,10 +87,10 @@ file pickers.
 
 ### Phase 4: Protected items (one PR)
 
-- [ ] **The unlock sheet only.** Opening a protected item first shows a plain cover with the main
+- [x] **The unlock sheet only.** (2026-11-12, rule 6b: `ProtectedUnlockSheet` on every app) Opening a protected item first shows a plain cover with the main
       password / biometric sheet; the item is never drawn behind it. If the user cancels, they
       go back to the list.
-- [ ] **Hidden values.** Once open, every value of a protected item is masked like a password,
+- [x] **Hidden values.** (`ProtectedItemGate` on every app, with unit tests) Once open, every value of a protected item is masked like a password,
       each with the eye button (crossed / uncrossed). Copy works without revealing. Values hide
       again when the user leaves the item or the app.
 

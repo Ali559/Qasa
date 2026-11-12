@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "tauri": "tauri",
+    "test": "vitest run",
     "tokens": "python3 ../../design/generate.py",
     "icons": "python3 scripts/app-icon.py && tauri icon src-tauri/icons/app-icon.png && rm -rf src-tauri/icons/android src-tauri/icons/ios",
     "tokens:check": "python3 ../../design/generate.py --check"
@@ -24,6 +25,7 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "typescript": "~5.9.0",
     "vite": "^7.0.0",
+    "vitest": "^3.2.4",
     "vue-tsc": "^3.0.0"
   }
 }

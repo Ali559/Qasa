@@ -17,7 +17,13 @@ import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
-import alibarznji.qasa.vault.BiometricGateEffect
+import alibarznji.qasa.vault.ProtectedItemGate
+import alibarznji.qasa.screens.vault.detail.ProtectedItemCover
+import alibarznji.qasa.screens.vault.detail.ProtectedUnlockSheet
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import alibarznji.qasa.vault.EphemeralClipboard
 import alibarznji.qasa.vault.VaultListRow
 import alibarznji.qasa.vault.VaultPayload
@@ -95,11 +101,9 @@ fun VaultItemDetailScreen(
     val qasaToast = LocalQasaToast.current
     val haptics = LocalHapticFeedback.current
     var payload by remember { mutableStateOf<VaultPayload?>(null) }
-    var gateItemId by remember { mutableStateOf<String?>(null) }
-    var revealed by remember { mutableStateOf(false) }
-    val protectedNotePrompt = stringResource(R.string.vault_unlockprotectednote)
-    // The row a locked tap asked to copy; copied once the gate succeeds.
-    var pendingCopy by remember { mutableStateOf<DetailField?>(null) }
+    // Rule 6b: what a protected note may show. Null until the payload is read, so nothing
+    // is drawn before the gate knows the item.
+    var gate by remember(itemId) { mutableStateOf<ProtectedItemGate?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     // Secret rows the user has unmasked with the eye toggle (iOS `revealedSecrets`).
     var shownSecrets by remember { mutableStateOf(setOf<Int>()) }
@@ -112,7 +116,23 @@ fun VaultItemDetailScreen(
     val collections by remember { vm.repo.observeCollections() }.collectAsState(initial = emptyList())
 
     LaunchedEffect(itemId, row?.updatedAt) {
-        payload = vm.repo.getPayload(itemId)
+        val loaded = vm.repo.getPayload(itemId)
+        payload = loaded
+        // A first read, or the note's protection changed in the editor: decide again.
+        val isProtected = loaded?.isProtectedNote == true
+        if (gate?.isProtected != isProtected) gate = ProtectedItemGate(isProtected)
+    }
+    // Going to the background locks a protected note again; leaving forgets reveals.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) gate = gate?.lock()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            gate = gate?.leave()
+        }
     }
     // iOS stamps "last used" on appear as well as on every copy (`:85`).
     LaunchedEffect(itemId) { vm.repo.markUsed(itemId) }
@@ -141,34 +161,23 @@ fun VaultItemDetailScreen(
         scope.launch { vm.repo.markUsed(itemId) }
     }
 
-    // A protected note is gated per item, per unlock: the session records the decision so
-    // re-composing (scroll, edit round-trip, rotation) does not re-prompt, and `lock()`
-    // clears it. Fails closed — no hardware, cancel, or lockout leaves the note masked.
-    val protectedNote = payload?.isProtectedNote == true
-    val alreadyRevealed = vm.session.isProtectedNoteRevealed(itemId)
-    val unlocked = !protectedNote || revealed || alreadyRevealed
-    LaunchedEffect(itemId, protectedNote, alreadyRevealed) {
-        if (protectedNote && !alreadyRevealed) gateItemId = itemId
+    val currentGate = gate
+    if (payload == null || currentGate == null || !currentGate.showsItem) {
+        // iOS: the plain cover, and the unlock sheet over it; cancelling goes back.
+        Column(Modifier.fillMaxSize().background(c.background)) {
+            BackChromeHeader(title = "", onBack = onBack)
+            ProtectedItemCover()
+        }
+        if (currentGate != null && !currentGate.showsItem) {
+            ProtectedUnlockSheet(
+                biometricsEnabled = vm.session.biometricsEnabled,
+                verify = vm.session::verify,
+                onUnlocked = { gate = gate?.unlock() },
+                onCancel = onBack,
+            )
+        }
+        return
     }
-    BiometricGateEffect(
-        enabled = gateItemId != null,
-        title = protectedNotePrompt,
-        onAuthenticated = {
-            gateItemId = null
-            if (protectedNote) {
-                vm.session.markProtectedNoteRevealed(itemId)
-                revealed = true
-            }
-            // iOS copies immediately after the gate succeeds (`VaultItemDetailView.swift:296`).
-            pendingCopy?.let { copy(it) }
-            pendingCopy = null
-        },
-        onDismissed = {
-            gateItemId = null
-            revealed = false
-            pendingCopy = null
-        },
-    )
 
     val untitled = stringResource(R.string.vault_untitled)
     val name = payload?.displayName()?.takeUnless { it.isBlank() || it == "Untitled" } ?: untitled
@@ -220,25 +229,17 @@ fun VaultItemDetailScreen(
                 fields = p.detailFields(context::getString) { VaultDates.display(it, locale) },
                 totp = (p as? VaultPayload.Login)?.totp?.ifEmpty { null },
                 onCopyTotp = ::copyTotp,
-                unlocked = unlocked,
+                gate = currentGate,
                 shownSecrets = shownSecrets,
-                onToggle = { field, locked ->
-                    // A locked row's eye answers the biometric gate first.
-                    if (locked) {
-                        gateItemId = itemId
+                onToggle = { field ->
+                    if (currentGate.isProtected && field.hiddenWhenProtected) {
+                        gate = currentGate.toggle(field.label.toString())
                     } else {
                         shownSecrets = if (field.label in shownSecrets) shownSecrets - field.label else shownSecrets + field.label
                     }
                 },
-                onCopy = { field, locked ->
-                    // A masked protected note must not copy plaintext before its gate.
-                    if (locked) {
-                        pendingCopy = field
-                        gateItemId = itemId
-                    } else {
-                        copy(field)
-                    }
-                },
+                // Copying works without revealing: the note is already unlocked to be drawn.
+                onCopy = ::copy,
             )
             val collectionId = p.collectionId() ?: row?.collectionId
             OrganizationCard(p, collections.firstOrNull { it.id.equals(collectionId, ignoreCase = true) }?.name)
@@ -295,10 +296,10 @@ private fun DetailsCard(
     fields: List<DetailField>,
     totp: String?,
     onCopyTotp: (String) -> Unit,
-    unlocked: Boolean,
+    gate: ProtectedItemGate,
     shownSecrets: Set<Int>,
-    onToggle: (DetailField, Boolean) -> Unit,
-    onCopy: (DetailField, Boolean) -> Unit,
+    onToggle: (DetailField) -> Unit,
+    onCopy: (DetailField) -> Unit,
 ) {
     val c = qasaColors
     DetailCard(stringResource(R.string.vault_details)) {
@@ -309,13 +310,14 @@ private fun DetailsCard(
         val totpAfter = fields.indexOfFirst { it.label == R.string.field_password }.takeIf { it >= 0 } ?: fields.lastIndex
         if (totp != null && totpAfter < 0) TotpDetailRow(totp, onCopyTotp)
         fields.forEachIndexed { index, field ->
-            val locked = field.secret && !unlocked
+            // A protected note hides every value (rule 6b); other items hide their secrets.
+            val guarded = gate.isProtected && field.hiddenWhenProtected
             DetailFieldRow(
                 field = field,
-                locked = locked,
-                shown = field.label in shownSecrets,
-                onToggleShown = { onToggle(field, locked) },
-                onCopy = { onCopy(field, locked) },
+                maskable = guarded || field.secret,
+                hidden = if (guarded) gate.isHidden(field.label.toString()) else field.secret && field.label !in shownSecrets,
+                onToggleShown = { onToggle(field) },
+                onCopy = { onCopy(field) },
             )
             if (totp != null && index == totpAfter) {
                 HorizontalDivider(color = c.stroke, thickness = QasaDimens.stroke)

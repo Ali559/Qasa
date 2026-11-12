@@ -202,6 +202,9 @@ export interface DetailField {
   value: string
   secret?: boolean
   multiline?: boolean
+  /** Stays shown on a protected item (the yes/no "Protected" flag); every other value of a
+   * protected item is hidden until its eye (design/README.md rule 6b). */
+  shownWhenProtected?: boolean
 }
 
 /** The stored dates of an item that the detail view shows localized (ISO `YYYY-MM-DD`,
@@ -241,7 +244,7 @@ export function detailFields(p: VaultPayload, t: T, date: (raw: string) => strin
       fields = [
         { label: t('field.title'), value: f.title },
         { label: t('field.content'), value: f.content, secret: f.protectItem, multiline: true },
-        { label: t('field.protected'), value: f.protectItem ? t('common.yes') : t('common.no') },
+        { label: t('field.protected'), value: f.protectItem ? t('common.yes') : t('common.no'), shownWhenProtected: true },
       ]
       break
     }

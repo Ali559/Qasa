@@ -11617,6 +11617,28 @@
         }
       }
     },
+    "protected.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your main password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أدخل كلمة مرورك الرئيسية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشەی نهێنی سەرەکیت بنووسە"
+          }
+        }
+      }
+    },
     "security.hidden": {
       "localizations": {
         "en": {

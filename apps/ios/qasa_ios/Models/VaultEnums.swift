@@ -255,6 +255,8 @@ struct DetailField: Identifiable {
     let value: String
     var isSecret: Bool = false
     var isMultiline: Bool = false
+    /// False for a protected item's yes/no flag, which stays readable (rule 6b).
+    var hiddenWhenProtected: Bool = true
 
     var id: String { label }
 }
@@ -580,7 +582,11 @@ extension VaultPayload {
             return [
                 DetailField(label: L10n.tr("field.title"), value: f.title),
                 DetailField(label: L10n.tr("field.content"), value: f.content, isSecret: f.protectItem, isMultiline: true),
-                DetailField(label: L10n.tr("field.protected"), value: f.protectItem ? L10n.tr("common.yes") : L10n.tr("common.no"))
+                DetailField(
+                    label: L10n.tr("field.protected"),
+                    value: f.protectItem ? L10n.tr("common.yes") : L10n.tr("common.no"),
+                    hiddenWhenProtected: false
+                )
             ].filter { !$0.value.isEmpty }
         case .card(let f):
             return [

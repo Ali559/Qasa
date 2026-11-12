@@ -114,6 +114,25 @@ A change that only one app picks up is not done.
    1pt `stroke`, inset badge + gap (50) on the leading side, running to the trailing edge.
    A page's header says what the page is, the same on every app: the Alerts tab is titled
    "Notifications" (`notifications.title`), whatever it shows inside.
+6b. **Protected items** (a secure note with "Protect item" on; chosen 2026-11-12).
+   - **Unlock first.** Opening one shows a plain cover (the `background` with the item's
+     icon badge and `lock`, nothing of the item) and the unlock sheet on top. The item is
+     never drawn behind it. Cancelling (dragging the sheet down, back, Esc) goes back to
+     the list.
+   - **The unlock sheet** is the app's own sheet: the shared header
+     (`vault.unlockProtectedNote`), the `protected.title` message, the main password as a
+     one-row group, then Unlock as the bottom button. With fingerprint / face unlock on, the
+     biometric prompt starts by itself as the sheet opens and a secondary
+     `auth.unlock.biometrics` button can start it again; the password always works.
+     A wrong password is an error on its row (`auth.unlock.wrongPassword`).
+   - **Every value is hidden.** Once open, each value in the item's details (title,
+     content; not the yes/no "Protected" flag) shows as dots with the eye button (`show` /
+     `hide`) trailing. The item's name in the hero stays, as it does in the list. The eye
+     reveals that one value; copying (tapping the row, or the list's copy) works without
+     revealing.
+   - **Hidden again.** Revealed values hide when the user leaves the item, and the whole
+     item locks again (cover and sheet) when the app goes to the background. Each opening
+     asks again: an unlock is never remembered between openings.
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default
