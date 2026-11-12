@@ -4,7 +4,9 @@ import SwiftUI
 /// Unlock first (Face ID starts on its own when it is on, the master password is always
 /// there), then pick an item, then the one value to insert. This is how a card number,
 /// an expiry, an address line or a phone number reaches a form on iOS: Apple doesn't let
-/// a provider fill whole card or address forms.
+/// a provider fill whole card or address forms. A strong password from the shared generator
+/// is offered first, before any unlock (design rule 6c): before iOS 26.2 this is the only way
+/// a third-party provider can suggest one on a sign-up form.
 struct TextInsertionView: View {
     let onCancel: () -> Void
     let onInsert: (_ text: String) -> Void
@@ -59,8 +61,19 @@ struct TextInsertionView: View {
 
     // MARK: unlock
 
+    /// "Use a strong password": needs nothing from the vault, so no unlock.
+    private var strongPasswordButton: some View {
+        Button {
+            onInsert(StrongPassword.generate())
+        } label: {
+            Label { Text(AutofillL10n.tr("fill.strongPassword", "Use a strong password")) } icon: { QasaIconImage(.generate, size: 17) }
+        }
+    }
+
     private var unlockForm: some View {
         VStack(spacing: 16) {
+            strongPasswordButton
+                .padding(.bottom, 8)
             Text(AutofillL10n.tr("autofill.unlockTitle", "Unlock Qasa"))
                 .font(QasaFontFace.font(size: 17, weight: .semibold))
             SecureField(AutofillL10n.tr("auth.unlock.placeholder", "Master password"), text: $password)
@@ -141,6 +154,7 @@ struct TextInsertionView: View {
 
     private var itemList: some View {
         List {
+            Section { strongPasswordButton }
             if filtered.isEmpty {
                 ContentUnavailableView(
                     AutofillL10n.tr("autofill.noMatches", "No matches"),

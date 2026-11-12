@@ -59,6 +59,21 @@ password in one or two taps and ends with the login saved. The rule is
   insertion (iOS 18+), which the user has to open from the field's AutoFill menu. The
   deployment target stays iOS 17, so the 26.2 path is `@available(iOS 26.2, *)`.
 
+- **Built** (branch `phase-5-ios`): the extension declares `SupportsGeneratePasswordCredentials`
+  (with the generate UI off, so iOS shows the suggestion itself) and
+  `SupportsSavePasswordCredentials`. A generate request answers at once with
+  `StrongPassword` (the shared generator's defaults, narrowed by the site's
+  `passwordrules`). A save request needs the vault key, so it asks for the save sheet
+  (`SavePasswordView`: unlock with Face ID or the main password, then Save); the login is
+  sealed with the vault key into `PendingSaveInbox` in the App Group and the app imports it
+  on its next unlock (`VaultRepository.importPendingSaves`: skip if already saved, new
+  password for the same site and username, else a new login). A
+  `generatedPasswordFilled` event saves nothing yet: the submit follows with its own
+  request. Before iOS 26.2, "AutoFill → Qasa" (text insertion) offers "Use a strong
+  password" first, before any unlock; there is no save prompt there.
+- **Not verified on a device:** the 26.2 generate and save flows need Qasa enabled as the
+  AutoFill provider and a sign-up form in Safari; only the unit tests ran.
+
 ### Desktop
 
 - Covered through the extension. A login saved from the extension goes through the

@@ -21,6 +21,12 @@
 				<true/>
 				<key>ProvidesTextToInsert</key>
 				<true/>
+				<key>SupportsGeneratePasswordCredentials</key>
+				<true/>
+				<key>SupportsGeneratePasswordCredentialsWithUI</key>
+				<false/>
+				<key>SupportsSavePasswordCredentials</key>
+				<true/>
 			</dict>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>

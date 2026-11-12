@@ -73,6 +73,9 @@
     <string name="autofill_prompt_desktoptitle">Fill passwords in your browser</string>
     <string name="autofill_prompt_notnow">Not now</string>
     <string name="autofill_prompt_title">Fill passwords with Qasa</string>
+    <string name="autofill_save">Save</string>
+    <string name="autofill_savebody">Unlock Qasa to save this login. It shows up in the app the next time you open it.</string>
+    <string name="autofill_savetitle">Save to Qasa</string>
     <string name="autofill_search">Search</string>
     <string name="autofill_searchqasa">Search Qasa</string>
     <string name="autofill_service_description">Qasa password autofill</string>

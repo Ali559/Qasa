@@ -2844,6 +2844,21 @@
     "ar": "استخدم كلمة مرور قوية",
     "ckb": "وشەی نهێنیی بەهێز بەکاربهێنە"
   },
+  "autofill.saveTitle": {
+    "en": "Save to Qasa",
+    "ar": "حفظ في قاصة",
+    "ckb": "پاشەکەوتکردن لە قاسە"
+  },
+  "autofill.saveBody": {
+    "en": "Unlock Qasa to save this login. It shows up in the app the next time you open it.",
+    "ar": "افتح قاصة لحفظ تسجيل الدخول هذا. سيظهر في التطبيق عند فتحه في المرة القادمة.",
+    "ckb": "قاسە بکەرەوە بۆ پاشەکەوتکردنی ئەم چوونەژوورەوەیە. جاری داهاتوو کە ئەپەکە دەکەیتەوە تێیدا دەردەکەوێت."
+  },
+  "autofill.save": {
+    "en": "Save",
+    "ar": "حفظ",
+    "ckb": "پاشەکەوتکردن"
+  },
   "vault.untitled": {
     "en": "Untitled",
     "ar": "بدون عنوان",
