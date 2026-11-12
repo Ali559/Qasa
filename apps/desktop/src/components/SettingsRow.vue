@@ -20,6 +20,8 @@ const props = defineProps<{
   /** Tints the badge (any CSS colour, usually a token). */
   iconColor?: string
   disabled?: boolean
+  /** An action-sheet row: a button with no chevron. */
+  noChevron?: boolean
 }>()
 defineEmits<{ click: [] }>()
 const slots = useSlots()
@@ -46,7 +48,7 @@ const badgeStyle = computed(() => (props.iconColor ? { '--badge-color': props.ic
     </span>
     <span v-if="trailingText" class="trailing-text">{{ trailingText }}</span>
     <slot name="trailing" />
-    <QasaIcon v-if="interactive && !destructive" name="chevron-forward" :size="13" class="chevron" />
+    <QasaIcon v-if="interactive && !destructive && !noChevron" name="chevron-forward" :size="13" class="chevron" />
   </component>
 </template>
 

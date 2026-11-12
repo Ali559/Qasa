@@ -6,12 +6,13 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import BrandHeader from '@/components/BrandHeader.vue'
 import FilterChip from '@/components/FilterChip.vue'
+import PickerSheet, { type PickerOption } from '@/components/PickerSheet.vue'
 import PrimaryButton from '@/components/PrimaryButton.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import SectionLabel from '@/components/SectionLabel.vue'
 import TextField from '@/components/TextField.vue'
 import ToastHost from '@/components/ToastHost.vue'
-import { LANGUAGE_NAMES, LANGUAGES } from '@/i18n'
+import { isRtl, LANGUAGE_NAMES, LANGUAGES, type Language } from '@/i18n'
 import { showToast } from '@/toast'
 import type { BridgeStatus, CopyField, LoginMatch, SearchHit } from '@ext/shared/messages'
 import { ask, fillInTab, isDetached, NoPageError, tabMatches, targetTab } from './api'
@@ -30,6 +31,14 @@ const matches = ref<LoginMatch[]>([])
 const query = ref('')
 const results = ref<SearchHit[]>([])
 const view = ref<'logins' | 'generator'>('logins')
+/** The language picker: the desktop's `PickerSheet`, rising from the popup's bottom edge. */
+const showLanguage = ref(false)
+const languageOptions: PickerOption<Language>[] = LANGUAGES.map((language) => ({
+  value: language,
+  label: LANGUAGE_NAMES[language],
+  dir: isRtl(language) ? 'rtl' : 'ltr',
+  lang: language,
+}))
 
 /** Whether the tab has a page we can fill (its content script answered). */
 const onWebPage = ref(true)
@@ -216,13 +225,19 @@ onBeforeUnmount(() => clearInterval(poll))
     </main>
 
     <footer class="footer">
-      <label class="language">
-        <span class="visually-hidden">{{ t('settings.language') }}</span>
-        <select v-model="prefs.language" :aria-label="t('settings.language')">
-          <option v-for="lang in LANGUAGES" :key="lang" :value="lang">{{ LANGUAGE_NAMES[lang] }}</option>
-        </select>
-      </label>
+      <button
+        type="button"
+        class="language"
+        :aria-label="`${t('settings.language')}, ${LANGUAGE_NAMES[prefs.language]}`"
+        aria-haspopup="dialog"
+        @click="showLanguage = true"
+      >
+        <QasaIcon name="language" :size="15" />
+        <span :lang="prefs.language">{{ LANGUAGE_NAMES[prefs.language] }}</span>
+        <QasaIcon name="chevron-down" :size="13" class="chevron" />
+      </button>
     </footer>
+    <PickerSheet v-model="prefs.language" :open="showLanguage" :title="t('settings.language')" :options="languageOptions" @close="showLanguage = false" />
     <ToastHost />
   </div>
 </template>
@@ -310,9 +325,12 @@ onBeforeUnmount(() => clearInterval(poll))
   background: var(--chrome);
 }
 
-.language select {
+.language {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   height: var(--size-field-icon-button);
-  padding: 0 8px;
+  padding: 0 10px;
   border: var(--size-stroke) solid var(--stroke);
   border-radius: var(--radius-control);
   background: var(--card-background);
@@ -322,11 +340,7 @@ onBeforeUnmount(() => clearInterval(poll))
   cursor: pointer;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+.language .chevron {
+  color: var(--text-tertiary);
 }
 </style>

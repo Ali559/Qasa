@@ -230,10 +230,12 @@
     <string name="common_mode">Mode</string>
     <string name="common_name">Name</string>
     <string name="common_no">No</string>
+    <string name="common_nomatches">No matches</string>
     <string name="common_none">None</string>
     <string name="common_ok">OK</string>
     <string name="common_remove">Remove</string>
     <string name="common_save">Save</string>
+    <string name="common_search">Search</string>
     <string name="common_skip">Skip</string>
     <string name="common_update">Update</string>
     <string name="common_yes">Yes</string>

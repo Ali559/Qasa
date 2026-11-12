@@ -240,10 +240,8 @@ struct VaultItemEditor: View {
 
     private var nameFields: some View {
         FieldGroup {
-            PickerFieldRow(label: L10n.tr("field.type"), value: nameHonorificBinding.wrappedValue.displayName) {
-                Picker(L10n.tr("field.type"), selection: nameHonorificBinding) {
-                    ForEach(Honorific.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                }
+            PickerFieldRow(label: L10n.tr("field.type"), selection: nameHonorificBinding) {
+                Honorific.allCases.map { PickerOption(value: $0, label: $0.displayName) }
             }
             FormTextField(title: L10n.tr("field.firstName"), text: nameBinding(\.firstName), error: error("firstName"))
             FormTextField(title: L10n.tr("field.middleName"), text: nameBinding(\.middleName), error: error("middleName"))
@@ -259,10 +257,8 @@ struct VaultItemEditor: View {
     private var emailFields: some View {
         FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: emailBinding(\.itemName), error: error("itemName"))
-            PickerFieldRow(label: L10n.tr("field.type"), value: emailKindBinding.wrappedValue.displayName) {
-                Picker(L10n.tr("field.type"), selection: emailKindBinding) {
-                    ForEach(EmailKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                }
+            PickerFieldRow(label: L10n.tr("field.type"), selection: emailKindBinding) {
+                EmailKind.allCases.map { PickerOption(value: $0, label: $0.displayName) }
             }
             FormTextField(title: L10n.tr("field.email"), text: emailBinding(\.email), placeholder: L10n.tr("field.emailPlaceholder"), keyboard: .emailAddress, error: error("email"))
         }
@@ -273,10 +269,8 @@ struct VaultItemEditor: View {
     private var phoneFields: some View {
         FieldGroup {
             FormTextField(title: L10n.tr("field.itemName"), text: phoneBinding(\.itemName), error: error("itemName"))
-            PickerFieldRow(label: L10n.tr("field.type"), value: phoneKindBinding.wrappedValue.displayName) {
-                Picker(L10n.tr("field.type"), selection: phoneKindBinding) {
-                    ForEach(PhoneKind.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                }
+            PickerFieldRow(label: L10n.tr("field.type"), selection: phoneKindBinding) {
+                PhoneKind.allCases.map { PickerOption(value: $0, label: $0.displayName) }
             }
             CountryPickerField(countryCode: phoneCountryBinding, showsDialCode: true, error: error("countryCode"))
             // The dial code as fixed text before the number, in the row's value line.
@@ -757,18 +751,10 @@ struct AddressPhonePicker: View {
         }
     }
 
-    private var value: String {
-        phones.first { $0.id == phoneItemId }?.displayName ?? L10n.tr("common.none")
-    }
-
     var body: some View {
-        PickerFieldRow(label: L10n.tr("field.phoneNumber"), value: value) {
-            Picker(L10n.tr("field.phoneNumber"), selection: $phoneItemId) {
-                Text(L10n.tr("common.none")).tag(Optional<UUID>.none)
-                ForEach(phones) { row in
-                    Text(row.displayName).tag(Optional(row.id))
-                }
-            }
+        PickerFieldRow(label: L10n.tr("field.phoneNumber"), selection: $phoneItemId) {
+            [PickerOption(value: UUID?.none, label: L10n.tr("common.none"))]
+                + phones.map { PickerOption(value: Optional($0.id), label: $0.displayName) }
         }
         .onAppear {
             if let id = phoneItemId, !phones.contains(where: { $0.id == id }) {

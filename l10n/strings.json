@@ -649,6 +649,11 @@
     "ar": "لا شيء",
     "ckb": "هیچ"
   },
+  "common.noMatches": {
+    "en": "No matches",
+    "ar": "لا توجد نتائج",
+    "ckb": "هیچ ئەنجامێک نییە"
+  },
   "common.ok": {
     "en": "OK",
     "ar": "حسناً",
@@ -663,6 +668,11 @@
     "en": "Save",
     "ar": "حفظ",
     "ckb": "پاشەکەوت"
+  },
+  "common.search": {
+    "en": "Search",
+    "ar": "بحث",
+    "ckb": "گەڕان"
   },
   "common.skip": {
     "en": "Skip",

@@ -270,22 +270,26 @@ extension PasswordFieldRow where Extra == EmptyView {
 
 // MARK: - Picker row
 
-/// A menu as a row: the label, the chosen `value` under it, a chevron trailing. `menu` is
-/// the menu's content, usually a `Picker` (shown inline, with a check on the current pick).
-struct PickerFieldRow<Menu: View, Extra: View>: View {
+/// A dropdown as a row: the label, the chosen value under it, a chevron trailing. Tapping it
+/// opens the app's own picker sheet (`qasaPickerSheet`), titled with the label.
+struct PickerFieldRow<Value: Hashable, Extra: View>: View {
     @Environment(\.themePalette) private var theme
     let label: String
-    let value: String
+    @Binding var selection: Value
+    let options: () -> [PickerOption<Value>]
     var error: String? = nil
-    @ViewBuilder var menu: Menu
     /// A button beside the chevron (new collection).
     @ViewBuilder var extra: Extra
+    @State private var isOpen = false
+
+    private var value: String {
+        options().first { $0.value == selection }?.label
+            ?? L10n.tr("common.none", locale: AppLanguage.current.locale)
+    }
 
     var body: some View {
         FieldRow(label: label, error: error) {
-            SwiftUI.Menu {
-                menu.pickerStyle(.inline)
-            } label: {
+            Button { isOpen = true } label: {
                 HStack(spacing: 6) {
                     Text(value)
                         .foregroundColor(theme.textPrimary)
@@ -295,16 +299,19 @@ struct PickerFieldRow<Menu: View, Extra: View>: View {
                 }
                 .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel(label)
             .accessibilityValue(value)
         } trailing: {
             extra
         }
+        .qasaPickerSheet(isPresented: $isOpen, title: label, selection: $selection, options: options)
     }
 }
 
 extension PickerFieldRow where Extra == EmptyView {
-    init(label: String, value: String, error: String? = nil, @ViewBuilder menu: () -> Menu) {
-        self.init(label: label, value: value, error: error, menu: menu, extra: { EmptyView() })
+    init(label: String, selection: Binding<Value>, error: String? = nil, options: @escaping () -> [PickerOption<Value>]) {
+        self.init(label: label, selection: selection, options: options, error: error, extra: { EmptyView() })
     }
 }
 

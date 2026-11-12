@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // iOS `TOTPEditorField` as the "2FA code" row of the login's `FieldGroup` (design/README.md
-// rule 4). While empty the value line is "Add 2FA code" (enter a setup key, or — the
-// desktop's stand-in for the camera — read the QR code from an image) with the help hint as
+// rule 4). While empty the value line is "Add 2FA code", which opens an action sheet (rule
+// 6a, iOS `qasaActionSheet`: enter a setup key, or — the desktop's stand-in for the camera —
+// read the QR code from an image) with the help hint as
 // a 12 secondary caption; once set, the live code with the issuer as the caption and a
 // trailing Remove button. The secret itself is never shown.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
+import ActionSheet from '@/components/ActionSheet.vue'
 import FieldIconButton from '@/components/FieldIconButton.vue'
 import GroupRow from '@/components/GroupRow.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
@@ -71,7 +73,6 @@ async function applyKey() {
 }
 
 async function fromImage() {
-  showMenu.value = false
   try {
     const found = await toolsApi.totpFromImage()
     if (found) {
@@ -84,12 +85,7 @@ async function fromImage() {
   }
 }
 
-function closeMenu(e: FocusEvent) {
-  if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) showMenu.value = false
-}
-
 function openKey() {
-  showMenu.value = false
   key.value = ''
   error.value = null
   showKey.value = true
@@ -98,16 +94,10 @@ function openKey() {
 
 <template>
   <GroupRow :id="id" :label="t('field.totp')" :error="rowError" :control="false">
-    <div v-if="!model" class="add-wrap" @focusout="closeMenu">
-      <button type="button" class="add" :aria-expanded="showMenu" aria-haspopup="menu" @click="showMenu = !showMenu">
-        <QasaIcon name="add" :size="16" />
-        <span>{{ t('totp.add') }}</span>
-      </button>
-      <div v-if="showMenu" class="menu" role="menu">
-        <button type="button" role="menuitem" @click="fromImage"><QasaIcon name="image" :size="16" />{{ t('totp.scanImage') }}</button>
-        <button type="button" role="menuitem" @click="openKey"><QasaIcon name="keyboard" :size="16" />{{ t('totp.enterKey') }}</button>
-      </div>
-    </div>
+    <button v-if="!model" type="button" class="add" aria-haspopup="dialog" @click="showMenu = true">
+      <QasaIcon name="add" :size="16" />
+      <span>{{ t('totp.add') }}</span>
+    </button>
     <span v-else class="code" dir="ltr">{{ code?.grouped ?? '' }}</span>
     <template #below>
       <span v-if="!model" class="caption">{{ t('totp.hint') }}</span>
@@ -118,6 +108,14 @@ function openKey() {
     </template>
   </GroupRow>
 
+  <ActionSheet
+    v-model:open="showMenu"
+    :title="t('totp.add')"
+    :items="[
+      { label: t('totp.scanImage'), icon: 'image', action: fromImage },
+      { label: t('totp.enterKey'), icon: 'keyboard', action: openKey },
+    ]"
+  />
   <PromptSheet
     v-model="key"
     :open="showKey"
@@ -132,11 +130,6 @@ function openKey() {
 </template>
 
 <style scoped>
-.add-wrap {
-  position: relative;
-  display: flex;
-}
-
 /* The value line's action: 16 semibold accent with a plus, no chrome. */
 .add {
   display: flex;
@@ -154,44 +147,6 @@ function openKey() {
 .add svg {
   width: var(--size-field-icon-glyph);
   height: var(--size-field-icon-glyph);
-}
-
-.menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  inset-inline-start: 0;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  padding: 6px;
-  border: var(--size-stroke) solid var(--stroke-chrome);
-  border-radius: var(--radius-control);
-  background: var(--chrome);
-  box-shadow: 0 12px 32px var(--shadow-color);
-}
-
-.menu button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: calc(var(--radius-control) - 4px);
-  background: transparent;
-  color: var(--text-primary);
-  font-size: var(--type-body-size);
-  text-align: start;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.menu button svg {
-  width: var(--size-field-icon-glyph);
-  height: var(--size-field-icon-glyph);
-}
-
-.menu button:hover {
-  background: var(--card-muted);
 }
 
 /* The live code, as the editor's value: mono, left to right in every language. */

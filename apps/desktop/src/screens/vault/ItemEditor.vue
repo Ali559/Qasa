@@ -137,8 +137,8 @@ const title = computed(() => {
 // Save stays enabled so a press can say what to fix (`validation.fixToSave`).
 const canSave = computed(() => !!payload.value && !busy.value)
 
-const countryOptions = COUNTRIES.map((c) => ({ value: c.code, label: c.name }))
-const phoneCountryOptions = COUNTRIES.map((c) => ({ value: c.code, label: `${c.name} (${c.dialCode})` }))
+const countryOptions = COUNTRIES.map((c) => ({ value: c.code, label: c.name, search: c.dialCode }))
+const phoneCountryOptions = COUNTRIES.map((c) => ({ value: c.code, label: `${c.name} (${c.dialCode})`, search: c.dialCode }))
 const honorificOptions = computed(() => HONORIFICS.map((h) => ({ value: h.value, label: t(h.key) })))
 const emailOptions = computed(() => EMAIL_KINDS.map((h) => ({ value: h.value, label: t(h.key) })))
 const phoneOptions = computed(() => PHONE_KINDS.map((h) => ({ value: h.value, label: t(h.key) })))

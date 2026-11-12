@@ -230,10 +230,12 @@
     <string name="common_mode">الوضع</string>
     <string name="common_name">الاسم</string>
     <string name="common_no">لا</string>
+    <string name="common_nomatches">لا توجد نتائج</string>
     <string name="common_none">لا شيء</string>
     <string name="common_ok">حسناً</string>
     <string name="common_remove">إزالة</string>
     <string name="common_save">حفظ</string>
+    <string name="common_search">بحث</string>
     <string name="common_skip">تخطي</string>
     <string name="common_update">تحديث</string>
     <string name="common_yes">نعم</string>

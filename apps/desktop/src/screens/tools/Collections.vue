@@ -1,12 +1,12 @@
 <script setup lang="ts">
 // iOS `CollectionsView` + `CollectionDetailView` ("Folders"): folder cards with an item
-// count and an Edit / Delete menu, + to create, and each folder's items one level in.
+// count and an Edit / Delete action sheet (titled with the folder's name), + to create, and each folder's items one level in.
 // Deleting a folder moves its items out of it (they are never deleted).
 import { computed, onMounted, ref } from 'vue'
 
+import ActionSheet from '@/components/ActionSheet.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import Fab from '@/components/Fab.vue'
-import Menu from '@/components/Menu.vue'
 import PageFrame from '@/components/PageFrame.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import { nav, selectTab } from '@/nav'
@@ -89,15 +89,16 @@ function openItem(id: string) {
         <span class="name">{{ c.name }}</span>
         <span class="count">{{ countLabel(c) }}</span>
       </span>
-      <Menu
+      <ActionSheet
         :label="t('a11y.moreActions')"
+        :title="c.name"
         :items="[
-          { label: t('common.edit'), action: () => startRename(c) },
-          { label: t('common.delete'), destructive: true, action: () => (deleting = c) },
+          { label: t('common.edit'), icon: 'edit', action: () => startRename(c) },
+          { label: t('common.delete'), icon: 'delete', destructive: true, action: () => (deleting = c) },
         ]"
       >
         <QasaIcon name="more-vertical" :size="16" />
-      </Menu>
+      </ActionSheet>
     </div>
 
     <template #overlay>

@@ -26,8 +26,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -44,6 +42,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import alibarznji.qasa.screens.vault.detail.organizationColor
+import alibarznji.qasa.theme.SheetAction
+import alibarznji.qasa.theme.QasaActionSheet
 
 /**
  * Port of iOS `VaultItemRow` (`Views/Vault/VaultItemRow.swift`): subtype icon, primary copy
@@ -93,44 +93,41 @@ internal fun VaultListItemRow(
                     contentDescription = stringResource(R.string.a11y_moreactions),
                     onClick = { menuOpen = true },
                 )
-                DropdownMenu(
-                    expanded = menuOpen,
-                    onDismissRequest = { menuOpen = false },
-                    containerColor = c.cardBackground,
-                ) {
-                    payload?.rowCopyActions().orEmpty().forEach { action ->
-                        MenuItem(stringResource(action.menuLabelRes), QasaIcons.Copy) {
-                            menuOpen = false
-                            onCopy(action.copy, action.gated)
-                        }
-                    }
-                    payload?.websiteUrl?.let { url ->
-                        MenuItem(stringResource(R.string.vault_openwebsite), QasaIcons.Website) {
-                            menuOpen = false
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(normalizedWebsiteUrl(url)))
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: ActivityNotFoundException) {
-                                // No browser: nothing to open, same as iOS `openURL` failing.
-                            }
-                        }
-                    }
-                    MenuItem(stringResource(R.string.vault_edititem), QasaIcons.Edit) {
-                        menuOpen = false
-                        scope.launch {
-                            val p = payload ?: runCatching { loadPayload(row.id) }.getOrNull() ?: return@launch
-                            onEdit(p)
-                        }
-                    }
-                    MenuItem(stringResource(R.string.vault_deleteitem), QasaIcons.Delete, destructive = true) {
-                        menuOpen = false
-                        confirmDelete = true
-                    }
-                }
             }
         },
     )
+
+    // iOS: the item's ⋯ is the app's own action sheet, titled with the item's name.
+    if (menuOpen) {
+        val actions = buildList {
+            payload?.rowCopyActions().orEmpty().forEach { action ->
+                add(SheetAction(QasaIcons.Copy, stringResource(action.menuLabelRes)) { onCopy(action.copy, action.gated) })
+            }
+            payload?.websiteUrl?.let { url ->
+                add(
+                    SheetAction(QasaIcons.Website, stringResource(R.string.vault_openwebsite)) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(normalizedWebsiteUrl(url)))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        try {
+                            context.startActivity(intent)
+                        } catch (_: ActivityNotFoundException) {
+                            // No browser: nothing to open, same as iOS `openURL` failing.
+                        }
+                    },
+                )
+            }
+            add(
+                SheetAction(QasaIcons.Edit, stringResource(R.string.vault_edititem)) {
+                    scope.launch {
+                        val p = payload ?: runCatching { loadPayload(row.id) }.getOrNull() ?: return@launch
+                        onEdit(p)
+                    }
+                },
+            )
+            add(SheetAction(QasaIcons.Delete, stringResource(R.string.vault_deleteitem), destructive = true) { confirmDelete = true })
+        }
+        QasaActionSheet(title = row.displayName, actions = actions, onDismiss = { menuOpen = false })
+    }
 
     if (confirmDelete) {
         QasaConfirmDialog(
@@ -144,20 +141,4 @@ internal fun VaultListItemRow(
             onDismiss = { confirmDelete = false },
         )
     }
-}
-
-@Composable
-private fun MenuItem(
-    title: String,
-    icon: ImageVector,
-    destructive: Boolean = false,
-    onClick: () -> Unit,
-) {
-    val c = qasaColors
-    val tint = if (destructive) c.danger else c.textPrimary
-    DropdownMenuItem(
-        text = { Text(title, color = tint, style = qasaText.bodyLarge) },
-        leadingIcon = { Icon(icon, contentDescription = null, tint = tint) },
-        onClick = onClick,
-    )
 }

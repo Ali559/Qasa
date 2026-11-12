@@ -11,6 +11,7 @@ struct TOTPEditorField: View {
     var error: String? = nil
 
     @State private var showScanner = false
+    @State private var showAddSheet = false
     @State private var showKeyEntry = false
     @State private var keyInput = ""
     /// A scanned or typed key that isn't a 2FA setup.
@@ -61,23 +62,22 @@ struct TOTPEditorField: View {
         }
     }
 
+    /// "Add 2FA code": opens the app's own action sheet (scan, or type the setup key).
     private var addMenu: some View {
-        Menu {
-            Button {
-                parseError = nil
-                showScanner = true
-            } label: {
-                Label { Text(L10n.tr("totp.scan")) } icon: { QasaIconImage(.qrScan, size: 17) }
-            }
-            Button {
-                openKeyEntry()
-            } label: {
-                Label { Text(L10n.tr("totp.enterKey")) } icon: { QasaIconImage(.keyboard, size: 17) }
-            }
-        } label: {
+        Button { showAddSheet = true } label: {
             QasaButtonLabel(title: L10n.tr("totp.add"), icon: .add)
                 .font(.qasa(16, weight: .semibold))
                 .foregroundColor(Theme.accent)
+        }
+        .buttonStyle(.plain)
+        .qasaActionSheet(isPresented: $showAddSheet, title: L10n.tr("totp.add")) {
+            [
+                SheetAction(icon: .qrScan, title: L10n.tr("totp.scan")) {
+                    parseError = nil
+                    showScanner = true
+                },
+                SheetAction(icon: .keyboard, title: L10n.tr("totp.enterKey")) { openKeyEntry() },
+            ]
         }
     }
 

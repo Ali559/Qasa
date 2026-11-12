@@ -72,7 +72,9 @@ looks the same everywhere.
 
 ### Phase 3: The app's own menus (one PR)
 
-- [ ] **Item options (⋯) and every dropdown use the app's own sheet**, not the system menu:
+- [x] **Item options (⋯) and every dropdown use the app's own sheet**, not the system menu
+      (2026-11-12: `OwnSheets.swift`, `QasaOwnSheets.kt`, `ActionSheet.vue` / `PickerSheet.vue`;
+      design/README.md rule 6a). Original list:
       - An action sheet component on each app: the shared sheet header, settings-style rows with
         icon, label and destructive red, and no Cancel.
       - A picker sheet for dropdowns (type, country, collection, phone): rows with a check on the

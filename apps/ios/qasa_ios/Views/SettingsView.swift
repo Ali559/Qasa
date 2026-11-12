@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(AppPreferences.self) private var prefs
     @State private var biometricUnlock = VaultKeychainStore.biometricsEnabled
     @State private var showClearDataAlert = false
+    @State private var showLanguagePicker = false
+    @State private var showThemePicker = false
     @State private var showLinkedDevices = false
     @State private var showPremium = false
     @State private var showLogoutConfirm = false
@@ -129,11 +131,7 @@ struct SettingsView: View {
                     }
 
                     settingsSection(title: L10n.tr("settings.appearance", locale: locale)) {
-                        Menu {
-                            ForEach(AppLanguage.allCases) { lang in
-                                Button(lang.displayName) { prefs.language = lang }
-                            }
-                        } label: {
+                        Button { showLanguagePicker = true } label: {
                             NavChevronRow(
                                 icon: .website,
                                 title: L10n.tr("settings.language", locale: locale),
@@ -141,14 +139,15 @@ struct SettingsView: View {
                             )
                         }
                         .buttonStyle(.qasaRow)
+                        .qasaPickerSheet(
+                            isPresented: $showLanguagePicker,
+                            title: L10n.tr("settings.language", locale: locale),
+                            selection: Binding(get: { prefs.language }, set: { prefs.language = $0 })
+                        ) {
+                            AppLanguage.allCases.map { PickerOption(value: $0, label: $0.displayName) }
+                        }
                         RowDivider()
-                        Menu {
-                            ForEach(AppThemePreference.allCases) { theme in
-                                Button(L10n.tr(theme.displayNameKey, locale: locale)) {
-                                    prefs.theme = theme
-                                }
-                            }
-                        } label: {
+                        Button { showThemePicker = true } label: {
                             NavChevronRow(
                                 icon: .themeDark,
                                 title: L10n.tr("settings.theme", locale: locale),
@@ -156,6 +155,15 @@ struct SettingsView: View {
                             )
                         }
                         .buttonStyle(.qasaRow)
+                        .qasaPickerSheet(
+                            isPresented: $showThemePicker,
+                            title: L10n.tr("settings.theme", locale: locale),
+                            selection: Binding(get: { prefs.theme }, set: { prefs.theme = $0 })
+                        ) {
+                            AppThemePreference.allCases.map {
+                                PickerOption(value: $0, label: L10n.tr($0.displayNameKey, locale: locale))
+                            }
+                        }
                     }
 
                     settingsSection(title: L10n.tr("settings.dataAccount", locale: locale)) {

@@ -8,7 +8,7 @@
 // inset 14 on the leading side. With an error a 3px danger bar runs down the leading edge,
 // inside the card's rounded corners; the message itself is drawn by the group.
 //
-// `id` is the row's control (input, select): the label names it, and a click anywhere in
+// `id` is the row's control (input, a picker's opener): the label names it, and a click anywhere in
 // the row that doesn't land on another control focuses it. A row with no single control
 // (`control: false`) labels itself as a group instead.
 import { inject, onBeforeUnmount, ref } from 'vue'
@@ -32,7 +32,7 @@ if (!group && import.meta.env.DEV) console.warn(`GroupRow "${props.label}" outsi
 group?.register({ id: props.id, label: () => props.label, error: () => props.error, el: () => el.value })
 onBeforeUnmount(() => group?.unregister(props.id))
 
-const INTERACTIVE = 'button, a, input, select, textarea, label, [role="menu"]'
+const INTERACTIVE = 'button, a, input, select, textarea, label'
 
 function focusControl(e: MouseEvent) {
   if (!props.control || props.disabled) return
@@ -98,7 +98,7 @@ function focusControl(e: MouseEvent) {
 }
 
 /* The error bar's clip follows the card's inner corners on the first and last rows, so a
-   row's own overflow (an open menu) is never clipped. */
+   row's own overflow is never clipped. */
 .stripe-clip {
   position: absolute;
   inset: 0;
@@ -184,21 +184,5 @@ function focusControl(e: MouseEvent) {
 
 .row-value :deep(input::placeholder) {
   color: var(--text-placeholder);
-}
-
-/* A picker's select is invisible: a keyboard user sees its row ringed instead. */
-.group-row:has(select:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-
-.group-row:first-child:has(select:focus-visible) {
-  border-start-start-radius: calc(var(--radius-group) - var(--size-stroke));
-  border-start-end-radius: calc(var(--radius-group) - var(--size-stroke));
-}
-
-.group-row:last-child:has(select:focus-visible) {
-  border-end-start-radius: calc(var(--radius-group) - var(--size-stroke));
-  border-end-end-radius: calc(var(--radius-group) - var(--size-stroke));
 }
 </style>
