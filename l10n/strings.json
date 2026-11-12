@@ -787,7 +787,7 @@
   "date.hourAgo": {
     "en": "1 hour ago",
     "ar": "منذ ساعة",
-    "ckb": "١ کاتژمێر لەمەوبەر"
+    "ckb": "1 کاتژمێر لەمەوبەر"
   },
   "date.hoursAgo": {
     "en": "%lld hours ago",
@@ -796,8 +796,8 @@
   },
   "date.invalidFormat": {
     "en": "Use e.g. Nov 6 2000",
-    "ar": "مثال: ٦ نوفمبر ٢٠٠٠",
-    "ckb": "وەک نموونە: ٦ Nov ٢٠٠٠"
+    "ar": "مثال: 6 نوفمبر 2000",
+    "ckb": "وەک نموونە: 6 Nov 2000"
   },
   "date.justNow": {
     "en": "Just now",
@@ -807,7 +807,7 @@
   "date.minuteAgo": {
     "en": "1 minute ago",
     "ar": "منذ دقيقة",
-    "ckb": "١ خولەک لەمەوبەر"
+    "ckb": "1 خولەک لەمەوبەر"
   },
   "date.minutesAgo": {
     "en": "%lld minutes ago",
@@ -927,7 +927,7 @@
   "devices.upgradeHint": {
     "en": "Free is limited to 1 device. Unlink a remote device to free the slot, or upgrade for up to 5.",
     "ar": "رقِّ إلى البريميوم لما يصل إلى 5 أجهزة في آن واحد.",
-    "ckb": "بۆ تا ٥ ئامێری هاوکات، بڕۆ بۆ پریمیۆم."
+    "ckb": "بۆ تا 5 ئامێری هاوکات، بڕۆ بۆ پریمیۆم."
   },
   "emailKind.personal": {
     "en": "Personal",
@@ -1246,13 +1246,13 @@
   },
   "gen.lowercase": {
     "en": "Lowercase (a-z)",
-    "ar": "أحرف صغيرة (a-z)",
-    "ckb": "پیتە بچووکەکان (a-z)"
+    "ar": "أحرف صغيرة (⁦a-z⁩)",
+    "ckb": "پیتە بچووکەکان (⁦a-z⁩)"
   },
   "gen.numbers": {
     "en": "Numbers (0-9)",
-    "ar": "أرقام (0-9)",
-    "ckb": "ژمارەکان (0-9)"
+    "ar": "أرقام (⁦0-9⁩)",
+    "ckb": "ژمارەکان (⁦0-9⁩)"
   },
   "gen.pronounceable": {
     "en": "Pronounceable",
@@ -1276,8 +1276,8 @@
   },
   "gen.symbols": {
     "en": "Symbols (!@#$)",
-    "ar": "رموز (!@#$)",
-    "ckb": "هێماکان (!@#$)"
+    "ar": "رموز (⁦!@#$⁩)",
+    "ckb": "هێماکان (⁦!@#$⁩)"
   },
   "gen.title": {
     "en": "Password Generator",
@@ -1286,8 +1286,8 @@
   },
   "gen.uppercase": {
     "en": "Uppercase (A-Z)",
-    "ar": "أحرف كبيرة (A-Z)",
-    "ckb": "پیتە گەورەکان (A-Z)"
+    "ar": "أحرف كبيرة (⁦A-Z⁩)",
+    "ckb": "پیتە گەورەکان (⁦A-Z⁩)"
   },
   "gen.use": {
     "en": "Use Password",
@@ -1337,7 +1337,7 @@
   "health.howScoringBody": {
     "en": "Score starts at 100 and drops for weak, reused or breached login passwords. Aim for unique, long passwords with mixed character types.",
     "ar": "تبدأ الدرجة من 100 وتنخفض لكلمات المرور الضعيفة أو المعاد استخدامها أو المسرّبة. احرص على كلمات فريدة وطويلة بأنواع أحرف متنوعة.",
-    "ckb": "خاڵ لە ١٠٠ دەست پێدەکات و بۆ وشەی نهێنی لاواز، دووبارەکراو یان دزراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە."
+    "ckb": "خاڵ لە 100 دەست پێدەکات و بۆ وشەی نهێنی لاواز، دووبارەکراو یان دزراو دادەبەزێت. وشەی درێژ و جیاواز بەکاربهێنە."
   },
   "health.issuesTitle": {
     "en": "Password Issues",
@@ -1372,7 +1372,7 @@
   "health.outOf100": {
     "en": "out of 100",
     "ar": "من 100",
-    "ckb": "لە ١٠٠"
+    "ckb": "لە 100"
   },
   "health.passwords": {
     "en": "Passwords",
@@ -1457,7 +1457,7 @@
   "lan.secureBody": {
     "en": "Vault ciphertext only. Enter the same 6-digit code on both devices. Never use public Wi‑Fi you do not trust.",
     "ar": "نص الخزنة المشفر فقط. أدخل نفس الرمز المكون من 6 أرقام على الجهازين. لا تستخدم Wi‑Fi عامًا غير موثوق.",
-    "ckb": "تەنها داتای نهێنی کۆگا. هەمان کۆدی ٦ ژمارەیی لەسەر هەردوو ئامێر بنووسە. Wi‑Fiی گشتی بەکارمەهێنە."
+    "ckb": "تەنها داتای نهێنی کۆگا. هەمان کۆدی 6 ژمارەیی لەسەر هەردوو ئامێر بنووسە. Wi‑Fiی گشتی بەکارمەهێنە."
   },
   "lan.secureTitle": {
     "en": "Secure LAN sync",
@@ -1652,7 +1652,7 @@
   "pair.codePlaceholder": {
     "en": "6-digit code",
     "ar": "رمز من 6 أرقام",
-    "ckb": "کۆدی ٦ ژمارەیی"
+    "ckb": "کۆدی 6 ژمارەیی"
   },
   "pair.continue": {
     "en": "Continue",
@@ -1797,7 +1797,7 @@
   "premium.featureDevices": {
     "en": "Protect up to 5 Devices",
     "ar": "حماية حتى 5 أجهزة",
-    "ckb": "پاراستنی تا ٥ ئامێر"
+    "ckb": "پاراستنی تا 5 ئامێر"
   },
   "premium.featureSave": {
     "en": "Save vs monthly",
@@ -1941,8 +1941,8 @@
   },
   "settings.autoLockValue": {
     "en": "5 mins",
-    "ar": "٥ دقائق",
-    "ckb": "٥ خولەک"
+    "ar": "5 دقائق",
+    "ckb": "5 خولەک"
   },
   "settings.autofill": {
     "en": "Autofill",
@@ -1952,7 +1952,7 @@
   "settings.autofillSubtitle": {
     "en": "Enable Qasa in Passwords → AutoFill Passwords",
     "ar": "فعّل قاصة من كلمات السر ← التعبئة التلقائية",
-    "ckb": "قاسە چالاک بکە لە Passwords → AutoFill Passwords"
+    "ckb": "قاسە چالاک بکە لە Passwords ← AutoFill Passwords"
   },
   "settings.biometricUnlock": {
     "en": "Fingerprint or face unlock",
@@ -2116,8 +2116,8 @@
   },
   "settings.pairingCodeFmt": {
     "en": "Code: %@ (10 min)",
-    "ar": "الرمز: %@ (١٠ دقائق)",
-    "ckb": "کۆد: %@ (١٠ خولەک)"
+    "ar": "الرمز: %@ (10 دقائق)",
+    "ckb": "کۆد: %@ (10 خولەک)"
   },
   "settings.pairingSubtitle": {
     "en": "For a new device on Wi‑Fi",
@@ -2217,7 +2217,7 @@
   "settings.weakMasterPassword": {
     "en": "Use at least 8 characters.",
     "ar": "استخدم 8 أحرف على الأقل.",
-    "ckb": "لانیکەم ٨ پیت بەکاربهێنە."
+    "ckb": "لانیکەم 8 پیت بەکاربهێنە."
   },
   "settings.wrongMasterPassword": {
     "en": "That's not your current main password.",
@@ -2427,7 +2427,7 @@
   "sub.premiumIncludes": {
     "en": "Premium includes 5 devices and VPN.",
     "ar": "يشمل بريميوم 5 أجهزة وVPN.",
-    "ckb": "پریمیەم ٥ ئامێر و VPN لەخۆدەگرێت."
+    "ckb": "پریمیەم 5 ئامێر و VPN لەخۆدەگرێت."
   },
   "sub.reasonTitle": {
     "en": "Cancellation reason",
@@ -3334,7 +3334,7 @@
     "android": "breached_privacy_body",
     "en": "Each password is hashed on your phone, and only the first 5 characters of that hash are sent to Have I Been Pwned. Your passwords never leave this device.",
     "ar": "تُحوَّل كل كلمة مرور إلى بصمة (hash) على هاتفك، ولا يُرسَل إلى Have I Been Pwned سوى أول 5 أحرف منها. لا تغادر كلمات مرورك هذا الجهاز أبدًا.",
-    "ckb": "هەر وشەیەکی نهێنی لەسەر مۆبایلەکەت هاش دەکرێت، و تەنها ٥ پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن."
+    "ckb": "هەر وشەیەکی نهێنی لەسەر مۆبایلەکەت هاش دەکرێت، و تەنها 5 پیتی یەکەمی ئەو هاشە دەنێردرێت بۆ Have I Been Pwned. وشە نهێنییەکانت هەرگیز ئەم ئامێرە بەجێناهێڵن."
   },
   "breached.offline": {
     "en": "Couldn't reach the breach check. Try again when you're online.",
@@ -3396,7 +3396,7 @@
   "totp.hint": {
     "en": "When a site asks you to set up two-step verification, scan its QR code here. Qasa then shows the 6-digit code to type in.",
     "ar": "عندما يطلب منك موقع إعداد التحقق بخطوتين، امسح رمز QR الخاص به هنا. ستعرض لك قاصة الرمز المكوّن من 6 أرقام لتكتبه.",
-    "ckb": "کاتێک ماڵپەڕێک داوات لێدەکات پشتڕاستکردنەوەی دوو هەنگاوی ڕێکبخەیت، کۆدی QR ـەکەی لێرە سکان بکە. ئینجا قاسە ئەو کۆدە ٦ ژمارەییەت پیشان دەدات کە دەینووسیت."
+    "ckb": "کاتێک ماڵپەڕێک داوات لێدەکات پشتڕاستکردنەوەی دوو هەنگاوی ڕێکبخەیت، کۆدی QR ـەکەی لێرە سکان بکە. ئینجا قاسە ئەو کۆدە 6 ژمارەییەت پیشان دەدات کە دەینووسیت."
   },
   "totp.copied": {
     "en": "2FA code copied",
@@ -3436,7 +3436,7 @@
   "breached.lockedBody": {
     "en": "Premium checks every saved password against known data breaches and shows which ones to change. Only a 5-character code ever leaves your phone.",
     "ar": "يفحص بريميوم كل كلمة مرور محفوظة مقابل التسريبات المعروفة ويُظهر لك ما يجب تغييره. لا يغادر هاتفك سوى رمز من 5 أحرف.",
-    "ckb": "پریمیۆم هەموو وشەیەکی نهێنیی پاشەکەوتکراو لەگەڵ دزەکراوە ناسراوەکان بەراورد دەکات و پیشانت دەدات کامیان بگۆڕیت. تەنها کۆدێکی ٥ پیتی لە مۆبایلەکەت دەردەچێت."
+    "ckb": "پریمیۆم هەموو وشەیەکی نهێنیی پاشەکەوتکراو لەگەڵ دزەکراوە ناسراوەکان بەراورد دەکات و پیشانت دەدات کامیان بگۆڕیت. تەنها کۆدێکی 5 پیتی لە مۆبایلەکەت دەردەچێت."
   },
   "breached.unlock": {
     "en": "Get Premium",

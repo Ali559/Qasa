@@ -264,7 +264,7 @@
     <string name="date_done">تم</string>
     <string name="date_hourago">منذ ساعة</string>
     <string name="date_hoursago">منذ %d ساعة</string>
-    <string name="date_invalidformat">مثال: ٦ نوفمبر ٢٠٠٠</string>
+    <string name="date_invalidformat">مثال: 6 نوفمبر 2000</string>
     <string name="date_justnow">الآن</string>
     <string name="date_minuteago">منذ دقيقة</string>
     <string name="date_minutesago">منذ %d دقيقة</string>
@@ -362,16 +362,16 @@
     <string name="gen_fair">متوسطة</string>
     <string name="gen_generatedpassword">كلمة المرور المُنشأة</string>
     <string name="gen_length">الطول</string>
-    <string name="gen_lowercase">أحرف صغيرة (a-z)</string>
-    <string name="gen_numbers">أرقام (0-9)</string>
+    <string name="gen_lowercase">أحرف صغيرة (⁦a-z⁩)</string>
+    <string name="gen_numbers">أرقام (⁦0-9⁩)</string>
     <string name="gen_pronounceable">قابل للنطق</string>
     <string name="gen_regenerate">إعادة الإنشاء</string>
     <string name="gen_savetovault">احفظ في كلمات مروري</string>
     <string name="gen_strength">القوة</string>
     <string name="gen_strong">قوية</string>
-    <string name="gen_symbols">رموز (!@#$)</string>
+    <string name="gen_symbols">رموز (⁦!@#$⁩)</string>
     <string name="gen_title">مولّد كلمات المرور</string>
-    <string name="gen_uppercase">أحرف كبيرة (A-Z)</string>
+    <string name="gen_uppercase">أحرف كبيرة (⁦A-Z⁩)</string>
     <string name="gen_use">استخدام كلمة المرور</string>
     <string name="gen_usepassword">استخدام كلمة المرور</string>
     <string name="gen_verystrong">قوية جدًا</string>
@@ -569,7 +569,7 @@
     <string name="settings_autolockhelp">بعد هذه الدقائق من عدم النشاط—أو عند العودة من الخلفية بعد تجاوز هذا الحد—تُقفل الخزنة وستحتاج كلمة المرور الرئيسية أو القياسات الحيوية.</string>
     <string name="settings_autolockminutesfmt">%d دقائق</string>
     <string name="settings_autolockpresets">إعدادات مسبقة</string>
-    <string name="settings_autolockvalue">٥ دقائق</string>
+    <string name="settings_autolockvalue">5 دقائق</string>
     <string name="settings_biometricnogate">لا توجد شاشة قفل أو وسيلة مصادقة على هذا الجهاز</string>
     <string name="settings_biometricpending">سيُحمى عند فتحك التالي بكلمة المرور الرئيسية</string>
     <string name="settings_biometricsealed">محمي بمصادقة الجهاز</string>
@@ -609,7 +609,7 @@
     <string name="settings_managesubscription">إدارة الاشتراك</string>
     <string name="settings_masterpasswordchanged">تم تحديث كلمة المرور الرئيسية.</string>
     <string name="settings_newmasterpassword">كلمة المرور الرئيسية الجديدة</string>
-    <string name="settings_pairingcodefmt">الرمز: %s (١٠ دقائق)</string>
+    <string name="settings_pairingcodefmt">الرمز: %s (10 دقائق)</string>
     <string name="settings_pairingsubtitle">لجهاز جديد على Wi‑Fi</string>
     <string name="settings_parsedcsv">تم استيراد %d عنصر.</string>
     <string name="settings_passwordmismatch">كلمتا المرور الجديدتان غير متطابقتين.</string>

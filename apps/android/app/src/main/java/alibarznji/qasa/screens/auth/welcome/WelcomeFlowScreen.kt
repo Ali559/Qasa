@@ -185,9 +185,9 @@ private fun LanguageRow(language: AppLanguage, selected: Boolean, onClick: () ->
         role = Role.RadioButton,
         modifier = Modifier.semantics { this.selected = selected },
     ) {
-        CompositionLocalProvider(
-            LocalLayoutDirection provides if (language.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
-        ) {
+        // Every row follows the app's direction so the icons line up; each name still shapes in
+        // its own script.
+        run {
             QasaRow(
                 title = language.nativeName,
                 icon = QasaIcons.Language,

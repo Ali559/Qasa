@@ -12,7 +12,9 @@ import java.util.Locale
  */
 object LocaleContext {
     fun wrap(base: Context, language: AppLanguage): Context {
-        val locale = Locale.forLanguageTag(language.code)
+        // `-u-nu-latn`: Western digits in every language, like iOS and every string (ckb would
+        // otherwise format ٣٩). Resource lookup ignores the extension.
+        val locale = Locale.forLanguageTag("${language.code}-u-nu-latn")
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
         config.setLocale(locale)

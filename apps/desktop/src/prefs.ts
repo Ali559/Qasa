@@ -71,6 +71,12 @@ export async function initPrefs(): Promise<void> {
 }
 
 /** `t('key', …args)` in the current language; re-renders when the language changes. */
+/** The app language as a BCP 47 tag for `Intl` and `toLocaleString`, with Western digits in
+ * every language (ckb would otherwise format ٣٩), like iOS, Android and every string. */
+export function formatLocale(language: string = prefs.language): string {
+  return `${language}-u-nu-latn`
+}
+
 export function useT() {
   const language = computed(() => prefs.language)
   return (key: string, ...args: Array<string | number>) => translate(language.value, key, ...args)

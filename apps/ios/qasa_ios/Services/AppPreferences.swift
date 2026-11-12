@@ -17,8 +17,8 @@ enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
     var locale: Locale {
         switch self {
         case .en: return Locale(identifier: "en")
-        case .ckb: return Locale(identifier: "ckb")
-        case .ar: return Locale(identifier: "ar")
+        case .ckb: return Locale(identifier: "ckb@numbers=latn") // Western digits, like ar and every string
+        case .ar: return Locale(identifier: "ar@numbers=latn")
         }
     }
 

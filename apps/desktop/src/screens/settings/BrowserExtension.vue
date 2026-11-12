@@ -11,7 +11,7 @@ import SectionLabel from '@/components/SectionLabel.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import { bridgeApi, type BridgeClient } from '@/bridge/api'
-import { prefs, useT } from '@/prefs'
+import { formatLocale, useT } from '@/prefs'
 
 defineEmits<{ back: [] }>()
 const t = useT()
@@ -25,7 +25,7 @@ async function refresh() {
 onMounted(refresh)
 
 function formatDate(ms: number): string {
-  return new Date(ms).toLocaleString(prefs.language, { dateStyle: 'medium', timeStyle: 'short' })
+  return new Date(ms).toLocaleString(formatLocale(), { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 async function remove() {

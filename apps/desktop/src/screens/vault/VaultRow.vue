@@ -91,7 +91,8 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
     <ItemTile :variant="row.variant" :name="row.displayName" :website="row.siteHost" :color="row.color" />
     <span class="text">
       <span class="name">{{ row.displayName }}</span>
-      <span class="subtitle">{{ subtitle }}</span>
+      <!-- bdi: a phone number, card digits or email keeps its own order in Arabic and Kurdish (iOS does the same). -->
+      <span class="subtitle"><bdi>{{ subtitle }}</bdi></span>
     </span>
     <button v-if="row.hasPrimaryCopy" type="button" class="icon-button" :aria-label="t('a11y.copy')" :title="t('a11y.copy')" @click.stop="copyPrimary">
       <QasaIcon name="copy" :size="17" />
