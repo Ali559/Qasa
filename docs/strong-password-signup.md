@@ -72,8 +72,12 @@ password in one or two taps and ends with the login saved. The rule is
    change-password form with "Use a strong password" (a preview of the generated password);
    picking it fills the new and confirm fields; submitting saves the login even though
    Qasa filled the password. Check that the desktop list shows the new login at once.
-2. **Android**: a new-password field gets a "Use a strong password" dataset (from
+2. **Android** (done, branch `phase-5-android`): a new-password field gets a "Use a strong password" dataset (from
    `PasswordGenerator`) instead of saved logins; the generated value fills new and confirm
-   fields; `SaveInfo` makes Android offer to save it.
+   fields; `SaveInfo` makes Android offer to save it. The decision is `credentials/AutofillOffers.kt`
+   (unit tested). The dataset needs no unlock. Android skips its save prompt when every
+   watched field still holds a value Qasa filled, so the save shows once the user has typed
+   the username (sign-up) or the current password (change form); a form whose only watched
+   fields Qasa filled itself gets no save prompt.
 3. **iOS**: 26.2 generate and save requests; text insertion gets a "Strong password"
    choice for iOS 18–26.1.

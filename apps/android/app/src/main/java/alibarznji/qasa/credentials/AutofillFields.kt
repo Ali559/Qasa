@@ -210,9 +210,15 @@ class AutofillForm<T>(fields: List<ClassifiedField<T>>) {
     val hasCard: Boolean get() = group(AutofillGroup.Card).any { it.type == AutofillFieldType.CardNumber }
     val hasIdentity: Boolean get() = group(AutofillGroup.Identity).isNotEmpty()
 
-    /** The login fields a save can read: the password and the username before it. */
+    /** A sign-up or change-password form: it gets "Use a strong password" (design rule 6c). */
+    val hasNewPassword: Boolean get() = fields.any { it.type == AutofillFieldType.NewPassword }
+
+    /**
+     * The password a save reads: the new password on a sign-up or change form (that is the
+     * one the account has after submit), else the password.
+     */
     val passwordField: ClassifiedField<T>? get() =
-        fields.firstOrNull { it.type == AutofillFieldType.Password } ?: fields.firstOrNull { it.type == AutofillFieldType.NewPassword }
+        fields.firstOrNull { it.type == AutofillFieldType.NewPassword } ?: fields.firstOrNull { it.type == AutofillFieldType.Password }
 
     companion object {
         /**

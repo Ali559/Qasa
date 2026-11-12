@@ -92,12 +92,12 @@ fun GenerateScreen(
  */
 @Stable
 class PasswordGeneratorState {
-    var length by mutableFloatStateOf(16f)
+    var length by mutableFloatStateOf(PasswordGenerator.DEFAULT_LENGTH.toFloat())
     var useUppercase by mutableStateOf(true)
     var useLowercase by mutableStateOf(true)
     var useDigits by mutableStateOf(true)
     var useSymbols by mutableStateOf(true)
-    var password by mutableStateOf(gen(16, uppercase = true, lowercase = true, digits = true, symbols = true))
+    var password by mutableStateOf(gen(PasswordGenerator.DEFAULT_LENGTH, uppercase = true, lowercase = true, digits = true, symbols = true))
     var copied by mutableStateOf(false)
 
     /** Bumped on every copy so a second tap restarts the 1.5 s "Copied" timer. */

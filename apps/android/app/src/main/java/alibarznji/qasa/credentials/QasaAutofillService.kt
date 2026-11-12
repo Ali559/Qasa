@@ -5,6 +5,7 @@ import alibarznji.qasa.R
 import alibarznji.qasa.prefs.LocaleContext
 import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.vault.VaultPayload
+import alibarznji.qasa.vault.crypto.PasswordGenerator
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
@@ -21,6 +22,7 @@ import android.service.autofill.SaveCallback
 import android.service.autofill.SaveInfo
 import android.service.autofill.SaveRequest
 import android.view.autofill.AutofillId
+import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
@@ -49,7 +51,7 @@ class QasaAutofillService : AutofillService() {
         // Never fill into Qasa itself.
         if ((screen.caller as? AutofillCaller.App)?.packageName == packageName) return callback.onSuccess(null)
         val form = screen.form
-        if (!form.hasLogin && !form.hasCard && !form.hasIdentity) return callback.onSuccess(null)
+        if (!form.hasLogin && !form.hasNewPassword && !form.hasCard && !form.hasIdentity) return callback.onSuccess(null)
 
         val entries = indexStore.read()
         // A service's resources follow the device language; the dataset labels follow the app's.
@@ -57,9 +59,19 @@ class QasaAutofillService : AutofillService() {
         val inline = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) InlineSpecs(request) else null
         val response = FillResponse.Builder()
         var added = 0
+        val loginOffers = AutofillOffers.login(form)
+
+        // Sign-up / change-password form (design rule 6c): the new-password fields get one
+        // suggestion, a fresh password from the shared generator, and never a saved login.
+        // First, so it gets a keyboard (inline) slot.
+        if (loginOffers.strongPasswordIds.isNotEmpty()) {
+            val password = PasswordGenerator.generateDefault()
+            response.addDataset(strongPasswordDataset(form, password, l10n.getString(R.string.fill_strongpassword), inline))
+            added++
+        }
 
         fun offer(group: AutofillGroup, candidates: List<AutofillIndexEntry>, limit: Int) {
-            val ids = form.group(group).map { it.id }
+            val ids = if (group == AutofillGroup.Login) loginOffers.savedLoginIds else form.group(group).map { it.id }
             if (ids.isEmpty()) return
             for (entry in candidates.take(limit)) {
                 response.addDataset(dataset(ids, group, entry.id, entry.title, AutofillPresentation.hint(entry), inline))
@@ -82,12 +94,23 @@ class QasaAutofillService : AutofillService() {
         }
         if (added == 0) return callback.onSuccess(null)
 
-        // Offer to save a login typed into this form.
-        form.passwordField?.let { password ->
-            val username = form.group(AutofillGroup.Login).firstOrNull { it.type == AutofillFieldType.Username }
-            val type = SaveInfo.SAVE_DATA_TYPE_PASSWORD or (if (username != null) SaveInfo.SAVE_DATA_TYPE_USERNAME else 0)
-            val save = SaveInfo.Builder(type, arrayOf(password.id))
-            username?.let { save.setOptionalIds(arrayOf(it.id)) }
+        // Offer to save a login typed into this form, or one whose password we just generated.
+        //
+        // The framework (Session#showSaveLocked) skips the save UI in two cases that matter
+        // here, and no SaveInfo flag turns either off:
+        //  1. "no value changed": every watched field still holds what a dataset filled, and
+        //     no optional field was edited by the user;
+        //  2. "dataset match": every watched field's value equals one dataset's value.
+        // On a sign-up form the user types the username (an optional id the strong-password
+        // dataset never carries), so neither applies and Android offers to save. On a change
+        // form the current password is watched too (AutofillOffers.save), so typing it does the
+        // same. Left out: a form whose only watched fields Qasa filled itself (a reset page
+        // with no username, or a change form whose current password came from a saved login);
+        // Android shows no save prompt there.
+        AutofillOffers.save(form)?.let { plan ->
+            val type = SaveInfo.SAVE_DATA_TYPE_PASSWORD or (if (plan.usernameId != null) SaveInfo.SAVE_DATA_TYPE_USERNAME else 0)
+            val save = SaveInfo.Builder(type, arrayOf(plan.passwordId))
+            if (plan.optionalIds.isNotEmpty()) save.setOptionalIds(plan.optionalIds.toTypedArray())
             response.setSaveInfo(save.build())
         }
         try {
@@ -104,11 +127,10 @@ class QasaAutofillService : AutofillService() {
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         val structure = request.fillContexts.lastOrNull()?.structure ?: return callback.onSuccess()
         val screen = AutofillStructureParser.parse(structure)
+        // The new password on a sign-up or change form (AutofillForm.passwordField).
         val password = screen.form.passwordField?.let { screen.textValues[it.id] }?.takeIf { it.isNotEmpty() }
             ?: return callback.onSuccess()
-        val username = screen.form.group(AutofillGroup.Login)
-            .firstOrNull { it.type == AutofillFieldType.Username }
-            ?.let { screen.textValues[it.id] }.orEmpty()
+        val username = AutofillOffers.save(screen.form)?.usernameId?.let { screen.textValues[it] }.orEmpty()
         val (name, website) = when (val caller = screen.caller) {
             is AutofillCaller.Web -> caller.host to caller.host
             is AutofillCaller.App -> appLabel(caller.packageName) to "androidapp://${caller.packageName}"
@@ -125,6 +147,32 @@ class QasaAutofillService : AutofillService() {
         val info = packageManager.getApplicationInfo(packageName, 0)
         packageManager.getApplicationLabel(info).toString()
     }.getOrDefault(packageName)
+
+    /**
+     * "Use a strong password": the generated value as the row's subtitle, filled at once into
+     * every new-password field (new and confirm). No authentication: a fresh random password
+     * is no vault data, so it needs neither an unlocked vault nor [AutofillAuthActivity].
+     */
+    @SuppressLint("NewApi")
+    private fun strongPasswordDataset(form: AutofillForm<AutofillId>, password: String, title: String, inline: InlineSpecs?): Dataset {
+        val presentation = RemoteViews(packageName, R.layout.autofill_suggestion).apply {
+            setTextViewText(R.id.autofill_title, title)
+            setTextViewText(R.id.autofill_hint, password)
+        }
+        val inlinePresentation = inline?.next(this, title, password, AutofillGroup.Login, STRONG_PASSWORD_ID)
+        @Suppress("DEPRECATION")
+        val builder = Dataset.Builder(presentation)
+        for ((id, value) in AutofillOffers.strongPasswordValues(form, password)) {
+            val autofillValue = AutofillValue.forText(value)
+            @Suppress("DEPRECATION")
+            if (inlinePresentation != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                builder.setValue(id, autofillValue, presentation, inlinePresentation)
+            } else {
+                builder.setValue(id, autofillValue, presentation)
+            }
+        }
+        return builder.build()
+    }
 
     @SuppressLint("NewApi")
     private fun dataset(
@@ -154,6 +202,9 @@ class QasaAutofillService : AutofillService() {
         return builder.build()
     }
 }
+
+/** The inline attribution's request-code key for the strong-password row (no vault item). */
+private const val STRONG_PASSWORD_ID = "strong-password"
 
 /** Keyboard (inline) suggestions, when the keyboard asks for them (Android 11+). */
 @RequiresApi(Build.VERSION_CODES.R)
