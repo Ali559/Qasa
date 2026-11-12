@@ -414,6 +414,7 @@
   "field.websitePlaceholder": "example.com",
   "field.websiteURL": "Website URL",
   "field.zipCode": "Zip Code",
+  "fill.strongPassword": "Use a strong password",
   "gen.copied": "Copied!",
   "gen.copy": "Copy",
   "gen.copyPassword": "Copy Password",

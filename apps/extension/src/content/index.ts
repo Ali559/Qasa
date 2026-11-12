@@ -10,7 +10,7 @@ import type { BgResponse, BridgeStatus, ContentRequest, FillValues, IdentityItem
 import { LANGUAGE_KEY, loadLanguage } from '@ext/shared/language'
 import { isWebUrl } from '@ext/shared/protocol'
 import { detect, FRAME_MARK, groupOf, iconFields, identityGroupOf, isOtpField, type Detection, type FieldGroup } from './detect'
-import { setFieldValue, setSelectValue } from './fill'
+import { fillGenerated, setFieldValue, setSelectValue } from './fill'
 import { candidates, optionFor, type IdentityGroup, type IdentityValues } from './identity'
 import { loadFonts, type FontBytes } from './fonts'
 import { effectiveOpacity, isFieldRendered, isFieldVisible } from './guard'
@@ -118,15 +118,19 @@ function scheduleReposition(): void {
 
 // MARK: menu
 
-/** What a field's menu offers: its login form's logins, 2FA codes, cards or profiles. */
+/** What a field's menu offers: its login form's logins, a strong password for a new
+ *  password (rule 6c), 2FA codes, cards or profiles. */
 type MenuContext =
   | { kind: 'login'; group: FieldGroup }
+  | { kind: 'newPassword'; group: FieldGroup }
   | { kind: 'otp' }
   | { kind: 'identity'; group: IdentityGroup }
 
 function contextOf(field: HTMLInputElement): MenuContext | null {
   if (isOtpField(field)) return { kind: 'otp' }
   const group = groupOf(detection.groups, field)
+  // Saved logins are never offered on a new-password field: only a strong password.
+  if (group && (field === group.newPassword || field === group.confirmPassword)) return { kind: 'newPassword', group }
   if (group) return { kind: 'login', group }
   const identity = identityGroupOf(detection.identity, field)
   return identity ? { kind: 'identity', group: identity } : null
@@ -146,7 +150,7 @@ function openMenuFor(field: HTMLInputElement): void {
       }
       overlay.closeMenu()
       if (context.kind === 'otp') void fillTotp(field, item.id, overlay.element)
-      else void fillGroup(context.group, item.id, overlay.element)
+      else if (context.kind === 'login') void fillGroup(context.group, item.id, overlay.element)
     },
   })
   overlay.revealAfter(fonts)
@@ -156,6 +160,19 @@ function openMenuFor(field: HTMLInputElement): void {
 async function loadMenu(overlay: Overlay, context: MenuContext): Promise<void> {
   try {
     const status = await ask<BridgeStatus>({ kind: 'status' })
+    if (context.kind === 'newPassword' && (status.state === 'unlocked' || status.state === 'locked')) {
+      // The generator needs the desktop, not an unlocked vault.
+      const password = await ask<string>({ kind: 'generate' })
+      overlay.setMenu({
+        kind: 'suggest',
+        password,
+        run: () => {
+          overlay.closeMenu()
+          fillStrongPassword(context.group, password, overlay.element)
+        },
+      })
+      return
+    }
     if (status.state === 'locked' && status.passwordDueDays) {
       // No Touch ID / Hello until the main password is typed in the app: Unlock just
       // brings its window forward, and the menu waits as usual.
@@ -239,6 +256,19 @@ async function fillGroup(group: FieldGroup, itemId: string, ownHost: Element | n
   // The item has 2FA and the page asks for it on the same screen.
   const otp = values.totp ? detection.otpFields.find((f) => f.ownerDocument === fields[0].ownerDocument && isFieldVisible(f, ownHost)) : undefined
   if (otp && values.totp) setFieldValue(otp, values.totp)
+  return true
+}
+
+/**
+ * "Use a strong password" (rule 6c): the generated password into the new-password field
+ * and its confirm field. The new-password field must be really visible (guard.ts); the
+ * confirm field at least rendered. Submitting the form then offers to save the login.
+ */
+function fillStrongPassword(group: FieldGroup, password: string, ownHost: Element | null): boolean {
+  const field = group.newPassword
+  if (!field || !isFieldVisible(field, ownHost)) return false
+  fillGenerated(field, password)
+  if (group.confirmPassword && isFieldRendered(group.confirmPassword)) fillGenerated(group.confirmPassword, password)
   return true
 }
 

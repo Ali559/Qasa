@@ -46,6 +46,18 @@ test('a signup form sends the new account', async ({ env }) => {
   await expect.poll(() => env.fake.saves).toEqual([{ url: `${env.servers.main}/signup.html`, username: 'fresh@user.test', password: 'fresh-password' }])
 })
 
+test('signup: "Use a strong password" fills both fields and the new account is saved with it', async ({ env }) => {
+  const page = await env.context.newPage()
+  await page.goto(`${env.servers.main}/signup.html`)
+  await page.locator('#username').pressSequentially('strong@user.test')
+  await fillVia(page, page.locator('#password'))
+  await expect.poll(() => page.locator('#password').inputValue()).not.toBe('')
+  const generated = await page.locator('#password').inputValue()
+  await expect(page.locator('#confirm')).toHaveValue(generated)
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await expect.poll(() => env.fake.saves).toEqual([{ url: `${env.servers.main}/signup.html`, username: 'strong@user.test', password: generated }])
+})
+
 test('multi-step: the username from step 1 is saved with the password from step 2', async ({ env }) => {
   const page = await env.context.newPage()
   await page.goto(`${env.servers.main}/multistep-1.html`)

@@ -29,11 +29,23 @@ describe('form kinds', () => {
     expect(otpFields).toHaveLength(0)
   })
 
-  it('finds a signup form and gives it no icons', () => {
+  it('finds a signup form, its confirm field, and an icon on the new password only', () => {
     loadFixture('signup.html')
     const d = detect(document)
-    expect(d.groups[0]).toMatchObject({ kind: 'signup', username: byId('username'), newPassword: byId('password') })
-    expect(iconFields(d)).toHaveLength(0)
+    expect(d.groups[0]).toMatchObject({
+      kind: 'signup',
+      username: byId('username'),
+      newPassword: byId('password'),
+      confirmPassword: byId('confirm'),
+    })
+    expect(iconFields(d)).toEqual([byId('password')])
+  })
+
+  it('finds a signup form with one new password and no confirm field', () => {
+    document.body.innerHTML = '<form><input name=email><input type=password autocomplete=new-password id=p></form>'
+    const [g] = detect(document).groups
+    expect(g).toMatchObject({ kind: 'signup', newPassword: byId('p') })
+    expect(g.confirmPassword).toBeUndefined()
   })
 
   it('finds a change-password form with its hidden username', () => {
@@ -47,8 +59,11 @@ describe('form kinds', () => {
 
   it('treats three unlabeled passwords as current / new / confirm', () => {
     document.body.innerHTML = '<form><input type=password id=a><input type=password id=b><input type=password id=c></form>'
-    const [g] = detect(document).groups
-    expect(g).toMatchObject({ kind: 'change', password: byId('a'), newPassword: byId('b') })
+    const d = detect(document)
+    const [g] = d.groups
+    expect(g).toMatchObject({ kind: 'change', password: byId('a'), newPassword: byId('b'), confirmPassword: byId('c') })
+    // The current password fills from the vault; the new one suggests a strong password.
+    expect(iconFields(d)).toEqual([byId('a'), byId('b')])
   })
 
   it('treats "old" + new password as a change form', () => {

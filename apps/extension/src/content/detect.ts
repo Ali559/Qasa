@@ -19,6 +19,8 @@ export interface FieldGroup {
   password?: HTMLInputElement
   /** Signup and change-password: the password being set. */
   newPassword?: HTMLInputElement
+  /** The "type it again" field after [newPassword], when the form has one. */
+  confirmPassword?: HTMLInputElement
   /** A hidden `autocomplete="username"` field, as change-password forms often have. */
   hiddenUsername?: HTMLInputElement
 }
@@ -158,13 +160,14 @@ function classify(container: FieldGroup['container'], inputs: HTMLInputElement[]
 
   let group: FieldGroup
   if (current.length && fresh.length) {
-    group = { kind: 'change', container, password: current[0], newPassword: fresh[0] }
+    group = { kind: 'change', container, password: current[0], newPassword: fresh[0], confirmPassword: fresh[1] }
   } else if (passwords.length >= 3) {
-    group = { kind: 'change', container, password: passwords[0], newPassword: passwords[1] }
+    group = { kind: 'change', container, password: passwords[0], newPassword: passwords[1], confirmPassword: passwords[2] }
   } else if (passwords.length === 2 && (current[0] === passwords[0] || looksOld(passwords[0]))) {
     group = { kind: 'change', container, password: passwords[0], newPassword: passwords[1] }
   } else if (passwords.length === 2 || fresh.length) {
-    group = { kind: 'signup', container, newPassword: fresh[0] ?? passwords[0] }
+    const newPassword = fresh[0] ?? passwords[0]
+    group = { kind: 'signup', container, newPassword, confirmPassword: passwords.find((p) => p !== newPassword) }
   } else {
     group = { kind: 'login', container, password: first }
   }
@@ -206,17 +209,21 @@ export function identityGroupOf(groups: IdentityGroup[], field: Element): Identi
 
 /** The group a field belongs to, if any. */
 export function groupOf(groups: FieldGroup[], field: Element): FieldGroup | undefined {
-  return groups.find((g) => g.username === field || g.password === field || g.newPassword === field)
+  return groups.find((g) => g.username === field || g.password === field || g.newPassword === field || g.confirmPassword === field)
 }
 
-/** Fields that get a Qasa icon: where filling makes sense (not signup forms). Card and
- *  profile fields get one too, except selects (no room for it). */
+/** Fields that get a Qasa icon: where filling makes sense, and the new-password field of a
+ *  signup or change-password form (its menu suggests a strong password, design rule 6c). A
+ *  signup form's username gets none: there is nothing saved to fill there. Card and profile
+ *  fields get one too, except selects (no room for it). */
 export function iconFields(d: Detection): HTMLInputElement[] {
   const out: HTMLInputElement[] = []
   for (const g of d.groups) {
-    if (g.kind === 'signup') continue
-    if (g.username) out.push(g.username)
-    if (g.password) out.push(g.password)
+    if (g.kind !== 'signup') {
+      if (g.username) out.push(g.username)
+      if (g.password) out.push(g.password)
+    }
+    if (g.newPassword) out.push(g.newPassword)
   }
   for (const g of d.identity) {
     for (const f of g.fields) if (isInput(f.field) && !out.includes(f.field)) out.push(f.field)

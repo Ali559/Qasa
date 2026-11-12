@@ -16,6 +16,8 @@ export type MenuState =
   | { kind: 'loading' }
   | { kind: 'items'; items: LoginMatch[] }
   | { kind: 'message'; key: string; args?: Array<string | number>; action?: { key: string; run: () => void } }
+  /** A new-password field (rule 6c): "Use a strong password", the generated value under it. */
+  | { kind: 'suggest'; password: string; run: () => void }
 
 /** The app's tokens (tokens.css, generated from design/tokens.json, the iOS values) as
  *  declarations for the shadow root: sizes, type, motion and shadows from the first `:root`
@@ -98,6 +100,9 @@ const CSS = `
 .title { font-size: var(--type-row-title-size); font-weight: var(--type-row-title-weight); }
 .sub { color: var(--text-secondary); font-size: var(--type-row-subtitle-size); font-weight: var(--type-row-subtitle-weight); }
 .msg { padding: 8px 10px 10px; color: var(--text-secondary); }
+.tile.brand { background: var(--card-muted); color: var(--accent); }
+.tile.brand svg { width: 16px; height: 18px; }
+.sub.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 /* iOS \`QasaButtonStyle(.primary)\`. */
 .action {
   display: flex; align-items: center; justify-content: center;
@@ -327,6 +332,27 @@ export class Overlay {
         this.actions.set(b, run)
         menu.el.append(b)
       }
+    } else if (state.kind === 'suggest') {
+      const row = this.doc.createElement('button')
+      row.type = 'button'
+      row.className = 'row'
+      row.setAttribute('role', 'menuitem')
+      const tile = this.doc.createElement('span')
+      tile.className = 'tile brand'
+      tile.append(qasaMark(this.doc))
+      const text = this.doc.createElement('span')
+      text.className = 'text'
+      const title = this.doc.createElement('span')
+      title.className = 'title'
+      title.textContent = ct(lang, 'fill.strongPassword')
+      const sub = this.doc.createElement('span')
+      sub.className = 'sub mono'
+      sub.textContent = state.password
+      sub.dir = 'ltr'
+      text.append(title, sub)
+      row.append(tile, text)
+      this.actions.set(row, state.run)
+      menu.el.append(row)
     } else {
       for (const item of state.items) {
         const row = this.doc.createElement('button')

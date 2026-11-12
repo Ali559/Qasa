@@ -64,6 +64,8 @@ export type ContentRequest =
   | { kind: 'rememberUsername'; username: string }
   /** The in-page menu's font files (content/fonts.ts). */
   | { kind: 'fonts' }
+  /** A strong password from the shared generator, for a new-password field (rule 6c). */
+  | { kind: 'generate' }
 
 export type BgRequest = PopupRequest | ContentRequest
 

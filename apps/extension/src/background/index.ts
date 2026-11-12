@@ -127,6 +127,9 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
   const url = contentFrameUrl(sender)
   const tabId = sender.tab!.id!
   switch (req.kind) {
+    case 'generate':
+      // The shared generator answers without the vault: nothing secret leaves the desktop.
+      return (await bridge.request('generate', {})).password
     case 'status':
       if (!contentStatus || Date.now() - contentStatus.at > CONTENT_STATUS_TTL_MS) {
         contentStatus = { at: Date.now(), value: bridge.status() }
@@ -167,7 +170,7 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
   }
 }
 
-const POPUP_ONLY = new Set(['pair', 'search', 'copy', 'generate'])
+const POPUP_ONLY = new Set(['pair', 'search', 'copy'])
 const CONTENT_ONLY = new Set(['matches', 'fill', 'totp', 'save', 'rememberUsername', 'fonts', 'identities', 'fillIdentity', 'confirm'])
 
 async function handle(req: BgRequest, sender: chrome.runtime.MessageSender): Promise<unknown> {
