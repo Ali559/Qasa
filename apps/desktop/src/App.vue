@@ -11,7 +11,7 @@ import { prefs, useT } from '@/prefs'
 import CreateVault from '@/screens/CreateVault.vue'
 import Shell from '@/screens/Shell.vue'
 import Unlock from '@/screens/Unlock.vue'
-import WelcomePreferences from '@/screens/WelcomePreferences.vue'
+import WelcomeFlow from '@/screens/welcome/WelcomeFlow.vue'
 import PairExisting from '@/screens/sync/PairExisting.vue'
 import ReplaceDevicePrompt from '@/screens/backup/ReplaceDevicePrompt.vue'
 import RestoreSetup from '@/screens/backup/RestoreSetup.vue'
@@ -107,7 +107,7 @@ defineExpose({ session })
 
 <template>
   <div v-if="stage === 'launching'" class="launching" />
-  <WelcomePreferences v-else-if="stage === 'welcome'" @continue="stage = 'create'" />
+  <WelcomeFlow v-else-if="stage === 'welcome'" @done="stage = 'create'" />
   <CreateVault v-else-if="stage === 'create'" @created="enterShell()" @pair="stage = 'pair'" @restore="stage = 'restore'" />
   <PairExisting v-else-if="stage === 'pair'" @back="stage = 'create'" @paired="route" />
   <RestoreSetup v-else-if="stage === 'restore'" @back="stage = 'create'" @restored="restoredFromBackup" />

@@ -2,6 +2,7 @@ package alibarznji.qasa.screens.settings.main
 
 import alibarznji.qasa.R
 import alibarznji.qasa.account.AccountDeletionResult
+import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.screens.settings.AutoLockSheet
 import alibarznji.qasa.screens.settings.SettingsViewModel
 import alibarznji.qasa.screens.settings.csv.CsvImportExportRows
@@ -66,8 +67,10 @@ fun SettingsHomeContent(
     ScreenScaffold(
         header = { AppMenuHeader(title = stringResource(R.string.settings_title), onMenu = onOpenMenu, applyStatusBars = false) },
     ) {
+        // The name picked at first launch or in Settings comes first (iOS `displayName`).
+        val userName by vm.appSession.userName.collectAsState()
         SettingsProfileCard(
-            displayName = vm.appSession.displayName,
+            displayName = AppSession.chosenDisplayName(userName, vm.appSession.displayName).orEmpty(),
             isPremium = isPremium,
             onCta = if (isPremium) onSubscription else onUpgrade,
         )

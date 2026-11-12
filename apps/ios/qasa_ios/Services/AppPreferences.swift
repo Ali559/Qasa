@@ -61,6 +61,7 @@ final class AppPreferences {
     private let themeKey = "qasa.theme"
     private let autoLockKey = "qasa.autoLockMinutes"
     private let welcomeKey = "qasa.hasCompletedWelcome"
+    private let userNameKey = "qasa.userName"
 
     var language: AppLanguage {
         didSet {
@@ -94,6 +95,16 @@ final class AppPreferences {
         didSet { defaults.set(hasCompletedWelcome, forKey: welcomeKey) }
     }
 
+    /// The name from the first-launch name screen (rule 6d), used in greetings. Kept on this
+    /// device only; empty when skipped.
+    var userName: String {
+        didSet {
+            let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed != userName { userName = trimmed; return }
+            defaults.set(trimmed, forKey: userNameKey)
+        }
+    }
+
     var locale: Locale { language.locale }
     var layoutDirection: LayoutDirection { language.layoutDirection }
 
@@ -106,6 +117,7 @@ final class AppPreferences {
         self.theme = themePref
         self.autoLockMinutes = min(60, max(1, storedLock))
         self.hasCompletedWelcome = defaults.bool(forKey: welcomeKey)
+        self.userName = defaults.string(forKey: userNameKey) ?? ""
         // Persist an inferred first pick too, so every reader sees the same language.
         defaults.set(lang.rawValue, forKey: langKey)
         defaults.set([lang.rawValue], forKey: "AppleLanguages")

@@ -170,7 +170,8 @@ fun QasaConfirmDialog(
  * collection", "Rename collection" and "Enter setup key". The shared [QasaSheetHeader]
  * title, an optional message, the field and the confirm button, 20dp apart. No Cancel: the
  * sheet closes by dragging down, the scrim or back, then [onDismiss].
- * [onConfirm] receives the trimmed text; the confirm button is disabled while it is blank.
+ * [onConfirm] receives the trimmed text; the confirm button is disabled while it is blank,
+ * unless [allowEmpty] (an optional value the user may clear, such as their name).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,10 +185,12 @@ fun QasaTextInputSheet(
     /** Optional help text under the title (the 2FA setup-key prompt). */
     message: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    allowEmpty: Boolean = false,
 ) {
     val c = qasaColors
     var text by rememberSaveable { mutableStateOf(initial) }
     val trimmed = text.trim()
+    val canConfirm = allowEmpty || trimmed.isNotEmpty()
     QasaModalBottomSheet(onDismissRequest = onDismiss, title = title) {
         Column(
             Modifier
@@ -212,12 +215,12 @@ fun QasaTextInputSheet(
                 placeholder = placeholder,
                 keyboardOptions = keyboardOptions,
                 imeAction = ImeAction.Done,
-                keyboardActions = KeyboardActions(onDone = { if (trimmed.isNotEmpty()) onConfirm(trimmed) }),
+                keyboardActions = KeyboardActions(onDone = { if (canConfirm) onConfirm(trimmed) }),
             )
             PrimaryButton(
                 title = confirmLabel,
-                onClick = { if (trimmed.isNotEmpty()) onConfirm(trimmed) },
-                enabled = trimmed.isNotEmpty(),
+                onClick = { if (canConfirm) onConfirm(trimmed) },
+                enabled = canConfirm,
             )
         }
     }

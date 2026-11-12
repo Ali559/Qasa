@@ -60,8 +60,9 @@ fun AppShellScreen(
     val isPremium by vm.appSession.isPremium.collectAsState()
     val openNotifications by vm.appSession.openNotifications.collectAsState()
     // Mirrors iOS `AppSession.displayName`: the placeholder name is shown localized.
-    val displayName = vm.appSession.displayName
-        .takeUnless { it.isBlank() || it == "Qasa User" }
+    // The name picked at first launch or in Settings comes first.
+    val userName by vm.appSession.userName.collectAsState()
+    val displayName = AppSession.chosenDisplayName(userName, vm.appSession.displayName)
         ?: stringResource(R.string.session_qasauser)
 
     val pendingSave by vm.appSession.pendingLoginSave.collectAsState()

@@ -37,6 +37,11 @@ struct CreateVaultView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 8) {
+                        if !prefs.userName.isEmpty {
+                            Text(String(format: L10n.tr("onboarding.hello", locale: locale), prefs.userName))
+                                .font(.qasa(17, weight: .semibold))
+                                .foregroundColor(Theme.accent)
+                        }
                         Text(L10n.tr("auth.create.title", locale: locale))
                             .font(.qasa(28, weight: .bold))
                             .foregroundColor(Theme.textPrimary)

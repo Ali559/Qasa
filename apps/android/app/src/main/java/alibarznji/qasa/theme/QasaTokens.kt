@@ -153,6 +153,10 @@ object QasaTokens {
         const val disabledOpacity: Float = 0.45f
         const val rowPressedOpacity: Float = 0.06f
         const val toastVisibleMillis: Long = 2500L
+        val tourEnter = QasaTokenSpring(0.45f, 0.82f)
+        const val tourDwell: Float = 4.2f
+        const val tourTypeStep: Float = 0.055f
+        const val tourStagger: Float = 0.25f
     }
 
     object Shadow {

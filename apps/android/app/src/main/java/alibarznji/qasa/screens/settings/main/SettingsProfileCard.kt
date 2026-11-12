@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.settings.main
 
 import alibarznji.qasa.R
+import alibarznji.qasa.screens.AppSession
 import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
@@ -29,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 
 /** iOS placeholder username (`AppSession.displayName`): shown localized, never verbatim. */
-private const val DefaultUsername = "Qasa User"
+private const val DefaultUsername = AppSession.PLACEHOLDER_USERNAME
 
 /**
  * iOS `SettingsView.profileCard` (`SettingsView.swift:300-352`): 56pt accent ring with a

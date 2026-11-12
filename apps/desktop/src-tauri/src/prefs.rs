@@ -1,6 +1,6 @@
-//! Non-secret preferences (language, theme, welcome done), stored as JSON in the OS app
-//! config folder. Mirrors iOS `AppPreferences` keys `qasa.language`, `qasa.theme` and
-//! `qasa.hasCompletedWelcome`. Secrets never go here; they go in the OS keychain.
+//! Non-secret preferences (language, theme, welcome done, the user's name), stored as JSON
+//! in the OS app config folder. Mirrors iOS `AppPreferences` keys `qasa.language`,
+//! `qasa.theme`, `qasa.hasCompletedWelcome` and `qasa.userName`. Secrets never go here; they go in the OS keychain.
 //!
 //! The `backup` block belongs to the core (`crate::backup`): the webview saves the other
 //! fields with `set_prefs`, which keeps the block as it is on disk, so a stale copy in the
@@ -75,6 +75,10 @@ pub struct Prefs {
     pub has_completed_welcome: bool,
     /// Minutes of inactivity before the vault locks, 1–60 (iOS default 5).
     pub auto_lock_minutes: u32,
+    /// What the user asked to be called (first launch or Settings), trimmed by the UI. Kept
+    /// on this computer only; left out while empty.
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub user_name: String,
     /// Written by the core only (see the module docs). Left out while untouched.
     #[serde(skip_serializing_if = "BackupPrefs::is_default")]
     pub backup: BackupPrefs,
@@ -98,6 +102,7 @@ impl Default for Prefs {
             theme: ThemePreference::default(),
             has_completed_welcome: false,
             auto_lock_minutes: 5,
+            user_name: String::new(),
             backup: BackupPrefs::default(),
         }
     }
@@ -172,12 +177,15 @@ mod tests {
             theme: ThemePreference::Dark,
             has_completed_welcome: true,
             auto_lock_minutes: 15,
+            user_name: String::new(),
             backup: BackupPrefs::default(),
         };
         assert_eq!(
             serde_json::to_string(&prefs).unwrap(),
             r#"{"language":"ckb","theme":"dark","hasCompletedWelcome":true,"autoLockMinutes":15}"#
         );
+        let named = Prefs { user_name: "Sara".into(), ..prefs };
+        assert!(serde_json::to_string(&named).unwrap().ends_with(r#""autoLockMinutes":15,"userName":"Sara"}"#));
     }
 
     #[test]

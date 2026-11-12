@@ -2,9 +2,11 @@ package alibarznji.qasa.screens
 
 import alibarznji.qasa.R
 import alibarznji.qasa.license.LicenseManager
+import alibarznji.qasa.prefs.AppPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class AppPage(
@@ -36,14 +38,18 @@ enum class AppPage(
 }
 
 @Singleton
-class AppSession @Inject constructor() {
+class AppSession @Inject constructor(private val prefs: AppPreferences) {
     private val _isPremium = MutableStateFlow(false)
     val isPremium = _isPremium.asStateFlow()
     private val _tierLabel = MutableStateFlow("Free")
     val tierLabel = _tierLabel.asStateFlow()
     private val _openNotifications = MutableStateFlow(false)
     val openNotifications = _openNotifications.asStateFlow()
-    var displayName: String = "Qasa User"
+    /** The account's name; [PLACEHOLDER_USERNAME] until there is one. */
+    var displayName: String = PLACEHOLDER_USERNAME
+
+    /** The name picked at first launch or in Settings; empty when none. */
+    val userName: StateFlow<String> get() = prefs.userName
 
     fun syncFromLicense(license: LicenseManager) {
         _isPremium.value = license.isPremium
@@ -72,4 +78,21 @@ class AppSession @Inject constructor() {
 
     fun consumeLoginSave(): alibarznji.qasa.vault.VaultPayload.Login? =
         _pendingLoginSave.value.also { _pendingLoginSave.value = null }
+
+    companion object {
+        /** iOS placeholder username: shown localized (`session_qasauser`), never verbatim. */
+        const val PLACEHOLDER_USERNAME = "Qasa User"
+
+        /**
+         * iOS `AppSession.displayName`: the picked [userName] first, then the account's
+         * [username], or null when only the placeholder is left (the caller shows
+         * `session_qasauser`).
+         */
+        fun chosenDisplayName(userName: String, username: String): String? {
+            val chosen = AppPreferences.normalizedUserName(userName)
+            if (chosen.isNotEmpty()) return chosen
+            if (username.isBlank() || username == PLACEHOLDER_USERNAME) return null
+            return username
+        }
+    }
 }

@@ -132,7 +132,7 @@ struct qasaApp: App {
                         onCreateVault: {}
                     )
                 } else if showWelcome {
-                    WelcomePreferencesView(onContinue: {})
+                    WelcomeFlowView()
                 } else {
                     CreateVaultView(
                         onVaultCreated: { password, biometrics in

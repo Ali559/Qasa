@@ -124,16 +124,18 @@ one or two taps and ends with the login saved.
 
 ### Phase 6: First launch (preview first, then one PR)
 
-- [ ] **Previews.** 2–3 directions for the welcome flow, animated, in the app's design and in
-      English and Arabic. The owner picks one before anything is built.
-- [ ] **Screen 1: language only.** Remove the theme picker; the app follows the system theme
+- [x] **Previews.** 2–3 directions for the welcome flow, animated, in the app's design and in
+      English and Arabic. The owner picks one before anything is built. (2026-11-12: three
+      directions in `design/previews/first-launch.html`; the owner picked B "Live demo".
+      Rule 6d in `design/README.md`.)
+- [x] **Screen 1: language only.** Remove the theme picker; the app follows the system theme
       until changed in Settings.
-- [ ] **Carousel.** After "Get started": at most 5 screens about the free features, in the
+- [x] **Carousel.** After "Get started": at most 5 screens about the free features, in the
       chosen language, with a sleek animated design (respecting reduce motion).
-- [ ] **Last screen.** "Let's get started" and a name field with a short, cheeky prompt
+- [x] **Last screen.** "Let's get started" and a name field with a short, cheeky prompt
       (something like "What should we call you?"). The name is stored on the device and used in
       greetings.
-- [ ] Same flow, copy and timings on iOS, Android and the desktop; new strings in
+- [x] Same flow, copy and timings on iOS, Android and the desktop; new strings in
       `l10n/strings.json` (en/ar/ckb).
 
 Done when: a fresh install on every app goes language → carousel → name → create vault, in all

@@ -12,6 +12,8 @@ struct SettingsView: View {
     @Environment(AppPreferences.self) private var prefs
     @State private var biometricUnlock = VaultKeychainStore.biometricsEnabled
     @State private var showClearDataAlert = false
+    @State private var showNameSheet = false
+    @State private var nameDraft = ""
     @State private var showLanguagePicker = false
     @State private var showThemePicker = false
     @State private var showLinkedDevices = false
@@ -131,6 +133,27 @@ struct SettingsView: View {
                     }
 
                     settingsSection(title: L10n.tr("settings.appearance", locale: locale)) {
+                        Button {
+                            nameDraft = prefs.userName
+                            showNameSheet = true
+                        } label: {
+                            NavChevronRow(
+                                icon: .person,
+                                title: L10n.tr("settings.yourName", locale: locale),
+                                trailingText: prefs.userName
+                            )
+                        }
+                        .buttonStyle(.qasaRow)
+                        .textPromptSheet(
+                            isPresented: $showNameSheet,
+                            title: L10n.tr("settings.yourName", locale: locale),
+                            placeholder: L10n.tr("onboarding.namePlaceholder", locale: locale),
+                            text: $nameDraft,
+                            confirmTitle: L10n.tr("common.save", locale: locale)
+                        ) {
+                            prefs.userName = nameDraft
+                        }
+                        RowDivider()
                         Button { showLanguagePicker = true } label: {
                             NavChevronRow(
                                 icon: .website,

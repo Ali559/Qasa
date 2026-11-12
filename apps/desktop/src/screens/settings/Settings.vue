@@ -18,7 +18,7 @@ import PrimaryButton from '@/components/PrimaryButton.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import { LANGUAGE_NAMES } from '@/i18n'
 import { openSubPage } from '@/nav'
-import { prefs, useT } from '@/prefs'
+import { prefs, setUserName, useDisplayName, useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { loadVault, session } from '@/vault/session'
 import { toolsApi } from '@/vault/tools'
@@ -26,10 +26,25 @@ import { checkForUpdate, updater } from '@/updater'
 import { isCommandError, type BiometricStatus } from '@/vault/types'
 import AppearanceSheet from './AppearanceSheet.vue'
 import AutoLockSheet from './AutoLockSheet.vue'
+import PromptSheet from '@/screens/vault/form/PromptSheet.vue'
 import ChangeMasterPassword from './ChangeMasterPassword.vue'
 
 const emit = defineEmits<{ back: []; lock: [] }>()
 const t = useT()
+const displayName = useDisplayName()
+
+// Appearance → Your name (iOS `textPromptSheet`): starts from the saved name; as on iOS,
+// Save stays off while the field is blank.
+const showNameSheet = ref(false)
+const nameDraft = ref('')
+function editName() {
+  nameDraft.value = prefs.userName
+  showNameSheet.value = true
+}
+function saveName() {
+  setUserName(nameDraft.value)
+  showNameSheet.value = false
+}
 
 /** Under "Check for updates": the result of the last check the user asked for. */
 const updateStatus = computed(() => {
@@ -189,7 +204,7 @@ function logout() {
       <div class="profile">
         <span class="avatar"><QasaIcon name="person" :size="22" /></span>
         <span class="who">
-          <span class="name">{{ t('session.qasaUser') }}</span>
+          <span class="name">{{ displayName }}</span>
           <span class="plan" :class="{ premium: account.status?.isPremium }">
             <QasaIcon :name="account.status?.isPremium ? 'best-value' : 'person'" :size="10" />
             {{ t(account.status?.isPremium ? 'settings.premiumAccount' : 'settings.freeAccount') }}
@@ -251,6 +266,13 @@ function logout() {
 
     <SettingsSection :title="t('settings.appearance')">
         <SettingsRow
+          icon="person"
+          :title="t('settings.yourName')"
+          :trailing-text="prefs.userName || undefined"
+          aria-haspopup="dialog"
+          @click="editName"
+        />
+        <SettingsRow
           icon="website"
           :title="t('settings.language')"
           :trailing-text="LANGUAGE_NAMES[prefs.language]"
@@ -308,6 +330,15 @@ function logout() {
       <ChangeMasterPassword :open="showChangeMasterPassword" @close="showChangeMasterPassword = false" />
       <AutoLockSheet :open="showAutoLock" @close="showAutoLock = false" />
       <AppearanceSheet :kind="appearanceSheet" @close="appearanceSheet = null" />
+      <PromptSheet
+        v-model="nameDraft"
+        :open="showNameSheet"
+        :title="t('settings.yourName')"
+        :placeholder="t('onboarding.namePlaceholder')"
+        :confirm-label="t('common.save')"
+        @confirm="saveName"
+        @cancel="showNameSheet = false"
+      />
       <ConfirmDialog
         :open="showClearDataAlert"
         :title="t('settings.clearAlertTitle')"
