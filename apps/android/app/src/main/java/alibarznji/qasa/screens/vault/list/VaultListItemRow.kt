@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
+import alibarznji.qasa.screens.vault.detail.organizationColor
 
 /**
  * Port of iOS `VaultItemRow` (`Views/Vault/VaultItemRow.swift`): subtype icon, primary copy
@@ -79,6 +80,7 @@ internal fun VaultListItemRow(
         icon = payload?.subtypeIcon ?: row.kind.icon,
         logo = if (row.kind == VaultItemKind.Login) siteLogoFor(row.displayName) else null,
         siteIcon = (payload as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) },
+        itemColor = payload?.organizationColor()?.let { it.swatch() to it.tile() },
         onClick = onOpen,
         // iOS gates even the title copy of a protected note (`VaultItemRow.swift:145`).
         onCopy = primary?.let { p -> { onCopy(p, payload?.isProtectedNote == true) } },

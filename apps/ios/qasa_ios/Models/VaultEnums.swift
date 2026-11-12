@@ -223,15 +223,30 @@ enum NoteColor: String, Codable, CaseIterable {
         L10n.tr("color.\(rawValue)")
     }
 
+    /// The colour itself: the item's icon and accent (`design/tokens.json` `noteMint` …).
     var color: Color {
-        switch self {
-        case .mint: return Color(hex: "2BB58A")
-        case .gold: return Theme.gold
-        case .blue: return Color(hex: "3B82F6")
-        case .purple: return Color(hex: "A855F7")
-        case .red: return Theme.danger
-        case .gray: return Theme.textSecondary
+        let (l, d) = palettes
+        return Color(light: l.0, dark: d.0)
+    }
+
+    /// The soft fill behind the item's icon: list tile and detail hero (`noteMintTile` …).
+    var tile: Color {
+        let (l, d) = palettes
+        return Color(light: l.1, dark: d.1)
+    }
+
+    private var palettes: ((Color, Color), (Color, Color)) {
+        func pick(_ p: ThemePalette) -> (Color, Color) {
+            switch self {
+            case .mint: return (p.noteMint, p.noteMintTile)
+            case .gold: return (p.noteGold, p.noteGoldTile)
+            case .blue: return (p.noteBlue, p.noteBlueTile)
+            case .purple: return (p.notePurple, p.notePurpleTile)
+            case .red: return (p.noteRed, p.noteRedTile)
+            case .gray: return (p.noteGray, p.noteGrayTile)
+            }
         }
+        return (pick(.light), pick(.dark))
     }
 }
 

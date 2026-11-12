@@ -55,13 +55,14 @@ Still open: the on-screen check on each app, and re-taking the landing `alerts-*
 
 ### Phase 2: Colours (one PR)
 
-- [ ] **Dark mode background.** Today the dark background (#17111D) is too close to the purple
+- [x] **Dark mode background.** (2026-11-12: candidate A, neutral ash #1C1D1F / cards #26272A.) Today the dark background (#17111D) is too close to the purple
       accent. Make it a dark ash grey, in the spirit of WhatsApp's dark text-field background,
       clearly apart from the accent (#B67FDB). Adjust the cards, strokes and chrome that sit on it
       so the steps between them stay visible. Keep the Home screen's warm/calm blend. Only
       `design/tokens.json` changes, then `design/generate.py`. Show 2–3 candidate greys as a
       preview before choosing.
-- [ ] **Item colours.** Picking a colour on an item does nothing today. Each of the six note
+- [x] **Item colours.** (2026-11-12: `note*` / `note*Tile` tokens; tile, hero and picker on iOS,
+      Android and the desktop. The extension shows no notes or cards.) Picking a colour on an item does nothing today. Each of the six note
       colours gets a light and a dark value in `tokens.json`. The item's tile (vault list and
       detail hero) and its accent use the chosen colour on every app. The picker shows the
       selected colour clearly in both themes.

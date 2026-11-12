@@ -115,7 +115,13 @@ A change that only one app picks up is not done.
    `#FEE7C8`, peach `#FF9292`. `tokens.json` derives every light and dark token from them
    (table in `docs/design.md` §2.1); no app writes a hex of its own. The only exceptions are
    other brands' logo colors (site icons, payment wallets) and the six note colors, which
-   are user data. On Android every Material color role is mapped to a token (`QasaTheme.kt`),
+   are user data. Dark mode is a neutral ash grey (`background` `#1C1D1F`, cards `#26272A`,
+   chosen 2026-11-12), clearly apart from the purple accent.
+   **Item colours**: the six note colours a secure note or card can carry are tokens too
+   (`noteMint` … `noteGray`, each with a `…Tile` fill), a light and a dark value each. The
+   item's tile in the vault list and its detail hero show the glyph in the colour on its tile
+   fill (the hero drops its stroke). In the picker, the selected swatch has a check in
+   `background` and a 2pt `textPrimary` ring 2 outside it. On Android every Material color role is mapped to a token (`QasaTheme.kt`),
    `surfaceTint` included, so no Material default (lavender, tonal tint) shows through. Each
    app follows the system light/dark setting unless the user picks one in Settings, so two
    phones in different modes show the two halves of the palette.

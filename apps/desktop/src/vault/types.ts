@@ -125,6 +125,8 @@ export interface ItemSummary {
   hasTotp: boolean
   /** A login's website host (bridge `host_of`), for its bundled site icon; else null. */
   siteHost: string | null
+  /** A note or card's colour (iOS `organizationColor`), for its row tile; else null. */
+  color: NoteColor | null
 }
 
 export interface Collection {

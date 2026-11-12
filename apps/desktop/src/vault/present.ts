@@ -37,14 +37,24 @@ export function countryName(code: string): string {
 
 export const NOTE_COLORS: NoteColor[] = ['mint', 'gold', 'blue', 'purple', 'red', 'gray']
 
-/** iOS `NoteColor.color`. Brand-independent swatches, same in light and dark. */
+/** iOS `NoteColor.color`: the colour itself (icon, accent), per theme (`tokens.css`). */
 export const NOTE_COLOR_VALUE: Record<NoteColor, string> = {
-  mint: '#2BB58A',
-  gold: 'var(--gold)',
-  blue: '#3B82F6',
-  purple: '#A855F7',
-  red: 'var(--danger)',
-  gray: 'var(--text-secondary)',
+  mint: 'var(--note-mint)',
+  gold: 'var(--note-gold)',
+  blue: 'var(--note-blue)',
+  purple: 'var(--note-purple)',
+  red: 'var(--note-red)',
+  gray: 'var(--note-gray)',
+}
+
+/** iOS `NoteColor.tile`: the soft fill behind the item's icon (row tile, detail hero). */
+export const NOTE_COLOR_TILE: Record<NoteColor, string> = {
+  mint: 'var(--note-mint-tile)',
+  gold: 'var(--note-gold-tile)',
+  blue: 'var(--note-blue-tile)',
+  purple: 'var(--note-purple-tile)',
+  red: 'var(--note-red-tile)',
+  gray: 'var(--note-gray-tile)',
 }
 
 export const HONORIFICS: Array<{ value: Honorific; key: string }> = [

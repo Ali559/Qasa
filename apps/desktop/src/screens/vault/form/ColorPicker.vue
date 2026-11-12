@@ -1,6 +1,8 @@
 <script setup lang="ts">
 // iOS `NoteColorPicker`: a `SectionLabel` 8 above six 28pt swatches (3 padding each, 12
-// apart); the selected one gets a 2pt text-primary stroke on its edge.
+// apart). The selected one gets a check in the canvas colour and a 2pt text-primary ring
+// 2 outside it (iOS strokes the 34 frame), so the pick reads in both themes.
+import QasaIcon from '@/components/QasaIcon.vue'
 import { useT } from '@/prefs'
 import { NOTE_COLORS, NOTE_COLOR_VALUE } from '@/vault/present'
 import type { NoteColor } from '@/vault/types'
@@ -25,7 +27,9 @@ const t = useT()
         :title="t(`color.${c}`)"
         :style="{ background: NOTE_COLOR_VALUE[c] }"
         @click="model = c"
-      />
+      >
+        <QasaIcon v-if="model === c" name="check" :size="16" />
+      </button>
     </div>
   </div>
 </template>
@@ -49,6 +53,9 @@ const t = useT()
 }
 
 .swatch {
+  display: grid;
+  place-items: center;
+  color: var(--background);
   width: 28px;
   height: 28px;
   margin: 3px;
@@ -58,10 +65,9 @@ const t = useT()
   cursor: pointer;
 }
 
-/* SwiftUI's `stroke` is centered on the edge: 1 outside, 1 inside. */
+/* iOS strokes the 34 frame: a 2pt ring from 2 to 4 outside the swatch. */
 .swatch.selected {
-  box-shadow:
-    0 0 0 1px var(--text-primary),
-    inset 0 0 0 1px var(--text-primary);
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
 }
 </style>

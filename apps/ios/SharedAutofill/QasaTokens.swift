@@ -167,17 +167,29 @@ enum QasaTokens {
         static let textOnChrome: UInt32 = 0x3E3346
         static let warm: UInt32 = 0xFEE7C8
         static let calm: UInt32 = 0xEDE9E9
+        static let noteMint: UInt32 = 0x1E8F6C
+        static let noteMintTile: UInt32 = 0xDDF2EA
+        static let noteGold: UInt32 = 0xA8661A
+        static let noteGoldTile: UInt32 = 0xFBEBD5
+        static let noteBlue: UInt32 = 0x2F67D0
+        static let noteBlueTile: UInt32 = 0xE2EBFB
+        static let notePurple: UInt32 = 0x8A3FC0
+        static let notePurpleTile: UInt32 = 0xF1E6F9
+        static let noteRed: UInt32 = 0xC8323C
+        static let noteRedTile: UInt32 = 0xFDE5E6
+        static let noteGray: UInt32 = 0x6A666C
+        static let noteGrayTile: UInt32 = 0xECEAEC
     }
 
     /// Dark palette as 0xRRGGBB.
     enum Dark {
-        static let background: UInt32 = 0x17111D
-        static let chrome: UInt32 = 0x17111D
-        static let cardBackground: UInt32 = 0x231A2B
-        static let cardBackgroundLight: UInt32 = 0x2B2134
-        static let cardMuted: UInt32 = 0x33243F
-        static let stroke: UInt32 = 0x352B3D
-        static let strokeChrome: UInt32 = 0x3F3448
+        static let background: UInt32 = 0x1C1D1F
+        static let chrome: UInt32 = 0x1C1D1F
+        static let cardBackground: UInt32 = 0x26272A
+        static let cardBackgroundLight: UInt32 = 0x2C2D30
+        static let cardMuted: UInt32 = 0x323337
+        static let stroke: UInt32 = 0x38393D
+        static let strokeChrome: UInt32 = 0x434448
         static let accent: UInt32 = 0xB67FDB
         static let accentDark: UInt32 = 0x722F99
         static let onAccent: UInt32 = 0x22102F
@@ -191,12 +203,24 @@ enum QasaTokens {
         static let dangerBackground: UInt32 = 0x4A1F28
         static let dangerText: UInt32 = 0xFFC0C0
         static let dangerTextMuted: UInt32 = 0xFFD9D9
-        static let textPrimary: UInt32 = 0xF2EDF4
+        static let textPrimary: UInt32 = 0xF2F1F3
         static let textSecondary: UInt32 = 0xC5C1C1
-        static let textTertiary: UInt32 = 0x8A8290
-        static let textPlaceholder: UInt32 = 0x8A8290
-        static let textOnChrome: UInt32 = 0xD9D3DD
-        static let warm: UInt32 = 0x3E2B2F
-        static let calm: UInt32 = 0x2A2430
+        static let textTertiary: UInt32 = 0x8D8D92
+        static let textPlaceholder: UInt32 = 0x8D8D92
+        static let textOnChrome: UInt32 = 0xDCDBDF
+        static let warm: UInt32 = 0x332C27
+        static let calm: UInt32 = 0x242527
+        static let noteMint: UInt32 = 0x4FD1A5
+        static let noteMintTile: UInt32 = 0x1F3A31
+        static let noteGold: UInt32 = 0xF0C48C
+        static let noteGoldTile: UInt32 = 0x3D3327
+        static let noteBlue: UInt32 = 0x80ABF6
+        static let noteBlueTile: UInt32 = 0x23304A
+        static let notePurple: UInt32 = 0xC792EC
+        static let notePurpleTile: UInt32 = 0x372A44
+        static let noteRed: UInt32 = 0xFF8080
+        static let noteRedTile: UInt32 = 0x462628
+        static let noteGray: UInt32 = 0xB9B7BD
+        static let noteGrayTile: UInt32 = 0x35363A
     }
 }

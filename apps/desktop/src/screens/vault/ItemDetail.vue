@@ -17,6 +17,7 @@ import {
   detailFields,
   displayDate,
   isProtectedNote,
+  NOTE_COLOR_TILE,
   NOTE_COLOR_VALUE,
   organizationColor,
   vaultDates,
@@ -136,7 +137,7 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
     <div v-if="payload" class="scroll">
       <div class="column">
         <div class="hero">
-          <span class="hero-icon" aria-hidden="true">
+          <span class="hero-icon" :class="{ tinted: !!color }" :style="color ? { background: NOTE_COLOR_TILE[color], color: NOTE_COLOR_VALUE[color] } : undefined" aria-hidden="true">
             <svg v-if="heroSitePath" viewBox="0 0 24 24" width="36" height="36" fill="currentColor" focusable="false"><path :d="heroSitePath" /></svg>
             <QasaIcon v-else :name="VARIANT_ICON[payload.variant]" :size="36" />
           </span>
@@ -300,6 +301,10 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
   border-radius: var(--radius-card);
   background: var(--chrome);
   color: var(--text-primary);
+}
+
+.hero-icon.tinted {
+  border-color: transparent;
 }
 
 .name {

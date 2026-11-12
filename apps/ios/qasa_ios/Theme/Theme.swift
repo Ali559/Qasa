@@ -44,6 +44,21 @@ struct ThemePalette: Equatable {
     /// Cool wash behind the Home status when something does.
     let calm: Color
 
+    /// The six item colours a note or card can carry (`NoteColor`): the colour itself (icon,
+    /// accent) and its `…Tile` fill behind the item's icon.
+    let noteMint: Color
+    let noteMintTile: Color
+    let noteGold: Color
+    let noteGoldTile: Color
+    let noteBlue: Color
+    let noteBlueTile: Color
+    let notePurple: Color
+    let notePurpleTile: Color
+    let noteRed: Color
+    let noteRedTile: Color
+    let noteGray: Color
+    let noteGrayTile: Color
+
     // `dark` and `light` are generated from design/tokens.json: ThemePalette+Tokens.swift.
 
     static func resolved(for scheme: ColorScheme) -> ThemePalette {

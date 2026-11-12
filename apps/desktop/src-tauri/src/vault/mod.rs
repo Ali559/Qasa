@@ -14,7 +14,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::time::Instant;
 
-use qasa_vault::payload::{Envelope, ItemKind, VaultPayload};
+use qasa_vault::payload::{Envelope, ItemKind, NoteColor, VaultPayload};
 use qasa_vault::validate::{self, CivilDate, FieldIssue};
 use qasa_vault::{decode_kdf_version, derive_root_key, encode_kdf_version, generate_salt, VaultKeys, KDF_VERSION};
 use serde::Serialize;
@@ -67,6 +67,9 @@ pub struct ItemSummary {
     /// A login's website host (`matcher::host_of`), which picks its bundled site icon in
     /// the UI (`siteIcon.ts`); None for other kinds and logins without a web address.
     pub site_host: Option<String>,
+    /// The colour a note or card carries (iOS `organizationColor`), for its row tile; None
+    /// for other kinds.
+    pub color: Option<NoteColor>,
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
@@ -280,6 +283,11 @@ impl Vault {
             has_totp: matches!(&payload, VaultPayload::Login(f) if f.totp.as_deref().is_some_and(|t| !t.is_empty())),
             site_host: match &payload {
                 VaultPayload::Login(f) => crate::bridge::matcher::host_of(&f.website),
+                _ => None,
+            },
+            color: match &payload {
+                VaultPayload::SecureNote(f) => Some(f.color),
+                VaultPayload::Card(f) => Some(f.color),
                 _ => None,
             },
         })
