@@ -61,14 +61,14 @@ enum class NoteColor(val raw: String, @StringRes val label: Int) {
     Red("red", R.string.color_red),
     Gray("gray", R.string.color_gray);
 
-    /** `NoteColor.color` (VaultEnums.swift:226): blue/purple are literal hexes on iOS too. */
+    /** iOS `NoteColor.color`: `noteMint` … from `design/tokens.json`, per theme. */
     fun color(c: QasaColors): Color = when (this) {
-        Mint -> Color(0xFF2BB58A) // the note colour named mint, not the accent
-        Gold -> c.gold
-        Blue -> Color(0xFF3B82F6)
-        Purple -> Color(0xFFA855F7)
-        Red -> c.danger
-        Gray -> c.textSecondary
+        Mint -> c.noteMint
+        Gold -> c.noteGold
+        Blue -> c.noteBlue
+        Purple -> c.notePurple
+        Red -> c.noteRed
+        Gray -> c.noteGray
     }
 
     companion object {

@@ -5,13 +5,13 @@ import SwiftUI
 
 extension ThemePalette {
     static let dark = ThemePalette(
-        background: Color(hex: "17111D"),
-        chrome: Color(hex: "17111D"),
-        cardBackground: Color(hex: "231A2B"),
-        cardBackgroundLight: Color(hex: "2B2134"),
-        cardMuted: Color(hex: "33243F"),
-        stroke: Color(hex: "352B3D"),
-        strokeChrome: Color(hex: "3F3448"),
+        background: Color(hex: "1C1D1F"),
+        chrome: Color(hex: "1C1D1F"),
+        cardBackground: Color(hex: "26272A"),
+        cardBackgroundLight: Color(hex: "2C2D30"),
+        cardMuted: Color(hex: "323337"),
+        stroke: Color(hex: "38393D"),
+        strokeChrome: Color(hex: "434448"),
         accent: Color(hex: "B67FDB"),
         accentDark: Color(hex: "722F99"),
         onAccent: Color(hex: "22102F"),
@@ -25,13 +25,25 @@ extension ThemePalette {
         dangerBackground: Color(hex: "4A1F28"),
         dangerText: Color(hex: "FFC0C0"),
         dangerTextMuted: Color(hex: "FFD9D9"),
-        textPrimary: Color(hex: "F2EDF4"),
+        textPrimary: Color(hex: "F2F1F3"),
         textSecondary: Color(hex: "C5C1C1"),
-        textTertiary: Color(hex: "8A8290"),
-        textPlaceholder: Color(hex: "8A8290"),
-        textOnChrome: Color(hex: "D9D3DD"),
-        warm: Color(hex: "3E2B2F"),
-        calm: Color(hex: "2A2430")
+        textTertiary: Color(hex: "8D8D92"),
+        textPlaceholder: Color(hex: "8D8D92"),
+        textOnChrome: Color(hex: "DCDBDF"),
+        warm: Color(hex: "332C27"),
+        calm: Color(hex: "242527"),
+        noteMint: Color(hex: "4FD1A5"),
+        noteMintTile: Color(hex: "1F3A31"),
+        noteGold: Color(hex: "F0C48C"),
+        noteGoldTile: Color(hex: "3D3327"),
+        noteBlue: Color(hex: "80ABF6"),
+        noteBlueTile: Color(hex: "23304A"),
+        notePurple: Color(hex: "C792EC"),
+        notePurpleTile: Color(hex: "372A44"),
+        noteRed: Color(hex: "FF8080"),
+        noteRedTile: Color(hex: "462628"),
+        noteGray: Color(hex: "B9B7BD"),
+        noteGrayTile: Color(hex: "35363A")
     )
 
     static let light = ThemePalette(
@@ -61,6 +73,18 @@ extension ThemePalette {
         textPlaceholder: Color(hex: "A39DA3"),
         textOnChrome: Color(hex: "3E3346"),
         warm: Color(hex: "FEE7C8"),
-        calm: Color(hex: "EDE9E9")
+        calm: Color(hex: "EDE9E9"),
+        noteMint: Color(hex: "1E8F6C"),
+        noteMintTile: Color(hex: "DDF2EA"),
+        noteGold: Color(hex: "A8661A"),
+        noteGoldTile: Color(hex: "FBEBD5"),
+        noteBlue: Color(hex: "2F67D0"),
+        noteBlueTile: Color(hex: "E2EBFB"),
+        notePurple: Color(hex: "8A3FC0"),
+        notePurpleTile: Color(hex: "F1E6F9"),
+        noteRed: Color(hex: "C8323C"),
+        noteRedTile: Color(hex: "FDE5E6"),
+        noteGray: Color(hex: "6A666C"),
+        noteGrayTile: Color(hex: "ECEAEC")
     )
 }

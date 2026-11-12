@@ -133,16 +133,25 @@ struct NoteColorPicker: View {
         VStack(alignment: .leading, spacing: Theme.fieldLabelSpacing) {
             SectionLabel(text: L10n.tr("vault.color", locale: AppLanguage.current.locale))
             HStack(spacing: 12) {
+                // Selected: a check in the canvas colour on the swatch and a `textPrimary` ring
+                // 3 outside it, so the pick reads in both themes and without colour.
                 ForEach(NoteColor.allCases, id: \.self) { c in
+                    let selected = color == c
                     Circle()
                         .fill(c.color)
                         .frame(width: 28, height: 28)
-                        .overlay(
-                            Circle().stroke(Theme.textPrimary, lineWidth: color == c ? 2 : 0)
-                        )
+                        .overlay {
+                            if selected {
+                                QasaIconImage(.check, size: 16).foregroundColor(Theme.background)
+                            }
+                        }
                         .padding(3)
+                        .overlay(Circle().stroke(Theme.textPrimary, lineWidth: selected ? 2 : 0))
                         .contentShape(Circle())
                         .onTapGesture { color = c }
+                        .accessibilityElement()
+                        .accessibilityLabel(c.displayName)
+                        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
                 }
             }
         }

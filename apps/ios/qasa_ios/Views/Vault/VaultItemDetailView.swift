@@ -175,15 +175,17 @@ struct VaultItemDetailView: View {
         }
     }
 
+    /// A note or card's hero takes its colour: the glyph in the colour on its tile fill.
     private var heroIcon: some View {
-        heroGlyph
-            .foregroundColor(Theme.textPrimary)
+        let itemColor = payload.organizationColor
+        return heroGlyph
+            .foregroundColor(itemColor?.color ?? Theme.textPrimary)
             .frame(width: 88, height: 88)
-            .background(Theme.chrome)
+            .background(itemColor?.tile ?? Theme.chrome)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Theme.strokeChrome, lineWidth: 1)
+                    .stroke(itemColor == nil ? Theme.strokeChrome : Color.clear, lineWidth: 1)
             )
             .padding(.top, 12)
     }

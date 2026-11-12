@@ -128,16 +128,31 @@ internal enum class NoteColor(val raw: String, @StringRes val label: Int) {
     Gray("gray", R.string.color_gray),
     ;
 
+    /** iOS `NoteColor.color`: the colour itself (`noteMint` …), per theme. */
     @Composable
     fun swatch(): Color {
         val c = qasaColors
         return when (this) {
-            Mint -> Color(0xFF2BB58A) // the note colour named mint, not the accent
-            Gold -> c.gold
-            Blue -> Color(0xFF3B82F6)
-            Purple -> Color(0xFFA855F7)
-            Red -> c.danger
-            Gray -> c.textSecondary
+            Mint -> c.noteMint
+            Gold -> c.noteGold
+            Blue -> c.noteBlue
+            Purple -> c.notePurple
+            Red -> c.noteRed
+            Gray -> c.noteGray
+        }
+    }
+
+    /** iOS `NoteColor.tile`: the soft fill behind the item's icon (`noteMintTile` …). */
+    @Composable
+    fun tile(): Color {
+        val c = qasaColors
+        return when (this) {
+            Mint -> c.noteMintTile
+            Gold -> c.noteGoldTile
+            Blue -> c.noteBlueTile
+            Purple -> c.notePurpleTile
+            Red -> c.noteRedTile
+            Gray -> c.noteGrayTile
         }
     }
 

@@ -56,12 +56,12 @@
    * Always-dark band (privacy section, phone bezel) regardless of scheme.
    * Values copied from the dark block of apps/desktop/src/theme/tokens.css.
    */
-  --night: #17111D;          /* background */
-  --night-card: #231A2B;     /* card-background */
-  --night-card-hi: #33243F;  /* card-muted */
-  --night-stroke: #352B3D;   /* stroke */
-  --night-stroke-hi: #3F3448; /* stroke-chrome */
-  --night-text: #F2EDF4;     /* text-primary */
+  --night: #1C1D1F;          /* background */
+  --night-card: #26272A;     /* card-background */
+  --night-card-hi: #323337;  /* card-muted */
+  --night-stroke: #38393D;   /* stroke */
+  --night-stroke-hi: #434448; /* stroke-chrome */
+  --night-text: #F2F1F3;     /* text-primary */
   --night-text-2: #C5C1C1;   /* text-secondary */
   --night-accent: #B67FDB;   /* accent */
   --night-danger: #FF6B6B;   /* danger */
@@ -89,8 +89,8 @@
     --badge: var(--gold);
     --on-badge: var(--background);
     /* The band sits a step below the (already dark) page. */
-    --night: color-mix(in srgb, #17111D 70%, #000);
-    --night-card: #17111D;
+    --night: color-mix(in srgb, #1C1D1F 70%, #000);
+    --night-card: #1C1D1F;
     --shadow-soft: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
     --shadow-chip: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
   }

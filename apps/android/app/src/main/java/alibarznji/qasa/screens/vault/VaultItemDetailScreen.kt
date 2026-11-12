@@ -70,6 +70,8 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.Color
+import alibarznji.qasa.screens.vault.detail.organizationColor
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
@@ -266,17 +268,24 @@ fun VaultItemDetailScreen(
 private fun HeroIcon(p: VaultPayload) {
     val c = qasaColors
     val shape = RoundedCornerShape(QasaDimens.cornerRadiusLarge)
+    // A note or card takes its colour: the glyph in the colour on its tile fill, no stroke.
+    val itemColor = p.organizationColor()
     Box(
         modifier = Modifier
             .padding(top = QasaDimens.gapSmall)
             .size(QasaIconFrame.shield)
             .clip(shape)
-            .background(c.chrome)
-            .border(QasaDimens.stroke, c.strokeChrome, shape),
+            .background(itemColor?.tile() ?: c.chrome)
+            .border(QasaDimens.stroke, if (itemColor == null) c.strokeChrome else Color.Transparent, shape),
         contentAlignment = Alignment.Center,
     ) {
         val siteIcon = (p as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) }
-        Icon(siteIcon ?: p.subtypeIcon, contentDescription = null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.x5l))
+        Icon(
+            siteIcon ?: p.subtypeIcon,
+            contentDescription = null,
+            tint = itemColor?.swatch() ?: c.textPrimary,
+            modifier = Modifier.size(QasaIconSize.x5l),
+        )
     }
 }
 

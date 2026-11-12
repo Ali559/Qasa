@@ -34,10 +34,12 @@ struct VaultItemRow: View {
                 .background(logo.color)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         } else {
+            // A note or card shows the colour picked for it; until it is decrypted, the default.
+            let itemColor = payload?.organizationColor
             QasaIconImage((payload ?? fallbackPayload).icon, size: 18)
-                .foregroundColor(Theme.accent)
+                .foregroundColor(itemColor?.color ?? Theme.accent)
                 .frame(width: 48, height: 48)
-                .background(Theme.cardMuted)
+                .background(itemColor?.tile ?? Theme.cardMuted)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }

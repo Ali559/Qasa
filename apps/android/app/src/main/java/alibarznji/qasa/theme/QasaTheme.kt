@@ -59,6 +59,19 @@ data class QasaColors(
     val warm: Color,
     /** Cool wash behind the Home status when something needs attention. */
     val calm: Color,
+    /** The six item colours ([NoteColor]): the colour (icon, accent) and its `…Tile` fill. */
+    val noteMint: Color,
+    val noteMintTile: Color,
+    val noteGold: Color,
+    val noteGoldTile: Color,
+    val noteBlue: Color,
+    val noteBlueTile: Color,
+    val notePurple: Color,
+    val notePurpleTile: Color,
+    val noteRed: Color,
+    val noteRedTile: Color,
+    val noteGray: Color,
+    val noteGrayTile: Color,
     /** Drawer scrim: black at 0.45 in both schemes, matching iOS `SideMenuView.swift:14`. */
     val scrim: Color,
 )
@@ -91,6 +104,18 @@ val LightQasaColors = QasaColors(
     textOnChrome = QasaTokens.Light.textOnChrome,
     warm = QasaTokens.Light.warm,
     calm = QasaTokens.Light.calm,
+    noteMint = QasaTokens.Light.noteMint,
+    noteMintTile = QasaTokens.Light.noteMintTile,
+    noteGold = QasaTokens.Light.noteGold,
+    noteGoldTile = QasaTokens.Light.noteGoldTile,
+    noteBlue = QasaTokens.Light.noteBlue,
+    noteBlueTile = QasaTokens.Light.noteBlueTile,
+    notePurple = QasaTokens.Light.notePurple,
+    notePurpleTile = QasaTokens.Light.notePurpleTile,
+    noteRed = QasaTokens.Light.noteRed,
+    noteRedTile = QasaTokens.Light.noteRedTile,
+    noteGray = QasaTokens.Light.noteGray,
+    noteGrayTile = QasaTokens.Light.noteGrayTile,
     scrim = Color(0xFF000000).copy(alpha = 0.45f),
 )
 
@@ -122,6 +147,18 @@ val DarkQasaColors = QasaColors(
     textOnChrome = QasaTokens.Dark.textOnChrome,
     warm = QasaTokens.Dark.warm,
     calm = QasaTokens.Dark.calm,
+    noteMint = QasaTokens.Dark.noteMint,
+    noteMintTile = QasaTokens.Dark.noteMintTile,
+    noteGold = QasaTokens.Dark.noteGold,
+    noteGoldTile = QasaTokens.Dark.noteGoldTile,
+    noteBlue = QasaTokens.Dark.noteBlue,
+    noteBlueTile = QasaTokens.Dark.noteBlueTile,
+    notePurple = QasaTokens.Dark.notePurple,
+    notePurpleTile = QasaTokens.Dark.notePurpleTile,
+    noteRed = QasaTokens.Dark.noteRed,
+    noteRedTile = QasaTokens.Dark.noteRedTile,
+    noteGray = QasaTokens.Dark.noteGray,
+    noteGrayTile = QasaTokens.Dark.noteGrayTile,
     scrim = Color(0xFF000000).copy(alpha = 0.45f),
 )
 

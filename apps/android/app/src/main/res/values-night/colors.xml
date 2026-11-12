@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window background before Compose draws: QasaColors.background (dark). -->
-    <color name="qasa_background">#17111D</color>
+    <color name="qasa_background">#1C1D1F</color>
 </resources>

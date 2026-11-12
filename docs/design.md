@@ -63,13 +63,13 @@ is copied from it. Change a color there, never here or in an app.
 
 | Token | Light | Dark | Role |
 | --- | --- | --- | --- |
-| `background` | `#FBF6F0` | `#17111D` | App canvas. The only root background. |
-| `chrome` | `#FBF6F0` | `#17111D` | Headers, sheets, sticky bars (same as background since the redesign) |
-| `cardBackground` | `#FFFFFF` | `#231A2B` | Card and text-field fill |
-| `cardBackgroundLight` | `#FFF3E3` | `#2B2134` | Inset / secondary surface, warm beige in light |
-| `cardMuted` | `#F3EAF7` | `#33243F` | Recessed surface: badges, chips, icon tiles |
-| `stroke` | `#E6E1E1` | `#352B3D` | Card and field border. Most-used token. |
-| `strokeChrome` | `#DCD7D7` | `#3F3448` | Border on chrome surfaces |
+| `background` | `#FBF6F0` | `#1C1D1F` | App canvas. The only root background. |
+| `chrome` | `#FBF6F0` | `#1C1D1F` | Headers, sheets, sticky bars (same as background since the redesign) |
+| `cardBackground` | `#FFFFFF` | `#26272A` | Card and text-field fill |
+| `cardBackgroundLight` | `#FFF3E3` | `#2C2D30` | Inset / secondary surface, warm beige in light |
+| `cardMuted` | `#F3EAF7` | `#323337` | Recessed surface: badges, chips, icon tiles |
+| `stroke` | `#E6E1E1` | `#38393D` | Card and field border. Most-used token. |
+| `strokeChrome` | `#DCD7D7` | `#434448` | Border on chrome surfaces |
 | `accent` | `#722F99` | `#B67FDB` | Brand purple: primary action, focus, selection, links |
 | `accentDark` | `#5C2580` | `#722F99` | Deeper accent: pressed / selected fills |
 | `onAccent` | `#FFFFFF` | `#22102F` | Text and icons on an `accent` fill |
@@ -83,13 +83,13 @@ is copied from it. Change a color there, never here or in an app.
 | `dangerBackground` | `#FFE6E6` | `#4A1F28` | Danger banner fill, icon disc |
 | `dangerText` | `#9E2F35` | `#FFC0C0` | Danger text on a light surface |
 | `dangerTextMuted` | `#B83C44` | `#FFD9D9` | Softer danger text |
-| `textPrimary` | `#2A1F33` | `#F2EDF4` | Body and headings |
+| `textPrimary` | `#2A1F33` | `#F2F1F3` | Body and headings |
 | `textSecondary` | `#6E6475` | `#C5C1C1` | Sub-labels, descriptions (brand grey in dark) |
-| `textTertiary` | `#A39DA3` | `#8A8290` | Disabled, chevrons, timestamps |
-| `textPlaceholder` | `#A39DA3` | `#8A8290` | Placeholder text |
-| `textOnChrome` | `#3E3346` | `#D9D3DD` | Text drawn on `chrome` |
-| `warm` | `#FEE7C8` | `#3E2B2F` | Warm wash behind Home when nothing needs attention (brand beige in light) |
-| `calm` | `#EDE9E9` | `#2A2430` | Cool wash behind Home when something does |
+| `textTertiary` | `#A39DA3` | `#8D8D92` | Disabled, chevrons, timestamps |
+| `textPlaceholder` | `#A39DA3` | `#8D8D92` | Placeholder text |
+| `textOnChrome` | `#3E3346` | `#DCDBDF` | Text drawn on `chrome` |
+| `warm` | `#FEE7C8` | `#332C27` | Warm wash behind Home when nothing needs attention (brand beige in light) |
+| `calm` | `#EDE9E9` | `#242527` | Cool wash behind Home when something does |
 
 ### 2.2 Rules
 

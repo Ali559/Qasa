@@ -36,6 +36,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.padding
 
 /** A vault Phone item offered by iOS `AddressPhonePicker` (VaultItemEditor.swift:730). */
 data class PhoneOption(val id: String, val displayName: String)
@@ -120,17 +123,23 @@ fun NoteColorPicker(color: NoteColor, onChange: (NoteColor) -> Unit) {
             NoteColor.entries.forEach { option ->
                 val label = stringResource(option.label)
                 val isSelected = option == color
+                // iOS: a 28 swatch inset 3 in a 34 frame; selected adds a 2pt `textPrimary`
+                // ring on the frame and a check in the canvas colour, readable in both themes.
                 Box(
                     Modifier
-                        .size(QasaIconSize.x4l)
+                        .size(SwatchFrame)
+                        .border(if (isSelected) 2.dp else 0.dp, if (isSelected) c.textPrimary else Color.Transparent, CircleShape)
+                        .padding(SwatchInset)
                         .background(option.color(c), CircleShape)
-                        .border(if (isSelected) 2.dp else 0.dp, if (isSelected) Color.White else Color.Transparent, CircleShape)
                         .clickable(role = Role.RadioButton) { onChange(option) }
                         .semantics {
                             contentDescription = label
                             selected = isSelected
                         },
-                )
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (isSelected) Icon(QasaIcons.Check, null, tint = c.background, modifier = Modifier.size(QasaIconSize.md))
+                }
             }
         }
     }
@@ -172,3 +181,7 @@ fun AddressPhonePicker(phoneItemId: String?, phones: List<PhoneOption>?, onChang
         onSelect = { onChange(it?.id) },
     )
 }
+
+/** iOS `NoteColorPicker`: 28 swatch + 3 on each side. */
+private val SwatchInset = 3.dp
+private val SwatchFrame = 34.dp

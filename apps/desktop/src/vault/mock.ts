@@ -98,6 +98,7 @@ function summary(id: string): ItemSummary {
     hasPrimaryCopy: true,
     hasTotp: p.variant === 'login' && !!p.fields.totp,
     siteHost: p.variant === 'login' ? hostOf(p.fields.website) : null,
+    color: p.variant === 'secureNote' || p.variant === 'card' ? p.fields.color : null,
   }
 }
 
