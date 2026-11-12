@@ -132,6 +132,10 @@ enum QasaTokens {
         static let disabledOpacity: Double = 0.45
         static let rowPressedOpacity: Double = 0.06
         static let toastVisible: Double = 2.5
+        static let tourEnter: Animation = .spring(response: 0.45, dampingFraction: 0.82)
+        static let tourDwell: Double = 4.2
+        static let tourTypeStep: Double = 0.055
+        static let tourStagger: Double = 0.25
     }
 
     enum Shadow {

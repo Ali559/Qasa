@@ -14,11 +14,12 @@ import { backupApi } from '@/backup/api'
 import { bridgeApi } from '@/bridge/api'
 import { backup, refreshBackup, setBackupStatus } from '@/backup/store'
 import { selectTab, openPage } from '@/nav'
-import { useT } from '@/prefs'
+import { useDisplayName, useT } from '@/prefs'
 import { session } from '@/vault/session'
 import { toolsApi, type HealthReport } from '@/vault/tools'
 
 const t = useT()
+const displayName = useDisplayName()
 const report = ref<HealthReport | null>(null)
 
 type Status = 'loading' | 'empty' | 'allGood' | 'needsAttention'
@@ -136,7 +137,7 @@ const health = computed(() => {
       <div class="greeting-row">
         <div class="greeting">
           <span class="hello">{{ t(greetingKey) }}</span>
-          <span class="name">{{ t('session.qasaUser') }}</span>
+          <span class="name">{{ displayName }}</span>
         </div>
         <button type="button" class="bell" :aria-label="t('nav.notifications')" :title="t('nav.notifications')" @click="openPage('notifications')">
           <QasaIcon name="alerts" :size="18" />

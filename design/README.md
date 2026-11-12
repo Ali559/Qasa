@@ -140,6 +140,22 @@ A change that only one app picks up is not done.
    settings. Choosing it fills the new password and its confirm field. Saved logins are
    never offered on a new-password field. When the form is submitted Qasa offers to save the
    login (site, username, the generated password), even though Qasa filled it.
+6d. **First launch: language, live tour, name** (direction B "Live demo", chosen 2026-11-12;
+   preview in `design/previews/first-launch.html`). A fresh install shows, in order:
+   - **Language only** (`onboarding.welcomeTitle`): English, العربية, کوردی and Get started.
+     No theme picker; the app follows the system theme until it is changed in Settings.
+   - **The tour**: four pages about free features (vault, autofill and strong passwords,
+     two-step codes, password health), story bars and Skip at the top, Next (Continue on
+     the last page) at the bottom. Each page plays a tiny version of the app: rows rise in
+     on `motion.tourEnter` `tourStagger` apart; the sign-up demo types the email
+     (`tourTypeStep` a character), shows "Use a strong password" and fills it; the code ring
+     counts down and the code changes; the health gauge sweeps to 82 over `motion.gauge`. A
+     page moves on by itself after `tourDwell` seconds; tapping the leading or trailing half
+     goes back or forward, and so does a swipe. With reduce motion on, pages fade, the demos
+     show their end state and nothing moves on by itself.
+   - **Name** (`onboarding.nameTitle`): one optional field, "Let's get started" and Skip.
+     The name is kept on the device only and greets the user ("Hi, %@" above the main
+     password screen, the home greeting, the profile card); Settings can change it.
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default

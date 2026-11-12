@@ -32,6 +32,8 @@ final class AppSession {
     }
 
     var displayName: String {
+        let chosen = AppPreferences.shared.userName
+        if !chosen.isEmpty { return chosen }
         if username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             || username == "Qasa User" {
             return L10n.tr("session.qasaUser", locale: AppPreferences.shared.locale)

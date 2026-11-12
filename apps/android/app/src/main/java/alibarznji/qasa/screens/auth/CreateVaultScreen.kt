@@ -1,6 +1,7 @@
 package alibarznji.qasa.screens.auth
 
 import alibarznji.qasa.R
+import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.screens.settings.backup.RestoreBackupPage
 import alibarznji.qasa.screens.settings.backup.RestoreBackupViewModel
 import alibarznji.qasa.screens.settings.backup.RestoreFromBackupOption
@@ -38,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,7 +64,10 @@ import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.viewModelScope
 
 @HiltViewModel
-class CreateVaultViewModel @Inject constructor(val session: VaultSession) : ViewModel() {
+class CreateVaultViewModel @Inject constructor(
+    val session: VaultSession,
+    val prefs: AppPreferences,
+) : ViewModel() {
     /** True while the key is being derived: the button stays disabled. */
     var creating by androidx.compose.runtime.mutableStateOf(false)
         private set
@@ -238,6 +243,12 @@ fun CreateVaultScreen(
             }
         },
     ) {
+        // iOS: "Hi, name" above the title, once a name was picked at first launch.
+        val userName by vm.prefs.userName.collectAsState()
+        if (userName.isNotEmpty()) {
+            Text(stringResource(R.string.onboarding_hello, userName), color = c.accent, style = qasaText.ctaLabel)
+            Spacer(Modifier.height(QasaDimens.contentGap))
+        }
         Text(stringResource(R.string.auth_create_title), color = c.textPrimary, style = qasaText.displayLarge)
         Spacer(Modifier.height(QasaDimens.contentGap))
         Text(

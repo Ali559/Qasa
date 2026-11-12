@@ -10231,46 +10231,46 @@
         }
       }
     },
-    "onboarding.continue": {
+    "onboarding.getStarted": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Continue"
+            "value": "Get started"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "متابعة"
+            "value": "ابدأ"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "بەردەوام بە"
+            "value": "دەستپێبکە"
           }
         }
       }
     },
-    "onboarding.headline": {
+    "onboarding.hello": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your language and look"
+            "value": "Hi, %@"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "لغتك ومظهرك"
+            "value": "أهلاً، %@"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "زمان و ڕووخسارەکەت"
+            "value": "سڵاو، %@"
           }
         }
       }
@@ -10297,46 +10297,464 @@
         }
       }
     },
-    "onboarding.subtitle": {
+    "onboarding.mockReused": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose these first so the rest of Qasa is easy to read. You can change them later in Settings."
+            "value": "%d reused"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "اخترهما أولاً حتى يسهل قراءة قاصة. يمكنك تغييرهما لاحقاً من الإعدادات."
+            "value": "%d مكررة"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "سەرەتا ئەمانە هەڵبژێرە تا قەسا ئاسانتر دەخوێنرێتەوە. دواتر لە ڕێکخستنەکان دەتوانیت بیانگۆڕیت."
+            "value": "%d دووبارە"
           }
         }
       }
     },
-    "onboarding.theme": {
+    "onboarding.mockSignup": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Theme"
+            "value": "Create account"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "المظهر"
+            "value": "إنشاء حساب"
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ڕووکار"
+            "value": "دروستکردنی هەژمار"
+          }
+        }
+      }
+    },
+    "onboarding.mockWeak": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d weak"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d ضعيفة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d لاواز"
+          }
+        }
+      }
+    },
+    "onboarding.mockWifi": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home Wi-Fi"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "واي فاي المنزل"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وایفایی ماڵەوە"
+          }
+        }
+      }
+    },
+    "onboarding.nameBody": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name, a nickname, your superhero alias. We only use it to say hi, and it stays on this device."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسمك، لقبك، أو اسمك كبطل خارق. نستخدمه فقط لنلقي التحية، ويبقى على هذا الجهاز."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوت، نازناوت، یان ناوی پاڵەوانە نهێنییەکەت. تەنها بۆ سڵاوکردن بەکاریدەهێنین، و لەسەر ئەم ئامێرە دەمێنێتەوە."
+          }
+        }
+      }
+    },
+    "onboarding.nameGo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's get started"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لنبدأ"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "با دەست پێبکەین"
+          }
+        }
+      }
+    },
+    "onboarding.namePlaceholder": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسمك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوەکەت"
+          }
+        }
+      }
+    },
+    "onboarding.nameTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What should we call you?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بماذا نناديك؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "چیت پێ بڵێین؟"
+          }
+        }
+      }
+    },
+    "onboarding.next": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التالي"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دواتر"
+          }
+        }
+      }
+    },
+    "onboarding.tour1Body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passwords, cards and notes, locked with one main password. They stay on this phone."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمات المرور والبطاقات والملاحظات، مقفلة بكلمة مرور رئيسية واحدة. تبقى على هذا الهاتف."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشە نهێنی و کارت و تێبینییەکان، بە یەک وشەی نهێنیی سەرەکی قوفڵ دەکرێن. لەسەر ئەم مۆبایلە دەمێننەوە."
+          }
+        }
+      }
+    },
+    "onboarding.tour1BodyDesktop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passwords, cards and notes, locked with one main password. They stay on this computer."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كلمات المرور والبطاقات والملاحظات، مقفلة بكلمة مرور رئيسية واحدة. تبقى على هذا الحاسوب."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشە نهێنی و کارت و تێبینییەکان، بە یەک وشەی نهێنیی سەرەکی قوفڵ دەکرێن. لەسەر ئەم کۆمپیوتەرە دەمێننەوە."
+          }
+        }
+      }
+    },
+    "onboarding.tour1Title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything in one place"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل شيء في مكان واحد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەموو شتێک لە یەک شوێندا"
+          }
+        }
+      }
+    },
+    "onboarding.tour2Body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your username and password go into apps and sites in one tap, and sign-up forms get a strong password."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسم المستخدم وكلمة المرور في التطبيقات والمواقع بلمسة واحدة، ونماذج التسجيل تحصل على كلمة مرور قوية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوی بەکارهێنەر و وشەی نهێنی بە یەک دەستلێدان دەچنە ناو ئەپ و ماڵپەڕەکان، و فۆرمی خۆتۆمارکردن وشەیەکی نهێنیی بەهێز وەردەگرێت."
+          }
+        }
+      }
+    },
+    "onboarding.tour2BodyDesktop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With the browser extension, your username and password go into sites in one click, and sign-up forms get a strong password."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مع إضافة المتصفح، يُملأ اسم المستخدم وكلمة المرور في المواقع بنقرة واحدة، ونماذج التسجيل تحصل على كلمة مرور قوية."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بە پێوەکراوی وێبگەڕ، ناوی بەکارهێنەر و وشەی نهێنی بە یەک کرتە دەچنە ناو ماڵپەڕەکان، و فۆرمی خۆتۆمارکردن وشەیەکی نهێنیی بەهێز وەردەگرێت."
+          }
+        }
+      }
+    },
+    "onboarding.tour2Title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa fills it in"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاصة تملؤها عنك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە بۆت پڕدەکاتەوە"
+          }
+        }
+      }
+    },
+    "onboarding.tour3Body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two-step codes sit next to the login they belong to. No second app."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رموز التحقق بخطوتين بجانب الحساب الذي تخصه. بلا تطبيق آخر."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆدەکانی پشتڕاستکردنەوەی دوو هەنگاوی لە تەنیشت ئەو چوونەژوورەوەیەن کە هی ئەوە. پێویستت بە ئەپێکی تر نییە."
+          }
+        }
+      }
+    },
+    "onboarding.tour3Title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your codes, right there"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رموزك في مكانها"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کۆدەکانت، هەر لێرەن"
+          }
+        }
+      }
+    },
+    "onboarding.tour4Body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password health points out weak and reused passwords, so you know what to change first."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُظهر صحة كلمات المرور الضعيفة والمكررة منها، فتعرف ما تغيّره أولاً."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تەندروستیی وشە نهێنییەکان وشە لاواز و دووبارەکان پیشان دەدات، بۆ ئەوەی بزانیت سەرەتا چی بگۆڕیت."
+          }
+        }
+      }
+    },
+    "onboarding.tour4Title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Know what to fix"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اعرف ما يحتاج إصلاحاً"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بزانە چی چاک بکەیت"
+          }
+        }
+      }
+    },
+    "onboarding.welcomeSubtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick your language. You can change it later in Settings."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر لغتك. يمكنك تغييرها لاحقاً من الإعدادات."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زمانەکەت هەڵبژێرە. دواتر لە ڕێکخستنەکان دەتوانیت بیگۆڕیت."
+          }
+        }
+      }
+    },
+    "onboarding.welcomeTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to Qasa"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أهلاً بك في قاصة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بەخێربێیت بۆ قاسە"
           }
         }
       }
@@ -13417,6 +13835,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "ئەوە وشەی نهێنی سەرەکی ئێستات نییە."
+          }
+        }
+      }
+    },
+    "settings.yourName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسمك"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ناوەکەت"
           }
         }
       }

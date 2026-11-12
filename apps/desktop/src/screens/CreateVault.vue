@@ -13,7 +13,7 @@ import StatusPill from '@/components/StatusPill.vue'
 import StrengthBar from '@/components/StrengthBar.vue'
 import SettingsRow from '@/components/SettingsRow.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
-import { useT } from '@/prefs'
+import { prefs, useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { isCommandError, type BiometricStatus } from '@/vault/types'
 
@@ -79,6 +79,7 @@ async function create() {
 
     <div class="content">
       <div class="intro">
+        <p v-if="prefs.userName" class="hello">{{ t('onboarding.hello', prefs.userName) }}</p>
         <h1 class="title">{{ t('auth.create.title') }}</h1>
         <p class="subtitle">{{ t('auth.create.subtitle') }}</p>
         <button type="button" class="pair" @click="emit('pair')">{{ t('auth.create.pairExisting') }}</button>
@@ -149,6 +150,14 @@ async function create() {
   flex-direction: column;
   gap: 8px;
   padding-bottom: 4px;
+}
+
+/* iOS: 17 semibold, accent, above the title. */
+.hello {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .title {

@@ -1614,30 +1614,10 @@
     "ar": "الإشعارات",
     "ckb": "ئاگادارییەکان"
   },
-  "onboarding.continue": {
-    "en": "Continue",
-    "ar": "متابعة",
-    "ckb": "بەردەوام بە"
-  },
-  "onboarding.headline": {
-    "en": "Your language and look",
-    "ar": "لغتك ومظهرك",
-    "ckb": "زمان و ڕووخسارەکەت"
-  },
   "onboarding.language": {
     "en": "Language",
     "ar": "اللغة",
     "ckb": "زمان"
-  },
-  "onboarding.subtitle": {
-    "en": "Choose these first so the rest of Qasa is easy to read. You can change them later in Settings.",
-    "ar": "اخترهما أولاً حتى يسهل قراءة قاصة. يمكنك تغييرهما لاحقاً من الإعدادات.",
-    "ckb": "سەرەتا ئەمانە هەڵبژێرە تا قەسا ئاسانتر دەخوێنرێتەوە. دواتر لە ڕێکخستنەکان دەتوانیت بیانگۆڕیت."
-  },
-  "onboarding.theme": {
-    "en": "Theme",
-    "ar": "المظهر",
-    "ckb": "ڕووکار"
   },
   "pair.accountHint": {
     "en": "Or paste account ID from the other device (advanced)",
@@ -4222,5 +4202,125 @@
     "en": "example.com",
     "ar": "example.com",
     "ckb": "example.com"
+  },
+  "onboarding.welcomeTitle": {
+    "en": "Welcome to Qasa",
+    "ar": "أهلاً بك في قاصة",
+    "ckb": "بەخێربێیت بۆ قاسە"
+  },
+  "onboarding.welcomeSubtitle": {
+    "en": "Pick your language. You can change it later in Settings.",
+    "ar": "اختر لغتك. يمكنك تغييرها لاحقاً من الإعدادات.",
+    "ckb": "زمانەکەت هەڵبژێرە. دواتر لە ڕێکخستنەکان دەتوانیت بیگۆڕیت."
+  },
+  "onboarding.getStarted": {
+    "en": "Get started",
+    "ar": "ابدأ",
+    "ckb": "دەستپێبکە"
+  },
+  "onboarding.next": {
+    "en": "Next",
+    "ar": "التالي",
+    "ckb": "دواتر"
+  },
+  "onboarding.tour1Title": {
+    "en": "Everything in one place",
+    "ar": "كل شيء في مكان واحد",
+    "ckb": "هەموو شتێک لە یەک شوێندا"
+  },
+  "onboarding.tour1Body": {
+    "en": "Passwords, cards and notes, locked with one main password. They stay on this phone.",
+    "ar": "كلمات المرور والبطاقات والملاحظات، مقفلة بكلمة مرور رئيسية واحدة. تبقى على هذا الهاتف.",
+    "ckb": "وشە نهێنی و کارت و تێبینییەکان، بە یەک وشەی نهێنیی سەرەکی قوفڵ دەکرێن. لەسەر ئەم مۆبایلە دەمێننەوە."
+  },
+  "onboarding.tour1BodyDesktop": {
+    "en": "Passwords, cards and notes, locked with one main password. They stay on this computer.",
+    "ar": "كلمات المرور والبطاقات والملاحظات، مقفلة بكلمة مرور رئيسية واحدة. تبقى على هذا الحاسوب.",
+    "ckb": "وشە نهێنی و کارت و تێبینییەکان، بە یەک وشەی نهێنیی سەرەکی قوفڵ دەکرێن. لەسەر ئەم کۆمپیوتەرە دەمێننەوە."
+  },
+  "onboarding.tour2Title": {
+    "en": "Qasa fills it in",
+    "ar": "قاصة تملؤها عنك",
+    "ckb": "قاسە بۆت پڕدەکاتەوە"
+  },
+  "onboarding.tour2Body": {
+    "en": "Your username and password go into apps and sites in one tap, and sign-up forms get a strong password.",
+    "ar": "اسم المستخدم وكلمة المرور في التطبيقات والمواقع بلمسة واحدة، ونماذج التسجيل تحصل على كلمة مرور قوية.",
+    "ckb": "ناوی بەکارهێنەر و وشەی نهێنی بە یەک دەستلێدان دەچنە ناو ئەپ و ماڵپەڕەکان، و فۆرمی خۆتۆمارکردن وشەیەکی نهێنیی بەهێز وەردەگرێت."
+  },
+  "onboarding.tour2BodyDesktop": {
+    "en": "With the browser extension, your username and password go into sites in one click, and sign-up forms get a strong password.",
+    "ar": "مع إضافة المتصفح، يُملأ اسم المستخدم وكلمة المرور في المواقع بنقرة واحدة، ونماذج التسجيل تحصل على كلمة مرور قوية.",
+    "ckb": "بە پێوەکراوی وێبگەڕ، ناوی بەکارهێنەر و وشەی نهێنی بە یەک کرتە دەچنە ناو ماڵپەڕەکان، و فۆرمی خۆتۆمارکردن وشەیەکی نهێنیی بەهێز وەردەگرێت."
+  },
+  "onboarding.tour3Title": {
+    "en": "Your codes, right there",
+    "ar": "رموزك في مكانها",
+    "ckb": "کۆدەکانت، هەر لێرەن"
+  },
+  "onboarding.tour3Body": {
+    "en": "Two-step codes sit next to the login they belong to. No second app.",
+    "ar": "رموز التحقق بخطوتين بجانب الحساب الذي تخصه. بلا تطبيق آخر.",
+    "ckb": "کۆدەکانی پشتڕاستکردنەوەی دوو هەنگاوی لە تەنیشت ئەو چوونەژوورەوەیەن کە هی ئەوە. پێویستت بە ئەپێکی تر نییە."
+  },
+  "onboarding.tour4Title": {
+    "en": "Know what to fix",
+    "ar": "اعرف ما يحتاج إصلاحاً",
+    "ckb": "بزانە چی چاک بکەیت"
+  },
+  "onboarding.tour4Body": {
+    "en": "Password health points out weak and reused passwords, so you know what to change first.",
+    "ar": "تُظهر صحة كلمات المرور الضعيفة والمكررة منها، فتعرف ما تغيّره أولاً.",
+    "ckb": "تەندروستیی وشە نهێنییەکان وشە لاواز و دووبارەکان پیشان دەدات، بۆ ئەوەی بزانیت سەرەتا چی بگۆڕیت."
+  },
+  "onboarding.mockWifi": {
+    "en": "Home Wi-Fi",
+    "ar": "واي فاي المنزل",
+    "ckb": "وایفایی ماڵەوە"
+  },
+  "onboarding.mockSignup": {
+    "en": "Create account",
+    "ar": "إنشاء حساب",
+    "ckb": "دروستکردنی هەژمار"
+  },
+  "onboarding.mockWeak": {
+    "en": "%d weak",
+    "ar": "%d ضعيفة",
+    "ckb": "%d لاواز"
+  },
+  "onboarding.mockReused": {
+    "en": "%d reused",
+    "ar": "%d مكررة",
+    "ckb": "%d دووبارە"
+  },
+  "onboarding.nameTitle": {
+    "en": "What should we call you?",
+    "ar": "بماذا نناديك؟",
+    "ckb": "چیت پێ بڵێین؟"
+  },
+  "onboarding.nameBody": {
+    "en": "Your name, a nickname, your superhero alias. We only use it to say hi, and it stays on this device.",
+    "ar": "اسمك، لقبك، أو اسمك كبطل خارق. نستخدمه فقط لنلقي التحية، ويبقى على هذا الجهاز.",
+    "ckb": "ناوت، نازناوت، یان ناوی پاڵەوانە نهێنییەکەت. تەنها بۆ سڵاوکردن بەکاریدەهێنین، و لەسەر ئەم ئامێرە دەمێنێتەوە."
+  },
+  "onboarding.namePlaceholder": {
+    "en": "Your name",
+    "ar": "اسمك",
+    "ckb": "ناوەکەت"
+  },
+  "onboarding.nameGo": {
+    "en": "Let's get started",
+    "ar": "لنبدأ",
+    "ckb": "با دەست پێبکەین"
+  },
+  "onboarding.hello": {
+    "en": "Hi, %@",
+    "ar": "أهلاً، %@",
+    "ckb": "سڵاو، %@"
+  },
+  "settings.yourName": {
+    "en": "Your name",
+    "ar": "اسمك",
+    "ckb": "ناوەکەت"
   }
 }

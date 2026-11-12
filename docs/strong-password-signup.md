@@ -94,5 +94,5 @@ password in one or two taps and ends with the login saved. The rule is
    watched field still holds a value Qasa filled, so the save shows once the user has typed
    the username (sign-up) or the current password (change form); a form whose only watched
    fields Qasa filled itself gets no save prompt.
-3. **iOS**: 26.2 generate and save requests; text insertion gets a "Strong password"
+3. **iOS** (done, branch `phase-5-ios`): 26.2 generate and save requests; text insertion gets a "Strong password"
    choice for iOS 18–26.1.

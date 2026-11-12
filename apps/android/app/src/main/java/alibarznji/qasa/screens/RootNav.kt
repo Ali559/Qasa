@@ -30,7 +30,7 @@ import alibarznji.qasa.services.AppBootstrap
 import alibarznji.qasa.services.AutoLockMonitor
 import alibarznji.qasa.screens.auth.CreateVaultScreen
 import alibarznji.qasa.screens.auth.UnlockScreen
-import alibarznji.qasa.screens.auth.WelcomePreferencesScreen
+import alibarznji.qasa.screens.auth.welcome.WelcomeFlowScreen
 import alibarznji.qasa.screens.settings.devices.DeviceReplaceHost
 import alibarznji.qasa.screens.shell.AppShellScreen
 import alibarznji.qasa.theme.ApiMisconfiguredBanner
@@ -152,7 +152,7 @@ fun RootNav(vm: RootViewModel = hiltViewModel()) {
                         storeFailure != null -> VaultStoreErrorView(storeFailure!!)
                         unlocked -> AppShellScreen(onLock = { vm.onLocked() })
                         vaultExists && !pairOpen -> UnlockScreen(onUnlocked = { vm.onUnlocked() })
-                        !welcomeDone -> WelcomePreferencesScreen(onContinue = { welcomeDone = true })
+                        !welcomeDone -> WelcomeFlowScreen(onFinished = { welcomeDone = true })
                         else -> CreateVaultScreen(
                             onCreated = { vm.onUnlocked() },
                             onPairOpenChanged = { pairOpen = it },

@@ -88,6 +88,19 @@ class AppPreferences @Inject constructor(
         get() = prefs.getLong(KEY_AUTOFILL_PROMPT_SNOOZE, 0L)
         set(value) = prefs.edit().putLong(KEY_AUTOFILL_PROMPT_SNOOZE, value).apply()
 
+    /**
+     * The name picked on the first-launch name screen or in Settings (iOS
+     * `AppPreferences.userName`). Kept trimmed, on this device only; empty means none.
+     */
+    private val _userName = MutableStateFlow(normalizedUserName(prefs.getString(KEY_USER_NAME, null).orEmpty()))
+    val userName: StateFlow<String> = _userName.asStateFlow()
+
+    fun setUserName(name: String) {
+        val trimmed = normalizedUserName(name)
+        prefs.edit().putString(KEY_USER_NAME, trimmed).apply()
+        _userName.value = trimmed
+    }
+
     var hasCompletedWelcome: Boolean
         get() = prefs.getBoolean(KEY_WELCOME, false)
         set(value) = prefs.edit().putBoolean(KEY_WELCOME, value).apply()
@@ -130,6 +143,9 @@ class AppPreferences @Inject constructor(
     }
 
     companion object {
+        /** The stored form of a typed name: surrounding spaces and newlines removed. */
+        fun normalizedUserName(raw: String): String = raw.trim()
+
         /**
          * Read before Hilt injects anything: `MainActivity.attachBaseContext` needs the
          * language to build the localized context the whole UI resolves strings from.
@@ -156,6 +172,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_THEME = "qasa.theme"
         private const val KEY_AUTO_LOCK = "qasa.autoLockMinutes"
         private const val KEY_WELCOME = "qasa.welcomeCompleted"
+        private const val KEY_USER_NAME = "qasa.userName"
         private const val KEY_AUTOFILL_CONFIRM = "qasa.autofill.confirmEveryFill"
         private const val KEY_AUTOFILL_PROMPT_SNOOZE = "qasa.autofill.promptSnoozedUntil"
         private const val KEY_VPN_KILL_SWITCH = "qasa.vpn.killSwitch"

@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import alibarznji.qasa.theme.PickerOption
 import alibarznji.qasa.theme.QasaPickerSheet
+import alibarznji.qasa.theme.QasaTextInputSheet
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 
 /** Native names, never translated (iOS `AppLanguage.displayName`). */
 private val AppLanguage.nativeName: String
@@ -42,8 +45,9 @@ private val AppThemeMode.labelRes: Int
     }
 
 /**
- * Appearance card (`SettingsView.swift:127-153`): Language then Theme, each a row whose
- * trailing text is the current choice and which opens a menu (iOS `Menu`).
+ * Appearance card (`SettingsView.swift`): Your name, Language, then Theme, each a row whose
+ * trailing text is the current value. The name opens the text-prompt sheet; the other two
+ * open a menu (iOS `Menu`).
  */
 @Composable
 internal fun AppearanceRows(prefs: AppPreferences) {
@@ -51,6 +55,9 @@ internal fun AppearanceRows(prefs: AppPreferences) {
     val lang by prefs.language.collectAsState()
     val theme by prefs.themeMode.collectAsState()
     val themeLabels = AppThemeMode.entries.associateWith { stringResource(it.labelRes) }
+
+    YourNameRow(prefs)
+    RowDivider()
 
     MenuRow(
         icon = QasaIcons.Language,
@@ -90,6 +97,35 @@ private fun <T> MenuRow(
             selected = selected,
             onSelect = onSelect,
             onDismiss = { open = false },
+        )
+    }
+}
+
+/** iOS "Your name": edits the name kept on this device; saving it empty clears it. */
+@Composable
+private fun YourNameRow(prefs: AppPreferences) {
+    val userName by prefs.userName.collectAsState()
+    var open by remember { mutableStateOf(false) }
+    val title = stringResource(R.string.settings_yourname)
+    NavChevronRow(
+        icon = QasaIcons.Person,
+        title = title,
+        trailingText = userName.ifEmpty { null },
+        onClick = { open = true },
+    )
+    if (open) {
+        QasaTextInputSheet(
+            title = title,
+            initial = userName,
+            placeholder = stringResource(R.string.onboarding_nameplaceholder),
+            confirmLabel = stringResource(R.string.common_save),
+            onConfirm = {
+                prefs.setUserName(it)
+                open = false
+            },
+            onDismiss = { open = false },
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+            allowEmpty = true,
         )
     }
 }

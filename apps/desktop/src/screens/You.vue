@@ -13,10 +13,11 @@ import PrimaryButton from '@/components/PrimaryButton.vue'
 import { account } from '@/account/store'
 import { openPage, type AppPage } from '@/nav'
 import { openUrl } from '@/opener'
-import { prefs, useT } from '@/prefs'
+import { prefs, useDisplayName, useT } from '@/prefs'
 import type { QasaIconName } from '@/icons/qasaIcons'
 
 const t = useT()
+const displayName = useDisplayName()
 
 /** Rows: app pages, plus Terms and Privacy, which open the website in the browser. */
 type Row = AppPage | 'terms' | 'privacy'
@@ -56,7 +57,7 @@ const premium = computed(() => account.status?.isPremium ?? false)
         <div class="profile">
           <span class="avatar"><QasaIcon name="person" :size="26" /></span>
           <div class="who">
-            <span class="name">{{ t('session.qasaUser') }}</span>
+            <span class="name">{{ displayName }}</span>
             <span class="plan">{{ t(premium ? 'settings.premiumAccount' : 'settings.freeAccount') }}</span>
           </div>
         </div>
