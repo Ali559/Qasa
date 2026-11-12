@@ -94,7 +94,7 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
     </button>
     <span @pointerdown.capture="prepareMenu" @keydown.enter.capture="prepareMenu">
       <Menu :items="menuItems" :label="t('a11y.moreActions')">
-        <QasaIcon name="more" :size="18" />
+        <QasaIcon name="more-vertical" :size="16" />
       </Menu>
     </span>
     <ConfirmDialog

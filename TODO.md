@@ -32,21 +32,26 @@ Any change to what a screen looks like also updates the landing page's app mocku
 
 ### Phase 1: Small fixes (one PR)
 
-- [ ] **No Cancel when adding or renaming a folder.** The folder sheet uses the shared sheet
+- [x] **No Cancel when adding or renaming a folder.** (2026-11-12, branch `phase-1-small-fixes`:
+      the shared one-field prompt sheet on iOS, Android and the desktop; also the 2FA setup key.) The folder sheet uses the shared sheet
       header and closes by dragging down (Esc / click outside on the desktop); its own action
       (Create / Save) stays as the bottom button. Check every one-field prompt sheet for the
       same Cancel.
-- [ ] **You → Tools: dividers between rows**, the same `RowDivider` inset as Settings →
+- [x] **You → Tools: dividers between rows** (Android was the one missing them; it now uses
+      `SettingsSection` like iOS), the same `RowDivider` inset as Settings →
       Security, on every app.
-- [ ] **The Notifications page always says "Notifications"** in its header, never "Breached
+- [x] **The Notifications page always says "Notifications"** (the Alerts tab header) in its header, never "Breached
       passwords". The Premium prompt for breached passwords inside it stays.
-- [ ] **Icons follow-up:** walk the apps side by side and make the same thing use the same
+- [x] **Icons follow-up:** (personal info `identity`, Auto-backup `backup-schedule`, row options
+      `more-vertical`, plus `image`, `extension`, `open-app`; Delete account was already the same) walk the apps side by side and make the same thing use the same
       icon everywhere. Known: the desktop's "Delete account" (`device-remove`) and add-item
       "Personal info" (`person`); Auto-backup and Restore both show `history`. Add the icons the
       desktop asked for (puzzle for the browser extension, an "open app" window, an image for
       "scan a QR from a picture", a vertical ellipsis) to `assets/icons/icons.json`.
 
 Done when: all four apps show the same thing for each, in light and dark, LTR and RTL.
+Still open: the on-screen check on each app, and re-taking the landing `alerts-*` screenshots
+(the header now says "Notifications"; Phase 7 re-takes them all).
 
 ### Phase 2: Colours (one PR)
 

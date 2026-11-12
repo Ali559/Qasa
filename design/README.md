@@ -82,9 +82,18 @@ A change that only one app picks up is not done.
      or the system back gesture. The sheet's own action (Save, Done, Connect…) stays as a
      full-width button at the bottom of the sheet. Confirmation sheets (title, message,
      confirm / cancel buttons) keep their buttons: they are the dialog's two answers.
+   - **One-field prompt sheets** (new folder, rename folder, 2FA setup key) are sheets like
+     any other: the shared header title, an optional `type.dialogMessage` line, the field,
+     then the action (Create / Save / Add) as the bottom button, `space.sheetActionsGap`
+     (20) apart. No Cancel: they close by dragging down (Esc or a click outside on the
+     desktop).
    - Content sized to fit, never taller than 92% of the window.
 6. **Rows.** `size.rowMinHeight` (60), icon badge 36 with radius 10, gap 14, title
-   `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13.
+   `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13. Rows that share a card (Settings,
+   You → Tools, Account, About) are a `SettingsSection` with a `RowDivider` between each two:
+   1pt `stroke`, inset badge + gap (50) on the leading side, running to the trailing edge.
+   A page's header says what the page is, the same on every app: the Alerts tab is titled
+   "Notifications" (`notifications.title`), whatever it shows inside.
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default
@@ -98,6 +107,10 @@ A change that only one app picks up is not done.
    active tab. To add an icon: name it in `icons.json`, run `import_solar.py`, then
    `generate.py`. Solar is CC BY 4.0: every app credits "Icons: Solar by 480 Design" on its
    licences screen (`assets/icons/LICENSE.md`).
+   **One meaning, one icon, on every app**: personal info `identity` (as ID documents), Delete
+   account `device-remove`, Auto-backup `backup-schedule`, Restore `history`, a row's options
+   `more-vertical` (never `more` turned 90°), scan a QR from a picture `image`, the browser
+   extension `extension` (a Tabler puzzle, like fingerprint), "Open Qasa" `open-app`.
 9. **Color.** The brand palette is four colors: purple `#722F99`, grey `#C5C1C1`, beige
    `#FEE7C8`, peach `#FF9292`. `tokens.json` derives every light and dark token from them
    (table in `docs/design.md` §2.1); no app writes a hex of its own. The only exceptions are

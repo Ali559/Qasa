@@ -212,7 +212,7 @@ async function remove(n: InboxNotification) {
               </span>
             </button>
             <Menu :label="t('a11y.moreActions')" :items="[{ label: t('common.delete'), destructive: true, action: () => remove(n) }]">
-              <QasaIcon name="more" :size="17" />
+              <QasaIcon name="more-vertical" :size="16" />
             </Menu>
           </div>
         </template>

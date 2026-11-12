@@ -475,7 +475,9 @@ struct ConfirmSheetContent: View {
     }
 }
 
-/// A one-field prompt sheet (new collection, rename, setup key).
+/// A one-field prompt sheet (new collection, rename, setup key). Same header as every sheet
+/// (`SheetHeader`'s title style, `sheetTitleTop` from the top edge, `sheetTitleBottom` to the
+/// content) and no Cancel: it closes by dragging down. Its own action is the bottom button.
 struct TextPromptSheetContent: View {
     @Environment(\.themePalette) private var theme
     let title: String
@@ -483,41 +485,42 @@ struct TextPromptSheetContent: View {
     let placeholder: String
     @Binding var text: String
     let confirmTitle: String
-    let cancelTitle: String
     var plainText: Bool = false
     let onConfirm: () -> Void
-    let onCancel: () -> Void
     @FocusState private var focused: Bool
 
     var body: some View {
-        VStack(spacing: 20) {
-            VStack(spacing: 8) {
-                Text(title)
-                    .font(.qasa(19, weight: .semibold))
-                    .foregroundColor(theme.textPrimary)
-                    .multilineTextAlignment(.center)
+        VStack(spacing: 0) {
+            // `SelfSizingSheet` already pads `sheetContentTop` (= `sheetTitleTop`) above this.
+            Text(title)
+                .font(.qasa(QasaTokens.Typography.sheetTitle.size, weight: QasaTokens.Typography.sheetTitle.weight))
+                .foregroundColor(theme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, QasaTokens.Space.sheetTitleSideInset)
+                .frame(maxWidth: .infinity)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.bottom, QasaTokens.Space.sheetTitleBottom)
+            VStack(spacing: 20) {
                 if let message, !message.isEmpty {
                     Text(message)
                         .font(.qasa(15))
                         .foregroundColor(theme.textSecondary)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity)
                 }
-            }
-            .frame(maxWidth: .infinity)
-            TextField(placeholder, text: $text)
-                .textInputAutocapitalization(plainText ? .never : .sentences)
-                .autocorrectionDisabled(plainText)
-                .focused($focused)
-                .submitLabel(.done)
-                .onSubmit(onConfirm)
-                .qasaField()
-            VStack(spacing: 10) {
+                TextField(placeholder, text: $text)
+                    .textInputAutocapitalization(plainText ? .never : .sentences)
+                    .autocorrectionDisabled(plainText)
+                    .focused($focused)
+                    .submitLabel(.done)
+                    .onSubmit(onConfirm)
+                    .qasaField()
                 Button(confirmTitle, action: onConfirm)
                     .buttonStyle(.qasaPrimary)
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                Button(cancelTitle, action: onCancel)
-                    .buttonStyle(.qasaSecondary)
             }
         }
         .onAppear { focused = true }
@@ -560,7 +563,8 @@ extension View {
         }
     }
 
-    /// Bottom-sheet single-field prompt (replaces alerts with a `TextField`).
+    /// Bottom-sheet single-field prompt (replaces alerts with a `TextField`). No Cancel:
+    /// dragging down dismisses it, and `onDismiss` runs however it closed.
     func textPromptSheet(
         isPresented: Binding<Bool>,
         title: String,
@@ -568,12 +572,11 @@ extension View {
         placeholder: String,
         text: Binding<String>,
         confirmTitle: String,
-        cancelTitle: String,
         plainText: Bool = false,
-        onCancel: @escaping () -> Void = {},
+        onDismiss: @escaping () -> Void = {},
         onConfirm: @escaping () -> Void
     ) -> some View {
-        sheet(isPresented: isPresented) {
+        sheet(isPresented: isPresented, onDismiss: onDismiss) {
             SelfSizingSheet {
                 TextPromptSheetContent(
                     title: title,
@@ -581,16 +584,11 @@ extension View {
                     placeholder: placeholder,
                     text: text,
                     confirmTitle: confirmTitle,
-                    cancelTitle: cancelTitle,
                     plainText: plainText,
                     onConfirm: {
                         guard !text.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
                         onConfirm()
                         isPresented.wrappedValue = false
-                    },
-                    onCancel: {
-                        isPresented.wrappedValue = false
-                        onCancel()
                     }
                 )
             }

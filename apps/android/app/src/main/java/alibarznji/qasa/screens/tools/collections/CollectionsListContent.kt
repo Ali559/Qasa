@@ -181,7 +181,7 @@ private fun CollectionCard(
         }
         Box {
             IconButton(onClick = { menuOpen = true }) {
-                Icon(QasaIcons.More, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
+                Icon(QasaIcons.MoreVertical, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
             }
             DropdownMenu(
                 expanded = menuOpen,

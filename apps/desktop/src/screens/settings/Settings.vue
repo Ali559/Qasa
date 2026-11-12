@@ -246,7 +246,7 @@ function logout() {
           :subtitle="account.status?.isPremium ? t('settings.premiumLanSync') : t('settings.requiresPremium')"
           @click="openSubPage('wifiSync', 'settings')"
         />
-        <SettingsRow icon="link" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
+        <SettingsRow icon="extension" :title="t('bridge.settingsRow')" @click="openSubPage('browserExtension', 'settings')" />
       </SettingsSection>
 
     <SettingsSection :title="t('settings.appearance')">

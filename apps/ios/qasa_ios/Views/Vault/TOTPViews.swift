@@ -40,7 +40,6 @@ struct TOTPEditorField: View {
             placeholder: L10n.tr("totp.keyPlaceholder"),
             text: $keyInput,
             confirmTitle: L10n.tr("totp.add"),
-            cancelTitle: L10n.tr("common.cancel"),
             plainText: true
         ) {
             applyKey(keyInput)

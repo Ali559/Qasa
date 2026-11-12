@@ -52,7 +52,6 @@ async function create() {
     :title="t('vault.newCollection')"
     :placeholder="t('common.name')"
     :confirm-label="t('common.create')"
-    :cancel-label="t('common.cancel')"
     @confirm="create"
     @cancel="showNew = false"
   />

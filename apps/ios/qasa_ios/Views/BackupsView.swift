@@ -158,7 +158,7 @@ struct BackupsView: View {
                     }
                 } label: {
                     NavChevronRow(
-                        icon: .history,
+                        icon: .backupSchedule,
                         title: L10n.tr("backup.auto", locale: locale),
                         trailingText: L10n.tr(backup.frequency.labelKey, locale: locale)
                     )

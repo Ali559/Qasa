@@ -4,18 +4,20 @@ import alibarznji.qasa.R
 import alibarznji.qasa.screens.AppPage
 import alibarznji.qasa.screens.settings.main.SettingsProfileCard
 import alibarznji.qasa.theme.AppMenuHeader
-import alibarznji.qasa.theme.CardContainer
 import alibarznji.qasa.theme.NavChevronRow
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.RowDivider
+import alibarznji.qasa.theme.SettingsSection
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 
@@ -63,12 +65,16 @@ fun YouScreen(
     }
 }
 
+/**
+ * iOS `YouView.group`: a [SettingsSection] of chevron rows with a [RowDivider] between them,
+ * the same card and inset as Settings → Security. [footer] sits 8 under it, inset 4.
+ */
 @Composable
 private fun PageGroup(label: String, pages: List<AppPage>, onOpen: (AppPage) -> Unit, footer: String? = null) {
-    Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.contentGap)) {
-        SectionLabel(label)
-        CardContainer {
-            pages.forEach { page ->
+    Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionLabelGap)) {
+        SettingsSection(title = label) {
+            pages.forEachIndexed { index, page ->
+                if (index > 0) RowDivider()
                 NavChevronRow(
                     title = stringResource(page.labelRes),
                     icon = page.youIcon,
@@ -77,7 +83,12 @@ private fun PageGroup(label: String, pages: List<AppPage>, onOpen: (AppPage) -> 
             }
         }
         if (footer != null) {
-            Text(footer, color = qasaColors.textSecondary, style = qasaText.bodySmall)
+            Text(
+                footer,
+                color = qasaColors.textSecondary,
+                style = qasaText.labelRegular,
+                modifier = Modifier.padding(horizontal = QasaDimens.spaceSmall),
+            )
         }
     }
 }

@@ -32,6 +32,6 @@ internal val VaultItemKind.icon: ImageVector
         VaultItemKind.Login -> QasaIcons.Login
         VaultItemKind.SecureNote -> QasaIcons.Note
         VaultItemKind.Payment -> QasaIcons.Card
-        VaultItemKind.PersonalInfo -> QasaIcons.Person
+        VaultItemKind.PersonalInfo -> QasaIcons.Identity
         VaultItemKind.IdDocument -> QasaIcons.Identity
     }
