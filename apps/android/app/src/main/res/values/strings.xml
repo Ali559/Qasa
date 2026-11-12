@@ -531,6 +531,7 @@
     <string name="premium_wallethint">Opens your wallet app. We\'ll refresh your license when payment completes.</string>
     <string name="premium_wayl">Wayl</string>
     <string name="premium_waylsub">Pay with FIB, Qi Card or another Iraqi wallet</string>
+    <string name="protected_title">Enter your main password</string>
     <string name="security_hidden">Qasa is hidden</string>
     <string name="session_qasauser">Qasa User</string>
     <string name="settings_activecount">%d Active</string>

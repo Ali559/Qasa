@@ -176,6 +176,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :item-id="selected.id"
         @edit="editor = { id: selected.id }"
         @deleted="nav.selectedItemId = null"
+        @close="nav.selectedItemId = null"
       />
       <div v-else class="placeholder">
         <span>{{ t('vault.selectItem') }}</span>

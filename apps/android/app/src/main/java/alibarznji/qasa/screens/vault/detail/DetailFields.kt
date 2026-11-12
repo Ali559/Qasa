@@ -17,6 +17,8 @@ internal data class DetailField(
     val secret: Boolean = false,
     val multiline: Boolean = false,
     val ephemeral: Boolean = false,
+    /** False for a protected note's yes/no flag, which stays readable (rule 6b). */
+    val hiddenWhenProtected: Boolean = true,
 )
 
 /**
@@ -42,7 +44,11 @@ internal fun VaultPayload.detailFields(
         DetailField(R.string.field_title, title),
         // Only a protected note's content is a secret on iOS.
         DetailField(R.string.field_content, content, secret = protectItem, multiline = true),
-        DetailField(R.string.field_protected, str(if (protectItem) R.string.common_yes else R.string.common_no)),
+        DetailField(
+            R.string.field_protected,
+            str(if (protectItem) R.string.common_yes else R.string.common_no),
+            hiddenWhenProtected = false,
+        ),
     )
     is VaultPayload.Card -> listOf(
         DetailField(R.string.field_itemname, itemName, ephemeral = true),

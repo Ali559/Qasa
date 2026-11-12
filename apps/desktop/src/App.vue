@@ -20,17 +20,13 @@ import BridgePrompts from '@/screens/bridge/BridgePrompts.vue'
 import { bridgeApi } from '@/bridge/api'
 import UpdatePrompt from '@/screens/UpdatePrompt.vue'
 import { scheduleUpdateCheck } from '@/updater'
-import { protectedReason } from '@/vault/protectedGate'
 import { attachAutoLock, loadVault, lockVault, refreshStatus, session } from '@/vault/session'
-import { watchEffect } from 'vue'
 
 type Stage = 'launching' | 'welcome' | 'create' | 'pair' | 'restore' | 'unlock' | 'shell'
 const stage = ref<Stage>('launching')
 const t = useT()
 /** Logging this computer out also wipes its vault, so it asks like Clear local data. */
 const confirmLogout = ref(false)
-// The Touch ID / Hello prompt for protected notes speaks the UI language.
-watchEffect(() => (protectedReason.text = t('vault.unlockProtectedNote')))
 
 async function route() {
   try {

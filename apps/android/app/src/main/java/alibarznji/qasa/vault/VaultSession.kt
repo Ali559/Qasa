@@ -120,6 +120,19 @@ class VaultSession @Inject constructor(
         return ok
     }
 
+    /**
+     * Whether [password] (as typed, or trimmed, like [unlockMatching]) is the main password,
+     * without touching the session: the unlock sheet of a protected item (rule 6b).
+     */
+    fun verify(password: String): Boolean {
+        val salt = store.kdfSalt ?: return false
+        val expected = store.passwordVerifier ?: return false
+        if (!store.vaultExists) return false
+        fun matches(p: String) = MasterKeyDeriver.passwordVerifier(MasterKeyDeriver.deriveRootKey(p, salt)).contentEquals(expected)
+        val trimmed = password.trim()
+        return matches(password) || (trimmed != password && trimmed.isNotEmpty() && matches(trimmed))
+    }
+
     private fun openWithPassword(password: String): Boolean {
         val salt = store.kdfSalt ?: return false
         val expected = store.passwordVerifier ?: return false

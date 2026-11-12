@@ -42,6 +42,17 @@ final class VaultSession {
         BiometricPolicy.recordMasterPasswordUnlock()
     }
 
+    /// Whether `password` is the main password, without touching the session (the unlock
+    /// sheet of a protected item, `ProtectedUnlockSheet`).
+    func verify(password: String) -> Bool {
+        guard vaultExists, isKdfVersionSupported,
+              let salt = VaultKeychainStore.kdfSalt,
+              let expected = VaultKeychainStore.passwordVerifier,
+              let root = try? MasterKeyDeriver.deriveRootKey(password: password, salt: salt)
+        else { return false }
+        return VaultCrypto.constantTimeEquals(MasterKeyDeriver.passwordVerifier(rootKey: root), expected)
+    }
+
     /// Unlocks with a typed master password and restarts the biometric interval
     /// (`BiometricPolicy`). Pass `recordsMasterPasswordUse: false` only for a password
     /// that came out of the biometric keychain item.

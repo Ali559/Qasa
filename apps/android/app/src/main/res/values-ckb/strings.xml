@@ -531,6 +531,7 @@
     <string name="premium_wallethint">ئەپی جزدان دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو دەبێت.</string>
     <string name="premium_wayl">Wayl</string>
     <string name="premium_waylsub">بە FIB، Qi Card یان جزدانێکی عێراقیی تر پارە بدە</string>
+    <string name="protected_title">وشەی نهێنی سەرەکیت بنووسە</string>
     <string name="security_hidden">قاسە پشتێ کراوە</string>
     <string name="session_qasauser">بەکارهێنەری قاسە</string>
     <string name="settings_activecount">%d چالاک</string>

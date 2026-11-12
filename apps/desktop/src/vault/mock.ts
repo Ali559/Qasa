@@ -131,6 +131,7 @@ function seed() {
       fields: { itemName: 'FIB Card', accountHolder: 'Sara Ahmed', number: '4111111111111111', securityCode: '123', expiryDate: '08/29', note: '', color: 'blue' },
     },
     { variant: 'secureNote', fields: { title: 'Home Wi‑Fi', content: 'Network: Ahmed-Home', color: 'mint', protectItem: false } },
+    { variant: 'secureNote', fields: { title: 'Safe code', content: 'Bedroom safe: 4821', color: 'purple', protectItem: true } },
   ]
   samples.forEach((payload, i) => {
     items.set(uuid(), { payload, createdAt: now - i * 60_000, updatedAt: now - i * 60_000, lastUsedAt: i < 3 ? now - i * 3_600_000 : null })

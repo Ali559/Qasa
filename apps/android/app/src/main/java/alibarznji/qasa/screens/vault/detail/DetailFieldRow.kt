@@ -32,13 +32,13 @@ import androidx.compose.ui.res.stringResource
 @Composable
 internal fun DetailFieldRow(
     field: DetailField,
-    locked: Boolean,
-    shown: Boolean,
+    /** Whether the row has an eye: a secret, or any value of a protected note (rule 6b). */
+    maskable: Boolean,
+    hidden: Boolean,
     onToggleShown: () -> Unit,
     onCopy: () -> Unit,
 ) {
     val c = qasaColors
-    val hidden = field.secret && !shown && !locked
     Column(
         Modifier
             .fillMaxWidth()
@@ -52,13 +52,12 @@ internal fun DetailFieldRow(
                 style = qasaText.bodySmall,
                 modifier = Modifier.weight(1f),
             )
-            if (field.secret) {
-                // A locked row's eye answers the gate first (handled by the caller).
+            if (maskable) {
                 IconButton(onClick = onToggleShown, modifier = Modifier.size(QasaIconSize.x3l)) {
                     Icon(
-                        if (hidden || locked) QasaIcons.Show else QasaIcons.Hide,
+                        if (hidden) QasaIcons.Show else QasaIcons.Hide,
                         contentDescription = stringResource(
-                            if (hidden || locked) R.string.a11y_showpassword else R.string.a11y_hidepassword,
+                            if (hidden) R.string.a11y_showpassword else R.string.a11y_hidepassword,
                         ),
                         tint = c.accent,
                         modifier = Modifier.size(QasaIconSize.sm),
@@ -68,11 +67,6 @@ internal fun DetailFieldRow(
         }
         Spacer(Modifier.height(QasaDimens.gapTiny))
         when {
-            locked -> Text(
-                stringResource(R.string.vault_lockedauthenticate),
-                color = c.textSecondary,
-                style = qasaText.bodyMedium15,
-            )
             hidden -> Text(
                 "•".repeat(field.value.length.coerceIn(8, 16)),
                 color = c.textPrimary,
