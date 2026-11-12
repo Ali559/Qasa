@@ -71,17 +71,6 @@ fun HalfCircleGauge(
     val animatedScore = progress.value
     val shownScore = animatedScore.roundToInt()
     val sweepFraction = animatedScore / 100f
-    val gradient = Brush.sweepGradient(
-        // 180deg of a 360deg sweep starts at the left edge, matching the arc origin.
-        colorStops = arrayOf(
-            0.00f to c.danger,
-            0.25f to c.gold,
-            0.50f to c.accent,
-            0.75f to c.accent,
-            1.00f to c.danger,
-        ),
-        center = Offset.Unspecified,
-    )
     // iOS `scoreColor(for:)` (`PasswordHealthView.swift:121`).
     val numberColor = when {
         shownScore >= 80 -> c.accent
@@ -99,6 +88,19 @@ fun HalfCircleGauge(
             val diameter = min(size.width, size.height * 2f) - strokePx
             val topLeft = Offset((size.width - diameter) / 2f, size.height - diameter / 2f)
             val arcSize = Size(diameter, diameter)
+            // iOS AngularGradient(danger, gold, accent) from 180° to 360°: red on the left,
+            // gold at the top, purple on the right. A Compose sweep starts at 3 o'clock and
+            // turns clockwise, and it must turn around the arc's centre (the bottom edge),
+            // not the canvas centre.
+            val gradient = Brush.sweepGradient(
+                colorStops = arrayOf(
+                    0.00f to c.accent,
+                    0.50f to c.danger,
+                    0.75f to c.gold,
+                    1.00f to c.accent,
+                ),
+                center = Offset(size.width / 2f, topLeft.y + diameter / 2f),
+            )
             drawArc(
                 color = c.stroke,
                 startAngle = 180f,

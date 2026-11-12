@@ -366,6 +366,9 @@ struct HalfCircleGauge: View {
                 )
                 .animation(.easeOut(duration: 1.1), value: progress)
         }
+        // A dial, not text: in Arabic and Kurdish the gradient would mirror while the arc
+        // doesn't, painting the filled part purple instead of red to orange.
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 

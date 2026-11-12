@@ -4,7 +4,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
 
-import { prefs } from '@/prefs'
+import { formatLocale } from '@/prefs'
 
 export type BackupFrequency = 'off' | 'daily' | 'weekly' | 'monthly'
 export const FREQUENCIES: readonly BackupFrequency[] = ['off', 'daily', 'weekly', 'monthly']
@@ -84,7 +84,7 @@ export function backupErrorKey(e: unknown): string {
 
 /** Medium date, short time, in the UI language (as Linked devices and the extension list). */
 export function formatBackupDate(ms: number): string {
-  return new Date(ms).toLocaleString(prefs.language, { dateStyle: 'medium', timeStyle: 'short' })
+  return new Date(ms).toLocaleString(formatLocale(), { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 const tauriBackupApi = {

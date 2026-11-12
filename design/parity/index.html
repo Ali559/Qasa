@@ -1,0 +1,113 @@
+<title>Qasa Parity Audit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<style>
+/* Layout: a sticky bar picks the variant; each screen is one row of iOS · Android · desktop. Colours from design/tokens.json. */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --stroke: #E6E1E1; --accent: #722F99; --onAccent: #FFFFFF;
+  --text: #2A1F33; --text2: #6E6475; --success: #2F9E6C; --gold: #94591A;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D; --accent: #B67FDB; --onAccent: #22102F;
+  --text: #F2F1F3; --text2: #C5C1C1; --success: #5CCB97; --gold: #F0C48C; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D; --accent: #B67FDB; --onAccent: #22102F;
+  --text: #F2F1F3; --text2: #C5C1C1; --success: #5CCB97; --gold: #F0C48C; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.page { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+header { padding-top: 28px; display: grid; gap: 6px; }
+h1 { margin: 0; font-size: 26px; font-weight: 700; text-wrap: balance; }
+header p { margin: 0; color: var(--text2); max-width: 72ch; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; border-bottom: 1px solid var(--stroke); }
+.seg { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { font: 600 13px var(--font); border: 0; background: transparent; color: var(--text2); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.label { font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: .02em; margin-inline-end: 6px; }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.box { background: var(--card); border-radius: 20px; padding: 16px 18px; min-width: 0; }
+.box h2 { margin: 0 0 8px; font-size: 15px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.box h2 .dot { width: 8px; height: 8px; border-radius: 4px; }
+.box ul { margin: 0; padding-inline-start: 18px; color: var(--text2); font-size: 14px; display: grid; gap: 4px; }
+.row { display: grid; gap: 10px; }
+.row h3 { margin: 0; font-size: 17px; font-weight: 600; display: flex; gap: 10px; align-items: baseline; }
+.row h3 code { font: 600 12px ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text2); }
+.shots { display: grid; grid-template-columns: minmax(0, 0.55fr) minmax(0, 0.55fr) minmax(0, 1.6fr); gap: 14px; align-items: start; }
+figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: .03em; }
+figure img { width: 100%; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--stroke); background: var(--card); display: block; }
+.missing { aspect-ratio: 1/2; border-radius: 14px; border: 1px dashed var(--stroke); display: grid; place-items: center; color: var(--text2); font-size: 13px; }
+@media (max-width: 760px) { .shots { grid-template-columns: 1fr 1fr; } .shots figure:last-child { grid-column: 1 / -1; } }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Side-by-side audit</h1>
+    <p>Every screen from iOS, Android and the desktop, taken the same way (TODO Phase 7). Data and plan differ between apps (iOS and the desktop show Premium, Android a free vault), so compare layout, type and colour rather than content. Findings live in <code>design/parity/NOTES.md</code>.</p>
+  </header>
+
+  <section class="summary" aria-label="Findings">
+    <div class="box"><h2><span class="dot" style="background:var(--success)"></span>Fixed in this pass</h2>
+      <ul>
+        <li>Western digits in every language (Kurdish mixed ٣٩ and 39)</li>
+        <li>Phone and card numbers keep their order in RTL lists</li>
+        <li>Generator ranges read A-Z, 0-9, !@#$ in RTL</li>
+        <li>Language rows line up with the app's direction</li>
+        <li>Health gauge colours: iOS in RTL, Android always</li>
+        <li>Android keyboard closes after saving a login</li>
+      </ul></div>
+    <div class="box"><h2><span class="dot" style="background:var(--gold)"></span>For you to decide</h2>
+      <ul>
+        <li>Sentence-case section labels everywhere?</li>
+        <li>Count this device in "Linked devices N active"?</li>
+        <li>"Alerts" tab vs "Notifications" title</li>
+        <li>Language icon looks like a radio wave</li>
+        <li>Tour sign-up card leaves an empty band</li>
+        <li>Android generator card and Home links styling</li>
+      </ul></div>
+  </section>
+
+  <div class="bar">
+    <div><span class="label">Variant</span><span class="seg" id="variant">
+      <button data-v="en-light">English light</button><button data-v="en-dark">English dark</button>
+      <button data-v="ar-light">Arabic light</button><button data-v="ckb-dark">Kurdish dark</button></span></div>
+  </div>
+
+  <div id="rows" class="page" style="gap:28px"></div>
+</div>
+
+<script>
+const SCREENS = [
+  ['01-welcome', 'Welcome, language'], ['02-tour', 'Tour, page 2'], ['03-name', 'Your name'],
+  ['04-create', 'Choose main password'], ['05-unlock', 'Unlock'], ['06-home', 'Home'],
+  ['07-passwords', 'Passwords'], ['08-detail', 'Login detail'], ['09-editor', 'New login'],
+  ['10-generator', 'Password generator'], ['11-alerts', 'Alerts'], ['12-health', 'Password health'],
+  ['13-you', 'You'], ['14-settings', 'Settings'], ['15-collections', 'Collections'], ['16-add-menu', 'Add menu'],
+];
+const APPS = [['ios', 'iOS'], ['android', 'Android'], ['desktop', 'Desktop']];
+let variant = 'en-light';
+try { variant = localStorage.getItem('parity.variant') || variant; } catch {}
+
+function render() {
+  document.querySelectorAll('#variant button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === variant));
+  document.getElementById('rows').innerHTML = SCREENS.map(([key, name]) => `
+    <section class="row"><h3>${name} <code>${key}</code></h3>
+      <div class="shots">${APPS.map(([app, label]) => `
+        <figure><figcaption>${label}</figcaption>
+          <img src="${app}/${key}-${variant}.webp" alt="${label}, ${name}, ${variant}" loading="lazy"
+               onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'missing',textContent:'No shot'}))">
+        </figure>`).join('')}
+      </div></section>`).join('');
+}
+document.getElementById('variant').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  variant = b.dataset.v;
+  try { localStorage.setItem('parity.variant', variant); } catch {}
+  render();
+});
+render();
+</script>

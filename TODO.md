@@ -143,9 +143,12 @@ three languages.
 
 ### Phase 7: Wrap-up
 
-- [ ] **Landing page.** Re-take every app screenshot and mockup on `apps/landing` from the
+- [x] **Landing page.** Re-take every app screenshot and mockup on `apps/landing` from the
       updated apps (icons, fields, colours, dark mode, onboarding), in all three languages.
-- [ ] **Side-by-side audit.** Section 3 below, with screenshots kept in `design/parity/`.
+      (2026-11-12: all 18 iOS shots in `apps/landing/public/screens/` re-taken.)
+- [x] **Side-by-side audit.** Section 3 below, with screenshots kept in `design/parity/`.
+      (2026-11-12: 3 × 64 shots, findings and open decisions in `design/parity/NOTES.md`,
+      browsable in `design/parity/index.html`.)
 
 ## 1. One shared design spec
 
@@ -188,7 +191,8 @@ three languages.
 
 ## 3. Side-by-side audit
 
-- [ ] **Look at the result.** Nothing past the welcome screens was checked by eye:
+- [x] **Look at the result.** (2026-11-12: done, `design/parity/`; what's left to decide is
+      in its `NOTES.md`.) Nothing past the welcome screens was checked by eye:
       the iOS simulator stalled under load, no Android emulator was running, and the
       desktop was only opened at its welcome screen. Walk every screen and sheet on all
       apps in light and dark, English, Arabic and Sorani, and keep screenshots in

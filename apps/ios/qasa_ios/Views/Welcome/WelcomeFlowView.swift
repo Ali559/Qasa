@@ -107,7 +107,6 @@ private struct WelcomeLanguageView: View {
                     .scaleEffect(selected ? 1 : 0.6)
                     .accessibilityHidden(true)
             }
-            .environment(\.layoutDirection, language.layoutDirection)
         }
         .buttonStyle(.qasaRow)
         .accessibilityAddTraits(selected ? .isSelected : [])

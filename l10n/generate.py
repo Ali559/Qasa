@@ -347,7 +347,26 @@ def check_drift() -> int:
     return 0
 
 
+EASTERN_DIGITS = re.compile("[\u0660-\u0669\u06F0-\u06F9]")
+
+
+def eastern_digit_keys() -> list[str]:
+    """Every language writes Western digits (0-9), like the numbers the apps format."""
+    table = load_json(ROOT / "l10n/strings.json")
+    return sorted(
+        f"{key} ({lang})"
+        for key, row in table.items()
+        if isinstance(row, dict)
+        for lang, text in row.items()
+        if isinstance(text, str) and EASTERN_DIGITS.search(text)
+    )
+
+
 def main() -> int:
+    bad = eastern_digit_keys()
+    if bad:
+        print("Use Western digits (0-9) in every language: " + ", ".join(bad))
+        return 1
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",

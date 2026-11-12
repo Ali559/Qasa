@@ -508,7 +508,7 @@ export function displayDate(ms: number | null, t: T, language: string, now = Dat
   if (ms === null) return t('vault.never')
   const seconds = (now - ms) / 1000
   const absolute = () =>
-    new Date(ms).toLocaleString(language, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    new Date(ms).toLocaleString(`${language}-u-nu-latn`, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
   if (seconds < 0) return absolute()
   if (seconds < 60) return t('date.justNow')
   if (seconds < 3600) {

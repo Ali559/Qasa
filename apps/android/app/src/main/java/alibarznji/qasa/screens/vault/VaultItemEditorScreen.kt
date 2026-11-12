@@ -17,6 +17,7 @@ import alibarznji.qasa.theme.QasaSheetHeader
 import alibarznji.qasa.theme.LocalQasaToast
 import alibarznji.qasa.theme.StickyBottomBar
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.VaultRepository
@@ -94,6 +95,7 @@ fun VaultItemEditorSheetContent(
     vm: EditorViewModel = hiltViewModel(),
 ) {
     val isEditing = existingId != null
+    val focusManager = LocalFocusManager.current
     // An edit opens with normalize applied (legacy dates → ISO, card numbers grouped…), so
     // only what normalize can't fix shows as an issue.
     var payload by remember(initial) {
@@ -180,6 +182,9 @@ fun VaultItemEditorSheetContent(
                             vm.repo.save(existingId, saved)
                             // Root-owned toast, so it stays up once this sheet has closed.
                             toast.show(context.savedToastText(saved, isEditing))
+                            // Close the keyboard with the sheet, or it stays up over the list
+                            // with its search field focused.
+                            focusManager.clearFocus(force = true)
                             onDone()
                         } catch (e: CancellationException) {
                             throw e

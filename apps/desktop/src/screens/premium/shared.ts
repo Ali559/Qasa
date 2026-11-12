@@ -3,12 +3,12 @@
 import { accountApi } from '@/account/api'
 import { isApiError } from '@/account/types'
 import type { PricingPlan, Subscription } from '@/account/types'
-import { prefs, useT } from '@/prefs'
+import { formatLocale, prefs, useT } from '@/prefs'
 
 /** iOS `amount.formatted(.number.grouping(.automatic).locale(…))`. */
 export function formatIqd(amount: number): string {
   try {
-    return new Intl.NumberFormat(prefs.language).format(amount)
+    return new Intl.NumberFormat(formatLocale()).format(amount)
   } catch {
     return new Intl.NumberFormat('en').format(amount)
   }

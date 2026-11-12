@@ -9,7 +9,7 @@ import PillBadge from '@/components/PillBadge.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import type { QasaIconName } from '@/icons/qasaIcons'
 import type { RemoteDevice } from '@/account/types'
-import { prefs, useT } from '@/prefs'
+import { formatLocale, useT } from '@/prefs'
 
 const props = defineProps<{
   device: RemoteDevice
@@ -39,7 +39,7 @@ const activated = computed(() => {
   if (!iso) return null
   const ms = Date.parse(iso)
   if (Number.isNaN(ms)) return null
-  return new Date(ms).toLocaleString(prefs.language, { dateStyle: 'medium', timeStyle: 'short' })
+  return new Date(ms).toLocaleString(formatLocale(), { dateStyle: 'medium', timeStyle: 'short' })
 })
 
 function onUnlink() {

@@ -9,7 +9,7 @@ import PageFrame from '@/components/PageFrame.vue'
 import QasaIcon from '@/components/QasaIcon.vue'
 import { account } from '@/account/store'
 import { nav, selectTab } from '@/nav'
-import { prefs, useT } from '@/prefs'
+import { formatLocale, useT } from '@/prefs'
 import { session } from '@/vault/session'
 import { toolsApi, type HealthReport } from '@/vault/tools'
 import BreachLockedCard from './BreachLockedCard.vue'
@@ -47,7 +47,7 @@ const rows = computed(() => {
   return r.breachedIds.map((id) => ({ row: byId.get(id), count: r.breachCounts[id] ?? 0 })).filter((x) => !!x.row)
 })
 
-const number = (n: number) => new Intl.NumberFormat(prefs.language).format(n)
+const number = (n: number) => new Intl.NumberFormat(formatLocale()).format(n)
 
 function openItem(id: string) {
   nav.selectedItemId = id
