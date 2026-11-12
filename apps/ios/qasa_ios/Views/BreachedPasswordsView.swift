@@ -22,7 +22,7 @@ struct BreachedPasswordsView: View {
     var body: some View {
         VStack(spacing: 0) {
             AppMenuHeader(
-                title: L10n.tr("nav.breachedPasswords", locale: AppPreferences.shared.locale),
+                title: L10n.tr("notifications.title", locale: AppPreferences.shared.locale),
                 onMenu: nil
             )
             ScrollView {

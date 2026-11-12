@@ -63,8 +63,7 @@ struct CollectionsView: View {
             title: L10n.tr("collections.createTitle"),
             placeholder: L10n.tr("common.name"),
             text: $newName,
-            confirmTitle: L10n.tr("common.create"),
-            cancelTitle: L10n.tr("common.cancel")
+            confirmTitle: L10n.tr("common.create")
         ) {
             createCollection()
         }
@@ -77,8 +76,7 @@ struct CollectionsView: View {
             title: L10n.tr("collections.rename"),
             placeholder: L10n.tr("common.name"),
             text: $editName,
-            confirmTitle: L10n.tr("common.save"),
-            cancelTitle: L10n.tr("common.cancel")
+            confirmTitle: L10n.tr("common.save")
         ) {
             saveRename()
         }
@@ -131,8 +129,7 @@ struct CollectionsView: View {
                     Label { Text(L10n.tr("common.delete")) } icon: { QasaIconImage(.delete, size: 17) }
                 }
             } label: {
-                QasaIconImage(.more, size: 16)
-                    .rotationEffect(.degrees(90))
+                QasaIconImage(.moreVertical, size: 16)
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
             }

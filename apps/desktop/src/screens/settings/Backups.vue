@@ -58,7 +58,7 @@ async function chooseLocation() {
 }
 
 const frequencyChoices = computed<Choice<BackupFrequency>[]>(() =>
-  FREQUENCIES.map((f) => ({ value: f, label: t(`backup.freq.${f}`), icon: 'history' as const })),
+  FREQUENCIES.map((f) => ({ value: f, label: t(`backup.freq.${f}`), icon: 'backup-schedule' as const })),
 )
 
 const frequency = computed<BackupFrequency>({

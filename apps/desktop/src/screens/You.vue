@@ -124,6 +124,6 @@ const premium = computed(() => account.status?.isPremium ?? false)
   margin: 0;
   padding-inline: 4px;
   font-size: var(--type-caption-size);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 </style>

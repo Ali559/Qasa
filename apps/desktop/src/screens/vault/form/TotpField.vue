@@ -104,7 +104,7 @@ function openKey() {
         <span>{{ t('totp.add') }}</span>
       </button>
       <div v-if="showMenu" class="menu" role="menu">
-        <button type="button" role="menuitem" @click="fromImage"><QasaIcon name="qr-scan" :size="16" />{{ t('totp.scanImage') }}</button>
+        <button type="button" role="menuitem" @click="fromImage"><QasaIcon name="image" :size="16" />{{ t('totp.scanImage') }}</button>
         <button type="button" role="menuitem" @click="openKey"><QasaIcon name="keyboard" :size="16" />{{ t('totp.enterKey') }}</button>
       </div>
     </div>
@@ -125,7 +125,6 @@ function openKey() {
     :message="t('totp.hint')"
     :placeholder="t('totp.keyPlaceholder')"
     :confirm-label="t('totp.add')"
-    :cancel-label="t('common.cancel')"
     mono
     @confirm="applyKey"
     @cancel="showKey = false"

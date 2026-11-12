@@ -85,9 +85,9 @@ internal fun VaultListItemRow(
         copyContentDescription = stringResource(R.string.a11y_copy),
         trailing = {
             Box {
-                // iOS: `ellipsis` rotated 90° in a 36pt frame.
+                // iOS: `more-vertical` in a 36pt frame.
                 QasaRowIconButton(
-                    icon = QasaIcons.More,
+                    icon = QasaIcons.MoreVertical,
                     contentDescription = stringResource(R.string.a11y_moreactions),
                     onClick = { menuOpen = true },
                 )

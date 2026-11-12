@@ -115,8 +115,7 @@ struct CollectionPickerField: View {
             placeholder: L10n.tr("common.name", locale: locale),
             text: $newName,
             confirmTitle: L10n.tr("common.create", locale: locale),
-            cancelTitle: L10n.tr("common.cancel", locale: locale),
-            onCancel: { newName = "" }
+            onDismiss: { newName = "" }
         ) {
             let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { return }

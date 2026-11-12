@@ -69,7 +69,7 @@ fun BreachedPasswordsScreen(
     var editing by remember { mutableStateOf<BreachedEdit?>(null) }
 
     ScreenScaffold(
-        header = { AppMenuHeader(title = stringResource(R.string.nav_breached_passwords), onMenu = onOpenMenu, applyStatusBars = false) },
+        header = { AppMenuHeader(title = stringResource(R.string.notifications_title), onMenu = onOpenMenu, applyStatusBars = false) },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionGap)) {
             val current = report

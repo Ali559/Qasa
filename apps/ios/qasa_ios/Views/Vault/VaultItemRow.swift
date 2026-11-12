@@ -110,8 +110,7 @@ struct VaultItemRow: View {
                     Label { Text(L10n.tr("vault.deleteItem")) } icon: { QasaIconImage(.delete, size: 17) }
                 }
             } label: {
-                QasaIconImage(.more, size: 16)
-                    .rotationEffect(.degrees(90))
+                QasaIconImage(.moreVertical, size: 16)
                     .foregroundColor(Theme.textSecondary)
                     .frame(width: 36, height: 36)
             }

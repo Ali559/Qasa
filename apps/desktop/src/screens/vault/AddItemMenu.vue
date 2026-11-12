@@ -23,7 +23,7 @@ const KINDS: Array<{ kind: ItemKind; icon: QasaIconName; variant?: Variant }> = 
   { kind: 'login', icon: 'login', variant: 'login' },
   { kind: 'secureNote', icon: 'note', variant: 'secureNote' },
   { kind: 'payment', icon: 'card' },
-  { kind: 'personalInfo', icon: 'person' },
+  { kind: 'personalInfo', icon: 'identity' },
   { kind: 'idDocument', icon: 'identity' },
 ]
 

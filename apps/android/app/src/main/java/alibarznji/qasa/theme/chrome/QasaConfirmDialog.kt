@@ -62,7 +62,7 @@ fun QasaConfirmSheet(
     enabled: Boolean = true,
     confirmEnabled: Boolean = true,
     icon: ImageVector? = null,
-    /** Title-to-message gap: 10 for a confirmation, 8 for a text prompt (iOS). */
+    /** Title-to-message gap (10, as on iOS). */
     textGap: Dp = QasaDimens.sheetTextGap,
     content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
@@ -166,10 +166,13 @@ fun QasaConfirmDialog(
 }
 
 /**
- * A [QasaConfirmSheet] around one text field: "New collection", "Rename collection",
- * "Enter setup key".
+ * iOS `textPromptSheet` (`TextPromptSheetContent`): one text field in a sheet, for "New
+ * collection", "Rename collection" and "Enter setup key". The shared [QasaSheetHeader]
+ * title, an optional message, the field and the confirm button, 20dp apart. No Cancel: the
+ * sheet closes by dragging down, the scrim or back, then [onDismiss].
  * [onConfirm] receives the trimmed text; the confirm button is disabled while it is blank.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QasaTextInputSheet(
     title: String,
@@ -182,25 +185,40 @@ fun QasaTextInputSheet(
     message: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
+    val c = qasaColors
     var text by rememberSaveable { mutableStateOf(initial) }
     val trimmed = text.trim()
-    QasaConfirmSheet(
-        title = title,
-        message = message,
-        confirmLabel = confirmLabel,
-        onConfirm = { if (trimmed.isNotEmpty()) onConfirm(trimmed) },
-        onDismiss = onDismiss,
-        destructive = false,
-        confirmEnabled = trimmed.isNotEmpty(),
-        textGap = QasaDimens.fieldLabelGap,
-    ) {
-        ThemedTextField(
-            value = text,
-            onValueChange = { text = it },
-            placeholder = placeholder,
-            keyboardOptions = keyboardOptions,
-            imeAction = ImeAction.Done,
-            keyboardActions = KeyboardActions(onDone = { if (trimmed.isNotEmpty()) onConfirm(trimmed) }),
-        )
+    QasaModalBottomSheet(onDismissRequest = onDismiss, title = title) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = QasaDimens.screenPadding)
+                .padding(bottom = QasaDimens.sheetContentBottom),
+            verticalArrangement = Arrangement.spacedBy(QasaDimens.sheetActionsGap),
+        ) {
+            if (!message.isNullOrBlank()) {
+                Text(
+                    message,
+                    color = c.textSecondary,
+                    style = qasaText.dialogMessage,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            ThemedTextField(
+                value = text,
+                onValueChange = { text = it },
+                placeholder = placeholder,
+                keyboardOptions = keyboardOptions,
+                imeAction = ImeAction.Done,
+                keyboardActions = KeyboardActions(onDone = { if (trimmed.isNotEmpty()) onConfirm(trimmed) }),
+            )
+            PrimaryButton(
+                title = confirmLabel,
+                onClick = { if (trimmed.isNotEmpty()) onConfirm(trimmed) },
+                enabled = trimmed.isNotEmpty(),
+            )
+        }
     }
 }

@@ -56,7 +56,7 @@ function openItem(id: string) {
 </script>
 
 <template>
-  <PageFrame :title="t('nav.breachedPasswords')" :gap="20">
+  <PageFrame :title="t('notifications.title')" :gap="20">
     <BreachLockedCard v-if="locked" />
 
     <template v-else-if="report && (!checking || report.breachedCount > 0)">

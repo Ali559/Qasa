@@ -143,7 +143,7 @@ onBeforeUnmount(() => clearInterval(poll))
     <BrandHeader>
       <template #trailing>
         <button v-if="state === 'unlocked'" type="button" class="header-button" :title="t('ext.openQasa')" :aria-label="t('ext.openQasa')" @click="openQasa">
-          <QasaIcon name="export" :size="16" />
+          <QasaIcon name="open-app" :size="16" />
         </button>
       </template>
     </BrandHeader>

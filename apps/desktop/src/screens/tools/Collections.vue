@@ -96,7 +96,7 @@ function openItem(id: string) {
           { label: t('common.delete'), destructive: true, action: () => (deleting = c) },
         ]"
       >
-        <QasaIcon name="more" :size="17" />
+        <QasaIcon name="more-vertical" :size="16" />
       </Menu>
     </div>
 
@@ -108,7 +108,6 @@ function openItem(id: string) {
         :title="nameSheet?.mode === 'rename' ? t('collections.rename') : t('collections.createTitle')"
         :placeholder="t('common.name')"
         :confirm-label="nameSheet?.mode === 'rename' ? t('common.save') : t('common.create')"
-        :cancel-label="t('common.cancel')"
         @confirm="submitName"
         @cancel="nameSheet = null"
       />

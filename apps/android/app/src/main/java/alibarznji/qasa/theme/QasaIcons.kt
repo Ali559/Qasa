@@ -348,6 +348,14 @@ object QasaIcons {
         )
     }
 
+    val MoreVertical: ImageVector by lazy {
+        icon("more-vertical", 24f, 24f,
+            S("M10 5A2 2 0 1 0 14 5A2 2 0 1 0 10 5Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M10 12A2 2 0 1 0 14 12A2 2 0 1 0 10 12Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M10 19A2 2 0 1 0 14 19A2 2 0 1 0 10 19Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+        )
+    }
+
     val Search: ImageVector by lazy {
         icon("search", 24f, 24f,
             S("M2 11.5A9.5 9.5 0 1 0 21 11.5A9.5 9.5 0 1 0 2 11.5Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
@@ -412,6 +420,16 @@ object QasaIcons {
         icon("history", 24f, 24f,
             S("M12 8V12L14.5 14.5", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
             S("M4.33776 6.87058L5.60414 5.6042C9.10115 2.10719 14.7996 2.13582 18.3319 5.66816C21.8642 9.2005 21.8929 14.8989 18.3959 18.3959C14.8988 21.8929 9.20044 21.8643 5.6681 18.332C3.57589 16.2397 2.71285 13.3876 3.08355 10.6831M4.32497 4.32503L4.33776 6.87058L6.88331 6.88337", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
+
+    val BackupSchedule: ImageVector by lazy {
+        icon("backup-schedule", 24f, 24f,
+            S("M15 16.25A1.5 1.5 0 1 0 18 16.25A1.5 1.5 0 1 0 15 16.25Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M10 21.75H14C17.7712 21.75 19.6569 21.75 20.8284 20.5784C22 19.4069 22 17.5212 22 13.75V11.75C22 7.97876 22 6.09315 20.8284 4.92157C19.6569 3.75 17.7712 3.75 14 3.75H10C6.22876 3.75 4.34315 3.75 3.17157 4.92157C2 6.09315 2 7.97876 2 11.75V13.75C2 17.5212 2 19.4069 3.17157 20.5784C4.34315 21.75 6.22876 21.75 10 21.75Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M2.03516 8.75H21.965", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M7 3.78496V2.25", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M17 3.78496V2.25", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
         )
     }
 
@@ -798,6 +816,31 @@ object QasaIcons {
             S("M9 13A3 3 0 1 0 15 13A3 3 0 1 0 9 13Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
             S("M14.2222 21H9.77778C6.65675 21 5.09624 21 3.97524 20.2646C3.48995 19.9462 3.07328 19.5371 2.74902 19.0607C2 17.9601 2 16.4279 2 13.3636C2 10.2994 2 8.76721 2.74902 7.6666C3.07328 7.19014 3.48995 6.78104 3.97524 6.46268C4.69555 5.99013 5.59733 5.82123 6.978 5.76086C7.63685 5.76086 8.20412 5.27068 8.33333 4.63636C8.52715 3.68489 9.37805 3 10.3663 3H13.6337C14.6219 3 15.4728 3.68489 15.6667 4.63636C15.7959 5.27068 16.3631 5.76086 17.022 5.76086C18.4027 5.82123 19.3044 5.99013 20.0248 6.46268C20.51 6.78104 20.9267 7.19014 21.251 7.6666C22 8.76721 22 10.2994 22 13.3636C22 16.4279 22 17.9601 21.251 19.0607C20.9267 19.5371 20.51 19.9462 20.0248 20.2646C18.9038 21 17.3433 21 14.2222 21Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
             S("M19 10H18", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+        )
+    }
+
+    val Image: ImageVector by lazy {
+        icon("image", 24f, 24f,
+            S("M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M14 8A2 2 0 1 0 18 8A2 2 0 1 0 14 8Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M2 12.5001L3.75159 10.9675C4.66286 10.1702 6.03628 10.2159 6.89249 11.0721L11.1822 15.3618C11.8694 16.0491 12.9512 16.1428 13.7464 15.5839L14.0446 15.3744C15.1888 14.5702 16.7369 14.6634 17.7765 15.599L21 18.5001", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+        )
+    }
+
+    val Extension: ImageVector by lazy {
+        icon("extension", 24f, 24f,
+            S("M4 7h3a1 1 0 0 0 1 -1v-1a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0 -1 1v3a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-1a2 2 0 0 0 -4 0v1a1 1 0 0 1 -1 1h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h1a2 2 0 0 0 0 -4h-1a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+    }
+
+    val OpenApp: ImageVector by lazy {
+        icon("open-app", 24f, 24f,
+            S("M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22Z", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M2 9.5H22", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M9 21.9797L9 9.5", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+            S("M12 6H12.0001", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
+            S("M9 6H9.0001", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
+            S("M6 6H6.0001", fill = false, stroke = 1.5f, cap = StrokeCap.Round, join = StrokeJoin.Round),
         )
     }
 
