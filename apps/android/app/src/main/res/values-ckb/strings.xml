@@ -351,6 +351,7 @@
     <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">بەستەری وێبسایت</string>
     <string name="field_zipcode">کۆدی پۆستە</string>
+    <string name="fill_strongpassword">وشەی نهێنیی بەهێز بەکاربهێنە</string>
     <string name="gen_copied">لەبەرگیرایەوە!</string>
     <string name="gen_copy">لەبەرگرتنەوە</string>
     <string name="gen_copypassword">لەبەرگرتنەوەی وشەی نهێنی</string>

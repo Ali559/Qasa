@@ -414,6 +414,7 @@
   "field.websitePlaceholder": "example.com",
   "field.websiteURL": "رابط الموقع",
   "field.zipCode": "الرمز البريدي",
+  "fill.strongPassword": "استخدم كلمة مرور قوية",
   "gen.copied": "تم النسخ!",
   "gen.copy": "نسخ",
   "gen.copyPassword": "نسخ كلمة المرور",

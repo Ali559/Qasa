@@ -69,9 +69,12 @@ test('a page without a content script shows the hint', async ({ env }) => {
 
 test('language picker switches to Arabic, right to left', async ({ env }) => {
   const popup = await openPopup(env)
-  await popup.getByRole('combobox').selectOption('ar')
+  // The footer button opens the app's own picker sheet (design rule 6a), not a <select>.
+  await popup.getByRole('button', { name: /^Language,/ }).click()
+  await popup.getByRole('option', { name: 'العربية' }).click()
   await expect(popup.locator('html')).toHaveAttribute('dir', 'rtl')
   await expect(popup.getByRole('button', { name: 'تسجيلات الدخول' })).toBeVisible()
-  await popup.getByRole('combobox').selectOption('en')
+  await popup.getByRole('button', { name: /، العربية$|, العربية$|العربية$/ }).click()
+  await popup.getByRole('option', { name: 'English' }).click()
   await expect(popup.locator('html')).toHaveAttribute('dir', 'ltr')
 })

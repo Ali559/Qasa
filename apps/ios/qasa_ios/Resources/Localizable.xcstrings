@@ -7657,6 +7657,28 @@
         }
       }
     },
+    "fill.strongPassword": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use a strong password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم كلمة مرور قوية"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وشەی نهێنیی بەهێز بەکاربهێنە"
+          }
+        }
+      }
+    },
     "gen.copied": {
       "localizations": {
         "en": {

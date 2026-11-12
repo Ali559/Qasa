@@ -2839,6 +2839,11 @@
     "ckb": "وشەی نهێنی سەرەکیت بنووسە",
     "en": "Enter your main password"
   },
+  "fill.strongPassword": {
+    "en": "Use a strong password",
+    "ar": "استخدم كلمة مرور قوية",
+    "ckb": "وشەی نهێنیی بەهێز بەکاربهێنە"
+  },
   "vault.untitled": {
     "en": "Untitled",
     "ar": "بدون عنوان",

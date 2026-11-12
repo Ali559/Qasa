@@ -133,6 +133,13 @@ A change that only one app picks up is not done.
    - **Hidden again.** Revealed values hide when the user leaves the item, and the whole
      item locks again (cover and sheet) when the app goes to the background. Each opening
      asks again: an unlock is never remembered between openings.
+6c. **Suggest a strong password at sign-up** (chosen 2026-11-12; audit in
+   `docs/strong-password-signup.md`). Wherever Qasa sees a new-password field (a sign-up or
+   change-password form), it offers "Use a strong password" (`fill.strongPassword`) with the
+   generated value as the row's subtitle, from the shared generator and its default
+   settings. Choosing it fills the new password and its confirm field. Saved logins are
+   never offered on a new-password field. When the form is submitted Qasa offers to save the
+   login (site, username, the generated password), even though Qasa filled it.
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default

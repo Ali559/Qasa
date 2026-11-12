@@ -351,6 +351,7 @@
     <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">رابط الموقع</string>
     <string name="field_zipcode">الرمز البريدي</string>
+    <string name="fill_strongpassword">استخدم كلمة مرور قوية</string>
     <string name="gen_copied">تم النسخ!</string>
     <string name="gen_copy">نسخ</string>
     <string name="gen_copypassword">نسخ كلمة المرور</string>

@@ -99,14 +99,14 @@ the eye. Add a test for each app's gate.
 
 ### Phase 5: Suggest a strong password at sign-up (one PR per platform; very important)
 
-- [ ] **Audit what exists.**
+- [x] **Audit what exists.** (2026-11-12: `docs/strong-password-signup.md`)
       - The extension's `detect.ts` already tells sign-up and change-password forms from
         logins.
       - Android's autofill service knows `newPassword` fields and can save.
       - iOS has the AutoFill "insert text" entry point (`prepareInterfaceForUserChoosingTextToInsert`).
 
       Write down, per platform, what the user sees today on a sign-up form.
-- [ ] **Browser extension:** on a sign-up or change-password form, the in-page menu offers
+- [x] **Browser extension:** on a sign-up or change-password form, the in-page menu offers
       "Use a strong password". It fills both password fields with a password from the shared
       generator, and once the form is submitted it offers to save a new login (site, username,
       password).
@@ -116,7 +116,7 @@ the eye. Add a test for each app's gate.
 - [ ] **iOS:** find what AutoFill allows a third-party provider on iOS 17 and 18+ (text
       insertion of a generated password, the save prompt). Ship the best that's allowed, and
       write down any limit Apple imposes.
-- [ ] **Desktop:** covered through the extension; make sure a login saved from the extension
+- [x] **Desktop:** covered through the extension (accepting a save reloads the list); make sure a login saved from the extension
       shows up in the app straight away.
 
 Done when: signing up on a test site (and a test app on each phone) offers a strong password in

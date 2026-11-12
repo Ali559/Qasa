@@ -19,7 +19,7 @@ export const aliases = [
 
 /** Keys the in-page menu needs besides `ext.page.*`: the main-password-due note and its
  *  "Open Qasa" button (the same strings as the desktop's unlock screen and the popup). */
-const CONTENT_EXTRA_KEYS = new Set(['brand.name', 'auth.unlock.masterPasswordDueFmt', 'ext.openQasa'])
+const CONTENT_EXTRA_KEYS = new Set(['brand.name', 'auth.unlock.masterPasswordDueFmt', 'ext.openQasa', 'fill.strongPassword'])
 
 /** `virtual:qasa-content-strings`: the `ext.page.*` keys and `CONTENT_EXTRA_KEYS` per language. */
 export function contentStrings(): Plugin {

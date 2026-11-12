@@ -38,6 +38,15 @@ export function setFieldValue(field: HTMLInputElement, value: string): void {
   filledByUs.set(field, digest(value))
 }
 
+/**
+ * A password Qasa generated (design rule 6c): filled like any value, but unlike a saved
+ * login's it is offered for saving when the form is submitted, so it is not recorded as ours.
+ */
+export function fillGenerated(field: HTMLInputElement, value: string): void {
+  setFieldValue(field, value)
+  filledByUs.delete(field)
+}
+
 export function wasFilledWith(field: HTMLInputElement, value: string): boolean {
   return filledByUs.get(field) === digest(value)
 }
