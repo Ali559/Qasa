@@ -113,7 +113,7 @@ the eye. Add a test for each app's gate.
 - [x] **Android:** for a `newPassword` field, the autofill service returns a "Generate strong
       password" dataset. Choosing it fills the generated password, and `onSaveRequest` saves the
       login.
-- [ ] **iOS:** find what AutoFill allows a third-party provider on iOS 17 and 18+ (text
+- [x] **iOS:** find what AutoFill allows a third-party provider on iOS 17 and 18+ (text
       insertion of a generated password, the save prompt). Ship the best that's allowed, and
       write down any limit Apple imposes.
 - [x] **Desktop:** covered through the extension (accepting a save reloads the list); make sure a login saved from the extension

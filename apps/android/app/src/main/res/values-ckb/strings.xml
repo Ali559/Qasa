@@ -73,6 +73,9 @@
     <string name="autofill_prompt_desktoptitle">وشە نهێنییەکان لە وێبگەڕەکەتدا پڕبکەرەوە</string>
     <string name="autofill_prompt_notnow">ئێستا نا</string>
     <string name="autofill_prompt_title">وشە نهێنییەکان بە قاسە پڕبکەرەوە</string>
+    <string name="autofill_save">پاشەکەوتکردن</string>
+    <string name="autofill_savebody">قاسە بکەرەوە بۆ پاشەکەوتکردنی ئەم چوونەژوورەوەیە. جاری داهاتوو کە ئەپەکە دەکەیتەوە تێیدا دەردەکەوێت.</string>
+    <string name="autofill_savetitle">پاشەکەوتکردن لە قاسە</string>
     <string name="autofill_search">گەڕان</string>
     <string name="autofill_searchqasa">لە قاسە بگەڕێ</string>
     <string name="autofill_service_description">پڕکردنەوەی خۆکاری وشەی نهێنی قاسە</string>

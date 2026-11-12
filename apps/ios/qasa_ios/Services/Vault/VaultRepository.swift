@@ -30,6 +30,7 @@ final class VaultRepository {
 
     func warmCache() async {
         guard let context else { return }
+        importPendingSaves()
         let descriptor = FetchDescriptor<VaultItemRecord>(
             predicate: VaultItemRecord.live,
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
@@ -498,6 +499,64 @@ final class VaultRepository {
             _ = try? write(payload: payload, id: record.id, origin: .storedAsIs)
         }
         try? context.save()
+    }
+
+    // MARK: logins saved from the AutoFill extension (iOS 26.2, design rule 6c)
+
+    /// What to do with a login the extension saved, against the vault's logins.
+    enum PendingSaveAction: Equatable {
+        /// Already saved with this password.
+        case skip
+        /// The same site and username with another password: the user chose to save it.
+        case updatePassword(UUID)
+        case create
+    }
+
+    static func pendingSaveAction(for login: PendingSaveInbox.Login, existing: [(id: UUID, fields: LoginFields)]) -> PendingSaveAction {
+        let host = AutofillContextMatcher.normalizeHost(login.website)
+        let user = login.username.trimmingCharacters(in: .whitespaces).lowercased()
+        let sameSite = existing.filter { pair in
+            host != nil && AutofillContextMatcher.normalizeHost(pair.fields.website) == host
+        }
+        let sameUser = sameSite.filter { pair in
+            let f = pair.fields
+            return [f.username, f.email].contains { $0.trimmingCharacters(in: .whitespaces).lowercased() == user }
+        }
+        if sameUser.contains(where: { $0.fields.password == login.password }) { return .skip }
+        if !user.isEmpty, let match = sameUser.first { return .updatePassword(match.id) }
+        return .create
+    }
+
+    /// Imports and clears `PendingSaveInbox` (sealed with the vault key, so only while
+    /// unlocked). New logins are stored like an import; a known login gets its new password.
+    func importPendingSaves() {
+        guard PendingSaveInbox.hasPending(), VaultSession.shared.isUnlocked, let context,
+              let key = try? VaultSession.shared.requireEncKey() else { return }
+        let waiting = PendingSaveInbox.drain(key: key)
+        guard !waiting.isEmpty else { return }
+        let records = (try? context.fetch(FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live))) ?? []
+        var logins: [(id: UUID, fields: LoginFields)] = records.compactMap { record in
+            guard case .login(let f) = try? decryptPayload(record) else { return nil }
+            return (record.id, f)
+        }
+        for login in waiting {
+            switch Self.pendingSaveAction(for: login, existing: logins) {
+            case .skip:
+                continue
+            case .updatePassword(let id):
+                try? rotatePassword(itemId: id, to: login.password)
+            case .create:
+                let isEmail = login.username.contains("@")
+                let fields = LoginFields(
+                    itemName: login.title,
+                    email: isEmail ? login.username : "",
+                    username: isEmail ? "" : login.username,
+                    password: login.password,
+                    website: login.website
+                )
+                if let row = try? importItem(.login(fields)).row { logins.append((row.id, fields)) }
+            }
+        }
     }
 
     /// Unit tests turn this off so they never touch the AutoFill extension's real index.

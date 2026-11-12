@@ -73,6 +73,9 @@
     <string name="autofill_prompt_desktoptitle">املأ كلمات المرور في متصفحك</string>
     <string name="autofill_prompt_notnow">ليس الآن</string>
     <string name="autofill_prompt_title">املأ كلمات المرور بقاصة</string>
+    <string name="autofill_save">حفظ</string>
+    <string name="autofill_savebody">افتح قاصة لحفظ تسجيل الدخول هذا. سيظهر في التطبيق عند فتحه في المرة القادمة.</string>
+    <string name="autofill_savetitle">حفظ في قاصة</string>
     <string name="autofill_search">بحث</string>
     <string name="autofill_searchqasa">البحث في قاصة</string>
     <string name="autofill_service_description">التعبئة التلقائية لكلمات مرور قاصة</string>
