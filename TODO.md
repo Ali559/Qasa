@@ -110,7 +110,7 @@ the eye. Add a test for each app's gate.
       "Use a strong password". It fills both password fields with a password from the shared
       generator, and once the form is submitted it offers to save a new login (site, username,
       password).
-- [ ] **Android:** for a `newPassword` field, the autofill service returns a "Generate strong
+- [x] **Android:** for a `newPassword` field, the autofill service returns a "Generate strong
       password" dataset. Choosing it fills the generated password, and `onSaveRequest` saves the
       login.
 - [ ] **iOS:** find what AutoFill allows a third-party provider on iOS 17 and 18+ (text

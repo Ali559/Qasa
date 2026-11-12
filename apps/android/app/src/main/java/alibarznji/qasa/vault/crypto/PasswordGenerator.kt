@@ -21,6 +21,12 @@ object PasswordGenerator {
     /** Above this the result is unlikely to be memorable anyway and costs a lot of entropy to type. */
     const val MAX_LENGTH = 256
 
+    /** The generator screen's default length; every class is on by default. */
+    const val DEFAULT_LENGTH = 16
+
+    /** A password with the default settings (the generator screen's, and autofill's strong password). */
+    fun generateDefault(): String = generate(DEFAULT_LENGTH)
+
     /**
      * Generates a password of [length] characters.
      *

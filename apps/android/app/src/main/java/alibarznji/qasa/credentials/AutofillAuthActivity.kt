@@ -246,7 +246,9 @@ object AutofillDatasets {
         // A login only ever fills where it matches, even when picked from "Search Qasa"
         // on an app it was never saved for: then the user chose it, which is the point.
         val secrets = indexStore.decryptSecrets(entry) ?: return null
-        val fields = screen.form.group(group)
+        // A saved login never fills a new-password field (design rule 6c): that one only
+        // takes "Use a strong password".
+        val fields = screen.form.group(group).filter { it.type != AutofillFieldType.NewPassword }
         val profile = if (group == AutofillGroup.Identity) {
             val entries = indexStore.read()
             AutofillIndexStore.IDENTITY_KINDS
