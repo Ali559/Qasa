@@ -50,6 +50,7 @@ enum QasaTokens {
 
     enum Space {
         static let screenPadding: CGFloat = 20
+        static let pageTop: CGFloat = 8
         static let headerHorizontal: CGFloat = 16
         static let fieldHorizontal: CGFloat = 14
         static let notesHorizontal: CGFloat = 10

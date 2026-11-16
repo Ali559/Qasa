@@ -19,7 +19,7 @@ struct GeneratorView: View {
                     PasswordGeneratorContent(model: model, compact: false)
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 24)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 24)
             }
         }

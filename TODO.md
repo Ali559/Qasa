@@ -192,7 +192,10 @@ picks one before anything is built.
 
 ### Phase 5: Less space under page headers
 
-- [ ] On the vault page there's a large gap between the title ("Your passwords") and the
+- [x] (2026-11-16, branch `phase-5-header-gap`: `space.pageTop` (8) under every page header
+      and the sign-in brand header, on iOS, Android and the desktop; was 16–28 per page.
+      Rule 4 in `design/README.md`. Sheets keep their own spacing; Home has no page header.)
+      On the vault page there's a large gap between the title ("Your passwords") and the
       search field. Move every page's content up so the gap isn't noticeable; one
       header-to-content value in `design/tokens.json` for all pages.
 

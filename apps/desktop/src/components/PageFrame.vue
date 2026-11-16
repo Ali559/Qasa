@@ -49,6 +49,6 @@ defineEmits<{ back: [] }>()
   flex-direction: column;
   width: 100%;
   margin-inline: auto;
-  padding: 16px var(--space-screen-padding) 40px;
+  padding: var(--space-page-top) var(--space-screen-padding) 40px;
 }
 </style>

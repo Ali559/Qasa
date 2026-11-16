@@ -89,8 +89,9 @@ struct PasswordHealthView: View {
                         }
                     }
                 }
-                .padding(Theme.screenPadding)
-                .padding(.bottom, 40)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, QasaTokens.Space.pageTop)
+                .padding(.bottom, Theme.screenPadding + 40)
             }
         }
         .background(Theme.background.ignoresSafeArea())

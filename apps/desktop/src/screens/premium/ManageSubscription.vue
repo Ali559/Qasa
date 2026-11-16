@@ -346,7 +346,7 @@ async function confirmCancel(reason: string) {
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
-  padding: var(--space-screen-padding) var(--space-screen-padding) 40px;
+  padding: var(--space-page-top) var(--space-screen-padding) 40px;
 }
 
 p {

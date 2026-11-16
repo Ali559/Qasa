@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.FilterChipButton
 import alibarznji.qasa.theme.MintFab
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.SectionLabel
 import alibarznji.qasa.theme.ThemedTextField
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -143,9 +145,9 @@ internal fun VaultListContent(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = QasaDimens.screenPadding),
+                contentPadding = PaddingValues(top = QasaTokens.Space.pageTop),
                 verticalArrangement = Arrangement.spacedBy(QasaDimens.gapMedium),
             ) {
-                item { Spacer(Modifier.height(QasaDimens.gap)) }
                 item {
                     ThemedTextField(
                         value = query,

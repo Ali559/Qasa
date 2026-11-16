@@ -51,8 +51,9 @@ struct CollectionsView: View {
                             }
                         }
                     }
-                    .padding(Theme.screenPadding)
-                    .padding(.bottom, 100)
+                    .padding(.horizontal, Theme.screenPadding)
+                    .padding(.top, QasaTokens.Space.pageTop)
+                    .padding(.bottom, Theme.screenPadding + 100)
                 }
             }
 

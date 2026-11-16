@@ -61,12 +61,12 @@ internal fun HealthOverview(
         },
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = QasaDimens.contentGap),
+            modifier = Modifier.fillMaxWidth().padding(bottom = QasaDimens.contentGap),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Until the first report lands the gauge sits at 0, then counts up once (iOS
             // computes synchronously on appear, so it never shows the placeholder 100).
-            HalfCircleGauge(score = report?.score ?: 0, modifier = Modifier.padding(top = QasaDimens.contentGap))
+            HalfCircleGauge(score = report?.score ?: 0)
             Spacer(Modifier.height(HEALTH_GAUGE_LABEL_GAP))
             if (report != null) {
                 Text(scoreLabel(report.score), color = c.textPrimary, style = qasaText.cardTitle)

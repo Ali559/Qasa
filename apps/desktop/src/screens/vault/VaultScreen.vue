@@ -230,7 +230,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px var(--space-screen-padding) 100px;
+  padding: var(--space-page-top) var(--space-screen-padding) 100px;
 }
 
 .search {

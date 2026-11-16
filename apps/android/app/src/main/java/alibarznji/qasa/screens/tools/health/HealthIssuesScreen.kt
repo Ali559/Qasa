@@ -8,6 +8,7 @@ import alibarznji.qasa.screens.vault.list.VaultListItemRow
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
@@ -73,7 +74,8 @@ internal fun HealthIssuesScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = QasaDimens.screenPadding, vertical = QasaDimens.drawerGap),
+                .padding(horizontal = QasaDimens.screenPadding)
+                .padding(top = QasaTokens.Space.pageTop, bottom = QasaDimens.drawerGap),
             horizontalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
         ) {
             HealthIssueTab.entries.forEach { tab ->
