@@ -166,7 +166,10 @@ picks one before anything is built.
 
 ### Phase 2: Bigger icons and a new add button (preview first)
 
-- [ ] Icons are too small overall, the add (+) button's most of all. Give the FAB a different,
+- [x] (2026-11-16, branch `phase-2-icons`: the owner picked option B with the regular plus in
+      `design/previews/icon-sizes.html`; rule 8 in `design/README.md`, `size.*Glyph` tokens,
+      the custom `add-plain` icon, on iOS, Android, the desktop and the extension popup.)
+      Icons are too small overall, the add (+) button's most of all. Give the FAB a different,
       larger glyph (a plain plus, not the small circled plus) and a fully circular background.
 
 ### Phase 3: Circular icon backgrounds (preview first)

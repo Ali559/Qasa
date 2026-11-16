@@ -103,6 +103,7 @@
     "laptop":            { "solar": "laptop",                 "sf": ["laptopcomputer"] },
     "desktop":           { "solar": "monitor",                "sf": ["desktopcomputer"] },
     "circle":            { "custom": "circle",                "sf": ["circle"] },
+    "add-plain":         { "custom": "add-plain",             "sf": [] },
 
     "chevron-back":      { "custom": "chevron-back",    "base": 17, "sf": ["chevron.backward"] },
     "chevron-forward":   { "custom": "chevron-forward", "base": 13, "sf": ["chevron.forward"] },

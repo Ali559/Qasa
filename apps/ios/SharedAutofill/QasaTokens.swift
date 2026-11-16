@@ -28,7 +28,7 @@ enum QasaTokens {
         static let buttonIconGlyph: CGFloat = 15
         static let rowMinHeight: CGFloat = 60
         static let iconBadge: CGFloat = 36
-        static let iconBadgeGlyph: CGFloat = 16
+        static let iconBadgeGlyph: CGFloat = 20
         static let rowChevronGlyph: CGFloat = 13
         static let headerHeight: CGFloat = 64
         static let sheetGrabberWidth: CGFloat = 36
@@ -37,6 +37,13 @@ enum QasaTokens {
         static let headerBackButton: CGFloat = 40
         static let headerBackGlyph: CGFloat = 17
         static let rowIconButton: CGFloat = 36
+        static let rowIconButtonGlyph: CGFloat = 20
+        static let itemTile: CGFloat = 48
+        static let itemTileGlyph: CGFloat = 24
+        static let homeTile: CGFloat = 40
+        static let homeTileGlyph: CGFloat = 22
+        static let fab: CGFloat = 56
+        static let fabGlyph: CGFloat = 26
         static let toastMinHeight: CGFloat = 44
         static let toastGlyph: CGFloat = 17
     }

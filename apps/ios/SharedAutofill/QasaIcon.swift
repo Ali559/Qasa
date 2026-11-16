@@ -111,6 +111,7 @@ enum QasaIcon: String, CaseIterable {
     case laptop = "qasa-laptop"
     case desktop = "qasa-desktop"
     case circle = "qasa-circle"
+    case addPlain = "qasa-add-plain"
     case chevronBack = "qasa-chevron-back"
     case chevronForward = "qasa-chevron-forward"
     case chevronDown = "qasa-chevron-down"

@@ -162,7 +162,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </div>
       </div>
       <div class="fab">
-        <Fab icon="add" :label="t('a11y.addItem')" @click="add" />
+        <Fab icon="add-plain" :label="t('a11y.addItem')" @click="add" />
       </div>
     </section>
 

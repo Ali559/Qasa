@@ -6,10 +6,10 @@ import alibarznji.qasa.screens.breach.BreachLockedCard
 import alibarznji.qasa.screens.vpn.VpnViewModel
 import alibarznji.qasa.screens.vpn.rememberVpnToggle
 import alibarznji.qasa.theme.QasaIcons
+import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.vpn.VpnPhase
 import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaPressable
 import alibarznji.qasa.theme.qasaColors
@@ -258,10 +258,10 @@ private fun HomeCard(onClick: () -> Unit, content: @Composable () -> Unit) {
 private fun IconTile(icon: ImageVector) {
     val c = qasaColors
     Box(
-        Modifier.size(QasaIconFrame.toggleDisc).background(c.cardMuted, RoundedCornerShape(QasaDimens.radiusSmall)),
+        Modifier.size(QasaTokens.Size.homeTile).background(c.cardMuted, RoundedCornerShape(QasaDimens.radiusSmall)),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = c.accent, modifier = Modifier.size(QasaIconSize.xl))
+        Icon(icon, null, tint = c.accent, modifier = Modifier.size(QasaTokens.Size.homeTileGlyph))
     }
 }
 

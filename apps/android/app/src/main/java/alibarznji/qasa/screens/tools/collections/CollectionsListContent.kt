@@ -8,6 +8,7 @@ import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaIcons
+import alibarznji.qasa.theme.QasaRowIconButton
 import alibarznji.qasa.theme.ScreenScaffold
 import alibarznji.qasa.theme.QasaTextInputSheet
 import alibarznji.qasa.theme.qasaColors
@@ -29,7 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -179,9 +179,11 @@ private fun CollectionCard(
                 style = qasaText.bodySmall,
             )
         }
-        IconButton(onClick = { menuOpen = true }) {
-            Icon(QasaIcons.MoreVertical, contentDescription = stringResource(R.string.a11y_moreactions), tint = c.textSecondary)
-        }
+        QasaRowIconButton(
+            icon = QasaIcons.MoreVertical,
+            contentDescription = stringResource(R.string.a11y_moreactions),
+            onClick = { menuOpen = true },
+        )
     }
     // iOS: the folder's ⋯ is the app's own action sheet, titled with the folder's name.
     if (menuOpen) {

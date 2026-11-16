@@ -41,7 +41,8 @@ const logo = computed(() => (props.variant === 'login' && !iconPath.value ? site
     }"
     aria-hidden="true"
   >
-    <QasaIcon :name="VARIANT_ICON[variant]" :size="size * 0.375" />
+    <!-- size.itemTileGlyph / size.itemTile: 24 of 48. -->
+    <QasaIcon :name="VARIANT_ICON[variant]" :size="size * 0.5" />
   </span>
 </template>
 

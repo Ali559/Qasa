@@ -237,27 +237,24 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier) {
 }
 
 /**
- * `MintFab` — `Components.swift:428`. 56x56, `cornerRadiusLarge`, `accent` fill,
- * `onAccent` glyph at 18 bold, 1pt `accent @ 50%` border, black-20% shadow at
- * radius 8 / y 4.
- *
- * Android used M3's `elevation(QasaDimens.contentGap)`, which tonal-tints instead of casting a black
- * shadow, and omitted the border entirely (§4.3).
+ * `MintFab` — `Components.swift` `MintFAB`. A `size.fab` (56) circle, `accent` fill,
+ * `onAccent` plain plus (`add-plain`) at `size.fabGlyph` (26), 1pt `accent @ 50%` border,
+ * black-20% shadow at radius 8 / y 4 (design/README.md, rule 8: Phase 2, 2026-11-16).
  */
 @Composable
 fun MintFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    icon: ImageVector = QasaIcons.Add,
+    icon: ImageVector = QasaIcons.AddPlain,
     contentDescription: String? = null,
 ) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadiusLarge)
+    val shape = CircleShape
     val interaction = remember { MutableInteractionSource() }
     val scale = rememberPressScale(interaction)
     Box(
         modifier = modifier
-            .size(QasaIconFrame.fab)
+            .size(QasaTokens.Size.fab)
             .scale(scale)
             .shadow(
                 elevation = QasaDimens.contentGap,
@@ -280,7 +277,7 @@ fun MintFab(
             icon,
             contentDescription = contentDescription,
             tint = c.onAccent,
-            modifier = Modifier.size(QasaIconSize.lg),
+            modifier = Modifier.size(QasaTokens.Size.fabGlyph),
         )
     }
 }

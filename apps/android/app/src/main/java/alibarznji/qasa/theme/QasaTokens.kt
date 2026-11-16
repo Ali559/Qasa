@@ -53,7 +53,7 @@ object QasaTokens {
         val buttonIconGlyph: Dp = 15.dp
         val rowMinHeight: Dp = 60.dp
         val iconBadge: Dp = 36.dp
-        val iconBadgeGlyph: Dp = 16.dp
+        val iconBadgeGlyph: Dp = 20.dp
         val rowChevronGlyph: Dp = 13.dp
         val headerHeight: Dp = 64.dp
         val sheetGrabberWidth: Dp = 36.dp
@@ -62,6 +62,13 @@ object QasaTokens {
         val headerBackButton: Dp = 40.dp
         val headerBackGlyph: Dp = 17.dp
         val rowIconButton: Dp = 36.dp
+        val rowIconButtonGlyph: Dp = 20.dp
+        val itemTile: Dp = 48.dp
+        val itemTileGlyph: Dp = 24.dp
+        val homeTile: Dp = 40.dp
+        val homeTileGlyph: Dp = 22.dp
+        val fab: Dp = 56.dp
+        val fabGlyph: Dp = 26.dp
         val toastMinHeight: Dp = 44.dp
         val toastGlyph: Dp = 17.dp
     }

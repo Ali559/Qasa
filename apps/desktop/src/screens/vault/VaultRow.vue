@@ -95,10 +95,10 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
       <span class="subtitle"><bdi>{{ subtitle }}</bdi></span>
     </span>
     <button v-if="row.hasPrimaryCopy" type="button" class="icon-button" :aria-label="t('a11y.copy')" :title="t('a11y.copy')" @click.stop="copyPrimary">
-      <QasaIcon name="copy" :size="17" />
+      <QasaIcon name="copy" :size="20" />
     </button>
     <button type="button" class="icon-button" :aria-label="t('a11y.moreActions')" :title="t('a11y.moreActions')" aria-haspopup="dialog" @click.stop="openMenu">
-      <QasaIcon name="more-vertical" :size="16" />
+      <QasaIcon name="more-vertical" :size="20" />
     </button>
     <ActionSheet v-model:open="showMenu" :title="row.displayName" :items="menuItems" />
     <ConfirmDialog

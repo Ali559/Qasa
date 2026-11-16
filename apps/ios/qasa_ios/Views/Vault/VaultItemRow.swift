@@ -22,7 +22,7 @@ struct VaultItemRow: View {
                 .scaledToFit()
                 .frame(width: 24, height: 24)
                 .foregroundColor(Theme.textPrimary)
-                .frame(width: 48, height: 48)
+                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(Theme.cardMuted)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityHidden(true)
@@ -31,15 +31,15 @@ struct VaultItemRow: View {
             Text(logo.letter)
                 .font(.qasa(18, weight: .bold))
                 .foregroundColor(.white)
-                .frame(width: 48, height: 48)
+                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(logo.color)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         } else {
             // A note or card shows the colour picked for it; until it is decrypted, the default.
             let itemColor = payload?.organizationColor
-            QasaIconImage((payload ?? fallbackPayload).icon, size: 18)
+            QasaIconImage((payload ?? fallbackPayload).icon, size: QasaTokens.Size.itemTileGlyph)
                 .foregroundColor(itemColor?.color ?? Theme.accent)
-                .frame(width: 48, height: 48)
+                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(itemColor?.tile ?? Theme.cardMuted)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
@@ -90,16 +90,16 @@ struct VaultItemRow: View {
                 Button {
                     copyPrimary()
                 } label: {
-                    QasaIconImage(.copy, size: 16)
+                    QasaIconImage(.copy, size: QasaTokens.Size.rowIconButtonGlyph)
                         .foregroundColor(Theme.textSecondary)
-                        .frame(width: 36, height: 36)
+                        .frame(width: QasaTokens.Size.rowIconButton, height: QasaTokens.Size.rowIconButton)
                 }
             }
 
             Button { showActions = true } label: {
-                QasaIconImage(.moreVertical, size: 16)
+                QasaIconImage(.moreVertical, size: QasaTokens.Size.rowIconButtonGlyph)
                     .foregroundColor(Theme.textSecondary)
-                    .frame(width: 36, height: 36)
+                    .frame(width: QasaTokens.Size.rowIconButton, height: QasaTokens.Size.rowIconButton)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

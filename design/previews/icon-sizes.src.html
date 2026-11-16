@@ -1,0 +1,181 @@
+<title>Qasa Icon Sizes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Phase 2 preview (2026-11-16): icon glyph sizes and the add button. Colours are design/tokens.json.
+   Built from icon-sizes.src.html by build_icon_sizes.py, which inlines assets/icons/svg. */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --stroke: #E6E1E1;
+  --accent: #722F99; --onAccent: #FFFFFF; --danger: #C8323C; --success: #2F9E6C; --blue: #2F67D0;
+  --text: #2A1F33; --text2: #6E6475; --text3: #A39DA3; --frame: #2A1F33;
+  --redTile: #F9E1E3; --red: #C8323C; --mintTile: #DDF2EA; --mint: #1E8F6C;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97; --blue: #80ABF6;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --redTile: #3E2427; --red: #FF8A8A; --mintTile: #1F3A31; --mint: #4FD1A5; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97; --blue: #80ABF6;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --redTile: #3E2427; --red: #FF8A8A; --mintTile: #1F3A31; --mint: #4FD1A5; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; margin: 0;
+  padding: 28px 16px 48px; }
+.page { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+header p { margin: 4px 0 0; color: var(--text2); max-width: 72ch; font-size: 15px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--text2);
+  padding: 5px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.opt h2 { font-size: 17px; margin: 0; }
+.opt .sub { color: var(--text2); font-size: 13px; margin: 0 0 10px; min-height: 60px; }
+.phone { background: var(--bg); border: 8px solid var(--frame); border-radius: 36px; overflow: hidden;
+  position: relative; height: 640px; max-width: 340px; margin: 0 auto; display: flex; flex-direction: column; }
+.screen { flex: 1; padding: 14px 16px 0; overflow: hidden; }
+.title { font-size: 22px; font-weight: 700; margin: 6px 0 12px; }
+.search { height: 44px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke);
+  display: flex; align-items: center; gap: 10px; padding: 0 14px; color: var(--text3); font-size: 14px; }
+.chips { display: flex; gap: 8px; margin: 10px 0 12px; }
+.chip { padding: 4px 14px; border-radius: 999px; border: 1px solid var(--stroke); font-size: 13px; color: var(--text2); }
+.chip.on { background: var(--accent); color: var(--onAccent); border-color: var(--accent); font-weight: 600; }
+.row { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--stroke);
+  border-radius: 20px; padding: 14px; margin-bottom: 10px; }
+.tile { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; flex: none;
+  background: var(--muted); color: var(--accent); font-weight: 700; font-size: 18px; }
+.tile.red { background: var(--redTile); color: var(--red); }
+.tile.mint { background: var(--mintTile); color: var(--mint); }
+.tile.letter { background: #2F9E6C; color: #fff; }
+.row .txt { flex: 1; min-width: 0; }
+.row .name, .row .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .name { font-weight: 600; font-size: 16px; }
+.row .meta { color: var(--text2); font-size: 14px; unicode-bidi: plaintext; text-align: start; }
+.rbtn { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text2); flex: none; }
+.fab { position: absolute; bottom: 82px; inset-inline-end: 18px; display: grid; place-items: center;
+  background: var(--accent); color: var(--onAccent); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.tabs { height: 66px; border-top: 1px solid var(--stroke); background: var(--card); display: flex; }
+.tabs div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text3); gap: 2px; }
+.tabs .on { color: var(--accent); font-weight: 600; }
+
+.card { background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; padding: 6px 16px; max-width: 340px; margin: 14px auto 0; }
+.srow { display: flex; align-items: center; gap: 14px; min-height: 60px; font-size: 15px; }
+.srow + .srow { border-top: 1px solid var(--stroke); margin-inline-start: 50px; padding-inline-start: 0; }
+.srow + .srow .badge { margin-inline-start: -50px; }
+.badge { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); flex: none; }
+.homes { display: flex; gap: 10px; padding: 12px 0; justify-content: space-between; align-items: center; }
+.home { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--muted); color: var(--accent); }
+.sizes { font-size: 12px; color: var(--text2); text-align: center; margin-top: 10px; font-variant-numeric: tabular-nums; }
+
+.glyphs { display: flex; flex-wrap: wrap; gap: 26px; align-items: flex-end; }
+.glyphs figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); text-align: center; max-width: 120px; }
+.glyphs .fab { position: static; }
+h3 { margin: 6px 0 2px; font-size: 17px; }
+.note { color: var(--text2); font-size: 14px; max-width: 72ch; margin: 0; }
+svg.i { display: block; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Phase 2: bigger icons and a new add button</h1>
+    <p>Three sizes side by side on the vault list, settings rows and home tiles. The tiles and boxes keep their sizes; only the glyph inside grows. The add button becomes a circle with a plain plus. Making every tile round is Phase 3, so the tiles stay rounded squares here.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="theme"><button data-v="light">Light</button><button data-v="dark" aria-pressed="true">Dark</button></div>
+    <div class="seg" id="lang"><button data-v="en">English</button><button data-v="ckb" aria-pressed="true">کوردی</button></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <section>
+    <h3>The add button's glyph</h3>
+    <p class="note">Today it's the small circled plus, so the plus inside is about 8 pt. All three options below are a plain plus on a 56 pt circle; they differ only in line weight. Solar has no plain plus, so it would be a custom icon (<code>add</code>) drawn like Solar's.</p>
+    <div class="glyphs" id="glyphs" style="margin-top:14px"></div>
+  </section>
+</div>
+
+<script>
+const ICONS = /*ICONS*/;
+const PLUS = (w) => `<svg viewBox="0 0 24 24"><path d="M12 5V19M5 12H19" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round"/></svg>`;
+const icon = (name, size) => {
+  const src = name.startsWith('<') ? name : ICONS[name];
+  return src.replace('<svg ', `<svg class="i" width="${size}" height="${size}" `);
+};
+
+const OPTIONS = [
+  { id: 'A', name: 'A · Today', sub: 'As shipped: glyphs fill 37–45% of their box; the add button is a rounded square with a circled plus.',
+    tile: 18, badge: 16, home: 18, rbtn: 16, fab: { size: 56, radius: 24, glyph: 'add', g: 18 } },
+  { id: 'B', name: 'B · Larger', sub: 'Glyphs about half their box (tile 24, badge 20, home 22, row buttons 20). Add button: a 56 circle, plain plus 24.',
+    tile: 24, badge: 20, home: 22, rbtn: 20, fab: { size: 56, radius: 28, glyph: PLUS(2), g: 26 } },
+  { id: 'C', name: 'C · Largest', sub: 'Glyphs near 60% (tile 28, badge 22, home 24, row buttons 22). Add button: a 60 circle, plain plus 28.',
+    tile: 28, badge: 22, home: 24, rbtn: 22, fab: { size: 60, radius: 30, glyph: PLUS(2.25), g: 30 } },
+];
+
+const T = {
+  en: { title: 'Your passwords', search: 'Search your passwords', all: 'All', logins: 'Logins', notes: 'Notes',
+        card: 'Card', home: 'Home', pw: 'Passwords', alerts: 'Alerts', you: 'You',
+        s1: 'Password generator', s2: 'Password health', s3: 'Auto-lock' },
+  ckb: { title: 'وشە نهێنییەکانت', search: 'لە وشە نهێنییەکانت بگەڕێ', all: 'هەموو', logins: 'چوونەژوورەوەکان', notes: 'تێبینییەکان',
+        card: 'کارت', home: 'سەرەکی', pw: 'وشە نهێنییەکان', alerts: 'ئاگادارییەکان', you: 'تۆ',
+        s1: 'دروستکەری وشەی نهێنی', s2: 'تەندروستی وشەی نهێنی', s3: 'قوفڵی خۆکار' },
+};
+
+function render(lang) {
+  const t = T[lang];
+  const dir = lang === 'ckb' ? 'rtl' : 'ltr';
+  document.getElementById('grid').innerHTML = OPTIONS.map(o => `
+    <div class="opt">
+      <h2>${o.name}</h2><p class="sub">${o.sub}</p>
+      <div class="phone" dir="${dir}" lang="${lang}"><div class="screen">
+        <div class="title">${t.title}</div>
+        <div class="search">${icon('search', 20)}<span>${t.search}</span></div>
+        <div class="chips"><span class="chip on">${t.all}</span><span class="chip">${t.logins}</span><span class="chip">${t.notes}</span></div>
+        <div class="row"><div class="tile red">${icon('card', o.tile)}</div><div class="txt"><div class="name">dbbd</div><div class="meta">${t.card}</div></div><div class="rbtn">${icon('more-vertical', o.rbtn)}</div></div>
+        <div class="row"><div class="tile letter">F</div><div class="txt"><div class="name">fbd</div><div class="meta">slaw@gmail.com</div></div><div class="rbtn">${icon('copy', o.rbtn)}</div><div class="rbtn">${icon('more-vertical', o.rbtn)}</div></div>
+        <div class="row"><div class="tile mint">${icon('note', o.tile)}</div><div class="txt"><div class="name">ffn</div><div class="meta">xbxbd</div></div><div class="rbtn">${icon('copy', o.rbtn)}</div><div class="rbtn">${icon('more-vertical', o.rbtn)}</div></div>
+        <div class="row"><div class="tile">${icon('login', o.tile)}</div><div class="txt"><div class="name">rhr</div><div class="meta">nizaamomer@gmail.com</div></div><div class="rbtn">${icon('copy', o.rbtn)}</div><div class="rbtn">${icon('more-vertical', o.rbtn)}</div></div>
+      </div>
+      <div class="fab" style="width:${o.fab.size}px;height:${o.fab.size}px;border-radius:${o.fab.radius}px">${icon(o.fab.glyph, o.fab.g)}</div>
+      <div class="tabs">
+        <div>${icon('you', 24)}${t.you}</div><div>${icon('alerts', 24)}${t.alerts}</div>
+        <div class="on">${icon('passwords.fill', 24)}${t.pw}</div><div>${icon('home', 24)}${t.home}</div>
+      </div></div>
+      <div class="card" dir="${dir}" lang="${lang}">
+        <div class="srow"><div class="badge">${icon('generate', o.badge)}</div>${t.s1}</div>
+        <div class="srow"><div class="badge">${icon('health', o.badge)}</div>${t.s2}</div>
+        <div class="srow"><div class="badge">${icon('auto-lock', o.badge)}</div>${t.s3}</div>
+        <div class="homes">${['shield', 'generate', 'vpn', 'backup', 'email-monitor'].map(n => `<div class="home">${icon(n, o.home)}</div>`).join('')}</div>
+      </div>
+      <div class="sizes">tile 48 → ${o.tile} · badge 36 → ${o.badge} · home 40 → ${o.home} · row button 36 → ${o.rbtn}</div>
+    </div>`).join('');
+  document.getElementById('glyphs').innerHTML = [
+    ['Today', 'add', 18, 24],
+    ['Thin plus (1.5)', PLUS(1.5), 26, 28],
+    ['Regular plus (2)', PLUS(2), 26, 28],
+    ['Bold plus (2.5)', PLUS(2.5), 26, 28],
+  ].map(([label, g, s, r]) => `<figure><div class="fab" style="width:56px;height:56px;border-radius:${r}px">${icon(g, s)}</div><figcaption>${label}</figcaption></figure>`).join('');
+}
+
+function seg(id, cb) {
+  const el = document.getElementById(id);
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    cb(b.dataset.v);
+  });
+}
+seg('theme', v => document.documentElement.dataset.theme = v);
+seg('lang', render);
+document.documentElement.dataset.theme = 'dark';
+render('ckb');
+</script>
