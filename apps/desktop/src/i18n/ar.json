@@ -691,6 +691,8 @@
   "settings.saving": "جارٍ الحفظ…",
   "settings.security": "الأمان",
   "settings.showPairingCode": "إظهار رمز الاقتران",
+  "settings.siteIcons": "أيقونات المواقع",
+  "settings.siteIconsHint": "تعرض أيقونة كل موقع. يطلبها Qasa من ذلك الموقع فقط، ولا يطلبها من أي جهة أخرى.",
   "settings.subscription": "الاشتراك",
   "settings.syncNetwork": "المزامنة على هذه الشبكة",
   "settings.theme": "السمة",

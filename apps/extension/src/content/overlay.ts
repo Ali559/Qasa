@@ -3,8 +3,7 @@
 // read or script them; guard.ts checks the host was not restyled or covered before a menu
 // click is acted on.
 import { QASA_MARK_SHAPES, QASA_MARK_TRANSFORM, QASA_MARK_VIEWBOX } from '@/brand/qasaMark'
-import { siteLogo } from '@/vault/present'
-import { siteIconPath } from '@/vault/siteIcon'
+import { siteLetter } from '@/vault/present'
 import type { LoginMatch } from '@ext/shared/messages'
 import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
@@ -91,12 +90,12 @@ const CSS = `
 .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tile {
   width: var(--size-icon-badge); height: var(--size-icon-badge); flex-shrink: 0; border-radius: 50%;
-  display: grid; place-items: center; color: #fff; font-weight: 700; font-size: calc(var(--size-icon-badge) * 0.375);
+  display: grid; place-items: center; box-sizing: border-box; background: var(--card-muted); color: var(--accent);
+  font-weight: 700; font-size: calc(var(--size-icon-badge) * 18 / 48); line-height: 1;
 }
-.tile.site { background: var(--card-muted); color: var(--text-primary); }
-/* A solid letter circle reads larger than a pale one: 44/48 of the slot, centred (size.itemLetterTile). */
-.tile:not(.site):not(.brand) { width: calc(var(--size-icon-badge) * 44 / 48); height: calc(var(--size-icon-badge) * 44 / 48); margin: calc(var(--size-icon-badge) * 2 / 48); }
-.tile.site svg { width: var(--size-icon-badge-glyph); height: var(--size-icon-badge-glyph); }
+/* docs/site-icons.md: the site's icon (28 of 48) on siteIconTile with a 1px stroke ring. */
+.tile.site { background: var(--site-icon-tile); border: var(--size-stroke) solid var(--stroke); }
+.tile.site canvas { display: block; width: calc(var(--size-icon-badge) * 28 / 48); height: calc(var(--size-icon-badge) * 28 / 48); }
 .text { display: flex; flex-direction: column; gap: var(--space-row-text-gap); min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title { font-size: var(--type-row-title-size); font-weight: var(--type-row-title-weight); }
@@ -119,18 +118,35 @@ const CSS = `
 .menu.pending { visibility: hidden; }
 `
 
-/** A filled 24×24 icon from one path. Built with DOM calls (no innerHTML), so pages with
- *  Trusted Types don't interfere. */
-function glyph(doc: Document, d: string): SVGSVGElement {
-  const ns = 'http://www.w3.org/2000/svg'
-  const svg = doc.createElementNS(ns, 'svg')
-  svg.setAttribute('viewBox', '0 0 24 24')
-  svg.setAttribute('fill', 'currentColor')
-  svg.setAttribute('aria-hidden', 'true')
-  const path = doc.createElementNS(ns, 'path')
-  path.setAttribute('d', d)
-  svg.append(path)
-  return svg
+/** The side of the icons the desktop sends (docs/site-icons.md step 6). */
+const SITE_ICON_PX = 64
+
+/**
+ * Draws a login's cached icon (PNG, base64) into a `<canvas>`. Decoded with
+ * `createImageBitmap` rather than an `<img src="data:…">`, which a page's CSP `img-src`
+ * can block. False on any error: the tile keeps its letter.
+ */
+async function siteIconCanvas(doc: Document, base64: string): Promise<HTMLCanvasElement | null> {
+  try {
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+    try {
+      const canvas = doc.createElement('canvas')
+      canvas.width = SITE_ICON_PX
+      canvas.height = SITE_ICON_PX
+      canvas.setAttribute('aria-hidden', 'true')
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return null
+      ctx.drawImage(bitmap, 0, 0, SITE_ICON_PX, SITE_ICON_PX)
+      return canvas
+    } finally {
+      bitmap.close()
+    }
+  } catch {
+    return null
+  }
 }
 
 /** The Qasa mark (Qaf Keyhole), as in the desktop's BrandHeader. DOM calls, no innerHTML. */
@@ -363,14 +379,15 @@ export class Overlay {
         row.setAttribute('role', 'menuitem')
         const tile = this.doc.createElement('span')
         tile.className = 'tile'
-        const iconPath = siteIconPath(item.website)
-        if (iconPath) {
-          tile.classList.add('site')
-          tile.append(glyph(this.doc, iconPath))
-        } else {
-          const logo = siteLogo(item.title)
-          tile.style.background = logo.color
-          tile.textContent = logo.letter
+        // The calm letter until the site's icon is decoded (and for good if it can't be).
+        tile.textContent = siteLetter(item.title)
+        if (item.icon) {
+          void siteIconCanvas(this.doc, item.icon).then((canvas) => {
+            if (!canvas) return
+            tile.textContent = ''
+            tile.classList.add('site')
+            tile.append(canvas)
+          })
         }
         const text = this.doc.createElement('span')
         text.className = 'text'

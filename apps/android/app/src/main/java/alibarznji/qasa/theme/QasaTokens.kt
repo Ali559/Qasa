@@ -64,7 +64,8 @@ object QasaTokens {
         val rowIconButtonGlyph: Dp = 20.dp
         val itemTile: Dp = 48.dp
         val itemTileGlyph: Dp = 24.dp
-        val itemLetterTile: Dp = 44.dp
+        val siteIconGlyph: Dp = 28.dp
+        val heroSiteIconGlyph: Dp = 52.dp
         val homeTile: Dp = 40.dp
         val homeTileGlyph: Dp = 22.dp
         val fab: Dp = 56.dp
@@ -181,6 +182,7 @@ object QasaTokens {
         val cardBackground: Color = Color(0xFFFFFFFF)
         val cardBackgroundLight: Color = Color(0xFFFFF3E3)
         val cardMuted: Color = Color(0xFFF3EAF7)
+        val siteIconTile: Color = Color(0xFFFFFFFF)
         val stroke: Color = Color(0xFFE6E1E1)
         val strokeChrome: Color = Color(0xFFDCD7D7)
         val accent: Color = Color(0xFF722F99)
@@ -223,6 +225,7 @@ object QasaTokens {
         val cardBackground: Color = Color(0xFF26272A)
         val cardBackgroundLight: Color = Color(0xFF2C2D30)
         val cardMuted: Color = Color(0xFF323337)
+        val siteIconTile: Color = Color(0xFFF2F1F3)
         val stroke: Color = Color(0xFF38393D)
         val strokeChrome: Color = Color(0xFF434448)
         val accent: Color = Color(0xFFB67FDB)

@@ -24,6 +24,7 @@ import {
   NOTE_COLOR_TILE,
   NOTE_COLOR_VALUE,
   organizationColor,
+  siteLetter,
   vaultDates,
   type DetailField,
 } from '@/vault/present'
@@ -31,7 +32,7 @@ import { ProtectedItemGate } from '@/vault/protectedItemGate'
 import { removeItem, session } from '@/vault/session'
 import type { VaultPayload } from '@/vault/types'
 import { VARIANT_ICON } from '@/icons'
-import { siteIconPath } from '@/vault/siteIcon'
+import { iconHost, siteIconFor } from '@/vault/siteIcon'
 import ProtectedUnlockSheet from './ProtectedUnlockSheet.vue'
 import TotpCodeRow from './TotpCodeRow.vue'
 
@@ -163,8 +164,10 @@ async function remove() {
 }
 
 const COLOR_KEY = (c: string) => `color.${c}`
-/** The hero's bundled site icon (logins), else the type symbol (iOS `heroGlyph`). */
-const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIconPath(payload.value.fields.website) : null))
+/** A login's hero (docs/site-icons.md): its site icon, else the calm letter. Other items
+ *  keep their type symbol (iOS `heroGlyph`). */
+const heroSiteIcon = computed(() => (payload.value?.variant === 'login' ? siteIconFor(iconHost(payload.value.fields.website)) : null))
+const heroLetter = computed(() => (payload.value?.variant === 'login' ? siteLetter(row.value?.displayName ?? payload.value.fields.itemName) : null))
 </script>
 
 <template>
@@ -188,9 +191,13 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
     <div v-else-if="payload && showsItem" class="scroll">
       <div class="column">
         <div class="hero">
-          <span class="hero-icon" :class="{ tinted: !!color }" :style="color ? { background: NOTE_COLOR_TILE[color], color: NOTE_COLOR_VALUE[color] } : undefined" aria-hidden="true">
-            <svg v-if="heroSitePath" viewBox="0 0 24 24" width="36" height="36" fill="currentColor" focusable="false"><path :d="heroSitePath" /></svg>
-            <QasaIcon v-else :name="VARIANT_ICON[payload.variant]" :size="36" />
+          <span v-if="heroSiteIcon" class="hero-icon site" aria-hidden="true">
+            <!-- size.heroSiteIconGlyph: 52. -->
+            <img :src="heroSiteIcon" width="52" height="52" alt="" draggable="false" />
+          </span>
+          <span v-else-if="heroLetter" class="hero-icon letter" aria-hidden="true">{{ heroLetter }}</span>
+          <span v-else class="hero-icon" :class="{ tinted: !!color }" :style="color ? { background: NOTE_COLOR_TILE[color], color: NOTE_COLOR_VALUE[color] } : undefined" aria-hidden="true">
+            <QasaIcon :name="VARIANT_ICON[payload.variant]" :size="36" />
           </span>
           <h1 class="name">{{ row?.displayName ?? t('vault.untitled') }}</h1>
         </div>
@@ -380,6 +387,28 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
 
 .hero-icon.tinted {
   border-color: transparent;
+}
+
+/* docs/site-icons.md: the site's icon at size.heroSiteIconGlyph on siteIconTile, 1px stroke ring. */
+.hero-icon.site {
+  border-color: var(--stroke);
+  background: var(--site-icon-tile);
+}
+
+.hero-icon.site img {
+  display: block;
+  width: var(--size-hero-site-icon-glyph);
+  height: var(--size-hero-site-icon-glyph);
+}
+
+/* The calm letter: 36 bold, accent on cardMuted. */
+.hero-icon.letter {
+  border-color: transparent;
+  background: var(--card-muted);
+  color: var(--accent);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .name {

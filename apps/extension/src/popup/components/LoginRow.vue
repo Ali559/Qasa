@@ -1,10 +1,12 @@
 <script setup lang="ts">
-// A login row like the desktop's `VaultRow` (iOS `VaultItemRow`): site icon or letter tile, title and
+// A login row like the desktop's `VaultRow` (iOS `VaultItemRow`): the site icon the desktop
+// sent (docs/site-icons.md) or the letter tile, title and
 // username, then the copy actions. The desktop does the copying and clears the clipboard;
 // the popup never holds the secret.
 import QasaIcon from '@/components/QasaIcon.vue'
 import { useT } from '@/prefs'
 import ItemTile from '@/screens/vault/ItemTile.vue'
+import { pngDataUrl } from '@/vault/siteIcon'
 import type { CopyField, LoginMatch } from '@ext/shared/messages'
 
 defineProps<{ item: LoginMatch; canFill: boolean }>()
@@ -14,7 +16,7 @@ const t = useT()
 
 <template>
   <div class="row" data-testid="login-row">
-    <ItemTile variant="login" :name="item.title" :website="item.website" :size="48" />
+    <ItemTile variant="login" :name="item.title" :website="item.website" :icon="pngDataUrl(item.icon)" :size="48" />
     <span class="text">
       <span class="name" dir="auto">{{ item.title }}</span>
       <span class="subtitle" dir="auto">{{ item.username }}</span>

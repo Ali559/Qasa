@@ -1,6 +1,7 @@
 package alibarznji.qasa.vault
 
 import alibarznji.qasa.credentials.AutofillIndexStore
+import alibarznji.qasa.siteicons.SiteIconService
 import alibarznji.qasa.vault.crypto.VaultCrypto
 import alibarznji.qasa.vault.crypto.VaultCryptoException
 import alibarznji.qasa.vault.crypto.VaultSearchIndex
@@ -53,6 +54,7 @@ class VaultRepository @Inject constructor(
     private val session: VaultSession,
     private val autofillIndex: AutofillIndexStore,
     private val secureStore: VaultSecureStore,
+    private val siteIcons: SiteIconService,
 ) {
     /**
      * Resolved per call: the store may fail to open, and the UI shows
@@ -80,8 +82,13 @@ class VaultRepository @Inject constructor(
      * normalized, then validated: any remaining issue throws [VaultValidationException]
      * and nothing is written. See [SaveOrigin] for the other origins.
      */
-    suspend fun save(id: String?, payload: VaultPayload, origin: SaveOrigin = SaveOrigin.User): String =
-        write(id, payload, origin).id
+    suspend fun save(id: String?, payload: VaultPayload, origin: SaveOrigin = SaveOrigin.User): String {
+        val written = write(id, payload, origin)
+        // The editor and the autofill save review both land here: a login saved with a
+        // website gets its icon now unless a fresh one is cached (docs/site-icons.md "When").
+        if (payload is VaultPayload.Login) siteIcons.onLoginSaved(payload.website)
+        return written.id
+    }
 
     /**
      * CSV import: stored normalized even when fields still break a rule (an import never
@@ -274,6 +281,8 @@ class VaultRepository @Inject constructor(
             for ((id, nameEnc) in names) dao.setCollectionNameEnc(id, nameEnc)
         }
         rebuildAutofillIndex()
+        // The icon cache was sealed with the old key: start it again under the new one.
+        siteIcons.clearAll()
     }
 
     suspend fun clearAll() {
@@ -281,6 +290,7 @@ class VaultRepository @Inject constructor(
         dao.clearTokens()
         dao.clearCollections()
         autofillIndex.clear()
+        siteIcons.clearAll()
     }
 
     /**

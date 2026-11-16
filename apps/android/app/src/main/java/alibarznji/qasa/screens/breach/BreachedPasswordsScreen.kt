@@ -17,7 +17,7 @@ import alibarznji.qasa.theme.SecondaryButton
 import alibarznji.qasa.theme.VaultItemRow
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
-import alibarznji.qasa.theme.siteLogoFor
+import alibarznji.qasa.theme.siteLetterFor
 import alibarznji.qasa.vault.VaultPayload
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -154,7 +154,7 @@ private fun BreachedList(report: PasswordHealthReport, onOpen: (String) -> Unit)
                 title = row.displayName,
                 subtitle = stringResource(R.string.breached_seen_count, format.format(report.breachCounts[row.id] ?: 0)),
                 icon = QasaIcons.Login,
-                logo = siteLogoFor(row.displayName),
+                letter = siteLetterFor(row.displayName),
                 onClick = { onOpen(row.id) },
             )
         }

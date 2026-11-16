@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 
 /**
  * Security card rows (`SettingsView.swift:35-78`): Change Master Password, Biometric Unlock,
- * Password AutoFill, Auto-lock "N min".
+ * Password AutoFill, Website icons, Auto-lock "N min".
  */
 @Composable
 internal fun SecurityRows(
@@ -89,6 +89,16 @@ internal fun SecurityRows(
         subtitle = stringResource(R.string.settings_autofillconfirmsubtitle),
         checked = confirmEveryFill,
         onCheckedChange = vm.prefs::setAutofillConfirmEveryFill,
+    )
+    RowDivider()
+    // docs/site-icons.md "Setting": on by default; off asks nothing and deletes the cache.
+    val siteIcons by vm.prefs.siteIconsEnabled.collectAsState()
+    ToggleRow(
+        icon = QasaIcons.Website,
+        title = stringResource(R.string.settings_siteicons),
+        subtitle = stringResource(R.string.settings_siteiconshint),
+        checked = siteIcons,
+        onCheckedChange = vm.prefs::setSiteIconsEnabled,
     )
     RowDivider()
     NavChevronRow(

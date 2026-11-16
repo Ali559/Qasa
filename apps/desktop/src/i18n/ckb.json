@@ -691,6 +691,8 @@
   "settings.saving": "پاشەکەوتکردن…",
   "settings.security": "ئاسایش",
   "settings.showPairingCode": "پیشاندانی کۆدی جووتکردن",
+  "settings.siteIcons": "ئایکۆنی ماڵپەڕەکان",
+  "settings.siteIconsHint": "ئایکۆنی هەر ماڵپەڕێک پیشان دەدات. Qasa تەنها لەو ماڵپەڕە داوای دەکات، هەرگیز لە کەسێکی تر نا.",
   "settings.subscription": "بەشداری",
   "settings.syncNetwork": "هاوکاتکردن لەسەر ئەم تۆڕە",
   "settings.theme": "ڕووکار",

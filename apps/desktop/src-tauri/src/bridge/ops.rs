@@ -110,14 +110,16 @@ fn logins(vault: &Vault) -> Result<Vec<(String, LoginFields)>, OpError> {
         .collect())
 }
 
-fn row(id: &str, f: &LoginFields) -> Value {
+fn row(vault: &Vault, id: &str, f: &LoginFields) -> Value {
     json!({
         "id": id,
         "title": title_of(f),
         "username": user_of(f),
         "hasTotp": totp_of(f).is_some(),
-        // The extension picks the row's bundled site icon from it (`siteIcon.ts`).
         "website": f.website,
+        // The site's cached icon (64 × 64 PNG, base64) or null: the extension never fetches
+        // one itself (docs/site-icons.md "Extension"); without it the row shows the letter.
+        "icon": crate::site_icons::host_of(&f.website).and_then(|h| vault.site_icon(&h)),
     })
 }
 
@@ -152,7 +154,7 @@ pub fn matches(vault: &Vault, args: &Value) -> OpResult {
         .filter(|(score, _, _)| *score >= FILL_THRESHOLD)
         .collect();
     found.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| title_of(&a.2).to_lowercase().cmp(&title_of(&b.2).to_lowercase())));
-    Ok(json!({ "items": found.iter().map(|(_, id, f)| row(id, f)).collect::<Vec<_>>() }))
+    Ok(json!({ "items": found.iter().map(|(_, id, f)| row(vault, id, f)).collect::<Vec<_>>() }))
 }
 
 pub fn fill(vault: &mut Vault, args: &Value) -> OpResult {
@@ -206,7 +208,7 @@ pub fn search(vault: &Vault, args: &Value) -> OpResult {
         })
         .collect();
     found.sort_by_key(|(_, f)| title_of(f).to_lowercase());
-    let items: Vec<Value> = found.iter().take(SEARCH_LIMIT).map(|(id, f)| row(id, f)).collect();
+    let items: Vec<Value> = found.iter().take(SEARCH_LIMIT).map(|(id, f)| row(vault, id, f)).collect();
     Ok(json!({ "items": items }))
 }
 

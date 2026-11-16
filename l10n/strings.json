@@ -4322,5 +4322,15 @@
     "en": "Your name",
     "ar": "اسمك",
     "ckb": "ناوەکەت"
+  },
+  "settings.siteIcons": {
+    "en": "Website icons",
+    "ar": "أيقونات المواقع",
+    "ckb": "ئایکۆنی ماڵپەڕەکان"
+  },
+  "settings.siteIconsHint": {
+    "en": "Shows each site's own icon. Qasa asks only that site, never anyone else.",
+    "ar": "تعرض أيقونة كل موقع. يطلبها Qasa من ذلك الموقع فقط، ولا يطلبها من أي جهة أخرى.",
+    "ckb": "ئایکۆنی هەر ماڵپەڕێک پیشان دەدات. Qasa تەنها لەو ماڵپەڕە داوای دەکات، هەرگیز لە کەسێکی تر نا."
   }
 }

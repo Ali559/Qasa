@@ -179,31 +179,23 @@ struct VaultItemDetailView: View {
         }
     }
 
-    /// The subtype symbol, or the login's bundled site icon (`SiteIcon`) when it has one.
-    @ViewBuilder
-    private var heroGlyph: some View {
-        if case .login(let login) = payload, let asset = SiteIcon.assetName(forWebsite: login.website) {
-            Image(asset)
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 36, height: 36)
-                .accessibilityHidden(true)
-        } else {
-            QasaIconImage(payload.icon, size: 36)
-        }
-    }
-
+    /// A login shows its site's own icon, or its calm letter (`LoginSiteTile`, hero size).
     /// A note or card's hero takes its colour: the glyph in the colour on its tile fill.
+    @ViewBuilder
     private var heroIcon: some View {
-        let itemColor = payload.organizationColor
-        return heroGlyph
-            .foregroundColor(itemColor?.color ?? Theme.textPrimary)
-            .frame(width: 88, height: 88)
-            .background(itemColor?.tile ?? Theme.chrome)
-            .clipShape(Circle())
-            .overlay(Circle().stroke(itemColor == nil ? Theme.strokeChrome : Color.clear, lineWidth: 1))
-            .padding(.top, 12)
+        if case .login(let login) = payload {
+            LoginSiteTile(name: row?.displayName ?? payload.displayName, website: login.website, hero: true)
+                .padding(.top, 12)
+        } else {
+            let itemColor = payload.organizationColor
+            QasaIconImage(payload.icon, size: 36)
+                .foregroundColor(itemColor?.color ?? Theme.textPrimary)
+                .frame(width: 88, height: 88)
+                .background(itemColor?.tile ?? Theme.chrome)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(itemColor == nil ? Theme.strokeChrome : Color.clear, lineWidth: 1))
+                .padding(.top, 12)
+        }
     }
 
     private var detailsSection: some View {

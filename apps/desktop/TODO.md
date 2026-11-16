@@ -56,13 +56,11 @@ Steps that need the account owner. The details for each are in
 
 ## Also open
 
-- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
-      (Simple Icons, `assets/site-icons`, generated into `src/vault/siteIconData.ts`), matched
-      by registrable domain (`siteIcon.ts`) on `VaultRow`, the detail hero, the extension
-      popup's `LoginRow` and the in-page menu (the bridge now sends each match's `website`);
-      other sites keep the letter tile, nothing is fetched. Not yet looked at in the running
-      app or a browser: check light and dark, and an older desktop app (no `website`) still
-      shows letters.
+- [x] **Site icons on login items.** Replaced 2026-11-16 (TODO Phase 7, `docs/site-icons.md`):
+      the bundled marks are gone; the Rust side asks only the login's own site for its icon
+      and keeps an encrypted cache (`src-tauri/src/site_icons/`); the UI, the extension popup
+      and the in-page menu show it, else the calm letter. Not yet looked at in the running
+      app: check a real fetch, light and dark, and **Website icons** off.
 - [ ] **Review the draft terms of use** before release: `apps/landing/src/terms.ts` (en/ar/ckb),
       shown at qasa-app.com/terms and opened from the apps' Terms row. Needs the owner's legal
       review, and native review of the Arabic and Sorani text.

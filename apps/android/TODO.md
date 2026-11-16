@@ -10,11 +10,10 @@
       module on first use; until then it falls back to manual entry. Check that on a device.
 - [x] **Delete account in the app** (2026-11-09): Settings > Data & Account; not yet tried
       on a device against a real server.
-- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
-      (Simple Icons, `assets/site-icons`, about 55 KB of path data in `theme/SiteIconData.kt`),
-      matched by the login website's registrable domain (`SiteIcons.kt`), on vault rows and
-      the detail hero; other sites keep the letter tile, nothing is fetched. Not yet seen on
-      a phone: check the icons in light and dark, and that rows don't flicker as they load.
+- [x] **Site icons on login items.** Replaced 2026-11-16 (TODO Phase 7, `docs/site-icons.md`):
+      the bundled marks are gone; a login shows its site's own favicon, asked only from that
+      site, or the installed app's icon for app logins, cached encrypted per device
+      (`siteicons/`), else the calm letter. Check on a device with **Website icons** on and off.
 - [ ] **Try the new flows on a phone (2026-11-10):** fingerprint unlock after an app restart
       (fixed key reuse), the autofill banner's Activate, Settings sheets opening and closing,
       the card editor's expiry/code row, Backups' "Only on this phone" card with a Google Drive

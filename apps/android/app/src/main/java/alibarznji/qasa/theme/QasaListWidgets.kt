@@ -39,6 +39,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -377,10 +380,10 @@ fun VaultItemRow(
     modifier: Modifier = Modifier,
     onCopy: (() -> Unit)? = null,
     copyContentDescription: String? = null,
-    /** When set, the tile shows this site logo instead of [icon] (logins). */
-    logo: SiteLogo? = null,
-    /** A bundled [SiteIcons] icon for the login's site; shown instead of [logo] when set. */
-    siteIcon: ImageVector? = null,
+    /** A login's calm letter ([siteLetterFor]): shown instead of [icon] when there's no [siteIcon]. */
+    letter: String? = null,
+    /** The login's own site icon (docs/site-icons.md); shown instead of [letter] when set. */
+    siteIcon: ImageBitmap? = null,
     /** A note or card's own colour ([NoteColor]): the icon's tint and its tile fill. */
     itemColor: Pair<Color, Color>? = null,
     trailing: (@Composable () -> Unit)? = null,
@@ -399,24 +402,7 @@ fun VaultItemRow(
                 .padding(QasaDimens.cardPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val tileShape = CircleShape
-            Box(
-                modifier = Modifier
-                    .size(QasaTokens.Size.itemTile)
-                    // A solid letter circle reads larger than a pale icon circle of the same
-                    // size: it is drawn at `itemLetterTile` (44), centred in the 48 slot.
-                    .padding(if (siteIcon == null && logo != null) (QasaTokens.Size.itemTile - QasaTokens.Size.itemLetterTile) / 2 else 0.dp)
-                    .background(if (siteIcon == null) logo?.color ?: itemColor?.second ?: c.cardMuted else c.cardMuted, tileShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (siteIcon != null) {
-                    Icon(siteIcon, null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.x3l))
-                } else if (logo != null) {
-                    Text(logo.letter, color = Color.White, style = qasaText.cardTitleBold)
-                } else {
-                    Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaTokens.Size.itemTileGlyph))
-                }
-            }
+            ItemTile(icon = icon, letter = letter, siteIcon = siteIcon, itemColor = itemColor)
             Spacer(Modifier.width(QasaDimens.gap))
             Column(Modifier.weight(1f)) {
                 Text(
@@ -445,6 +431,46 @@ fun VaultItemRow(
                 )
             }
             trailing?.invoke()
+        }
+    }
+}
+
+/**
+ * The 48 circle at the start of a [VaultItemRow] (docs/site-icons.md "What a tile shows"):
+ * a login's site icon at `siteIconGlyph` on `siteIconTile` with a 1dp `stroke` ring; else
+ * its letter, 18 bold `accent` on `cardMuted`; else the item's type icon.
+ */
+@Composable
+private fun ItemTile(icon: ImageVector, letter: String?, siteIcon: ImageBitmap?, itemColor: Pair<Color, Color>?) {
+    val c = qasaColors
+    val shape = CircleShape
+    when {
+        siteIcon != null -> Box(
+            modifier = Modifier
+                .size(QasaTokens.Size.itemTile)
+                .clip(shape)
+                .background(c.siteIconTile, shape)
+                .border(QasaDimens.stroke, c.stroke, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                bitmap = siteIcon,
+                contentDescription = null,
+                modifier = Modifier.size(QasaTokens.Size.siteIconGlyph),
+                filterQuality = FilterQuality.High,
+            )
+        }
+        letter != null -> Box(
+            modifier = Modifier.size(QasaTokens.Size.itemTile).background(c.cardMuted, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(letter, color = c.accent, style = qasaText.cardTitleBold, maxLines = 1)
+        }
+        else -> Box(
+            modifier = Modifier.size(QasaTokens.Size.itemTile).background(itemColor?.second ?: c.cardMuted, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaTokens.Size.itemTileGlyph))
         }
     }
 }

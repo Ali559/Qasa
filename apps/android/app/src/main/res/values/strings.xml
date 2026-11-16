@@ -621,6 +621,8 @@
     <string name="settings_saving">Saving…</string>
     <string name="settings_security">Security</string>
     <string name="settings_showpairingcode">Show pairing code</string>
+    <string name="settings_siteicons">Website icons</string>
+    <string name="settings_siteiconshint">Shows each site\'s own icon. Qasa asks only that site, never anyone else.</string>
     <string name="settings_subscription">Subscription</string>
     <string name="settings_syncnetwork">Sync on this network</string>
     <string name="settings_theme">Theme</string>

@@ -62,6 +62,7 @@ final class AppPreferences {
     private let autoLockKey = "qasa.autoLockMinutes"
     private let welcomeKey = "qasa.hasCompletedWelcome"
     private let userNameKey = "qasa.userName"
+    private let siteIconsKey = "qasa.siteIcons"
 
     var language: AppLanguage {
         didSet {
@@ -105,6 +106,15 @@ final class AppPreferences {
         }
     }
 
+    /// Settings → Security → Website icons (`docs/site-icons.md`), on by default. Off: no
+    /// site is asked, the icon cache is deleted and every login shows its letter.
+    var siteIconsEnabled: Bool {
+        didSet {
+            defaults.set(siteIconsEnabled, forKey: siteIconsKey)
+            if !siteIconsEnabled { SiteIconStore.shared.clearAll() }
+        }
+    }
+
     var locale: Locale { language.locale }
     var layoutDirection: LayoutDirection { language.layoutDirection }
 
@@ -118,6 +128,7 @@ final class AppPreferences {
         self.autoLockMinutes = min(60, max(1, storedLock))
         self.hasCompletedWelcome = defaults.bool(forKey: welcomeKey)
         self.userName = defaults.string(forKey: userNameKey) ?? ""
+        self.siteIconsEnabled = defaults.object(forKey: siteIconsKey) as? Bool ?? true
         // Persist an inferred first pick too, so every reader sees the same language.
         defaults.set(lang.rawValue, forKey: langKey)
         defaults.set([lang.rawValue], forKey: "AppleLanguages")

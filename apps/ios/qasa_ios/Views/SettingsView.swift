@@ -100,6 +100,18 @@ struct SettingsView: View {
                             )
                         }
                         .buttonStyle(.qasaRow)
+                        RowDivider()
+                        // Off: no site is asked, the icon cache is deleted (`AppPreferences`).
+                        ToggleRow(
+                            icon: .website,
+                            iconColor: Theme.textPrimary,
+                            title: L10n.tr("settings.siteIcons", locale: locale),
+                            subtitle: L10n.tr("settings.siteIconsHint", locale: locale),
+                            isOn: Binding(
+                                get: { prefs.siteIconsEnabled },
+                                set: { prefs.siteIconsEnabled = $0 }
+                            )
+                        )
                     }
 
                     SettingsSection(

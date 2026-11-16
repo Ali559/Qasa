@@ -4,6 +4,7 @@
 const ALLOWED = new Set([
   'get_prefs',
   'set_prefs',
+  'site_icons_get',
   'clipboard_copy',
   'open_url',
   'vault_status',
