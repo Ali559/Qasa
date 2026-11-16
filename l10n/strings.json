@@ -4362,5 +4362,15 @@
     "en": "Unlock Qasa",
     "ar": "افتح قاصة",
     "ckb": "قاسە بکەرەوە"
+  },
+  "ios.faceIdUsage": {
+    "en": "Unlock your vault and reveal protected notes with Face ID.",
+    "ar": "افتح خزنتك واعرض الملاحظات المحمية باستخدام Face ID.",
+    "ckb": "بە Face ID کۆگاکەت بکەرەوە و تێبینییە پارێزراوەکان ببینە."
+  },
+  "ios.faceIdUsageAutofill": {
+    "en": "Unlock your vault to fill passwords and other items with Face ID.",
+    "ar": "افتح خزنتك باستخدام Face ID لتعبئة كلمات المرور والعناصر الأخرى.",
+    "ckb": "بە Face ID کۆگاکەت بکەرەوە بۆ پڕکردنەوەی وشە نهێنییەکان و بابەتەکانی تر."
   }
 }

@@ -128,6 +128,34 @@ export async function openMenuByClick(page: Page, field: Locator): Promise<void>
   await page.waitForTimeout(800)
 }
 
+interface AxNode {
+  role: string
+  name: string
+  selected?: boolean
+  children?: AxNode[]
+}
+
+/**
+ * The open in-page menu as the accessibility tree sees it (which, unlike the page's
+ * scripts, reaches into the closed shadow root): all of its text, and its options with
+ * which one is selected. `open` is false when no Qasa menu is on screen.
+ */
+export async function readMenu(page: Page): Promise<{ open: boolean; text: string; options: { name: string; selected: boolean }[] }> {
+  const tree = (await page.accessibility.snapshot({ interestingOnly: false })) as AxNode | null
+  const names: string[] = []
+  const options: { name: string; selected: boolean }[] = []
+  // The menu starts at its "Qasa" header; everything after it, in order, is the menu.
+  let inMenu = false
+  const walk = (n: AxNode) => {
+    if (n.role === 'listbox' || (n.role === 'StaticText' && n.name === 'Qasa') || (n.role === 'text' && n.name === 'Qasa')) inMenu = true
+    if (inMenu && n.name) names.push(n.name)
+    if (n.role === 'option') options.push({ name: n.name, selected: !!n.selected })
+    for (const c of n.children ?? []) walk(c)
+  }
+  if (tree) walk(tree)
+  return { open: inMenu, text: names.join(' '), options }
+}
+
 /** Number of Qasa host elements on <html> of `page`'s main frame. */
 export function iconHosts(target: Page | import('@playwright/test').Frame): Promise<number> {
   return target.evaluate(() => [...document.documentElement.children].filter((e) => e.tagName === 'DIV' && (e.getAttribute('style') ?? '').includes('2147483647')).length)

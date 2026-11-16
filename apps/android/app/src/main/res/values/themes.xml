@@ -5,4 +5,8 @@
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowBackground">@color/qasa_background</item>
     </style>
+    <!-- A trampoline that finishes in onCreate: no window, no animation. -->
+    <style name="Theme.Qasa.NoDisplay" parent="android:Theme.NoDisplay">
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
 </resources>

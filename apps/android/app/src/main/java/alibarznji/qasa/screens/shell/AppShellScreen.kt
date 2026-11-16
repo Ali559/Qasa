@@ -36,6 +36,8 @@ import alibarznji.qasa.screens.tools.NotificationsScreen
 import alibarznji.qasa.screens.tools.PasswordHealthScreen
 import alibarznji.qasa.screens.vault.VaultListScreen
 import alibarznji.qasa.screens.vpn.VPNScreen
+import alibarznji.qasa.theme.QasaConfirmSheet
+import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.vault.VaultPayload
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -133,6 +135,23 @@ fun AppShellScreen(
             }
         }
         if (page == null) ShellTabBar(selected = tab, onSelect = { tab = it })
+    }
+
+    // R4: a strong password autofill filled that no login holds yet (AppBootstrap).
+    val generatedOffer by vm.appSession.generatedSaveOffer.collectAsState()
+    generatedOffer?.let { offer ->
+        QasaConfirmSheet(
+            title = offer.site?.let { stringResource(R.string.vault_generatedsave_titlefmt, it) }
+                ?: stringResource(R.string.vault_generatedsave_title),
+            message = stringResource(R.string.vault_generatedsave_body),
+            confirmLabel = stringResource(R.string.common_save),
+            // Picked up by the pendingSave effect above: Passwords tab, new-login form.
+            onConfirm = { vm.appSession.answerGeneratedSave(save = true) },
+            onDismiss = { vm.appSession.answerGeneratedSave(save = false) },
+            dismissLabel = stringResource(R.string.vault_generatedsave_notnow),
+            destructive = false,
+            icon = QasaIcons.Passwords,
+        )
     }
 }
 

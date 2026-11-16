@@ -79,6 +79,24 @@ class AppSession @Inject constructor(private val prefs: AppPreferences) {
     fun consumeLoginSave(): alibarznji.qasa.vault.VaultPayload.Login? =
         _pendingLoginSave.value.also { _pendingLoginSave.value = null }
 
+    /**
+     * R4: a strong password autofill filled but no login holds, offered once after the
+     * unlock ("Save the password you created for <site>?"). In memory only.
+     */
+    private val _generatedSaveOffer = MutableStateFlow<alibarznji.qasa.credentials.GeneratedSaveOffer?>(null)
+    val generatedSaveOffer = _generatedSaveOffer.asStateFlow()
+
+    fun offerGeneratedSave(offer: alibarznji.qasa.credentials.GeneratedSaveOffer) {
+        _generatedSaveOffer.value = offer
+    }
+
+    /** Save: the new-login form opens with it. Not now ([save] false): dropped. */
+    fun answerGeneratedSave(save: Boolean) {
+        val offer = _generatedSaveOffer.value ?: return
+        _generatedSaveOffer.value = null
+        if (save) requestSaveLogin(offer.login)
+    }
+
     companion object {
         /** iOS placeholder username: shown localized (`session_qasauser`), never verbatim. */
         const val PLACEHOLDER_USERNAME = "Qasa User"

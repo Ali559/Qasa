@@ -44,6 +44,14 @@
             android:theme="@style/Theme.Qasa"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- "Use a strong password" picks: no UI, records the pick (R4), then fills. -->
+        <activity
+            android:name=".credentials.StrongPasswordPickActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.Qasa.NoDisplay" />
+
         <!-- Credential Manager picks: unlock, then return the password. -->
         <activity
             android:name=".credentials.CredentialPickActivity"

@@ -22,6 +22,7 @@ python3 l10n/generate.py
 - Shared keys use dotted camelCase: `auth.create.button`, `settings.autoLockMinutesFmt`.
 - Android resource names are derived: `auth.create.button` → `auth_create_button`. When the Android code uses a name that cannot be derived, give the row an explicit one: `"home.allgoodBody": { "android": "home_allgood_body", "en": …, "ar": …, "ckb": … }`.
 - Platform-only keys live in `platform/ios.json` / `platform/android.json` (same `{ en, ar, ckb }` shape). Android overlay keys may already be snake_case (`app_name`).
+- Keys starting with `ios.` are Info.plist texts (for example `ios.faceIdUsage` → `NSFaceIDUsageDescription`). They go only into each target's `InfoPlist.xcstrings`, never into `Localizable.xcstrings`, Android or the desktop/extension JSON.
 
 ## Placeholders
 

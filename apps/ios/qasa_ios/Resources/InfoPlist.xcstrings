@@ -1,0 +1,28 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSFaceIDUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock your vault and reveal protected notes with Face ID."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتح خزنتك واعرض الملاحظات المحمية باستخدام Face ID."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بە Face ID کۆگاکەت بکەرەوە و تێبینییە پارێزراوەکان ببینە."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -18,6 +18,19 @@ LANGS = ("en", "ar", "ckb")
 IOS_MAIN = ROOT / "apps/ios/qasa_ios/Resources/Localizable.xcstrings"
 IOS_CREDENTIAL = ROOT / "apps/ios/QasaCredentialProvider/Localizable.xcstrings"
 IOS_PAYMENT = ROOT / "apps/ios/QasaPaymentNotification/Localizable.xcstrings"
+# Info.plist strings (permission prompts) per target, as InfoPlist.xcstrings catalogs.
+# The English value is also the default in each target's Info.plist / build settings.
+IOS_INFOPLIST = {
+    ROOT / "apps/ios/qasa_ios/Resources/InfoPlist.xcstrings": {
+        "NSFaceIDUsageDescription": "ios.faceIdUsage",
+    },
+    ROOT / "apps/ios/QasaCredentialProvider/InfoPlist.xcstrings": {
+        "NSFaceIDUsageDescription": "ios.faceIdUsageAutofill",
+    },
+}
+# Keys under this prefix only feed IOS_INFOPLIST: they stay out of Localizable.xcstrings,
+# Android and the desktop/extension catalogs.
+INFOPLIST_PREFIX = "ios."
 ANDROID_RES = ROOT / "apps/android/app/src/main/res"
 # Desktop app catalogs; the browser extension imports the same files.
 WEB_DIR = ROOT / "apps/desktop/src/i18n"
@@ -231,6 +244,26 @@ def write_xcstrings(path: Path, table: dict[str, dict[str, str]]) -> None:
     )
 
 
+def without_infoplist(table: dict) -> dict:
+    return {k: v for k, v in table.items() if not k.startswith(INFOPLIST_PREFIX)}
+
+
+def write_infoplist_catalogs(
+    table: dict[str, dict[str, str]], map_path
+) -> list[Path]:
+    written = []
+    for path, plist_keys in IOS_INFOPLIST.items():
+        rows = {}
+        for plist_key, key in plist_keys.items():
+            if key not in table:
+                raise KeyError(f"missing Info.plist string {key} for {plist_key}")
+            rows[plist_key] = table[key]
+        out = map_path(path)
+        write_xcstrings(out, rows)
+        written.append(out)
+    return written
+
+
 def subset(table: dict[str, dict[str, str]], keys: list[str]) -> dict:
     missing = [k for k in keys if k not in table]
     if missing:
@@ -279,7 +312,9 @@ def generate_into(dest_root: Path | None = None) -> list[Path]:
     ios_overlay = load_json(L10N / "platform/ios.json")
     desktop_overlay = load_json(L10N / "platform/desktop.json")
     android_overlay = load_json(L10N / "platform/android.json")
-    ios_table = merge_tables(shared, ios_overlay)
+    infoplist_table = merge_tables(shared, ios_overlay)
+    ios_table = without_infoplist(infoplist_table)
+    shared = without_infoplist(shared)
 
     def map_path(p: Path) -> Path:
         if dest_root is None:
@@ -299,6 +334,8 @@ def generate_into(dest_root: Path | None = None) -> list[Path]:
     pay_path = map_path(IOS_PAYMENT)
     write_xcstrings(pay_path, subset(ios_table, PAYMENT_KEYS))
     written.append(pay_path)
+
+    written.extend(write_infoplist_catalogs(infoplist_table, map_path))
 
     if dest_root is None:
         android_dirs = ANDROID_DIR
@@ -331,6 +368,7 @@ def check_drift() -> int:
             IOS_MAIN,
             IOS_CREDENTIAL,
             IOS_PAYMENT,
+            *IOS_INFOPLIST,
             *[d / "strings.xml" for d in ANDROID_DIR.values()],
             *web_paths(None),
         ]
