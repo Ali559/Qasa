@@ -79,6 +79,9 @@ pub struct Prefs {
     /// on this computer only; left out while empty.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub user_name: String,
+    /// Settings → Security → Website icons (docs/site-icons.md), on by default. Off: no
+    /// site is ever asked and the icon cache is deleted.
+    pub site_icons: bool,
     /// Written by the core only (see the module docs). Left out while untouched.
     #[serde(skip_serializing_if = "BackupPrefs::is_default")]
     pub backup: BackupPrefs,
@@ -103,6 +106,7 @@ impl Default for Prefs {
             has_completed_welcome: false,
             auto_lock_minutes: 5,
             user_name: String::new(),
+            site_icons: true,
             backup: BackupPrefs::default(),
         }
     }
@@ -163,7 +167,15 @@ pub fn set_prefs(app: AppHandle, prefs: Prefs) -> Result<(), String> {
     let path = prefs_path(&app)?;
     let _guard = WRITE.lock().unwrap_or_else(|e| e.into_inner());
     let merged = Prefs::from_ui(prefs, &read(&path));
-    write(&path, &merged)
+    write(&path, &merged)?;
+    drop(_guard);
+    if !merged.site_icons {
+        // Off: the cache goes now, not at the next unlock.
+        if let Ok(mut vault) = app.state::<crate::vault::commands::VaultState>().0.lock() {
+            vault.clear_site_icons();
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -178,14 +190,17 @@ mod tests {
             has_completed_welcome: true,
             auto_lock_minutes: 15,
             user_name: String::new(),
+            site_icons: false,
             backup: BackupPrefs::default(),
         };
         assert_eq!(
             serde_json::to_string(&prefs).unwrap(),
-            r#"{"language":"ckb","theme":"dark","hasCompletedWelcome":true,"autoLockMinutes":15}"#
+            r#"{"language":"ckb","theme":"dark","hasCompletedWelcome":true,"autoLockMinutes":15,"siteIcons":false}"#
         );
         let named = Prefs { user_name: "Sara".into(), ..prefs };
-        assert!(serde_json::to_string(&named).unwrap().ends_with(r#""autoLockMinutes":15,"userName":"Sara"}"#));
+        assert!(serde_json::to_string(&named).unwrap().ends_with(r#""autoLockMinutes":15,"userName":"Sara","siteIcons":false}"#));
+        // Website icons are on unless turned off (files from before the setting).
+        assert!(serde_json::from_str::<Prefs>(r#"{"language":"en"}"#).unwrap().site_icons);
     }
 
     #[test]

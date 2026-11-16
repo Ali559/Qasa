@@ -1,40 +1,57 @@
 import SwiftUI
 
-/// A recognisable stand-in for a site's logo: its first letter on its brand colour, so a
-/// login is spotted at a glance without fetching icons from the network (which would leak
-/// the user's list of sites). Unknown sites get a stable colour picked from their name.
-/// Same table as Android `SiteLogo.kt`.
+/// The calm letter a login shows while it has no site icon (`docs/site-icons.md`): the name's
+/// first letter or digit, upper-cased (`?` when none). No colour per site: it is drawn in the
+/// theme accent on `cardMuted`.
 struct SiteLogo: Equatable {
     let letter: String
-    let color: Color
-
-    private static let knownBrands: [(String, String)] = [
-        ("facebook", "1877F2"), ("messenger", "0084FF"), ("whatsapp", "25D366"),
-        ("instagram", "D62976"), ("gmail", "EA4335"), ("google", "4285F4"),
-        ("youtube", "FF0000"), ("snapchat", "F7C600"), ("tiktok", "111111"),
-        ("telegram", "229ED9"), ("viber", "7360F2"), ("twitter", "1D9BF0"),
-        ("linkedin", "0A66C2"), ("apple", "333333"), ("icloud", "3693F3"),
-        ("microsoft", "00A4EF"), ("outlook", "0078D4"), ("amazon", "FF9900"),
-        ("netflix", "E50914"), ("spotify", "1DB954"), ("github", "24292F"),
-        ("fib", "0E7A5A"), ("fastpay", "E2136E"), ("superqi", "F57C20"),
-        ("zain", "6B2C91"), ("asiacell", "E30613"), ("korek", "00843D"),
-    ]
-
-    /// Soft, readable-with-white colours for sites we do not recognise.
-    private static let fallbackColors = ["722F99", "E07A5F", "3FA7C9", "2F9E6C", "D4537E", "B7791F", "5B7CF0"]
 
     init(name: String) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        let key = trimmed.lowercased()
-        letter = trimmed.first(where: { $0.isLetter || $0.isNumber }).map { String($0).uppercased() } ?? "?"
-        if let brand = Self.knownBrands.first(where: { key.contains($0.0) }) {
-            color = Color(hex: brand.1)
-        } else {
-            // Java's `String.hashCode` + `floorMod`, so a site gets the same colour as on Android
-            // (and across launches, which Swift's seeded `hashValue` would not give).
-            let hash = key.utf16.reduce(Int32(0)) { $0 &* 31 &+ Int32($1) }
-            let count = Int32(Self.fallbackColors.count)
-            color = Color(hex: Self.fallbackColors[Int(((hash % count) + count) % count)])
+        letter = SiteIconRules.letter(for: name)
+    }
+}
+
+/// A login's circle: its site's own icon when one is cached (`SiteIconStore`), else the calm
+/// letter. The row tile is 48 (icon 28, letter 18 bold); the detail hero 88 (icon 52, letter
+/// 36 bold). The icon sits on `siteIconTile` with a 1pt `stroke` ring. An arriving icon
+/// replaces the letter without animation.
+struct LoginSiteTile: View {
+    @Environment(\.themePalette) private var theme
+    let name: String
+    /// The login's website, nil until its payload is read (the letter shows meanwhile).
+    let website: String?
+    var hero = false
+
+    private var side: CGFloat { hero ? 88 : QasaTokens.Size.itemTile }
+    private var glyph: CGFloat { hero ? QasaTokens.Size.heroSiteIconGlyph : QasaTokens.Size.siteIconGlyph }
+
+    var body: some View {
+        let host = website.flatMap(SiteIconRules.host(forWebsite:))
+        Group {
+            if let image = SiteIconStore.shared.icon(forHost: host) {
+                Image(uiImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: glyph, height: glyph)
+                    .frame(width: side, height: side)
+                    .background(theme.siteIconTile)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(theme.stroke, lineWidth: QasaTokens.Size.stroke))
+            } else {
+                Text(SiteLogo(name: name).letter)
+                    .font(.qasa(hero ? 36 : 18, weight: .bold))
+                    .foregroundColor(theme.accent)
+                    .frame(width: side, height: side)
+                    .background(theme.cardMuted)
+                    .clipShape(Circle())
+            }
+        }
+        .transaction { $0.animation = nil }
+        .accessibilityHidden(true)
+        // Asked again when the setting is turned back on.
+        .task(id: "\(AppPreferences.shared.siteIconsEnabled)|\(website ?? "")") {
+            if let website { SiteIconStore.shared.request(website: website) }
         }
     }
 }

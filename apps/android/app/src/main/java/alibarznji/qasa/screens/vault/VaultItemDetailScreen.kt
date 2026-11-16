@@ -15,7 +15,10 @@ import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaIcons
-import alibarznji.qasa.theme.SiteIcons
+import alibarznji.qasa.theme.siteLetterFor
+import alibarznji.qasa.siteicons.rememberSiteIcon
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.FilterQuality
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.ProtectedItemGate
@@ -225,7 +228,7 @@ fun VaultItemDetailScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionGap),
         ) {
-            HeroIcon(p)
+            HeroIcon(p, name)
             Text(name, color = c.textPrimary, style = qasaText.sectionHeadline, textAlign = TextAlign.Center)
             // Stored before the shared field rules (or synced in): editing will ask for fixes.
             val needsAttention = remember(p) {
@@ -272,25 +275,52 @@ fun VaultItemDetailScreen(
     }
 }
 
-/** iOS `heroIcon` (`VaultItemDetailView.swift:110`): 88pt chrome tile, per-subtype glyph. */
+/**
+ * iOS `heroIcon` (`VaultItemDetailView.swift:110`): an 88 circle. A login shows its site's
+ * own icon at `heroSiteIconGlyph` on `siteIconTile` with a 1dp `stroke` ring, or its letter
+ * at 36 bold on `cardMuted` (docs/site-icons.md); other kinds keep their type glyph.
+ */
 @Composable
-private fun HeroIcon(p: VaultPayload) {
+private fun HeroIcon(p: VaultPayload, name: String) {
     val c = qasaColors
     val shape = CircleShape
+    val heroModifier = Modifier
+        .padding(top = QasaDimens.gapSmall)
+        .size(QasaIconFrame.shield)
+        .clip(shape)
+    if (p is VaultPayload.Login) {
+        val siteIcon = rememberSiteIcon(p.website)
+        if (siteIcon != null) {
+            Box(
+                modifier = heroModifier
+                    .background(c.siteIconTile)
+                    .border(QasaDimens.stroke, c.stroke, shape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    bitmap = siteIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(QasaTokens.Size.heroSiteIconGlyph),
+                    filterQuality = FilterQuality.High,
+                )
+            }
+        } else {
+            Box(modifier = heroModifier.background(c.cardMuted), contentAlignment = Alignment.Center) {
+                Text(siteLetterFor(name), color = c.accent, style = qasaText.heroLetter, maxLines = 1)
+            }
+        }
+        return
+    }
     // A note or card takes its colour: the glyph in the colour on its tile fill, no stroke.
     val itemColor = p.organizationColor()
     Box(
-        modifier = Modifier
-            .padding(top = QasaDimens.gapSmall)
-            .size(QasaIconFrame.shield)
-            .clip(shape)
+        modifier = heroModifier
             .background(itemColor?.tile() ?: c.chrome)
             .border(QasaDimens.stroke, if (itemColor == null) c.strokeChrome else Color.Transparent, shape),
         contentAlignment = Alignment.Center,
     ) {
-        val siteIcon = (p as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) }
         Icon(
-            siteIcon ?: p.subtypeIcon,
+            p.subtypeIcon,
             contentDescription = null,
             tint = itemColor?.swatch() ?: c.textPrimary,
             modifier = Modifier.size(QasaIconSize.x5l),

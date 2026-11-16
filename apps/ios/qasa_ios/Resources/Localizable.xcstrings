@@ -13597,6 +13597,50 @@
         }
       }
     },
+    "settings.siteIcons": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website icons"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أيقونات المواقع"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئایکۆنی ماڵپەڕەکان"
+          }
+        }
+      }
+    },
+    "settings.siteIconsHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows each site's own icon. Qasa asks only that site, never anyone else."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعرض أيقونة كل موقع. يطلبها Qasa من ذلك الموقع فقط، ولا يطلبها من أي جهة أخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئایکۆنی هەر ماڵپەڕێک پیشان دەدات. Qasa تەنها لەو ماڵپەڕە داوای دەکات، هەرگیز لە کەسێکی تر نا."
+          }
+        }
+      }
+    },
     "settings.subscription": {
       "localizations": {
         "en": {

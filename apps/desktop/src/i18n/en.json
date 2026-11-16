@@ -691,6 +691,8 @@
   "settings.saving": "Saving…",
   "settings.security": "Security",
   "settings.showPairingCode": "Show pairing code",
+  "settings.siteIcons": "Website icons",
+  "settings.siteIconsHint": "Shows each site's own icon. Qasa asks only that site, never anyone else.",
   "settings.subscription": "Subscription",
   "settings.syncNetwork": "Sync on this network",
   "settings.theme": "Theme",

@@ -23,6 +23,7 @@ use error::{CommandError, CommandResult};
 use biometrics::{Biometrics, BiometricStatus, PlatformBiometrics};
 use qasa_biometric::Sealed;
 use qasa_vault::RootKey;
+use crate::site_icons::cache::{Cache as SiteIconCache, Entry as SiteIconEntry};
 use store::{
     now_ms, CollectionRow, ItemRow, Store, META_BIOMETRIC_ENABLED, META_BIOMETRIC_SEALED, META_KDF_VERSION, META_LAST_MASTER_PASSWORD_UNLOCK,
     META_SALT, META_VERIFIER,
@@ -64,8 +65,8 @@ pub struct ItemSummary {
     pub has_primary_copy: bool,
     /// Logins with a 2FA code.
     pub has_totp: bool,
-    /// A login's website host (`matcher::host_of`), which picks its bundled site icon in
-    /// the UI (`siteIcon.ts`); None for other kinds and logins without a web address.
+    /// The host a login's site icon is asked of and cached under (`site_icons::host_of`,
+    /// docs/site-icons.md); None for other kinds and for logins whose site is never asked.
     pub site_host: Option<String>,
     /// The colour a note or card carries (iOS `organizationColor`), for its row tile; None
     /// for other kinds.
@@ -81,11 +82,18 @@ pub struct Collection {
     pub item_count: usize,
 }
 
+/// Asks for a host's site icon after a save (`site_icons::queue::request`). Called with
+/// the vault lock held, so it must only queue.
+pub type IconRequester = Box<dyn Fn(String) + Send>;
+
 pub struct Vault {
     store: Store,
     keys: Option<VaultKeys>,
     last_activity: Instant,
     bio: Box<dyn Biometrics>,
+    /// Site icons for logins (docs/site-icons.md), sealed with the item key.
+    site_icons: SiteIconCache,
+    icon_requester: Option<IconRequester>,
 }
 
 /// The device's local calendar day, for the "not in the future" / "not absurdly far
@@ -128,11 +136,25 @@ fn has_primary_copy(p: &VaultPayload) -> bool {
 
 impl Vault {
     pub fn open(path: &Path) -> CommandResult<Self> {
-        Ok(Self::with_store(Store::open(path)?, Box::new(PlatformBiometrics)))
+        let mut vault = Self::with_store(Store::open(path)?, Box::new(PlatformBiometrics));
+        vault.site_icons = SiteIconCache::beside(path);
+        Ok(vault)
     }
 
     fn with_store(store: Store, bio: Box<dyn Biometrics>) -> Self {
-        Self { store, keys: None, last_activity: Instant::now(), bio }
+        Self { store, keys: None, last_activity: Instant::now(), bio, site_icons: SiteIconCache::new(None), icon_requester: None }
+    }
+
+    /// Sets who is asked for a login's site icon after it is saved.
+    pub fn set_icon_requester(&mut self, requester: IconRequester) {
+        self.icon_requester = Some(requester);
+    }
+
+    /// Runs after every unlock (and create): the keys are in place.
+    fn on_unlocked(&mut self) {
+        if let Some(keys) = &self.keys {
+            self.site_icons.load(keys.enc());
+        }
     }
 
     /// An in-memory vault with fake biometrics, for tests of other modules.
@@ -182,6 +204,7 @@ impl Vault {
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &root.verifier())?;
         self.keys = Some(root.subkeys());
+        self.on_unlocked();
         self.note_master_password()?;
         if biometrics && self.bio.available() {
             self.store.set_meta(META_BIOMETRIC_ENABLED, b"1")?;
@@ -206,6 +229,7 @@ impl Vault {
             let root = derive_root_key(candidate, &salt)?;
             if root.matches_verifier(&verifier) {
                 self.keys = Some(root.subkeys());
+                self.on_unlocked();
                 self.note_activity();
                 self.note_master_password()?;
                 let _ = self.rebuild_missing_tokens();
@@ -240,6 +264,7 @@ impl Vault {
     pub fn lock(&mut self) {
         // Dropping VaultKeys zeroes them.
         self.keys = None;
+        self.site_icons.unload();
     }
 
     // MARK: items
@@ -282,7 +307,7 @@ impl Vault {
             has_primary_copy: has_primary_copy(&payload),
             has_totp: matches!(&payload, VaultPayload::Login(f) if f.totp.as_deref().is_some_and(|t| !t.is_empty())),
             site_host: match &payload {
-                VaultPayload::Login(f) => crate::bridge::matcher::host_of(&f.website),
+                VaultPayload::Login(f) => crate::site_icons::host_of(&f.website),
                 _ => None,
             },
             color: match &payload {
@@ -355,7 +380,9 @@ impl Vault {
         if !issues.is_empty() {
             return Err(CommandError::InvalidFields(issues));
         }
-        self.write(id, &normalized)
+        let saved = self.write(id, &normalized)?;
+        self.want_site_icon(&normalized);
+        Ok(saved)
     }
 
     /// A save that must never be lost (a login the browser extension captured): normalized
@@ -365,7 +392,9 @@ impl Vault {
         self.keys()?;
         let normalized = validate::normalize(payload);
         let issues = validate::validate(&normalized, today());
-        Ok((self.write(id, &normalized)?, issues))
+        let saved = self.write(id, &normalized)?;
+        self.want_site_icon(&normalized);
+        Ok((saved, issues))
     }
 
     /// Encrypts and stores `payload` as it is: no field rules. Only for rewrites of items
@@ -570,6 +599,10 @@ impl Vault {
         self.store.set_meta(META_KDF_VERSION, &encode_kdf_version(KDF_VERSION))?;
         self.store.set_meta(META_VERIFIER, &new_root.verifier())?;
         self.note_master_password()?;
+        // The icon cache was sealed with the old item key.
+        if let Some(keys) = &self.keys {
+            let _ = self.site_icons.save(keys.enc());
+        }
         // The old seal holds the old root key: replace it.
         self.store.delete_meta(META_BIOMETRIC_SEALED)?;
         if self.biometric_enabled()? {
@@ -680,6 +713,7 @@ impl Vault {
             return Err(CommandError::BiometricInvalidated);
         }
         self.keys = Some(root.subkeys());
+        self.on_unlocked();
         self.note_activity();
         let _ = self.rebuild_missing_tokens();
         let _ = self.encrypt_legacy_names();
@@ -779,7 +813,45 @@ impl Vault {
     /// "Clear local data": locks and deletes every item, collection and the key material.
     pub fn wipe(&mut self) -> CommandResult<()> {
         self.lock();
+        self.site_icons.delete();
         self.store.wipe()
+    }
+
+    // MARK: site icons (docs/site-icons.md)
+
+    /// Asks for a saved login's site icon when its host has no fresh cache entry.
+    fn want_site_icon(&self, payload: &VaultPayload) {
+        let VaultPayload::Login(f) = payload else { return };
+        let Some(host) = crate::site_icons::host_of(&f.website) else { return };
+        if let Some(request) = &self.icon_requester {
+            if !self.site_icons.is_fresh(&host, now_ms()) {
+                request(host);
+            }
+        }
+    }
+
+    /// The cached icon for `host` (a 64 × 64 PNG, base64), stale or not; None while locked.
+    pub fn site_icon(&self, host: &str) -> Option<String> {
+        self.site_icons.png(host).map(str::to_string)
+    }
+
+    /// Whether `host` needs no new request at `now` (false while locked).
+    pub fn site_icon_fresh(&self, host: &str, now: i64) -> bool {
+        self.site_icons.is_fresh(host, now)
+    }
+
+    /// Records a site's answer. Ignored while locked.
+    pub fn put_site_icon(&mut self, host: &str, entry: SiteIconEntry) {
+        if let Some(keys) = &self.keys {
+            if let Err(e) = self.site_icons.put(keys.enc(), host, entry) {
+                eprintln!("[qasa] could not save the site icon cache: {e}");
+            }
+        }
+    }
+
+    /// Deletes every cached icon (the setting was turned off). Works locked too.
+    pub fn clear_site_icons(&mut self) {
+        self.site_icons.delete();
     }
 }
 
@@ -1094,6 +1166,53 @@ mod tests {
         v.save(None, &login("A")).unwrap();
         v.wipe().unwrap();
         assert_eq!(v.status().unwrap(), VaultStatus { exists: false, unlocked: false, unsupported_kdf_version: None });
+    }
+
+    // MARK: site icons (docs/site-icons.md)
+
+    #[test]
+    fn a_saved_login_asks_for_its_site_icon_once_it_has_none() {
+        use std::sync::{Arc, Mutex};
+        let asked = Arc::new(Mutex::new(Vec::<String>::new()));
+        let mut v = vault();
+        let log = asked.clone();
+        v.set_icon_requester(Box::new(move |host| log.lock().unwrap().push(host)));
+        v.create("password1", false).unwrap();
+        let web = |site: &str| VaultPayload::Login(LoginFields { item_name: "x".into(), password: "pw".into(), website: site.into(), ..Default::default() });
+        v.save(None, &web("https://www.GitHub.com/login")).unwrap();
+        v.save_flagged(None, &web("http://192.168.1.1")).unwrap();
+        v.save(None, &login("no website")).unwrap();
+        assert_eq!(*asked.lock().unwrap(), ["github.com"]);
+        // A fresh answer: no new request.
+        v.put_site_icon("github.com", SiteIconEntry::none(now_ms()));
+        v.save(None, &web("github.com")).unwrap();
+        assert_eq!(asked.lock().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn the_icon_cache_follows_the_vault_key_and_goes_with_the_vault() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("vault.sqlite");
+        let file = dir.path().join(crate::site_icons::cache::FILE_NAME);
+        let mut v = Vault::open(&path).unwrap();
+        v.create("password1", false).unwrap();
+        v.put_site_icon("github.com", SiteIconEntry::icon(b"png", now_ms()));
+        assert!(file.exists());
+        v.lock();
+        assert_eq!(v.site_icon("github.com"), None, "nothing in memory while locked");
+        v.unlock("password1").unwrap();
+        assert!(v.site_icon("github.com").is_some());
+        // Re-sealed with the new key on a master password change.
+        v.change_password("password1", "password2").unwrap();
+        v.lock();
+        v.unlock("password2").unwrap();
+        assert!(v.site_icon("github.com").is_some());
+        // The setting off, or the vault wiped: the file is gone.
+        v.clear_site_icons();
+        assert!(!file.exists() && v.site_icon("github.com").is_none());
+        v.put_site_icon("github.com", SiteIconEntry::icon(b"png", now_ms()));
+        v.wipe().unwrap();
+        assert!(!file.exists());
     }
 
     // MARK: encrypted collection names (plan decision 5)

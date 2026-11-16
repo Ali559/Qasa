@@ -32,6 +32,8 @@ data class QasaColors(
     val cardBackground: Color,
     val cardBackgroundLight: Color,
     val cardMuted: Color,
+    /** Behind a site's own icon on a login tile (docs/site-icons.md). */
+    val siteIconTile: Color,
     val stroke: Color,
     val strokeChrome: Color,
     /** Primary action colour: buttons, selected tabs, links. */
@@ -82,6 +84,7 @@ val LightQasaColors = QasaColors(
     cardBackground = QasaTokens.Light.cardBackground,
     cardBackgroundLight = QasaTokens.Light.cardBackgroundLight,
     cardMuted = QasaTokens.Light.cardMuted,
+    siteIconTile = QasaTokens.Light.siteIconTile,
     stroke = QasaTokens.Light.stroke,
     strokeChrome = QasaTokens.Light.strokeChrome,
     accent = QasaTokens.Light.accent,
@@ -125,6 +128,7 @@ val DarkQasaColors = QasaColors(
     cardBackground = QasaTokens.Dark.cardBackground,
     cardBackgroundLight = QasaTokens.Dark.cardBackgroundLight,
     cardMuted = QasaTokens.Dark.cardMuted,
+    siteIconTile = QasaTokens.Dark.siteIconTile,
     stroke = QasaTokens.Dark.stroke,
     strokeChrome = QasaTokens.Dark.strokeChrome,
     accent = QasaTokens.Dark.accent,

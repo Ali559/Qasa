@@ -19,8 +19,12 @@ export interface LoginMatch {
   title: string
   username: string
   hasTotp: boolean
-  /** The login's website, for its bundled site icon (`siteIcon.ts`). Older desktop apps leave it out. */
+  /** The login's website. Older desktop apps leave it out. */
   website?: string
+  /** The site's icon as the desktop cached it (a 64 × 64 PNG, base64), or null when it has
+   *  none (docs/site-icons.md "Extension"); the extension never fetches one. Older desktop
+   *  apps leave it out. Without it the row shows the letter. */
+  icon?: string | null
 }
 
 /** A card or profile item for the in-page menu: never a secret, only a masked hint. */

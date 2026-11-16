@@ -30,7 +30,8 @@
   --size-row-icon-button-glyph: 20px;
   --size-item-tile: 48px;
   --size-item-tile-glyph: 24px;
-  --size-item-letter-tile: 44px;
+  --size-site-icon-glyph: 28px;
+  --size-hero-site-icon-glyph: 52px;
   --size-home-tile: 40px;
   --size-home-tile-glyph: 22px;
   --size-fab: 56px;
@@ -167,6 +168,7 @@
   --card-background: #FFFFFF;
   --card-background-light: #FFF3E3;
   --card-muted: #F3EAF7;
+  --site-icon-tile: #FFFFFF;
   --stroke: #E6E1E1;
   --stroke-chrome: #DCD7D7;
   --accent: #722F99;
@@ -210,6 +212,7 @@
   --card-background: #26272A;
   --card-background-light: #2C2D30;
   --card-muted: #323337;
+  --site-icon-tile: #F2F1F3;
   --stroke: #38393D;
   --stroke-chrome: #434448;
   --accent: #B67FDB;
@@ -254,6 +257,7 @@
     --card-background: #26272A;
     --card-background-light: #2C2D30;
     --card-muted: #323337;
+    --site-icon-tile: #F2F1F3;
     --stroke: #38393D;
     --stroke-chrome: #434448;
     --accent: #B67FDB;

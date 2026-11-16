@@ -12,6 +12,8 @@ struct ThemePalette: Equatable {
     let cardBackground: Color
     let cardBackgroundLight: Color
     let cardMuted: Color
+    /// Behind a site's own icon (light in both themes, so dark marks stay visible).
+    let siteIconTile: Color
     let stroke: Color
     let strokeChrome: Color
 
@@ -88,6 +90,7 @@ enum Theme {
         dark: ThemePalette.dark.cardBackgroundLight
     )
     static let cardMuted = Color(light: ThemePalette.light.cardMuted, dark: ThemePalette.dark.cardMuted)
+    static let siteIconTile = Color(light: ThemePalette.light.siteIconTile, dark: ThemePalette.dark.siteIconTile)
     static let stroke = Color(light: ThemePalette.light.stroke, dark: ThemePalette.dark.stroke)
     static let strokeChrome = Color(light: ThemePalette.light.strokeChrome, dark: ThemePalette.dark.strokeChrome)
 

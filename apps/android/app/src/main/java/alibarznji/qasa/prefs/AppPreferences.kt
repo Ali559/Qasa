@@ -83,6 +83,19 @@ class AppPreferences @Inject constructor(
         _autofillConfirmEveryFill.value = on
     }
 
+    /**
+     * Settings → Security "Website icons" (docs/site-icons.md): a login shows its site's own
+     * icon, asked from that site only. On by default; off, nothing is asked and the icon
+     * cache is deleted ([alibarznji.qasa.siteicons.SiteIconService]).
+     */
+    private val _siteIconsEnabled = MutableStateFlow(prefs.getBoolean(KEY_SITE_ICONS, true))
+    val siteIconsEnabled: StateFlow<Boolean> = _siteIconsEnabled.asStateFlow()
+
+    fun setSiteIconsEnabled(on: Boolean) {
+        prefs.edit().putBoolean(KEY_SITE_ICONS, on).apply()
+        _siteIconsEnabled.value = on
+    }
+
     /** Epoch ms until which Home doesn't ask to turn on Qasa autofill (Not now). */
     var autofillPromptSnoozedUntil: Long
         get() = prefs.getLong(KEY_AUTOFILL_PROMPT_SNOOZE, 0L)
@@ -175,6 +188,7 @@ class AppPreferences @Inject constructor(
         private const val KEY_USER_NAME = "qasa.userName"
         private const val KEY_AUTOFILL_CONFIRM = "qasa.autofill.confirmEveryFill"
         private const val KEY_AUTOFILL_PROMPT_SNOOZE = "qasa.autofill.promptSnoozedUntil"
+        private const val KEY_SITE_ICONS = "qasa.siteIcons"
         private const val KEY_VPN_KILL_SWITCH = "qasa.vpn.killSwitch"
         private const val KEY_VPN_AUTO_CONNECT = "qasa.vpn.autoConnect"
         private const val KEY_VPN_NODE_ID = "qasa.vpn.nodeId"

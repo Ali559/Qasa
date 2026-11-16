@@ -1,0 +1,70 @@
+{
+  "$comment": "Shared cases for docs/site-icons.md. Every platform's unit tests load this file (or a copy generated from it) and must pass every case. host: the website field -> the host asked (null: never asked). letter: item name -> tile letter. pickIcons: page URL + HTML -> the icon URLs to try, in order (favicon.ico fallback not included).",
+  "host": [
+    { "website": "https://github.com/login", "host": "github.com" },
+    { "website": "github.com", "host": "github.com" },
+    { "website": "  https://WWW.Google.com/  ", "host": "google.com" },
+    { "website": "http://example.org", "host": "example.org" },
+    { "website": "accounts.google.com", "host": "accounts.google.com" },
+    { "website": "https://shop.example.co.uk:8443/a?b=c", "host": "shop.example.co.uk" },
+    { "website": "https://fib.iq.", "host": "fib.iq" },
+    { "website": "ftp://files.example.com", "host": null },
+    { "website": "androidapp://com.instagram.android", "host": null },
+    { "website": "", "host": null },
+    { "website": "not a url", "host": null },
+    { "website": "localhost:3000", "host": null },
+    { "website": "http://192.168.1.1", "host": null },
+    { "website": "https://10.0.0.5/admin", "host": null },
+    { "website": "https://[::1]/", "host": null },
+    { "website": "https://2001:db8::1", "host": null },
+    { "website": "router", "host": null },
+    { "website": "https://nas.local", "host": null },
+    { "website": "https://printer.lan", "host": null },
+    { "website": "https://wiki.corp", "host": null },
+    { "website": "https://app.home.arpa", "host": null },
+    { "website": "https://site.test", "host": null },
+    { "website": "https://example.onion", "host": null },
+    { "website": "https://dev.localhost", "host": null }
+  ],
+  "letter": [
+    { "name": "Asiacell", "letter": "A" },
+    { "name": "  gmail", "letter": "G" },
+    { "name": "123 Bank", "letter": "1" },
+    { "name": "@work", "letter": "W" },
+    { "name": "کورەک", "letter": "ک" },
+    { "name": "", "letter": "?" },
+    { "name": "!!!", "letter": "?" }
+  ],
+  "pickIcons": [
+    {
+      "url": "https://example.com/",
+      "html": "<html><head><link rel=\"icon\" href=\"/favicon-32.png\" sizes=\"32x32\"><link rel=\"icon\" href=\"/favicon-192.png\" sizes=\"192x192\"><link rel=\"apple-touch-icon\" href=\"/apple.png\"></head></html>",
+      "icons": ["https://example.com/apple.png", "https://example.com/favicon-192.png", "https://example.com/favicon-32.png"]
+    },
+    {
+      "url": "https://example.com/start/",
+      "html": "<link rel=\"SHORTCUT ICON\" href=\"img/fav.ico\"><link rel=\"icon\" type=\"image/svg+xml\" href=\"/logo.svg\"><link rel=\"icon\" href=\"/mark.svg\">",
+      "icons": ["https://example.com/start/img/fav.ico"]
+    },
+    {
+      "url": "https://example.com/",
+      "html": "<link rel=\"icon\" href=\"http://cdn.example.com/a.png\"><link rel=\"icon\" href=\"//cdn.example.com/b.png\" sizes=\"any\"><link rel=\"stylesheet\" href=\"/s.css\">",
+      "icons": ["https://cdn.example.com/b.png"]
+    },
+    {
+      "url": "https://example.com/",
+      "html": "<link rel=\"apple-touch-icon-precomposed\" href=\"/p.png\"><link rel=\"icon\" href=\"/a.png\" sizes=\"16x16 48x48\"><link rel=\"icon\" href=\"/b.png\" sizes=\"48x48\">",
+      "icons": ["https://example.com/p.png", "https://example.com/a.png", "https://example.com/b.png"]
+    },
+    {
+      "url": "https://example.com/",
+      "html": "<html><head><title>No icons</title></head></html>",
+      "icons": []
+    },
+    {
+      "url": "https://example.com/",
+      "html": "<link href=\"/x.png\" rel=\"alternate icon\">",
+      "icons": ["https://example.com/x.png"]
+    }
+  ]
+}

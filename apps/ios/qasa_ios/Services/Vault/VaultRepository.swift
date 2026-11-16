@@ -151,6 +151,11 @@ final class VaultRepository {
         let row = VaultListRow(record: record, envelope: envelope)
         cache.upsert(row)
         Task { await syncAutofillIndex() }
+        // A saved login asks its site for an icon when its host has no fresh one
+        // (`docs/site-icons.md`, When). Covers the editor, CSV import and AutoFill saves.
+        if origin != .storedAsIs, case .login(let login) = payload, !login.website.isEmpty {
+            SiteIconStore.shared.request(website: login.website)
+        }
         return (row, issues)
     }
 

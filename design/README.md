@@ -170,8 +170,10 @@ A change that only one app picks up is not done.
    `QasaIcons.Copy` on Android, `<QasaIcon name="copy" :size>` on the desktop and in the
    extension. No app uses SF Symbols, Material icons or Lucide. **Sizes** (Phase 2,
    2026-11-16, option B in `previews/icon-sizes.html`): a glyph fills about half its box.
-   Item tile `size.itemTile` 48 / `itemTileGlyph` 24 (a solid letter circle is drawn at
-   `itemLetterTile` 44, centred in the 48 slot, so it reads the same size as a pale one); icon badge 36 / `iconBadgeGlyph` 20;
+   Item tile `size.itemTile` 48 / `itemTileGlyph` 24. A login's tile shows its **site's own
+   icon** (`siteIconGlyph` 28 on `siteIconTile` with a 1pt `stroke` ring; hero
+   `heroSiteIconGlyph` 52), else the **calm letter** (accent on `cardMuted`); never a bundled
+   brand mark or a brand colour (Phase 7, 2026-11-16; `docs/site-icons.md`); icon badge 36 / `iconBadgeGlyph` 20;
    home tile `homeTile` 40 / `homeTileGlyph` 22; a row's plain icon buttons (copy, ⋯)
    `rowIconButton` 36 / `rowIconButtonGlyph` 20. Field icon buttons stay 32 / 16, the tab
    bar 22. **The add button** is a `size.fab` (56) accent circle with the plain plus

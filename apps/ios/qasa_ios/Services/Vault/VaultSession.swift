@@ -133,6 +133,8 @@ final class VaultSession {
         encKey = nil
         searchKey = nil
         isUnlocked = false
+        // Decrypted site icons (and the hosts they name) don't outlive the unlock.
+        SiteIconStore.shared.forgetInMemory()
     }
 
     func requireEncKey() throws -> SymmetricKey {
@@ -147,6 +149,8 @@ final class VaultSession {
 
     func wipeVault() {
         lock()
+        // The icon cache is sealed with this vault's key and is as private as the vault.
+        SiteIconCache.shared.clear()
         VaultKeychainStore.resetVaultSecrets()
     }
 
@@ -199,6 +203,8 @@ final class VaultSession {
         VaultKeychainStore.kdfSalt = newSalt
         VaultKeychainStore.passwordVerifier = newVerifier
         VaultKeychainStore.kdfVersion = VaultCrypto.kdfVersion
+        // The icon cache is sealed with the old key: drop it, the tiles ask again.
+        SiteIconStore.shared.clearAll()
         encKey = newEnc
         searchKey = newSearch
         if VaultKeychainStore.biometricsEnabled {

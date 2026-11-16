@@ -18,9 +18,12 @@ export interface Prefs {
   autoLockMinutes: number
   /** Trimmed; empty when the user skipped it. Set with `setUserName`. */
   userName: string
+  /** Settings → Security → Website icons (docs/site-icons.md), on by default. Off: no site
+   *  is asked, the core deletes the icon cache and every login shows its letter. */
+  siteIcons: boolean
 }
 
-const DEFAULTS: Prefs = { language: 'en', theme: 'system', hasCompletedWelcome: false, autoLockMinutes: 5, userName: '' }
+const DEFAULTS: Prefs = { language: 'en', theme: 'system', hasCompletedWelcome: false, autoLockMinutes: 5, userName: '', siteIcons: true }
 const BROWSER_KEY = 'qasa.prefs'
 const inTauri = '__TAURI_INTERNALS__' in window
 

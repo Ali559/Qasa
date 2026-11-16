@@ -621,6 +621,8 @@
     <string name="settings_saving">جارٍ الحفظ…</string>
     <string name="settings_security">الأمان</string>
     <string name="settings_showpairingcode">إظهار رمز الاقتران</string>
+    <string name="settings_siteicons">أيقونات المواقع</string>
+    <string name="settings_siteiconshint">تعرض أيقونة كل موقع. يطلبها Qasa من ذلك الموقع فقط، ولا يطلبها من أي جهة أخرى.</string>
     <string name="settings_subscription">الاشتراك</string>
     <string name="settings_syncnetwork">المزامنة على هذه الشبكة</string>
     <string name="settings_theme">السمة</string>

@@ -5,6 +5,7 @@ import { reactive } from 'vue'
 
 import { vaultApi } from './api'
 import { resetProtectedAccess } from './protectedGate'
+import { clearSiteIcons } from './siteIcon'
 import type { Collection, ItemSummary, VaultStatus } from './types'
 
 export const session = reactive({
@@ -48,6 +49,7 @@ export function removeItem(id: string): void {
 
 function clearUnlockedState() {
   resetProtectedAccess()
+  clearSiteIcons()
   session.items = []
   session.collections = []
   session.unreadable = 0

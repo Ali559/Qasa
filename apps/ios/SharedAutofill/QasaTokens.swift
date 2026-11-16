@@ -39,7 +39,8 @@ enum QasaTokens {
         static let rowIconButtonGlyph: CGFloat = 20
         static let itemTile: CGFloat = 48
         static let itemTileGlyph: CGFloat = 24
-        static let itemLetterTile: CGFloat = 44
+        static let siteIconGlyph: CGFloat = 28
+        static let heroSiteIconGlyph: CGFloat = 52
         static let homeTile: CGFloat = 40
         static let homeTileGlyph: CGFloat = 22
         static let fab: CGFloat = 56
@@ -158,6 +159,7 @@ enum QasaTokens {
         static let cardBackground: UInt32 = 0xFFFFFF
         static let cardBackgroundLight: UInt32 = 0xFFF3E3
         static let cardMuted: UInt32 = 0xF3EAF7
+        static let siteIconTile: UInt32 = 0xFFFFFF
         static let stroke: UInt32 = 0xE6E1E1
         static let strokeChrome: UInt32 = 0xDCD7D7
         static let accent: UInt32 = 0x722F99
@@ -201,6 +203,7 @@ enum QasaTokens {
         static let cardBackground: UInt32 = 0x26272A
         static let cardBackgroundLight: UInt32 = 0x2C2D30
         static let cardMuted: UInt32 = 0x323337
+        static let siteIconTile: UInt32 = 0xF2F1F3
         static let stroke: UInt32 = 0x38393D
         static let strokeChrome: UInt32 = 0x434448
         static let accent: UInt32 = 0xB67FDB

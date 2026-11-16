@@ -18,8 +18,7 @@
       account id…), so the rows can't be decrypted any more, but the encrypted rows stay in
       the SwiftData store until a new vault replaces them. Delete account erases them; Clear
       local data should too.
-- [x] **Site icons on login items.** Done 2026-11-10: 57 bundled monochrome icons
-      (Simple Icons, `assets/site-icons`, template SVGs in `Assets.xcassets/SiteIcons`),
-      matched by the login website's registrable domain (`SiteIcon.swift`), on `VaultItemRow`
-      and the detail hero; other sites keep the letter tile, nothing is fetched. Tested on the
-      simulator only: check them on a device in light and dark.
+- [x] **Site icons on login items.** Replaced 2026-11-16 (TODO Phase 7, `docs/site-icons.md`):
+      the bundled marks are gone; a login shows its site's own favicon, asked only from that
+      site and cached encrypted per device (`Services/SiteIcons/`), else the calm letter.
+      Check on a device in light and dark, and with **Website icons** off.

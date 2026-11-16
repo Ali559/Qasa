@@ -621,6 +621,8 @@
     <string name="settings_saving">پاشەکەوتکردن…</string>
     <string name="settings_security">ئاسایش</string>
     <string name="settings_showpairingcode">پیشاندانی کۆدی جووتکردن</string>
+    <string name="settings_siteicons">ئایکۆنی ماڵپەڕەکان</string>
+    <string name="settings_siteiconshint">ئایکۆنی هەر ماڵپەڕێک پیشان دەدات. Qasa تەنها لەو ماڵپەڕە داوای دەکات، هەرگیز لە کەسێکی تر نا.</string>
     <string name="settings_subscription">بەشداری</string>
     <string name="settings_syncnetwork">هاوکاتکردن لەسەر ئەم تۆڕە</string>
     <string name="settings_theme">ڕووکار</string>

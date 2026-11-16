@@ -1,6 +1,6 @@
 // How vault items are shown: detail fields, copy actions, names, colours, dates. Ported
 // from iOS `VaultEnums.swift` (`detailFields`, `copyActions`, `primaryCopy`,
-// `displayName`), `Country.swift`, `SiteLogo.swift` and `VaultDateFormat`.
+// `displayName`), `Country.swift` and `VaultDateFormat`.
 import type { EmailKind, Honorific, ItemKind, NoteColor, PhoneKind, Variant, VaultPayload } from './types'
 
 type T = (key: string, ...args: Array<string | number>) => string
@@ -473,32 +473,16 @@ export function localizedSubtitle(subtitle: string, t: T): string {
   return subtitle
 }
 
-// MARK: site logo
+// MARK: site letter
 
-const KNOWN_BRANDS: Array<[string, string]> = [
-  ['facebook', '#1877F2'], ['messenger', '#0084FF'], ['whatsapp', '#25D366'], ['instagram', '#D62976'],
-  ['gmail', '#EA4335'], ['google', '#4285F4'], ['youtube', '#FF0000'], ['snapchat', '#F7C600'],
-  ['tiktok', '#111111'], ['telegram', '#229ED9'], ['viber', '#7360F2'], ['twitter', '#1D9BF0'],
-  ['linkedin', '#0A66C2'], ['apple', '#333333'], ['icloud', '#3693F3'], ['microsoft', '#00A4EF'],
-  ['outlook', '#0078D4'], ['amazon', '#FF9900'], ['netflix', '#E50914'], ['spotify', '#1DB954'],
-  ['github', '#24292F'], ['fib', '#0E7A5A'], ['fastpay', '#E2136E'], ['superqi', '#F57C20'],
-  ['zain', '#6B2C91'], ['asiacell', '#E30613'], ['korek', '#00843D'],
-]
-const FALLBACK_COLORS = ['#722F99', '#E07A5F', '#3FA7C9', '#2F9E6C', '#D4537E', '#B7791F', '#5B7CF0']
-
-/** iOS `SiteLogo`: first letter on the brand colour, with the same hash as Android. */
-export function siteLogo(name: string): { letter: string; color: string } {
-  const trimmed = name.trim()
-  const key = trimmed.toLowerCase()
-  const first = [...trimmed].find((c) => /[\p{L}\p{N}]/u.test(c))
-  const letter = first ? first.toUpperCase() : '?'
-  const brand = KNOWN_BRANDS.find(([k]) => key.includes(k))
-  if (brand) return { letter, color: brand[1] }
-  // Java String.hashCode (UTF-16 units, 32-bit wrap) + floorMod.
-  let hash = 0
-  for (let i = 0; i < key.length; i++) hash = (Math.imul(hash, 31) + key.charCodeAt(i)) | 0
-  const n = FALLBACK_COLORS.length
-  return { letter, color: FALLBACK_COLORS[((hash % n) + n) % n] }
+/**
+ * The calm letter a login shows without a site icon (docs/site-icons.md): the name's first
+ * letter or digit, upper-cased, or `?`. Drawn in the accent on `cardMuted`; there is no
+ * colour per site.
+ */
+export function siteLetter(name: string): string {
+  const first = [...name.trim()].find((c) => /[\p{L}\p{N}]/u.test(c))
+  return first ? first.toUpperCase() : '?'
 }
 
 // MARK: dates

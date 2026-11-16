@@ -244,6 +244,12 @@ function logout() {
           :trailing-text="t('settings.autoLockMinutesFmt', prefs.autoLockMinutes)"
           @click="showAutoLock = true"
         />
+        <!-- docs/site-icons.md "Setting": on by default; off asks no site and deletes the cache. -->
+        <SettingsRow icon="website" :title="t('settings.siteIcons')" :subtitle="t('settings.siteIconsHint')">
+          <template #trailing>
+            <ToggleSwitch v-model="prefs.siteIcons" :label="t('settings.siteIcons')" />
+          </template>
+        </SettingsRow>
       </SettingsSection>
 
     <SettingsSection :title="t('settings.linkedDevices')">

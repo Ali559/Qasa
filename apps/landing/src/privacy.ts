@@ -29,7 +29,7 @@ export interface Policy {
 }
 
 /** ISO date of the current text; shown localized in `updated`. */
-export const PRIVACY_UPDATED = "2026-11-10";
+export const PRIVACY_UPDATED = "2026-11-16";
 
 /** Forwarded by Cloudflare Email Routing (docs/deploy.md → Email). */
 const EMAIL = "privacy@qasa-app.com";
@@ -52,7 +52,7 @@ const en: Policy = {
     "How Qasa handles your data: your vault stays encrypted on your devices, and our server keeps only what it needs to link devices, run Premium and send notices.",
   kicker: "Privacy policy",
   title: "Your vault is yours. Here is everything else.",
-  updated: "Last updated: 10 November 2026",
+  updated: "Last updated: 16 November 2026",
   contents: "On this page",
   sections: [
     {
@@ -134,6 +134,14 @@ const en: Policy = {
       body: [
         `When Qasa checks your passwords against known leaks, your device turns each password into a SHA‑1 hash and sends only its first 5 characters to ${hibp}'s Pwned Passwords service. It gets back a padded list of the leaked hashes that start with those characters, and your device looks for a match itself.`,
         "This goes straight from your device to Have I Been Pwned, not through our server. They see your IP address and the 5-character prefixes, each shared by hundreds of different passwords. Your passwords never leave your device.",
+      ],
+    },
+    {
+      id: "site-icons",
+      title: "Website icons",
+      body: [
+        "To show a login's icon, your device asks that login's own website for its icon over HTTPS, once, and keeps it encrypted on the device. The request goes straight to that website, not through our server or anyone else, and carries no cookies and nothing about you or your vault. The website sees your IP address, as it does when you visit it.",
+        "Sites on your local network or with a private address (a router, a NAS) are never asked. Android takes an app's icon from the phone itself. You can turn this off in Settings → Website icons; then nothing is asked and the stored icons are deleted.",
       ],
     },
     {
@@ -249,7 +257,7 @@ const ckb: Policy = {
     "قاسە چۆن مامەڵە لەگەڵ داتاکانت دەکات: کۆگاکەت لەسەر ئامێرەکانت شفرەکراو دەمێنێتەوە، و سێرڤەرەکەمان تەنها ئەوە هەڵدەگرێت کە بۆ بەستنەوەی ئامێر، پریمیۆم و ناردنی ئاگاداری پێویستە.",
   kicker: "سیاسەتی تایبەتمەندی",
   title: "کۆگاکەت هی خۆتە. ئەمەش هەموو شتەکانی ترە.",
-  updated: "دوایین نوێکردنەوە: ١٠ی تشرینی دووەمی ٢٠٢٦",
+  updated: "دوایین نوێکردنەوە: ١٦ی تشرینی دووەمی ٢٠٢٦",
   contents: "لەم پەڕەیەدا",
   sections: [
     {
@@ -331,6 +339,14 @@ const ckb: Policy = {
       body: [
         `کاتێک قاسە وشە نهێنییەکانت لەگەڵ دزەکردنە ناسراوەکان بەراورد دەکات، ئامێرەکەت هەر وشەیەکی نهێنی دەگۆڕێت بۆ هاشی ${L("SHA‑1")} و تەنها ٥ پیتی یەکەمی دەنێرێت بۆ خزمەتگوزاریی ${L("Pwned Passwords")} ـی ${hibpRtl}. لیستێکی پڕکراوە لەو هاشە دزراوانە وەردەگرێتەوە کە بەو پیتانە دەست پێدەکەن، و ئامێرەکەت خۆی بەدوای هاوتادا دەگەڕێت.`,
         `ئەمە ڕاستەوخۆ لە ئامێرەکەتەوە دەچێت بۆ ${L("Have I Been Pwned")}، نەک بە سێرڤەرەکەماندا. ئەوان ناونیشانی ${L("IP")} ـەکەت و پێشگرە ٥ پیتییەکان دەبینن، کە هەریەکەیان لە نێوان سەدان وشەی نهێنیی جیاوازدا هاوبەشە. وشە نهێنییەکانت هەرگیز ئامێرەکەت بەجێناهێڵن.`,
+      ],
+    },
+    {
+      id: "site-icons",
+      title: "ئایکۆنی ماڵپەڕەکان",
+      body: [
+        `بۆ پیشاندانی ئایکۆنی چوونەژوورەوەیەک، ئامێرەکەت یەکجار بە ${L("HTTPS")} داوای ئایکۆنەکە لە ماڵپەڕی خودی ئەو چوونەژوورەوەیە دەکات و بە شێوەی کۆدکراو لەسەر ئامێرەکە هەڵیدەگرێت. داواکارییەکە ڕاستەوخۆ دەچێتە ئەو ماڵپەڕە، نەک بە ڕێگەی ڕاژەکاری ئێمە یان هیچ کەسێکی تر، و هیچ کووکی و هیچ زانیارییەک دەربارەی تۆ یان کۆگاکەت نابات. ماڵپەڕەکە ناونیشانی ${L("IP")} ـەکەت دەبینێت، وەک کاتێک سەردانی دەکەیت.`,
+        `هەرگیز داوا لە ماڵپەڕەکانی تۆڕی ناوخۆیی یان ناونیشانی تایبەت (ڕاوتەر، ${L("NAS")}) ناکرێت. ئەندرۆید ئایکۆنی ئەپ لە خودی مۆبایلەکە وەردەگرێت. دەتوانیت لە ڕێکخستنەکان → ئایکۆنی ماڵپەڕەکان بیکوژێنیتەوە؛ ئەو کات هیچ داوایەک ناکرێت و ئایکۆنە هەڵگیراوەکان دەسڕێنەوە.`,
       ],
     },
     {
@@ -446,7 +462,7 @@ const ar: Policy = {
     "كيف تتعامل قاصة مع بياناتك: تبقى خزنتك مشفّرة على أجهزتك، ولا يحتفظ خادمنا إلا بما يلزم لربط الأجهزة وتشغيل بريميوم وإرسال الإشعارات.",
   kicker: "سياسة الخصوصية",
   title: "خزنتك ملكك. وهذا كل ما عدا ذلك.",
-  updated: "آخر تحديث: 10 تشرين الثاني 2026",
+  updated: "آخر تحديث: 16 تشرين الثاني 2026",
   contents: "في هذه الصفحة",
   sections: [
     {
@@ -528,6 +544,14 @@ const ar: Policy = {
       body: [
         `عندما تفحص قاصة كلمات مرورك مقابل التسريبات المعروفة، يحوّل جهازك كل كلمة مرور إلى بصمة ${L("SHA‑1")} (${L("hash")})، ولا يرسل سوى أول 5 أحرف منها إلى خدمة ${L("Pwned Passwords")} التابعة لـ ${hibpRtl}. ويستلم قائمة مُبطَّنة بالبصمات المسرّبة التي تبدأ بهذه الأحرف، ويبحث جهازك بنفسه عن تطابق.`,
         `ينتقل هذا مباشرة من جهازك إلى ${L("Have I Been Pwned")}، لا عبر خادمنا. يرون عنوان ${L("IP")} الخاص بك والبادئات المكوّنة من 5 أحرف، وكل منها مشتركة بين مئات كلمات المرور المختلفة. ولا تغادر كلمات مرورك جهازك أبدًا.`,
+      ],
+    },
+    {
+      id: "site-icons",
+      title: "أيقونات المواقع",
+      body: [
+        `لعرض أيقونة تسجيل دخول، يطلب جهازك الأيقونة من موقع تسجيل الدخول نفسه عبر ${L("HTTPS")} مرة واحدة، ويحتفظ بها مشفرة على الجهاز. يذهب الطلب مباشرة إلى ذلك الموقع، لا عبر خادمنا ولا عبر أي جهة أخرى، ولا يحمل ملفات تعريف الارتباط ولا أي شيء عنك أو عن خزنتك. يرى الموقع عنوان ${L("IP")} الخاص بك، كما يحدث عند زيارته.`,
+        `لا تُسأل أبدًا المواقع الموجودة على شبكتك المحلية أو ذات العناوين الخاصة (الراوتر أو جهاز ${L("NAS")}). يأخذ أندرويد أيقونة التطبيق من الهاتف نفسه. يمكنك إيقاف ذلك من الإعدادات ← أيقونات المواقع؛ عندها لا يُرسل أي طلب وتُحذف الأيقونات المحفوظة.`,
       ],
     },
     {

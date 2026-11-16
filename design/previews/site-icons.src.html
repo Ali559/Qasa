@@ -1,0 +1,152 @@
+<title>Qasa Site Icons</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Phase 7 preview (2026-11-16): logins show the site's own icon; what shows when there is none,
+   and where icons come from. Colours are design/tokens.json. Built by build.py. The "favicons"
+   here are stand-ins: each brand's mark (site-marks.json) in its brand colour. */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --stroke: #E6E1E1;
+  --accent: #722F99; --onAccent: #FFFFFF; --danger: #C8323C; --success: #2F9E6C;
+  --text: #2A1F33; --text2: #6E6475; --text3: #A39DA3; --frame: #2A1F33;
+  --blue: #2F67D0; --blueTile: #E2EBFB; --mint: #1E8F6C; --mintTile: #DDF2EA; --favBg: #FFFFFF;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; --favBg: #F2F1F3; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; --favBg: #F2F1F3; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; margin: 0; padding: 28px 16px 48px; }
+.page { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+header p, .note { margin: 4px 0 0; color: var(--text2); max-width: 76ch; font-size: 15px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: inline-flex; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--text2); padding: 5px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.opt h2 { font-size: 17px; margin: 0; }
+.opt .sub { color: var(--text2); font-size: 13px; margin: 0 0 10px; min-height: 60px; }
+.phone { background: var(--bg); border: 8px solid var(--frame); border-radius: 36px; overflow: hidden; height: 640px; max-width: 340px; margin: 0 auto; padding: 14px 16px; }
+.title { font-size: 22px; font-weight: 700; margin: 6px 0 12px; }
+.row { display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 10px; background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; }
+.txt { flex: 1; min-width: 0; }
+.name, .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.name { font-weight: 600; font-size: 16px; }
+.meta { color: var(--text2); font-size: 14px; unicode-bidi: plaintext; text-align: start; }
+.rbtn { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text2); flex: none; }
+.slot { width: 48px; height: 48px; display: grid; place-items: center; flex: none; }
+.tile { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--muted); color: var(--accent); }
+.tile.fav { background: var(--favBg); box-shadow: inset 0 0 0 1px var(--stroke); }
+.tile.blue { background: var(--blueTile); color: var(--blue); }
+.tile.mint { background: var(--mintTile); color: var(--mint); }
+.letter { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 18px; }
+.letter.soft { width: 48px; height: 48px; background: var(--muted); color: var(--accent); }
+.legend { font-size: 12px; color: var(--text3); margin: -4px 0 10px; }
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.src { background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; padding: 16px; }
+.src h3 { margin: 0 0 4px; font-size: 16px; }
+.src .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; margin-bottom: 8px; }
+.tag.good { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.tag.mid { background: color-mix(in srgb, #B7701E 15%, transparent); color: #B7701E; }
+.tag.bad { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+.src ul { margin: 6px 0 0; padding-inline-start: 18px; font-size: 14px; color: var(--text2); }
+h2.sec { font-size: 20px; margin: 10px 0 0; }
+svg.i { display: block; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Phase 7: the site's own icon</h1>
+    <p>A login saved from a website or app shows that site's icon. The hard-coded logos go. When there's no icon or it can't be fetched, the tile falls back to one of the options below. The icons here are stand-ins (each brand's mark in its colour) so the page needs no network.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="theme"><button data-v="light">Light</button><button data-v="dark" aria-pressed="true">Dark</button></div>
+    <div class="seg" id="lang"><button data-v="en">English</button><button data-v="ckb" aria-pressed="true">کوردی</button></div>
+  </div>
+
+  <h2 class="sec">1. The fallback</h2>
+  <p class="note">Google, Facebook, Instagram and GitHub have an icon here; FIB, Asiacell and Korek don't (no favicon, or it couldn't be reached). Notes and cards keep their type icon.</p>
+  <div class="grid" id="grid"></div>
+
+  <h2 class="sec">2. Where the icons come from</h2>
+  <p class="note">This is the privacy decision. Today nothing is fetched, on purpose: the bundled-logo README says fetching favicons "would tell a third party which sites the user has". Whatever is picked, an icon is fetched once when the login is saved, kept with the item (encrypted, synced), and never fetched again on other devices.</p>
+  <div class="sources">
+    <div class="src"><span class="tag good">Recommended</span><h3>A · Straight from the site</h3>
+      <ul><li>The app asks the login's own site for its icon (<code>/favicon.ico</code>, or the icon its page links to).</li>
+      <li>Only that site sees the request, and you already use it. No third party, no Qasa server.</li>
+      <li>Some sites block it or have no icon: those get the fallback.</li>
+      <li>On Android, an app's icon comes from the phone itself (no network at all).</li></ul></div>
+    <div class="src"><span class="tag mid">Middle</span><h3>B · Through a Qasa icon server</h3>
+      <ul><li>The apps ask a Qasa server, which fetches and caches icons (as 1Password and Bitwarden do).</li>
+      <li>More reliable and uniform sizes, but Qasa's server sees which sites a user saves, even if it keeps no logs. That cuts against "Only you can see your passwords".</li>
+      <li>A server to run and pay for.</li></ul></div>
+    <div class="src"><span class="tag bad">Not recommended</span><h3>C · A public favicon service</h3>
+      <ul><li>Google's or DuckDuckGo's favicon API.</li>
+      <li>Easiest, but every saved site goes to Google or DuckDuckGo with the user's IP address.</li></ul></div>
+  </div>
+</div>
+
+<script>
+const ICONS = /*ICONS*/;
+const SITES = /*SITES*/;
+const icon = (name, size) => ICONS[name].replace('<svg ', `<svg class="i" width="${size}" height="${size}" `);
+const mark = (id, size) => `<svg class="i" viewBox="0 0 24 24" width="${size}" height="${size}" fill="#${SITES[id].hex}"><path d="${SITES[id].path}"/></svg>`;
+
+const ITEMS = [
+  { name: 'Google', meta: 'sara.ahmed@gmail.com', site: 'google' },
+  { name: 'Facebook', meta: 'sara.ahmed@gmail.com', site: 'facebook' },
+  { name: 'FIB', meta: '0750 123 4821', color: '0E7A5A' },
+  { name: 'Instagram', meta: '@sara.ahmed', site: 'instagram' },
+  { name: 'Asiacell', meta: '0770 555 1290', color: 'E30613' },
+  { name: 'GitHub', meta: 'sara-dev', site: 'github' },
+  { name: 'Korek', meta: '0751 444 9032', color: '00843D' },
+  { kind: 'card', name: 'FIB Card', meta: '•••• 1111' },
+];
+
+const OPTIONS = [
+  { name: 'A · Letter on brand colour', sub: 'Today\'s letter tile: the first letter on the brand\'s colour (or a stable colour from the name). Easy to spot, but busy next to real icons.',
+    fallback: it => `<div class="slot"><div class="letter" style="background:#${it.color}">${it.name[0]}</div></div>` },
+  { name: 'B · Key icon', sub: 'One calm key icon, like the type icons on notes and cards. Quiet, but every login without an icon looks the same.',
+    fallback: () => `<div class="tile">${icon('login', 24)}</div>` },
+  { name: 'C · Letter, calm', sub: 'The first letter in the accent colour on the same soft tile as the type icons. Still tells logins apart, without loud colours.',
+    fallback: it => `<div class="slot"><div class="letter soft">${it.name[0]}</div></div>` },
+];
+
+const T = { en: 'Your passwords', ckb: 'وشە نهێنییەکانت' };
+
+function render(lang) {
+  const dir = lang === 'ckb' ? 'rtl' : 'ltr';
+  document.getElementById('grid').innerHTML = OPTIONS.map(o => `
+    <div class="opt"><h2>${o.name}</h2><p class="sub">${o.sub}</p>
+      <div class="phone" dir="${dir}" lang="${lang}"><div class="title">${T[lang]}</div>
+      ${ITEMS.map(it => {
+        const tile = it.kind === 'card' ? `<div class="tile blue">${icon('card', 24)}</div>`
+          : it.site ? `<div class="tile fav">${mark(it.site, 26)}</div>` : o.fallback(it);
+        return `<div class="row">${tile}<div class="txt"><div class="name">${it.name}</div><div class="meta">${it.meta}</div></div><div class="rbtn">${icon('copy', 20)}</div><div class="rbtn">${icon('more-vertical', 20)}</div></div>`;
+      }).join('')}
+      </div></div>`).join('');
+}
+function seg(id, cb) {
+  const el = document.getElementById(id);
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    cb(b.dataset.v);
+  });
+}
+seg('theme', v => document.documentElement.dataset.theme = v);
+seg('lang', render);
+document.documentElement.dataset.theme = 'dark';
+render('ckb');
+</script>

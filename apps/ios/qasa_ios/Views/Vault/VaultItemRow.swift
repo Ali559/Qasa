@@ -11,32 +11,16 @@ struct VaultItemRow: View {
     @State private var toast: String?
     @State private var payload: VaultPayload?
 
-    /// Logins show a bundled site icon when their website has one (`SiteIcon`), else the
-    /// site's letter on its brand colour; other kinds keep their symbol.
+    /// Logins show their site's own icon when one is cached, else the calm letter
+    /// (`LoginSiteTile`); other kinds keep their symbol.
     @ViewBuilder
     private var tile: some View {
-        if case .login(let login) = payload, let asset = SiteIcon.assetName(forWebsite: login.website) {
-            Image(asset)
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-                .foregroundColor(Theme.textPrimary)
-                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
-                .background(Theme.cardMuted)
-                .clipShape(Circle())
-                .accessibilityHidden(true)
-        } else if row.kind == .login {
-            let logo = SiteLogo(name: row.displayName)
-            // A solid letter circle reads larger than a pale icon circle of the same size, so
-            // it is drawn at `itemLetterTile` (44) inside the 48 slot (the text still lines up).
-            Text(logo.letter)
-                .font(.qasa(18, weight: .bold))
-                .foregroundColor(.white)
-                .frame(width: QasaTokens.Size.itemLetterTile, height: QasaTokens.Size.itemLetterTile)
-                .background(logo.color)
-                .clipShape(Circle())
-                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
+        if row.kind == .login {
+            if case .login(let login) = payload {
+                LoginSiteTile(name: row.displayName, website: login.website)
+            } else {
+                LoginSiteTile(name: row.displayName, website: nil)
+            }
         } else {
             // A note or card shows the colour picked for it; until it is decrypted, the default.
             let itemColor = payload?.organizationColor

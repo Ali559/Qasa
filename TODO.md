@@ -214,7 +214,15 @@ picks one before anything is built.
 
 ### Phase 7: Logins show the site's or app's own icon (preview first for the fallback)
 
-- [ ] When a login is added from a website or app, fetch its favicon / app icon and use it as
+- [x] (2026-11-16, branch `phase-7-site-icons`: the owner picked the calm letter (C) and
+      "only from the site itself" in `design/previews/site-icons.html`. Spec and shared test
+      cases: `docs/site-icons.md`, `docs/site-icons-vectors.json`. Bundled marks
+      (`assets/site-icons`) removed. Per-device cache encrypted with the vault key, not
+      synced (an older app would drop a synced field on re-save). Settings → Website icons,
+      on by default. Privacy policy has a "Website icons" section (ckb/ar need native review).
+      Checked on the Android emulator: GitHub's icon fetched and shown, letter when off.
+      Not yet seen running on iOS or the desktop.)
+      When a login is added from a website or app, fetch its favicon / app icon and use it as
       the item's logo. Remove the hard-coded logos (Google etc.); every logo comes
       dynamically. If there's no favicon or it can't be reached, fall back to the first
       letter or a key icon; preview both. (Mind the privacy side: which service fetches

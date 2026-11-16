@@ -4,6 +4,7 @@ import alibarznji.qasa.backup.BackupService
 import alibarznji.qasa.backup.clearRestoreKeys
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.screens.AppSession
+import alibarznji.qasa.siteicons.SiteIconService
 import alibarznji.qasa.vault.VaultRepository
 import alibarznji.qasa.vault.VaultSecureStore
 import alibarznji.qasa.vault.VaultSession
@@ -24,11 +25,14 @@ class LocalDataEraser @Inject constructor(
     private val appSession: AppSession,
     private val backups: BackupService,
     private val secrets: VaultSecureStore,
+    private val siteIcons: SiteIconService,
 ) {
     suspend fun eraseAll() {
         // Tunnel off and the device's WireGuard key gone with the account.
         vpn.forget()
         repo.clearAll()
+        // The icon cache is sealed with this vault's key and names its sites: it goes too.
+        siteIcons.clearAll()
         // Clears the whole secure store: salt, verifier, account id, device fingerprint,
         // license token, the biometric secret and the backup restore keys (current,
         // written flag and a pending one from a restored backup).

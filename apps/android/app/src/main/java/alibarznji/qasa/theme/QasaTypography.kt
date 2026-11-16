@@ -173,6 +173,9 @@ class QasaText internal constructor(
 
     // ---- Display ----------------------------------------------------------
 
+    /** 36 bold — a login's letter on the detail hero (docs/site-icons.md). */
+    val heroLetter get() = style(36, FontWeight.Bold)
+
     /** 34 semibold — nav large title. */
     val navLargeTitle get() = style(34, FontWeight.SemiBold)
 

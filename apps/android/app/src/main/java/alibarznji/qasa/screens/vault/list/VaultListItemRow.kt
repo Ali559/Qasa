@@ -14,9 +14,9 @@ import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaRowIconButton
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.theme.QasaIconSize
-import alibarznji.qasa.theme.SiteIcons
 import alibarznji.qasa.theme.VaultItemRow
-import alibarznji.qasa.theme.siteLogoFor
+import alibarznji.qasa.theme.siteLetterFor
+import alibarznji.qasa.siteicons.rememberSiteIcon
 import alibarznji.qasa.vault.VaultItemKind
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.vault.VaultListRow
@@ -73,13 +73,15 @@ internal fun VaultListItemRow(
     var menuOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val primary = payload?.rowPrimaryCopy()
+    // The site's own icon once it's cached or fetched; the letter until then.
+    val siteIcon = rememberSiteIcon((payload as? VaultPayload.Login)?.website)
 
     VaultItemRow(
         title = row.displayName,
         subtitle = row.subtitle.ifBlank { subtitleFallback },
         icon = payload?.subtypeIcon ?: row.kind.icon,
-        logo = if (row.kind == VaultItemKind.Login) siteLogoFor(row.displayName) else null,
-        siteIcon = (payload as? VaultPayload.Login)?.let { SiteIcons.forWebsite(it.website) },
+        letter = if (row.kind == VaultItemKind.Login) siteLetterFor(row.displayName) else null,
+        siteIcon = siteIcon,
         itemColor = payload?.organizationColor()?.let { it.swatch() to it.tile() },
         onClick = onOpen,
         // iOS gates even the title copy of a protected note (`VaultItemRow.swift:145`).

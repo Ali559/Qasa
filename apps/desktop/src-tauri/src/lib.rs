@@ -6,6 +6,7 @@ mod backup;
 mod bridge;
 mod clipboard;
 mod prefs;
+mod site_icons;
 mod sync;
 mod vault;
 
@@ -32,7 +33,11 @@ pub fn run() {
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
-            let vault = Vault::open(&dir.join("vault.sqlite")).map_err(|e| e.to_string())?;
+            let mut vault = Vault::open(&dir.join("vault.sqlite")).map_err(|e| e.to_string())?;
+            // A saved login's site icon is asked for in the background (docs/site-icons.md).
+            app.manage(site_icons::queue::SiteIconQueue::default());
+            let icons = app.handle().clone();
+            vault.set_icon_requester(Box::new(move |host| site_icons::queue::request(&icons, host)));
             app.manage(VaultState(Mutex::new(vault)));
             let api = account::api::ApiClient::new(account::api::base_url());
             let account = account::Account::new(api, Box::new(account::secrets::KeyringStore));
@@ -54,6 +59,7 @@ pub fn run() {
             open_url,
             prefs::get_prefs,
             prefs::set_prefs,
+            site_icons::queue::site_icons_get,
             vc::vault_status,
             vc::vault_create,
             vc::vault_unlock,
