@@ -134,7 +134,7 @@ struct LoginView: View {
                     .padding(.bottom, 24)
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 24)
+                .padding(.top, QasaTokens.Space.pageTop)
             }
             .scrollDismissesKeyboard(.interactively)
         }

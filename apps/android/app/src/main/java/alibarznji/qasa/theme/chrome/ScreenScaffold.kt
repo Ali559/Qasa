@@ -31,7 +31,7 @@ private val NoInsets = WindowInsets(0, 0, 0, 0)
  *     AppMenuHeader / BrandMenuHeader   // 64dp, chrome, 1dp strokeChrome underline
  *     ScrollView { Column(spacing 16|24) { ... }
  *         .padding(horizontal = screenPadding)
- *         .padding(top = 24, bottom = scrollTail) }
+ *         .padding(top = QasaTokens.Space.pageTop, bottom = scrollTail) }
  *     StickyBottomBar?                  // chrome, 1px stroke top hairline
  * }
  * .background(background)
@@ -71,9 +71,10 @@ fun ScreenScaffold(
             .fillMaxWidth()
             .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
             .padding(horizontal = QasaDimens.screenPadding)
+            // Under a page header the first content starts pageTop below it, on every page.
             // In a sheet: iOS pads the page by screenPadding under the sheet header.
             .padding(
-                top = if (inSheet) QasaDimens.screenPadding else QasaDimens.sectionGap,
+                top = if (inSheet) QasaDimens.screenPadding else QasaTokens.Space.pageTop,
                 bottom = if (inSheet) QasaDimens.screenPadding else QasaDimens.scrollTail,
             )
             .windowInsetsPadding(tailInset)

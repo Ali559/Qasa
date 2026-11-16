@@ -99,6 +99,8 @@ struct NotificationsView: View {
                         }
                     }
                     .scrollContentBackground(.hidden)
+                    // design/README.md: a page's first content starts `pageTop` under the header.
+                    .contentMargins(.top, QasaTokens.Space.pageTop, for: .scrollContent)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

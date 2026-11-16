@@ -75,6 +75,7 @@ object QasaTokens {
 
     object Space {
         val screenPadding: Dp = 20.dp
+        val pageTop: Dp = 8.dp
         val headerHorizontal: Dp = 16.dp
         val fieldHorizontal: Dp = 14.dp
         val notesHorizontal: Dp = 10.dp

@@ -7,6 +7,7 @@ import alibarznji.qasa.screens.vault.list.VaultListItemRow
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.EmptyState
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -112,7 +113,7 @@ internal fun CollectionDetailContent(
                 contentPadding = PaddingValues(
                     start = QasaDimens.screenPadding,
                     end = QasaDimens.screenPadding,
-                    top = QasaDimens.screenPadding,
+                    top = QasaTokens.Space.pageTop,
                     bottom = QasaDimens.scrollTail,
                 ),
                 verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall),

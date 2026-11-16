@@ -43,8 +43,9 @@ struct VPNView: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(Theme.screenPadding)
-        .padding(.top, 24)
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.top, QasaTokens.Space.pageTop)
+        .padding(.bottom, Theme.screenPadding)
     }
 
     private func premiumContent(vpn: VPNService) -> some View {
@@ -94,9 +95,9 @@ struct VPNView: View {
 
                 securityFeaturesCard
             }
-            .padding(Theme.screenPadding)
-            .padding(.top, 16)
-            .padding(.bottom, 40)
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, QasaTokens.Space.pageTop)
+            .padding(.bottom, Theme.screenPadding + 40)
         }
     }
 

@@ -156,7 +156,7 @@ struct CreateVaultView: View {
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 24)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 24)
             }
             .scrollDismissesKeyboard(.interactively)

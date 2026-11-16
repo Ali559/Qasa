@@ -113,6 +113,10 @@ A change that only one app picks up is not done.
    `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13. Rows that share a card (Settings,
    You → Tools, Account, About) are a `SettingsSection` with a `RowDivider` between each two:
    1pt `stroke`, inset badge + gap (50) on the leading side, running to the trailing edge.
+   **Under the page header** (`AppMenuHeader` / `BrandMenuHeader`, 64 tall, and the
+   sign-in screens' `KasoBrandHeader` / `BrandHeader`) a page's first
+   content starts `space.pageTop` (8) below it, on every page and every app (Phase 5,
+   2026-11-16); never a page's own 16–24.
    A page's header says what the page is, the same on every app: the Alerts tab is titled
    "Notifications" (`notifications.title`), whatever it shows inside.
 6b. **Protected items** (a secure note with "Protect item" on; chosen 2026-11-12).

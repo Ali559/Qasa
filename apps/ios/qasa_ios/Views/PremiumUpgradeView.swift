@@ -71,7 +71,7 @@ struct PremiumUpgradeView: View {
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 20)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 24)
             }
         }

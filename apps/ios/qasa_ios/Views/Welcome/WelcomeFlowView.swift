@@ -73,7 +73,7 @@ private struct WelcomeLanguageView: View {
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 28)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 24)
             }
         }
@@ -149,7 +149,7 @@ private struct WelcomeNameView: View {
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 28)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 24)
             }
             .scrollDismissesKeyboard(.interactively)

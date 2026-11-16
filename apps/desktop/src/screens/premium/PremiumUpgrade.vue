@@ -372,7 +372,7 @@ async function simulateStub() {
   width: 100%;
   max-width: 720px;
   margin-inline: auto;
-  padding: 20px var(--space-screen-padding) 40px;
+  padding: var(--space-page-top) var(--space-screen-padding) 40px;
 }
 
 .accent {

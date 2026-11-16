@@ -55,7 +55,7 @@ defineProps<{ wash?: boolean }>()
   padding-inline: var(--space-screen-padding);
   display: flex;
   flex-direction: column;
-  padding-top: 24px;
+  padding-top: var(--space-page-top);
   padding-bottom: 40px;
 }
 </style>

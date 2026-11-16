@@ -28,7 +28,7 @@ struct YouView: View {
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, 16)
+                .padding(.top, QasaTokens.Space.pageTop)
                 .padding(.bottom, 40)
             }
         }

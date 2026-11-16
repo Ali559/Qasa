@@ -11,6 +11,7 @@ import alibarznji.qasa.screens.vault.detail.detailFields
 import alibarznji.qasa.theme.BackChromeHeader
 import alibarznji.qasa.theme.QasaConfirmDialog
 import alibarznji.qasa.theme.QasaDimens
+import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaIcons
@@ -214,7 +215,7 @@ fun VaultItemDetailScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = QasaDimens.screenPadding)
-                .padding(top = QasaDimens.contentGap, bottom = QasaDimens.scrollTail),
+                .padding(top = QasaTokens.Space.pageTop, bottom = QasaDimens.scrollTail),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(QasaDimens.sectionGap),
         ) {

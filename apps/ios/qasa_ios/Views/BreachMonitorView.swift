@@ -87,7 +87,7 @@ struct BreachMonitorView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 24)
+        .padding(.top, QasaTokens.Space.pageTop)
     }
 
     private var premiumContent: some View {
@@ -110,7 +110,7 @@ struct BreachMonitorView: View {
                 }
             }
             .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 24)
+            .padding(.top, QasaTokens.Space.pageTop)
             .padding(.bottom, 40)
         }
     }
