@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // iOS `PremiumUpgradeView` (embedded in the shell): the plan carousel, auto-renew, the
-// wallet rows and the pinned pay button. Desktop change (plan §7): Wayl's hosted page opens
+// payment rows (card, FIB, FastPay, SuperQi; all through Wayl) and the pinned pay button. Desktop change (plan §7): Wayl's hosted page opens
 // in the browser; a wallet app link (`fib://…`) is shown as a QR code to scan with the
 // phone. Then the payment is polled 30 × 2 s, with "Check again" after a timeout.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -19,7 +19,8 @@ import { openUrl } from '@/opener'
 import { useT } from '@/prefs'
 import FeatureRow from './FeatureRow.vue'
 import FilledCheck from './FilledCheck.vue'
-import { errorText, FALLBACK_PLANS, formatIqd, isYearly, pollUntilComplete } from './shared'
+import { errorText, FALLBACK_PLANS, formatIqd, isYearly, PAYMENT_METHODS, pollUntilComplete } from './shared'
+import type { PaymentMethodId } from './shared'
 import WalletQr from './WalletQr.vue'
 
 defineEmits<{ back: [] }>()
@@ -27,22 +28,32 @@ const t = useT()
 const isDev = import.meta.env.DEV
 
 interface PaymentMethod {
+  /** UI only: which row is chosen. */
+  id: PaymentMethodId
   name: string
   subtitle: string
-  badgeText: string
+  /** The short brand name in "Pay … via …" and "Complete payment in …". */
+  shortName: string
+  /** One logo in a circle, or two stacked (Visa and Mastercard). */
+  logos: string[]
+  /** What the server is asked for: every method pays through Wayl's hosted page. */
   gateway: string
 }
 
-// One option: Wayl's hosted page offers FIB, Qi Card and the other Iraqi wallets itself.
-const methods = computed<PaymentMethod[]>(() => [
-  { name: t('premium.wayl'), subtitle: t('premium.waylSub'), badgeText: 'Wayl', gateway: 'wayl' },
-])
+// Four rows, one per brand, all paid through Wayl (the choice doesn't change the request).
+const methods = computed<PaymentMethod[]>(() =>
+  PAYMENT_METHODS.map((m) => ({
+    ...m,
+    name: t(`premium.${m.id}`),
+    subtitle: t(`premium.${m.id}Sub`),
+  })),
+)
 
 const plans = ref<PricingPlan[]>(FALLBACK_PLANS)
 const autoRenewModes = ref<Record<string, string>>({})
 const selectedPlanId = ref('premium_monthly')
 const autoRenew = ref(true)
-const selectedGateway = ref('wayl')
+const selectedMethodId = ref<PaymentMethodId>('card')
 const isPaying = ref(false)
 const statusMessage = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
@@ -58,7 +69,7 @@ let unmounted = false
 onBeforeUnmount(() => (unmounted = true))
 
 const premium = computed(() => account.status?.isPremium ?? false)
-const selectedMethod = computed(() => methods.value.find((m) => m.gateway === selectedGateway.value) ?? methods.value[0])
+const selectedMethod = computed(() => methods.value.find((m) => m.id === selectedMethodId.value) ?? methods.value[0])
 const selectedPlan = computed(() => plans.value.find((p) => p.id === selectedPlanId.value) ?? plans.value[0])
 
 const periodLabel = (plan: PricingPlan) => (isYearly(plan) ? t('premium.periodYear') : t('premium.periodMonth'))
@@ -72,13 +83,13 @@ function features(plan: PricingPlan): string[] {
 
 /** Only wallets the server can charge get the "we'll charge it" wording. */
 const autoRenewDetail = computed(() =>
-  autoRenewModes.value[selectedGateway.value]?.toLowerCase() === 'charge'
+  autoRenewModes.value[selectedMethod.value.gateway]?.toLowerCase() === 'charge'
     ? t('premium.autoRenewDetailCharge')
     : t('premium.autoRenewDetail'),
 )
 
 const payTitle = computed(() =>
-  isPaying.value ? t('premium.processing') : t('premium.payVia', formatIqd(selectedPlan.value.amount_iqd), selectedMethod.value.badgeText),
+  isPaying.value ? t('premium.processing') : t('premium.payVia', formatIqd(selectedPlan.value.amount_iqd), selectedMethod.value.shortName),
 )
 
 onMounted(async () => {
@@ -183,7 +194,7 @@ async function startPayment() {
       qrLink.value = intent.deep_link
       if (isDev) stubIntent.value = intent
     }
-    statusMessage.value = t('premium.completeInWallet', method.badgeText)
+    statusMessage.value = t('premium.completeInWallet', method.shortName)
     await finish(intent.payment_id, 30, 2000)
   } catch (e) {
     errorMessage.value = errorText(t, e)
@@ -210,7 +221,7 @@ async function checkAgain() {
 async function simulateStub() {
   const intent = stubIntent.value
   if (!isDev || !intent) return
-  statusMessage.value = t('premium.simulatingPayment', selectedMethod.value.badgeText)
+  statusMessage.value = t('premium.simulatingPayment', selectedMethod.value.shortName)
   try {
     // The server may route to another gateway; its webhook is the one to hit.
     await accountApi.simulateStub(intent.gateway, intent.gateway_order_id)
@@ -291,27 +302,35 @@ async function simulateStub() {
           <div class="methods" role="radiogroup" :aria-label="t('premium.selectPayment')">
             <button
               v-for="method in methods"
-              :key="method.gateway"
+              :key="method.id"
               type="button"
               role="radio"
               class="method"
-              :class="{ selected: method.gateway === selectedGateway }"
-              :aria-checked="method.gateway === selectedGateway"
+              :class="{ selected: method.id === selectedMethodId }"
+              :aria-checked="method.id === selectedMethodId"
               :disabled="isPaying"
-              @click="selectedGateway = method.gateway"
+              @click="selectedMethodId = method.id"
             >
-              <span class="logo" aria-hidden="true">{{ method.badgeText.charAt(0) }}</span>
+              <span class="logos" aria-hidden="true">
+                <span v-for="logo in method.logos" :key="logo" class="logo" :class="{ mark: method.logos.length > 1 }">
+                  <img :src="logo" alt="" draggable="false" />
+                </span>
+              </span>
               <span class="method-text">
                 <span class="method-name">{{ method.name }}</span>
                 <span class="method-sub">{{ method.subtitle }}</span>
               </span>
-              <FilledCheck v-if="method.gateway === selectedGateway" :size="22" />
+              <FilledCheck v-if="method.id === selectedMethodId" :size="22" />
               <QasaIcon v-else name="circle" :size="22" class="unchecked" />
             </button>
           </div>
+          <p class="via-wayl">
+            <QasaIcon name="lock" :size="14" />
+            <span>{{ t('premium.viaWayl') }}</span>
+          </p>
         </section>
 
-        <WalletQr v-if="qrLink" :link="qrLink" :wallet="selectedMethod.badgeText" />
+        <WalletQr v-if="qrLink" :link="qrLink" :wallet="selectedMethod.shortName" />
 
         <p v-if="statusMessage" class="status" role="status">{{ statusMessage }}</p>
         <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
@@ -576,20 +595,60 @@ async function simulateStub() {
   cursor: default;
 }
 
-/* No wallet logo for Wayl: a text badge, the method's initial on an accent tint. */
+/* Brand logos (assets/payment-logos, untouched): each in a 36 circle. Visa and
+   Mastercard share a row as two stacked circles, the second 32 along (68 wide in all), so both marks show in full. */
+.logos {
+  display: flex;
+  flex-shrink: 0;
+  /* Every row reserves the card pair's width so the titles line up. */
+  min-width: calc(var(--size-icon-badge) + 32px);
+  margin-inline-end: var(--space-row-icon-gap);
+}
+
 .logo {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  margin-inline-end: var(--space-row-icon-gap);
+  overflow: hidden;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
-  font-size: var(--type-field-size);
-  font-weight: 700;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logo.mark {
+  border: var(--size-stroke) solid var(--stroke);
+  background: #fff;
+}
+
+.logo.mark + .logo.mark {
+  margin-inline-start: -4px;
+}
+
+.logo.mark img {
+  width: 24px;
+  height: auto;
+  object-fit: contain;
+}
+
+.via-wayl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.via-wayl :deep(svg) {
+  flex-shrink: 0;
 }
 
 .method-text {

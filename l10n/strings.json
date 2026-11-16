@@ -1825,9 +1825,9 @@
     "ckb": "پارەدان سەرکەوتوو بوو بەڵام نوێکردنەوەی مۆڵەت سەرنەکەوت. کۆگا قفڵ بکە و دووبارە بکەرەوە."
   },
   "premium.opensWallet": {
-    "en": "Opens your wallet app. We'll refresh your license when payment completes.",
-    "ar": "يفتح تطبيق المحفظة. سنحدّث الترخيص عند اكتمال الدفع.",
-    "ckb": "ئەپی جزدانەکەت دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو."
+    "en": "Opens Wayl's secure payment page. We'll refresh your license when payment completes.",
+    "ar": "تفتح صفحة الدفع الآمنة من Wayl. سنحدّث ترخيصك عند اكتمال الدفع.",
+    "ckb": "پەڕەی پارەدانی سەلامەتی Wayl دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو."
   },
   "premium.payVia": {
     "en": "Pay %@ IQD via %@",
@@ -4372,5 +4372,35 @@
     "en": "Unlock your vault to fill passwords and other items with Face ID.",
     "ar": "افتح خزنتك باستخدام Face ID لتعبئة كلمات المرور والعناصر الأخرى.",
     "ckb": "بە Face ID کۆگاکەت بکەرەوە بۆ پڕکردنەوەی وشە نهێنییەکان و بابەتەکانی تر."
+  },
+  "premium.card": {
+    "en": "Visa / Mastercard",
+    "ar": "فيزا / ماستركارد",
+    "ckb": "ڤیزا / ماستەرکارد"
+  },
+  "premium.cardSub": {
+    "en": "Debit or credit card",
+    "ar": "بطاقة خصم أو بطاقة ائتمان",
+    "ckb": "کارتی بانکی یان کارتی کرێدیت"
+  },
+  "premium.fibSub": {
+    "en": "Pay in the FIB app",
+    "ar": "ادفع من تطبيق FIB",
+    "ckb": "لە ئەپی FIB پارە بدە"
+  },
+  "premium.fastpaySub": {
+    "en": "Pay in the FastPay app",
+    "ar": "ادفع من تطبيق FastPay",
+    "ckb": "لە ئەپی FastPay پارە بدە"
+  },
+  "premium.superqiSub": {
+    "en": "Pay in the SuperQi app with your Qi Card",
+    "ar": "ادفع من تطبيق SuperQi ببطاقة Qi Card",
+    "ckb": "لە ئەپی SuperQi بە Qi Card پارە بدە"
+  },
+  "premium.viaWayl": {
+    "en": "Every method is processed securely by Wayl.",
+    "ar": "تتم معالجة كل طرق الدفع بأمان عبر Wayl.",
+    "ckb": "هەموو شێوازەکانی پارەدان بە سەلامەتی لە ڕێگەی Wayl ئەنجام دەدرێن."
   }
 }

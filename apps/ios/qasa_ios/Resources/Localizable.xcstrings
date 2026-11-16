@@ -11595,6 +11595,50 @@
         }
       }
     },
+    "premium.card": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visa / Mastercard"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فيزا / ماستركارد"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ڤیزا / ماستەرکارد"
+          }
+        }
+      }
+    },
+    "premium.cardSub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debit or credit card"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بطاقة خصم أو بطاقة ائتمان"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کارتی بانکی یان کارتی کرێدیت"
+          }
+        }
+      }
+    },
     "premium.comingSoonBody": {
       "localizations": {
         "en": {
@@ -11679,6 +11723,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "FastPay"
+          }
+        }
+      }
+    },
+    "premium.fastpaySub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay in the FastPay app"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ادفع من تطبيق FastPay"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە ئەپی FastPay پارە بدە"
           }
         }
       }
@@ -11793,6 +11859,28 @@
         }
       }
     },
+    "premium.fibSub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay in the FIB app"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ادفع من تطبيق FIB"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە ئەپی FIB پارە بدە"
+          }
+        }
+      }
+    },
     "premium.installWalletApp": {
       "localizations": {
         "en": {
@@ -11842,19 +11930,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opens your wallet app. We'll refresh your license when payment completes."
+            "value": "Opens Wayl's secure payment page. We'll refresh your license when payment completes."
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يفتح تطبيق المحفظة. سنحدّث الترخيص عند اكتمال الدفع."
+            "value": "تفتح صفحة الدفع الآمنة من Wayl. سنحدّث ترخيصك عند اكتمال الدفع."
           }
         },
         "ckb": {
           "stringUnit": {
             "state": "translated",
-            "value": "ئەپی جزدانەکەت دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو."
+            "value": "پەڕەی پارەدانی سەلامەتی Wayl دەکاتەوە. مۆڵەت نوێ دەکەینەوە کاتێک پارەدان تەواو بوو."
           }
         }
       }
@@ -12057,6 +12145,28 @@
         }
       }
     },
+    "premium.superqiSub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay in the SuperQi app with your Qi Card"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ادفع من تطبيق SuperQi ببطاقة Qi Card"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لە ئەپی SuperQi بە Qi Card پارە بدە"
+          }
+        }
+      }
+    },
     "premium.title": {
       "localizations": {
         "en": {
@@ -12097,6 +12207,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "بەرزکردنەوە بۆ پرۆ"
+          }
+        }
+      }
+    },
+    "premium.viaWayl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every method is processed securely by Wayl."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تتم معالجة كل طرق الدفع بأمان عبر Wayl."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەموو شێوازەکانی پارەدان بە سەلامەتی لە ڕێگەی Wayl ئەنجام دەدرێن."
           }
         }
       }
