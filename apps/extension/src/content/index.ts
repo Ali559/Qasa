@@ -9,8 +9,9 @@
 import type { BgResponse, BridgeStatus, ContentRequest, FillValues, IdentityItem, LoginMatch, TabRequest } from '@ext/shared/messages'
 import { LANGUAGE_KEY, loadLanguage } from '@ext/shared/language'
 import { isWebUrl } from '@ext/shared/protocol'
-import { detect, FRAME_MARK, groupOf, iconFields, identityGroupOf, isOtpField, type Detection, type FieldGroup } from './detect'
-import { fillGenerated, setFieldValue, setSelectValue } from './fill'
+import { generateConstraints } from './constraints'
+import { deepInputs, detect, FRAME_MARK, groupOf, iconFields, identityGroupOf, isOtpField, isPasswordField, type Detection, type FieldGroup } from './detect'
+import { fillGenerated, fillOtpRun, restoreFocus, setFieldValue, setSelectValue } from './fill'
 import { candidates, optionFor, type IdentityGroup, type IdentityValues } from './identity'
 import { loadFonts, type FontBytes } from './fonts'
 import { effectiveOpacity, isFieldRendered, isFieldVisible } from './guard'
@@ -38,7 +39,7 @@ try {
   // Storage events unavailable: the language stays as loaded.
 }
 
-let detection: Detection = { groups: [], otpFields: [], identity: [] }
+let detection: Detection = { groups: [], otpFields: [], otpRuns: [], identity: [] }
 /** One overlay per document we handle (ours, plus script-less same-origin frames). */
 const overlays = new Map<Document, Overlay>()
 /** Icons show only while the desktop is reachable and paired. */
@@ -78,7 +79,17 @@ function scan(): void {
   }
   for (const [doc, overlay] of overlays) overlay.setIcons(byDoc.get(doc) ?? [])
   for (const [doc, list] of byDoc) overlayFor(doc).setIcons(list)
+  // The open menu's field was replaced by a re-render: move the menu to its successor.
+  for (const overlay of overlays.values()) {
+    const field = overlay.menuField()
+    if (!field || field.isConnected || openMenuRef?.overlay !== overlay) continue
+    const live = deepInputs(openMenuRef.ref.doc).find((f) => matchesRef(f, openMenuRef!.ref))
+    if (live) overlay.retarget(live)
+  }
 }
+
+/** The field the open menu was opened on, to find it again after a re-render. */
+let openMenuRef: { overlay: Overlay; ref: FieldRef } | undefined
 
 async function refreshStatus(): Promise<void> {
   statusCheckedAt = Date.now()
@@ -121,19 +132,51 @@ function scheduleReposition(): void {
 /** What a field's menu offers: its login form's logins, a strong password for a new
  *  password (rule 6c), 2FA codes, cards or profiles. */
 type MenuContext =
-  | { kind: 'login'; group: FieldGroup }
-  | { kind: 'newPassword'; group: FieldGroup }
-  | { kind: 'otp' }
+  | { kind: 'login'; group: FieldGroup; anchor: HTMLInputElement }
+  | { kind: 'newPassword'; group: FieldGroup; anchor: HTMLInputElement }
+  | { kind: 'otp'; anchor: HTMLInputElement }
   | { kind: 'identity'; group: IdentityGroup }
 
+/** A field with a split one-time code: its run of one-character boxes. */
+function otpRunOf(field: HTMLInputElement): HTMLInputElement[] | undefined {
+  return detection.otpRuns.find((run) => run.includes(field))
+}
+
+/** Fields whose click (or ArrowDown) opens the menu: the icon fields and every box of a
+ *  split one-time code. */
+function openable(field: HTMLInputElement): boolean {
+  return iconFields(detection).includes(field) || !!otpRunOf(field)
+}
+
 function contextOf(field: HTMLInputElement): MenuContext | null {
-  if (isOtpField(field)) return { kind: 'otp' }
+  if (isOtpField(field) || otpRunOf(field)) return { kind: 'otp', anchor: field }
   const group = groupOf(detection.groups, field)
   // Saved logins are never offered on a new-password field: only a strong password.
-  if (group && (field === group.newPassword || field === group.confirmPassword)) return { kind: 'newPassword', group }
-  if (group) return { kind: 'login', group }
+  if (group && (field === group.newPassword || field === group.confirmPassword)) return { kind: 'newPassword', group, anchor: field }
+  if (group) return { kind: 'login', group, anchor: field }
   const identity = identityGroupOf(detection.identity, field)
   return identity ? { kind: 'identity', group: identity } : null
+}
+
+/**
+ * Runs a fill with the menu out of the way (so it can't stand in for a covered field in
+ * the visibility checks), then closes it, or, when nothing could be filled, shows it again
+ * saying so (R5): it never closes as if the fill worked.
+ */
+async function fillFromMenu(overlay: Overlay, fill: () => Promise<boolean> | boolean): Promise<void> {
+  overlay.hideMenu()
+  let key = 'ext.page.fillFailed'
+  try {
+    if (await fill()) {
+      overlay.closeMenu()
+      return
+    }
+  } catch {
+    key = 'ext.page.error'
+  }
+  if (!overlay.isMenuOpen()) return
+  overlay.showMenu()
+  overlay.setMenu({ kind: 'message', key })
 }
 
 function openMenuFor(field: HTMLInputElement): void {
@@ -141,6 +184,8 @@ function openMenuFor(field: HTMLInputElement): void {
   if (!context) return
   const overlay = overlayFor(field.ownerDocument)
   const fonts = loadFonts(field.ownerDocument, () => ask<FontBytes>({ kind: 'fonts' }))
+  const snap = context.kind === 'login' || context.kind === 'newPassword' ? snapshot(context.group, field) : undefined
+  openMenuRef = { overlay, ref: fieldRef(field) }
   overlay.openMenu(field, {
     onPick: (item) => {
       if (context.kind === 'identity') {
@@ -148,28 +193,121 @@ function openMenuFor(field: HTMLInputElement): void {
         void fillIdentity(field, context.group, item.id, overlay)
         return
       }
-      overlay.closeMenu()
-      if (context.kind === 'otp') void fillTotp(field, item.id, overlay.element)
-      else if (context.kind === 'login') void fillGroup(context.group, item.id, overlay.element)
+      if (context.kind === 'otp') {
+        void fillFromMenu(overlay, () => {
+          const live = liveField(fieldRef(field), field)
+          return live ? fillTotp(live, item.id, overlay.element) : false
+        })
+      } else if (context.kind === 'login' && snap) {
+        void fillFromMenu(overlay, () => {
+          const live = liveGroup(snap, context.group)
+          return live ? fillGroup(live, item.id, overlay.element, liveField(snap.anchor, field) ?? undefined) : false
+        })
+      }
     },
   })
   overlay.revealAfter(fonts)
-  void loadMenu(overlay, context)
+  void loadMenu(overlay, context, snap)
 }
 
-async function loadMenu(overlay: Overlay, context: MenuContext): Promise<void> {
+// MARK: re-finding fields (R6)
+
+const ROLES = ['username', 'password', 'newPassword', 'confirmPassword'] as const
+type GroupRole = (typeof ROLES)[number]
+
+/** How to find a field again after the page re-rendered it: its name / id / autocomplete,
+ *  and its position among the inputs of its document. */
+interface FieldRef {
+  key: string
+  index: number
+  doc: Document
+}
+
+interface GroupSnapshot {
+  kind: FieldGroup['kind']
+  container: FieldGroup['container']
+  refs: Partial<Record<GroupRole, FieldRef>>
+  anchor: FieldRef
+}
+
+function fieldKey(f: HTMLInputElement): string {
+  const name = f.name || f.getAttribute('name') || ''
+  return [isPasswordField(f) ? 'pw' : 'tx', name, f.id, f.getAttribute('autocomplete') ?? ''].join('|')
+}
+
+function fieldRef(f: HTMLInputElement): FieldRef {
+  return { key: fieldKey(f), index: deepInputs(f.ownerDocument).indexOf(f), doc: f.ownerDocument }
+}
+
+/** A field matches a ref by its name / id / autocomplete when it has any, else by position. */
+function matchesRef(f: HTMLInputElement, ref: FieldRef): boolean {
+  if (f.ownerDocument !== ref.doc) return false
+  const named = !/^\w+\|\|\|$/.test(ref.key)
+  return named ? fieldKey(f) === ref.key : deepInputs(ref.doc).indexOf(f) === ref.index
+}
+
+function snapshot(group: FieldGroup, anchor: HTMLInputElement): GroupSnapshot {
+  const refs: GroupSnapshot['refs'] = {}
+  for (const role of ROLES) {
+    const f = group[role]
+    if (f) refs[role] = fieldRef(f)
+  }
+  return { kind: group.kind, container: group.container, refs, anchor: fieldRef(anchor) }
+}
+
+/** The live field for a ref: `current` while it is still in the page, else the field of a
+ *  fresh scan that matches it. */
+function liveField(ref: FieldRef, current: HTMLInputElement): HTMLInputElement | null {
+  if (current.isConnected) return current
+  scan()
+  return deepInputs(ref.doc).find((f) => matchesRef(f, ref)) ?? null
+}
+
+/**
+ * The group as it is in the page now. A React / Vue re-render between the menu opening and
+ * the pick can replace the fields (and the form); then a fresh scan's group with the same
+ * fields (same form, name / id / autocomplete, or position) is used.
+ */
+function liveGroup(snap: GroupSnapshot, current: FieldGroup): FieldGroup | null {
+  if (ROLES.every((r) => !current[r] || current[r]!.isConnected)) return current
+  scan()
+  const primary: GroupRole = snap.refs.newPassword ? 'newPassword' : snap.refs.password ? 'password' : 'username'
+  let best: FieldGroup | null = null
+  let bestScore = 0
+  for (const g of detection.groups) {
+    const main = g[primary]
+    if (!main || !matchesRef(main, snap.refs[primary]!)) continue
+    let score = 2
+    if (g.container === snap.container) score += 2
+    if (g.kind === snap.kind) score += 1
+    for (const role of ROLES) {
+      const ref = snap.refs[role]
+      const f = g[role]
+      if (role !== primary && ref && f && matchesRef(f, ref)) score += 1
+    }
+    if (score > bestScore) {
+      best = g
+      bestScore = score
+    }
+  }
+  return best
+}
+
+async function loadMenu(overlay: Overlay, context: MenuContext, snap?: GroupSnapshot): Promise<void> {
   try {
     const status = await ask<BridgeStatus>({ kind: 'status' })
     if (context.kind === 'newPassword' && (status.state === 'unlocked' || status.state === 'locked')) {
-      // The generator needs the desktop, not an unlocked vault.
-      const password = await ask<string>({ kind: 'generate' })
+      // The generator needs the desktop, not an unlocked vault. R2: it fits the fields.
+      const password = await ask<string>({ kind: 'generate', constraints: generateConstraints(context.group) })
       overlay.setMenu({
         kind: 'suggest',
         password,
-        run: () => {
-          overlay.closeMenu()
-          fillStrongPassword(context.group, password, overlay.element)
-        },
+        run: () =>
+          void fillFromMenu(overlay, () => {
+            const live = snap ? liveGroup(snap, context.group) : context.group
+            const anchor = snap ? liveField(snap.anchor, context.anchor) : context.anchor
+            return !!live && fillStrongPassword(live, password, overlay.element, anchor ?? undefined)
+          }),
       })
       return
     }
@@ -180,12 +318,12 @@ async function loadMenu(overlay: Overlay, context: MenuContext): Promise<void> {
         kind: 'message',
         key: 'auth.unlock.masterPasswordDueFmt',
         args: [status.passwordDueDays],
-        action: { key: 'ext.openQasa', run: () => void unlock(overlay, context) },
+        action: { key: 'ext.openQasa', run: () => void unlock(overlay, context, snap) },
       })
       return
     }
     if (status.state === 'locked') {
-      overlay.setMenu({ kind: 'message', key: 'ext.page.locked', action: { key: 'ext.page.unlock', run: () => void unlock(overlay, context) } })
+      overlay.setMenu({ kind: 'message', key: 'ext.page.locked', action: { key: 'ext.page.unlock', run: () => void unlock(overlay, context, snap) } })
       return
     }
     if (status.state !== 'unlocked') {
@@ -219,7 +357,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
  * password), and the menu waits, then lists the items for the same field: no second
  * click on the field (docs/autofill-plan.md §1.2).
  */
-async function unlock(overlay: Overlay, context: MenuContext): Promise<void> {
+async function unlock(overlay: Overlay, context: MenuContext, snap?: GroupSnapshot): Promise<void> {
   overlay.setMenu({ kind: 'message', key: 'ext.page.unlocking' })
   await ask({ kind: 'unlock' }).catch(() => undefined)
   const started = Date.now()
@@ -227,11 +365,11 @@ async function unlock(overlay: Overlay, context: MenuContext): Promise<void> {
     await sleep(POLL_MS)
     const status = await ask<BridgeStatus>({ kind: 'status' }).catch(() => null)
     if (status?.state === 'unlocked') {
-      if (overlay.isMenuOpen()) await loadMenu(overlay, context)
+      if (overlay.isMenuOpen()) await loadMenu(overlay, context, snap)
       return
     }
   }
-  if (overlay.isMenuOpen()) await loadMenu(overlay, context)
+  if (overlay.isMenuOpen()) await loadMenu(overlay, context, snap)
 }
 
 // MARK: filling
@@ -242,41 +380,69 @@ function targets(group: FieldGroup): HTMLInputElement[] {
 }
 
 /**
- * Fills a group after a user action. Every target must be really visible (guard.ts)
- * before the credential is even requested, and again before it is written.
+ * The fields of `fields` to write, or null to write none. Every field must be really
+ * visible (guard.ts), except one the page doesn't draw at all (`display: none`, off the
+ * page, transparent), which is skipped: an optional field hidden by the page never
+ * receives a value, and never blocks the visible ones. A field that is drawn but covered
+ * or off screen blocks the whole fill (clickjacking).
  */
-async function fillGroup(group: FieldGroup, itemId: string, ownHost: Element | null): Promise<boolean> {
+function visibleTargets(fields: HTMLInputElement[], ownHost: Element | null): HTMLInputElement[] | null {
+  const out: HTMLInputElement[] = []
+  for (const f of fields) {
+    if (isFieldVisible(f, ownHost)) out.push(f)
+    else if (isFieldRendered(f)) return null
+  }
+  return out.length ? out : null
+}
+
+/**
+ * Fills a group after a user action. The targets are checked (visibleTargets) before the
+ * credential is even requested, and again before it is written.
+ */
+async function fillGroup(group: FieldGroup, itemId: string, ownHost: Element | null, anchor?: HTMLInputElement): Promise<boolean> {
   const fields = targets(group)
-  const visible = () => fields.length > 0 && fields.every((f) => isFieldVisible(f, ownHost))
-  if (!visible()) return false
+  if (!visibleTargets(fields, ownHost)) return false
   const values = await ask<FillValues>({ kind: 'fill', itemId })
-  if (!visible()) return false
-  if (group.username && values.username) setFieldValue(group.username, values.username)
-  if (group.password) setFieldValue(group.password, values.password)
+  const write = visibleTargets(fields, ownHost)
+  if (!write) return false
+  if (group.username && values.username && write.includes(group.username)) setFieldValue(group.username, values.username)
+  if (group.password && write.includes(group.password)) setFieldValue(group.password, values.password)
   // The item has 2FA and the page asks for it on the same screen.
-  const otp = values.totp ? detection.otpFields.find((f) => f.ownerDocument === fields[0].ownerDocument && isFieldVisible(f, ownHost)) : undefined
-  if (otp && values.totp) setFieldValue(otp, values.totp)
+  const doc = write[0].ownerDocument
+  const otp = values.totp ? detection.otpFields.find((f) => f.ownerDocument === doc && isFieldVisible(f, ownHost)) : undefined
+  if (otp && values.totp) {
+    const run = otpRunOf(otp)
+    if (run) fillOtpRun(run, values.totp)
+    else setFieldValue(otp, values.totp)
+  }
+  restoreFocus(anchor)
   return true
 }
 
 /**
- * "Use a strong password" (rule 6c): the generated password into the new-password field
- * and its confirm field. The new-password field must be really visible (guard.ts); the
- * confirm field at least rendered. Submitting the form then offers to save the login.
+ * "Use a strong password" (rule 6c, R3): the generated password into the new-password field
+ * and its confirm field in one action. The new-password field must be really visible
+ * (guard.ts); the confirm field at least rendered. Submitting the form then offers to save
+ * the login.
  */
-function fillStrongPassword(group: FieldGroup, password: string, ownHost: Element | null): boolean {
+function fillStrongPassword(group: FieldGroup, password: string, ownHost: Element | null, anchor?: HTMLInputElement): boolean {
   const field = group.newPassword
   if (!field || !isFieldVisible(field, ownHost)) return false
   fillGenerated(field, password)
   if (group.confirmPassword && isFieldRendered(group.confirmPassword)) fillGenerated(group.confirmPassword, password)
+  restoreFocus(anchor)
   return true
 }
 
+/** A one-time code into its field, or a digit per box of a split code. */
 async function fillTotp(field: HTMLInputElement, itemId: string, ownHost: Element | null): Promise<boolean> {
-  if (!isFieldVisible(field, ownHost)) return false
+  const boxes = otpRunOf(field) ?? [field]
+  const visible = () => boxes.every((b) => isFieldVisible(b, ownHost))
+  if (!visible()) return false
   const code = await ask<string>({ kind: 'totp', itemId })
-  if (!isFieldVisible(field, ownHost)) return false
-  setFieldValue(field, code)
+  if (!visible()) return false
+  if (boxes.length > 1) fillOtpRun(boxes, code)
+  else setFieldValue(field, code)
   return true
 }
 
@@ -396,7 +562,7 @@ function watchDocument(doc: Document): void {
       const t = eventTarget(e)
       if (!e.isTrusted || !iconsAllowed || t?.tagName !== 'INPUT') return
       const field = t as HTMLInputElement
-      if (!iconFields(detection).includes(field) || effectiveOpacity(field) < 0.5) return
+      if (!openable(field) || effectiveOpacity(field) < 0.5) return
       const overlay = overlays.get(field.ownerDocument)
       if (overlay?.menuField() === field) return
       openMenuFor(field)
@@ -409,10 +575,16 @@ function watchDocument(doc: Document): void {
       const t = eventTarget(e)
       const overlay = t ? overlays.get(t.ownerDocument) : undefined
       if (e.isTrusted && overlay?.menuField() === t && (e.key.length === 1 || e.key === 'Backspace')) overlay.closeMenu()
+      // ArrowDown in an empty field opens its menu, as a browser's own suggestions do.
+      if (!e.isTrusted || e.key !== 'ArrowDown' || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
+      if (!iconsAllowed || t?.tagName !== 'INPUT') return
+      const field = t as HTMLInputElement
+      if (field.value !== '' || !openable(field) || effectiveOpacity(field) < 0.5 || overlay?.menuField() === field) return
+      openMenuFor(field)
     },
     true,
   )
-  new MutationObserver(() => scheduleScan()).observe(doc, { childList: true, subtree: true, attributes: true, attributeFilter: ['type', 'autocomplete', 'style', 'class', 'hidden'] })
+  new MutationObserver(() => scheduleScan()).observe(doc, { childList: true, subtree: true, attributes: true, attributeFilter: ['type', 'autocomplete', 'style', 'class', 'hidden', 'open'] })
   doc.addEventListener('focusin', () => scheduleScan(0), true)
   doc.addEventListener('scroll', scheduleReposition, { capture: true, passive: true })
 }

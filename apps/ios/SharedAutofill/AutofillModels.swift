@@ -1,6 +1,6 @@
 import Foundation
 
-enum AutofillItemKind: String, Codable, Sendable, CaseIterable {
+nonisolated enum AutofillItemKind: String, Codable, Sendable, CaseIterable {
     case login
     case card
     case bankAccount
@@ -22,7 +22,7 @@ enum AutofillItemKind: String, Codable, Sendable, CaseIterable {
 }
 
 /// Non-secret metadata + encrypted secrets blob for Autofill (App Group).
-struct AutofillIndexEntry: Codable, Identifiable, Sendable, Equatable {
+nonisolated struct AutofillIndexEntry: Codable, Identifiable, Sendable, Equatable {
     let id: UUID
     let kind: AutofillItemKind
     let title: String
@@ -37,13 +37,13 @@ struct AutofillIndexEntry: Codable, Identifiable, Sendable, Equatable {
     var hasTOTP: Bool? = nil
 }
 
-struct AutofillIndexFile: Codable, Sendable {
+nonisolated struct AutofillIndexFile: Codable, Sendable {
     var version: Int = 1
     var updatedAt: Date
     var entries: [AutofillIndexEntry]
 }
 
-enum AutofillSecrets: Codable, Sendable {
+nonisolated enum AutofillSecrets: Codable, Sendable {
     case login(Login)
     case card(Card)
     case bank(Bank)
@@ -53,23 +53,23 @@ enum AutofillSecrets: Codable, Sendable {
     case address(Address)
     case company(Company)
 
-    struct Name: Codable, Sendable {
+    nonisolated struct Name: Codable, Sendable {
         var firstName: String
         var middleName: String
         var lastName: String
     }
 
-    struct Email: Codable, Sendable {
+    nonisolated struct Email: Codable, Sendable {
         var email: String
     }
 
-    struct Phone: Codable, Sendable {
+    nonisolated struct Phone: Codable, Sendable {
         var number: String
         /// `+964`, resolved by the app (the extensions don't carry the country table).
         var dialCode: String
     }
 
-    struct Address: Codable, Sendable {
+    nonisolated struct Address: Codable, Sendable {
         var recipient: String
         var address: String
         var building: String
@@ -81,12 +81,12 @@ enum AutofillSecrets: Codable, Sendable {
         var countryName: String
     }
 
-    struct Company: Codable, Sendable {
+    nonisolated struct Company: Codable, Sendable {
         var companyName: String
         var jobTitle: String
     }
 
-    struct Login: Codable, Sendable {
+    nonisolated struct Login: Codable, Sendable {
         var email: String
         var username: String
         var password: String
@@ -95,7 +95,7 @@ enum AutofillSecrets: Codable, Sendable {
         var totp: String? = nil
     }
 
-    struct Card: Codable, Sendable {
+    nonisolated struct Card: Codable, Sendable {
         var itemName: String
         var accountHolder: String
         var number: String
@@ -103,7 +103,7 @@ enum AutofillSecrets: Codable, Sendable {
         var expiryDate: String
     }
 
-    struct Bank: Codable, Sendable {
+    nonisolated struct Bank: Codable, Sendable {
         var itemName: String
         var accountHolder: String
         var accountNumber: String
@@ -112,7 +112,7 @@ enum AutofillSecrets: Codable, Sendable {
     }
 }
 
-struct AutofillCandidate: Identifiable, Sendable, Equatable {
+nonisolated struct AutofillCandidate: Identifiable, Sendable, Equatable {
     let id: UUID
     let kind: AutofillItemKind
     let title: String

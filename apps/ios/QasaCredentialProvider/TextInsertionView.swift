@@ -21,6 +21,8 @@ struct TextInsertionView: View {
     /// Read on appear (Keychain, not observable).
     @State private var masterPasswordDue = false
     @State private var showsBiometricButton = false
+    /// The strong password inserted in the last 5 minutes, for the confirm field (R3).
+    @State private var samePassword: String?
 
     /// Cards and profile items first: they are what text insertion is for.
     private static let order: [AutofillItemKind] = [.card, .address, .name, .email, .phone, .company, .login, .bankAccount]
@@ -52,27 +54,46 @@ struct TextInsertionView: View {
             }
             masterPasswordDue = AutofillBiometricGate.masterPasswordDue
             showsBiometricButton = AutofillBiometricGate.showsBiometricButton
-            // Once per appearance; a cancelled prompt leaves the button.
+            samePassword = GeneratedPasswordStore.reusablePassword()
+        }
+        // Once per appearance, after the sheet is up (R2); a cancelled prompt leaves the button.
+        .task {
+            try? await Task.sleep(for: AutofillUnlock.biometricDelay)
             if session == nil, AutofillUnlock.canOfferBiometricUnlock {
-                Task { await unlockWithBiometrics(automatic: true) }
+                await unlockWithBiometrics(automatic: true)
             }
         }
     }
 
     // MARK: unlock
 
-    /// "Use a strong password": needs nothing from the vault, so no unlock.
+    /// "Use a strong password": needs nothing from the vault, so no unlock. Text insertion
+    /// fills one field, so the password just inserted is offered first for 5 minutes: the
+    /// confirm field gets the same one (R3). Every inserted password is kept for saving (R4).
+    @ViewBuilder
     private var strongPasswordButton: some View {
+        if let samePassword {
+            Button {
+                insertGenerated(samePassword)
+            } label: {
+                Label { Text(AutofillL10n.tr("fill.samePassword", "Use the same strong password")) } icon: { QasaIconImage(.generate, size: 17) }
+            }
+        }
         Button {
-            onInsert(StrongPassword.generate())
+            insertGenerated(StrongPassword.generate())
         } label: {
             Label { Text(AutofillL10n.tr("fill.strongPassword", "Use a strong password")) } icon: { QasaIconImage(.generate, size: 17) }
         }
     }
 
+    private func insertGenerated(_ password: String) {
+        GeneratedPasswordStore.recordFilled(password, host: nil)
+        onInsert(password)
+    }
+
     private var unlockForm: some View {
         VStack(spacing: 16) {
-            strongPasswordButton
+            VStack(spacing: 12) { strongPasswordButton }
                 .padding(.bottom, 8)
             Text(AutofillL10n.tr("autofill.unlockTitle", "Unlock Qasa"))
                 .font(QasaFontFace.font(size: 17, weight: .semibold))
@@ -121,7 +142,7 @@ struct TextInsertionView: View {
         guard !isUnlocking else { return }
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let unlocked = AutofillUnlock.unlockWithBiometrics() else {
+        guard let unlocked = await AutofillUnlock.unlockWithBiometricsInBackground() else {
             masterPasswordDue = AutofillBiometricGate.masterPasswordDue
             showsBiometricButton = AutofillBiometricGate.showsBiometricButton
             if !automatic {
@@ -136,7 +157,7 @@ struct TextInsertionView: View {
         guard !password.isEmpty else { return }
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let unlocked = AutofillUnlock.unlock(password: password) else {
+        guard let unlocked = await AutofillUnlock.unlockInBackground(password: password) else {
             unlockError = AutofillL10n.tr("autofill.wrongPassword", "Wrong master password.")
             return
         }

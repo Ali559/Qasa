@@ -22,20 +22,42 @@ function digest(value: string): number {
 }
 
 /**
- * Sets the value through the native `value` setter of the field's own realm (React keeps
- * its own tracker on the instance, which would swallow a plain assignment), then fires
- * `input` and `change` so the framework updates its state.
+ * Fills a field the way typing would look to the page (R6): focus, `keydown`,
+ * `beforeinput`, the value through the native `value` setter of the field's own realm
+ * (React keeps its own tracker on the instance, which would swallow a plain assignment),
+ * `input` as an `InputEvent` with `insertReplacementText`, `keyup` and `change`. The real
+ * `blur` comes when focus moves on (the next field, or back to the clicked one).
  */
 export function setFieldValue(field: HTMLInputElement, value: string): void {
-  const win = field.ownerDocument.defaultView ?? window
-  const proto = (win as typeof window).HTMLInputElement?.prototype ?? HTMLInputElement.prototype
+  const win = (field.ownerDocument.defaultView ?? window) as typeof window
+  const proto = win.HTMLInputElement?.prototype ?? HTMLInputElement.prototype
   const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set
+  const Keyboard = win.KeyboardEvent ?? KeyboardEvent
+  const Input = win.InputEvent ?? InputEvent
+  const init = { bubbles: true, composed: true, cancelable: true }
   field.focus({ preventScroll: true })
+  field.dispatchEvent(new Keyboard('keydown', { ...init, key: 'Unidentified' }))
+  field.dispatchEvent(new Input('beforeinput', { ...init, inputType: 'insertReplacementText', data: value }))
   if (setter) setter.call(field, value)
   else field.value = value
-  field.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+  field.dispatchEvent(new Input('input', { bubbles: true, composed: true, inputType: 'insertReplacementText', data: value }))
+  field.dispatchEvent(new Keyboard('keyup', { ...init, key: 'Unidentified' }))
   field.dispatchEvent(new Event('change', { bubbles: true, composed: true }))
   filledByUs.set(field, digest(value))
+}
+
+/** A split one-time code: one character per box, in order. */
+export function fillOtpRun(boxes: HTMLInputElement[], code: string): void {
+  const chars = [...code]
+  boxes.forEach((box, i) => {
+    if (i < chars.length) setFieldValue(box, chars[i])
+  })
+}
+
+/** Gives focus back to the field the user clicked, so the other filled fields get their
+ *  real `blur` and the user's place in the form is kept. */
+export function restoreFocus(field: HTMLInputElement | undefined): void {
+  if (field?.isConnected && field.ownerDocument.activeElement !== field) field.focus({ preventScroll: true })
 }
 
 /**

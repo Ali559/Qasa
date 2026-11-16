@@ -1,8 +1,8 @@
 import CryptoKit
 import Foundation
 
-enum AutofillUnlock {
-    struct Session {
+nonisolated enum AutofillUnlock {
+    struct Session: Sendable {
         let encKey: SymmetricKey
     }
 
@@ -48,6 +48,19 @@ enum AutofillUnlock {
               let password = SharedVaultKeychain.loadBiometricPassword() else { return nil }
         return deriveSession(password: password)
     }
+
+    /// The PBKDF2 derivation and the Face ID keychain read take a moment: off the main actor,
+    /// so the sheet keeps animating (docs/autofill-hardening.md R2).
+    static func unlockInBackground(password: String) async -> Session? {
+        await Task.detached(priority: .userInitiated) { unlock(password: password) }.value
+    }
+
+    static func unlockWithBiometricsInBackground() async -> Session? {
+        await Task.detached(priority: .userInitiated) { unlockWithBiometrics() }.value
+    }
+
+    /// How long a sheet waits after appearing before Face ID starts on its own.
+    static let biometricDelay: Duration = .milliseconds(450)
 
     static func decryptSecrets(_ entry: AutofillIndexEntry, session: Session) throws -> AutofillSecrets {
         let data = try SharedVaultCrypto.decrypt(entry.encryptedSecrets, key: session.encKey)

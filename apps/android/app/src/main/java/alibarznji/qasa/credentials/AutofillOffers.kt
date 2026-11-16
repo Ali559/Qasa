@@ -1,5 +1,8 @@
 package alibarznji.qasa.credentials
 
+import alibarznji.qasa.vault.crypto.PasswordRules
+import alibarznji.qasa.vault.crypto.PasswordSpec
+
 /**
  * What a fill request offers on a login, sign-up or change-password form (design rule 6c),
  * as plain ids so the decision is unit tested without the framework.
@@ -39,6 +42,22 @@ object AutofillOffers {
     /** The strong-password pick: the same [password] in every new-password field (new and confirm). */
     fun <T> strongPasswordValues(form: AutofillForm<T>, password: String): Map<T, String> =
         form.fields.filter { it.type == AutofillFieldType.NewPassword }.associate { it.id to password }
+
+    /**
+     * R2: the strong password fits every new field: their smallest `maxlength`, largest
+     * `minlength`, the site's `passwordrules` (first new field that has them), digits only
+     * on a number keyboard.
+     */
+    fun <T> strongPasswordSpec(form: AutofillForm<T>): PasswordSpec {
+        val fields = form.fields.filter { it.type == AutofillFieldType.NewPassword }.map { it.signals }
+        val rules = fields.firstNotNullOfOrNull { PasswordRules.parse(it.htmlAttributes["passwordrules"]) }
+        return PasswordSpec.forFields(
+            maxLengths = fields.map { it.maxLength },
+            minLengths = fields.map { it.htmlAttributes["minlength"]?.trim()?.toIntOrNull() },
+            rules = rules,
+            numeric = fields.isNotEmpty() && fields.all { AutofillFieldClassifier.isNumericField(it) },
+        )
+    }
 
     /** What to watch for a save, or null when the form has no password to save. */
     fun <T> save(form: AutofillForm<T>): SavePlan<T>? {

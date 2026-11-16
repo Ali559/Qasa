@@ -31,6 +31,7 @@ final class VaultRepository {
     func warmCache() async {
         guard let context else { return }
         importPendingSaves()
+        offerUnsavedGeneratedPassword()
         let descriptor = FetchDescriptor<VaultItemRecord>(
             predicate: VaultItemRecord.live,
             sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
@@ -48,7 +49,9 @@ final class VaultRepository {
         await MainActor.run {
             cache.rebuild(from: pairs)
         }
-        await syncAutofillIndex()
+        // Off in unit tests: no suspension point there, so suites sharing the repository
+        // don't interleave.
+        if autofillSyncEnabled { await scheduleAutofillSync().value }
     }
 
     /// Where a decrypted payload being encrypted comes from. Rows that arrive as ciphertext
@@ -150,7 +153,7 @@ final class VaultRepository {
 
         let row = VaultListRow(record: record, envelope: envelope)
         cache.upsert(row)
-        Task { await syncAutofillIndex() }
+        scheduleAutofillSync()
         // A saved login asks its site for an icon when its host has no fresh one
         // (`docs/site-icons.md`, When). Covers the editor, CSV import and AutoFill saves.
         if origin != .storedAsIs, case .login(let login) = payload, !login.website.isEmpty {
@@ -167,7 +170,7 @@ final class VaultRepository {
         Self.markDeleted(record, at: Date())
         try context.save()
         cache.remove(id: id)
-        Task { await syncAutofillIndex() }
+        scheduleAutofillSync()
     }
 
     /// Clears an item's data and marks it deleted (plan §6.3).
@@ -348,7 +351,8 @@ final class VaultRepository {
             context.rollback()
             throw error
         }
-        Task { await warmCache(); await syncAutofillIndex() }
+        // warmCache rebuilds the AutoFill index too.
+        Task { await warmCache() }
     }
 
     /// Reads everything under `oldEnc` first and only then writes, so an unreadable item or
@@ -532,40 +536,100 @@ final class VaultRepository {
         return .create
     }
 
-    /// Imports and clears `PendingSaveInbox` (sealed with the vault key, so only while
-    /// unlocked). New logins are stored like an import; a known login gets its new password.
+    /// Imports `PendingSaveInbox` (sealed with the vault key, so only while unlocked). New
+    /// logins are stored like an import; a known login gets its new password. An entry leaves
+    /// the inbox only once it is in the vault; one that fails stays for the next unlock.
     func importPendingSaves() {
         guard PendingSaveInbox.hasPending(), VaultSession.shared.isUnlocked, let context,
               let key = try? VaultSession.shared.requireEncKey() else { return }
-        let waiting = PendingSaveInbox.drain(key: key)
-        guard !waiting.isEmpty else { return }
         let records = (try? context.fetch(FetchDescriptor<VaultItemRecord>(predicate: VaultItemRecord.live))) ?? []
         var logins: [(id: UUID, fields: LoginFields)] = records.compactMap { record in
             guard case .login(let f) = try? decryptPayload(record) else { return nil }
             return (record.id, f)
         }
-        for login in waiting {
-            switch Self.pendingSaveAction(for: login, existing: logins) {
-            case .skip:
-                continue
-            case .updatePassword(let id):
-                try? rotatePassword(itemId: id, to: login.password)
-            case .create:
-                let isEmail = login.username.contains("@")
-                let fields = LoginFields(
-                    itemName: login.title,
-                    email: isEmail ? login.username : "",
-                    username: isEmail ? "" : login.username,
-                    password: login.password,
-                    website: login.website
-                )
-                if let row = try? importItem(.login(fields)).row { logins.append((row.id, fields)) }
+        do {
+            try PendingSaveInbox.drain(key: key) { login in
+                do {
+                    switch Self.pendingSaveAction(for: login, existing: logins) {
+                    case .skip:
+                        break
+                    case .updatePassword(let id):
+                        try rotatePassword(itemId: id, to: login.password)
+                        if let i = logins.firstIndex(where: { $0.id == id }) { logins[i].fields.password = login.password }
+                    case .create:
+                        let isEmail = login.username.contains("@")
+                        let fields = LoginFields(
+                            itemName: login.title,
+                            email: isEmail ? login.username : "",
+                            username: isEmail ? "" : login.username,
+                            password: login.password,
+                            website: login.website
+                        )
+                        let row = try importItem(.login(fields)).row
+                        logins.append((row.id, fields))
+                    }
+                    return true
+                } catch {
+                    print("Qasa: a login saved from AutoFill could not be imported yet: \(error)")
+                    return false
+                }
             }
+        } catch {
+            print("Qasa: the AutoFill save inbox could not be read: \(error)")
         }
+    }
+
+    // MARK: strong passwords generated in AutoFill (docs/autofill-hardening.md R4)
+
+    /// A password AutoFill generated and filled that no saved login has: the shell asks once
+    /// whether to save it (the new-login editor, prefilled), then this clears.
+    var generatedPasswordOffer: GeneratedPasswordStore.Record?
+
+    /// On unlock: forgets generated passwords that are saved by now and offers the newest of
+    /// the rest, once (it leaves the store as it is offered).
+    func offerUnsavedGeneratedPassword(now: Date = Date()) {
+        guard autofillSyncEnabled, VaultSession.shared.isUnlocked, generatedPasswordOffer == nil else { return }
+        let records = GeneratedPasswordStore.loadUnsaved(now: now)
+        guard !records.isEmpty else { return }
+        let saved = Set(((try? allLoginPayloads()) ?? []).map(\.1.password))
+        let offer = GeneratedPasswordStore.offer(from: records, savedPasswords: saved, now: now)
+        GeneratedPasswordStore.replaceUnsaved(records.filter { !saved.contains($0.password) && $0 != offer })
+        generatedPasswordOffer = offer
     }
 
     /// Unit tests turn this off so they never touch the AutoFill extension's real index.
     var autofillSyncEnabled = true
+
+    /// The kinds the AutoFill extension gets: logins and payment items for the password list,
+    /// profile items for text insertion (docs/autofill-plan.md §3.4). Notes and the rest never
+    /// leave the app.
+    static func isAutofillIndexed(_ payload: VaultPayload) -> Bool {
+        switch payload {
+        case .login, .card, .bankAccount, .name, .personalEmail, .phone, .address, .company:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// Index syncs run one after another, never interleaved (each awaits the identity store),
+    /// and only the newest of those waiting runs: it reads the vault as it is by then.
+    private var autofillSyncTask: Task<Void, Never>?
+    private var autofillSyncGeneration = 0
+
+    @discardableResult
+    func scheduleAutofillSync() -> Task<Void, Never> {
+        autofillSyncGeneration += 1
+        let generation = autofillSyncGeneration
+        let previous = autofillSyncTask
+        let task = Task { @MainActor [weak self] in
+            await previous?.value
+            guard let self, generation == self.autofillSyncGeneration else { return }
+            await self.syncAutofillIndex()
+        }
+        autofillSyncTask = task
+        return task
+    }
 
     private func syncAutofillIndex() async {
         guard autofillSyncEnabled, VaultSession.shared.isUnlocked, let context else { return }
@@ -573,14 +637,9 @@ final class VaultRepository {
         guard let records = try? context.fetch(descriptor) else { return }
         var pairs: [(UUID, VaultPayload)] = []
         for record in records {
-            guard let payload = try? decryptPayload(record) else { continue }
-            switch payload {
-            case .login, .card, .bankAccount:
-                pairs.append((record.id, payload))
-            default:
-                continue
-            }
+            guard let payload = try? decryptPayload(record), Self.isAutofillIndexed(payload) else { continue }
+            pairs.append((record.id, payload))
         }
-        AutofillVaultSync.rebuild(from: pairs)
+        await AutofillVaultSync.rebuild(from: pairs)
     }
 }

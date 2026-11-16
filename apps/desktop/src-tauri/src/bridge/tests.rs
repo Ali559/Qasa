@@ -598,3 +598,84 @@ fn unlock_skips_touch_id_when_the_master_password_is_due() {
     assert_eq!(reply["passwordDue"], true);
     assert!(host.seen.lock().unwrap().biometrics.is_empty());
 }
+
+// MARK: generate with the page's constraints (docs/autofill-hardening.md R2)
+
+fn gen(args: Value) -> String {
+    ops::generate(&args).unwrap()["password"].as_str().unwrap().to_string()
+}
+
+fn longest_run(s: &str) -> usize {
+    let chars: Vec<char> = s.chars().collect();
+    let (mut best, mut run) = (0, 0);
+    for i in 0..chars.len() {
+        run = if i > 0 && chars[i] == chars[i - 1] { run + 1 } else { 1 };
+        best = best.max(run);
+    }
+    best
+}
+
+#[test]
+fn generate_without_constraints_keeps_the_defaults() {
+    for args in [json!({}), json!({ "rules": "" }), json!({ "rules": "   " }), json!({ "maxLength": 2 })] {
+        let pw = gen(args);
+        assert_eq!(pw.chars().count(), 16);
+        assert!(pw.chars().any(|c| c.is_ascii_uppercase()) && pw.chars().any(|c| c.is_ascii_lowercase()));
+        assert!(pw.chars().any(|c| c.is_ascii_digit()) && pw.chars().any(|c| qasa_vault::generator::SYMBOLS.contains(c)));
+    }
+}
+
+#[test]
+fn generate_fits_maxlength_and_minlength() {
+    assert_eq!(gen(json!({ "maxLength": 12 })).len(), 12);
+    assert_eq!(gen(json!({ "length": 16, "maxLength": 6 })).len(), 6, "below 8 still used when at least 4");
+    assert_eq!(gen(json!({ "maxLength": 3 })).len(), 16, "below 4 ignored");
+    assert_eq!(gen(json!({ "minLength": 20 })).len(), 20);
+    assert_eq!(gen(json!({ "minLength": 20, "maxLength": 18 })).len(), 18, "maxlength wins");
+    assert_eq!(gen(json!({ "rules": "minlength: 24; maxlength: 30" })).len(), 24);
+    assert_eq!(gen(json!({ "maxLength": 14, "rules": "maxlength: 10" })).len(), 10);
+}
+
+#[test]
+fn generate_honours_required_and_allowed_classes() {
+    for _ in 0..100 {
+        let digits = gen(json!({ "rules": "required: digit" }));
+        assert!(digits.chars().all(|c| c.is_ascii_digit()), "{digits}");
+        let pw = gen(json!({ "rules": "required: upper; required: lower; allowed: [-_]" }));
+        assert!(pw.chars().all(|c| c.is_ascii_alphabetic() || c == '-' || c == '_'), "{pw}");
+        assert!(pw.chars().any(|c| c.is_ascii_uppercase()) && pw.chars().any(|c| c.is_ascii_lowercase()));
+        assert!(pw.chars().any(|c| c == '-' || c == '_'), "the allowed symbols are still used: {pw}");
+        let no_symbols = gen(json!({ "rules": "required: upper, lower; required: digit" }));
+        assert!(no_symbols.chars().all(|c| c.is_ascii_alphanumeric()), "{no_symbols}");
+    }
+    // Only characters the generator doesn't have: the rules can't be met, defaults instead.
+    assert_eq!(gen(json!({ "rules": "allowed: [~`]" })).len(), 16);
+}
+
+#[test]
+fn generate_honours_max_consecutive() {
+    for _ in 0..200 {
+        let pw = gen(json!({ "rules": "required: digit; max-consecutive: 1", "length": 32 }));
+        assert!(longest_run(&pw) <= 1, "{pw}");
+        assert!(pw.chars().all(|c| c.is_ascii_digit()));
+        assert!(longest_run(&gen(json!({ "rules": "max-consecutive: 2", "length": 64 }))) <= 2);
+    }
+}
+
+#[test]
+fn generate_drops_classes_that_cannot_fit() {
+    let pw = gen(json!({ "maxLength": 4, "rules": "required: upper, lower, digit, special" }));
+    assert_eq!(pw.len(), 4);
+    let pw = gen(json!({ "length": 4, "maxLength": 4 }));
+    assert_eq!(pw.len(), 4);
+}
+
+#[test]
+fn generate_over_the_bridge_accepts_constraints() {
+    let (host, _, _) = host();
+    let ext = Ext::pair(&host);
+    let g = ext.call(&host, "generate", json!({ "maxLength": 12, "rules": "required: lower, digit" }));
+    let pw = g["password"].as_str().unwrap();
+    assert_eq!(pw.len(), 12);
+    assert!(pw.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit()));
+}

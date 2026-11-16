@@ -1,18 +1,22 @@
 <script setup lang="ts">
-// iOS `LoginView`: main password, and the fingerprint / Hello row when it is turned on and
-// sealed for this vault. With biometrics on, the prompt starts by itself (once each time the
-// screen appears or the window comes back), unless the main password is due again: then
-// only the password is offered, and the screen says why.
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+// design/README.md rule 6d, "Unlocking the app" (option B, prompt first): a returning user
+// never sees a login page. The window is the splash (the app icon centred, the wordmark
+// under it, nothing of the vault). With Touch ID / Windows Hello on, sealed for this vault
+// and the main password not due, the prompt starts by itself once the window has settled
+// (~450 ms) and success opens the app. Cancelled or failed, or biometrics off or due, the
+// unlock card rises over the splash and the icon moves up above it: rule 6b's sheet as a
+// centred card (header, `protected.title`, the password as a one-row group with its error
+// on the row, Unlock, and the secondary biometric button while it is offered). Nothing is
+// behind it, so it can't be dismissed (Esc and clicks outside do nothing). The prompt
+// starts again by itself when the window comes back (once each time).
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
-import AuthFrame from '@/components/AuthFrame.vue'
-import CardContainer from '@/components/CardContainer.vue'
-import PrimaryButton from '@/components/PrimaryButton.vue'
-import QasaIcon from '@/components/QasaIcon.vue'
+import AppIcon from '@/components/AppIcon.vue'
 import FieldGroup from '@/components/FieldGroup.vue'
 import FieldRow from '@/components/FieldRow.vue'
-import SettingsRow from '@/components/SettingsRow.vue'
-import StatusPill from '@/components/StatusPill.vue'
+import PrimaryButton from '@/components/PrimaryButton.vue'
+import QasaIcon from '@/components/QasaIcon.vue'
+import SheetHeader from '@/components/SheetHeader.vue'
 import { useT } from '@/prefs'
 import { vaultApi } from '@/vault/api'
 import { session } from '@/vault/session'
@@ -21,28 +25,50 @@ import { isCommandError, type BiometricStatus } from '@/vault/types'
 const emit = defineEmits<{ unlocked: [] }>()
 const t = useT()
 
+/** How long the splash settles before the system prompt starts by itself. */
+const SETTLE_MS = 450
+
 const password = ref('')
 const error = ref<string | null>(null)
 const busy = ref(false)
 const canUnlock = computed(() => password.value.trim().length > 0 && !busy.value)
 const bio = ref<BiometricStatus | null>(null)
 const bioReady = computed(() => !!bio.value && bio.value.kind !== 'none' && bio.value.enabled && bio.value.sealed)
-/** Biometrics is set up but the main password is due: no button, no prompt. */
+/** Biometrics is set up but the main password is due: no button, no prompt, the note. */
 const passwordDue = computed(() => bioReady.value && !!bio.value?.masterPasswordDue)
 const showBiometric = computed(() => bioReady.value && !passwordDue.value)
+/** The unlock card is up (it stays up once shown, until the vault opens). */
+const sheetOpen = ref(false)
+const card = ref<HTMLElement | null>(null)
 
 /** Set when the window loses focus (not while our own prompt has it), so the next focus
  * prompts once. The system prompt itself blurs the window; that never re-arms it. */
 let armed = false
 let gone = false
+let settle: ReturnType<typeof setTimeout> | undefined
 
 async function refreshBio() {
   bio.value = await vaultApi.biometricStatus().catch(() => null)
 }
 
-/** Starts the prompt by itself only when it would be offered as a button. */
-function autoPrompt() {
-  if (showBiometric.value && !busy.value && !gone) void unlockWithBiometrics()
+async function openSheet() {
+  if (sheetOpen.value || gone) return
+  sheetOpen.value = true
+  await nextTick()
+  card.value?.querySelector<HTMLInputElement>('input')?.focus()
+}
+
+/** Starts the prompt by itself only when it would be offered as a button; otherwise the
+ * card is the way in. */
+function autoPrompt(delay = 0) {
+  clearTimeout(settle)
+  if (!showBiometric.value) {
+    void openSheet()
+    return
+  }
+  settle = setTimeout(() => {
+    if (!busy.value && !gone) void unlockWithBiometrics()
+  }, delay)
 }
 
 function onBlur() {
@@ -53,7 +79,7 @@ function onFocus() {
   if (!armed) return
   armed = false
   // The status may have changed while away (the interval ran out, or Settings turned it off).
-  void refreshBio().then(autoPrompt)
+  void refreshBio().then(() => autoPrompt(sheetOpen.value ? 0 : SETTLE_MS))
 }
 
 function onVisibility() {
@@ -66,13 +92,16 @@ onMounted(async () => {
   window.addEventListener('focus', onFocus)
   document.addEventListener('visibilitychange', onVisibility)
   await refreshBio()
-  // A window opened in the background prompts when it comes forward instead.
-  if (document.hasFocus()) autoPrompt()
+  if (gone) return
+  // A window opened in the background prompts when it comes forward instead (the splash
+  // waits; without biometrics the card is up straight away).
+  if (document.hasFocus() || !showBiometric.value) autoPrompt(SETTLE_MS)
   else armed = true
 })
 
 onBeforeUnmount(() => {
   gone = true
+  clearTimeout(settle)
   window.removeEventListener('blur', onBlur)
   window.removeEventListener('focus', onFocus)
   document.removeEventListener('visibilitychange', onVisibility)
@@ -91,6 +120,7 @@ async function unlockWithBiometrics() {
     const quiet = isCommandError(e) && (e.code === 'cancelled' || e.code === 'masterPasswordDue')
     if (!quiet) error.value = t('auth.unlock.biometricsFailed')
     await refreshBio()
+    void openSheet()
   } finally {
     busy.value = false
   }
@@ -119,81 +149,141 @@ async function unlock() {
 </script>
 
 <template>
-  <AuthFrame>
-    <template #header-trailing><StatusPill :text="t('brand.localOffline')" /></template>
+  <div class="splash" :class="{ open: sheetOpen }">
+    <Transition name="scrim"><div v-if="sheetOpen" class="scrim" aria-hidden="true" /></Transition>
 
-    <div class="content">
-      <div class="intro">
-        <h1 class="title">{{ t('auth.unlock.title') }}</h1>
-        <p class="subtitle">{{ t('auth.unlock.subtitle') }}</p>
+    <TransitionGroup tag="div" name="rise" class="stack">
+      <div key="mark" class="mark" role="img" :aria-label="t('brand.name')">
+        <AppIcon :size="96" />
+        <span class="wordmark" aria-hidden="true">{{ t('brand.name') }}</span>
       </div>
 
-      <div class="group">
-        <FieldGroup>
-          <FieldRow v-model="password" :label="t('auth.unlock.masterPassword')" secure revealable autofocus :error="error" @submit="unlock" />
-        </FieldGroup>
-        <p v-if="!error && passwordDue" class="due">
-          <QasaIcon name="login" :size="13" class="due-icon" />
-          <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
-        </p>
-      </div>
-
-      <!-- iOS: a `SettingsRow` with a chevron in a stroked card, 14 in, `PressableStyle`. -->
-      <div v-if="showBiometric" class="bio">
-        <SettingsRow
-          :icon="bio?.kind === 'windowsHello' ? 'face' : 'fingerprint'"
-          :title="t('auth.unlock.biometrics')"
-          :subtitle="t('auth.unlock.biometricsHint')"
-          :disabled="busy"
-          @click="unlockWithBiometrics"
-        />
-      </div>
-
-      <CardContainer muted class="local-only">
-        <div class="lo-title">
-          <QasaIcon name="shield" :size="17" class="accent" />
-          <span>{{ t('auth.unlock.localOnly') }}</span>
+      <!-- Rule 6b's unlock sheet as a centred card; not dismissable. -->
+      <section v-if="sheetOpen" key="card" ref="card" class="card" role="dialog" aria-modal="true" aria-labelledby="unlock-sheet-title">
+        <SheetHeader id="unlock-sheet-title" :title="t('auth.unlock.sheetTitle')" />
+        <div class="body">
+          <p class="message">{{ t('protected.title') }}</p>
+          <div class="group">
+            <FieldGroup>
+              <FieldRow
+                v-model="password"
+                :label="t('auth.unlock.masterPassword')"
+                :placeholder="t('auth.unlock.placeholder')"
+                secure
+                revealable
+                autofocus
+                :error="error"
+                @submit="unlock"
+              />
+            </FieldGroup>
+            <p v-if="!error && passwordDue" class="due">
+              <QasaIcon name="login" :size="13" class="due-icon" />
+              <span>{{ t('auth.unlock.masterPasswordDueFmt', bio!.masterPasswordIntervalDays) }}</span>
+            </p>
+          </div>
+          <div class="actions">
+            <PrimaryButton
+              :title="busy ? t('auth.securingVault') : t('auth.unlock.button')"
+              icon="unlock"
+              :disabled="!canUnlock"
+              @click="unlock"
+            />
+            <PrimaryButton
+              v-if="showBiometric"
+              kind="secondary"
+              :icon="bio?.kind === 'windowsHello' ? 'face' : 'fingerprint'"
+              :title="t('auth.unlock.biometrics')"
+              :disabled="busy"
+              @click="unlockWithBiometrics"
+            />
+          </div>
         </div>
-        <p class="lo-body">{{ t('auth.unlock.localOnlyBody') }}</p>
-      </CardContainer>
-    </div>
-
-    <template #footer>
-      <PrimaryButton
-        :title="busy ? t('auth.securingVault') : t('auth.unlock.button')"
-        icon="unlock"
-        :disabled="!canUnlock"
-        @click="unlock"
-      />
-    </template>
-  </AuthFrame>
+      </section>
+    </TransitionGroup>
+  </div>
 </template>
 
 <style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-form-gap);
+/* The splash: the page background, the app icon (96) and the wordmark centred. */
+.splash {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--background);
 }
 
-.intro,
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--scrim);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 100%;
+  padding: var(--space-screen-padding);
+}
+
+.mark {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.wordmark {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: var(--line-height);
+  color: var(--accent);
+}
+
+/* Rule 6b's sheet, as the desktop's centred card: the page background, `--radius-sheet`.
+   Nothing but the splash is behind it, so (unlike a sheet over a page) a 1px stroke and
+   the elevation shadow keep its edge visible in both themes. */
+.card {
+  border: var(--size-stroke) solid var(--stroke);
+  box-shadow: 0 10px 40px var(--shadow-color);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sheet);
+  background: var(--background);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+/* As the protected-item sheet: the message, the group and the buttons 20 apart. */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sheet-actions-gap);
+  padding: 0 var(--space-screen-padding) var(--space-sheet-content-bottom);
+}
+
+.message {
+  margin: 0;
+  text-align: center;
+  font-size: var(--type-dialog-message-size);
+  font-weight: var(--type-dialog-message-weight);
+  color: var(--text-secondary);
+}
+
 .group {
   display: flex;
   flex-direction: column;
   gap: var(--space-field-label-gap);
-}
-
-.title {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--text-secondary);
 }
 
 .due {
@@ -214,48 +304,41 @@ async function unlock() {
   color: var(--accent);
 }
 
-.bio {
-  margin-top: 4px;
-  padding-inline: var(--space-section-inset-horizontal);
-  border: var(--size-stroke) solid var(--stroke);
-  border-radius: var(--radius-card);
-  background: var(--card-background);
-  transition:
-    opacity var(--motion-press),
-    transform var(--motion-press);
-}
-
-.bio:has(.settings-row:active:not(:disabled)) {
-  opacity: var(--motion-pressed-opacity);
-  transform: scale(var(--motion-press-scale));
-}
-
-.bio :deep(.settings-row::after) {
-  display: none;
-}
-
-.local-only {
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.lo-title {
+.actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  flex-direction: column;
+  gap: var(--space-sheet-button-gap);
 }
 
-.accent {
-  flex-shrink: 0;
-  color: var(--accent);
+/* The icon moves up and the card rises in on `motion.standard`; none with reduce motion. */
+.rise-move {
+  transition: transform var(--motion-standard);
 }
 
-.lo-body {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--text-secondary);
+.rise-enter-active {
+  transition:
+    opacity var(--motion-standard),
+    transform var(--motion-standard);
+}
+
+.rise-enter-from {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.scrim-enter-active {
+  transition: opacity var(--motion-standard);
+}
+
+.scrim-enter-from {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-move,
+  .rise-enter-active,
+  .scrim-enter-active {
+    transition: none;
+  }
 }
 </style>

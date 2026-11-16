@@ -44,10 +44,30 @@ struct StrongPasswordSignupTests {
         let login = PendingSaveInbox.Login(title: "example.com", website: "example.com", username: "ali", password: "Gen-3rated!", savedAt: Date(timeIntervalSince1970: 0))
         try PendingSaveInbox.append(login, key: key, at: url)
         #expect(!String(decoding: try Data(contentsOf: url), as: UTF8.self).contains("Gen-3rated"))
-        #expect(PendingSaveInbox.drain(key: SymmetricKey(size: .bits256), at: url).isEmpty)
+        #expect(try PendingSaveInbox.drain(key: SymmetricKey(size: .bits256), at: url).isEmpty)
         try PendingSaveInbox.append(login, key: key, at: url)
-        #expect(PendingSaveInbox.drain(key: key, at: url) == [login])
-        #expect(PendingSaveInbox.drain(key: key, at: url).isEmpty)
+        #expect(try PendingSaveInbox.drain(key: key, at: url) == [login])
+        #expect(try PendingSaveInbox.drain(key: key, at: url).isEmpty)
+    }
+
+    @Test func theInboxKeepsWhatFailedToImport() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("pending-\(UUID()).json")
+        let key = SymmetricKey(size: .bits256)
+        let a = PendingSaveInbox.Login(title: "a.com", website: "a.com", username: "ali", password: "A", savedAt: Date(timeIntervalSince1970: 0))
+        let b = PendingSaveInbox.Login(title: "b.com", website: "b.com", username: "ali", password: "B", savedAt: Date(timeIntervalSince1970: 0))
+        try PendingSaveInbox.append(a, key: key, at: url)
+        try PendingSaveInbox.append(b, key: key, at: url)
+        try PendingSaveInbox.drain(key: key, at: url) { $0 == a }
+        #expect(PendingSaveInbox.hasPending(at: url))
+        #expect(try PendingSaveInbox.drain(key: key, at: url) == [b])
+        #expect(!PendingSaveInbox.hasPending(at: url))
+    }
+
+    @Test func noAppGroupIsAnErrorNotASave() {
+        let login = PendingSaveInbox.Login(title: "a", website: "a.com", username: "u", password: "p", savedAt: Date())
+        #expect(throws: PendingSaveInbox.InboxError.self) {
+            try PendingSaveInbox.append(login, key: SymmetricKey(size: .bits256), at: nil)
+        }
     }
 
     @Test func importSkipsUpdatesOrCreates() {

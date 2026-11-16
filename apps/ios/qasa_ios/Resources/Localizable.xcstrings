@@ -903,6 +903,28 @@
         }
       }
     },
+    "auth.unlock.sheetTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock Qasa"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتح قاصة"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە بکەرەوە"
+          }
+        }
+      }
+    },
     "auth.unlock.subtitle": {
       "localizations": {
         "en": {
@@ -7719,6 +7741,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "کۆدی پۆستە"
+          }
+        }
+      }
+    },
+    "fill.samePassword": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the same strong password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم كلمة المرور القوية نفسها"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەمان وشەی نهێنیی بەهێز بەکاربهێنە"
           }
         }
       }
@@ -16893,6 +16937,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "دروستکردنی وشەی نهێنی"
+          }
+        }
+      }
+    },
+    "vault.generatedSave.body": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qasa made a strong password for a sign-up form, but it isn't in your vault yet."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أنشأت قاصة كلمة مرور قوية لنموذج تسجيل، لكنها ليست في خزنتك بعد."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قاسە وشەیەکی نهێنیی بەهێزی بۆ فۆرمێکی خۆتۆمارکردن دروست کرد، بەڵام هێشتا لە سندووقەکەتدا نییە."
+          }
+        }
+      }
+    },
+    "vault.generatedSave.notNow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس الآن"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئێستا نا"
+          }
+        }
+      }
+    },
+    "vault.generatedSave.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save the password you created?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تريد حفظ كلمة المرور التي أنشأتها؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەو وشەی نهێنییەی دروستت کرد پاشەکەوت بکرێت؟"
+          }
+        }
+      }
+    },
+    "vault.generatedSave.titleFmt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save the password you created for %@?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تريد حفظ كلمة المرور التي أنشأتها لـ %@؟"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ئەو وشەی نهێنییەی بۆ %@ دروستت کرد پاشەکەوت بکرێت؟"
           }
         }
       }

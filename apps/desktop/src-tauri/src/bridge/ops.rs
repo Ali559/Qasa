@@ -212,9 +212,198 @@ pub fn search(vault: &Vault, args: &Value) -> OpResult {
     Ok(json!({ "items": items }))
 }
 
-pub fn generate() -> OpResult {
-    let password = qasa_vault::generator::generate(&Default::default()).map_err(|_| OpError::Bad)?;
+/// A strong password from the shared generator, fitted to the field it is for
+/// (docs/autofill-hardening.md R2). Every argument is optional, so `{}` gets the defaults:
+///   - `length`: the length wanted (16 when absent);
+///   - `maxLength` / `minLength`: the page's `maxlength` (smallest over the new fields) and
+///     `minlength`;
+///   - `rules`: the page's `passwordrules` attribute (`required`, `allowed`, `minlength`,
+///     `maxlength`, `max-consecutive`).
+pub fn generate(args: &Value) -> OpResult {
+    let plan = GeneratePlan::from_args(args);
+    let password = plan.generate().ok_or(OpError::Bad)?;
     Ok(json!({ "password": password }))
+}
+
+/// `generate`'s arguments resolved to a length, the characters each class may use, and
+/// the longest run of one character.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct GeneratePlan {
+    pub length: usize,
+    /// Allowed characters per class, in generator order (upper, lower, digits, symbols);
+    /// an empty class is off.
+    pub classes: [Vec<char>; 4],
+    pub max_consecutive: Option<usize>,
+}
+
+/// `maxlength` below this is ignored: no useful password fits (R2).
+const MIN_FIELD_LENGTH: usize = 4;
+
+/// Apple's `passwordrules` syntax, the subset R2 needs.
+#[derive(Debug, Default)]
+struct PasswordRules {
+    /// Union of `required` and `allowed`; `None` when the rules name no class.
+    allowed: Option<[Vec<char>; 4]>,
+    min_length: Option<usize>,
+    max_length: Option<usize>,
+    max_consecutive: Option<usize>,
+}
+
+fn class_sets() -> [Vec<char>; 4] {
+    use qasa_vault::generator::{DIGITS, LOWERCASE, SYMBOLS, UPPERCASE};
+    [UPPERCASE, LOWERCASE, DIGITS, SYMBOLS].map(|s| s.chars().collect())
+}
+
+fn parse_rules(text: &str) -> PasswordRules {
+    let mut rules = PasswordRules::default();
+    let all = class_sets();
+    let mut allowed: [Vec<char>; 4] = Default::default();
+    let mut named = false;
+    for rule in text.split(';') {
+        let Some((name, value)) = rule.split_once(':') else { continue };
+        let value = value.trim();
+        let number = || value.parse::<usize>().ok();
+        match name.trim().to_ascii_lowercase().as_str() {
+            "required" | "allowed" => {
+                named = true;
+                for token in split_classes(value) {
+                    let wanted: Vec<bool> = match token.to_ascii_lowercase().as_str() {
+                        "upper" => vec![true, false, false, false],
+                        "lower" => vec![false, true, false, false],
+                        "digit" => vec![false, false, true, false],
+                        "special" => vec![false, false, false, true],
+                        "ascii-printable" | "unicode" => vec![true; 4],
+                        _ => {
+                            // A custom set, `[-_.]`: only its characters of each class.
+                            if let Some(chars) = token.strip_prefix('[').and_then(|t| t.strip_suffix(']')) {
+                                for (i, set) in all.iter().enumerate() {
+                                    for c in chars.chars().filter(|c| set.contains(c)) {
+                                        if !allowed[i].contains(&c) {
+                                            allowed[i].push(c);
+                                        }
+                                    }
+                                }
+                            }
+                            continue;
+                        }
+                    };
+                    for (i, on) in wanted.into_iter().enumerate() {
+                        if on {
+                            allowed[i] = all[i].clone();
+                        }
+                    }
+                }
+            }
+            "minlength" => rules.min_length = number(),
+            "maxlength" => rules.max_length = number(),
+            "max-consecutive" => rules.max_consecutive = number().filter(|&n| n > 0),
+            _ => {}
+        }
+    }
+    if named && allowed.iter().any(|c| !c.is_empty()) {
+        // Keep the generator's order inside each class.
+        for (i, set) in all.iter().enumerate() {
+            allowed[i] = set.iter().copied().filter(|c| allowed[i].contains(c)).collect();
+        }
+        rules.allowed = Some(allowed);
+    }
+    rules
+}
+
+/// `upper, [-_,]`: commas inside a custom set don't split it.
+fn split_classes(value: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut current = String::new();
+    let mut in_set = false;
+    for c in value.chars() {
+        match c {
+            '[' if !in_set => {
+                in_set = true;
+                current.push(c);
+            }
+            ']' if in_set => {
+                in_set = false;
+                current.push(c);
+            }
+            ',' if !in_set => out.push(std::mem::take(&mut current)),
+            _ => current.push(c),
+        }
+    }
+    out.push(current);
+    out.into_iter().map(|t| t.trim().to_string()).filter(|t| !t.is_empty()).collect()
+}
+
+impl GeneratePlan {
+    pub(crate) fn from_args(args: &Value) -> Self {
+        use qasa_vault::generator::{DEFAULT_LENGTH, MAX_LENGTH};
+        let num = |key: &str| args.get(key).and_then(Value::as_u64).map(|n| n.min(MAX_LENGTH as u64) as usize);
+        let rules = args.get("rules").and_then(Value::as_str).map(parse_rules).unwrap_or_default();
+        let mut length = num("length").filter(|&n| n >= MIN_FIELD_LENGTH).unwrap_or(DEFAULT_LENGTH);
+        let max = [num("maxLength"), rules.max_length].into_iter().flatten().filter(|&n| n >= MIN_FIELD_LENGTH).min();
+        let min = [num("minLength"), rules.min_length].into_iter().flatten().max();
+        if let Some(max) = max {
+            length = length.min(max);
+        }
+        if let Some(min) = min {
+            if min > length {
+                length = max.map_or(min, |max| min.min(max));
+            }
+        }
+        let mut classes = rules.allowed.unwrap_or_else(class_sets);
+        // One of each class must fit: drop symbols, then upper case, then lower case.
+        for drop in [3, 0, 1] {
+            if classes.iter().filter(|c| !c.is_empty()).count() <= length {
+                break;
+            }
+            if classes.iter().filter(|c| !c.is_empty()).count() > 1 {
+                classes[drop].clear();
+            }
+        }
+        Self { length: length.clamp(1, MAX_LENGTH), classes, max_consecutive: rules.max_consecutive }
+    }
+
+    /// The shared generator with this plan's classes; a class narrowed by the rules has
+    /// each of its characters redrawn from the allowed ones, and runs longer than
+    /// `max_consecutive` are broken up the same way (same class, so every class stays).
+    pub(crate) fn generate(&self) -> Option<String> {
+        use rand::rngs::OsRng;
+        use rand::Rng;
+        let full = class_sets();
+        let options = qasa_vault::generator::GeneratorOptions {
+            length: self.length,
+            uppercase: !self.classes[0].is_empty(),
+            lowercase: !self.classes[1].is_empty(),
+            digits: !self.classes[2].is_empty(),
+            symbols: !self.classes[3].is_empty(),
+        };
+        let raw = qasa_vault::generator::generate(&options).ok()?;
+        let class_of = |c: char| full.iter().position(|set| set.contains(&c));
+        let mut chars: Vec<char> = raw
+            .chars()
+            .map(|c| match class_of(c) {
+                Some(i) if self.classes[i].len() < full[i].len() => self.classes[i][OsRng.gen_range(0..self.classes[i].len())],
+                _ => c,
+            })
+            .collect();
+        if let Some(limit) = self.max_consecutive {
+            let mut run = 1;
+            for i in 1..chars.len() {
+                run = if chars[i] == chars[i - 1] { run + 1 } else { 1 };
+                if run <= limit {
+                    continue;
+                }
+                let set = &self.classes[class_of(chars[i])?];
+                let next = chars.get(i + 1).copied();
+                let choices: Vec<char> = set.iter().copied().filter(|&c| c != chars[i - 1] && Some(c) != next).collect();
+                if choices.is_empty() {
+                    continue; // a one-character class: nothing else to use
+                }
+                chars[i] = choices[OsRng.gen_range(0..choices.len())];
+                run = 1;
+            }
+        }
+        Some(chars.into_iter().collect())
+    }
 }
 
 /// Decides between nothing, a new login and a password update, without telling the

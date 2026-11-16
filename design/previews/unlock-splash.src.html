@@ -1,0 +1,186 @@
+<title>Qasa Unlock Over Splash</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Phase 9 preview (2026-11-16): a returning user sees only the unlock (biometric prompt or
+   main-password sheet) over the app's splash, never the login page. Colours are
+   design/tokens.json. Built by build.py. */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --stroke: #E6E1E1;
+  --accent: #722F99; --onAccent: #FFFFFF; --danger: #C8323C; --cream: #FEE7C8; --coral: #FF9292;
+  --text: #2A1F33; --text2: #6E6475; --text3: #A39DA3; --frame: #2A1F33; --scrim: rgba(20,12,28,.32);
+  --sys: rgba(245,245,247,.92); --sysText: #1d1d1f;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10; --scrim: rgba(0,0,0,.5);
+  --sys: rgba(44,44,46,.94); --sysText: #f5f5f7; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10; --scrim: rgba(0,0,0,.5);
+  --sys: rgba(44,44,46,.94); --sysText: #f5f5f7; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; margin: 0; padding: 28px 16px 48px; }
+.page { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+header p, .note { margin: 4px 0 0; color: var(--text2); max-width: 80ch; font-size: 15px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--text2); padding: 5px 12px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.opt h2 { font-size: 17px; margin: 0; }
+.opt .sub { color: var(--text2); font-size: 13px; margin: 0 0 10px; min-height: 80px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 9px; border-radius: 999px; background: color-mix(in srgb, #2F9E6C 15%, transparent); color: #2F9E6C; margin-inline-start: 6px; vertical-align: 2px; }
+
+.phone { position: relative; background: var(--bg); border: 8px solid var(--frame); border-radius: 40px; overflow: hidden; height: 660px; max-width: 330px; margin: 0 auto; }
+.splash { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 150px; gap: 14px; }
+.splash .icon { width: 96px; height: 96px; }
+.splash .word { font-size: 26px; font-weight: 700; color: var(--accent); }
+.splash.up { padding-top: 110px; }
+.scrim { position: absolute; inset: 0; background: var(--scrim); }
+
+/* The app's own unlock sheet (rule 6b). */
+.sheet { position: absolute; inset-inline: 0; bottom: 0; background: var(--bg); border-radius: 22px 22px 0 0; padding: 8px 16px 18px; box-shadow: 0 -8px 30px rgba(0,0,0,.18); }
+.grab { width: 36px; height: 5px; border-radius: 3px; background: var(--text3); opacity: .5; margin: 0 auto 10px; }
+.sh-title { text-align: center; font-weight: 600; font-size: 16px; margin-bottom: 14px; }
+.sh-msg { font-size: 14px; color: var(--text2); margin: 0 0 10px; }
+.group { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 10px 14px; }
+.group .lbl { font-size: 12px; color: var(--text2); }
+.group .val { display: flex; justify-content: space-between; align-items: center; font-size: 16px; min-height: 26px; letter-spacing: 2px; }
+.group .val .caret { width: 2px; height: 20px; background: var(--accent); display: inline-block; vertical-align: middle; }
+.group .err { font-size: 12px; color: var(--danger); margin-top: 2px; letter-spacing: 0; }
+.group.bad { border-color: var(--danger); }
+.due { display: flex; gap: 8px; font-size: 12px; color: var(--text2); margin: 10px 2px 0; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 50px; border-radius: 16px; font-weight: 600; font-size: 16px; margin-top: 12px; }
+.btn.primary { background: var(--accent); color: var(--onAccent); }
+.btn.secondary { background: var(--muted); color: var(--accent); }
+.btn.ghost { color: var(--accent); height: 40px; margin-top: 6px; }
+.splashBtns { position: absolute; inset-inline: 16px; bottom: 22px; }
+
+/* System biometric prompts (stand-ins). */
+.faceid { position: absolute; left: 50%; top: 60%; transform: translate(-50%, -50%); width: 150px; height: 150px; border-radius: 30px; background: var(--sys); color: var(--sysText); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-size: 14px; backdrop-filter: blur(20px); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+.bio { position: absolute; inset-inline: 0; bottom: 0; background: var(--card); color: var(--text); border-radius: 26px 26px 0 0; padding: 22px 20px 26px; text-align: center; box-shadow: 0 -8px 30px rgba(0,0,0,.2); }
+.bio .t { font-weight: 600; font-size: 18px; }
+.bio .s { color: var(--text2); font-size: 13px; margin: 2px 0 16px; }
+.bio .fp { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center; background: var(--muted); color: var(--accent); }
+.bio .cancel { color: var(--accent); font-weight: 600; font-size: 14px; text-align: start; }
+.bio .row { display: flex; justify-content: space-between; }
+svg.i { display: block; }
+.cap { font-size: 12px; color: var(--text3); text-align: center; margin-top: 8px; }
+.opt.chosen .phone { outline: 3px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Phase 9: unlock without the login page</h1>
+    <p>Opening Qasa with a vault on the device shows the splash (the app icon) and the unlock, nothing else: no "Welcome back" page. Pick a state to see each option in it.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="state">
+      <button data-v="launch" aria-pressed="true">1 · Opening</button>
+      <button data-v="cancel">2 · Face/fingerprint cancelled</button>
+      <button data-v="password">3 · Main password only</button>
+      <button data-v="wrong">4 · Wrong password</button>
+    </div>
+    <div class="seg" id="os"><button data-v="ios" aria-pressed="true">iPhone</button><button data-v="android">Android</button></div>
+    <div class="seg" id="theme"><button data-v="light">Light</button><button data-v="dark" aria-pressed="true">Dark</button></div>
+    <div class="seg" id="lang"><button data-v="en">English</button><button data-v="ckb" aria-pressed="true">کوردی</button></div>
+  </div>
+  <p class="note" id="stateNote"></p>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">In every option: the vault list is never drawn behind the unlock; returning from the background after auto-lock shows the same thing; the desktop app does the same in its window (the splash mark centred, the unlock as a centred card); creating or pairing a vault (no vault on the device yet) keeps today's welcome pages. "Reset the vault" stays reachable from the sheet's ⋯ menu, as today.</p>
+</div>
+
+<script>
+const ICONS = /*ICONS*/;
+const icon = (n, s) => ICONS[n].replace('<svg ', `<svg class="i" width="${s}" height="${s}" `);
+const APPICON = `<svg class="icon" viewBox="0 0 200 200"><rect width="200" height="200" rx="44" fill="#722F99"/><g transform="translate(100 100) scale(0.85) translate(-105.0 -104.5)"><circle cx="86" cy="42" r="10" fill="#FEE7C8"/><circle cx="114" cy="42" r="10" fill="#FEE7C8"/><circle cx="100" cy="112" r="44" fill="none" stroke="#FEE7C8" stroke-width="18"/><path d="M121 133 L156 168" stroke="#FEE7C8" stroke-width="16" stroke-linecap="round"/><circle cx="100" cy="100" r="11" fill="#FF9292"/><polygon points="93,105 107,105 110,125 90,125" fill="#FF9292"/></g></svg>`;
+
+const T = {
+  en: { brand: 'Qasa', sheetTitle: 'Unlock Qasa', msg: 'Enter your main password', pw: 'Main password', unlock: 'Unlock', bio: 'Use fingerprint or face',
+        wrong: "That's not the right main password. Try again.", due: "It's been 14 days, so enter your main password to keep it fresh in your mind.",
+        faceid: 'Face ID', fpTitle: 'Unlock Qasa', fpSub: 'Touch the fingerprint sensor', cancel: 'Cancel', usePw: 'Use main password' },
+  ckb: { brand: 'قاسە', sheetTitle: 'کردنەوەی قاسە', msg: 'وشەی نهێنی سەرەکیت بنووسە', pw: 'وشەی نهێنی سەرەکی', unlock: 'کردنەوە', bio: 'پەنجەمۆر یان ڕوخسار بەکاربهێنە',
+        wrong: 'ئەوە وشەی نهێنی سەرەکی دروست نییە. دووبارە هەوڵبدەرەوە.', due: '١٤ ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە با لە یادت بمێنێت.',
+        faceid: 'Face ID', fpTitle: 'کردنەوەی قاسە', fpSub: 'دەست لە هەستەوەری پەنجەمۆر بدە', cancel: 'هەڵوەشاندنەوە', usePw: 'وشەی نهێنی سەرەکی' },
+};
+const NOTES = {
+  launch: 'Face or fingerprint unlock is on. The app opens and the biometric prompt starts by itself.',
+  cancel: 'The user cancelled the prompt (or it failed). Nothing locks them out: the main password is always there.',
+  password: 'Face/fingerprint is off, or the 14-day main-password check is due.',
+  wrong: 'A wrong main password: the error sits on its own row (Phase 4).',
+};
+
+const OPTIONS = [
+  { id: 'A', name: 'A · The protected-item sheet', rec: true,
+    sub: 'Exactly how a protected note unlocks (rule 6b): the splash with the unlock sheet already up, and the biometric prompt on top of it. The password is always one tap away; cancelling the prompt just leaves the sheet.' },
+  { id: 'B', name: 'B · Prompt first, sheet on cancel',
+    sub: 'Only the splash and the system prompt at first, the calmest launch. The sheet rises only when the prompt is cancelled or fails, or when there is no biometric unlock.' },
+  { id: 'C', name: 'C · Splash with buttons',
+    sub: 'No sheet. The prompt starts by itself; cancelling leaves the splash with two buttons. "Use main password" opens the same sheet as A.' },
+];
+
+let S = { state: 'launch', os: 'ios', lang: 'ckb' };
+
+function sheet(t, { error = false, due = false, bio = true, typed = false } = {}) {
+  return `<div class="sheet"><div class="grab"></div><div class="sh-title">${t.sheetTitle}</div>
+    <p class="sh-msg">${t.msg}</p>
+    <div class="group ${error ? 'bad' : ''}"><div class="lbl">${t.pw}</div>
+      <div class="val"><span>${typed ? '••••••••••' : '<span class="caret"></span>'}</span><span style="color:var(--text2)">${icon('show', 20)}</span></div>
+      ${error ? `<div class="err">${t.wrong}</div>` : ''}</div>
+    ${due ? `<div class="due">${icon('login', 14)}<span>${t.due}</span></div>` : ''}
+    <div class="btn primary">${icon('unlock', 20)}${t.unlock}</div>
+    ${bio ? `<div class="btn ghost">${icon(S.os === 'ios' ? 'face' : 'fingerprint', 20)}${t.bio}</div>` : ''}
+  </div>`;
+}
+function prompt(t) {
+  return S.os === 'ios'
+    ? `<div class="faceid">${icon('face', 54)}<span>${t.faceid}</span></div>`
+    : `<div class="bio"><div class="t">${t.fpTitle}</div><div class="s">${t.fpSub}</div><div class="fp">${icon('fingerprint', 36)}</div><div class="row"><span class="cancel">${t.usePw}</span><span class="cancel">${t.cancel}</span></div></div>`;
+}
+function splash(up) { return `<div class="splash ${up ? 'up' : ''}">${APPICON}<div class="word">${T[S.lang].brand}</div></div>`; }
+
+function screen(o) {
+  const t = T[S.lang], st = S.state;
+  const sheetState = { error: st === 'wrong', due: st === 'password', bio: st !== 'password', typed: st === 'wrong' };
+  if (o.id === 'A') {
+    return splash(true) + `<div class="scrim"></div>` + sheet(t, sheetState) + (st === 'launch' ? prompt(t) : '');
+  }
+  if (o.id === 'B') {
+    if (st === 'launch') return splash(false) + prompt(t);
+    return splash(true) + `<div class="scrim"></div>` + sheet(t, sheetState);
+  }
+  // C
+  if (st === 'launch') return splash(false) + prompt(t);
+  if (st === 'cancel') return splash(false) + `<div class="splashBtns"><div class="btn primary">${icon(S.os === 'ios' ? 'face' : 'fingerprint', 20)}${t.bio}</div><div class="btn secondary">${t.usePw}</div></div>`;
+  return splash(true) + `<div class="scrim"></div>` + sheet(t, sheetState);
+}
+
+function render() {
+  const dir = S.lang === 'ckb' ? 'rtl' : 'ltr';
+  document.getElementById('stateNote').textContent = NOTES[S.state];
+  document.getElementById('grid').innerHTML = OPTIONS.map(o => `
+    <div class="opt"><h2>${o.name}${o.rec ? '<span class="tag">Recommended</span>' : ''}</h2><p class="sub">${o.sub}</p>
+      <div class="phone" dir="${dir}" lang="${S.lang}">${screen(o)}</div></div>`).join('');
+}
+function seg(id, key) {
+  const el = document.getElementById(id);
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    if (key === 'theme') document.documentElement.dataset.theme = b.dataset.v; else { S[key] = b.dataset.v; render(); }
+  });
+}
+seg('state', 'state'); seg('os', 'os'); seg('theme', 'theme'); seg('lang', 'lang');
+document.documentElement.dataset.theme = 'dark';
+render();
+</script>

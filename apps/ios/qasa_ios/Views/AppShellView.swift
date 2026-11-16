@@ -48,8 +48,9 @@ struct AppShellView: View {
     @Environment(AppPreferences.self) private var prefs
     @State private var tab: ShellTab = .home
     @State private var page: AppPage?
-    /// A generated password waiting for the Passwords tab to open the new-login editor.
-    @State private var pendingPassword: String?
+    /// A new login waiting for the Passwords tab to open the new-login editor.
+    @State private var pendingLogin: LoginFields?
+    @Bindable private var vault = VaultRepository.shared
 
     var body: some View {
         ZStack {
@@ -59,7 +60,7 @@ struct AppShellView: View {
                     .tabItem { tabLabel(.home) }
                     .tag(ShellTab.home)
                 NavigationStack {
-                    VaultListView(pendingPassword: $pendingPassword)
+                    VaultListView(pendingLogin: $pendingLogin)
                 }
                 .tabItem { tabLabel(.passwords) }
                 .tag(ShellTab.passwords)
@@ -88,6 +89,38 @@ struct AppShellView: View {
         .onReceive(NotificationCenter.default.publisher(for: .qasaOpenNotifications)) { _ in
             open(.notifications)
         }
+        // A strong password AutoFill filled that no login has (docs/autofill-hardening.md R4).
+        .alert(
+            generatedOfferTitle,
+            isPresented: Binding(
+                get: { vault.generatedPasswordOffer != nil },
+                set: { if !$0 { vault.generatedPasswordOffer = nil } }
+            ),
+            presenting: vault.generatedPasswordOffer
+        ) { offer in
+            Button(L10n.tr("common.save", locale: prefs.locale)) { saveGeneratedOffer(offer) }
+            Button(L10n.tr("vault.generatedSave.notNow", locale: prefs.locale), role: .cancel) {}
+        } message: { _ in
+            Text(L10n.tr("vault.generatedSave.body", locale: prefs.locale))
+        }
+    }
+
+    private var generatedOfferTitle: String {
+        if let host = vault.generatedPasswordOffer?.host {
+            return String(format: L10n.tr("vault.generatedSave.titleFmt", locale: prefs.locale), host)
+        }
+        return L10n.tr("vault.generatedSave.title", locale: prefs.locale)
+    }
+
+    /// Opens the new-login editor with the generated password (and its site) filled in.
+    private func saveGeneratedOffer(_ offer: GeneratedPasswordStore.Record) {
+        vault.generatedPasswordOffer = nil
+        let site = offer.host ?? ""
+        withAnimation(.easeOut(duration: 0.22)) {
+            page = nil
+            tab = .passwords
+        }
+        pendingLogin = LoginFields(itemName: site, password: offer.password, website: site)
     }
 
     /// Linear glyph when inactive, its filled twin when selected.
@@ -120,7 +153,7 @@ struct AppShellView: View {
             page = nil
             tab = .passwords
         }
-        pendingPassword = password
+        pendingLogin = LoginFields(password: password)
     }
 
     private func back() {

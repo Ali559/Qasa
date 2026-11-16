@@ -230,20 +230,42 @@ picks one before anything is built.
 
 ### Phase 8: Autofill must be bullet-proof (investigate first)
 
-- [ ] **Reported: the suggested strong password didn't fill.** Reproduce and find the cause.
-- [ ] **Then harden every autofill path** we support, on every OS version we support:
+- [x] **Reported: the suggested strong password didn't fill.** Reproduce and find the cause.
+      (2026-11-16) Reproduced on Android: a confirm field without a hint (`password_repeat`)
+      was read as a current password, so only the first field filled. The same class of bug
+      on iOS 18–26.1 (a new password for each field) and in the extension. See
+      `docs/autofill-hardening.md`.
+- [x] **Then harden every autofill path** we support, on every OS version we support:
       - sign-up forms (suggest a strong password, fill both fields, save the login),
       - login forms,
       - every other autofill type (cards, identities, 2FA codes, the extension's in-page menu).
 
       It has to work every time, not most of the time. Write down the test matrix (OS
       versions × form types × browsers/apps) and run it on each platform.
+      (2026-11-16) Rules R1–R6 and the matrix in `docs/autofill-hardening.md`; forms A–H
+      in `docs/autofill-test-pages/signup.html` run as tests on every platform. Still needs a
+      real device: iOS 26.2 generate/save, iOS 18 text insertion, Face ID in the extension.
 
 ### Phase 9: Unlock without the login page (preview first)
 
-- [ ] A returning user shouldn't see the login screen, only the biometric prompt or
+- [x] A returning user shouldn't see the login screen, only the biometric prompt or
       main-password sheet, the same way protected items work (rule 6b), over the app's
       splash screen. Preview this before deciding.
+      (2026-11-16) Option B "prompt first, sheet on cancel" (`previews/unlock-splash.html`),
+      design rule 6d. Built on iOS, Android and the desktop; the system launch screens on
+      iOS and Android 12+ show the same icon in the same place. Seen on the iOS simulator,
+      the Android emulator and the desktop UI in a browser. Not tried: the automatic Face ID
+      / fingerprint / Touch ID / Hello prompt on real hardware.
+
+### Phase 9b: Autofill follow-ups (from Phase 8)
+
+- [ ] **Android save offer:** a picked strong password is only caught when Android contacts
+      Qasa's autofill service again before the next unlock. Catch it reliably, and show the
+      "Save the password you created for <site>?" wording instead of the plain new-login form.
+- [ ] **Extension:** card and profile fills still close the menu when they fail (apply R5),
+      and rows in the in-page menu can't be picked with the keyboard yet.
+- [ ] **iOS:** the Face ID text in the AutoFill sheet is English only, and the app's own
+      Face ID text isn't translated either.
 
 ### Phase 10: Payment options on the upgrade page
 

@@ -280,7 +280,7 @@ impl Bridge {
             return Ok(if locked && due { json!({ "method": "window", "passwordDue": true }) } else { json!({ "method": "window" }) });
         }
         if op == "generate" {
-            return ops::generate();
+            return ops::generate(req);
         }
         let mut vault = host.vault().lock().map_err(|_| OpError::Bad)?;
         if op == "status" {

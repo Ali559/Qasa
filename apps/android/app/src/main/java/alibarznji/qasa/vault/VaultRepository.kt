@@ -1,6 +1,7 @@
 package alibarznji.qasa.vault
 
 import alibarznji.qasa.credentials.AutofillIndexStore
+import alibarznji.qasa.credentials.GeneratedPasswordStore
 import alibarznji.qasa.siteicons.SiteIconService
 import alibarznji.qasa.vault.crypto.VaultCrypto
 import alibarznji.qasa.vault.crypto.VaultCryptoException
@@ -55,6 +56,7 @@ class VaultRepository @Inject constructor(
     private val autofillIndex: AutofillIndexStore,
     private val secureStore: VaultSecureStore,
     private val siteIcons: SiteIconService,
+    private val generatedPasswords: GeneratedPasswordStore,
 ) {
     /**
      * Resolved per call: the store may fail to open, and the UI shows
@@ -291,6 +293,7 @@ class VaultRepository @Inject constructor(
         dao.clearCollections()
         autofillIndex.clear()
         siteIcons.clearAll()
+        generatedPasswords.clear()
     }
 
     /**
@@ -350,6 +353,15 @@ class VaultRepository @Inject constructor(
      * (before logins carried their 2FA code). The rebuild stamps the current version, so
      * later unlocks skip it.
      */
+    /** Every saved login's password (unlocked only): R4 checks a generated one was saved. */
+    suspend fun loginPasswords(): Set<String> {
+        val enc = session.requireEncKey()
+        return dao.getAllItems().filter { VaultItemKind.fromRaw(it.kindRaw) == VaultItemKind.Login }.mapNotNull { item ->
+            runCatching { VaultJson.decodePayload(VaultCrypto.decrypt(item.encryptedPayload, enc)) }.getOrNull()
+                .let { it as? VaultPayload.Login }?.password?.takeIf { it.isNotEmpty() }
+        }.toSet()
+    }
+
     suspend fun rebuildAutofillIndexIfOutdated() {
         if (!session.isUnlocked || !autofillIndex.isOutdated()) return
         rebuildAutofillIndex()

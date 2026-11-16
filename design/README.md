@@ -161,6 +161,26 @@ A change that only one app picks up is not done.
    - **Name** (`onboarding.nameTitle`): one optional field, "Let's get started" and Skip.
      The name is kept on the device only and greets the user ("Hi, %@" above the main
      password screen, the home greeting, the profile card); Settings can change it.
+6d. **Unlocking the app** (chosen 2026-11-16, option B in `previews/unlock-splash.html`).
+   A returning user (a vault on this device, locked: at launch and after auto-lock) never
+   sees a login page. The screen is the **splash**: the `background` with the app icon
+   (96) centred, the same place the system launch screen puts it, and the wordmark under
+   it; nothing of the vault is drawn.
+   - **Face or fingerprint on** (and the 14-day main-password check not due): the system
+     prompt starts by itself once the window has settled (~450 ms). Success opens the app.
+   - **Cancelled or failed, or biometrics off or due:** the unlock sheet rises over the
+     splash and the icon moves up above it (`standard` timing; none with reduce motion).
+     The sheet is rule 6b's: the shared header (`auth.unlock.sheetTitle`), the
+     `protected.title` message, the main password as a one-row group (error on its row),
+     Unlock as the bottom button, and `auth.unlock.biometrics` as a secondary button that
+     starts the prompt again (only when biometrics are on and not due). When the check is
+     due, its note (`auth.unlock.masterPasswordDueFmt`) sits under the password.
+   - The sheet can't be dismissed (there is nothing behind it). Anything the old login
+     page offered besides unlocking (reset the vault, help) stays reachable from the sheet.
+   - The desktop does the same in its window: the splash mark centred, Touch ID / Windows
+     Hello started by itself, and the sheet as a centred card.
+   - No vault on the device yet (create or pair) keeps the welcome pages.
+
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default

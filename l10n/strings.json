@@ -2824,6 +2824,31 @@
     "ar": "استخدم كلمة مرور قوية",
     "ckb": "وشەی نهێنیی بەهێز بەکاربهێنە"
   },
+  "fill.samePassword": {
+    "en": "Use the same strong password",
+    "ar": "استخدم كلمة المرور القوية نفسها",
+    "ckb": "هەمان وشەی نهێنیی بەهێز بەکاربهێنە"
+  },
+  "vault.generatedSave.titleFmt": {
+    "en": "Save the password you created for %@?",
+    "ar": "هل تريد حفظ كلمة المرور التي أنشأتها لـ %@؟",
+    "ckb": "ئەو وشەی نهێنییەی بۆ %@ دروستت کرد پاشەکەوت بکرێت؟"
+  },
+  "vault.generatedSave.title": {
+    "en": "Save the password you created?",
+    "ar": "هل تريد حفظ كلمة المرور التي أنشأتها؟",
+    "ckb": "ئەو وشەی نهێنییەی دروستت کرد پاشەکەوت بکرێت؟"
+  },
+  "vault.generatedSave.body": {
+    "en": "Qasa made a strong password for a sign-up form, but it isn't in your vault yet.",
+    "ar": "أنشأت قاصة كلمة مرور قوية لنموذج تسجيل، لكنها ليست في خزنتك بعد.",
+    "ckb": "قاسە وشەیەکی نهێنیی بەهێزی بۆ فۆرمێکی خۆتۆمارکردن دروست کرد، بەڵام هێشتا لە سندووقەکەتدا نییە."
+  },
+  "vault.generatedSave.notNow": {
+    "en": "Not now",
+    "ar": "ليس الآن",
+    "ckb": "ئێستا نا"
+  },
   "autofill.saveTitle": {
     "en": "Save to Qasa",
     "ar": "حفظ في قاصة",
@@ -4332,5 +4357,10 @@
     "en": "Shows each site's own icon. Qasa asks only that site, never anyone else.",
     "ar": "تعرض أيقونة كل موقع. يطلبها Qasa من ذلك الموقع فقط، ولا يطلبها من أي جهة أخرى.",
     "ckb": "ئایکۆنی هەر ماڵپەڕێک پیشان دەدات. Qasa تەنها لەو ماڵپەڕە داوای دەکات، هەرگیز لە کەسێکی تر نا."
+  },
+  "auth.unlock.sheetTitle": {
+    "en": "Unlock Qasa",
+    "ar": "افتح قاصة",
+    "ckb": "قاسە بکەرەوە"
   }
 }

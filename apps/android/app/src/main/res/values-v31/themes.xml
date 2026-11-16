@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ draws its own launch screen. Make it the unlock splash's first frame
+         (design/README.md rule 6d): the app background and the 96dp app tile, centred,
+         so the hand-off to the app is only the wordmark appearing. -->
+    <style name="Theme.Qasa" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowBackground">@color/qasa_background</item>
+        <item name="android:windowSplashScreenBackground">@color/qasa_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+    </style>
+</resources>

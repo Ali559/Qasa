@@ -68,8 +68,9 @@ export type ContentRequest =
   | { kind: 'rememberUsername'; username: string }
   /** The in-page menu's font files (content/fonts.ts). */
   | { kind: 'fonts' }
-  /** A strong password from the shared generator, for a new-password field (rule 6c). */
-  | { kind: 'generate' }
+  /** A strong password from the shared generator, for a new-password field (rule 6c),
+   *  fitted to the page's `maxlength` / `minlength` / `passwordrules` (R2). */
+  | { kind: 'generate'; constraints?: { maxLength?: number; minLength?: number; rules?: string } }
 
 export type BgRequest = PopupRequest | ContentRequest
 

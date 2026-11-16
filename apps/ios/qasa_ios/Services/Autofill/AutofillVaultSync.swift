@@ -3,7 +3,7 @@ import Foundation
 
 /// Builds / refreshes the App Group Autofill index + ASCredentialIdentityStore from vault contents.
 enum AutofillVaultSync {
-    static func rebuild(from payloads: [(id: UUID, payload: VaultPayload)]) {
+    static func rebuild(from payloads: [(id: UUID, payload: VaultPayload)]) async {
         guard VaultSession.shared.isUnlocked,
               let encKey = try? VaultSession.shared.requireEncKey() else {
             return
@@ -16,7 +16,7 @@ enum AutofillVaultSync {
             }
         }
         AutofillIndexStore.replaceAll(entries: entries)
-        AutofillIdentitySync.sync(entries: entries)
+        await AutofillIdentitySync.sync(entries: entries)
 
         // Keep shared keychain flags aligned for the extension.
         SharedVaultKeychain.vaultExists = VaultKeychainStore.vaultExists

@@ -43,6 +43,7 @@
     <string name="auth_unlock_masterpassword">Main password</string>
     <string name="auth_unlock_masterpasswordduefmt">It\'s been %d days, so enter your main password to keep it fresh in your mind. Face or fingerprint unlock works again after this.</string>
     <string name="auth_unlock_placeholder">Enter password</string>
+    <string name="auth_unlock_sheettitle">Unlock Qasa</string>
     <string name="auth_unlock_subtitle">Enter your main password to see your passwords.</string>
     <string name="auth_unlock_title">Welcome back</string>
     <string name="auth_unlock_wrongpassword">That\'s not the right main password. Try again.</string>
@@ -354,6 +355,7 @@
     <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">Website URL</string>
     <string name="field_zipcode">Zip Code</string>
+    <string name="fill_samepassword">Use the same strong password</string>
     <string name="fill_strongpassword">Use a strong password</string>
     <string name="gen_copied">Copied!</string>
     <string name="gen_copy">Copy</string>
@@ -770,6 +772,10 @@
     <string name="vault_empty">No items yet</string>
     <string name="vault_emptyhint">Tap + to save your first password.</string>
     <string name="vault_emptytitle">No passwords yet</string>
+    <string name="vault_generatedsave_body">Qasa made a strong password for a sign-up form, but it isn\'t in your vault yet.</string>
+    <string name="vault_generatedsave_notnow">Not now</string>
+    <string name="vault_generatedsave_title">Save the password you created?</string>
+    <string name="vault_generatedsave_titlefmt">Save the password you created for %s?</string>
     <string name="vault_generatepassword">Generate password</string>
     <string name="vault_hidepassword">Hide password</string>
     <string name="vault_history">History</string>

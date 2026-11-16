@@ -1,29 +1,17 @@
 package alibarznji.qasa.screens.vault.detail
 
 import alibarznji.qasa.R
-import alibarznji.qasa.theme.PrimaryButton
-import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaFieldGroup
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.QasaModalBottomSheet
-import alibarznji.qasa.theme.QasaSecureRow
 import alibarznji.qasa.theme.RowIconBadge
-import alibarznji.qasa.theme.SecondaryButton
+import alibarznji.qasa.theme.UnlockSheetBody
 import alibarznji.qasa.theme.qasaColors
-import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGate
 import alibarznji.qasa.vault.BiometricGateEffect
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,9 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -108,48 +93,17 @@ internal fun ProtectedUnlockSheet(
     }
 
     QasaModalBottomSheet(onDismissRequest = onCancel, title = stringResource(R.string.vault_unlockprotectednote)) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = QasaDimens.screenPadding)
-                .padding(bottom = QasaDimens.sheetContentBottom),
-            verticalArrangement = Arrangement.spacedBy(QasaDimens.sheetActionsGap),
-        ) {
-            Text(
-                stringResource(R.string.protected_title),
-                color = c.textSecondary,
-                style = qasaText.dialogMessage,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            QasaFieldGroup {
-                QasaSecureRow(
-                    label = stringResource(R.string.auth_unlock_masterpassword),
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        wrong = false
-                    },
-                    placeholder = stringResource(R.string.auth_unlock_placeholder),
-                    error = if (wrong) stringResource(R.string.auth_unlock_wrongpassword) else null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { check() }),
-                )
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(QasaDimens.sheetButtonGap)) {
-                PrimaryButton(
-                    title = stringResource(R.string.auth_unlock_button),
-                    onClick = ::check,
-                    enabled = password.isNotEmpty() && !checking,
-                )
-                if (canUseBiometrics) {
-                    SecondaryButton(
-                        title = stringResource(R.string.auth_unlock_biometrics),
-                        onClick = { askingBiometrics = true },
-                    )
-                }
-            }
-        }
+        UnlockSheetBody(
+            password = password,
+            onPasswordChange = {
+                password = it
+                wrong = false
+            },
+            error = if (wrong) stringResource(R.string.auth_unlock_wrongpassword) else null,
+            unlockEnabled = password.isNotEmpty() && !checking,
+            onUnlock = ::check,
+            onBiometrics = if (canUseBiometrics) ({ askingBiometrics = true }) else null,
+        )
     }
 }
 

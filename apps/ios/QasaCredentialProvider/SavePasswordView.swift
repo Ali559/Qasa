@@ -37,14 +37,14 @@ struct SavePasswordView: View {
                 SecureField(AutofillL10n.tr("auth.unlock.placeholder", "Main password"), text: $password)
                     .qasaExtensionField()
                     .submitLabel(.go)
-                    .onSubmit { saveWithPassword() }
+                    .onSubmit { Task { await saveWithPassword() } }
                     .padding(.horizontal)
                 if let unlockError {
                     Text(unlockError)
                         .font(QasaFontFace.font(size: 13))
                         .foregroundStyle(QasaSharedPalette.danger)
                 }
-                Button(action: saveWithPassword) {
+                Button { Task { await saveWithPassword() } } label: {
                     Text(AutofillL10n.tr("autofill.save", "Save"))
                 }
                 .buttonStyle(QasaExtensionPrimaryButtonStyle())
@@ -52,7 +52,7 @@ struct SavePasswordView: View {
                 .padding(.horizontal)
                 if showsBiometricButton {
                     Button {
-                        saveWithBiometrics(automatic: false)
+                        Task { await saveWithBiometrics(automatic: false) }
                     } label: {
                         Label { Text(AutofillL10n.tr("autofill.useBiometrics", "Use Face ID / Touch ID")) } icon: { QasaIconImage(.face, size: 17) }
                     }
@@ -70,15 +70,19 @@ struct SavePasswordView: View {
         }
         .onAppear {
             showsBiometricButton = AutofillBiometricGate.showsBiometricButton
-            if AutofillUnlock.canOfferBiometricUnlock { saveWithBiometrics(automatic: true) }
+        }
+        // Face ID starts once the sheet is up; the work runs off the main actor (R2).
+        .task {
+            try? await Task.sleep(for: AutofillUnlock.biometricDelay)
+            if AutofillUnlock.canOfferBiometricUnlock { await saveWithBiometrics(automatic: true) }
         }
     }
 
-    private func saveWithBiometrics(automatic: Bool) {
+    private func saveWithBiometrics(automatic: Bool) async {
         guard !isUnlocking else { return }
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let session = AutofillUnlock.unlockWithBiometrics() else {
+        guard let session = await AutofillUnlock.unlockWithBiometricsInBackground() else {
             showsBiometricButton = AutofillBiometricGate.showsBiometricButton
             if !automatic { unlockError = AutofillL10n.tr("autofill.biometricFailed", "Biometric unlock failed.") }
             return
@@ -86,11 +90,11 @@ struct SavePasswordView: View {
         onSave(session)
     }
 
-    private func saveWithPassword() {
+    private func saveWithPassword() async {
         guard !password.isEmpty, !isUnlocking else { return }
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let session = AutofillUnlock.unlock(password: password) else {
+        guard let session = await AutofillUnlock.unlockInBackground(password: password) else {
             unlockError = AutofillL10n.tr("autofill.wrongPassword", "Wrong master password.")
             return
         }

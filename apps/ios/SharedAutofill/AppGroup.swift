@@ -1,6 +1,6 @@
 import Foundation
 
-enum AppGroup {
+nonisolated enum AppGroup {
     static let identifier = "group.alibarznji.qasa"
     static let keychainAccessGroup = "R6H3Y7XP76.alibarznji.qasa.shared"
 

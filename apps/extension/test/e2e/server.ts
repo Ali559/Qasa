@@ -6,6 +6,9 @@ import type { AddressInfo } from 'node:net'
 import { extname, join, normalize } from 'node:path'
 
 const FIXTURES = join(import.meta.dirname, '../fixtures')
+/** docs/autofill-test-pages, served under /autofill-test-pages/. */
+const TEST_PAGES = join(import.meta.dirname, '../../../../docs/autofill-test-pages')
+const TEST_PAGES_PREFIX = 'autofill-test-pages/'
 const TYPES: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' }
 
 export interface FixtureServers {
@@ -18,7 +21,8 @@ function serve(other: () => string): Server {
   return createServer(async (req, res) => {
     const path = normalize(new URL(req.url ?? '/', 'http://x').pathname).replace(/^\/+/, '')
     try {
-      let body: Buffer | string = await readFile(join(FIXTURES, path || 'login.html'))
+      const file = path.startsWith(TEST_PAGES_PREFIX) ? join(TEST_PAGES, path.slice(TEST_PAGES_PREFIX.length)) : join(FIXTURES, path || 'login.html')
+      let body: Buffer | string = await readFile(file)
       if (path.endsWith('.html')) body = body.toString('utf8').replaceAll('{{OTHER_ORIGIN}}', other())
       res.writeHead(200, { 'content-type': TYPES[extname(path)] ?? 'application/octet-stream', 'cache-control': 'no-store' })
       res.end(body)

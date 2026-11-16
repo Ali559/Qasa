@@ -6,7 +6,7 @@ import Foundation
 /// `Services/Vault/MasterKeyDeriver.swift`). A divergence in the KDF parameters makes
 /// the credential provider derive a different root key than the app, which breaks
 /// autofill for every user while the main app keeps working — silently.
-enum SharedMasterKeyDeriver {
+nonisolated enum SharedMasterKeyDeriver {
     private static let saltLength = SharedVaultCrypto.saltLength
     private static let rootKeyLength = SharedVaultCrypto.rootKeyLength
     private static let pbkdf2Iterations = SharedVaultCrypto.pbkdf2Iterations

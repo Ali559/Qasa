@@ -15,6 +15,7 @@ import android.os.CancellationSignal
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
 import android.service.autofill.FillCallback
+import android.service.autofill.FillEventHistory
 import android.service.autofill.FillRequest
 import android.service.autofill.FillResponse
 import android.service.autofill.InlinePresentation
@@ -29,6 +30,7 @@ import androidx.annotation.RequiresApi
 import androidx.autofill.inline.UiVersions
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -44,9 +46,12 @@ import javax.inject.Inject
 class QasaAutofillService : AutofillService() {
     @Inject lateinit var indexStore: AutofillIndexStore
     @Inject lateinit var appSession: AppSession
+    @Inject lateinit var generated: GeneratedPasswordStore
 
     override fun onFillRequest(request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback) {
         val structure = request.fillContexts.lastOrNull()?.structure ?: return callback.onSuccess(null)
+        // R4: a strong password picked on the last screen is recorded before anything else.
+        recordStrongPasswordPicks(emptyList(), null)
         val screen = AutofillStructureParser.parse(structure)
         // Never fill into Qasa itself.
         if ((screen.caller as? AutofillCaller.App)?.packageName == packageName) return callback.onSuccess(null)
@@ -65,8 +70,15 @@ class QasaAutofillService : AutofillService() {
         // suggestion, a fresh password from the shared generator, and never a saved login.
         // First, so it gets a keyboard (inline) slot.
         if (loginOffers.strongPasswordIds.isNotEmpty()) {
-            val password = PasswordGenerator.generateDefault()
-            response.addDataset(strongPasswordDataset(form, password, l10n.getString(R.string.fill_strongpassword), inline))
+            // R2: fitted to the fields' maxlength / minlength / passwordrules.
+            val password = runCatching { PasswordGenerator.generate(AutofillOffers.strongPasswordSpec(form)) }
+                .getOrElse { PasswordGenerator.generateDefault() }
+            val datasetId = GeneratedPasswordLog.DATASET_PREFIX + UUID.randomUUID()
+            // R4: kept (encrypted, briefly) so a pick reported later by id still has its value.
+            val (name, website) = loginTarget(screen.caller)
+            val now = System.currentTimeMillis()
+            generated.update { GeneratedPasswordLog.offered(it, GeneratedPassword(datasetId, name, website, password, now), now) }
+            response.addDataset(strongPasswordDataset(form, datasetId, password, l10n.getString(R.string.fill_strongpassword), inline))
             added++
         }
 
@@ -131,16 +143,39 @@ class QasaAutofillService : AutofillService() {
         val password = screen.form.passwordField?.let { screen.textValues[it.id] }?.takeIf { it.isNotEmpty() }
             ?: return callback.onSuccess()
         val username = AutofillOffers.save(screen.form)?.usernameId?.let { screen.textValues[it] }.orEmpty()
-        val (name, website) = when (val caller = screen.caller) {
-            is AutofillCaller.Web -> caller.host to caller.host
-            is AutofillCaller.App -> appLabel(caller.packageName) to "androidapp://${caller.packageName}"
-        }
+        // R4: the generated password is being saved here; still recorded as picked, so the
+        // unlock reminder catches it if the user closes the review without saving.
+        val picked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) request.datasetIds.orEmpty() else emptyList()
+        recordStrongPasswordPicks(picked, password)
+        val (name, website) = loginTarget(screen.caller)
         appSession.requestSaveLogin(
             VaultPayload.Login(itemName = name, username = username, password = password, website = website),
         )
         val intent = Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         val pending = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) callback.onSuccess(pending.intentSender) else callback.onSuccess()
+    }
+
+    private fun loginTarget(caller: AutofillCaller): Pair<String, String> = when (caller) {
+        is AutofillCaller.Web -> caller.host to caller.host
+        is AutofillCaller.App -> appLabel(caller.packageName) to "androidapp://${caller.packageName}"
+    }
+
+    /**
+     * R4: marks offered strong passwords the user picked. The fill event history holds the
+     * events of this service's last response (TYPE_DATASET_SELECTED carries the dataset
+     * id); a save request also lists the datasets picked in its session ([extraIds]), and a
+     * saved [password] equal to an offered one is a pick too.
+     */
+    private fun recordStrongPasswordPicks(extraIds: List<String>, password: String?) {
+        val fromHistory = runCatching {
+            fillEventHistory?.events.orEmpty()
+                .filter { it.type == FillEventHistory.Event.TYPE_DATASET_SELECTED }
+                .mapNotNull { it.datasetId }
+        }.getOrDefault(emptyList())
+        val ids = (fromHistory + extraIds).filter { it.startsWith(GeneratedPasswordLog.DATASET_PREFIX) }.toSet()
+        if (ids.isEmpty() && password == null) return
+        generated.update { GeneratedPasswordLog.picked(it, ids, password) }
     }
 
     private fun appLabel(packageName: String): String = runCatching {
@@ -154,7 +189,7 @@ class QasaAutofillService : AutofillService() {
      * is no vault data, so it needs neither an unlocked vault nor [AutofillAuthActivity].
      */
     @SuppressLint("NewApi")
-    private fun strongPasswordDataset(form: AutofillForm<AutofillId>, password: String, title: String, inline: InlineSpecs?): Dataset {
+    private fun strongPasswordDataset(form: AutofillForm<AutofillId>, datasetId: String, password: String, title: String, inline: InlineSpecs?): Dataset {
         val presentation = RemoteViews(packageName, R.layout.autofill_suggestion).apply {
             setTextViewText(R.id.autofill_title, title)
             setTextViewText(R.id.autofill_hint, password)
@@ -162,6 +197,8 @@ class QasaAutofillService : AutofillService() {
         val inlinePresentation = inline?.next(this, title, password, AutofillGroup.Login, STRONG_PASSWORD_ID)
         @Suppress("DEPRECATION")
         val builder = Dataset.Builder(presentation)
+        // The id comes back in the fill event history when the user picks this row (R4).
+        builder.setId(datasetId)
         for ((id, value) in AutofillOffers.strongPasswordValues(form, password)) {
             val autofillValue = AutofillValue.forText(value)
             @Suppress("DEPRECATION")

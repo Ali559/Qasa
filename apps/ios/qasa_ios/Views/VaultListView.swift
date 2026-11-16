@@ -3,13 +3,13 @@ import SwiftData
 
 struct VaultListView: View {
     var onOpenMenu: (() -> Void)? = nil
-    /// A generated password handed over from the Generator: opens the new-login editor
-    /// with it prefilled, then clears.
-    @Binding var pendingPassword: String?
+    /// A new login handed over (a password from the Generator, or one AutoFill generated
+    /// and the user chose to save): opens the new-login editor with it prefilled, then clears.
+    @Binding var pendingLogin: LoginFields?
 
-    init(onOpenMenu: (() -> Void)? = nil, pendingPassword: Binding<String?> = .constant(nil)) {
+    init(onOpenMenu: (() -> Void)? = nil, pendingLogin: Binding<LoginFields?> = .constant(nil)) {
         self.onOpenMenu = onOpenMenu
-        self._pendingPassword = pendingPassword
+        self._pendingLogin = pendingLogin
     }
 
     @Environment(AppPreferences.self) private var prefs
@@ -122,8 +122,8 @@ struct VaultListView: View {
             .appLocalization()
             .presentationDetents([.medium, .large])
         }
-        .onAppear(perform: consumePendingPassword)
-        .onChange(of: pendingPassword) { _, _ in consumePendingPassword() }
+        .onAppear(perform: consumePendingLogin)
+        .onChange(of: pendingLogin) { _, _ in consumePendingLogin() }
         .sheet(item: $editorMode) { presentation in
             VaultItemEditor(mode: presentation.mode) {
                 editorMode = nil
@@ -188,11 +188,11 @@ struct VaultListView: View {
         .buttonStyle(.plain)
     }
 
-    private func consumePendingPassword() {
-        guard let password = pendingPassword, !password.isEmpty else { return }
-        pendingPassword = nil
+    private func consumePendingLogin() {
+        guard let login = pendingLogin, !login.password.isEmpty else { return }
+        pendingLogin = nil
         showAddMenu = false
-        editorMode = EditorPresentation(mode: .create(.login(LoginFields(password: password))))
+        editorMode = EditorPresentation(mode: .create(.login(login)))
     }
 
     private func handleAddTapped() {

@@ -5,7 +5,7 @@
 import { QASA_MARK_SHAPES, QASA_MARK_TRANSFORM, QASA_MARK_VIEWBOX } from '@/brand/qasaMark'
 import { siteLetter } from '@/vault/present'
 import type { LoginMatch } from '@ext/shared/messages'
-import { HOST_STYLE, isHostIntact, supportsOcclusion } from './guard'
+import { HOST_STYLE, hostParent, isHostIntact, occlusionMayMisreport, supportsOcclusion } from './guard'
 import { ct, type ContentLanguage } from './i18n'
 import { PLEX } from './fonts'
 import TOKENS from '@/theme/tokens.css?raw'
@@ -214,8 +214,39 @@ export class Overlay {
       this.host.remove()
       return false
     }
-    if (this.host.parentNode !== this.doc.documentElement) this.doc.documentElement.append(this.host)
+    const parent = hostParent(this.doc)
+    if (this.host.parentNode !== parent) parent.append(this.host)
+    this.raise()
     return true
+  }
+
+  /**
+   * A modal <dialog>, a fullscreen element or an open popover sits in the top layer, above
+   * any z-index: then the host goes there too, as a manual popover (when the browser has
+   * popovers), shown again so it is above the page's latest top-layer element. Without
+   * anything in the top layer it stays a plain fixed element, stacked by z-index.
+   */
+  private raise(): void {
+    const host = this.host as HTMLElement & { showPopover?: () => void; hidePopover?: () => void }
+    if (typeof host.showPopover !== 'function') return
+    let topLayer = false
+    try {
+      topLayer = !!this.doc.querySelector('dialog:modal, :fullscreen, :popover-open:not([data-qasa])') || !!this.doc.fullscreenElement
+    } catch {
+      return // selectors unsupported
+    }
+    try {
+      if (!topLayer) {
+        if (host.matches(':popover-open')) host.hidePopover?.()
+        return
+      }
+      if (host.getAttribute('popover') !== 'manual') host.setAttribute('popover', 'manual')
+      host.setAttribute('data-qasa', '')
+      if (host.matches(':popover-open')) host.hidePopover?.()
+      host.showPopover()
+    } catch {
+      // Not connected, or the page interfered: stay a plain fixed element.
+    }
   }
 
   /** Shows icons for exactly these fields. */
@@ -271,8 +302,10 @@ export class Overlay {
   openMenu(field: HTMLInputElement, handlers: MenuHandlers): void {
     this.closeMenu()
     if (!this.ensureAttached()) return
-    // Last child of <html>, so later page elements with the same z-index can't simply sit on top.
-    this.doc.documentElement.append(this.host)
+    // Last child of <html>, so later page elements with the same z-index can't simply sit on
+    // top (or of the open modal dialog: see hostParent).
+    hostParent(this.doc).append(this.host)
+    this.raise()
     const el = this.doc.createElement('div')
     el.className = 'menu'
     el.setAttribute('role', 'menu')
@@ -307,6 +340,20 @@ export class Overlay {
     }
     void fonts.finally(reveal)
     setTimeout(reveal, FONT_WAIT_MS)
+  }
+
+  /** Takes the open menu off the screen while a fill runs (index.ts `fillFromMenu`),
+   *  keeping its state; `showMenu` brings it back. */
+  hideMenu(): void {
+    if (this.menu) this.menu.el.style.display = 'none'
+  }
+
+  showMenu(): void {
+    const menu = this.menu
+    if (!menu || menu.el.style.display !== 'none') return
+    menu.el.style.display = ''
+    menu.shownAt = performance.now()
+    this.placeMenu()
   }
 
   isMenuOpen(): boolean {
@@ -418,10 +465,19 @@ export class Overlay {
     return p
   }
 
+  /** The page replaced the menu's field (a re-render): the menu follows the new one. */
+  retarget(field: HTMLInputElement): void {
+    if (!this.menu || this.menu.field === field) return
+    this.menu.field = field
+    this.placeMenu()
+  }
+
   private placeMenu(): void {
     const menu = this.menu
     const win = this.doc.defaultView
     if (!menu || !win) return
+    // A field the page just removed has no box: stay put until it is re-found (retarget).
+    if (!menu.field.isConnected) return
     const r = menu.field.getBoundingClientRect()
     const rtl = win.getComputedStyle(menu.field).direction === 'rtl'
     const left = rtl ? r.right - MENU_WIDTH : r.left
@@ -442,7 +498,13 @@ export class Overlay {
     const target = (e.composedPath()[0] as Element).closest?.('.row, .action')
     if (!target) return
     if (performance.now() - menu.shownAt < MENU_ARM_MS) return
-    const ioVisible = supportsOcclusion() ? this.menuVisible === true : null
+    // IntersectionObserver v2 reports any filter or transform on <html>, or a menu partly
+    // outside the viewport, as "not visible" even when nothing covers it. Only then does a
+    // click count without it: the hit test at the click point must still find our host and
+    // the menu must have been up for MENU_ARM_MS (checked above). A cover that lets clicks
+    // through (`pointer-events: none`) on an ordinary page is still refused.
+    let ioVisible = supportsOcclusion() ? this.menuVisible === true : null
+    if (ioVisible === false && occlusionMayMisreport(this.doc, menu.el)) ioVisible = null
     if (!isHostIntact(this.host, { x: e.clientX, y: e.clientY }, ioVisible)) {
       this.closeMenu()
       return

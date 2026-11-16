@@ -1145,6 +1145,28 @@
         }
       }
     },
+    "fill.samePassword": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the same strong password"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استخدم كلمة المرور القوية نفسها"
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هەمان وشەی نهێنیی بەهێز بەکاربهێنە"
+          }
+        }
+      }
+    },
     "fill.strongPassword": {
       "localizations": {
         "en": {

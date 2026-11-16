@@ -1,13 +1,20 @@
 import SwiftUI
 
+/// Unlocking the app (`design/README.md` rule 6d, option B "Prompt first, sheet on cancel").
+/// A returning user never sees a login page: the screen is the splash (the background, the
+/// app icon centred where the system launch screen puts it, the wordmark under it). With Face
+/// ID / Touch ID on and the 14-day check not due, the system prompt starts by itself; when it
+/// is cancelled or fails, or biometrics are off or due, the unlock sheet (rule 6b's layout)
+/// rises over the splash and the icon moves up above it. The sheet can't be dismissed.
 struct LoginView: View {
     /// The unlocked password, and whether Face ID / Touch ID released it (`true`) or it
     /// was typed (`false`): only a typed one restarts the master-password interval.
-    var onUnlocked: (_ password: String, _ viaBiometrics: Bool) -> Void
-    var onCreateVault: () -> Void
+    /// Returns whether the vault opened; `false` brings the sheet back.
+    var onUnlocked: (_ password: String, _ viaBiometrics: Bool) async -> Bool
 
     @Environment(AppPreferences.self) private var prefs
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var password = ""
     @State private var errorMessage: String?
     /// Wrong password: shown on the password row itself.
@@ -23,6 +30,12 @@ struct LoginView: View {
     /// it and loop.
     @State private var autoPromptArmed = true
     @State private var isAuthenticating = false
+    /// The unlock sheet is up over the splash.
+    @State private var showsSheet = false
+    /// Unlocked: the sheet goes away while the root opens the vault.
+    @State private var didUnlock = false
+    /// The sheet's measured height, so the icon can sit centred in the space above it.
+    @State private var sheetHeight: CGFloat = 360
 
     private var showsBiometricButton: Bool { biometricsEnabled && !masterPasswordDue }
 
@@ -32,120 +45,41 @@ struct LoginView: View {
         !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    /// The icon is "up" while the sheet is.
+    private var iconUp: Bool { showsSheet && !didUnlock }
+
     var body: some View {
-        VStack(spacing: 0) {
-            KasoBrandHeader(
-                trailing: AnyView(StatusPill(text: L10n.tr("brand.localOffline", locale: locale)))
-            )
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(L10n.tr("auth.unlock.title", locale: locale))
-                            .font(.qasa(28, weight: .bold))
-                            .foregroundColor(Theme.textPrimary)
-                        Text(L10n.tr("auth.unlock.subtitle", locale: locale))
-                            .font(.qasa(14))
-                            .foregroundColor(Theme.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        FieldGroup {
-                            PasswordFieldRow(
-                                label: L10n.tr("auth.unlock.masterPassword", locale: locale),
-                                text: $password,
-                                error: passwordError,
-                                onSubmit: attemptUnlock
-                            )
-                        }
-                        .onChange(of: password) { _, _ in passwordError = nil }
-
-                        if let errorMessage {
-                            Text(errorMessage)
-                                .font(.qasa(13, weight: .medium))
-                                .foregroundColor(Theme.danger)
-                        }
-
-                        if biometricsEnabled && masterPasswordDue {
-                            HStack(alignment: .top, spacing: 8) {
-                                QasaIconImage(.login, size: 13)
-                                    .foregroundColor(Theme.accent)
-                                    .accessibilityHidden(true)
-                                Text(
-                                    String(
-                                        format: L10n.tr("auth.unlock.masterPasswordDueFmt", locale: locale),
-                                        locale: locale,
-                                        BiometricPolicy.masterPasswordIntervalDays
-                                    )
-                                )
-                                .font(.qasa(13))
-                                .foregroundColor(Theme.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .padding(.top, 2)
-                            .accessibilityElement(children: .combine)
-                        }
-                    }
-
-                    // Only offered when biometrics were enabled for this vault (Android parity);
-                    // tapping a row that can only answer "enable biometrics first" was a dead end.
-                    // Hidden while the 14-day master-password unlock is due (`BiometricPolicy`).
-                    if showsBiometricButton {
-                        Button {
-                            Task { await unlockWithBiometrics(automatic: false) }
-                        } label: {
-                            SettingsRow(
-                                icon: .fingerprint,
-                                title: L10n.tr("auth.unlock.biometrics", locale: locale),
-                                subtitle: L10n.tr("auth.unlock.biometricsHint", locale: locale)
-                            ) {
-                                RowChevron()
-                            }
-                            .padding(.horizontal, 14)
-                            .background(Theme.cardBackground)
-                            .cornerRadius(Theme.cornerRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: Theme.cornerRadius)
-                                    .stroke(Theme.stroke, lineWidth: 1)
-                            )
-                        }
-                        .buttonStyle(PressableStyle())
-                        .disabled(isAuthenticating)
-                        .padding(.top, 4)
-                    }
-
-                    CardContainer(background: Theme.cardBackgroundLight) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 8) {
-                                QasaIconImage(.shield, size: 16)
-                                    .foregroundColor(Theme.accent)
-                                Text(L10n.tr("auth.unlock.localOnly", locale: locale))
-                                    .font(.qasa(16, weight: .semibold))
-                                    .foregroundColor(Theme.textPrimary)
-                            }
-                            Text(L10n.tr("auth.unlock.localOnlyBody", locale: locale))
-                                .font(.qasa(14))
-                                .foregroundColor(Theme.textSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
-                }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.top, QasaTokens.Space.pageTop)
-            }
-            .scrollDismissesKeyboard(.interactively)
+        // The whole screen, keyboard included, so the icon never moves with the safe area.
+        GeometryReader { proxy in
+            splash
+                .position(x: proxy.size.width / 2, y: iconCentre(fullHeight: proxy.size.height))
         }
+        .ignoresSafeArea()
         .background(Theme.background.ignoresSafeArea())
-        .bottomActionBar {
-            PrimaryButton(title: L10n.tr("auth.unlock.button", locale: locale), icon: .unlock) {
-                attemptUnlock()
+        .animation(reduceMotion ? nil : QasaTokens.Motion.standard, value: iconUp)
+        .sheet(isPresented: Binding(get: { showsSheet && !didUnlock }, set: { _ in })) {
+            SelfSizingSheet {
+                UnlockSheetLayout(
+                    title: L10n.tr("auth.unlock.sheetTitle", locale: locale),
+                    password: $password,
+                    error: passwordError,
+                    unlockDisabled: !canUnlock,
+                    showsBiometrics: showsBiometricButton,
+                    biometricsDisabled: isAuthenticating,
+                    onUnlock: attemptUnlock,
+                    onBiometrics: { Task { await unlockWithBiometrics(automatic: false) } }
+                ) {
+                    sheetNotes
+                }
+                .onChange(of: password) { _, _ in passwordError = nil }
             }
-            .disabled(!canUnlock)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                // The content's height plus the sheet's own bottom inset (home indicator).
+                sheetHeight = height + 34
+            }
+            .interactiveDismissDisabled()
+            .environment(prefs)
         }
-        .environment(prefs)
         .onAppear {
             autoPromptArmed = true
             refreshBiometricState()
@@ -164,16 +98,83 @@ struct LoginView: View {
         }
     }
 
+    /// The icon with the wordmark under it; the icon itself is what sits on the centre line.
+    private var splash: some View {
+        Image("SplashIcon")
+            .resizable()
+            .frame(width: 96, height: 96)
+            .accessibilityHidden(true)
+            .overlay(alignment: .top) {
+                Text(L10n.tr("brand.name", locale: locale))
+                    .font(.qasa(26, weight: .bold))
+                    .foregroundColor(Theme.accent)
+                    .fixedSize()
+                    .offset(y: 96 + 14)
+                    .accessibilityAddTraits(.isHeader)
+            }
+    }
+
+    /// Screen centre at rest (where the launch screen draws the icon); with the sheet up,
+    /// the icon and wordmark sit centred in the space above the sheet.
+    private func iconCentre(fullHeight: CGFloat) -> CGFloat {
+        guard iconUp else { return fullHeight / 2 }
+        // Icon (96) + gap (14) + wordmark (~34): centre that block above the sheet.
+        let block: CGFloat = 96 + 14 + 34
+        let above = fullHeight - sheetHeight
+        let centre = above / 2 - (block / 2 - 48)
+        // Never under the status bar / Dynamic Island.
+        return max(120, min(centre, fullHeight / 2))
+    }
+
+    @ViewBuilder
+    private var sheetNotes: some View {
+        if let errorMessage {
+            Text(errorMessage)
+                .font(.qasa(13, weight: .medium))
+                .foregroundColor(Theme.danger)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        if biometricsEnabled && masterPasswordDue {
+            HStack(alignment: .top, spacing: 8) {
+                QasaIconImage(.login, size: 13)
+                    .foregroundColor(Theme.accent)
+                    .accessibilityHidden(true)
+                Text(
+                    String(
+                        format: L10n.tr("auth.unlock.masterPasswordDueFmt", locale: locale),
+                        locale: locale,
+                        BiometricPolicy.masterPasswordIntervalDays
+                    )
+                )
+                .font(.qasa(13))
+                .foregroundColor(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, 2)
+            .accessibilityElement(children: .combine)
+        }
+    }
+
     private func refreshBiometricState() {
         biometricsEnabled = VaultKeychainStore.biometricsEnabled
         masterPasswordDue = BiometricPolicy.isMasterPasswordDue
     }
 
+    private func presentSheet() {
+        guard !didUnlock, !showsSheet else { return }
+        showsSheet = true
+    }
+
     /// Starts Face ID / Touch ID on its own when it's allowed, at most once per arming.
+    /// When it isn't (biometrics off, or the 14-day check due) the sheet rises instead.
     private func autoPromptIfNeeded() {
-        guard autoPromptArmed, scenePhase == .active, !isAuthenticating else { return }
+        guard !didUnlock else { return }
         guard VaultSession.shared.canOfferBiometricUnlock,
-              VaultKeychainStore.biometricPasswordStored else { return }
+              VaultKeychainStore.biometricPasswordStored else {
+            presentSheet()
+            return
+        }
+        guard autoPromptArmed, scenePhase == .active, !isAuthenticating else { return }
         autoPromptArmed = false
         Task {
             // Let the window settle first: at launch and right after returning to the
@@ -208,7 +209,7 @@ struct LoginView: View {
             if VaultAuthStore.verifyMasterPassword(candidate) {
                 errorMessage = nil
                 passwordError = nil
-                onUnlocked(candidate, false)
+                finishUnlock(candidate, viaBiometrics: false)
                 return
             }
             if candidate == trimmed { break }
@@ -217,30 +218,49 @@ struct LoginView: View {
         passwordError = L10n.tr("auth.unlock.wrongPassword", locale: locale)
     }
 
-    /// `automatic`: the prompt started on its own. A cancel or failure then stays quiet;
-    /// the biometric button and the password field are both still there to retry.
+    /// Hands the password to the root, which opens the vault; the sheet goes away meanwhile.
+    /// If the root refuses it (a stale biometric password, say), the sheet comes back.
+    private func finishUnlock(_ password: String, viaBiometrics: Bool) {
+        didUnlock = true
+        Task {
+            guard !(await onUnlocked(password, viaBiometrics)) else { return }
+            didUnlock = false
+            showsSheet = false
+            if viaBiometrics {
+                errorMessage = L10n.tr("auth.unlock.biometricsFailed", locale: locale)
+            } else {
+                passwordError = L10n.tr("auth.unlock.wrongPassword", locale: locale)
+            }
+            presentSheet()
+        }
+    }
+
+    /// `automatic`: the prompt started on its own. A cancel or failure then stays quiet and
+    /// just brings up the sheet; its biometric button and the password are both there to retry.
     private func unlockWithBiometrics(automatic: Bool) async {
         guard !isAuthenticating else { return }
         guard VaultKeychainStore.biometricsEnabled else {
             errorMessage = L10n.tr("auth.unlock.enableBiometricsHint", locale: locale)
+            presentSheet()
             return
         }
         isAuthenticating = true
         defer { isAuthenticating = false }
         if let unlockedPassword = await VaultSession.shared.unlockWithBiometrics() {
             errorMessage = nil
-            onUnlocked(unlockedPassword, true)
+            finishUnlock(unlockedPassword, viaBiometrics: true)
         } else {
             // The interval may have run out since the screen appeared.
             refreshBiometricState()
             if !automatic {
                 errorMessage = L10n.tr("auth.unlock.biometricsFailed", locale: locale)
             }
+            presentSheet()
         }
     }
 }
 
 #Preview {
-    LoginView(onUnlocked: { _, _ in }, onCreateVault: {})
+    LoginView(onUnlocked: { _, _ in false })
         .environment(AppPreferences.shared)
 }

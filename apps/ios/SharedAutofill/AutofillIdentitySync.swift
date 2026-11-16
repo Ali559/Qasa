@@ -8,7 +8,8 @@ enum AutofillIdentitySync {
     static func identities(for entries: [AutofillIndexEntry]) -> [any ASCredentialIdentity] {
         var out: [any ASCredentialIdentity] = []
         for entry in entries where entry.kind == .login {
-            let service = serviceIdentifier(for: entry)
+            // A login without a website has no domain: its title ("Netflix") is not one.
+            guard let service = serviceIdentifier(for: entry) else { continue }
             let user = entry.subtitle.trimmingCharacters(in: .whitespacesAndNewlines)
             let label = user.isEmpty ? entry.title : user
             out.append(ASPasswordCredentialIdentity(serviceIdentifier: service, user: label, recordIdentifier: entry.id.uuidString))
@@ -19,20 +20,23 @@ enum AutofillIdentitySync {
         return out
     }
 
-    static func serviceIdentifier(for entry: AutofillIndexEntry) -> ASCredentialServiceIdentifier {
-        let host = entry.websiteHost?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let host, !host.isEmpty {
-            return ASCredentialServiceIdentifier(identifier: host, type: .domain)
-        }
-        return ASCredentialServiceIdentifier(identifier: entry.title, type: .domain)
+    static func serviceIdentifier(for entry: AutofillIndexEntry) -> ASCredentialServiceIdentifier? {
+        guard let raw = entry.websiteHost, let host = AutofillContextMatcher.normalizeHost(raw),
+              host.contains(".") || host == "localhost" else { return nil }
+        return ASCredentialServiceIdentifier(identifier: host, type: .domain)
     }
 
-    static func sync(entries: [AutofillIndexEntry]) {
+    /// Replaces the QuickType identities; returns once the store has them, so syncs run in
+    /// order (`VaultRepository.scheduleAutofillSync`).
+    static func sync(entries: [AutofillIndexEntry]) async {
         let store = ASCredentialIdentityStore.shared
         let identities = identities(for: entries)
-        store.getState { state in
-            guard state.isEnabled else { return }
-            store.replaceCredentialIdentities(identities) { _, _ in }
+        let enabled = await withCheckedContinuation { continuation in
+            store.getState { continuation.resume(returning: $0.isEnabled) }
+        }
+        guard enabled else { return }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            store.replaceCredentialIdentities(identities) { _, _ in continuation.resume() }
         }
     }
 

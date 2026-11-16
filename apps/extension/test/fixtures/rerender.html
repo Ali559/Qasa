@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Re-rendered sign-up</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Sign-up form that re-renders</h1>
+<div id="app"></div>
+<script>
+  // Like a React / Vue app: a click anywhere re-renders the whole form a moment later, so
+  // the fields the menu was opened on are gone when the pick comes.
+  let renders = 0
+  function render() {
+    renders++
+    document.getElementById("app").innerHTML =
+      '<form id="signup" data-record data-render="' + renders + '">' +
+      '<input id="username" name="email" type="email" autocomplete="email" placeholder="Email">' +
+      '<input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password">' +
+      '<input id="confirm" name="confirm" type="password" placeholder="Repeat password">' +
+      '<button type="submit">Create account</button></form>'
+  }
+  render()
+  document.addEventListener("mousedown", () => { if (renders < 2) setTimeout(render, 150) }, true)
+</script>
+<pre id="result"></pre>
+</body>
+</html>
