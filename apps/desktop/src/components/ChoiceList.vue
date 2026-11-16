@@ -111,7 +111,7 @@ const model = defineModel<T>({ required: true })
   flex-shrink: 0;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
   background: color-mix(in srgb, var(--badge-color) 12%, transparent);
   color: var(--badge-color);
   transition:

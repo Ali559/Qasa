@@ -36,7 +36,6 @@ object QasaTokens {
         val cardLarge: Dp = 24.dp
         val group: Dp = 20.dp
         val control: Dp = 10.dp
-        val iconBadge: Dp = 10.dp
         val rowPress: Dp = 10.dp
         val sheet: Dp = 28.dp
         val sheetGrabber: Dp = 2.5.dp

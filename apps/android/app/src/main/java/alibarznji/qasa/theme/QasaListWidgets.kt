@@ -44,12 +44,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 
 /**
- * iOS `IconBadge`: a [QasaDimens.rowIconBadge] (36) square, [QasaDimens.rowIconBadgeRadius]
- * (10) corners, `tint @ 12%` fill (or [background]), 16dp glyph.
+ * iOS `IconBadge`: a [QasaDimens.rowIconBadge] (36) circle (rule 8: every icon background is
+ * round), `tint @ 12%` fill (or [background]), `size.iconBadgeGlyph` (20) glyph.
  */
 @Composable
 fun RowIconBadge(icon: ImageVector, tint: Color, background: Color? = null) {
-    val shape = RoundedCornerShape(QasaDimens.rowIconBadgeRadius)
+    val shape = CircleShape
     Box(
         modifier = Modifier
             .size(QasaDimens.rowIconBadge)
@@ -399,7 +399,7 @@ fun VaultItemRow(
                 .padding(QasaDimens.cardPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val tileShape = RoundedCornerShape(QasaDimens.radiusSmall)
+            val tileShape = CircleShape
             Box(
                 modifier = Modifier
                     .size(QasaTokens.Size.itemTile)

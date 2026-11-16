@@ -279,7 +279,7 @@ private struct HomeIconTile: View {
             .foregroundColor(theme.accent)
             .frame(width: QasaTokens.Size.homeTile, height: QasaTokens.Size.homeTile)
             .background(theme.cardMuted)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(Circle())
     }
 }
 

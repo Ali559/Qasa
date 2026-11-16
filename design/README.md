@@ -108,7 +108,7 @@ A change that only one app picks up is not done.
      label (and the dial code); with no match, `common.noMatches` in `textSecondary`. A long
      list opens at full height and scrolls; a short one sizes to fit.
    - **The row that opens a picker** keeps rule 4's look: label, chosen value, `RowChevron`.
-6. **Rows.** `size.rowMinHeight` (60), icon badge 36 with radius 10, gap 14, title
+6. **Rows.** `size.rowMinHeight` (60), icon badge 36 (a circle, rule 8), gap 14, title
    `type.rowTitle`, subtitle `type.rowSubtitle`, chevron 13. Rows that share a card (Settings,
    You → Tools, Account, About) are a `SettingsSection` with a `RowDivider` between each two:
    1pt `stroke`, inset badge + gap (50) on the leading side, running to the trailing edge.
@@ -169,7 +169,10 @@ A change that only one app picks up is not done.
    home tile `homeTile` 40 / `homeTileGlyph` 22; a row's plain icon buttons (copy, ⋯)
    `rowIconButton` 36 / `rowIconButtonGlyph` 20. Field icon buttons stay 32 / 16, the tab
    bar 22. **The add button** is a `size.fab` (56) accent circle with the plain plus
-   `add-plain` (custom, line 2) at `fabGlyph` 26; never the circled `add`. A navigation tab's
+   `add-plain` (custom, line 2) at `fabGlyph` 26; never the circled `add`. **Every icon
+   background is a circle** (Phase 3, 2026-11-16, option B in `previews/round-icons.html`):
+   item tiles, icon badges, Home tiles, the item hero, the Home bell, payment and confirm
+   badges. An icon with no fill (tab bar, row buttons, field buttons) has no shape. A navigation tab's
    icon is the linear glyph, and the filled glyph (`.fill`, Solar Bold) while it is the
    active tab. To add an icon: name it in `icons.json`, run `import_solar.py`, then
    `generate.py`. Solar is CC BY 4.0: every app credits "Icons: Solar by 480 Design" on its

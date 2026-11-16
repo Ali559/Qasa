@@ -332,7 +332,7 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
   place-items: center;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
   transform: scale(1.2);
@@ -373,7 +373,7 @@ const heroSitePath = computed(() => (payload.value?.variant === 'login' ? siteIc
   height: 88px;
   margin-top: 12px;
   border: var(--size-stroke) solid var(--stroke-chrome);
-  border-radius: var(--radius-card);
+  border-radius: 50%;
   background: var(--chrome);
   color: var(--text-primary);
 }

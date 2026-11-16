@@ -257,7 +257,7 @@ const health = computed(() => {
   justify-content: space-between;
 }
 
-/* iOS: 44pt card-filled square, radius 14, 18 medium bell; the badge 11 semibold, 4 in. */
+/* iOS: 44pt card-filled circle, 18 medium bell; the badge 11 semibold, 4 in. */
 .bell {
   position: relative;
   display: grid;
@@ -266,7 +266,7 @@ const health = computed(() => {
   height: 44px;
   padding: 0;
   border: 0;
-  border-radius: 14px;
+  border-radius: 50%;
   background: var(--card-background);
   color: var(--text-primary);
   cursor: pointer;
@@ -463,14 +463,14 @@ const health = computed(() => {
   font-weight: 500;
 }
 
-/* iOS `HomeIconTile`: `size.homeTile` (40), radius 12, cardMuted, `size.homeTileGlyph` (22) accent glyph. */
+/* iOS `HomeIconTile`: a `size.homeTile` (40) circle, cardMuted, `size.homeTileGlyph` (22) accent glyph. */
 .tile {
   display: grid;
   place-items: center;
   flex-shrink: 0;
   width: var(--size-home-tile);
   height: var(--size-home-tile);
-  border-radius: 12px;
+  border-radius: 50%;
   background: var(--card-muted);
   color: var(--accent);
 }

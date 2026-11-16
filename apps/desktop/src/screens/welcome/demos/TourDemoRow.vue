@@ -48,7 +48,7 @@ defineProps<{
   flex-shrink: 0;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
 }
 
 .text {

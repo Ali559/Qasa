@@ -258,7 +258,7 @@ private fun HomeCard(onClick: () -> Unit, content: @Composable () -> Unit) {
 private fun IconTile(icon: ImageVector) {
     val c = qasaColors
     Box(
-        Modifier.size(QasaTokens.Size.homeTile).background(c.cardMuted, RoundedCornerShape(QasaDimens.radiusSmall)),
+        Modifier.size(QasaTokens.Size.homeTile).background(c.cardMuted, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, null, tint = c.accent, modifier = Modifier.size(QasaTokens.Size.homeTileGlyph))

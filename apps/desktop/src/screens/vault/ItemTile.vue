@@ -51,7 +51,7 @@ const logo = computed(() => (props.variant === 'login' && !iconPath.value ? site
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 50%;
 }
 
 .letter {

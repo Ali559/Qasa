@@ -11,7 +11,6 @@ enum QasaTokens {
         static let cardLarge: CGFloat = 24
         static let group: CGFloat = 20
         static let control: CGFloat = 10
-        static let iconBadge: CGFloat = 10
         static let rowPress: CGFloat = 10
         static let sheet: CGFloat = 28
         static let sheetGrabber: CGFloat = 2.5

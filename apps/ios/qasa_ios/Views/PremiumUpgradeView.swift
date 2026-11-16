@@ -304,7 +304,7 @@ struct PremiumUpgradeView: View {
             .foregroundColor(Theme.accent)
             .frame(width: Theme.iconBadgeSize, height: Theme.iconBadgeSize)
             .background(Theme.accent.opacity(0.12))
-            .clipShape(RoundedRectangle(cornerRadius: Theme.iconBadgeCornerRadius, style: .continuous))
+            .clipShape(Circle())
             .accessibilityHidden(true)
     }
 

@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -173,7 +172,7 @@ private fun GreetingRow(displayName: String, unread: Int, onNotifications: () ->
             modifier = Modifier.size(QasaIconSize.x7l),
         ) {
             Box(
-                Modifier.fillMaxSize().background(c.cardBackground, RoundedCornerShape(QasaDimens.radiusMedium)),
+                Modifier.fillMaxSize().background(c.cardBackground, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(QasaIcons.Alerts, null, tint = c.textPrimary, modifier = Modifier.size(QasaIconSize.xl))

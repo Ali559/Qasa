@@ -192,7 +192,7 @@ extension View {
 
 // MARK: - Settings rows
 
-/// The rounded-square icon tile every settings / tools row leads with.
+/// The round icon badge every settings / tools row leads with (rule 8: every icon background is a circle).
 struct IconBadge: View {
     @Environment(\.themePalette) private var theme
     let icon: QasaIcon
@@ -204,10 +204,7 @@ struct IconBadge: View {
         QasaIconImage(icon, size: Theme.iconBadgeGlyphSize)
             .foregroundColor(color)
             .frame(width: Theme.iconBadgeSize, height: Theme.iconBadgeSize)
-            .background(
-                RoundedRectangle(cornerRadius: Theme.iconBadgeCornerRadius, style: .continuous)
-                    .fill(background ?? color.opacity(0.12))
-            )
+            .background(Circle().fill(background ?? color.opacity(0.12)))
             .accessibilityHidden(true)
     }
 }

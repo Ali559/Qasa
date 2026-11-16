@@ -1,0 +1,204 @@
+<title>Qasa Round Icons</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Phase 3 preview (2026-11-16): the shape behind every icon that has a background, at the
+   Phase 2 sizes. Colours are design/tokens.json. Built by build.py (inlines assets/icons/svg). */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --chrome: #F6F1EC; --stroke: #E6E1E1; --strokeChrome: #DCD7D7;
+  --accent: #722F99; --onAccent: #FFFFFF; --danger: #C8323C; --success: #2F9E6C; --gold: #B7701E;
+  --text: #2A1F33; --text2: #6E6475; --text3: #A39DA3; --frame: #2A1F33; --warm: #FEE7C8;
+  --blue: #2F67D0; --blueTile: #E2EBFB; --mint: #1E8F6C; --mintTile: #DDF2EA;
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --chrome: #2C2D30; --stroke: #38393D; --strokeChrome: #434448;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97; --gold: #FEE7C8;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10; --warm: #332C27;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --chrome: #2C2D30; --stroke: #38393D; --strokeChrome: #434448;
+  --accent: #B67FDB; --onAccent: #22102F; --danger: #FF6B6B; --success: #5CCB97; --gold: #FEE7C8;
+  --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10; --warm: #332C27;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; margin: 0; padding: 28px 16px 48px; }
+.page { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+header p { margin: 4px 0 0; color: var(--text2); max-width: 74ch; font-size: 15px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--text2); padding: 5px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.opt h2 { font-size: 17px; margin: 0; }
+.opt .sub { color: var(--text2); font-size: 13px; margin: 0 0 10px; min-height: 60px; }
+.phone { background: var(--bg); border: 8px solid var(--frame); border-radius: 36px; overflow: hidden; position: relative;
+  height: 660px; max-width: 340px; margin: 0 auto; display: flex; flex-direction: column; }
+.screen { flex: 1; padding: 14px 16px 0; overflow: hidden; }
+.title { font-size: 22px; font-weight: 700; margin: 6px 0 12px; }
+.card { background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; }
+.search { height: 44px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: var(--text3); font-size: 14px; }
+.chips { display: flex; gap: 8px; margin: 10px 0 12px; }
+.chip { padding: 4px 14px; border-radius: 999px; border: 1px solid var(--stroke); font-size: 13px; color: var(--text2); white-space: nowrap; }
+.chip.on { background: var(--accent); color: var(--onAccent); border-color: var(--accent); font-weight: 600; }
+.row { display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 10px; }
+.txt { flex: 1; min-width: 0; }
+.name, .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.name { font-weight: 600; font-size: 16px; }
+.meta { color: var(--text2); font-size: 14px; unicode-bidi: plaintext; text-align: start; }
+.rbtn { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text2); flex: none; }
+
+/* The shapes under test. --r-* are set per option. */
+.tile { width: 48px; height: 48px; border-radius: var(--r-tile); display: grid; place-items: center; flex: none;
+  background: var(--muted); color: var(--accent); font-weight: 700; font-size: 18px; }
+.tile.blue { background: var(--blueTile); color: var(--blue); }
+.tile.mint { background: var(--mintTile); color: var(--mint); }
+.tile.red { background: #E3000F; color: #fff; }
+.tile.green { background: #12805C; color: #fff; }
+.badge { width: 36px; height: 36px; border-radius: var(--r-badge); display: grid; place-items: center; flex: none;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+.home { width: 40px; height: 40px; border-radius: var(--r-home); display: grid; place-items: center; flex: none; background: var(--muted); color: var(--accent); }
+.hero { width: 88px; height: 88px; border-radius: var(--r-hero); display: grid; place-items: center; margin: 12px auto 0;
+  background: var(--blueTile); color: var(--blue); }
+.bell { width: 44px; height: 44px; border-radius: var(--r-bell); display: grid; place-items: center; background: var(--card); color: var(--text); flex: none; }
+.back { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--card); color: var(--text); }
+.fab { position: absolute; bottom: 82px; inset-inline-end: 18px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--onAccent); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.mark { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: var(--onAccent); display: grid; place-items: center; flex: none; }
+
+.tabs { height: 66px; border-top: 1px solid var(--stroke); background: var(--card); display: flex; }
+.tabs div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: var(--text3); gap: 2px; }
+.tabs .on { color: var(--accent); font-weight: 600; }
+.srow { display: flex; align-items: center; gap: 14px; min-height: 60px; font-size: 15px; padding: 0 16px; position: relative; }
+.srow + .srow::before { content: ""; position: absolute; top: 0; inset-inline: 66px 0; border-top: 1px solid var(--stroke); }
+.srow .grow { flex: 1; }
+.chev { color: var(--text3); }
+.sec { font-size: 13px; color: var(--text2); margin: 14px 4px 6px; font-weight: 600; }
+.hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0 14px; }
+.hdr small { color: var(--text2); font-size: 13px; display: block; }
+.hdr b { font-size: 20px; }
+.pad { padding: 16px; }
+.btn { background: var(--accent); color: var(--onAccent); border-radius: 10px; text-align: center; padding: 8px; font-weight: 600; font-size: 14px; }
+.field { padding: 10px 16px; display: flex; align-items: center; gap: 10px; position: relative; }
+.field + .field::before { content: ""; position: absolute; top: 0; inset-inline: 16px; border-top: 1px solid var(--stroke); }
+.field label { display: block; font-size: 12px; color: var(--text2); }
+.htitle { text-align: center; font-weight: 700; font-size: 20px; margin-top: 10px; }
+.hsub { text-align: center; color: var(--text2); font-size: 13px; margin-bottom: 12px; }
+.note { color: var(--text2); font-size: 14px; max-width: 74ch; margin: 0; }
+svg.i { display: block; }
+[dir="rtl"] .back svg { transform: scaleX(-1); }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Phase 3: round icon backgrounds</h1>
+    <p>Every icon that sits on a fill (item tiles, settings badges, Home tiles, the item hero, the bell button) in three shapes, at the Phase 2 sizes. Icons with no fill (tab bar, row buttons) don't change. The back button and add button are already round.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="screen"><button data-v="vault" aria-pressed="true">Passwords</button><button data-v="detail">Item</button><button data-v="home">Home</button><button data-v="settings">Settings</button></div>
+    <div class="seg" id="theme"><button data-v="light">Light</button><button data-v="dark" aria-pressed="true">Dark</button></div>
+    <div class="seg" id="lang"><button data-v="en">English</button><button data-v="ckb" aria-pressed="true">کوردی</button></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">A circle reads as an avatar (a person or an app), which suits the item list and the item hero. Inside rectangular cards and settings rows it sits fine as long as the rows keep their 14 gap; the soft shape (C) is a middle ground that keeps the row rhythm of today with no hard corners.</p>
+</div>
+
+<script>
+const ICONS = /*ICONS*/;
+const icon = (name, size) => ICONS[name].replace('<svg ', `<svg class="i" width="${size}" height="${size}" `);
+
+const OPTIONS = [
+  { name: 'A · Today', sub: 'Rounded squares: tile 12, badge 10, Home tile 12, hero 20, bell 14.',
+    r: { tile: '12px', badge: '10px', home: '12px', hero: '20px', bell: '14px' } },
+  { name: 'B · Circles', sub: 'Every icon background is a full circle, as you asked.',
+    r: { tile: '50%', badge: '50%', home: '50%', hero: '50%', bell: '50%' } },
+  { name: 'C · Soft squares', sub: 'A middle ground: corners at about a third of the size (tile 16, badge 12, Home 14, hero 30, bell 16).',
+    r: { tile: '16px', badge: '12px', home: '14px', hero: '30px', bell: '16px' } },
+];
+
+const T = {
+  en: { pw: 'Your passwords', search: 'Search your passwords', all: 'All', logins: 'Logins', notes: 'Notes', card: 'Card',
+    home: 'Home', pwTab: 'Passwords', alerts: 'Alerts', you: 'You', hi: 'Good morning', user: 'Sara',
+    fill: 'Fill passwords with Qasa', fillB: 'Turn on AutoFill to fill logins, cards and your details.', on: 'Turn on',
+    backup: 'Back up your vault', backupB: 'Your vault lives only on this phone.', health: 'Password health', healthB: '4 to fix',
+    settings: 'Settings', security: 'Security', s1: 'Face ID', s2: 'Auto-lock', s3: 'Main password', general: 'General', s4: 'Language', s5: 'Theme', s6: 'Backups',
+    number: 'Card number', holder: 'Card holder', expiry: 'Expiry', details: 'Details', fib: 'FIB Card' },
+  ckb: { pw: 'وشە نهێنییەکانت', search: 'لە وشە نهێنییەکانت بگەڕێ', all: 'هەموو', logins: 'چوونەژوورەوەکان', notes: 'تێبینییەکان', card: 'کارت',
+    home: 'سەرەکی', pwTab: 'وشە نهێنییەکان', alerts: 'ئاگادارییەکان', you: 'تۆ', hi: 'بەیانیت باش', user: 'سارا',
+    fill: 'وشە نهێنییەکان بە قاسە پڕبکەرەوە', fillB: 'پڕکردنەوەی خۆکاری قاسە چالاک بکە.', on: 'چالاککردن',
+    backup: 'باکئەپی کۆگاکەت بکە', backupB: 'کۆگاکەت تەنها لەسەر ئەم مۆبایلەیە.', health: 'تەندروستی وشە نهێنییەکان', healthB: '4 بۆ چاککردن',
+    settings: 'ڕێکخستنەکان', security: 'پاراستن', s1: 'Face ID', s2: 'قوفڵی خۆکار', s3: 'وشەی نهێنی سەرەکی', general: 'گشتی', s4: 'زمان', s5: 'ڕووکار', s6: 'باکئەپەکان',
+    number: 'ژمارەی کارت', holder: 'خاوەنی کارت', expiry: 'بەسەرچوون', details: 'وردەکاری', fib: 'کارتی FIB' },
+};
+
+const row = (tile, name, meta, copy = true) => `<div class="card row">${tile}<div class="txt"><div class="name">${name}</div><div class="meta">${meta}</div></div>${copy ? `<div class="rbtn">${icon('copy', 20)}</div>` : ''}<div class="rbtn">${icon('more-vertical', 20)}</div></div>`;
+const srow = (ic, label, end = icon('chevron-forward', 13)) => `<div class="srow"><div class="badge">${icon(ic, 20)}</div><span class="grow">${label}</span><span class="chev">${end}</span></div>`;
+
+const SCREENS = {
+  vault: t => `<div class="title">${t.pw}</div>
+    <div class="search">${icon('search', 20)}<span>${t.search}</span></div>
+    <div class="chips"><span class="chip on">${t.all}</span><span class="chip">${t.logins}</span><span class="chip">${t.notes}</span></div>
+    ${row(`<div class="tile blue">${icon('card', 24)}</div>`, t.fib, '•••• 1111')}
+    ${row(`<div class="tile red">A</div>`, 'Asiacell', '0770 555 1290')}
+    ${row(`<div class="tile">${icon('website', 24)}</div>`, 'Facebook', 'sara.ahmed@gmail.com')}
+    ${row(`<div class="tile mint">${icon('note', 24)}</div>`, 'Wi-Fi', 'Home-Net')}
+    ${row(`<div class="tile green">F</div>`, 'FIB', '0750 123 4821')}`,
+  detail: t => `<div class="back">${icon('chevron-back', 17)}</div>
+    <div class="hero">${icon('card', 36)}</div>
+    <div class="htitle">${t.fib}</div><div class="hsub">${t.card}</div>
+    <div class="sec">${t.details}</div>
+    <div class="card">
+      <div class="field"><div class="txt"><label>${t.holder}</label>Sara Ahmed</div><div class="rbtn">${icon('copy', 20)}</div></div>
+      <div class="field"><div class="txt"><label>${t.number}</label>•••• •••• •••• 1111</div><div class="rbtn">${icon('show', 20)}</div><div class="rbtn">${icon('copy', 20)}</div></div>
+      <div class="field"><div class="txt"><label>${t.expiry}</label>08/28</div><div class="rbtn">${icon('copy', 20)}</div></div>
+    </div>`,
+  home: t => `<div class="hdr"><div><small>${t.hi}</small><b>${t.user}</b></div><div class="bell">${icon('alerts', 20)}</div></div>
+    <div class="card pad" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+      <div class="mark">${icon('passwords', 24)}</div><div class="txt" style="white-space:normal"><div class="name" style="white-space:normal">${t.fill}</div><div class="meta" style="white-space:normal">${t.fillB}</div><div class="btn" style="margin-top:10px">${t.on}</div></div></div>
+    <div class="card pad" style="display:flex;gap:12px;margin-bottom:12px"><div class="badge">${icon('backup', 20)}</div><div class="txt"><div class="name">${t.backup}</div><div class="meta" style="white-space:normal">${t.backupB}</div></div></div>
+    <div class="card pad" style="display:flex;gap:12px;align-items:center"><div class="home">${icon('health', 22)}</div><div class="txt"><div class="name">${t.health}</div><div class="meta" style="color:var(--danger)">${t.healthB}</div></div></div>
+    <div class="card pad" style="display:flex;gap:12px;align-items:center;margin-top:12px"><div class="home">${icon('vpn', 22)}</div><div class="txt"><div class="name">VPN</div><div class="meta">Off</div></div></div>`,
+  settings: t => `<div class="title">${t.settings}</div>
+    <div class="sec">${t.security}</div>
+    <div class="card">${srow('face', t.s1, '')}${srow('auto-lock', t.s2)}${srow('lock', t.s3)}</div>
+    <div class="sec">${t.general}</div>
+    <div class="card">${srow('language', t.s4)}${srow('theme-system', t.s5)}${srow('backup-schedule', t.s6)}</div>`,
+};
+
+let state = { screen: 'vault', lang: 'ckb' };
+function render() {
+  const t = T[state.lang], dir = state.lang === 'ckb' ? 'rtl' : 'ltr';
+  document.getElementById('grid').innerHTML = OPTIONS.map(o => `
+    <div class="opt"><h2>${o.name}</h2><p class="sub">${o.sub}</p>
+      <div class="phone" dir="${dir}" lang="${state.lang}" style="--r-tile:${o.r.tile};--r-badge:${o.r.badge};--r-home:${o.r.home};--r-hero:${o.r.hero};--r-bell:${o.r.bell}">
+        <div class="screen">${SCREENS[state.screen](t)}</div>
+        ${state.screen === 'vault' ? `<div class="fab">${icon('add-plain', 26)}</div>` : ''}
+        <div class="tabs">
+          <div class="${state.screen === 'settings' ? 'on' : ''}">${icon(state.screen === 'settings' ? 'you.fill' : 'you', 24)}${t.you}</div>
+          <div>${icon('alerts', 24)}${t.alerts}</div>
+          <div class="${state.screen === 'vault' || state.screen === 'detail' ? 'on' : ''}">${icon(state.screen === 'vault' || state.screen === 'detail' ? 'passwords.fill' : 'passwords', 24)}${t.pwTab}</div>
+          <div class="${state.screen === 'home' ? 'on' : ''}">${icon(state.screen === 'home' ? 'home.fill' : 'home', 24)}${t.home}</div>
+        </div>
+      </div></div>`).join('');
+}
+function seg(id, cb) {
+  const el = document.getElementById(id);
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    cb(b.dataset.v);
+  });
+}
+seg('screen', v => { state.screen = v; render(); });
+seg('lang', v => { state.lang = v; render(); });
+seg('theme', v => document.documentElement.dataset.theme = v);
+document.documentElement.dataset.theme = 'dark';
+render();
+</script>
