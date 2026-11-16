@@ -150,6 +150,80 @@ three languages.
       (2026-11-12: 3 × 64 shots, findings and open decisions in `design/parity/NOTES.md`,
       browsable in `design/parity/index.html`.)
 
+## 0b. Next (added 2026-11-15)
+
+Reported from the Android app (Sorani). Each phase is one step, done one at a time, and runs as
+in "How each phase runs" above: on iOS, Android, the desktop and the extension wherever it
+applies. Phases marked **preview first** get 2–3 options in `design/previews/` and the owner
+picks one before anything is built.
+
+### Phase 1: Generator strength bar says "Weak"
+
+- [x] **The left label under the strength bar says "Weak" (لاواز), not "Strength" (هێز).**
+      (2026-11-16, branch `phase-1-weak-label`: the existing `gen.weak` string on iOS, Android
+      and the desktop; the extension has no generator.) The other end keeps showing the
+      current rating ("Strong" / "Very strong").
+
+### Phase 2: Bigger icons and a new add button (preview first)
+
+- [ ] Icons are too small overall, the add (+) button's most of all. Give the FAB a different,
+      larger glyph (a plain plus, not the small circled plus) and a fully circular background.
+
+### Phase 3: Circular icon backgrounds (preview first)
+
+- [ ] Every icon with a background (tiles, item avatars, FAB…) gets a fully round background.
+      Not icons with no or a transparent background (navigation tabs, row icons). Unsure how
+      it looks inside non-circular cards, so preview it on real screens (vault list, item
+      detail, home, settings) in light and dark first.
+
+### Phase 4: Validation messages under their own field
+
+- [ ] Today a bad email shows its error at the bottom of the form ("Email: write an email
+      like name@example.com"), far from the field. Each message goes directly under the field
+      it belongs to, in every form (item editor, sign-up, settings) on every app.
+
+### Phase 5: Less space under page headers
+
+- [ ] On the vault page there's a large gap between the title ("Your passwords") and the
+      search field. Move every page's content up so the gap isn't noticeable; one
+      header-to-content value in `design/tokens.json` for all pages.
+
+### Phase 6: Protected secure note asks to unlock twice
+
+- [ ] Opening it asks for the main password or biometrics (correct). Leaving with the header
+      back button asks *again*; leaving with the system back gesture doesn't. The back button
+      must just leave, like the gesture. Check every protected item type on every app.
+
+### Phase 7: Logins show the site's or app's own icon (preview first for the fallback)
+
+- [ ] When a login is added from a website or app, fetch its favicon / app icon and use it as
+      the item's logo. Remove the hard-coded logos (Google etc.); every logo comes
+      dynamically. If there's no favicon or it can't be reached, fall back to the first
+      letter or a key icon; preview both. (Mind the privacy side: which service fetches
+      icons, and whether it learns which sites a user has.)
+
+### Phase 8: Autofill must be bullet-proof (investigate first)
+
+- [ ] **Reported: the suggested strong password didn't fill.** Reproduce and find the cause.
+- [ ] **Then harden every autofill path** we support, on every OS version we support:
+      - sign-up forms (suggest a strong password, fill both fields, save the login),
+      - login forms,
+      - every other autofill type (cards, identities, 2FA codes, the extension's in-page menu).
+
+      It has to work every time, not most of the time. Write down the test matrix (OS
+      versions × form types × browsers/apps) and run it on each platform.
+
+### Phase 9: Unlock without the login page (preview first)
+
+- [ ] A returning user shouldn't see the login screen, only the biometric prompt or
+      main-password sheet, the same way protected items work (rule 6b), over the app's
+      splash screen. Preview this before deciding.
+
+### Phase 10: Payment options on the upgrade page
+
+- [ ] The upgrade page lists Visa / Mastercard, FIB, FastPay and Super Qi, each with its own
+      brand logo. All of them still go through Wayl; the user just sees the method they know.
+
 ## 1. One shared design spec
 
 - [x] **Spec from iOS** (2026-11-11): `design/tokens.json` holds every color, radius, size,
