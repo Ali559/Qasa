@@ -275,8 +275,13 @@ picks one before anything is built.
 
 ### Phase 10: Payment options on the upgrade page
 
-- [ ] The upgrade page lists Visa / Mastercard, FIB, FastPay and Super Qi, each with its own
+- [x] The upgrade page lists Visa / Mastercard, FIB, FastPay and Super Qi, each with its own
       brand logo. All of them still go through Wayl; the user just sees the method they know.
+      (2026-11-16) Four rows on iOS, Android and the desktop, card first; every row sends
+      gateway `wayl`. Visa and Mastercard sit in two white circles side by side; the
+      wallets show their app icons. A line under the list says Wayl processes every method,
+      and the hint under Pay now says it opens Wayl's payment page. Seen on the iOS
+      simulator and the desktop UI; Android builds but wasn't seen on screen.
 
 ## 1. One shared design spec
 

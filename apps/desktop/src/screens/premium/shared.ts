@@ -3,6 +3,11 @@
 import { accountApi } from '@/account/api'
 import { isApiError } from '@/account/types'
 import type { PricingPlan, Subscription } from '@/account/types'
+import fastpayLogo from '@/assets/payment-logos/fastpay-icon.png'
+import fibLogo from '@/assets/payment-logos/fib-icon.png'
+import mastercardLogo from '@/assets/payment-logos/mastercard.svg'
+import superqiLogo from '@/assets/payment-logos/superqi-icon.png'
+import visaLogo from '@/assets/payment-logos/visa.svg'
 import { formatLocale, prefs, useT } from '@/prefs'
 
 /** iOS `amount.formatted(.number.grouping(.automatic).locale(…))`. */
@@ -34,6 +39,17 @@ export function isYearly(plan: Pick<PricingPlan, 'interval'>): boolean {
 export const FALLBACK_PLANS: PricingPlan[] = [
   { id: 'premium_monthly', title: 'Premium Monthly', interval: 'monthly', amount_iqd: 5_000, days: 30, vpn_quota_gb: 100, active: true, sort_order: 1, features_json: null },
   { id: 'premium_yearly', title: 'Premium Yearly', interval: 'yearly', amount_iqd: 50_000, days: 365, vpn_quota_gb: 100, active: true, sort_order: 2, features_json: null },
+]
+
+export type PaymentMethodId = 'card' | 'fib' | 'fastpay' | 'superqi'
+
+/** The upgrade page's payment rows, in order (the first is the default). The choice is
+ *  UI only: every row pays through Wayl's hosted page, so the gateway is always "wayl". */
+export const PAYMENT_METHODS: { id: PaymentMethodId; shortName: string; logos: string[]; gateway: string }[] = [
+  { id: 'card', shortName: 'Visa / Mastercard', logos: [visaLogo, mastercardLogo], gateway: 'wayl' },
+  { id: 'fib', shortName: 'FIB', logos: [fibLogo], gateway: 'wayl' },
+  { id: 'fastpay', shortName: 'FastPay', logos: [fastpayLogo], gateway: 'wayl' },
+  { id: 'superqi', shortName: 'SuperQi', logos: [superqiLogo], gateway: 'wayl' },
 ]
 
 /** iOS `ManageSubscriptionView.gatewayName`. Old payments keep their wallet's name. */

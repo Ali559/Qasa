@@ -10,7 +10,7 @@ struct PremiumUpgradeView: View {
     @State private var plans: [PricingPlanDTO] = PricingService.fallbackPlans
     @State private var selectedPlanId: String = "premium_monthly"
     @State private var autoRenew = true
-    @State private var selectedGateway: String = "wayl"
+    @State private var selectedMethodId: String = "card"
     @State private var isPaying = false
     @State private var statusMessage: String?
     @State private var errorMessage: String?
@@ -21,20 +21,47 @@ struct PremiumUpgradeView: View {
 
     private var locale: Locale { prefs.locale }
 
-    /// One option: Wayl's hosted page offers FIB, Qi Card and the other Iraqi wallets itself.
+    /// The brands the user recognises; every one pays through Wayl's hosted page,
+    /// so they all send gateway "wayl" and the choice only sets the label.
     private var methods: [PaymentMethod] {
         [
             PaymentMethod(
-                name: L10n.tr("premium.wayl", locale: locale),
-                subtitle: L10n.tr("premium.waylSub", locale: locale),
-                badgeText: "Wayl",
+                id: "card",
+                name: L10n.tr("premium.card", locale: locale),
+                subtitle: L10n.tr("premium.cardSub", locale: locale),
+                badgeText: "Visa / Mastercard",
+                logos: ["PaymentLogo-visa", "PaymentLogo-mastercard"],
                 gateway: "wayl"
-            )
+            ),
+            PaymentMethod(
+                id: "fib",
+                name: L10n.tr("premium.fib", locale: locale),
+                subtitle: L10n.tr("premium.fibSub", locale: locale),
+                badgeText: "FIB",
+                logos: ["PaymentLogo-fib"],
+                gateway: "wayl"
+            ),
+            PaymentMethod(
+                id: "fastpay",
+                name: L10n.tr("premium.fastpay", locale: locale),
+                subtitle: L10n.tr("premium.fastpaySub", locale: locale),
+                badgeText: "FastPay",
+                logos: ["PaymentLogo-fastpay"],
+                gateway: "wayl"
+            ),
+            PaymentMethod(
+                id: "superqi",
+                name: L10n.tr("premium.superqi", locale: locale),
+                subtitle: L10n.tr("premium.superqiSub", locale: locale),
+                badgeText: "SuperQi",
+                logos: ["PaymentLogo-superqi"],
+                gateway: "wayl"
+            ),
         ]
     }
 
     private var selectedMethod: PaymentMethod? {
-        methods.first { $0.gateway == selectedGateway } ?? methods.first
+        methods.first { $0.id == selectedMethodId } ?? methods.first
     }
 
     private var selectedPlan: PricingPlanDTO {
@@ -82,7 +109,7 @@ struct PremiumUpgradeView: View {
                     : String(
                         format: L10n.tr("premium.payVia", locale: locale),
                         formattedAmount,
-                        selectedMethod?.badgeText ?? "Wayl"
+                        selectedMethod?.badgeText ?? "Visa / Mastercard"
                     ),
                 icon: .lock
             ) {
@@ -226,7 +253,7 @@ struct PremiumUpgradeView: View {
 
     /// Only wallets the server can charge get the "we'll charge it" wording; unknown means pay-by-link.
     private var autoRenewDetail: String {
-        PricingService.shared.autoRenewModes[selectedGateway]?.lowercased() == "charge"
+        PricingService.shared.autoRenewModes[selectedMethod?.gateway ?? "wayl"]?.lowercased() == "charge"
             ? L10n.tr("premium.autoRenewDetailCharge", locale: locale)
             : L10n.tr("premium.autoRenewDetail", locale: locale)
     }
@@ -259,16 +286,25 @@ struct PremiumUpgradeView: View {
                     paymentRow(method)
                 }
             }
+
+            HStack(spacing: 6) {
+                QasaIconImage(.lock, size: 14)
+                Text(L10n.tr("premium.viaWayl", locale: locale))
+                    .font(.qasaLabel(12))
+            }
+            .foregroundColor(Theme.textSecondary)
         }
     }
 
     private func paymentRow(_ method: PaymentMethod) -> some View {
-        let selected = selectedGateway == method.gateway
+        let selected = selectedMethodId == method.id
         return Button {
-            selectedGateway = method.gateway
+            selectedMethodId = method.id
         } label: {
             HStack(spacing: 0) {
+                // Every badge takes the card pair's width so the titles line up.
                 paymentBadge(method)
+                    .frame(width: Theme.iconBadgeSize + 32, alignment: .leading)
                     .padding(.trailing, 14)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -297,15 +333,37 @@ struct PremiumUpgradeView: View {
         .buttonStyle(PressableStyle())
     }
 
-    /// No wallet logo for Wayl: a text badge, the method's initial on an accent tint.
+    /// The brand's own logo, never recoloured: a wallet icon clipped to a circle, or for
+    /// cards two white circles overlapping like stacked avatars (Visa on top, then Mastercard).
+    @ViewBuilder
     private func paymentBadge(_ method: PaymentMethod) -> some View {
-        Text(String(method.badgeText.prefix(1)))
-            .font(.qasa(16, weight: .bold))
-            .foregroundColor(Theme.accent)
-            .frame(width: Theme.iconBadgeSize, height: Theme.iconBadgeSize)
-            .background(Theme.accent.opacity(0.12))
-            .clipShape(Circle())
+        let size = Theme.iconBadgeSize
+        if method.logos.count > 1 {
+            ZStack(alignment: .leading) {
+                ForEach(Array(method.logos.enumerated()), id: \.offset) { index, logo in
+                    Image(logo)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24)
+                        .frame(width: size, height: size)
+                        .background(Circle().fill(Color.white))
+                        .overlay(Circle().stroke(Theme.stroke, lineWidth: 1))
+                        .padding(.leading, CGFloat(index) * 32)
+                        // The first logo sits on top so Visa's wordmark is never covered.
+                        .zIndex(Double(method.logos.count - index))
+                }
+            }
+            .frame(width: size + CGFloat(method.logos.count - 1) * 32, alignment: .leading)
             .accessibilityHidden(true)
+        } else if let logo = method.logos.first {
+            Image(logo)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Theme.stroke, lineWidth: 1))
+                .accessibilityHidden(true)
+        }
     }
 
     private func startPayment() async {

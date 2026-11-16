@@ -7,7 +7,9 @@ import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,28 +30,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
 
+/** What a payment row shows as its badge: brand logos, never redrawn or recoloured. */
+internal sealed interface GatewayLogo {
+    /** Visa and Mastercard marks on two overlapping white circles. */
+    data object Cards : GatewayLogo
+
+    /** A wallet's app icon clipped to a circle. */
+    data class AppIcon(@DrawableRes val res: Int) : GatewayLogo
+}
+
 /**
- * `PaymentMethod` rows (PremiumUpgradeView.swift:20). `badge` is the wallet brand name (iOS
- * `badgeText`, not localized); it is also the short name in "Pay … via %@".
+ * `PaymentMethod` rows (PremiumUpgradeView.swift:20). [id] is the UI choice only; every row
+ * pays through [gateway] (Wayl's hosted page takes cards and the Iraqi wallets itself).
+ * [badge] is the short brand name in "Pay … via %@" (not localized).
  */
 internal data class GatewayOption(
     val id: String,
     val badge: String,
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
+    val logo: GatewayLogo,
+    val gateway: String = WAYL_GATEWAY,
 )
 
-/** One option: Wayl's hosted page offers FIB, Qi Card and the other Iraqi wallets itself. */
+/** The gateway id the server gets for every row. */
+internal const val WAYL_GATEWAY = "wayl"
+
+/** TODO Phase 10: four brands, all through Wayl. The first (card) is the default. */
 internal val premiumGateways = listOf(
-    GatewayOption("wayl", "Wayl", R.string.premium_wayl, R.string.premium_waylsub),
+    GatewayOption("card", "Visa / Mastercard", R.string.premium_card, R.string.premium_cardsub, GatewayLogo.Cards),
+    GatewayOption("fib", "FIB", R.string.premium_fib, R.string.premium_fibsub, GatewayLogo.AppIcon(R.drawable.payment_logo_fib)),
+    GatewayOption("fastpay", "FastPay", R.string.premium_fastpay, R.string.premium_fastpaysub, GatewayLogo.AppIcon(R.drawable.payment_logo_fastpay)),
+    GatewayOption("superqi", "SuperQi", R.string.premium_superqi, R.string.premium_superqisub, GatewayLogo.AppIcon(R.drawable.payment_logo_superqi)),
 )
 
-/** Names of the wallets older payments went through, still shown in their history. */
-private val legacyGatewayNames = mapOf(
+/** Names for the `gateway` ids payments report: Wayl today, the wallets older payments used. */
+private val gatewayNames = mapOf(
+    WAYL_GATEWAY to R.string.premium_wayl,
     "fib" to R.string.premium_fib,
     "fastpay" to R.string.premium_fastpay,
     "superqi" to R.string.premium_superqi,
@@ -59,8 +83,7 @@ private val legacyGatewayNames = mapOf(
 @Composable
 internal fun gatewayDisplayName(id: String?): String = when (id) {
     null -> ""
-    else -> (premiumGateways.firstOrNull { it.id == id }?.title ?: legacyGatewayNames[id])
-        ?.let { stringResource(it) } ?: id
+    else -> gatewayNames[id]?.let { stringResource(it) } ?: id
 }
 
 // iOS badge is 36 x 36 with a 9pt corner.
@@ -105,6 +128,11 @@ internal fun PremiumPaymentSection(selectedId: String, onSelect: (String) -> Uni
                 PaymentRow(g, selected = g.id == selectedId, onClick = { onSelect(g.id) })
             }
         }
+        // Every row pays through Wayl; say so once under the list.
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(QasaDimens.spaceMicro * 2)) {
+            Icon(QasaIcons.ShieldLock, contentDescription = null, tint = c.textSecondary, modifier = Modifier.size(14.dp))
+            Text(stringResource(R.string.premium_viawayl), color = c.textSecondary, style = qasaText.caption)
+        }
     }
 }
 
@@ -139,18 +167,43 @@ private fun PaymentRow(option: GatewayOption, selected: Boolean, onClick: () -> 
     }
 }
 
-/** `paymentBadge` (PremiumUpgradeView.swift): no wallet logo for Wayl, so a text badge,
- * the method's initial on an accent tint, a 36dp circle. */
+/** `paymentBadge` (PremiumUpgradeView.swift): the brand's own logo in a 36dp circle. */
 @Composable
 private fun PaymentBadge(option: GatewayOption) {
-    val c = qasaColors
+    when (val logo = option.logo) {
+        GatewayLogo.Cards -> CardsBadge()
+        is GatewayLogo.AppIcon -> Image(
+            painterResource(logo.res),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(BadgeSize).clip(CircleShape),
+        )
+    }
+}
+
+/** Visa and Mastercard on two white circles stacked like avatars, 32dp apart (68dp wide), so both marks show in full.
+ * Row order follows the layout direction, so RTL mirrors the stack. */
+@Composable
+private fun CardsBadge() {
+    Row(horizontalArrangement = Arrangement.spacedBy(CardsOverlap)) {
+        LogoCircle(R.drawable.payment_logo_visa)
+        LogoCircle(R.drawable.payment_logo_mastercard)
+    }
+}
+
+@Composable
+private fun LogoCircle(@DrawableRes res: Int) {
     Box(
         modifier = Modifier
             .size(BadgeSize)
             .clip(CircleShape)
-            .background(c.accent.copy(alpha = 0.12f)),
+            .background(Color.White, CircleShape)
+            .border(QasaDimens.stroke, qasaColors.stroke, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(option.badge.take(1), color = c.accent, style = qasaText.bodySemibold15)
+        Image(painterResource(res), contentDescription = null, modifier = Modifier.width(LogoWidth))
     }
 }
+
+private val CardsOverlap = 32.dp - BadgeSize
+private val LogoWidth = 24.dp

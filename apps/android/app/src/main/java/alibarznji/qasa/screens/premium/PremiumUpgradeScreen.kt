@@ -61,7 +61,8 @@ fun PremiumUpgradeScreen(
     val c = qasaColors
     // iOS starts from the fallback plans so the carousel never renders empty.
     var plans by remember { mutableStateOf(vm.pricing.plans.ifEmpty { PricingService.FALLBACK_PLANS }) }
-    var gateway by remember { mutableStateOf("wayl") }
+    // The row the user picked (UI only); the server always gets `selectedGateway.gateway`.
+    var method by remember { mutableStateOf(premiumGateways.first().id) }
     var autoRenew by remember { mutableStateOf(true) }
     var autoRenewModes by remember { mutableStateOf(vm.pricing.autoRenewModes) }
     var status by remember { mutableStateOf<String?>(null) }
@@ -82,7 +83,7 @@ fun PremiumUpgradeScreen(
 
     val pagerState = rememberPagerState(pageCount = { plans.size.coerceAtLeast(1) })
     val selected = plans.getOrNull(pagerState.currentPage) ?: plans.firstOrNull()
-    val selectedGateway = premiumGateways.firstOrNull { it.id == gateway } ?: premiumGateways.first()
+    val selectedGateway = premiumGateways.firstOrNull { it.id == method } ?: premiumGateways.first()
     val locale = appLocale()
 
     ScreenScaffold(
@@ -123,7 +124,7 @@ fun PremiumUpgradeScreen(
                                     status = null
                                     scope.launch {
                                         try {
-                                            val intent = vm.payments.createIntent(gateway, plan.id, plan.amount_iqd, autoRenew)
+                                            val intent = vm.payments.createIntent(selectedGateway.gateway, plan.id, plan.amount_iqd, autoRenew)
                                             // `deep_link` is a wallet scheme or, behind Wayl, an
                                             // https hosted page; ACTION_VIEW opens either one.
                                             val opened = try {
@@ -199,10 +200,10 @@ fun PremiumUpgradeScreen(
             PremiumAutoRenewRow(
                 checked = autoRenew,
                 // Unknown or missing means link mode, the default with Wayl.
-                chargesWallet = autoRenewModes?.get(gateway) == "charge",
+                chargesWallet = autoRenewModes?.get(selectedGateway.gateway) == "charge",
                 onCheckedChange = { autoRenew = it },
             )
-            PremiumPaymentSection(selectedId = gateway, onSelect = { gateway = it })
+            PremiumPaymentSection(selectedId = method, onSelect = { method = it })
             status?.let {
                 // iOS: status in accent, errors in danger.
                 Text(it, color = if (isError) c.danger else c.accent, style = qasaText.bodySmall)
