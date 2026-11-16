@@ -63,8 +63,9 @@ A change that only one app picks up is not done.
      13pt chevron (`RowChevron`) trailing; tapping the row opens the menu or picker.
    - **Errors**: the row's label turns `danger` and a `size.groupErrorStripe` (3) `danger` bar
      runs down the row's leading edge (it mirrors in RTL). The message, `type.fieldError`
-     (11) `danger`, sits `space.fieldErrorGap` (6) under the card, prefixed with the field's
-     label when the group has more than one row ("Email: Enter an email like …").
+     (11) `danger`, sits **in the row, right under the value**, `space.rowErrorGap` (2) below
+     it, with no label prefix (Phase 4, 2026-11-16). A notes card's message sits
+     `space.fieldErrorGap` (6) under that card. Never a list of messages under the group.
    - **Notes / multi-line** fields get their own card below the group: `radius.control`
      corners, the label inside at top `space.groupNotesLabelTop` (9), text under it, min
      height `size.notesMinHeight` (112), growing.
@@ -165,7 +166,8 @@ A change that only one app picks up is not done.
    `QasaIcons.Copy` on Android, `<QasaIcon name="copy" :size>` on the desktop and in the
    extension. No app uses SF Symbols, Material icons or Lucide. **Sizes** (Phase 2,
    2026-11-16, option B in `previews/icon-sizes.html`): a glyph fills about half its box.
-   Item tile `size.itemTile` 48 / `itemTileGlyph` 24; icon badge 36 / `iconBadgeGlyph` 20;
+   Item tile `size.itemTile` 48 / `itemTileGlyph` 24 (a solid letter circle is drawn at
+   `itemLetterTile` 44, centred in the 48 slot, so it reads the same size as a pale one); icon badge 36 / `iconBadgeGlyph` 20;
    home tile `homeTile` 40 / `homeTileGlyph` 22; a row's plain icon buttons (copy, ⋯)
    `rowIconButton` 36 / `rowIconButtonGlyph` 20. Field icon buttons stay 32 / 16, the tab
    bar 22. **The add button** is a `size.fab` (56) accent circle with the plain plus

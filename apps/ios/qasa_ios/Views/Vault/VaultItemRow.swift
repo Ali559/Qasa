@@ -28,12 +28,15 @@ struct VaultItemRow: View {
                 .accessibilityHidden(true)
         } else if row.kind == .login {
             let logo = SiteLogo(name: row.displayName)
+            // A solid letter circle reads larger than a pale icon circle of the same size, so
+            // it is drawn at `itemLetterTile` (44) inside the 48 slot (the text still lines up).
             Text(logo.letter)
                 .font(.qasa(18, weight: .bold))
                 .foregroundColor(.white)
-                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
+                .frame(width: QasaTokens.Size.itemLetterTile, height: QasaTokens.Size.itemLetterTile)
                 .background(logo.color)
                 .clipShape(Circle())
+                .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
         } else {
             // A note or card shows the colour picked for it; until it is decrypted, the default.
             let itemColor = payload?.organizationColor

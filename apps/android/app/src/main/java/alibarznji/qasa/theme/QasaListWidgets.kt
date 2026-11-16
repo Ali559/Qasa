@@ -403,6 +403,9 @@ fun VaultItemRow(
             Box(
                 modifier = Modifier
                     .size(QasaTokens.Size.itemTile)
+                    // A solid letter circle reads larger than a pale icon circle of the same
+                    // size: it is drawn at `itemLetterTile` (44), centred in the 48 slot.
+                    .padding(if (siteIcon == null && logo != null) (QasaTokens.Size.itemTile - QasaTokens.Size.itemLetterTile) / 2 else 0.dp)
                     .background(if (siteIcon == null) logo?.color ?: itemColor?.second ?: c.cardMuted else c.cardMuted, tileShape),
                 contentAlignment = Alignment.Center,
             ) {

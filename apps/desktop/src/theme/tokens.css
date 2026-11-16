@@ -30,6 +30,7 @@
   --size-row-icon-button-glyph: 20px;
   --size-item-tile: 48px;
   --size-item-tile-glyph: 24px;
+  --size-item-letter-tile: 44px;
   --size-home-tile: 40px;
   --size-home-tile-glyph: 22px;
   --size-fab: 56px;
@@ -51,6 +52,7 @@
   --space-group-row-trailing-gap: 8px;
   --space-group-notes-label-top: 9px;
   --space-field-error-gap: 6px;
+  --space-row-error-gap: 2px;
   --space-form-gap: 16px;
   --space-bottom-bar-vertical: 12px;
   --space-bottom-bar-gap: 10px;

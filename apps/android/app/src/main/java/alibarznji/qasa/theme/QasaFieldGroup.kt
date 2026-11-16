@@ -29,15 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -55,8 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -86,92 +77,60 @@ import kotlinx.coroutines.flow.drop
  *   }
  *   QasaNotesCard(...)          // multi-line notes: their own card under the group
  *
- * Rows register their label and error with the enclosing group, which draws the dividers
- * between them and the error messages under the card ("Email: …" when it has more rows).
+ * The group draws the dividers between its rows. A row with an error shows its message in
+ * the row itself, right under the value (design/README.md, Phase 4).
  */
 
 // ---------------------------------------------------------------------------
 // Group
 // ---------------------------------------------------------------------------
 
-/** One row's entry in its group: what the message under the card needs. */
-@Stable
-internal class GroupRowEntry {
-    var label by mutableStateOf("")
-    var error by mutableStateOf<String?>(null)
-
-    /** The row's top inside the card, so messages list in the order the rows read. */
-    var top by mutableFloatStateOf(0f)
-}
-
-@Stable
-internal class FieldGroupState {
-    val rows = mutableStateListOf<GroupRowEntry>()
-}
-
-private val LocalFieldGroup = compositionLocalOf<FieldGroupState?> { null }
-
 /**
  * The card one form section's rows share: `cardBackground`, 1dp `stroke`, `radius.group`
  * (20), a 1dp divider between rows inset `space.groupDividerInset` on the leading side.
- * Row errors are listed `space.fieldErrorGap` under the card in `type.fieldError` `danger`.
  * Successive groups are spaced `space.formGap` (16) by their parent column.
  */
 @Composable
 fun QasaFieldGroup(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val c = qasaColors
-    val state = remember { FieldGroupState() }
     val shape = RoundedCornerShape(QasaTokens.Radius.group)
     // Divider positions, written by the layout below and read when it draws.
     val dividers = remember { mutableStateOf(emptyList<Float>()) }
-    Column(modifier.fillMaxWidth()) {
-        CompositionLocalProvider(LocalFieldGroup provides state) {
-            Layout(
-                content = content,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .background(c.cardBackground, shape)
-                    .drawWithContent {
-                        drawContent()
-                        val stroke = QasaDimens.stroke.toPx()
-                        val inset = QasaTokens.Space.groupDividerInset.toPx()
-                        val rtl = layoutDirection == LayoutDirection.Rtl
-                        dividers.value.forEach { y ->
-                            drawRect(
-                                c.stroke,
-                                topLeft = Offset(if (rtl) 0f else inset, y - stroke / 2),
-                                size = Size(size.width - inset, stroke),
-                            )
-                        }
-                    }
-                    .border(QasaDimens.stroke, c.stroke, shape),
-            ) { measurables, constraints ->
-                val rowConstraints = constraints.copy(minHeight = 0)
-                val placeables = measurables.map { it.measure(rowConstraints) }
-                val width = constraints.maxWidth
-                val height = placeables.sumOf { it.height }.coerceIn(constraints.minHeight, constraints.maxHeight)
-                layout(width, height) {
-                    var y = 0
-                    val lines = ArrayList<Float>()
-                    placeables.forEach { p ->
-                        if (p.height == 0) return@forEach
-                        if (y > 0) lines += y.toFloat()
-                        p.placeRelative(0, y)
-                        y += p.height
-                    }
-                    if (lines != dividers.value) dividers.value = lines
+    Layout(
+        content = content,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(c.cardBackground, shape)
+            .drawWithContent {
+                drawContent()
+                val stroke = QasaDimens.stroke.toPx()
+                val inset = QasaTokens.Space.groupDividerInset.toPx()
+                val rtl = layoutDirection == LayoutDirection.Rtl
+                dividers.value.forEach { y ->
+                    drawRect(
+                        c.stroke,
+                        topLeft = Offset(if (rtl) 0f else inset, y - stroke / 2),
+                        size = Size(size.width - inset, stroke),
+                    )
                 }
             }
-        }
-        val prefixed = state.rows.size > 1
-        val errors = state.rows.filter { it.error != null }.sortedBy { it.top }
-        if (errors.isNotEmpty()) {
-            Spacer(Modifier.height(QasaTokens.Space.fieldErrorGap))
-            errors.forEach { row ->
-                val message = row.error.orEmpty()
-                QasaFieldErrorText(if (prefixed && row.label.isNotEmpty()) "${row.label}: $message" else message)
+            .border(QasaDimens.stroke, c.stroke, shape),
+    ) { measurables, constraints ->
+        val rowConstraints = constraints.copy(minHeight = 0)
+        val placeables = measurables.map { it.measure(rowConstraints) }
+        val width = constraints.maxWidth
+        val height = placeables.sumOf { it.height }.coerceIn(constraints.minHeight, constraints.maxHeight)
+        layout(width, height) {
+            var y = 0
+            val lines = ArrayList<Float>()
+            placeables.forEach { p ->
+                if (p.height == 0) return@forEach
+                if (y > 0) lines += y.toFloat()
+                p.placeRelative(0, y)
+                y += p.height
             }
+            if (lines != dividers.value) dividers.value = lines
         }
     }
 }
@@ -180,23 +139,6 @@ fun QasaFieldGroup(modifier: Modifier = Modifier, content: @Composable () -> Uni
 @Composable
 fun QasaFieldErrorText(message: String, modifier: Modifier = Modifier) {
     Text(message, color = qasaColors.danger, style = qasaText.fieldError, modifier = modifier.fillMaxWidth())
-}
-
-/** Registers a row with its enclosing [QasaFieldGroup] (if any); returns the modifier
- *  that records the row's position. */
-@Composable
-private fun registerWithGroup(label: String, error: String?): Modifier {
-    val group = LocalFieldGroup.current ?: return Modifier
-    val entry = remember { GroupRowEntry() }
-    DisposableEffect(group) {
-        group.rows += entry
-        onDispose { group.rows -= entry }
-    }
-    SideEffect {
-        entry.label = label
-        entry.error = error
-    }
-    return Modifier.onPlaced { entry.top = it.positionInParent().y }
 }
 
 /** Draws the `size.groupErrorStripe` `danger` bar down the leading edge (mirrors in RTL). */
@@ -239,7 +181,8 @@ private fun GroupLabel(label: String, error: Boolean, focused: Boolean) {
  * `space.groupRowVertical` × `space.groupRowHorizontal`; the label, then [content] under it
  * with no gap; [trailing] controls at the trailing edge, vertically centered. [below] spans
  * the row's full width under that (the inline calendar). A row with [error] gets the
- * leading `danger` stripe and a `danger` label; the message shows under the card.
+ * leading `danger` stripe and a `danger` label; the message shows in the row,
+ * `space.rowErrorGap` under the value.
  *
  * [onTap] runs for a tap anywhere in the row (text rows focus their input). When [role] is
  * set the whole row is one accessible control (pickers), named by its label and value.
@@ -257,7 +200,6 @@ fun QasaGroupRow(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val c = qasaColors
-    val placed = registerWithGroup(label, error)
     val tap = when {
         onTap == null -> Modifier
         role != null -> Modifier.clickable(role = role, onClick = onTap)
@@ -267,7 +209,6 @@ fun QasaGroupRow(
     Column(
         modifier
             .fillMaxWidth()
-            .then(placed)
             .then(tap)
             .errorStripe(if (error != null) c.danger else null),
     ) {
@@ -284,6 +225,10 @@ fun QasaGroupRow(
             Column(Modifier.weight(1f)) {
                 GroupLabel(label, error = error != null, focused = focused)
                 content()
+                if (error != null) {
+                    Spacer(Modifier.height(QasaTokens.Space.rowErrorGap))
+                    QasaFieldErrorText(error)
+                }
             }
             if (trailing != null) {
                 Spacer(Modifier.width(QasaTokens.Space.groupRowTrailingGap))

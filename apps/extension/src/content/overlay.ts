@@ -94,6 +94,8 @@ const CSS = `
   display: grid; place-items: center; color: #fff; font-weight: 700; font-size: calc(var(--size-icon-badge) * 0.375);
 }
 .tile.site { background: var(--card-muted); color: var(--text-primary); }
+/* A solid letter circle reads larger than a pale one: 44/48 of the slot, centred (size.itemLetterTile). */
+.tile:not(.site):not(.brand) { width: calc(var(--size-icon-badge) * 44 / 48); height: calc(var(--size-icon-badge) * 44 / 48); margin: calc(var(--size-icon-badge) * 2 / 48); }
 .tile.site svg { width: var(--size-icon-badge-glyph); height: var(--size-icon-badge-glyph); }
 .text { display: flex; flex-direction: column; gap: var(--space-row-text-gap); min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
