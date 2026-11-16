@@ -15,6 +15,9 @@ const props = withDefaults(
   { size: 48, website: null, color: null },
 )
 const iconPath = computed(() => (props.variant === 'login' ? siteIconPath(props.website) : null))
+// A solid letter circle reads larger than a pale icon circle of the same size: it is drawn
+// at `size.itemLetterTile` / `size.itemTile` (44 of 48), centred in the same slot.
+const letter = computed(() => (props.size * 44) / 48)
 const logo = computed(() => (props.variant === 'login' && !iconPath.value ? siteLogo(props.name) : null))
 </script>
 
@@ -27,7 +30,7 @@ const logo = computed(() => (props.variant === 'login' && !iconPath.value ? site
   <span
     v-else-if="logo"
     class="tile letter"
-    :style="{ width: `${size}px`, height: `${size}px`, background: logo.color, fontSize: `${size * 0.375}px` }"
+    :style="{ width: `${letter}px`, height: `${letter}px`, margin: `${(size - letter) / 2}px`, background: logo.color, fontSize: `${size * 0.375}px` }"
     aria-hidden="true"
     >{{ logo.letter }}</span
   >

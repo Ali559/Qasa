@@ -64,6 +64,7 @@ object QasaTokens {
         val rowIconButtonGlyph: Dp = 20.dp
         val itemTile: Dp = 48.dp
         val itemTileGlyph: Dp = 24.dp
+        val itemLetterTile: Dp = 44.dp
         val homeTile: Dp = 40.dp
         val homeTileGlyph: Dp = 22.dp
         val fab: Dp = 56.dp
@@ -88,6 +89,7 @@ object QasaTokens {
         val groupRowTrailingGap: Dp = 8.dp
         val groupNotesLabelTop: Dp = 9.dp
         val fieldErrorGap: Dp = 6.dp
+        val rowErrorGap: Dp = 2.dp
         val formGap: Dp = 16.dp
         val bottomBarVertical: Dp = 12.dp
         val bottomBarGap: Dp = 10.dp

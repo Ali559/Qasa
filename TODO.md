@@ -183,7 +183,10 @@ picks one before anything is built.
 
 ### Phase 4: Validation messages under their own field
 
-- [ ] Today a bad email shows its error at the bottom of the form ("Email: write an email
+- [x] (2026-11-16, branch `phase-4-field-errors`: the shared field row on iOS, Android and
+      the desktop shows its own message under its value, `space.rowErrorGap` 2; the groups
+      no longer list messages; rule 4 in `design/README.md`. The extension has no forms.)
+      Today a bad email shows its error at the bottom of the form ("Email: write an email
       like name@example.com"), far from the field. Each message goes directly under the field
       it belongs to, in every form (item editor, sign-up, settings) on every app.
 

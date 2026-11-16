@@ -39,6 +39,7 @@ enum QasaTokens {
         static let rowIconButtonGlyph: CGFloat = 20
         static let itemTile: CGFloat = 48
         static let itemTileGlyph: CGFloat = 24
+        static let itemLetterTile: CGFloat = 44
         static let homeTile: CGFloat = 40
         static let homeTileGlyph: CGFloat = 22
         static let fab: CGFloat = 56
@@ -63,6 +64,7 @@ enum QasaTokens {
         static let groupRowTrailingGap: CGFloat = 8
         static let groupNotesLabelTop: CGFloat = 9
         static let fieldErrorGap: CGFloat = 6
+        static let rowErrorGap: CGFloat = 2
         static let formGap: CGFloat = 16
         static let bottomBarVertical: CGFloat = 12
         static let bottomBarGap: CGFloat = 10

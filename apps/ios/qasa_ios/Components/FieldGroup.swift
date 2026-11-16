@@ -1,8 +1,8 @@
 import SwiftUI
 
 // Labelled fields are rows in a grouped card (design/README.md, "Labelled fields"): the label
-// sits inside each row, rows share one card with inset dividers, errors stripe the row and
-// are listed under the card. Android (`QasaFieldGroup`) and the desktop (`FieldGroup.vue`)
+// sits inside each row, rows share one card with inset dividers, an error stripes the row and
+// its message sits in the row, right under the value. Android (`QasaFieldGroup`) and the desktop (`FieldGroup.vue`)
 // draw the same thing from the same tokens.
 
 // MARK: - Group
@@ -13,31 +13,16 @@ struct FieldGroup<Content: View>: View {
     @Environment(\.themePalette) private var theme
     @ViewBuilder var content: Content
 
-    @State private var errors: [FieldRowError] = []
-    @State private var rowCount = 0
-
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: QasaTokens.Radius.group, style: .continuous)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: QasaTokens.Space.fieldErrorGap) {
-            _VariadicView.Tree(DividedRows()) { content }
-                .background(theme.cardBackground)
-                .clipShape(shape)
-                .overlay(shape.stroke(theme.stroke, lineWidth: QasaTokens.Size.stroke))
-            ForEach(errors) { item in
-                Text(rowCount > 1 ? "\(item.label): \(item.message)" : item.message)
-                    .font(.qasa(QasaTokens.Typography.fieldError.size, weight: QasaTokens.Typography.fieldError.weight))
-                    .foregroundColor(theme.danger)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .onPreferenceChange(FieldRowErrorKey.self) { errors = $0 }
-        .onPreferenceChange(FieldRowCountKey.self) { rowCount = $0 }
+        _VariadicView.Tree(DividedRows()) { content }
+            .background(theme.cardBackground)
+            .clipShape(shape)
+            .overlay(shape.stroke(theme.stroke, lineWidth: QasaTokens.Size.stroke))
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -66,29 +51,11 @@ private struct RowSeparator: View {
     }
 }
 
-struct FieldRowError: Equatable, Identifiable {
-    let id: String
-    let label: String
-    let message: String
-}
-
-private struct FieldRowErrorKey: PreferenceKey {
-    static let defaultValue: [FieldRowError] = []
-    static func reduce(value: inout [FieldRowError], nextValue: () -> [FieldRowError]) {
-        value.append(contentsOf: nextValue())
-    }
-}
-
-private struct FieldRowCountKey: PreferenceKey {
-    static let defaultValue = 0
-    static func reduce(value: inout Int, nextValue: () -> Int) { value += nextValue() }
-}
-
 // MARK: - Row
 
 /// One row: the label on top, `value` under it, `trailing` controls centered on the trailing
 /// edge. `isFocused` tints the label; `error` turns it red, stripes the leading edge and
-/// lists the message under the group.
+/// shows the message in the row, `space.rowErrorGap` under the value.
 struct FieldRow<Value: View, Trailing: View>: View {
     @Environment(\.themePalette) private var theme
     let label: String
@@ -116,6 +83,15 @@ struct FieldRow<Value: View, Trailing: View>: View {
                     .foregroundColor(theme.textPrimary)
                     .tint(theme.accent)
                     .accessibilityLabel(label)
+                if let error {
+                    Text(error)
+                        .font(.qasa(QasaTokens.Typography.fieldError.size, weight: QasaTokens.Typography.fieldError.weight))
+                        .foregroundColor(theme.danger)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, QasaTokens.Space.rowErrorGap)
+                        .transition(.opacity)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing
@@ -131,11 +107,7 @@ struct FieldRow<Value: View, Trailing: View>: View {
         .contentShape(Rectangle())
         .onTapGesture { onTap?() }
         .animation(QasaTokens.Motion.fast, value: isFocused)
-        .preference(key: FieldRowCountKey.self, value: 1)
-        .preference(
-            key: FieldRowErrorKey.self,
-            value: error.map { [FieldRowError(id: label, label: label, message: $0)] } ?? []
-        )
+        .animation(QasaTokens.Motion.fast, value: error)
     }
 }
 

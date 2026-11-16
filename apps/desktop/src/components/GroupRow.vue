@@ -6,14 +6,13 @@
 // (32, vertically centered) at the trailing edge, `--space-group-row-trailing-gap` (8) after
 // the value. Rows after the first get a 1px divider
 // inset 14 on the leading side. With an error a 3px danger bar runs down the leading edge,
-// inside the card's rounded corners; the message itself is drawn by the group.
+// inside the card's rounded corners, and the message (11 danger) sits in the row,
+// `--space-row-error-gap` (2) under the value.
 //
 // `id` is the row's control (input, a picker's opener): the label names it, and a click anywhere in
 // the row that doesn't land on another control focuses it. A row with no single control
 // (`control: false`) labels itself as a group instead.
-import { inject, onBeforeUnmount, ref } from 'vue'
-
-import { FIELD_GROUP } from './fieldGroup'
+import { errorIdFor } from './fieldGroup'
 
 const props = withDefaults(
   defineProps<{
@@ -26,12 +25,6 @@ const props = withDefaults(
   { control: true },
 )
 
-const el = ref<HTMLElement | null>(null)
-const group = inject(FIELD_GROUP, null)
-if (!group && import.meta.env.DEV) console.warn(`GroupRow "${props.label}" outside a FieldGroup`)
-group?.register({ id: props.id, label: () => props.label, error: () => props.error, el: () => el.value })
-onBeforeUnmount(() => group?.unregister(props.id))
-
 const INTERACTIVE = 'button, a, input, select, textarea, label'
 
 function focusControl(e: MouseEvent) {
@@ -43,7 +36,6 @@ function focusControl(e: MouseEvent) {
 
 <template>
   <div
-    ref="el"
     class="group-row"
     :class="{ invalid: !!error, disabled, 'has-trailing': !!$slots.trailing, clickable: control }"
     :role="control ? undefined : 'group'"
@@ -55,6 +47,7 @@ function focusControl(e: MouseEvent) {
       <label v-if="control" :for="id" class="row-label">{{ label }}</label>
       <span v-else :id="`${id}-label`" class="row-label">{{ label }}</span>
       <div class="row-value"><slot /></div>
+      <span v-if="error" :id="errorIdFor(id)" class="row-error" role="alert">{{ error }}</span>
       <slot name="below" />
     </div>
     <div v-if="$slots.trailing" class="row-trailing"><slot name="trailing" /></div>
@@ -158,6 +151,15 @@ function focusControl(e: MouseEvent) {
   font-weight: var(--type-group-value-weight);
   line-height: var(--line-height);
   color: var(--text-primary);
+}
+
+/* iOS `FieldRow` error: 11 regular danger, 2 under the value. */
+.row-error {
+  margin-top: var(--space-row-error-gap);
+  font-size: var(--type-field-error-size);
+  font-weight: var(--type-field-error-weight);
+  line-height: var(--line-height);
+  color: var(--danger);
 }
 
 .row-trailing {
