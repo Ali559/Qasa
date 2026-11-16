@@ -97,12 +97,12 @@ function openItem(id: string) {
           { label: t('common.delete'), icon: 'delete', destructive: true, action: () => (deleting = c) },
         ]"
       >
-        <QasaIcon name="more-vertical" :size="16" />
+        <QasaIcon name="more-vertical" :size="20" />
       </ActionSheet>
     </div>
 
     <template #overlay>
-      <div class="fab"><Fab icon="add" :label="t('collections.createTitle')" @click="startCreate" /></div>
+      <div class="fab"><Fab icon="add-plain" :label="t('collections.createTitle')" @click="startCreate" /></div>
       <PromptSheet
         v-model="name"
         :open="!!nameSheet"

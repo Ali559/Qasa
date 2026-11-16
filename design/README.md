@@ -163,8 +163,13 @@ A change that only one app picks up is not done.
 8. **Icons: one library, Solar Linear** (chosen 2026-11-12), in `assets/icons`, generated
    into every app by `assets/icons/generate.py`: `QasaIconImage(.copy, size:)` on iOS,
    `QasaIcons.Copy` on Android, `<QasaIcon name="copy" :size>` on the desktop and in the
-   extension. No app uses SF Symbols, Material icons or Lucide. Sizes stay what each place
-   used before (16 in fields, badges and row buttons; 22 in the tab bar). A navigation tab's
+   extension. No app uses SF Symbols, Material icons or Lucide. **Sizes** (Phase 2,
+   2026-11-16, option B in `previews/icon-sizes.html`): a glyph fills about half its box.
+   Item tile `size.itemTile` 48 / `itemTileGlyph` 24; icon badge 36 / `iconBadgeGlyph` 20;
+   home tile `homeTile` 40 / `homeTileGlyph` 22; a row's plain icon buttons (copy, ⋯)
+   `rowIconButton` 36 / `rowIconButtonGlyph` 20. Field icon buttons stay 32 / 16, the tab
+   bar 22. **The add button** is a `size.fab` (56) accent circle with the plain plus
+   `add-plain` (custom, line 2) at `fabGlyph` 26; never the circled `add`. A navigation tab's
    icon is the linear glyph, and the filled glyph (`.fill`, Solar Bold) while it is the
    active tab. To add an icon: name it in `icons.json`, run `import_solar.py`, then
    `generate.py`. Solar is CC BY 4.0: every app credits "Icons: Solar by 480 Design" on its

@@ -385,15 +385,12 @@ struct MintFAB: View {
 
     var body: some View {
         Button(action: action) {
-            QasaIconImage(icon, size: 18)
+            QasaIconImage(icon, size: QasaTokens.Size.fabGlyph)
                 .foregroundColor(theme.onAccent)
-                .frame(width: 56, height: 56)
-                .background(theme.accent)
-                .cornerRadius(Theme.cornerRadiusLarge)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Theme.cornerRadiusLarge)
-                        .stroke(theme.accent.opacity(0.5), lineWidth: 1)
-                )
+                .frame(width: QasaTokens.Size.fab, height: QasaTokens.Size.fab)
+                .background(Circle().fill(theme.accent))
+                .overlay(Circle().stroke(theme.accent.opacity(0.5), lineWidth: 1))
+                .contentShape(Circle())
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
         }
     }

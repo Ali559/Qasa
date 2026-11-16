@@ -275,9 +275,9 @@ private struct HomeIconTile: View {
     @Environment(\.themePalette) private var theme
 
     var body: some View {
-        QasaIconImage(icon, size: 18)
+        QasaIconImage(icon, size: QasaTokens.Size.homeTileGlyph)
             .foregroundColor(theme.accent)
-            .frame(width: 40, height: 40)
+            .frame(width: QasaTokens.Size.homeTile, height: QasaTokens.Size.homeTile)
             .background(theme.cardMuted)
             .clipShape(RoundedRectangle(cornerRadius: 12))
     }

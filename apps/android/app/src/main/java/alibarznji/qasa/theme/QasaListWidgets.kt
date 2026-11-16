@@ -1,7 +1,6 @@
 package alibarznji.qasa.theme
 
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIconFrame
 import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.qasaText
 import androidx.compose.animation.core.animateDpAsState
@@ -403,7 +402,7 @@ fun VaultItemRow(
             val tileShape = RoundedCornerShape(QasaDimens.radiusSmall)
             Box(
                 modifier = Modifier
-                    .size(QasaIconFrame.tile)
+                    .size(QasaTokens.Size.itemTile)
                     .background(if (siteIcon == null) logo?.color ?: itemColor?.second ?: c.cardMuted else c.cardMuted, tileShape),
                 contentAlignment = Alignment.Center,
             ) {
@@ -412,7 +411,7 @@ fun VaultItemRow(
                 } else if (logo != null) {
                     Text(logo.letter, color = Color.White, style = qasaText.cardTitleBold)
                 } else {
-                    Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaIconSize.lg))
+                    Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaTokens.Size.itemTileGlyph))
                 }
             }
             Spacer(Modifier.width(QasaDimens.gap))
@@ -508,7 +507,7 @@ fun CheckToggle(
 }
 
 /**
- * iOS `VaultItemRow`'s plain 36dp icon buttons (copy, ⋯): a 17dp `textSecondary` glyph,
+ * iOS `VaultItemRow`'s plain 36dp icon buttons (copy, ⋯): a `size.rowIconButtonGlyph` (20) `textSecondary` glyph,
  * dimmed while pressed, no ripple and no 48dp layout inflation.
  */
 @Composable
@@ -523,13 +522,13 @@ fun QasaRowIconButton(
     val alpha = rememberPressOpacity(interaction)
     Box(
         modifier
-            .size(QasaDimens.rowIconBadge)
+            .size(QasaTokens.Size.rowIconButton)
             .graphicsLayer { this.alpha = alpha }
             .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick)
             .semanticsRoleButton(contentDescription),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaIconSize.menu))
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaTokens.Size.rowIconButtonGlyph))
     }
 }
 

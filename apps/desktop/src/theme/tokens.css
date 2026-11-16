@@ -19,7 +19,7 @@
   --size-button-icon-glyph: 15px;
   --size-row-min-height: 60px;
   --size-icon-badge: 36px;
-  --size-icon-badge-glyph: 16px;
+  --size-icon-badge-glyph: 20px;
   --size-row-chevron-glyph: 13px;
   --size-header-height: 64px;
   --size-sheet-grabber-width: 36px;
@@ -28,6 +28,13 @@
   --size-header-back-button: 40px;
   --size-header-back-glyph: 17px;
   --size-row-icon-button: 36px;
+  --size-row-icon-button-glyph: 20px;
+  --size-item-tile: 48px;
+  --size-item-tile-glyph: 24px;
+  --size-home-tile: 40px;
+  --size-home-tile-glyph: 22px;
+  --size-fab: 56px;
+  --size-fab-glyph: 26px;
   --size-toast-min-height: 44px;
   --size-toast-glyph: 17px;
   --space-screen-padding: 20px;

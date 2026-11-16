@@ -56,7 +56,7 @@ struct CollectionsView: View {
                 }
             }
 
-            MintFAB(icon: .add) {
+            MintFAB(icon: .addPlain) {
                 newName = ""
                 showCreate = true
             }
@@ -142,9 +142,9 @@ struct CollectionsView: View {
             Spacer()
 
             Button { menuTarget = MenuTarget(collection: collection, name: name) } label: {
-                QasaIconImage(.moreVertical, size: 16)
+                QasaIconImage(.moreVertical, size: QasaTokens.Size.rowIconButtonGlyph)
                     .foregroundColor(Theme.textSecondary)
-                    .frame(width: 36, height: 36)
+                    .frame(width: QasaTokens.Size.rowIconButton, height: QasaTokens.Size.rowIconButton)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

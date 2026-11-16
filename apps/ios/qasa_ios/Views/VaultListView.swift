@@ -102,7 +102,7 @@ struct VaultListView: View {
                 }
             }
 
-            MintFAB(icon: .add) {
+            MintFAB(icon: .addPlain) {
                 handleAddTapped()
             }
             .padding(.trailing, Theme.screenPadding)

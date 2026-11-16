@@ -33,6 +33,10 @@ CHEVRONS = {
                      'stroke-linecap="round" stroke-linejoin="round" d="M1.91 2.1L6.975 7.89L12.04 2.1"/>'),
     # A plain ring (an unselected radio), Solar's 1.5 line on the check-circle's circle.
     "circle": ("0 0 24 24", '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/>'),
+    # The add button's plain plus (Phase 2, 2026-11-16): Solar has none. Drawn at 2, not 1.5,
+    # because it is shown larger and alone on the accent circle.
+    "add-plain": ("0 0 24 24", '<path fill="none" stroke="currentColor" stroke-width="2" '
+                  'stroke-linecap="round" d="M12 5V19M5 12H19"/>'),
 }
 
 

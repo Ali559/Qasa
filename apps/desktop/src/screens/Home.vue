@@ -175,7 +175,7 @@ const health = computed(() => {
       <!-- Backup reminder: the vault is only on this computer (spec: backups §7). -->
       <div v-if="backup.status?.remind" class="home-card static" role="region" :aria-label="t('backup.reminder.title')">
         <div class="card-row top">
-          <span class="tile" aria-hidden="true"><QasaIcon name="backup-problem" :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon name="backup-problem" :size="22" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('backup.reminder.title') }}</span>
             <span class="card-line">{{ t('backup.reminder.body') }}</span>
@@ -204,7 +204,7 @@ const health = computed(() => {
 
       <div class="home-card static">
         <div class="card-row">
-          <span class="tile" aria-hidden="true"><QasaIcon name="vpn" :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon name="vpn" :size="22" /></span>
           <span class="card-text">
             <span class="card-title">{{ t('nav.vpn') }}</span>
             <span class="card-line">{{ t('home.vpnDesktop') }}</span>
@@ -214,7 +214,7 @@ const health = computed(() => {
 
       <button type="button" class="home-card" @click="premium ? selectTab('alerts') : openPage('premiumUpgrade')">
         <div class="card-row">
-          <span class="tile" aria-hidden="true"><QasaIcon :name="premium ? 'breach' : 'shield-lock'" :size="18" /></span>
+          <span class="tile" aria-hidden="true"><QasaIcon :name="premium ? 'breach' : 'shield-lock'" :size="22" /></span>
           <span class="card-text">
             <span class="card-title">{{ t(premium ? 'nav.breachedPasswords' : 'breached.lockedTitle') }}</span>
             <span class="card-line">{{ t(premium ? 'home.breachedBody' : 'breached.lockedBody') }}</span>
@@ -463,13 +463,13 @@ const health = computed(() => {
   font-weight: 500;
 }
 
-/* iOS `HomeIconTile`: 40pt, radius 12, cardMuted, 18 medium accent glyph. */
+/* iOS `HomeIconTile`: `size.homeTile` (40), radius 12, cardMuted, `size.homeTileGlyph` (22) accent glyph. */
 .tile {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: var(--size-home-tile);
+  height: var(--size-home-tile);
   border-radius: 12px;
   background: var(--card-muted);
   color: var(--accent);

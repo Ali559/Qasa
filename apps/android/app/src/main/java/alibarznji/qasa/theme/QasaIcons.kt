@@ -881,6 +881,12 @@ object QasaIcons {
         )
     }
 
+    val AddPlain: ImageVector by lazy {
+        icon("add-plain", 24f, 24f,
+            S("M12 5V19M5 12H19", fill = false, stroke = 2f, cap = StrokeCap.Round, join = StrokeJoin.Miter),
+        )
+    }
+
     val ChevronBack: ImageVector by lazy {
         icon("chevron-back", 13f, 18f,
             S("M8.79 2.26L2.16 9L8.79 15.74", fill = false, stroke = 2.32f, cap = StrokeCap.Round, join = StrokeJoin.Round),
