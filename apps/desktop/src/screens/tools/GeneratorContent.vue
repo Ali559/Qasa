@@ -70,7 +70,7 @@ watch(options, regenerate)
 
     <CardContainer :padding="compact ? 14 : 17" class="large-radius">
       <div class="strength-head">
-        <SectionLabel :text="t('gen.strength')" />
+        <SectionLabel :text="t('gen.weak')" />
         <span class="strength-label">{{ t(strength.key) }}</span>
       </div>
       <StrengthBar class="strength-bar" :segments="5" :filled="strength.filled" :color="STRENGTH_COLOR[strength.key]" :height="8" />

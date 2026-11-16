@@ -216,7 +216,7 @@ fun PasswordGeneratorContent(
         Spacer(Modifier.height(QasaDimens.gap))
         CardContainer {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.gen_strength), color = c.textSecondary, style = qasaText.sectionLabel)
+                Text(stringResource(R.string.gen_weak), color = c.textSecondary, style = qasaText.sectionLabel)
                 Spacer(Modifier.weight(1f))
                 Text(stringResource(strength.label), color = c.accent, style = qasaText.bodyMedium)
             }

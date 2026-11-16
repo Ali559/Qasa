@@ -158,7 +158,7 @@ struct PasswordGeneratorContent: View {
     private var strengthCard: some View {
         CardContainer(padding: compact ? 14 : 17, cornerRadius: Theme.cornerRadiusLarge) {
             HStack {
-                Text(L10n.tr("gen.strength"))
+                Text(L10n.tr("gen.weak"))
                     .font(.qasa(12, weight: .semibold))
                     .foregroundColor(Theme.textSecondary)
                 Spacer()
