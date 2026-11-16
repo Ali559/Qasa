@@ -90,7 +90,7 @@ internal fun CollectionsListContent(
                 .align(Alignment.BottomEnd)
                 .padding(end = QasaDimens.screenPadding, bottom = QasaDimens.sectionGap),
         ) {
-            MintFab(onClick = { showCreate = true })
+            MintFab(onClick = { showCreate = true }, contentDescription = stringResource(R.string.collections_createtitle))
         }
     }
 

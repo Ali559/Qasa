@@ -202,7 +202,7 @@ internal fun VaultListContent(
             }
         }
         Box(Modifier.align(Alignment.BottomEnd).padding(QasaDimens.screenPadding)) {
-            MintFab(onClick = { onAdd(tabs[tab]) })
+            MintFab(onClick = { onAdd(tabs[tab]) }, contentDescription = stringResource(R.string.a11y_additem))
         }
     }
 }
