@@ -87,7 +87,11 @@ const CSS = `
   opacity: 0; pointer-events: none; transition: opacity var(--motion-press);
 }
 .row:hover::after, .row:active::after { opacity: var(--motion-row-pressed-opacity); }
-.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row:focus-visible, .row.active { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* The keyboard's row (focus stays in the page's field): the focus ring plus the hover wash. */
+.row.active::after { opacity: var(--motion-row-pressed-opacity); }
+.list { display: block; }
+.sr { position: fixed; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .tile {
   width: var(--size-icon-badge); height: var(--size-icon-badge); flex-shrink: 0; border-radius: 50%;
   display: grid; place-items: center; box-sizing: border-box; background: var(--card-muted); color: var(--accent);
@@ -113,7 +117,7 @@ const CSS = `
   transition: opacity var(--motion-press), transform var(--motion-press);
 }
 .action:active { opacity: var(--motion-pressed-opacity); transform: scale(var(--motion-press-scale)); }
-.action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.action:focus-visible, .action.active { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* Hidden until the Plex faces are in, so the menu never paints in a system font. */
 .menu.pending { visibility: hidden; }
 `
@@ -167,15 +171,36 @@ function qasaMark(doc: Document): SVGSVGElement {
 }
 
 export interface MenuHandlers {
-  /** A login row was picked by a click that passed every check. */
+  /** A login row was picked by a click (or Enter) that passed every check. */
   onPick(item: LoginMatch): void
+}
+
+export interface MenuOptions {
+  /** Opened from the keyboard (ArrowDown in the field): the first row is highlighted as
+   *  soon as there is one. */
+  keyboard?: boolean
+}
+
+interface OpenMenu {
+  el: HTMLElement
+  field: HTMLInputElement
+  shownAt: number
+  handlers: MenuHandlers
+  /** The highlighted row or button (keyboard), -1 for none. */
+  active: number
+  /** The keyboard is driving this menu: each new state highlights its first row. */
+  keyboard: boolean
+  /** Announces the highlighted row: focus stays in the page's field, so an
+   *  `aria-activedescendant` there can't point into our closed shadow root. */
+  live: HTMLElement
 }
 
 export class Overlay {
   private readonly host: HTMLElement
   private readonly root: ShadowRoot
   private readonly icons = new Map<HTMLInputElement, HTMLButtonElement>()
-  private menu: { el: HTMLElement; field: HTMLInputElement; shownAt: number; handlers: MenuHandlers } | null = null
+  private menu: OpenMenu | null = null
+  private optionSeq = 0
   private observer: IntersectionObserver | null = null
   /** Latest IntersectionObserver v2 verdict for the menu; null when unsupported. */
   private menuVisible: boolean | null = null
@@ -194,7 +219,7 @@ export class Overlay {
     style.textContent = CSS
     this.root.append(style)
     doc.addEventListener('mousedown', (e) => this.onOutside(e), true)
-    doc.addEventListener('keydown', (e) => e.key === 'Escape' && this.closeMenu(), true)
+    doc.addEventListener('keydown', (e) => e.isTrusted && e.key === 'Escape' && this.closeMenu(), true)
   }
 
   get element(): HTMLElement {
@@ -299,7 +324,7 @@ export class Overlay {
 
   // MARK: menu
 
-  openMenu(field: HTMLInputElement, handlers: MenuHandlers): void {
+  openMenu(field: HTMLInputElement, handlers: MenuHandlers, options: MenuOptions = {}): void {
     this.closeMenu()
     if (!this.ensureAttached()) return
     // Last child of <html>, so later page elements with the same z-index can't simply sit on
@@ -308,9 +333,11 @@ export class Overlay {
     this.raise()
     const el = this.doc.createElement('div')
     el.className = 'menu'
-    el.setAttribute('role', 'menu')
-    this.root.append(el)
-    this.menu = { el, field, shownAt: performance.now(), handlers }
+    const live = this.doc.createElement('div')
+    live.className = 'sr'
+    live.setAttribute('aria-live', 'polite')
+    this.root.append(el, live)
+    this.menu = { el, field, shownAt: performance.now(), handlers, active: -1, keyboard: !!options.keyboard, live }
     this.placeMenu()
     this.setMenu({ kind: 'loading' })
     this.menuVisible = null
@@ -369,6 +396,7 @@ export class Overlay {
     this.observer?.disconnect()
     this.observer = null
     this.menu?.el.remove()
+    this.menu?.live.remove()
     this.menu = null
   }
 
@@ -379,6 +407,8 @@ export class Overlay {
     menu.el.lang = lang
     menu.el.dir = lang === 'en' ? 'ltr' : 'rtl'
     menu.el.replaceChildren()
+    menu.active = -1
+    menu.live.textContent = ''
     const head = this.doc.createElement('div')
     head.className = 'head'
     head.append(qasaMark(this.doc), ct(lang, 'brand.name'))
@@ -398,10 +428,8 @@ export class Overlay {
         menu.el.append(b)
       }
     } else if (state.kind === 'suggest') {
-      const row = this.doc.createElement('button')
-      row.type = 'button'
-      row.className = 'row'
-      row.setAttribute('role', 'menuitem')
+      const list = this.listbox(lang)
+      const row = this.option()
       const tile = this.doc.createElement('span')
       tile.className = 'tile brand'
       tile.append(qasaMark(this.doc))
@@ -417,13 +445,12 @@ export class Overlay {
       text.append(title, sub)
       row.append(tile, text)
       this.actions.set(row, state.run)
-      menu.el.append(row)
+      list.append(row)
+      menu.el.append(list)
     } else {
+      const list = this.listbox(lang)
       for (const item of state.items) {
-        const row = this.doc.createElement('button')
-        row.type = 'button'
-        row.className = 'row'
-        row.setAttribute('role', 'menuitem')
+        const row = this.option()
         const tile = this.doc.createElement('span')
         tile.className = 'tile'
         // The calm letter until the site's icon is decoded (and for good if it can't be).
@@ -449,10 +476,100 @@ export class Overlay {
         text.append(title, sub)
         row.append(tile, text)
         this.rows.set(row, item)
-        menu.el.append(row)
+        list.append(row)
       }
+      menu.el.append(list)
     }
     this.placeMenu()
+    if (menu.keyboard && this.options().length) this.highlight(0)
+  }
+
+  /** The rows' container: a listbox whose highlighted option is its active descendant. */
+  private listbox(lang: ContentLanguage): HTMLElement {
+    const list = this.doc.createElement('div')
+    list.className = 'list'
+    list.setAttribute('role', 'listbox')
+    list.setAttribute('aria-label', ct(lang, 'brand.name'))
+    return list
+  }
+
+  private option(): HTMLButtonElement {
+    const row = this.doc.createElement('button')
+    row.type = 'button'
+    row.className = 'row'
+    row.tabIndex = -1
+    row.id = `qasa-option-${++this.optionSeq}`
+    row.setAttribute('role', 'option')
+    row.setAttribute('aria-selected', 'false')
+    return row
+  }
+
+  /** What the keyboard moves through: the rows, else the message's button. */
+  private options(): HTMLElement[] {
+    return this.menu ? [...this.menu.el.querySelectorAll<HTMLElement>('.row, .action')] : []
+  }
+
+  private highlight(index: number): void {
+    const menu = this.menu
+    if (!menu) return
+    const options = this.options()
+    menu.active = options.length ? ((index % options.length) + options.length) % options.length : -1
+    options.forEach((o, i) => {
+      o.classList.toggle('active', i === menu.active)
+      if (o.getAttribute('role') === 'option') o.setAttribute('aria-selected', String(i === menu.active))
+    })
+    const current = options[menu.active]
+    const list = menu.el.querySelector('[role="listbox"]')
+    if (list && current?.id) list.setAttribute('aria-activedescendant', current.id)
+    else list?.removeAttribute('aria-activedescendant')
+    const text = current ? [...current.querySelectorAll('.title, .sub')].map((n) => n.textContent ?? '').filter(Boolean) : []
+    menu.live.textContent = current ? (text.length ? text.join(', ') : (current.textContent ?? '')) : ''
+  }
+
+  /** The highlighted row's index, -1 for none (tests). */
+  activeIndex(): number {
+    return this.menu?.active ?? -1
+  }
+
+  /**
+   * A key pressed in the menu's field while it is open (index.ts calls this only for the
+   * menu's own field). ArrowDown / ArrowUp move the highlight (wrapping), Enter picks the
+   * highlighted row, Escape closes the menu, Tab closes it and lets focus move on. Only a
+   * trusted key counts: it stands in for the trusted click. True when the key was used
+   * (the caller then keeps it from the page).
+   */
+  handleKey(e: KeyboardEvent): boolean {
+    const menu = this.menu
+    if (!menu || !e.isTrusted || e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return false
+    // A fill is running with the menu out of the way.
+    if (menu.el.style.display === 'none') return false
+    if (e.key === 'Tab') {
+      this.closeMenu()
+      return false
+    }
+    if (e.shiftKey) return false
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      this.closeMenu()
+      return true
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      menu.keyboard = true
+      const n = this.options().length
+      if (n) this.highlight(menu.active < 0 ? (e.key === 'ArrowDown' ? 0 : n - 1) : menu.active + (e.key === 'ArrowDown' ? 1 : -1))
+      return true
+    }
+    if (e.key === 'Enter') {
+      const target = this.options()[menu.active]
+      if (!target) return false
+      // Never let this Enter submit the form, even when the pick is refused.
+      e.preventDefault()
+      const r = target.getBoundingClientRect()
+      this.activate(target, { x: r.left + r.width / 2, y: r.top + r.height / 2 })
+      return true
+    }
+    return false
   }
 
   private readonly rows = new WeakMap<Element, LoginMatch>()
@@ -493,10 +610,16 @@ export class Overlay {
    * after the menu appeared, on a host the page has not restyled or covered.
    */
   private onMenuClick(e: MouseEvent): void {
-    const menu = this.menu
-    if (!menu || !e.isTrusted) return
+    if (!this.menu || !e.isTrusted) return
     const target = (e.composedPath()[0] as Element).closest?.('.row, .action')
-    if (!target) return
+    if (target) this.activate(target, { x: e.clientX, y: e.clientY })
+  }
+
+  /** Runs a row or button after a trusted click or Enter at `point` (for Enter, the row's
+   *  centre), when the menu is armed and its host intact (see onMenuClick). */
+  private activate(target: Element, point: { x: number; y: number }): void {
+    const menu = this.menu
+    if (!menu || menu.el.classList.contains('pending')) return
     if (performance.now() - menu.shownAt < MENU_ARM_MS) return
     // IntersectionObserver v2 reports any filter or transform on <html>, or a menu partly
     // outside the viewport, as "not visible" even when nothing covers it. Only then does a
@@ -505,7 +628,7 @@ export class Overlay {
     // through (`pointer-events: none`) on an ordinary page is still refused.
     let ioVisible = supportsOcclusion() ? this.menuVisible === true : null
     if (ioVisible === false && occlusionMayMisreport(this.doc, menu.el)) ioVisible = null
-    if (!isHostIntact(this.host, { x: e.clientX, y: e.clientY }, ioVisible)) {
+    if (!isHostIntact(this.host, point, ioVisible)) {
       this.closeMenu()
       return
     }

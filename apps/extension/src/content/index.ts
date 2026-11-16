@@ -16,6 +16,7 @@ import { candidates, optionFor, type IdentityGroup, type IdentityValues } from '
 import { loadFonts, type FontBytes } from './fonts'
 import { effectiveOpacity, isFieldRendered, isFieldVisible } from './guard'
 import type { ContentLanguage } from './i18n'
+import { fillFromMenu, type FillOutcome } from './menu-fill'
 import { Overlay } from './overlay'
 import { groupContaining, isSubmitControl, SaveDeduper, saveMessageFor } from './save'
 
@@ -158,28 +159,7 @@ function contextOf(field: HTMLInputElement): MenuContext | null {
   return identity ? { kind: 'identity', group: identity } : null
 }
 
-/**
- * Runs a fill with the menu out of the way (so it can't stand in for a covered field in
- * the visibility checks), then closes it, or, when nothing could be filled, shows it again
- * saying so (R5): it never closes as if the fill worked.
- */
-async function fillFromMenu(overlay: Overlay, fill: () => Promise<boolean> | boolean): Promise<void> {
-  overlay.hideMenu()
-  let key = 'ext.page.fillFailed'
-  try {
-    if (await fill()) {
-      overlay.closeMenu()
-      return
-    }
-  } catch {
-    key = 'ext.page.error'
-  }
-  if (!overlay.isMenuOpen()) return
-  overlay.showMenu()
-  overlay.setMenu({ kind: 'message', key })
-}
-
-function openMenuFor(field: HTMLInputElement): void {
+function openMenuFor(field: HTMLInputElement, keyboard = false): void {
   const context = contextOf(field)
   if (!context) return
   const overlay = overlayFor(field.ownerDocument)
@@ -189,8 +169,8 @@ function openMenuFor(field: HTMLInputElement): void {
   overlay.openMenu(field, {
     onPick: (item) => {
       if (context.kind === 'identity') {
-        // The menu stays up while a card waits for its confirmation.
-        void fillIdentity(field, context.group, item.id, overlay)
+        // The menu comes back while a card waits for its confirmation.
+        void fillFromMenu(overlay, () => fillIdentity(field, context.group, item.id, overlay))
         return
       }
       if (context.kind === 'otp') {
@@ -205,7 +185,7 @@ function openMenuFor(field: HTMLInputElement): void {
         })
       }
     },
-  })
+  }, { keyboard })
   overlay.revealAfter(fonts)
   void loadMenu(overlay, context, snap)
 }
@@ -454,43 +434,58 @@ const CONFIRM_WAIT_MS = 120_000
  * was clicked must be really visible (guard.ts); the rest of the form, which may be below
  * the fold, must at least be rendered inside the page.
  */
-async function fillIdentity(anchor: HTMLInputElement, group: IdentityGroup, itemId: string, overlay: Overlay): Promise<boolean> {
+async function fillIdentity(anchor: HTMLInputElement, group: IdentityGroup, itemId: string, overlay: Overlay): Promise<FillOutcome> {
   const ownHost = overlay.element
   if (!isFieldVisible(anchor, ownHost)) return false
   let values: IdentityValues | null = null
   const started = Date.now()
   let asked = false
+  let waiting = false
   while (!values) {
     try {
       values = await ask<IdentityValues>({ kind: 'fillIdentity', itemId })
     } catch (e) {
       const code = e instanceof Error ? e.message : 'bad'
+      if ((code === 'confirm' || code === 'pending') && !waiting) {
+        // The menu comes back saying so while the desktop asks.
+        waiting = true
+        overlay.showMenu()
+        overlay.setMenu({ kind: 'message', key: 'ext.page.confirming' })
+      }
       if (code === 'confirm' && !asked) {
         asked = true
-        overlay.setMenu({ kind: 'message', key: 'ext.page.confirming' })
         await ask({ kind: 'confirm', itemId }).catch(() => undefined)
       } else if ((code === 'pending' || code === 'confirm') && Date.now() - started < CONFIRM_WAIT_MS && overlay.isMenuOpen()) {
         await sleep(POLL_MS)
+      } else if (code === 'cancelled') {
+        // The user said no on the desktop: "Not filled.", not "Couldn't fill".
+        return 'cancelled'
       } else {
-        if (overlay.isMenuOpen()) overlay.setMenu({ kind: 'message', key: code === 'cancelled' ? 'ext.page.cancelled' : 'ext.page.error' })
-        return false
+        throw e
       }
     }
   }
-  overlay.closeMenu()
+  // Out of the way again for the checks and the writes.
+  overlay.hideMenu()
   if (!isFieldVisible(anchor, ownHost)) return false
+  let wrote = false
   for (const f of group.fields) {
     if (f.field !== anchor && !isFieldRendered(f.field)) continue
     const wanted = candidates(f, group.fields, values)
     if (!wanted.length) continue
     if (f.field.tagName === 'SELECT') {
       const option = optionFor(f.field as HTMLSelectElement, wanted)
-      if (option) setSelectValue(f.field as HTMLSelectElement, option.value)
+      if (option) {
+        setSelectValue(f.field as HTMLSelectElement, option.value)
+        wrote = true
+      }
     } else {
       setFieldValue(f.field as HTMLInputElement, wanted[0])
+      wrote = true
     }
   }
-  return true
+  restoreFocus(anchor)
+  return wrote
 }
 
 /** The popup's Fill button (top frame only): the focused group, else the first one that
@@ -537,6 +532,19 @@ function eventTarget(e: Event): Element | null {
 /** Save capture, rescans and repositioning for our document and for each script-less
  *  child frame document we handle. */
 function watchDocument(doc: Document): void {
+  // Keys in the open menu's field drive the menu (overlay.ts handleKey). First, so a picking
+  // Enter never reaches the save capture below or the page's own handlers.
+  doc.addEventListener(
+    'keydown',
+    (e) => {
+      if (!e.isTrusted) return
+      const t = eventTarget(e)
+      const overlay = t ? overlays.get(t.ownerDocument) : undefined
+      if (!overlay || overlay.menuField() !== t) return
+      if (overlay.handleKey(e)) e.stopImmediatePropagation()
+    },
+    true,
+  )
   doc.addEventListener('submit', (e) => captureFrom(eventTarget(e)), true)
   doc.addEventListener(
     'keydown',
@@ -580,7 +588,8 @@ function watchDocument(doc: Document): void {
       if (!iconsAllowed || t?.tagName !== 'INPUT') return
       const field = t as HTMLInputElement
       if (field.value !== '' || !openable(field) || effectiveOpacity(field) < 0.5 || overlay?.menuField() === field) return
-      openMenuFor(field)
+      e.preventDefault()
+      openMenuFor(field, true)
     },
     true,
   )

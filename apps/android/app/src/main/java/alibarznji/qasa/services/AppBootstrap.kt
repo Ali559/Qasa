@@ -3,7 +3,6 @@ package alibarznji.qasa.services
 import alibarznji.qasa.backup.BackupService
 import alibarznji.qasa.credentials.GeneratedPasswordLog
 import alibarznji.qasa.credentials.GeneratedPasswordStore
-import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.push.DevicePrefsSync
@@ -73,8 +72,9 @@ class AppBootstrap @Inject constructor(
 
     /**
      * R4 (docs/autofill-hardening.md): a strong password autofill filled whose login was
-     * never saved (the site's form gave no save prompt, or the review was closed) opens the
-     * new-login form once, prefilled. A save already waiting (onSaveRequest) goes first.
+     * never saved (the site's form gave no save prompt, or the review was closed) is offered
+     * once: "Save the password you created for <site>?" (Save opens the new-login form,
+     * prefilled). A save already waiting (onSaveRequest) goes first.
      */
     private suspend fun offerUnsavedGeneratedPassword() {
         val entries = generatedPasswords.read()
@@ -82,7 +82,7 @@ class AppBootstrap @Inject constructor(
             if (entries.isNotEmpty()) generatedPasswords.update { GeneratedPasswordLog.prune(it, System.currentTimeMillis()) }
             return
         }
-        if (appSession.pendingLoginSave.value != null) return
+        if (appSession.pendingLoginSave.value != null || appSession.generatedSaveOffer.value != null) return
         val saved = vault.loginPasswords()
         var due: alibarznji.qasa.credentials.GeneratedPassword? = null
         generatedPasswords.update { current ->
@@ -90,7 +90,7 @@ class AppBootstrap @Inject constructor(
             due = next
             rest
         }
-        due?.let { appSession.requestSaveLogin(VaultPayload.Login(itemName = it.name, password = it.password, website = it.website)) }
+        due?.let { appSession.offerGeneratedSave(GeneratedPasswordLog.offer(it)) }
     }
 
     /** License, session and device prefs follow a registration, normal or replacing. */

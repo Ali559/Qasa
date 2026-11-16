@@ -1,0 +1,28 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSFaceIDUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock your vault to fill passwords and other items with Face ID."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افتح خزنتك باستخدام Face ID لتعبئة كلمات المرور والعناصر الأخرى."
+          }
+        },
+        "ckb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بە Face ID کۆگاکەت بکەرەوە بۆ پڕکردنەوەی وشە نهێنییەکان و بابەتەکانی تر."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

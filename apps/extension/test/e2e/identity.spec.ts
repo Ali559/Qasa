@@ -2,7 +2,7 @@
 // a card waits for the desktop's confirmation, a profile fills the whole form, and a
 // locked vault unlocks from the menu and then lists the items without a second click.
 import { LOGINS } from '../fake-desktop'
-import { clickMenuRow, expect, openMenuByClick, test } from './harness'
+import { clickMenuRow, expect, openMenuByClick, readMenu, test } from './harness'
 
 test('a card fills after the desktop confirms it', async ({ env }) => {
   const page = await env.context.newPage()
@@ -22,6 +22,39 @@ test('a card fills after the desktop confirms it', async ({ env }) => {
   await expect(page.locator('#city')).toHaveValue('')
 })
 
+test('a card that cannot be filled keeps the menu open, saying so (R5)', async ({ env }) => {
+  const page = await env.context.newPage()
+  await page.goto(`${env.servers.main}/checkout.html`)
+  const number = page.locator('#ccnumber')
+  await openMenuByClick(page, number)
+  // The page lays a cover over the card number field after the menu opened.
+  await page.evaluate(() => {
+    const r = document.getElementById('ccnumber')!.getBoundingClientRect()
+    const cover = document.createElement('div')
+    cover.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;background:#fff;z-index:10`
+    document.body.append(cover)
+  })
+  await clickMenuRow(page, number, 0)
+  await expect.poll(async () => (await readMenu(page)).text).toContain("Couldn't fill. Click the field and try again.")
+  expect((await readMenu(page)).open).toBe(true)
+  await expect(number).toHaveValue('')
+  await expect(page.locator('#cvc')).toHaveValue('')
+  // Refused before the card was even asked for.
+  expect(env.fake.confirms).toEqual([])
+})
+
+test('a profile fill that cannot happen keeps the menu open, saying so (R5)', async ({ env }) => {
+  const page = await env.context.newPage()
+  await page.goto(`${env.servers.main}/checkout.html`)
+  const name = page.locator('#fullname')
+  await openMenuByClick(page, name)
+  await page.evaluate(() => (document.getElementById('fullname')!.style.opacity = '0.1'))
+  await clickMenuRow(page, name, 0)
+  await expect.poll(async () => (await readMenu(page)).text).toContain("Couldn't fill")
+  await expect(name).toHaveValue('')
+  await expect(page.locator('#city')).toHaveValue('')
+})
+
 test('a dismissed confirmation fills nothing', async ({ env }) => {
   env.fake.confirmAnswer = 'deny'
   const page = await env.context.newPage()
@@ -33,6 +66,10 @@ test('a dismissed confirmation fills nothing', async ({ env }) => {
   await page.waitForTimeout(2000)
   await expect(number).toHaveValue('')
   await expect(page.locator('#cvc')).toHaveValue('')
+  // The user said no: "Not filled.", not "Couldn't fill".
+  const menu = await readMenu(page)
+  expect(menu.text).toContain('Not filled.')
+  expect(menu.text).not.toContain("Couldn't fill")
 })
 
 test('a profile fills the whole address form, below the fold too', async ({ env }) => {

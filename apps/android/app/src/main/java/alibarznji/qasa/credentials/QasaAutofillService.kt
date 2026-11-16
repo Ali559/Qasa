@@ -23,7 +23,6 @@ import android.service.autofill.SaveCallback
 import android.service.autofill.SaveInfo
 import android.service.autofill.SaveRequest
 import android.view.autofill.AutofillId
-import android.view.autofill.AutofillValue
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
@@ -162,15 +161,19 @@ class QasaAutofillService : AutofillService() {
     }
 
     /**
-     * R4: marks offered strong passwords the user picked. The fill event history holds the
-     * events of this service's last response (TYPE_DATASET_SELECTED carries the dataset
+     * R4: marks offered strong passwords the user picked. [StrongPasswordPickActivity] does
+     * this at the pick; this is the fallback. The fill event history holds the events of
+     * this service's last response (selected / authentication selected carry the dataset
      * id); a save request also lists the datasets picked in its session ([extraIds]), and a
      * saved [password] equal to an offered one is a pick too.
      */
     private fun recordStrongPasswordPicks(extraIds: List<String>, password: String?) {
         val fromHistory = runCatching {
             fillEventHistory?.events.orEmpty()
-                .filter { it.type == FillEventHistory.Event.TYPE_DATASET_SELECTED }
+                .filter {
+                    it.type == FillEventHistory.Event.TYPE_DATASET_SELECTED ||
+                        it.type == FillEventHistory.Event.TYPE_DATASET_AUTHENTICATION_SELECTED
+                }
                 .mapNotNull { it.datasetId }
         }.getOrDefault(emptyList())
         val ids = (fromHistory + extraIds).filter { it.startsWith(GeneratedPasswordLog.DATASET_PREFIX) }.toSet()
@@ -184,9 +187,10 @@ class QasaAutofillService : AutofillService() {
     }.getOrDefault(packageName)
 
     /**
-     * "Use a strong password": the generated value as the row's subtitle, filled at once into
-     * every new-password field (new and confirm). No authentication: a fresh random password
-     * is no vault data, so it needs neither an unlocked vault nor [AutofillAuthActivity].
+     * "Use a strong password": the generated value as the row's subtitle, filled into every
+     * new-password field (new and confirm). Its authentication is [StrongPasswordPickActivity],
+     * which has no UI and needs no unlock (a fresh random password is no vault data): it
+     * records the pick at once (R4) and hands the values back.
      */
     @SuppressLint("NewApi")
     private fun strongPasswordDataset(form: AutofillForm<AutofillId>, datasetId: String, password: String, title: String, inline: InlineSpecs?): Dataset {
@@ -197,17 +201,17 @@ class QasaAutofillService : AutofillService() {
         val inlinePresentation = inline?.next(this, title, password, AutofillGroup.Login, STRONG_PASSWORD_ID)
         @Suppress("DEPRECATION")
         val builder = Dataset.Builder(presentation)
-        // The id comes back in the fill event history when the user picks this row (R4).
+        // The id also comes back in the fill event history (the fallback, R4).
         builder.setId(datasetId)
-        for ((id, value) in AutofillOffers.strongPasswordValues(form, password)) {
-            val autofillValue = AutofillValue.forText(value)
+        for (id in AutofillOffers.strongPasswordValues(form, password).keys) {
             @Suppress("DEPRECATION")
             if (inlinePresentation != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                builder.setValue(id, autofillValue, presentation, inlinePresentation)
+                builder.setValue(id, null, presentation, inlinePresentation)
             } else {
-                builder.setValue(id, autofillValue, presentation)
+                builder.setValue(id, null, presentation)
             }
         }
+        builder.setAuthentication(StrongPasswordPickActivity.intentSender(this, datasetId))
         return builder.build()
     }
 

@@ -259,13 +259,19 @@ picks one before anything is built.
 
 ### Phase 9b: Autofill follow-ups (from Phase 8)
 
-- [ ] **Android save offer:** a picked strong password is only caught when Android contacts
+- [x] **Android save offer:** a picked strong password is only caught when Android contacts
       Qasa's autofill service again before the next unlock. Catch it reliably, and show the
       "Save the password you created for <site>?" wording instead of the plain new-login form.
-- [ ] **Extension:** card and profile fills still close the menu when they fail (apply R5),
+      (2026-11-16) The pick goes through a no-UI activity that records it at once; the
+      unlock shows a Save / Not now sheet. Unit tested; not yet seen on a device (the
+      emulator's fill requests time out).
+- [x] **Extension:** card and profile fills still close the menu when they fail (apply R5),
       and rows in the in-page menu can't be picked with the keyboard yet.
-- [ ] **iOS:** the Face ID text in the AutoFill sheet is English only, and the app's own
+      (2026-11-16) Both done: "Couldn't fill" keeps the menu; arrows, Enter, Esc and Tab
+      work from the field (trusted keys only). Firefox e2e not run.
+- [x] **iOS:** the Face ID text in the AutoFill sheet is English only, and the app's own
       Face ID text isn't translated either.
+      (2026-11-16) `ios.faceIdUsage*` keys, generated into each target's `InfoPlist.xcstrings`.
 
 ### Phase 10: Payment options on the upgrade page
 

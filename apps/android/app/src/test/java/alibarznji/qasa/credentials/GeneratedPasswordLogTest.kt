@@ -49,4 +49,32 @@ class GeneratedPasswordLogTest {
         assertNull(due)
         assertTrue(rest.isEmpty())
     }
+
+    @Test
+    fun aPickThroughItsAuthenticationIsMarkedAtOnce() {
+        val log = listOf(entry(1, 0), entry(2, 0))
+        val (picked, next) = GeneratedPasswordLog.pick(log, "${GeneratedPasswordLog.DATASET_PREFIX}2", now = hour)
+        assertEquals("pw2", picked!!.password)
+        assertEquals(listOf(false, true), next.map { it.picked })
+        // Due on the next unlock without any later fill request.
+        assertEquals("pw2", GeneratedPasswordLog.dueOnUnlock(next, emptySet(), now = 2 * hour).first!!.password)
+    }
+
+    @Test
+    fun anUnknownOrExpiredPickFillsNothing() {
+        val log = listOf(entry(1, 0))
+        assertNull(GeneratedPasswordLog.pick(log, "${GeneratedPasswordLog.DATASET_PREFIX}9", now = hour).first)
+        val (expired, kept) = GeneratedPasswordLog.pick(log, "${GeneratedPasswordLog.DATASET_PREFIX}1", now = 25 * hour)
+        assertNull(expired)
+        assertEquals(log, kept)
+    }
+
+    @Test
+    fun theOfferNamesTheSiteWhenThereIsOne() {
+        val offer = GeneratedPasswordLog.offer(entry(1, 0))
+        assertEquals("example.com", offer.site)
+        assertEquals("pw1", offer.login.password)
+        assertEquals("example.com", offer.login.website)
+        assertNull(GeneratedPasswordLog.offer(entry(1, 0).copy(name = " ")).site)
+    }
 }

@@ -1,5 +1,6 @@
 package alibarznji.qasa.credentials
 
+import alibarznji.qasa.vault.VaultPayload
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -31,6 +32,12 @@ data class GeneratedPassword(
 )
 
 /**
+ * "Save the password you created for <site>?" on unlock (R4): Save opens the new-login form
+ * with [login]; Not now drops it. [site] is null when there is no name to show.
+ */
+data class GeneratedSaveOffer(val login: VaultPayload.Login, val site: String?)
+
+/**
  * The rules of the "recent generated" list, pure so they are unit tested. Offered values
  * are kept (a few, briefly) because Android reports a pick only later, by dataset id; a
  * picked one is kept until it is saved, offered once on unlock, or 24 hours old.
@@ -54,6 +61,23 @@ object GeneratedPasswordLog {
     /** Marks the entries with these dataset ids, or holding [password], as picked. */
     fun picked(entries: List<GeneratedPassword>, ids: Collection<String>, password: String? = null): List<GeneratedPassword> =
         entries.map { if (it.id in ids || (password != null && it.password == password)) it.copy(picked = true) else it }
+
+    /**
+     * The user picked the "Use a strong password" row with this dataset id (its
+     * authentication, [StrongPasswordPickActivity]): the entry to fill, and the list with it
+     * marked picked. Null (list unchanged) when it is unknown or expired.
+     */
+    fun pick(entries: List<GeneratedPassword>, id: String, now: Long): Pair<GeneratedPassword?, List<GeneratedPassword>> {
+        val live = prune(entries, now)
+        val entry = live.firstOrNull { it.id == id } ?: return null to entries
+        return entry to live.map { if (it.id == id) it.copy(picked = true) else it }
+    }
+
+    /** The unlock offer for [entry]: its new login, and the site the title names (none when blank). */
+    fun offer(entry: GeneratedPassword): GeneratedSaveOffer = GeneratedSaveOffer(
+        login = VaultPayload.Login(itemName = entry.name, password = entry.password, website = entry.website),
+        site = entry.name.trim().ifEmpty { null },
+    )
 
     /**
      * On unlock: the picked password to offer for saving (the newest one no saved login
