@@ -77,5 +77,6 @@ enum AccountDeletion {
         AutofillIndexStore.clear()
         AutofillIdentitySync.clear()
         EphemeralSecretStore.clear()
+        GeneratedPasswordStore.clearAll()
     }
 }

@@ -38,35 +38,15 @@ struct ProtectedUnlockSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            OwnSheetTitle(title: L10n.tr("vault.unlockProtectedNote", locale: locale))
-            VStack(spacing: QasaTokens.Space.sheetActionsGap) {
-                Text(L10n.tr("protected.title", locale: locale))
-                    .font(.qasa(15))
-                    .foregroundColor(theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity)
-                FieldGroup {
-                    PasswordFieldRow(
-                        label: L10n.tr("auth.unlock.masterPassword", locale: locale),
-                        text: $password,
-                        hint: L10n.tr("auth.unlock.placeholder", locale: locale),
-                        error: wrong ? L10n.tr("auth.unlock.wrongPassword", locale: locale) : nil,
-                        onSubmit: checkPassword
-                    )
-                }
-                VStack(spacing: QasaTokens.Space.sheetButtonGap) {
-                    Button(L10n.tr("auth.unlock.button", locale: locale), action: checkPassword)
-                        .buttonStyle(.qasaPrimary)
-                        .disabled(password.isEmpty || checking)
-                    if biometricsAvailable {
-                        Button(L10n.tr("auth.unlock.biometrics", locale: locale), action: askBiometrics)
-                            .buttonStyle(.qasaSecondary)
-                    }
-                }
-            }
-        }
+        UnlockSheetLayout(
+            title: L10n.tr("vault.unlockProtectedNote", locale: locale),
+            password: $password,
+            error: wrong ? L10n.tr("auth.unlock.wrongPassword", locale: locale) : nil,
+            unlockDisabled: password.isEmpty || checking,
+            showsBiometrics: biometricsAvailable,
+            onUnlock: checkPassword,
+            onBiometrics: askBiometrics
+        )
         .onChange(of: password) { _, _ in wrong = false }
         .onAppear {
             guard !biometricsTried, biometricsAvailable else { return }
@@ -97,5 +77,77 @@ struct ProtectedUnlockSheet: View {
                 if ok { onUnlocked() } else { wrong = true }
             }
         }
+    }
+}
+
+/// The unlock sheet's layout, shared by a protected item (rule 6b) and the app's own unlock
+/// over the splash (rule 6d): the shared header, the `protected.title` message, the main
+/// password as a one-row group (error on its row), an optional note under it, Unlock as the
+/// primary button and `auth.unlock.biometrics` as the secondary one.
+struct UnlockSheetLayout<Note: View>: View {
+    @Environment(\.themePalette) private var theme
+    let title: String
+    @Binding var password: String
+    let error: String?
+    let unlockDisabled: Bool
+    let showsBiometrics: Bool
+    var biometricsDisabled: Bool = false
+    let onUnlock: () -> Void
+    let onBiometrics: () -> Void
+    @ViewBuilder var note: Note
+
+    private var locale: Locale { AppLanguage.current.locale }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            OwnSheetTitle(title: title)
+            VStack(spacing: QasaTokens.Space.sheetActionsGap) {
+                Text(L10n.tr("protected.title", locale: locale))
+                    .font(.qasa(15))
+                    .foregroundColor(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                VStack(alignment: .leading, spacing: 8) {
+                    FieldGroup {
+                        PasswordFieldRow(
+                            label: L10n.tr("auth.unlock.masterPassword", locale: locale),
+                            text: $password,
+                            hint: L10n.tr("auth.unlock.placeholder", locale: locale),
+                            error: error,
+                            onSubmit: onUnlock
+                        )
+                    }
+                    note
+                }
+                VStack(spacing: QasaTokens.Space.sheetButtonGap) {
+                    Button(L10n.tr("auth.unlock.button", locale: locale), action: onUnlock)
+                        .buttonStyle(.qasaPrimary)
+                        .disabled(unlockDisabled)
+                    if showsBiometrics {
+                        Button(L10n.tr("auth.unlock.biometrics", locale: locale), action: onBiometrics)
+                            .buttonStyle(.qasaSecondary)
+                            .disabled(biometricsDisabled)
+                    }
+                }
+            }
+        }
+    }
+}
+
+extension UnlockSheetLayout where Note == EmptyView {
+    init(
+        title: String,
+        password: Binding<String>,
+        error: String?,
+        unlockDisabled: Bool,
+        showsBiometrics: Bool,
+        onUnlock: @escaping () -> Void,
+        onBiometrics: @escaping () -> Void
+    ) {
+        self.init(
+            title: title, password: password, error: error, unlockDisabled: unlockDisabled,
+            showsBiometrics: showsBiometrics, onUnlock: onUnlock, onBiometrics: onBiometrics
+        ) { EmptyView() }
     }
 }

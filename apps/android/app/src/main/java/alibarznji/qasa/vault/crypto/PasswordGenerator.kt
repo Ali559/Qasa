@@ -24,8 +24,69 @@ object PasswordGenerator {
     /** The generator screen's default length; every class is on by default. */
     const val DEFAULT_LENGTH = 16
 
+    /** The four classes, as sets: [PasswordSpec]'s default and what site rules narrow. */
+    val DEFAULT_CLASSES: List<Set<Char>> = listOf(UPPERCASE, LOWERCASE, DIGITS, SYMBOLS).map { it.toSet() }
+
     /** A password with the default settings (the generator screen's, and autofill's strong password). */
     fun generateDefault(): String = generate(DEFAULT_LENGTH)
+
+    /**
+     * A password for [spec] (autofill's strong password fitted to the field, R2): one
+     * character from every class, the rest from their union, and no character repeated
+     * more than [PasswordSpec.maxConsecutive] times in a row.
+     */
+    fun generate(spec: PasswordSpec): String {
+        require(spec.length in 1..MAX_LENGTH) { "length out of range: ${spec.length}" }
+        val classes = spec.classes.filter { it.isNotEmpty() }.map { it.toList().sorted() }
+        require(classes.isNotEmpty()) { "no character classes selected" }
+        require(spec.length >= classes.size) { "length ${spec.length} is too short for ${classes.size} classes" }
+        val all = classes.flatten().distinct()
+        val chars = CharArray(spec.length)
+        classes.forEachIndexed { i, cls -> chars[i] = cls[random.nextInt(cls.size)] }
+        for (i in classes.size until spec.length) chars[i] = all[random.nextInt(all.size)]
+        shuffle(chars)
+        spec.maxConsecutive?.let { limit -> breakRuns(chars, limit, classes, all) }
+        return String(chars)
+    }
+
+    /**
+     * `max-consecutive`: a character that makes a run longer than [limit] is redrawn from its
+     * own class (so every class keeps its character), avoiding both neighbours; from the
+     * whole pool when its class has nothing else.
+     */
+    private fun breakRuns(chars: CharArray, limit: Int, classes: List<List<Char>>, all: List<Char>) {
+        var run = 0
+        for (i in chars.indices) {
+            run = if (i > 0 && chars[i] == chars[i - 1]) run + 1 else 1
+            if (run <= limit) continue
+            val avoid = setOfNotNull(chars.getOrNull(i - 1), chars.getOrNull(i + 1))
+            val own = classes.firstOrNull { chars[i] in it }.orEmpty().filter { it !in avoid }
+            val pick = own.ifEmpty { all.filter { it !in avoid } }.ifEmpty { all.filter { it != chars[i - 1] } }
+            if (pick.isEmpty()) continue // A one-character pool: nothing else to use.
+            chars[i] = pick[random.nextInt(pick.size)]
+            run = 1
+        }
+    }
+
+    /** The longest run of one repeated character. */
+    fun longestRun(chars: CharArray): Int {
+        var best = 0
+        var run = 0
+        for (i in chars.indices) {
+            run = if (i > 0 && chars[i] == chars[i - 1]) run + 1 else 1
+            best = maxOf(best, run)
+        }
+        return best
+    }
+
+    private fun shuffle(chars: CharArray) {
+        for (i in chars.lastIndex downTo 1) {
+            val j = random.nextInt(i + 1)
+            val tmp = chars[i]
+            chars[i] = chars[j]
+            chars[j] = tmp
+        }
+    }
 
     /**
      * Generates a password of [length] characters.

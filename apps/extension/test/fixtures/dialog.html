@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Login in a modal dialog</title><link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body>
+<h1>Login in a modal &lt;dialog&gt; (top layer)</h1>
+<dialog id="dlg" style="width: 420px">
+  <form id="login" data-record>
+    <input id="username" name="email" type="email" autocomplete="username">
+    <input id="password" name="password" type="password" autocomplete="current-password">
+    <button type="submit">Sign in</button>
+  </form>
+</dialog>
+<script>document.getElementById("dlg").showModal()</script>
+<pre id="result"></pre>
+</body>
+</html>

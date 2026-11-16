@@ -8,6 +8,15 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Qasa finds your other devices on this Wi‑Fi to sync your encrypted vault.</string>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>SplashIcon</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<false/>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>IBMPlexSansArabic-Regular.ttf</string>

@@ -177,6 +177,22 @@ object AutofillFieldClassifier {
     private fun textVariation(inputType: Int): Int =
         if (inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_CLASS_TEXT) inputType and InputType.TYPE_MASK_VARIATION else -1
 
+    /**
+     * A password-type field (R1): a password input type, `type="password"`, or a declared
+     * password hint. Name-only matches ("password_hint" in a text field) are not.
+     */
+    fun isPasswordField(s: FieldSignals): Boolean {
+        if (isPasswordInput(s.inputType) || s.htmlAttributes["type"]?.lowercase() == "password") return true
+        val declared = s.autofillHints + listOfNotNull(s.htmlAttributes["autocomplete"])
+        return declared.flatMap { it.lowercase().split(' ', ',') }.any { hintTable[it] == AutofillFieldType.Password || hintTable[it] == AutofillFieldType.NewPassword }
+    }
+
+    /** A number keyboard (a PIN-style password): a generated password must be digits only. */
+    fun isNumericField(s: FieldSignals): Boolean =
+        s.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_CLASS_NUMBER ||
+            s.htmlAttributes["type"]?.lowercase() == "number" ||
+            s.htmlAttributes["inputmode"]?.lowercase() == "numeric"
+
     private fun isPasswordInput(inputType: Int): Boolean {
         val klass = inputType and InputType.TYPE_MASK_CLASS
         val variation = inputType and InputType.TYPE_MASK_VARIATION
@@ -196,9 +212,13 @@ object AutofillFieldClassifier {
 /** One field of the screen, classified. [T] is the platform id (`AutofillId` in the service). */
 data class ClassifiedField<T>(val id: T, val type: AutofillFieldType, val signals: FieldSignals)
 
-/** The screen's fields, split into the groups a dataset can fill. */
-class AutofillForm<T>(fields: List<ClassifiedField<T>>) {
-    val fields: List<ClassifiedField<T>> = resolveUsernames(fields)
+/**
+ * The screen's fields, split into the groups a dataset can fill. [others] are the signals of
+ * the fields the classifier left untyped (a date of birth, a checkbox label): R1 reads them
+ * for sign-up context.
+ */
+class AutofillForm<T>(fields: List<ClassifiedField<T>>, others: List<FieldSignals> = emptyList()) {
+    val fields: List<ClassifiedField<T>> = resolvePasswords(resolveUsernames(fields), others)
 
     fun group(group: AutofillGroup): List<ClassifiedField<T>> = when (group) {
         // A username step (Google's "Email or phone" page) is a login form without a password.
@@ -221,6 +241,29 @@ class AutofillForm<T>(fields: List<ClassifiedField<T>>) {
         fields.firstOrNull { it.type == AutofillFieldType.NewPassword } ?: fields.firstOrNull { it.type == AutofillFieldType.Password }
 
     companion object {
+        /**
+         * R1 (docs/autofill-hardening.md): which password-type fields are new, decided over
+         * the screen's password fields in order ([PasswordFieldRoles]). A field whose type
+         * came from its name alone (no password input type, no hint) is left as classified.
+         */
+        private fun <T> resolvePasswords(fields: List<ClassifiedField<T>>, others: List<FieldSignals>): List<ClassifiedField<T>> {
+            val passwords = fields.filter {
+                (it.type == AutofillFieldType.Password || it.type == AutofillFieldType.NewPassword) &&
+                    AutofillFieldClassifier.isPasswordField(it.signals)
+            }
+            if (passwords.isEmpty()) return fields
+            val signupContext = fields.any {
+                it.type == AutofillFieldType.GivenName || it.type == AutofillFieldType.FamilyName ||
+                    it.type == AutofillFieldType.MiddleName || it.type == AutofillFieldType.Phone
+            } || others.any { PasswordFieldRoles.isBirthday(it) } || fields.any { it.type.group == AutofillGroup.Identity && PasswordFieldRoles.isBirthday(it.signals) }
+            val isNew = PasswordFieldRoles.resolve(passwords.map { it.signals }, signupContext)
+            val roles = passwords.zip(isNew).associate { (field, new) -> field to new }
+            return fields.map { field ->
+                val new = roles[field] ?: return@map field
+                field.copy(type = if (new) AutofillFieldType.NewPassword else AutofillFieldType.Password)
+            }
+        }
+
         /**
          * Login forms often ask for "email" or "phone" as the username. With a password on
          * the screen and no username, the email/phone field before it is the username; with

@@ -27,6 +27,7 @@ CREDENTIAL_KEYS = [
     "autofill.saveBody",
     "autofill.saveTitle",
     "fill.strongPassword",
+    "fill.samePassword",
     "auth.unlock.masterPasswordDueFmt",
     "auth.unlock.placeholder",
     "autofill.addressLine2",

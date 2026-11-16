@@ -58,11 +58,14 @@ export function isFieldVisible(field: HTMLElement, ownHost?: Element | null): bo
   if (effectiveOpacity(field) < 0.5) return false
   const hit = deepElementFromPoint(doc, cx, cy)
   if (!hit) return false
+  // A floating label (a <span> inside the field's <label>) drawn over its centre counts as
+  // the field: a click there focuses it.
+  const label = hit.closest?.('label') as HTMLLabelElement | null
   const ok =
     hit === field ||
     field.contains(hit) ||
     (ownHost != null && hit === ownHost) ||
-    (hit.tagName === 'LABEL' && (hit as HTMLLabelElement).control === field)
+    (label != null && (label.control === field || label.contains(field)))
   if (!ok) return false
   // A field inside a same-origin child frame: the frame must be visible in its parent too.
   const frame = win.frameElement as HTMLIFrameElement | null
@@ -76,6 +79,21 @@ function isFrameVisible(frame: HTMLIFrameElement): boolean {
   const cx = rect.left + rect.width / 2
   const cy = rect.top + rect.height / 2
   return deepElementFromPoint(frame.ownerDocument, cx, cy) === frame
+}
+
+/**
+ * Where our host lives: on <html>, or, while the page shows a modal <dialog>, inside it.
+ * A modal dialog makes everything outside it inert (no clicks reach it, even in the top
+ * layer), so the host joins the dialog and is raised above it as a popover (overlay.ts).
+ */
+export function hostParent(doc: Document): Element {
+  try {
+    const modals = doc.querySelectorAll('dialog:modal')
+    if (modals.length) return modals[modals.length - 1]
+  } catch {
+    // `:modal` unsupported: no top layer either.
+  }
+  return doc.documentElement
 }
 
 /** Inline style on our host. Inline `!important` beats any page stylesheet; a page script
@@ -129,7 +147,7 @@ export function isFieldRendered(field: HTMLElement): boolean {
 
 export function isHostIntact(host: HTMLElement, click: { x: number; y: number }, ioVisible: boolean | null): boolean {
   if (host.getAttribute('style') !== HOST_STYLE) return false
-  if (host.parentNode !== host.ownerDocument.documentElement) return false
+  if (host.parentNode !== hostParent(host.ownerDocument)) return false
   const win = host.ownerDocument.defaultView
   if (!win) return false
   const style = win.getComputedStyle(host)
@@ -147,6 +165,23 @@ export function isHostIntact(host: HTMLElement, click: { x: number; y: number },
   if (host.ownerDocument.elementFromPoint(click.x, click.y) !== host) return false
   if (ioVisible === false) return false
   return true
+}
+
+/**
+ * IntersectionObserver v2's `isVisible` is false whenever the target or an ancestor has a
+ * filter or a non-translate transform, and when the target is not wholly in the viewport.
+ * Our menu's only ancestor in the page is <html> (the host's own style is checked
+ * separately), so a false "not visible" is expected exactly when <html> carries such an
+ * effect, or the menu runs past the viewport's edge.
+ */
+export function occlusionMayMisreport(doc: Document, menu: Element): boolean {
+  const win = doc.defaultView
+  if (!win) return false
+  const style = win.getComputedStyle(doc.documentElement)
+  if ((style.filter && style.filter !== 'none') || (style.transform && style.transform !== 'none')) return true
+  if (style.perspective && style.perspective !== 'none') return true
+  const r = menu.getBoundingClientRect()
+  return r.left < 0 || r.top < 0 || r.right > win.innerWidth || r.bottom > win.innerHeight
 }
 
 /** Whether the browser can report occlusion (Chrome's IntersectionObserver v2). */

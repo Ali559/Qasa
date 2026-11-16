@@ -149,12 +149,16 @@ struct CredentialProviderRootView: View {
                     }
                 }
             }
-            // Once per presentation of the sheet; a cancelled prompt leaves the button.
             .onAppear {
                 masterPasswordDue = AutofillBiometricGate.masterPasswordDue
                 showsBiometricButton = AutofillBiometricGate.showsBiometricButton
+            }
+            // Once per presentation of the sheet, after it has slid up (R2); a cancelled
+            // prompt leaves the button.
+            .task {
+                try? await Task.sleep(for: AutofillUnlock.biometricDelay)
                 if AutofillUnlock.canOfferBiometricUnlock {
-                    Task { await unlockWithBiometrics(automatic: true) }
+                    await unlockWithBiometrics(automatic: true)
                 }
             }
         }
@@ -213,7 +217,7 @@ struct CredentialProviderRootView: View {
         guard !isUnlocking else { return }
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let session = AutofillUnlock.unlockWithBiometrics() else {
+        guard let session = await AutofillUnlock.unlockWithBiometricsInBackground() else {
             masterPasswordDue = AutofillBiometricGate.masterPasswordDue
             showsBiometricButton = AutofillBiometricGate.showsBiometricButton
             if !automatic {
@@ -227,7 +231,7 @@ struct CredentialProviderRootView: View {
     private func unlockWithPassword() async {
         isUnlocking = true
         defer { isUnlocking = false }
-        guard let session = AutofillUnlock.unlock(password: password) else {
+        guard let session = await AutofillUnlock.unlockInBackground(password: password) else {
             unlockError = AutofillL10n.tr("autofill.wrongPassword", "Wrong master password.")
             return
         }
@@ -236,33 +240,44 @@ struct CredentialProviderRootView: View {
 
     private func complete(with session: AutofillUnlock.Session) async {
         guard let pending else { return }
+        let secrets: AutofillSecrets
         do {
-            let secrets = try AutofillUnlock.decryptSecrets(pending, session: session)
-            showUnlock = false
-            password = ""
-            switch secrets {
-            case .login(let login) where mode == .oneTimeCode:
-                guard let code = TOTP(stored: login.totp)?.code() else {
-                    unlockError = AutofillL10n.tr("autofill.decryptFailed", "Could not decrypt item.")
-                    return
-                }
-                onProvideCode(code)
-            case .login(let login):
-                let user = login.username.isEmpty ? login.email : login.username
-                // The site usually asks for the 2FA code right after the password.
-                TOTPPasteboard.copyCurrentCode(stored: login.totp)
-                onProvideLogin(user, login.password)
-            case .name, .email, .phone, .address, .company:
-                // Never listed here (see `load`).
-                onCancel()
-            case .card, .bank:
-                showedPaymentDrawer = true
-                ephemeral.present(secrets: secrets)
-                self.pending = nil
-            }
+            secrets = try AutofillUnlock.decryptSecrets(pending, session: session)
         } catch {
             unlockError = AutofillL10n.tr("autofill.decryptFailed", "Could not decrypt item.")
+            return
         }
+        // Errors are shown in the unlock sheet, so it only closes once there is a value.
+        switch secrets {
+        case .login(let login) where mode == .oneTimeCode:
+            guard let code = TOTP(stored: login.totp)?.code() else {
+                unlockError = AutofillL10n.tr("autofill.decryptFailed", "Could not decrypt item.")
+                return
+            }
+            closeUnlock()
+            onProvideCode(code)
+        case .login(let login):
+            closeUnlock()
+            let user = login.username.isEmpty ? login.email : login.username
+            // The site usually asks for the 2FA code right after the password.
+            TOTPPasteboard.copyCurrentCode(stored: login.totp)
+            onProvideLogin(user, login.password)
+        case .name, .email, .phone, .address, .company:
+            // Never listed here (see `load`).
+            closeUnlock()
+            onCancel()
+        case .card, .bank:
+            closeUnlock()
+            showedPaymentDrawer = true
+            ephemeral.present(secrets: secrets)
+            self.pending = nil
+        }
+    }
+
+    private func closeUnlock() {
+        showUnlock = false
+        password = ""
+        unlockError = nil
     }
 
     private func rowSubtitle(_ item: AutofillCandidate) -> String {

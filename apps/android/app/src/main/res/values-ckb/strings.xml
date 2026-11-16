@@ -43,6 +43,7 @@
     <string name="auth_unlock_masterpassword">وشەی نهێنی سەرەکی</string>
     <string name="auth_unlock_masterpasswordduefmt">%d ڕۆژ تێپەڕیوە، بۆیە وشەی نهێنی سەرەکیت بنووسە تاوەکو لەبیرت بمێنێت. دوای ئەوە کردنەوە بە ڕوخسار یان پەنجەمۆر دووبارە کار دەکات.</string>
     <string name="auth_unlock_placeholder">وشەی نهێنی بنووسە</string>
+    <string name="auth_unlock_sheettitle">قاسە بکەرەوە</string>
     <string name="auth_unlock_subtitle">وشەی نهێنی سەرەکیت بنووسە بۆ بینینی وشە نهێنییەکانت.</string>
     <string name="auth_unlock_title">بەخێربێیتەوە</string>
     <string name="auth_unlock_wrongpassword">ئەوە وشەی نهێنی سەرەکی دروست نییە. دووبارە هەوڵبدەرەوە.</string>
@@ -354,6 +355,7 @@
     <string name="field_websiteplaceholder">example.com</string>
     <string name="field_websiteurl">بەستەری وێبسایت</string>
     <string name="field_zipcode">کۆدی پۆستە</string>
+    <string name="fill_samepassword">هەمان وشەی نهێنیی بەهێز بەکاربهێنە</string>
     <string name="fill_strongpassword">وشەی نهێنیی بەهێز بەکاربهێنە</string>
     <string name="gen_copied">لەبەرگیرایەوە!</string>
     <string name="gen_copy">لەبەرگرتنەوە</string>
@@ -770,6 +772,10 @@
     <string name="vault_empty">هێشتا هیچ بڕگەیەک نییە</string>
     <string name="vault_emptyhint">+ لێبدە بۆ پاشەکەوتکردنی یەکەم وشەی نهێنیت.</string>
     <string name="vault_emptytitle">هێشتا هیچ وشەیەکی نهێنی نییە</string>
+    <string name="vault_generatedsave_body">قاسە وشەیەکی نهێنیی بەهێزی بۆ فۆرمێکی خۆتۆمارکردن دروست کرد، بەڵام هێشتا لە سندووقەکەتدا نییە.</string>
+    <string name="vault_generatedsave_notnow">ئێستا نا</string>
+    <string name="vault_generatedsave_title">ئەو وشەی نهێنییەی دروستت کرد پاشەکەوت بکرێت؟</string>
+    <string name="vault_generatedsave_titlefmt">ئەو وشەی نهێنییەی بۆ %s دروستت کرد پاشەکەوت بکرێت؟</string>
     <string name="vault_generatepassword">دروستکردنی وشەی نهێنی</string>
     <string name="vault_hidepassword">شاردنەوەی وشەی نهێنی</string>
     <string name="vault_history">مێژوو</string>

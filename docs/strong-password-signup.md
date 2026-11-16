@@ -68,9 +68,13 @@ password in one or two taps and ends with the login saved. The rule is
   sealed with the vault key into `PendingSaveInbox` in the App Group and the app imports it
   on its next unlock (`VaultRepository.importPendingSaves`: skip if already saved, new
   password for the same site and username, else a new login). A
-  `generatedPasswordFilled` event saves nothing yet: the submit follows with its own
-  request. Before iOS 26.2, "AutoFill → Qasa" (text insertion) offers "Use a strong
-  password" first, before any unlock; there is no save prompt there.
+  `generatedPasswordFilled` event is kept as a pending account (`GeneratedPasswordStore`,
+  shared keychain, 24 h) and completed with `completeSavePasswordRequest`; the submit
+  follows with its own request, which saves it. Before iOS 26.2, "AutoFill → Qasa" (text
+  insertion) offers "Use a strong password" first, before any unlock, and for 5 minutes
+  "Use the same strong password" above it so the confirm field gets the same one. Any
+  generated password no saved login has is offered on the app's next unlock
+  (docs/autofill-hardening.md R3, R4).
 - **Not verified on a device:** the 26.2 generate and save flows need Qasa enabled as the
   AutoFill provider and a sign-up form in Safari; only the unit tests ran.
 

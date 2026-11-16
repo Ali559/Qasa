@@ -1,7 +1,7 @@
 import CryptoKit
 import Foundation
 
-enum SharedVaultCrypto {
+nonisolated enum SharedVaultCrypto {
     private static let nonceLength = 12
     private static let tagLength = 16
 

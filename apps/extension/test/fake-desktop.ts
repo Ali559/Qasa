@@ -91,6 +91,8 @@ export class FakeDesktop {
   readonly saves: Array<{ url: string; username: string; password: string }> = []
   readonly copies: Array<{ itemId: string; field: string }> = []
   readonly ops: string[] = []
+  /** The constraints of every `generate` request (R2). */
+  readonly generates: Array<{ maxLength?: number; minLength?: number; rules?: string }> = []
   /** Host of every `matches` / `fill` / `totp` request, as `op host`. */
   readonly urlOps: string[] = []
   readonly hellos: string[] = []
@@ -263,8 +265,16 @@ export class FakeDesktop {
         setTimeout(() => this.approvals.set(id, answer === 'approve' ? 'approved' : 'denied'), 600)
         return { ok: true }
       }
-      case 'generate':
-        return { ok: true, password: randomBytes(15).toString('base64').replace(/[+/=]/g, 'x') }
+      case 'generate': {
+        // The page's constraints (R2), as the desktop resolves them for length.
+        const { maxLength, minLength, rules } = body as { maxLength?: number; minLength?: number; rules?: string }
+        this.generates.push({ ...(maxLength ? { maxLength } : {}), ...(minLength ? { minLength } : {}), ...(rules ? { rules } : {}) })
+        let length = 16
+        if (maxLength && maxLength >= 4) length = Math.min(length, maxLength)
+        if (minLength && minLength > length) length = maxLength && maxLength >= 4 ? Math.min(minLength, maxLength) : minLength
+        const password = randomBytes(64).toString('base64').replace(/[+/=]/g, 'x').slice(0, length - 1) + '!'
+        return { ok: true, password }
+      }
       case 'save':
         this.saves.push({ url: String(body.url), username: String(body.username), password: String(body.password) })
         return { ok: true, result: 'prompted' }

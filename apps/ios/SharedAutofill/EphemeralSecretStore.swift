@@ -15,7 +15,9 @@ nonisolated enum EphemeralSecretStore {
         let expiresAt: Date
     }
 
-    private static var baseQuery: [String: Any] {
+    private static var baseQuery: [String: Any] { query(account: account) }
+
+    private static func query(account: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -23,6 +25,34 @@ nonisolated enum EphemeralSecretStore {
             kSecAttrAccessGroup as String: AppGroup.keychainAccessGroup,
         ]
     }
+
+    // MARK: any short-lived secret (same keychain group and protection)
+
+    /// Replaces what `account` holds. Readable only while the phone is unlocked, this device
+    /// only, never backed up. Used for generated passwords too (`GeneratedPasswordStore`).
+    @discardableResult
+    static func putData(_ data: Data, account: String) -> Bool {
+        clear(account: account)
+        var query = query(account: account)
+        query[kSecValueData as String] = data
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
+    }
+
+    static func loadData(account: String) -> Data? {
+        var query = query(account: account)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess else { return nil }
+        return result as? Data
+    }
+
+    static func clear(account: String) {
+        SecItemDelete(query(account: account) as CFDictionary)
+    }
+
+    // MARK: payment fields
 
     static func put(_ fields: [EphemeralPaymentNotificationSupport.FieldPayload], expiresAt: Date) {
         clear()

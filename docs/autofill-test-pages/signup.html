@@ -1,0 +1,119 @@
+<!doctype html>
+<!-- Autofill test page (TODO Phase 8). Sign-up and change-password forms in the shapes real
+     sites use. Each form reports what its fields hold after a fill, the way the site's own
+     code would see it (a React-style controlled input keeps only values it got an input event for). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qasa autofill: sign-up forms</title>
+<style>
+  body { font: 16px system-ui, sans-serif; margin: 0; padding: 12px; background: #f6f6f6; }
+  form { background: #fff; border-radius: 12px; padding: 12px; margin: 0 0 14px; }
+  h2 { font-size: 15px; margin: 0 0 8px; }
+  label { display: block; font-size: 13px; color: #555; margin-top: 8px; }
+  input { width: 100%; box-sizing: border-box; font-size: 16px; padding: 8px; border: 1px solid #ccc; border-radius: 8px; }
+  .out { font: 12px ui-monospace, monospace; margin-top: 8px; white-space: pre-wrap; word-break: break-all; }
+  .ok { color: #1e8f6c; } .bad { color: #c8323c; }
+  nav a { margin-inline-end: 10px; }
+</style>
+</head>
+<body>
+<nav><a href="#a">A</a><a href="#b">B</a><a href="#c">C</a><a href="#d">D</a><a href="#e">E</a><a href="#f">F</a><a href="#g">G</a><a href="#h">H</a></nav>
+
+<form id="a" data-name="A · new-password + confirm by autocomplete">
+  <h2>A · autocomplete="new-password" on both</h2>
+  <label>Email<input name="email" type="email" autocomplete="email"></label>
+  <label>Password<input name="password" type="password" autocomplete="new-password"></label>
+  <label>Confirm password<input name="password_confirmation" type="password" autocomplete="new-password"></label>
+  <button>Create account</button><div class="out"></div>
+</form>
+
+<form id="b" data-name="B · new-password, confirm without a hint">
+  <h2>B · new-password, confirm named "password_repeat"</h2>
+  <label>Email<input name="email" type="email"></label>
+  <label>Password<input name="password" type="password" autocomplete="new-password"></label>
+  <label>Repeat password<input name="password_repeat" type="password"></label>
+  <button>Sign up</button><div class="out"></div>
+</form>
+
+<form id="c" data-name="C · two plain password fields">
+  <h2>C · two password fields, no hints (id pw1 / pw2)</h2>
+  <label>Username<input name="user" type="text"></label>
+  <label>Password<input id="pw1" name="pw1" type="password"></label>
+  <label>Again<input id="pw2" name="pw2" type="password"></label>
+  <button>Register</button><div class="out"></div>
+</form>
+
+<form id="d" data-name="D · one plain password, sign-up page">
+  <h2>D · one plain password with name fields (sign-up)</h2>
+  <label>First name<input name="first_name" autocomplete="given-name"></label>
+  <label>Last name<input name="last_name" autocomplete="family-name"></label>
+  <label>Email<input name="email" type="email" autocomplete="email"></label>
+  <label>Password<input name="password" type="password"></label>
+  <button>Join</button><div class="out"></div>
+</form>
+
+<form id="e" data-name="E · change password">
+  <h2>E · change password (current, new, confirm)</h2>
+  <label>Current password<input name="current" type="password" autocomplete="current-password"></label>
+  <label>New password<input name="new" type="password" autocomplete="new-password"></label>
+  <label>Confirm new password<input name="confirm" type="password"></label>
+  <button>Change</button><div class="out"></div>
+</form>
+
+<form id="f" data-name="F · maxlength 12">
+  <h2>F · new-password with maxlength=12 + confirm</h2>
+  <label>Email<input name="email" type="email"></label>
+  <label>Password<input name="password" type="password" autocomplete="new-password" maxlength="12"></label>
+  <label>Confirm<input name="confirm_password" type="password" maxlength="12"></label>
+  <button>Sign up</button><div class="out"></div>
+</form>
+
+<form id="g" data-name="G · Kurdish / Arabic labels" dir="rtl">
+  <h2>G · Kurdish labels (aria-label)</h2>
+  <label>ئیمەیڵ<input name="f1" type="email" aria-label="ئیمەیڵ"></label>
+  <label>وشەی نهێنی<input name="f2" type="password" aria-label="وشەی نهێنی نوێ"></label>
+  <label>دووبارە وشەی نهێنی<input name="f3" type="password" aria-label="دووبارەکردنەوەی وشەی نهێنی"></label>
+  <button>تۆمارکردن</button><div class="out"></div>
+</form>
+
+<form id="h" data-name="H · controlled inputs (React-like)">
+  <h2>H · controlled inputs: value only counts after an input event</h2>
+  <label>Email<input name="email" type="email" data-controlled></label>
+  <label>Password<input name="password" type="password" autocomplete="new-password" data-controlled></label>
+  <label>Confirm password<input name="confirmPassword" type="password" autocomplete="new-password" data-controlled></label>
+  <button>Create</button><div class="out"></div>
+</form>
+
+<script>
+// What the "site" sees. Controlled inputs keep the last value an input event reported.
+const state = new WeakMap();
+for (const el of document.querySelectorAll('[data-controlled]')) {
+  state.set(el, '');
+  el.addEventListener('input', () => state.set(el, el.value));
+}
+function report(form) {
+  const pw = [...form.querySelectorAll('input[type=password]')];
+  const seen = el => el.hasAttribute('data-controlled') ? state.get(el) : el.value;
+  const vals = pw.map(seen);
+  const fresh = form.querySelector('[autocomplete=new-password]') ? vals.filter((_, i) => pw[i].autocomplete !== 'current-password') : vals;
+  const lines = pw.map((el, i) => `${el.name}: ${vals[i] ? vals[i].length + ' chars' : 'EMPTY'}${el.hasAttribute('data-controlled') && el.value !== vals[i] ? ' (DOM has a value the site never saw)' : ''}`);
+  const filled = fresh.filter(Boolean);
+  const ok = filled.length === fresh.length && new Set(fresh).size === 1;
+  const out = form.querySelector('.out');
+  out.className = 'out ' + (ok ? 'ok' : 'bad');
+  out.textContent = (ok ? 'OK: new password fields match\n' : 'NOT OK\n') + lines.join('\n');
+  document.title = form.id + (ok ? ' OK' : ' BAD');
+}
+// ?only=b shows that form alone, so each case gets a fresh autofill session.
+const only = new URLSearchParams(location.search).get('only');
+if (only) for (const form of [...document.forms]) if (form.id !== only) form.remove();
+for (const form of document.forms) {
+  form.addEventListener('submit', e => { e.preventDefault(); report(form); });
+  form.addEventListener('change', () => report(form));
+  form.addEventListener('input', () => report(form));
+}
+</script>
+</body>
+</html>

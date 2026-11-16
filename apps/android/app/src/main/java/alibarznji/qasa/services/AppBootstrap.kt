@@ -1,6 +1,9 @@
 package alibarznji.qasa.services
 
 import alibarznji.qasa.backup.BackupService
+import alibarznji.qasa.credentials.GeneratedPasswordLog
+import alibarznji.qasa.credentials.GeneratedPasswordStore
+import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.device.DeviceRegistrationService
 import alibarznji.qasa.license.LicenseManager
 import alibarznji.qasa.push.DevicePrefsSync
@@ -22,6 +25,7 @@ class AppBootstrap @Inject constructor(
     private val vault: VaultRepository,
     private val premiumRefresher: PremiumStatusRefresher,
     private val backups: BackupService,
+    private val generatedPasswords: GeneratedPasswordStore,
 ) {
 
     suspend fun onVaultUnlocked() {
@@ -51,6 +55,12 @@ class AppBootstrap @Inject constructor(
             throw e
         } catch (_: Exception) {
         }
+        try {
+            offerUnsavedGeneratedPassword()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
         pushTokenRegistrar.refreshTokenIfAvailable()
         // The verifying key must exist before any token is trusted, and before the UI
         // reads `isPremium` — verification fails closed without one.
@@ -59,6 +69,28 @@ class AppBootstrap @Inject constructor(
         afterRegistration()
         // An automatic backup that came due while locked runs now, in the background.
         backups.runIfDue()
+    }
+
+    /**
+     * R4 (docs/autofill-hardening.md): a strong password autofill filled whose login was
+     * never saved (the site's form gave no save prompt, or the review was closed) opens the
+     * new-login form once, prefilled. A save already waiting (onSaveRequest) goes first.
+     */
+    private suspend fun offerUnsavedGeneratedPassword() {
+        val entries = generatedPasswords.read()
+        if (entries.none { it.picked }) {
+            if (entries.isNotEmpty()) generatedPasswords.update { GeneratedPasswordLog.prune(it, System.currentTimeMillis()) }
+            return
+        }
+        if (appSession.pendingLoginSave.value != null) return
+        val saved = vault.loginPasswords()
+        var due: alibarznji.qasa.credentials.GeneratedPassword? = null
+        generatedPasswords.update { current ->
+            val (next, rest) = GeneratedPasswordLog.dueOnUnlock(current, saved, System.currentTimeMillis())
+            due = next
+            rest
+        }
+        due?.let { appSession.requestSaveLogin(VaultPayload.Login(itemName = it.name, password = it.password, website = it.website)) }
     }
 
     /** License, session and device prefs follow a registration, normal or replacing. */

@@ -125,12 +125,10 @@ struct qasaApp: App {
                                 .onChanged { _ in AutoLockMonitor.shared.noteActivity() }
                         )
                 } else if showLogin {
-                    LoginView(
-                        onUnlocked: { password, viaBiometrics in
-                            Task { await handleUnlock(password: password, typedByUser: !viaBiometrics) }
-                        },
-                        onCreateVault: {}
-                    )
+                    // Rule 6d: the splash and the unlock sheet, never a login page.
+                    LoginView(onUnlocked: { password, viaBiometrics in
+                        await handleUnlock(password: password, typedByUser: !viaBiometrics)
+                    })
                 } else if showWelcome {
                     WelcomeFlowView()
                 } else {
@@ -330,14 +328,16 @@ struct qasaApp: App {
         @MainActor
         /// `typedByUser` is false when Face ID / Touch ID released the password: that unlock
         /// must not restart the master-password interval (`BiometricPolicy`).
-        private func handleUnlock(password: String, typedByUser: Bool = true) async {
-            guard VaultAuthStore.verifyMasterPassword(password, typedByUser: typedByUser) else { return }
+        @discardableResult
+        private func handleUnlock(password: String, typedByUser: Bool = true) async -> Bool {
+            guard VaultAuthStore.verifyMasterPassword(password, typedByUser: typedByUser) else { return false }
             isBootstrapping = true
             defer { isBootstrapping = false }
             await AppBootstrap.onVaultUnlocked(context: modelContext, session: session)
             unlocked = true
             AutoLockMonitor.shared.start(onLock: handleLogout)
             BackupService.shared.runIfDue(container: modelContext.container)
+            return true
         }
 
         @MainActor

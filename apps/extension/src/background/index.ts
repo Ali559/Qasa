@@ -97,6 +97,18 @@ function items<T>(reply: Record<string, unknown>): T[] {
   return Array.isArray(reply.items) ? (reply.items as T[]) : []
 }
 
+/** R2: only well-formed constraints reach the desktop (it checks them again). */
+function generateArgs(c: unknown): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  if (!c || typeof c !== 'object') return out
+  const { maxLength, minLength, rules } = c as Record<string, unknown>
+  const length = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n > 0 && n <= 4096
+  if (length(maxLength)) out.maxLength = maxLength
+  if (length(minLength)) out.minLength = minLength
+  if (typeof rules === 'string' && rules.trim()) out.rules = rules.slice(0, 1000)
+  return out
+}
+
 async function handlePopup(req: PopupRequest): Promise<unknown> {
   switch (req.kind) {
     case 'status':
@@ -129,7 +141,7 @@ async function handleContent(req: ContentRequest, sender: chrome.runtime.Message
   switch (req.kind) {
     case 'generate':
       // The shared generator answers without the vault: nothing secret leaves the desktop.
-      return (await bridge.request('generate', {})).password
+      return (await bridge.request('generate', generateArgs(req.constraints))).password
     case 'status':
       if (!contentStatus || Date.now() - contentStatus.at > CONTENT_STATUS_TTL_MS) {
         contentStatus = { at: Date.now(), value: bridge.status() }

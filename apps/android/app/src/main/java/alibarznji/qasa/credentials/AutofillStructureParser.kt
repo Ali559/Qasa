@@ -19,6 +19,8 @@ class ParsedScreen(
 object AutofillStructureParser {
     fun parse(structure: AssistStructure): ParsedScreen {
         val fields = mutableListOf<ClassifiedField<AutofillId>>()
+        // Untyped fields (a date of birth): R1 reads them for sign-up context.
+        val others = mutableListOf<FieldSignals>()
         val values = mutableMapOf<AutofillId, String>()
         var webDomain: String? = null
         var focused: AutofillId? = null
@@ -27,7 +29,9 @@ object AutofillStructureParser {
             val id = node.autofillId
             if (id != null && node.autofillType != View.AUTOFILL_TYPE_NONE && node.visibility == View.VISIBLE) {
                 val signals = signalsOf(node)
-                AutofillFieldClassifier.classify(signals)?.let { fields += ClassifiedField(id, it, signals) }
+                // Depth-first, so fields stay in screen order (R1 reads password fields in order).
+                val type = AutofillFieldClassifier.classify(signals)
+                if (type != null) fields += ClassifiedField(id, type, signals) else others += signals
                 if (node.isFocused) focused = id
                 node.autofillValue?.takeIf { it.isText }?.textValue?.toString()?.let { values[id] = it }
             }
@@ -35,7 +39,7 @@ object AutofillStructureParser {
         }
         for (i in 0 until structure.windowNodeCount) walk(structure.getWindowNodeAt(i).rootViewNode)
         val packageName = structure.activityComponent?.packageName.orEmpty()
-        return ParsedScreen(AutofillForm(fields), AutofillMatcher.caller(packageName, webDomain), focused, values)
+        return ParsedScreen(AutofillForm(fields, others), AutofillMatcher.caller(packageName, webDomain), focused, values)
     }
 
     private fun signalsOf(node: AssistStructure.ViewNode): FieldSignals {

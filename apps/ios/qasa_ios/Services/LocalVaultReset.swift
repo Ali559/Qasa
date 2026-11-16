@@ -37,6 +37,7 @@ enum LocalVaultReset {
         // Logins of the erased vault must not stay in the QuickType bar.
         AutofillIdentitySync.clear()
         EphemeralSecretStore.clear()
+        GeneratedPasswordStore.clearAll()
         AppPreferences.shared.resetWelcome()
     }
 }

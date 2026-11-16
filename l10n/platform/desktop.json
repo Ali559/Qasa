@@ -379,6 +379,11 @@
     "ckb": "هەڵەیەک ڕوویدا. دووبارە هەوڵبدەرەوە.",
     "en": "Something went wrong. Try again."
   },
+  "ext.page.fillFailed": {
+    "ar": "تعذّر الملء. انقر على الحقل وحاول مجدداً.",
+    "ckb": "پڕکردنەوە نەکرا. کرتە لە خانەکە بکە و دووبارە هەوڵبدەرەوە.",
+    "en": "Couldn't fill. Click the field and try again."
+  },
   "update.section": {
     "ar": "التحديثات",
     "ckb": "نوێکردنەوەکان",

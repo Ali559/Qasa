@@ -63,13 +63,21 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
 
     // MARK: generated passwords and saving (iOS 26.2, design rule 6c)
 
-    /// A new-password field: one strong password from the shared generator, within the site's
-    /// `passwordrules`. The system shows it; Info.plist opts out of our own generate UI.
+    /// A new-password field: a strong password from the shared generator (and an alphanumeric
+    /// alternative), within the new field's, the confirm field's and Apple's quirk
+    /// `passwordrules`; empty rules count as none (R2). The system shows them; Info.plist opts
+    /// out of our own generate UI.
     @available(iOS 26.2, *)
     override func performWithoutUserInteraction(generatePasswordsRequest: ASGeneratePasswordsRequest) {
-        let rules = generatePasswordsRequest.passwordFieldPasswordRules ?? generatePasswordsRequest.passwordRulesFromQuirks
-        let password = ASGeneratedPassword(kind: .strong, value: StrongPassword.generate(rules: rules))
-        extensionContext.completeGeneratePasswordRequest(results: [password], completionHandler: nil)
+        let rules = StrongPassword.rules(
+            password: generatePasswordsRequest.passwordFieldPasswordRules,
+            confirm: generatePasswordsRequest.confirmPasswordFieldPasswordRules,
+            quirks: generatePasswordsRequest.passwordRulesFromQuirks
+        )
+        let results = StrongPassword.suggestions(rules: rules).map { suggestion in
+            ASGeneratedPassword(kind: suggestion.kind == .strong ? .strong : .alphanumeric, value: suggestion.value)
+        }
+        extensionContext.completeGeneratePasswordRequest(results: results, completionHandler: nil)
     }
 
     /// Only reachable if the generate UI were on (it is off in Info.plist): same answer.
@@ -79,12 +87,17 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
     }
 
     /// Saving needs the vault key, which needs the user: always ask for the save sheet. A
-    /// generated password filled into a form not yet sent is not saved yet: the submit (or the
-    /// form going away) follows with its own request, which does.
+    /// generated password filled into a form not yet sent is kept as a pending account (R4:
+    /// the app offers it on its next unlock if the submit's own save never comes) and the
+    /// request completes; Apple says not to ask the user anything for this event.
     @available(iOS 26.2, *)
     override func performWithoutUserInteractionIfPossible(savePasswordRequest: ASSavePasswordRequest) {
         if savePasswordRequest.event == .generatedPasswordFilled {
-            cancel()
+            GeneratedPasswordStore.recordFilled(
+                savePasswordRequest.credential.password,
+                host: AutofillContextMatcher.normalizeHost(savePasswordRequest.serviceIdentifier.identifier)
+            )
+            extensionContext.completeSavePasswordRequest(completionHandler: nil)
         } else {
             requireInteraction()
         }
@@ -109,6 +122,8 @@ final class CredentialProviderViewController: ASCredentialProviderViewController
                 )
                 do {
                     try PendingSaveInbox.append(login, key: session.encKey)
+                    // Saved (the app imports it): no "save the password you created" later.
+                    GeneratedPasswordStore.forget(password: credential.password)
                     self?.extensionContext.completeSavePasswordRequest(completionHandler: nil)
                 } catch {
                     self?.extensionContext.cancelRequest(withError: NSError(domain: ASExtensionErrorDomain, code: ASExtensionError.failed.rawValue))

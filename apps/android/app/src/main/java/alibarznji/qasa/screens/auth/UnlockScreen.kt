@@ -1,67 +1,74 @@
 package alibarznji.qasa.screens.auth
 
 import alibarznji.qasa.R
-import alibarznji.qasa.theme.BrandHeader
-import alibarznji.qasa.theme.CardContainer
-import alibarznji.qasa.theme.PrimaryButton
 import alibarznji.qasa.theme.QasaDimens
-import alibarznji.qasa.theme.QasaIcons
-import alibarznji.qasa.theme.RowChevron
-import alibarznji.qasa.theme.QasaIconSize
-import alibarznji.qasa.theme.ScreenScaffold
-import alibarznji.qasa.theme.QasaFieldGroup
-import alibarznji.qasa.theme.QasaSecureRow
-import alibarznji.qasa.theme.StatusPill
-import alibarznji.qasa.theme.StickyBottomBar
+import alibarznji.qasa.theme.QasaMotion
+import alibarznji.qasa.theme.QasaSheetHeader
+import alibarznji.qasa.theme.QasaTokens
+import alibarznji.qasa.theme.UnlockSheetBody
 import alibarznji.qasa.theme.qasaColors
+import alibarznji.qasa.theme.qasaReduceMotion
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.BiometricGateEffect
 import alibarznji.qasa.vault.BiometricPolicy
 import alibarznji.qasa.vault.VaultSecureStore
 import alibarznji.qasa.vault.VaultSession
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.flow.first
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
-import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class UnlockViewModel @Inject constructor(
@@ -85,6 +92,14 @@ private sealed interface UnlockPrompt {
     ) : UnlockPrompt
 }
 
+/**
+ * The app's unlock (`design/README.md` rule 6d, option B): the splash (the app tile centred
+ * where the launch screen put it, the wordmark under it) and nothing of the vault. With
+ * fingerprint / face on and the 14-day check not due, the system prompt starts by itself
+ * once the window has settled; only when it is cancelled or fails (or there is no
+ * biometric unlock) does the unlock sheet rise, and the tile moves up above it. The sheet
+ * can't be dismissed: there is nothing behind it, and back leaves the app as before.
+ */
 @Composable
 fun UnlockScreen(
     onUnlocked: () -> Unit,
@@ -92,7 +107,6 @@ fun UnlockScreen(
 ) {
     val c = qasaColors
     var password by remember { mutableStateOf("") }
-    var visible by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var prompt by remember { mutableStateOf<UnlockPrompt?>(null) }
     val canUnlock = password.isNotBlank()
@@ -160,15 +174,31 @@ fun UnlockScreen(
     val masterPasswordDue = remember(foregroundTick, busy) { vm.session.masterPasswordDue }
     val biometricAllowed = remember(foregroundTick, busy, prompt) { vm.session.biometricUnlockAllowed() }
     val showMasterPasswordDue = masterPasswordDue && vm.session.biometricsEnabled
+    // Option B: the sheet stays down while the first prompt can run, and rises when it is
+    // cancelled or fails, or straight away when there is no biometric unlock to offer.
+    // Saveable, so a rotation does not lower a sheet the user is typing in.
+    var sheetUp by rememberSaveable { mutableStateOf(!vm.session.biometricUnlockAllowed()) }
     LaunchedEffect(autoPromptArmed) {
         if (!autoPromptArmed) return@LaunchedEffect
         // `BiometricPrompt` must be shown from a resumed host.
         lifecycleOwner.lifecycle.currentStateFlow.first { it.isAtLeast(Lifecycle.State.RESUMED) }
+        // Let the window settle (the launch screen hands over, the splash is drawn) so the
+        // prompt does not land on a frame that is still changing.
+        delay(PromptSettleMillis)
+        lifecycleOwner.lifecycle.currentStateFlow.first { it.isAtLeast(Lifecycle.State.RESUMED) }
         // Consumed whether or not it prompts: one chance per appearance, never a retry loop.
         autoPromptArmed = false
-        if (prompt != null || busy || !vm.session.biometricUnlockAllowed()) return@LaunchedEffect
+        if (prompt != null || busy) return@LaunchedEffect
+        if (!vm.session.biometricUnlockAllowed()) {
+            sheetUp = true
+            return@LaunchedEffect
+        }
         // No cipher means no usable gate: never fall back to a presence-only prompt here.
-        val cipher = vm.session.biometricUnlockCipher() ?: return@LaunchedEffect
+        val cipher = vm.session.biometricUnlockCipher()
+        if (cipher == null) {
+            sheetUp = true
+            return@LaunchedEffect
+        }
         prompt = UnlockPrompt.Unlock(cipher)
     }
 
@@ -180,7 +210,10 @@ fun UnlockScreen(
         onAuthenticated = { cipher ->
             when (val attempt = prompt) {
                 is UnlockPrompt.Unlock -> {
-                    runUnlock({ cipher != null && vm.session.unlockWithBiometricCipher(cipher) }) { error = failedMessage }
+                    runUnlock({ cipher != null && vm.session.unlockWithBiometricCipher(cipher) }) {
+                        error = failedMessage
+                        sheetUp = true
+                    }
                 }
                 is UnlockPrompt.Capture -> {
                     // Unlock first so only the variant that verified gets sealed (sealing
@@ -203,119 +236,149 @@ fun UnlockScreen(
                 // Sealing is an optional convenience, not the unlock itself: a declined
                 // or failed prompt must not lock the user out of a password they know.
                 is UnlockPrompt.Capture -> unlockWithPassword(attempt.password)
-                is UnlockPrompt.Unlock -> error = failedMessage
+                is UnlockPrompt.Unlock -> {
+                    error = failedMessage
+                    sheetUp = true
+                }
                 null -> Unit
             }
         },
     )
 
-    ScreenScaffold(
-        header = { BrandHeader(applyStatusBars = false) { StatusPill(stringResource(R.string.brand_localoffline)) } },
-        stickyBottom = {
-            StickyBottomBar {
-                PrimaryButton(
-                    title = stringResource(R.string.auth_unlock_button),
-                    icon = QasaIcons.Unlock,
-                    enabled = canUnlock && !busy,
-                    onClick = {
-                        // The secret is sealed at unlock time, not at create time: a
-                        // password can only be cached behind a cipher the hardware
-                        // authorized, and the user is holding the password right now.
-                        val captureCipher = if (vm.session.needsBiometricCapture) {
-                            vm.session.biometricCaptureCipher()
-                        } else {
-                            null
-                        }
-                        if (captureCipher != null) {
-                            prompt = UnlockPrompt.Capture(captureCipher, password)
-                        } else {
-                            unlockWithPassword(password)
-                        }
-                    },
-                )
-            }
-        },
-    ) {
-        Text(stringResource(R.string.auth_unlock_title), color = c.textPrimary, style = qasaText.displayLarge)
-        Spacer(Modifier.height(QasaDimens.contentGap))
-        Text(
-            stringResource(R.string.auth_unlock_subtitle),
-            color = c.textSecondary,
-            style = qasaText.bodyMedium
+    fun onUnlockTapped() {
+        // The secret is sealed at unlock time, not at create time: a password can only be
+        // cached behind a cipher the hardware authorized, and the user is holding the
+        // password right now.
+        val captureCipher = if (vm.session.needsBiometricCapture) vm.session.biometricCaptureCipher() else null
+        if (captureCipher != null) {
+            prompt = UnlockPrompt.Capture(captureCipher, password)
+        } else {
+            unlockWithPassword(password)
+        }
+    }
+
+    UnlockSplash(sheetUp = sheetUp) {
+        UnlockSheetBody(
+            password = password,
+            onPasswordChange = { password = it; error = null },
+            // The wrong-password message: danger label and stripe, the text on its row.
+            error = error,
+            unlockEnabled = canUnlock && !busy,
+            onUnlock = ::onUnlockTapped,
+            onBiometrics = if (biometricAllowed) {
+                { if (prompt == null) prompt = UnlockPrompt.Unlock(vm.session.biometricUnlockCipher()) }
+            } else {
+                null
+            },
+            note = if (showMasterPasswordDue) {
+                stringResource(R.string.auth_unlock_masterpasswordduefmt, BiometricPolicy.MASTER_PASSWORD_INTERVAL_DAYS)
+            } else {
+                null
+            },
         )
-        Spacer(Modifier.height(QasaDimens.screenPadding))
-        QasaFieldGroup {
-            QasaSecureRow(
-                label = stringResource(R.string.auth_unlock_masterpassword),
-                value = password,
-                onValueChange = { password = it; error = null },
-                // The wrong-password message: danger label and stripe, the text under the card.
-                error = error,
-                revealed = visible,
-                onToggleReveal = { visible = !visible },
-            )
-        }
-        if (showMasterPasswordDue) {
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(
-                stringResource(R.string.auth_unlock_masterpasswordduefmt, BiometricPolicy.MASTER_PASSWORD_INTERVAL_DAYS),
-                color = c.textSecondary,
-                style = qasaText.bodyMedium,
-            )
-        }
-        if (biometricAllowed) {
-            Spacer(Modifier.height(QasaDimens.gap))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(QasaDimens.cornerRadius))
-                    .background(c.cardBackground)
-                    .border(QasaDimens.stroke, c.stroke, RoundedCornerShape(QasaDimens.cornerRadius))
-                    .clickable {
-                        if (prompt == null) {
-                            prompt = UnlockPrompt.Unlock(vm.session.biometricUnlockCipher())
-                        }
-                    }
-                    .padding(QasaDimens.gap),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(QasaIconSize.x6l)
-                        .clip(CircleShape)
-                        .background(c.cardBackgroundLight),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        QasaIcons.Fingerprint,
-                        contentDescription = null,
-                        tint = c.accent,
-                        modifier = Modifier.size(QasaIconSize.xxl),
-                    )
-                }
-                Spacer(Modifier.width(QasaDimens.gapSmall))
-                Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.auth_unlock_biometrics), color = c.textPrimary, style = qasaText.rowTitle)
-                    Text(stringResource(R.string.auth_unlock_biometricshint), color = c.textSecondary, style = MaterialTheme.typography.labelMedium)
-                }
-                RowChevron()
-            }
-        }
-        Spacer(Modifier.height(QasaDimens.gap))
-        // iOS: shield + "Local unlock only" title above the body.
-        CardContainer(background = c.cardBackgroundLight) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(QasaIcons.Shield, null, tint = c.accent)
-                Spacer(Modifier.width(QasaDimens.contentGap))
-                Text(stringResource(R.string.auth_unlock_localonly), color = c.textPrimary, style = qasaText.rowTitle)
-            }
-            Spacer(Modifier.height(QasaDimens.contentGap))
-            Text(
-                stringResource(R.string.auth_unlock_localonlybody),
-                color = c.textSecondary,
-                style = qasaText.bodyMedium
-            )
-        }
-        Spacer(Modifier.height(QasaDimens.heroArtHeight))
     }
 }
+
+/**
+ * The splash and, when [sheetUp], the unlock sheet over it. The tile sits centred on the
+ * whole window (where the Android 12+ launch screen draws `ic_splash_icon`), and moves up
+ * to the middle of the room above the sheet as it rises (`standard`; at once with reduce
+ * motion). The sheet is the app's sheet look (rule 6b) drawn in this window rather than
+ * as a dialog, because it can't be dragged away and back must reach the activity.
+ */
+@Composable
+private fun UnlockSplash(sheetUp: Boolean, sheet: @Composable () -> Unit) {
+    val c = qasaColors
+    val reduceMotion = qasaReduceMotion.enabled
+    val density = LocalDensity.current
+    var sheetHeightPx by remember { mutableIntStateOf(0) }
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .background(c.background),
+    ) {
+        val windowHeightPx = constraints.maxHeight
+        val topInsetPx = WindowInsets.statusBars.getTop(density)
+        val iconPx = with(density) { SplashIconSize.toPx() }
+        val groupPx = with(density) { (SplashIconSize + SplashGap + SplashWordmarkRoom).toPx() }
+        // Down: the tile's centre on the window's centre. Up: the tile and wordmark centred
+        // in the room between the status bar and the sheet, never under the status bar.
+        val centredTop = (windowHeightPx - iconPx) / 2f
+        val raisedTop = (topInsetPx + (windowHeightPx - sheetHeightPx - topInsetPx - groupPx) / 2f)
+            .coerceAtLeast(topInsetPx.toFloat())
+        val iconTop by animateFloatAsState(
+            targetValue = if (sheetUp && sheetHeightPx > 0) raisedTop else centredTop,
+            animationSpec = if (reduceMotion) snap() else QasaMotion.standardTween(),
+            label = "unlockSplashIcon",
+        )
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .offset { IntOffset(0, iconTop.roundToInt()) },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Image(
+                painterResource(R.drawable.ic_qasa_app_icon),
+                contentDescription = null,
+                modifier = Modifier.size(SplashIconSize),
+            )
+            Spacer(Modifier.height(SplashGap))
+            Text(stringResource(R.string.brand_name), color = c.accent, style = qasaText.brandStandalone)
+        }
+        AnimatedVisibility(
+            visible = sheetUp,
+            enter = fadeIn(if (reduceMotion) QasaMotion.fadeTween() else QasaMotion.standardTween()),
+            exit = androidx.compose.animation.fadeOut(QasaMotion.fadeTween()),
+        ) {
+            Box(Modifier.fillMaxSize().background(c.scrim))
+        }
+        AnimatedVisibility(
+            visible = sheetUp,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = if (reduceMotion) {
+                fadeIn(QasaMotion.fadeTween())
+            } else {
+                slideInVertically(QasaMotion.standardTween()) { it }
+            },
+        ) {
+            UnlockSheetSurface(Modifier.onSizeChanged { sheetHeightPx = it.height }, sheet)
+        }
+    }
+}
+
+/** The app's sheet look (`QasaModalBottomSheet`): 28 top corners, the grabber, the header. */
+@Composable
+private fun UnlockSheetSurface(modifier: Modifier, content: @Composable () -> Unit) {
+    val c = qasaColors
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(topStart = QasaDimens.sheetRadius, topEnd = QasaDimens.sheetRadius))
+            .background(c.background)
+            .navigationBarsPadding()
+            .imePadding(),
+    ) {
+        Box(Modifier.fillMaxWidth().height(QasaDimens.sheetTitleTop), contentAlignment = Alignment.TopCenter) {
+            Box(
+                Modifier
+                    .padding(top = QasaDimens.sheetGrabberTop)
+                    .size(QasaDimens.sheetGrabberWidth, QasaDimens.sheetGrabberHeight)
+                    .background(c.textTertiary, RoundedCornerShape(QasaTokens.Radius.sheetGrabber)),
+            )
+        }
+        QasaSheetHeader(stringResource(R.string.auth_unlock_sheettitle))
+        content()
+    }
+}
+
+/** `design/README.md` rule 6d: the system prompt starts once the window has settled. */
+private const val PromptSettleMillis = 450L
+
+/** The app tile on the splash, as on the launch screen (`ic_splash_icon`). */
+private val SplashIconSize = 96.dp
+
+/** Between the tile and the wordmark. */
+private val SplashGap = 14.dp
+
+/** The wordmark line's height, for centring the tile and wordmark above the sheet. */
+private val SplashWordmarkRoom = 32.dp

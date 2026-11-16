@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?><!--
    Backups are off (android:allowBackup="false"). Kept explicit anyway for Android 11 and older:
-   the website icon cache (files/site-icons, docs/site-icons.md) is sealed with the vault key
-   and never leaves the device.
+   the website icon cache (files/site-icons, docs/site-icons.md) is sealed with the vault key,
+   and the recent generated passwords (files/autofill-generated, docs/autofill-hardening.md R4)
+   with a device key; neither leaves the device.
    See https://developer.android.com/guide/topics/data/autobackup
 -->
 <full-backup-content>
     <exclude domain="file" path="site-icons/" />
+    <exclude domain="file" path="autofill-generated/" />
 </full-backup-content>
