@@ -201,7 +201,14 @@ picks one before anything is built.
 
 ### Phase 6: Protected secure note asks to unlock twice
 
-- [ ] Opening it asks for the main password or biometrics (correct). Leaving with the header
+- [x] (2026-11-16, branch `phase-6-protected-back`: Android only. The item screen relocked on
+      its back-stack entry's ON_STOP, which a pop also sends, so leaving by the header button
+      showed the locked cover for ~0.4 s and, with biometrics on, raised the prompt again. It
+      now relocks on the activity's ON_STOP (the app going to the background), as iOS does
+      with `scenePhase` and the desktop with `visibilitychange`. Checked on the emulator:
+      old build shows the locked cover on the way out, new build doesn't, and backgrounding
+      still relocks. Also: Android's add buttons now have a screen-reader label.)
+      Opening it asks for the main password or biometrics (correct). Leaving with the header
       back button asks *again*; leaving with the system back gesture doesn't. The back button
       must just leave, like the gesture. Check every protected item type on every app.
 

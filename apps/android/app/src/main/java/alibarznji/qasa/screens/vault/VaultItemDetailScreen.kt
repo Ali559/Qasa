@@ -22,6 +22,7 @@ import alibarznji.qasa.vault.ProtectedItemGate
 import alibarznji.qasa.screens.vault.detail.ProtectedItemCover
 import alibarznji.qasa.screens.vault.detail.ProtectedUnlockSheet
 import androidx.compose.runtime.DisposableEffect
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -35,6 +36,7 @@ import alibarznji.qasa.vault.totp.TotpClipboard
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import alibarznji.qasa.theme.LocalQasaToast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -125,7 +127,11 @@ fun VaultItemDetailScreen(
         if (gate?.isProtected != isProtected) gate = ProtectedItemGate(isProtected)
     }
     // Going to the background locks a protected note again; leaving forgets reveals.
-    val lifecycleOwner = LocalLifecycleOwner.current
+    // Watch the *activity* (the app going to the background, as iOS `scenePhase`), never
+    // this screen's back-stack entry: popping the entry stops it too, which relocked the
+    // note during the exit animation and raised the unlock prompt again on the way out.
+    val screenOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = context.findActivity() ?: screenOwner
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) gate = gate?.lock()
@@ -349,4 +355,11 @@ private fun NeedsAttentionBanner() {
         Spacer(Modifier.width(QasaDimens.contentGap))
         Text(stringResource(R.string.validation_needsattention), color = c.textPrimary, style = qasaText.bodyMedium)
     }
+}
+
+/** The activity hosting this composition (its lifecycle is the app's foreground state). */
+private tailrec fun Context.findActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
