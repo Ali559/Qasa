@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -64,7 +65,6 @@ internal fun gatewayDisplayName(id: String?): String = when (id) {
 
 // iOS badge is 36 x 36 with a 9pt corner.
 private val BadgeSize = 36.dp
-private val BadgeRadius = 9.dp
 
 /** `autoRenewRow` (PremiumUpgradeView.swift:239): 18pt accent icon, 15/12 text, chrome card r8. */
 @Composable
@@ -140,14 +140,14 @@ private fun PaymentRow(option: GatewayOption, selected: Boolean, onClick: () -> 
 }
 
 /** `paymentBadge` (PremiumUpgradeView.swift): no wallet logo for Wayl, so a text badge,
- * the method's initial on an accent tint, 36dp, r9. */
+ * the method's initial on an accent tint, a 36dp circle. */
 @Composable
 private fun PaymentBadge(option: GatewayOption) {
     val c = qasaColors
     Box(
         modifier = Modifier
             .size(BadgeSize)
-            .clip(RoundedCornerShape(BadgeRadius))
+            .clip(CircleShape)
             .background(c.accent.copy(alpha = 0.12f)),
         contentAlignment = Alignment.Center,
     ) {

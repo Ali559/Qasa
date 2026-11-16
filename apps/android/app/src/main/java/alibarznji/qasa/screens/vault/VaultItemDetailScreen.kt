@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -268,7 +269,7 @@ fun VaultItemDetailScreen(
 @Composable
 private fun HeroIcon(p: VaultPayload) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadiusLarge)
+    val shape = CircleShape
     // A note or card takes its colour: the glyph in the colour on its tile fill, no stroke.
     val itemColor = p.organizationColor()
     Box(

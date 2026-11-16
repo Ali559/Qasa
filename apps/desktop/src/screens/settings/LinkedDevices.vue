@@ -269,7 +269,7 @@ function upgrade() {
   place-items: center;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
   background: color-mix(in srgb, var(--gold) 20%, transparent);
   color: var(--gold);
 }

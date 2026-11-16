@@ -96,7 +96,6 @@ object QasaDimens {
     val rowChevronGlyph: Dp = QasaTokens.Size.rowChevronGlyph
 
     /** 10 — corner radius of [rowIconBadge]. */
-    val rowIconBadgeRadius: Dp = QasaTokens.Radius.iconBadge
 
     /** 60 — minimum height of a settings / navigation row. */
     val rowMinHeight: Dp = QasaTokens.Size.rowMinHeight

@@ -152,7 +152,6 @@ enum Theme {
     // MARK: Settings / list rows.
     static let rowMinHeight: CGFloat = QasaTokens.Size.rowMinHeight
     static let iconBadgeSize: CGFloat = QasaTokens.Size.iconBadge
-    static let iconBadgeCornerRadius: CGFloat = QasaTokens.Radius.iconBadge
     static let iconBadgeGlyphSize: CGFloat = QasaTokens.Size.iconBadgeGlyph
 }
 

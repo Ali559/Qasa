@@ -125,7 +125,7 @@ struct HomeView: View {
                     .foregroundColor(theme.textPrimary)
                     .frame(width: 44, height: 44)
                     .background(theme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .clipShape(Circle())
                     .overlay(alignment: .topTrailing) {
                         if unreadBadge > 0 {
                             Text(unreadBadge > 99 ? "99+" : "\(unreadBadge)")

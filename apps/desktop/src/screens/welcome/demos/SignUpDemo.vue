@@ -133,7 +133,7 @@ onMounted(() => {
   flex-shrink: 0;
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
   background: var(--card-background);
   color: var(--accent);
 }

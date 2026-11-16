@@ -24,7 +24,7 @@ struct VaultItemRow: View {
                 .foregroundColor(Theme.textPrimary)
                 .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(Theme.cardMuted)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(Circle())
                 .accessibilityHidden(true)
         } else if row.kind == .login {
             let logo = SiteLogo(name: row.displayName)
@@ -33,7 +33,7 @@ struct VaultItemRow: View {
                 .foregroundColor(.white)
                 .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(logo.color)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(Circle())
         } else {
             // A note or card shows the colour picked for it; until it is decrypted, the default.
             let itemColor = payload?.organizationColor
@@ -41,7 +41,7 @@ struct VaultItemRow: View {
                 .foregroundColor(itemColor?.color ?? Theme.accent)
                 .frame(width: QasaTokens.Size.itemTile, height: QasaTokens.Size.itemTile)
                 .background(itemColor?.tile ?? Theme.cardMuted)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(Circle())
         }
     }
 

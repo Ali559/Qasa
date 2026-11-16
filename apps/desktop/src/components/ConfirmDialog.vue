@@ -72,7 +72,7 @@ const t = useT()
   width: calc(var(--size-icon-badge) * 1.2);
   height: calc(var(--size-icon-badge) * 1.2);
   margin-bottom: 4px;
-  border-radius: calc(var(--radius-icon-badge) * 1.2);
+  border-radius: 50%;
   background: color-mix(in srgb, var(--badge-color) 12%, transparent);
   color: var(--badge-color);
 }

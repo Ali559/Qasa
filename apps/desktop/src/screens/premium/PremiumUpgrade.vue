@@ -585,7 +585,7 @@ async function simulateStub() {
   width: var(--size-icon-badge);
   height: var(--size-icon-badge);
   margin-inline-end: var(--space-row-icon-gap);
-  border-radius: var(--radius-icon-badge);
+  border-radius: 50%;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
   font-size: var(--type-field-size);

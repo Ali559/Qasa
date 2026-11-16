@@ -90,7 +90,7 @@ const CSS = `
 .row:hover::after, .row:active::after { opacity: var(--motion-row-pressed-opacity); }
 .row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tile {
-  width: var(--size-icon-badge); height: var(--size-icon-badge); flex-shrink: 0; border-radius: var(--radius-icon-badge);
+  width: var(--size-icon-badge); height: var(--size-icon-badge); flex-shrink: 0; border-radius: 50%;
   display: grid; place-items: center; color: #fff; font-weight: 700; font-size: calc(var(--size-icon-badge) * 0.375);
 }
 .tile.site { background: var(--card-muted); color: var(--text-primary); }

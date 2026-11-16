@@ -174,7 +174,9 @@ picks one before anything is built.
 
 ### Phase 3: Circular icon backgrounds (preview first)
 
-- [ ] Every icon with a background (tiles, item avatars, FAB…) gets a fully round background.
+- [x] (2026-11-16, branch `phase-3-round-icons`: the owner picked B, circles, in
+      `design/previews/round-icons.html`; rule 8 in `design/README.md`, `radius.iconBadge`
+      removed, on iOS, Android, the desktop and the extension.) Every icon with a background (tiles, item avatars, FAB…) gets a fully round background.
       Not icons with no or a transparent background (navigation tabs, row icons). Unsure how
       it looks inside non-circular cards, so preview it on real screens (vault list, item
       detail, home, settings) in light and dark first.

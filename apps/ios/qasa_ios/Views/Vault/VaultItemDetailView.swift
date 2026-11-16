@@ -201,11 +201,8 @@ struct VaultItemDetailView: View {
             .foregroundColor(itemColor?.color ?? Theme.textPrimary)
             .frame(width: 88, height: 88)
             .background(itemColor?.tile ?? Theme.chrome)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(itemColor == nil ? Theme.strokeChrome : Color.clear, lineWidth: 1)
-            )
+            .clipShape(Circle())
+            .overlay(Circle().stroke(itemColor == nil ? Theme.strokeChrome : Color.clear, lineWidth: 1))
             .padding(.top, 12)
     }
 
