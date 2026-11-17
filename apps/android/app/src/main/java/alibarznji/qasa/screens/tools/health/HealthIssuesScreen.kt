@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -115,11 +116,13 @@ internal fun HealthIssuesScreen(
                     end = QasaDimens.screenPadding,
                     bottom = QasaDimens.scrollTail,
                 ),
-                verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall),
             ) {
-                items(items, key = { it.id }) { row: VaultListRow ->
+                // One card for the whole list (design/README.md rule 6e).
+                itemsIndexed(items, key = { _, it -> it.id }) { i, row: VaultListRow ->
                     VaultListItemRow(
                         row = row,
+                        first = i == 0,
+                        last = i == items.lastIndex,
                         subtitleFallback = loginLabel,
                         loadPayload = loadPayload,
                         onOpen = { onOpenItem(row.id) },

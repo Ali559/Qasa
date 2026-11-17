@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 
 /*
  * Press feedback, as iOS draws it (no Material ripple):
@@ -37,12 +38,14 @@ fun QasaPressable(
     role: Role? = Role.Button,
     contentDescription: String? = null,
     pressScale: Boolean = false,
+    /** Corner radius of the row wash; 0 for a row inside a card that clips it (rule 6e). */
+    pressRadius: Dp = QasaDimens.rowPressRadius,
     content: @Composable () -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
-            .qasaPressFeedback(interaction, pressScale, enabled)
+            .qasaPressFeedback(interaction, pressScale, enabled, pressRadius)
             .clickable(
                 interactionSource = interaction,
                 indication = null,
@@ -119,6 +122,7 @@ private fun Modifier.qasaPressFeedback(
     interaction: MutableInteractionSource,
     pressScale: Boolean,
     enabled: Boolean,
+    pressRadius: Dp = QasaDimens.rowPressRadius,
 ): Modifier {
     if (pressScale) {
         val scale = rememberPressScale(interaction, enabled = enabled)
@@ -138,7 +142,7 @@ private fun Modifier.qasaPressFeedback(
     )
     return this.drawBehind {
         if (wash > 0f) {
-            val r = QasaDimens.rowPressRadius.toPx()
+            val r = pressRadius.toPx()
             drawRoundRect(c.textPrimary.copy(alpha = wash), cornerRadius = CornerRadius(r, r))
         }
     }

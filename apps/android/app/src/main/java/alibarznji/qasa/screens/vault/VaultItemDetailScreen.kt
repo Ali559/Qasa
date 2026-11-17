@@ -17,8 +17,7 @@ import alibarznji.qasa.theme.QasaIconSize
 import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.siteLetterFor
 import alibarznji.qasa.siteicons.rememberSiteIcon
-import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.FilterQuality
+import alibarznji.qasa.theme.SiteIconTile
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import alibarznji.qasa.vault.ProtectedItemGate
@@ -277,7 +276,7 @@ fun VaultItemDetailScreen(
 
 /**
  * iOS `heroIcon` (`VaultItemDetailView.swift:110`): an 88 circle. A login shows its site's
- * own icon at `heroSiteIconGlyph` on `siteIconTile` with a 1dp `stroke` ring, or its letter
+ * own icon filling the circle ([SiteIconTile]: on `siteIconTile`, a ring for a glyph), or its letter
  * at 36 bold on `cardMuted` (docs/site-icons.md); other kinds keep their type glyph.
  */
 @Composable
@@ -291,19 +290,7 @@ private fun HeroIcon(p: VaultPayload, name: String) {
     if (p is VaultPayload.Login) {
         val siteIcon = rememberSiteIcon(p.website)
         if (siteIcon != null) {
-            Box(
-                modifier = heroModifier
-                    .background(c.siteIconTile)
-                    .border(QasaDimens.stroke, c.stroke, shape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    bitmap = siteIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(QasaTokens.Size.heroSiteIconGlyph),
-                    filterQuality = FilterQuality.High,
-                )
-            }
+            SiteIconTile(siteIcon, QasaIconFrame.shield, Modifier.padding(top = QasaDimens.gapSmall))
         } else {
             Box(modifier = heroModifier.background(c.cardMuted), contentAlignment = Alignment.Center) {
                 Text(siteLetterFor(name), color = c.accent, style = qasaText.heroLetter, maxLines = 1)

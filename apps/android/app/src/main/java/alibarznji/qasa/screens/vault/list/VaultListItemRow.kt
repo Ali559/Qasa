@@ -63,6 +63,9 @@ internal fun VaultListItemRow(
     onCopy: (copy: RowCopy, gated: Boolean) -> Unit,
     onEdit: (VaultPayload) -> Unit,
     onDelete: () -> Unit,
+    /** Its place in the section's card (design/README.md rule 6e). */
+    first: Boolean = true,
+    last: Boolean = true,
 ) {
     val c = qasaColors
     val context = LocalContext.current
@@ -83,6 +86,8 @@ internal fun VaultListItemRow(
         letter = if (row.kind == VaultItemKind.Login) siteLetterFor(row.displayName) else null,
         siteIcon = siteIcon,
         itemColor = payload?.organizationColor()?.let { it.swatch() to it.tile() },
+        first = first,
+        last = last,
         onClick = onOpen,
         // iOS gates even the title copy of a protected note (`VaultItemRow.swift:145`).
         onCopy = primary?.let { p -> { onCopy(p, payload?.isProtectedNote == true) } },

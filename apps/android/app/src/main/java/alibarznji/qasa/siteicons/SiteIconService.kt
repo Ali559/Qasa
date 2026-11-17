@@ -5,8 +5,6 @@ import alibarznji.qasa.vault.VaultSession
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -52,14 +50,14 @@ class SiteIconService @Inject constructor(
 
     /** Watches the lock and the setting; never cancelled. */
     private val watcher = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val cache = SiteIconCache(File(context.filesDir, CACHE_DIR))
+    private val cache = SiteIconCache(File(context.filesDir, CACHE_DIR), reshape = SiteIconImages::reshape)
     private val fetcher by lazy { SiteIconFetcher(SiteIconImages::normalise) }
     private val permits = Semaphore(MAX_CONCURRENT)
 
-    private val _icons = MutableStateFlow<Map<String, ImageBitmap>>(emptyMap())
+    private val _icons = MutableStateFlow<Map<String, SiteIcon>>(emptyMap())
 
     /** Icons ready to draw, by [keyFor]. Empty while locked or with the setting off. */
-    val icons: StateFlow<Map<String, ImageBitmap>> = _icons.asStateFlow()
+    val icons: StateFlow<Map<String, SiteIcon>> = _icons.asStateFlow()
 
     /** Keys looked at since the unlock (cache read, fetch queued or done): asked once each. */
     private val seen = ConcurrentHashMap.newKeySet<String>()
@@ -143,14 +141,14 @@ class SiteIconService @Inject constructor(
             return
         }
         if (!enabled) return
-        val bitmap = SiteIconImages.fromDrawable(drawable).asImageBitmap()
+        val bitmap = SiteIcon.from(SiteIconImages.fromDrawable(drawable))
         _icons.value = _icons.value + (key to bitmap)
     }
 
     private fun show(key: String, png: ByteArray) {
         if (!enabled) return
         val bitmap = BitmapFactory.decodeByteArray(png, 0, png.size) ?: return
-        _icons.value = _icons.value + (key to bitmap.asImageBitmap())
+        _icons.value = _icons.value + (key to SiteIcon.from(bitmap))
     }
 
     /** Runs [block] with a copy of the vault key (wiped after), or returns null when locked. */

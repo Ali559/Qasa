@@ -7,7 +7,15 @@ import alibarznji.qasa.theme.QasaIcons
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.theme.qasaText
 import androidx.annotation.StringRes
+import alibarznji.qasa.theme.QasaMotion
+import alibarznji.qasa.theme.QasaTokens
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,11 +66,27 @@ fun ShellTabBar(selected: ShellTab, onSelect: (ShellTab) -> Unit) {
             ShellTab.entries.forEach { tab ->
                 val on = tab == selected
                 val tint = if (on) c.accent else c.textTertiary
+                // design/README.md rule 8: no ripple or pressed fill; the glyph and label
+                // dim to `tabPressedOpacity` while the finger is down.
+                val interaction = remember { MutableInteractionSource() }
+                val pressed by interaction.collectIsPressedAsState()
+                val alpha by animateFloatAsState(
+                    if (pressed) QasaTokens.Motion.tabPressedOpacity else 1f,
+                    QasaMotion.pressTween(),
+                    label = "shellTabPress",
+                )
                 Column(
                     Modifier
                         .weight(1f)
-                        .selectable(selected = on, role = Role.Tab, onClick = { onSelect(tab) })
-                        .padding(vertical = QasaDimens.spaceSmall),
+                        .selectable(
+                            selected = on,
+                            interactionSource = interaction,
+                            indication = null,
+                            role = Role.Tab,
+                            onClick = { onSelect(tab) },
+                        )
+                        .padding(vertical = QasaDimens.spaceSmall)
+                        .graphicsLayer { this.alpha = alpha },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Icon(if (on) tab.selectedIcon else tab.icon, contentDescription = null, tint = tint, modifier = Modifier.size(QasaIconSize.xxl))

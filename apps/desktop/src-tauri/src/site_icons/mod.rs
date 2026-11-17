@@ -10,6 +10,7 @@ pub mod fetch;
 pub mod host;
 pub mod pick;
 pub mod queue;
+pub mod shape;
 
 #[cfg(test)]
 mod tests;

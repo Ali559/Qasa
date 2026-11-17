@@ -50,34 +50,44 @@ struct VaultListView: View {
         return keys.map { ($0, grouped[$0]!.sorted { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }) }
     }
 
+    /// Suggested, most recent, then every letter; each one card (design/README.md rule 6e).
+    private struct ListSection: Identifiable {
+        let id: String
+        let title: String
+        let rows: [VaultListRow]
+    }
+
+    private var sections: [ListSection] {
+        var out: [ListSection] = []
+        if selectedTab == .all, !suggestedRows.isEmpty {
+            out.append(ListSection(id: "suggested", title: suggestedProvider.context.title, rows: suggestedRows))
+        }
+        if !recentRows.isEmpty {
+            out.append(ListSection(id: "recent", title: L10n.tr("vault.mostRecent", locale: prefs.locale), rows: recentRows))
+        }
+        out += letterSections.map { ListSection(id: "letter-" + $0.letter, title: $0.letter, rows: $0.items) }
+        return out
+    }
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
                 AppMenuHeader(title: L10n.tr("vault.titleYours", locale: prefs.locale), onMenu: onOpenMenu)
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: QasaTokens.Space.formGap) {
                         searchField
                         tabChips
 
-                        if selectedTab == .all, !suggestedRows.isEmpty {
-                            sectionHeader(suggestedProvider.context.title)
-                            ForEach(suggestedRows) { row in
-                                rowLink(for: row)
-                            }
-                        }
-
-                        if !recentRows.isEmpty {
-                            sectionHeader(L10n.tr("vault.mostRecent", locale: prefs.locale))
-                            ForEach(recentRows) { row in
-                                rowLink(for: row)
-                            }
-                        }
-
-                        ForEach(letterSections, id: \.letter) { section in
-                            sectionHeader(section.letter)
-                            ForEach(section.items) { row in
-                                rowLink(for: row)
+                        if !sections.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
+                                    VaultSection(title: section.title, isFirst: index == 0) {
+                                        ForEach(section.rows) { row in
+                                            rowLink(for: row)
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -167,14 +177,6 @@ struct VaultListView: View {
         }
     }
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.qasa(14, weight: .semibold))
-            .foregroundColor(Theme.textSecondary)
-            .padding(.top, 8)
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
     private func rowLink(for row: VaultListRow) -> some View {
         NavigationLink {
             VaultItemDetailView(itemId: row.id) {
@@ -185,7 +187,7 @@ struct VaultListView: View {
                 editorMode = EditorPresentation(mode: .edit(row.id))
             } onDeleted: {}
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.vaultRow)
     }
 
     private func consumePendingLogin() {

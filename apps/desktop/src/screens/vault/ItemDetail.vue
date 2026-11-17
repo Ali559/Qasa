@@ -32,7 +32,7 @@ import { ProtectedItemGate } from '@/vault/protectedItemGate'
 import { removeItem, session } from '@/vault/session'
 import type { VaultPayload } from '@/vault/types'
 import { VARIANT_ICON } from '@/icons'
-import { iconHost, siteIconFor } from '@/vault/siteIcon'
+import { iconHost, siteIconFor, siteIconRing } from '@/vault/siteIcon'
 import ProtectedUnlockSheet from './ProtectedUnlockSheet.vue'
 import TotpCodeRow from './TotpCodeRow.vue'
 
@@ -167,6 +167,7 @@ const COLOR_KEY = (c: string) => `color.${c}`
 /** A login's hero (docs/site-icons.md): its site icon, else the calm letter. Other items
  *  keep their type symbol (iOS `heroGlyph`). */
 const heroSiteIcon = computed(() => (payload.value?.variant === 'login' ? siteIconFor(iconHost(payload.value.fields.website)) : null))
+const heroRing = computed(() => !!heroSiteIcon.value && siteIconRing(heroSiteIcon.value))
 const heroLetter = computed(() => (payload.value?.variant === 'login' ? siteLetter(row.value?.displayName ?? payload.value.fields.itemName) : null))
 </script>
 
@@ -191,9 +192,9 @@ const heroLetter = computed(() => (payload.value?.variant === 'login' ? siteLett
     <div v-else-if="payload && showsItem" class="scroll">
       <div class="column">
         <div class="hero">
-          <span v-if="heroSiteIcon" class="hero-icon site" aria-hidden="true">
-            <!-- size.heroSiteIconGlyph: 52. -->
-            <img :src="heroSiteIcon" width="52" height="52" alt="" draggable="false" />
+          <span v-if="heroSiteIcon" class="hero-icon site" :class="{ ring: heroRing }" aria-hidden="true">
+            <!-- The cached icon is already shaped for its circle: drawn filling it. -->
+            <img :src="heroSiteIcon" width="88" height="88" alt="" draggable="false" />
           </span>
           <span v-else-if="heroLetter" class="hero-icon letter" aria-hidden="true">{{ heroLetter }}</span>
           <span v-else class="hero-icon" :class="{ tinted: !!color }" :style="color ? { background: NOTE_COLOR_TILE[color], color: NOTE_COLOR_VALUE[color] } : undefined" aria-hidden="true">
@@ -389,16 +390,29 @@ const heroLetter = computed(() => (payload.value?.variant === 'login' ? siteLett
   border-color: transparent;
 }
 
-/* docs/site-icons.md: the site's icon at size.heroSiteIconGlyph on siteIconTile, 1px stroke ring. */
+/* docs/site-icons.md: the shaped icon filling the circle on siteIconTile, cut to the
+   circle; a glyph (pixel 11, 11 see-through) gets a 1px stroke ring drawn over its edge. */
 .hero-icon.site {
-  border-color: var(--stroke);
+  position: relative;
+  overflow: hidden;
+  border: 0;
   background: var(--site-icon-tile);
 }
 
 .hero-icon.site img {
   display: block;
-  width: var(--size-hero-site-icon-glyph);
-  height: var(--size-hero-site-icon-glyph);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-icon.site.ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: var(--size-stroke) solid var(--stroke);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 /* The calm letter: 36 bold, accent on cardMuted. */

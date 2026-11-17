@@ -14,6 +14,7 @@ import { useT } from '@/prefs'
 import { session } from '@/vault/session'
 import { toolsApi, type HealthReport } from '@/vault/tools'
 import VaultRow from '../vault/VaultRow.vue'
+import VaultSection from '../vault/VaultSection.vue'
 import BreachLockedCard from '../BreachLockedCard.vue'
 import { account } from '@/account/store'
 
@@ -100,15 +101,16 @@ function openItem(id: string) {
       <strong>{{ t(EMPTY[issues].title) }}</strong>
       <span>{{ t(EMPTY[issues].body) }}</span>
     </div>
-    <VaultRow
-      v-for="row in issueRows"
-      v-else
-      :key="row!.id"
-      :row="row!"
-      :selected="false"
-      @select="openItem(row!.id)"
-      @edit="openItem(row!.id)"
-    />
+    <VaultSection v-else>
+      <VaultRow
+        v-for="row in issueRows"
+        :key="row!.id"
+        :row="row!"
+        :selected="false"
+        @select="openItem(row!.id)"
+        @edit="openItem(row!.id)"
+      />
+    </VaultSection>
   </PageFrame>
 
   <!-- Overview -->

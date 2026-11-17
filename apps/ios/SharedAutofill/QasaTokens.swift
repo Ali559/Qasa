@@ -39,8 +39,8 @@ enum QasaTokens {
         static let rowIconButtonGlyph: CGFloat = 20
         static let itemTile: CGFloat = 48
         static let itemTileGlyph: CGFloat = 24
-        static let siteIconGlyph: CGFloat = 28
-        static let heroSiteIconGlyph: CGFloat = 52
+        static let vaultTile: CGFloat = 44
+        static let vaultTileGlyph: CGFloat = 22
         static let homeTile: CGFloat = 40
         static let homeTileGlyph: CGFloat = 22
         static let fab: CGFloat = 56
@@ -73,6 +73,9 @@ enum QasaTokens {
         static let rowVertical: CGFloat = 10
         static let rowIconGap: CGFloat = 14
         static let rowTextGap: CGFloat = 2
+        static let vaultRowVertical: CGFloat = 10
+        static let vaultRowHorizontal: CGFloat = 14
+        static let vaultSectionTop: CGFloat = 20
         static let sectionLabelGap: CGFloat = 8
         static let sectionInsetHorizontal: CGFloat = 14
         static let sectionInsetVertical: CGFloat = 4
@@ -141,6 +144,7 @@ enum QasaTokens {
         static let pressedOpacity: Double = 0.85
         static let disabledOpacity: Double = 0.45
         static let rowPressedOpacity: Double = 0.06
+        static let tabPressedOpacity: Double = 0.6
         static let toastVisible: Double = 2.5
         static let tourEnter: Animation = .spring(response: 0.45, dampingFraction: 0.82)
         static let tourDwell: Double = 4.2

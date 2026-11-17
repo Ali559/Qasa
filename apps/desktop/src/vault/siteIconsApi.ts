@@ -7,13 +7,23 @@ import { watch } from 'vue'
 
 import { prefs } from '@/prefs'
 
+import { mockSiteIcons } from './mock'
 import { clearSiteIcons, setSiteIcon, setSiteIconSource } from './siteIcon'
 
 let attached = false
 
 export function attachSiteIcons(): void {
-  if (attached || !('__TAURI_INTERNALS__' in window)) return
+  if (attached) return
   attached = true
+  if (!('__TAURI_INTERNALS__' in window)) {
+    // The browser mock (`bun run dev`): a few shaped sample icons, the rest show letters.
+    setSiteIconSource((hosts) => (prefs.siteIcons ? mockSiteIcons(hosts) : Promise.resolve({})))
+    watch(
+      () => prefs.siteIcons,
+      () => clearSiteIcons(),
+    )
+    return
+  }
   setSiteIconSource((hosts) =>
     prefs.siteIcons ? invoke<Record<string, string | null>>('site_icons_get', { hosts }) : Promise.resolve({}),
   )

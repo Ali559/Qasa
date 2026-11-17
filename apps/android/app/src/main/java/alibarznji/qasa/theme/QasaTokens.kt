@@ -64,8 +64,8 @@ object QasaTokens {
         val rowIconButtonGlyph: Dp = 20.dp
         val itemTile: Dp = 48.dp
         val itemTileGlyph: Dp = 24.dp
-        val siteIconGlyph: Dp = 28.dp
-        val heroSiteIconGlyph: Dp = 52.dp
+        val vaultTile: Dp = 44.dp
+        val vaultTileGlyph: Dp = 22.dp
         val homeTile: Dp = 40.dp
         val homeTileGlyph: Dp = 22.dp
         val fab: Dp = 56.dp
@@ -98,6 +98,9 @@ object QasaTokens {
         val rowVertical: Dp = 10.dp
         val rowIconGap: Dp = 14.dp
         val rowTextGap: Dp = 2.dp
+        val vaultRowVertical: Dp = 10.dp
+        val vaultRowHorizontal: Dp = 14.dp
+        val vaultSectionTop: Dp = 20.dp
         val sectionLabelGap: Dp = 8.dp
         val sectionInsetHorizontal: Dp = 14.dp
         val sectionInsetVertical: Dp = 4.dp
@@ -162,6 +165,7 @@ object QasaTokens {
         const val pressedOpacity: Float = 0.85f
         const val disabledOpacity: Float = 0.45f
         const val rowPressedOpacity: Float = 0.06f
+        const val tabPressedOpacity: Float = 0.6f
         const val toastVisibleMillis: Long = 2500L
         val tourEnter = QasaTokenSpring(0.45f, 0.82f)
         const val tourDwell: Float = 4.2f

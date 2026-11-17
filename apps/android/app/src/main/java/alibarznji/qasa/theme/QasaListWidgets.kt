@@ -40,11 +40,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.ImageBitmap
+import alibarznji.qasa.siteicons.SiteIcon
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.fillMaxSize
 
 /**
  * iOS `IconBadge`: a [QasaDimens.rowIconBadge] (36) circle (rule 8: every icon background is
@@ -366,10 +369,11 @@ fun StatBox(
 }
 
 /**
- * `VaultItemRow` — `VaultItemRow.swift`. 17pt padding, 12pt radius, 1pt `stroke`
- * border, `cardBackground`; 48x48 tile with an 8pt radius, `chrome` fill and
- * `strokeChrome` border, 18pt icon; 16pt gap; title 16 semibold and subtitle 14,
- * both single-line with ellipsis.
+ * A row of a vault list (design/README.md rule 6e): one slice of its section's card
+ * ([vaultSectionSegment]; [first] / [last] give its place, both true for a lone row),
+ * `vaultRowVertical` (10) / `vaultRowHorizontal` (14) padding, the `vaultTile` (44) circle,
+ * `rowIconGap` (14), title `vaultRowTitle` over subtitle `vaultRowSubtitle`, then the copy
+ * and [trailing] buttons. Pressing tints this row only, clipped to the card's corners.
  */
 @Composable
 fun VaultItemRow(
@@ -383,40 +387,41 @@ fun VaultItemRow(
     /** A login's calm letter ([siteLetterFor]): shown instead of [icon] when there's no [siteIcon]. */
     letter: String? = null,
     /** The login's own site icon (docs/site-icons.md); shown instead of [letter] when set. */
-    siteIcon: ImageBitmap? = null,
+    siteIcon: SiteIcon? = null,
     /** A note or card's own colour ([NoteColor]): the icon's tint and its tile fill. */
     itemColor: Pair<Color, Color>? = null,
+    /** The section's first row: the card's top corners, no divider above. */
+    first: Boolean = true,
+    /** The section's last row: the card's bottom corners. */
+    last: Boolean = true,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val c = qasaColors
-    val shape = RoundedCornerShape(QasaDimens.cornerRadius)
     QasaPressable(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().vaultSectionSegment(first, last),
+        pressRadius = 0.dp,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(c.cardBackground, shape)
-                .border(QasaDimens.stroke, c.stroke, shape)
-                .padding(QasaDimens.cardPadding),
+                .padding(horizontal = QasaTokens.Space.vaultRowHorizontal, vertical = QasaTokens.Space.vaultRowVertical),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ItemTile(icon = icon, letter = letter, siteIcon = siteIcon, itemColor = itemColor)
-            Spacer(Modifier.width(QasaDimens.gap))
+            Spacer(Modifier.width(QasaTokens.Space.rowIconGap))
             Column(Modifier.weight(1f)) {
                 Text(
                     title,
                     color = c.textPrimary,
-                    style = qasaText.rowTitle,
+                    style = qasaText.vaultRowTitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(QasaDimens.rowTextGap))
                 Text(
                     subtitle,
                     color = c.textSecondary,
-                    style = qasaText.bodyMedium,
+                    style = qasaText.vaultRowSubtitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -436,41 +441,55 @@ fun VaultItemRow(
 }
 
 /**
- * The 48 circle at the start of a [VaultItemRow] (docs/site-icons.md "What a tile shows"):
- * a login's site icon at `siteIconGlyph` on `siteIconTile` with a 1dp `stroke` ring; else
- * its letter, 18 bold `accent` on `cardMuted`; else the item's type icon.
+ * A login's own site icon in its circle (docs/site-icons.md "What a tile shows"): the cached
+ * PNG, already shaped for the circle, filling the whole [size] on `siteIconTile`, cut to the
+ * circle; a 1dp `stroke` ring on top only for a glyph ([SiteIcon.ring]). The vault list tile
+ * (44) and the detail hero (88).
  */
 @Composable
-private fun ItemTile(icon: ImageVector, letter: String?, siteIcon: ImageBitmap?, itemColor: Pair<Color, Color>?) {
+fun SiteIconTile(siteIcon: SiteIcon, size: Dp, modifier: Modifier = Modifier) {
     val c = qasaColors
     val shape = CircleShape
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(shape)
+            .background(c.siteIconTile, shape)
+            .then(if (siteIcon.ring) Modifier.border(QasaDimens.stroke, c.stroke, shape) else Modifier),
+    ) {
+        Image(
+            bitmap = siteIcon.bitmap,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+            filterQuality = FilterQuality.High,
+        )
+    }
+}
+
+/**
+ * The `vaultTile` (44) circle at the start of a [VaultItemRow] (docs/site-icons.md "What a
+ * tile shows"): a login's [SiteIconTile]; else its letter, 18 bold `accent` on `cardMuted`;
+ * else the item's type icon at `vaultTileGlyph` (22).
+ */
+@Composable
+private fun ItemTile(icon: ImageVector, letter: String?, siteIcon: SiteIcon?, itemColor: Pair<Color, Color>?) {
+    val c = qasaColors
+    val shape = CircleShape
+    val tile = QasaTokens.Size.vaultTile
     when {
-        siteIcon != null -> Box(
-            modifier = Modifier
-                .size(QasaTokens.Size.itemTile)
-                .clip(shape)
-                .background(c.siteIconTile, shape)
-                .border(QasaDimens.stroke, c.stroke, shape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Image(
-                bitmap = siteIcon,
-                contentDescription = null,
-                modifier = Modifier.size(QasaTokens.Size.siteIconGlyph),
-                filterQuality = FilterQuality.High,
-            )
-        }
+        siteIcon != null -> SiteIconTile(siteIcon, tile)
         letter != null -> Box(
-            modifier = Modifier.size(QasaTokens.Size.itemTile).background(c.cardMuted, shape),
+            modifier = Modifier.size(tile).background(c.cardMuted, shape),
             contentAlignment = Alignment.Center,
         ) {
             Text(letter, color = c.accent, style = qasaText.cardTitleBold, maxLines = 1)
         }
         else -> Box(
-            modifier = Modifier.size(QasaTokens.Size.itemTile).background(itemColor?.second ?: c.cardMuted, shape),
+            modifier = Modifier.size(tile).background(itemColor?.second ?: c.cardMuted, shape),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaTokens.Size.itemTileGlyph))
+            Icon(icon, null, tint = itemColor?.first ?: c.accent, modifier = Modifier.size(QasaTokens.Size.vaultTileGlyph))
         }
     }
 }

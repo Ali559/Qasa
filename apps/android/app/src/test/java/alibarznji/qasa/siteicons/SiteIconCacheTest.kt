@@ -84,4 +84,39 @@ class SiteIconCacheTest {
         assertNull(cache.read("github.com", key))
         assertFalse(dir.exists())
     }
+
+    @Test fun anUnshapedEntryIsShapedOnReadAndWrittenBack() {
+        val shapedPng = byteArrayOf(9, 9, 9)
+        var calls = 0
+        val shaping = SiteIconCache(dir, reshape = { calls++; shapedPng }) { now }
+        shaping.writeUnshapedForTest(SiteIconEntry("github.com", SiteIconStatus.Icon, now - 5, png, shape = 0), key)
+        val first = shaping.read("github.com", key)!!
+        assertArrayEquals(shapedPng, first.png)
+        assertEquals(SiteIconCache.SHAPE_VERSION, first.shape)
+        // Same status and time: nothing is fetched again for this.
+        assertEquals(SiteIconStatus.Icon, first.status)
+        assertEquals(now - 5, first.checkedAt)
+        assertFalse(shaping.isDue(first))
+        // Written back: the next read doesn't shape it again.
+        val second = shaping.read("github.com", key)!!
+        assertArrayEquals(shapedPng, second.png)
+        assertEquals(1, calls)
+    }
+
+    @Test fun anEntryThatCantBeShapedIsKeptAndTriedAgain() {
+        var calls = 0
+        val failing = SiteIconCache(dir, reshape = { calls++; null }) { now }
+        failing.writeUnshapedForTest(SiteIconEntry("github.com", SiteIconStatus.Icon, now, png, shape = 0), key)
+        assertArrayEquals(png, failing.read("github.com", key)!!.png)
+        assertArrayEquals(png, failing.read("github.com", key)!!.png)
+        assertEquals(2, calls)
+    }
+
+    @Test fun newEntriesAreRecordedShaped() {
+        var calls = 0
+        val shaping = SiteIconCache(dir, reshape = { calls++; it }) { now }
+        shaping.record("github.com", SiteIconStatus.Icon, png, key)
+        assertEquals(SiteIconCache.SHAPE_VERSION, shaping.read("github.com", key)!!.shape)
+        assertEquals(0, calls)
+    }
 }

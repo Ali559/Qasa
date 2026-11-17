@@ -14,6 +14,7 @@ import { session } from '@/vault/session'
 import { toolsApi, type HealthReport } from '@/vault/tools'
 import BreachLockedCard from './BreachLockedCard.vue'
 import VaultRow from './vault/VaultRow.vue'
+import VaultSection from './vault/VaultSection.vue'
 
 const t = useT()
 const report = ref<HealthReport | null>(null)
@@ -83,12 +84,12 @@ function openItem(id: string) {
 
     <div v-else class="checking"><span class="spinner" />{{ t('breached.checking') }}</div>
 
-    <div v-if="!locked && rows.length" class="rows">
+    <VaultSection v-if="!locked && rows.length">
       <div v-for="{ row, count } in rows" :key="row!.id" class="breached">
         <VaultRow :row="row!" :selected="false" @select="openItem(row!.id)" @edit="openItem(row!.id)" />
         <span class="seen">{{ t('breached.seenCount', number(count)) }}</span>
       </div>
-    </div>
+    </VaultSection>
 
     <CardContainer :padding="20">
       <div class="stack tight">
@@ -201,20 +202,28 @@ function openItem(id: string) {
   }
 }
 
-.rows {
+/* Each breached item is its row with the count under its text, one card for all of them
+   (design/README.md rule 6e), split by the vault list's divider. */
+.breached {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-.breached {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.breached + .breached::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: calc(var(--space-vault-row-horizontal) + var(--size-vault-tile) + var(--space-row-icon-gap));
+  inset-inline-end: 0;
+  border-top: var(--size-stroke) solid var(--stroke);
+  pointer-events: none;
 }
 
 .seen {
-  padding-inline-start: 64px;
+  margin-top: calc(-1 * var(--space-vault-row-vertical) + 2px);
+  padding-block-end: var(--space-vault-row-vertical);
+  padding-inline-start: calc(var(--space-vault-row-horizontal) + var(--size-vault-tile) + var(--space-row-icon-gap));
   font-size: var(--type-row-value-size);
   font-weight: 500;
   color: var(--danger);

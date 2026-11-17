@@ -270,3 +270,57 @@ export const mockVaultApi = {
     }
   },
 }
+
+/**
+ * Site icons for the browser mock (design work only): plain shapes drawn the way the core
+ * caches them after docs/site-icons.md step 7 (64 × 64, already shaped for the circle), so
+ * the tiles can be checked without the app. No brand marks: a few colours and shapes.
+ */
+const MOCK_ICON_SHAPES: Record<string, 'bleed' | 'edge' | 'glyph' | 'emptyGlyph'> = {
+  'facebook.com': 'bleed',
+  'instagram.com': 'glyph',
+  'fib.iq': 'edge',
+  'mail.google.com': 'glyph',
+  'asiacell.com': 'edge',
+  'netflix.com': 'bleed',
+  'slack.com': 'emptyGlyph',
+}
+
+function mockIcon(kind: 'bleed' | 'edge' | 'glyph' | 'emptyGlyph', hue: number): string | null {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = 64
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
+  if (kind === 'bleed') {
+    // A solid square favicon: kept as it is, the tile cuts its corners.
+    ctx.fillStyle = `hsl(${hue} 70% 45%)`
+    ctx.fillRect(0, 0, 64, 64)
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(26, 14, 12, 36)
+  } else if (kind === 'edge') {
+    // A wide solid logo on its own edge colour, the logo in the middle 48.
+    ctx.fillStyle = `hsl(${hue} 60% 30%)`
+    ctx.fillRect(0, 0, 64, 64)
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(12, 28, 40, 8)
+  } else if (kind === 'glyph') {
+    // A shape on a see-through background, in the middle 38.
+    ctx.fillStyle = `hsl(${hue} 75% 50%)`
+    ctx.beginPath()
+    ctx.moveTo(32, 13)
+    ctx.lineTo(51, 32)
+    ctx.lineTo(32, 51)
+    ctx.lineTo(13, 32)
+    ctx.fill()
+  }
+  return canvas.toDataURL('image/png')
+}
+
+export function mockSiteIcons(hosts: string[]): Promise<Record<string, string | null>> {
+  const out: Record<string, string | null> = {}
+  hosts.forEach((host) => {
+    const kind = MOCK_ICON_SHAPES[host]
+    out[host] = kind ? mockIcon(kind, [...host].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 0)) : null
+  })
+  return delay(out)
+}

@@ -97,9 +97,11 @@ const CSS = `
   display: grid; place-items: center; box-sizing: border-box; background: var(--card-muted); color: var(--accent);
   font-weight: 700; font-size: calc(var(--size-icon-badge) * 18 / 48); line-height: 1;
 }
-/* docs/site-icons.md: the site's icon (28 of 48) on siteIconTile with a 1px stroke ring. */
-.tile.site { background: var(--site-icon-tile); border: var(--size-stroke) solid var(--stroke); }
-.tile.site canvas { display: block; width: calc(var(--size-icon-badge) * 28 / 48); height: calc(var(--size-icon-badge) * 28 / 48); }
+/* docs/site-icons.md: the shaped icon filling the circle on siteIconTile, cut to the
+   circle; only a glyph (pixel 11, 11 see-through) gets the 1px stroke ring over its edge. */
+.tile.site { position: relative; overflow: hidden; background: var(--site-icon-tile); }
+.tile.site canvas { display: block; width: 100%; height: 100%; border-radius: 50%; }
+.tile.site.ring::after { content: ""; position: absolute; inset: 0; border: var(--size-stroke) solid var(--stroke); border-radius: 50%; pointer-events: none; }
 .text { display: flex; flex-direction: column; gap: var(--space-row-text-gap); min-width: 0; }
 .title, .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title { font-size: var(--type-row-title-size); font-weight: var(--type-row-title-weight); }
@@ -122,15 +124,18 @@ const CSS = `
 .menu.pending { visibility: hidden; }
 `
 
-/** The side of the icons the desktop sends (docs/site-icons.md step 6). */
+/** The side of the icons the desktop sends (docs/site-icons.md steps 6–7, already shaped
+ *  for the circle). */
 const SITE_ICON_PX = 64
+/** The pixel that tells a glyph (see-through there, gets the ring) from a bleed or edge icon. */
+const RING_PROBE = 11
 
 /**
  * Draws a login's cached icon (PNG, base64) into a `<canvas>`. Decoded with
  * `createImageBitmap` rather than an `<img src="data:…">`, which a page's CSP `img-src`
  * can block. False on any error: the tile keeps its letter.
  */
-async function siteIconCanvas(doc: Document, base64: string): Promise<HTMLCanvasElement | null> {
+async function siteIconCanvas(doc: Document, base64: string): Promise<{ canvas: HTMLCanvasElement; ring: boolean } | null> {
   try {
     const binary = atob(base64)
     const bytes = new Uint8Array(binary.length)
@@ -143,8 +148,14 @@ async function siteIconCanvas(doc: Document, base64: string): Promise<HTMLCanvas
       canvas.setAttribute('aria-hidden', 'true')
       const ctx = canvas.getContext('2d')
       if (!ctx) return null
+      // The whole icon, filling the tile, cut to its circle.
+      ctx.beginPath()
+      ctx.arc(SITE_ICON_PX / 2, SITE_ICON_PX / 2, SITE_ICON_PX / 2, 0, Math.PI * 2)
+      ctx.clip()
       ctx.drawImage(bitmap, 0, 0, SITE_ICON_PX, SITE_ICON_PX)
-      return canvas
+      // docs/site-icons.md: the ring only for a glyph, whose pixel (11, 11) is see-through.
+      const ring = ctx.getImageData(RING_PROBE, RING_PROBE, 1, 1).data[3] < 128
+      return { canvas, ring }
     } finally {
       bitmap.close()
     }
@@ -456,11 +467,12 @@ export class Overlay {
         // The calm letter until the site's icon is decoded (and for good if it can't be).
         tile.textContent = siteLetter(item.title)
         if (item.icon) {
-          void siteIconCanvas(this.doc, item.icon).then((canvas) => {
-            if (!canvas) return
+          void siteIconCanvas(this.doc, item.icon).then((icon) => {
+            if (!icon) return
             tile.textContent = ''
             tile.classList.add('site')
-            tile.append(canvas)
+            if (icon.ring) tile.classList.add('ring')
+            tile.append(icon.canvas)
           })
         }
         const text = this.doc.createElement('span')

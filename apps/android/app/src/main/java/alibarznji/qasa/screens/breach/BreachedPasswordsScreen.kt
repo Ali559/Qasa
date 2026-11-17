@@ -149,14 +149,19 @@ private fun BreachedList(report: PasswordHealthReport, onOpen: (String) -> Unit)
         )
         Text(stringResource(R.string.breached_change_hint), color = c.textSecondary, style = qasaText.bodyMedium)
         Spacer(Modifier.height(QasaDimens.spaceSmall))
-        report.breachedItems.forEach { row ->
-            VaultItemRow(
-                title = row.displayName,
-                subtitle = stringResource(R.string.breached_seen_count, format.format(report.breachCounts[row.id] ?: 0)),
-                icon = QasaIcons.Login,
-                letter = siteLetterFor(row.displayName),
-                onClick = { onOpen(row.id) },
-            )
+        // One card for the affected logins (design/README.md rule 6e), no gap between rows.
+        Column {
+            report.breachedItems.forEachIndexed { i, row ->
+                VaultItemRow(
+                    title = row.displayName,
+                    subtitle = stringResource(R.string.breached_seen_count, format.format(report.breachCounts[row.id] ?: 0)),
+                    icon = QasaIcons.Login,
+                    letter = siteLetterFor(row.displayName),
+                    onClick = { onOpen(row.id) },
+                    first = i == 0,
+                    last = i == report.breachedItems.lastIndex,
+                )
+            }
         }
     }
 }
