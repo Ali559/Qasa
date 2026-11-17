@@ -42,7 +42,7 @@ const asked = new Set<string>()
 let pending = new Set<string>()
 let source: SiteIconSource | null = null
 
-/** Set by the desktop app (`siteIconsApi.ts`); in the extension and the browser mock nothing asks. */
+/** Set by the desktop app (`siteIconsApi.ts`; sample icons in the browser mock); in the extension nothing asks. */
 export function setSiteIconSource(next: SiteIconSource | null): void {
   source = next
 }
@@ -96,4 +96,44 @@ export function clearSiteIcons(): void {
 /** A cached icon the desktop sent as base64 PNG (the extension's items) as a data URL, or null. */
 export function pngDataUrl(base64: string | null | undefined): string | null {
   return base64 && /^[A-Za-z0-9+/]+={0,2}$/.test(base64) ? `data:image/png;base64,${base64}` : null
+}
+
+/** The pixel a tile reads to decide on its ring (docs/site-icons.md "What a tile shows"). */
+export const RING_PROBE = 11
+
+/**
+ * Whether a shaped 64 × 64 icon gets the 1px stroke ring: only a glyph, whose pixel
+ * (11, 11) is see-through (alpha < 128). A bleed or edge icon is its own solid circle.
+ * `rgba` is the image's pixels, `width` its width (64).
+ */
+export function needsRing(rgba: ArrayLike<number>, width: number): boolean {
+  return rgba[(RING_PROBE * width + RING_PROBE) * 4 + 3] < 128
+}
+
+/** icon data URL → whether it gets the ring; missing while it is being decoded. */
+const rings = reactive(new Map<string, boolean>())
+const decoding = new Set<string>()
+
+/** Whether the icon at `url` gets the ring. False until it has been decoded (once per URL). */
+export function siteIconRing(url: string): boolean {
+  const ring = rings.get(url)
+  if (ring !== undefined) return ring
+  if (!decoding.has(url) && typeof Image !== 'undefined') {
+    decoding.add(url)
+    const img = new Image()
+    img.src = url
+    img
+      .decode()
+      .then(() => {
+        const canvas = document.createElement('canvas')
+        canvas.width = canvas.height = 64
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        if (!ctx) return
+        ctx.drawImage(img, 0, 0, 64, 64)
+        rings.set(url, needsRing(ctx.getImageData(0, 0, 64, 64).data, 64))
+      })
+      .catch(() => {})
+      .finally(() => decoding.delete(url))
+  }
+  return false
 }

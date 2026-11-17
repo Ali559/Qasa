@@ -150,16 +150,22 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   text-align: start;
   cursor: pointer;
   transition:
-    background-color var(--motion-fast),
-    color var(--motion-fast);
+    color var(--motion-fast),
+    opacity var(--motion-press);
 }
 
+/* design/README.md rule 8: navigation buttons have no hover or pressed fill. Hover only
+   brightens the label; pressing dims glyph and label to tabPressedOpacity. */
 .tab:hover {
-  background: var(--card-muted);
   color: var(--text-primary);
 }
 
-.tab.active {
+.tab:active {
+  opacity: var(--motion-tab-pressed-opacity);
+}
+
+.tab.active,
+.tab.active:hover {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
   font-weight: 600;

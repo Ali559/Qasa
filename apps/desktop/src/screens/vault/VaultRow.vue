@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // iOS `VaultItemRow`: tile, name and subtitle, a copy button for the primary value and
 // the ⋯ action sheet titled with the item's name (copy actions, 2FA code, open website,
-// edit, delete). Clicking the row selects it for the detail pane.
+// edit, delete). Clicking the row selects it for the detail pane. Rows sit in a
+// `VaultSection` card (design/README.md rule 6e): no card of their own, a divider between
+// them, and the hover, press and selected tints clipped to the card's corners.
 import { computed, ref } from 'vue'
 
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -88,7 +90,8 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
 
 <template>
   <div class="row" :class="{ selected }" role="button" tabindex="0" @click="emit('select')" @keydown.enter.self="emit('select')">
-    <ItemTile :variant="row.variant" :name="row.displayName" :website="row.siteHost" :color="row.color" />
+    <!-- size.vaultTile: 44. -->
+    <ItemTile :variant="row.variant" :name="row.displayName" :website="row.siteHost" :color="row.color" :size="44" />
     <span class="text">
       <span class="name">{{ row.displayName }}</span>
       <!-- bdi: a phone number, card digits or email keeps its own order in Arabic and Kurdish (iOS does the same). -->
@@ -115,33 +118,70 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
 </template>
 
 <style scoped>
+/* design/README.md rule 6e: 10 top and bottom, 14 at the sides, the 44 tile, 14 to the
+   text; 64 high. */
 .row {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 17px;
-  border: var(--size-stroke) solid var(--stroke);
-  border-radius: var(--radius-card);
-  background: var(--card-background);
+  gap: var(--space-row-icon-gap);
+  padding: var(--space-vault-row-vertical) var(--space-vault-row-horizontal);
   cursor: pointer;
-  transition:
-    border-color var(--motion-fast),
-    background-color var(--motion-fast);
+  transition: background-color var(--motion-fast);
 }
 
-.row:hover {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--stroke));
+/* The divider: 1px stroke from the text's leading edge (14 + 44 + 14 = 72) to the card's
+   trailing edge; none above the first row. */
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: calc(var(--space-vault-row-horizontal) + var(--size-vault-tile) + var(--space-row-icon-gap));
+  inset-inline-end: 0;
+  border-top: var(--size-stroke) solid var(--stroke);
+  pointer-events: none;
+}
+
+/* The hover and press wash (rowPressedOpacity) covers this row only; the card clips it. */
+.row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-press);
+}
+
+.row:hover::after,
+.row:active::after {
+  opacity: var(--motion-row-pressed-opacity);
 }
 
 .row.selected {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, var(--card-background));
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* The selected fill and focus ring follow the card's inner corners. */
+.row:first-child {
+  border-start-start-radius: calc(var(--radius-group) - var(--size-stroke));
+  border-start-end-radius: calc(var(--radius-group) - var(--size-stroke));
+}
+
+.row:last-child {
+  border-end-start-radius: calc(var(--radius-group) - var(--size-stroke));
+  border-end-end-radius: calc(var(--radius-group) - var(--size-stroke));
 }
 
 .text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-row-text-gap);
   flex: 1;
   min-width: 0;
 }
@@ -154,21 +194,25 @@ const subtitle = computed(() => localizedSubtitle(props.row.subtitle, t))
 }
 
 .name {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--type-vault-row-title-size);
+  font-weight: var(--type-vault-row-title-weight);
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: var(--type-vault-row-subtitle-size);
+  font-weight: var(--type-vault-row-subtitle-weight);
   color: var(--text-secondary);
 }
 
+/* size.rowIconButton 36, glyph 20. */
 .icon-button {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: var(--size-row-icon-button);
+  height: var(--size-row-icon-button);
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;

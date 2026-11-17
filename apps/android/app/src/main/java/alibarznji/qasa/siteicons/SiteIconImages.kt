@@ -12,10 +12,10 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 /**
- * Decodes a downloaded icon and normalises it (docs/site-icons.md "The request", steps 5–6):
+ * Decodes a downloaded icon and normalises it (docs/site-icons.md "The request", steps 5–7):
  * PNG, ICO (its largest image), JPEG, GIF (first frame) and WebP through [BitmapFactory];
  * anything under 16 × 16 is refused; the result is fitted into 64 × 64 (aspect kept,
- * centred, transparent padding) and encoded as PNG.
+ * centred, transparent padding), shaped for its circle ([SiteIconShaper]) and encoded as PNG.
  */
 object SiteIconImages {
     const val SIZE_PX = 64
@@ -31,14 +31,46 @@ object SiteIconImages {
         }
     }
 
-    /** An installed app's icon at the same 64 × 64, for `androidapp://` logins. */
+    /** An installed app's icon at the same 64 × 64, shaped like a site's, for `androidapp://` logins. */
     fun fromDrawable(drawable: Drawable): Bitmap {
         val out = Bitmap.createBitmap(SIZE_PX, SIZE_PX, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
         drawable.setBounds(0, 0, SIZE_PX, SIZE_PX)
         drawable.draw(canvas)
+        applyShape(out)
         return out
     }
+
+    /**
+     * A cached PNG written before step 7 existed, shaped now (docs/site-icons.md "Cache");
+     * null when it can't be decoded.
+     */
+    fun reshape(png: ByteArray): ByteArray? {
+        val decoded = BitmapFactory.decodeByteArray(png, 0, png.size) ?: return null
+        try {
+            if (decoded.width != SIZE_PX || decoded.height != SIZE_PX) return fit(decoded)
+            val copy = decoded.copy(Bitmap.Config.ARGB_8888, true) ?: return null
+            return try {
+                applyShape(copy)
+                encode(copy)
+            } finally {
+                copy.recycle()
+            }
+        } finally {
+            decoded.recycle()
+        }
+    }
+
+    /** Step 7 in place on a mutable 64 × 64 bitmap. */
+    private fun applyShape(bitmap: Bitmap) {
+        val pixels = IntArray(SIZE_PX * SIZE_PX)
+        bitmap.getPixels(pixels, 0, SIZE_PX, 0, 0, SIZE_PX, SIZE_PX)
+        val shaped = SiteIconShaper.shape(pixels)
+        bitmap.setPixels(shaped.pixels, 0, SIZE_PX, 0, 0, SIZE_PX, SIZE_PX)
+    }
+
+    private fun encode(bitmap: Bitmap): ByteArray =
+        ByteArrayOutputStream().also { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
 
     private fun decode(bytes: ByteArray): Bitmap? {
         // An ICO holds several images: decode the largest one ourselves when it's a PNG or
@@ -94,7 +126,8 @@ object SiteIconImages {
             Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
         )
         return try {
-            ByteArrayOutputStream().also { out.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+            applyShape(out)
+            encode(out)
         } finally {
             out.recycle()
         }

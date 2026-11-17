@@ -221,17 +221,19 @@ struct CollectionDetailView: View {
                     )
                     .padding(.top, 40)
                 } else {
-                    ForEach(collectionItems) { row in
-                        NavigationLink {
-                            VaultItemDetailView(itemId: row.id) {
-                                editorMode = EditorPresentation(mode: .edit(row.id))
-                            } onDeleted: {}
-                        } label: {
-                            VaultItemRow(row: row) {
-                                editorMode = EditorPresentation(mode: .edit(row.id))
-                            } onDeleted: {}
+                    VaultSectionCard {
+                        ForEach(collectionItems) { row in
+                            NavigationLink {
+                                VaultItemDetailView(itemId: row.id) {
+                                    editorMode = EditorPresentation(mode: .edit(row.id))
+                                } onDeleted: {}
+                            } label: {
+                                VaultItemRow(row: row) {
+                                    editorMode = EditorPresentation(mode: .edit(row.id))
+                                } onDeleted: {}
+                            }
+                            .buttonStyle(.vaultRow)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }

@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { siteLetter } from './present'
-import { iconHost, pngDataUrl } from './siteIcon'
+import { iconHost, needsRing, pngDataUrl } from './siteIcon'
 
 interface Vectors {
   host: Array<{ website: string; host: string | null }>
@@ -30,5 +30,20 @@ describe('site icon vectors', () => {
     expect(pngDataUrl('iVBORw0KGgo=')).toBe('data:image/png;base64,iVBORw0KGgo=')
     expect(pngDataUrl('"><script>')).toBeNull()
     expect(pngDataUrl(null)).toBeNull()
+  })
+})
+
+describe('the ring', () => {
+  // Only a glyph gets the 1px stroke ring: pixel (11, 11) of the shaped icon is see-through.
+  const icon = (alphaAt11: number) => {
+    const rgba = new Uint8ClampedArray(64 * 64 * 4).fill(255)
+    rgba[(11 * 64 + 11) * 4 + 3] = alphaAt11
+    return rgba
+  }
+  it('is drawn for a see-through probe pixel only', () => {
+    expect(needsRing(icon(0), 64)).toBe(true)
+    expect(needsRing(icon(127), 64)).toBe(true)
+    expect(needsRing(icon(128), 64)).toBe(false)
+    expect(needsRing(icon(255), 64)).toBe(false)
   })
 })

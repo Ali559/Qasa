@@ -10,7 +10,7 @@ import alibarznji.qasa.theme.MintFab
 import alibarznji.qasa.theme.QasaDimens
 import alibarznji.qasa.theme.QasaTokens
 import alibarznji.qasa.theme.QasaIcons
-import alibarznji.qasa.theme.SectionLabel
+import alibarznji.qasa.theme.VaultSectionLabel
 import alibarznji.qasa.theme.ThemedTextField
 import alibarznji.qasa.theme.qasaColors
 import alibarznji.qasa.vault.BiometricGateEffect
@@ -35,7 +35,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -112,9 +112,11 @@ internal fun VaultListContent(
     }
 
     val rowContent: LazyListScope.(String, List<VaultListRow>) -> Unit = { keyPrefix, sectionRows ->
-        items(sectionRows, key = { keyPrefix + it.id }) { row ->
+        itemsIndexed(sectionRows, key = { _, it -> keyPrefix + it.id }) { i, row ->
             VaultListItemRow(
                 row = row,
+                first = i == 0,
+                last = i == sectionRows.lastIndex,
                 subtitleFallback = stringResource(row.kind.chipLabel),
                 loadPayload = vm::loadPayload,
                 onOpen = { onOpenDetail(row.id) },
@@ -146,8 +148,8 @@ internal fun VaultListContent(
                     .weight(1f)
                     .padding(horizontal = QasaDimens.screenPadding),
                 contentPadding = PaddingValues(top = QasaTokens.Space.pageTop),
-                verticalArrangement = Arrangement.spacedBy(QasaDimens.gapMedium),
             ) {
+                // Rule 6e: no gap between a section's rows; each label carries its own spacing.
                 item {
                     ThemedTextField(
                         value = query,
@@ -158,7 +160,9 @@ internal fun VaultListContent(
                 }
                 item {
                     Row(
-                        Modifier.horizontalScroll(rememberScrollState()),
+                        Modifier
+                            .padding(top = QasaDimens.gapMedium)
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(QasaDimens.contentGap),
                     ) {
                         tabs.forEachIndexed { i, k ->
@@ -171,21 +175,26 @@ internal fun VaultListContent(
                     }
                 }
                 val suggestedTitle = provider.context.titleRes
+                var firstSection = true
+                fun LazyListScope.section(key: String, label: @Composable () -> String, keyPrefix: String, sectionRows: List<VaultListRow>) {
+                    val isFirst = firstSection
+                    firstSection = false
+                    item(key = "h-$key") { VaultSectionLabel(label(), first = isFirst) }
+                    rowContent(keyPrefix, sectionRows)
+                }
                 if (sections.suggested.isNotEmpty() && suggestedTitle != null) {
-                    item(key = "h-suggested") { SectionLabel(stringResource(suggestedTitle)) }
-                    rowContent("s-", sections.suggested)
+                    section("suggested", { stringResource(suggestedTitle) }, "s-", sections.suggested)
                 }
                 if (sections.recent.isNotEmpty()) {
-                    item(key = "h-recent") { SectionLabel(stringResource(R.string.vault_mostrecent)) }
-                    rowContent("r-", sections.recent)
+                    section("recent", { stringResource(R.string.vault_mostrecent) }, "r-", sections.recent)
                 }
                 sections.letters.forEach { (letter, sectionRows) ->
-                    item(key = "h-$letter") { SectionLabel(letter) }
-                    rowContent("", sectionRows)
+                    section(letter, { letter }, "", sectionRows)
                 }
                 if (sections.filtered.isEmpty()) {
                     item {
                         EmptyState(
+                            modifier = Modifier.padding(top = QasaDimens.gapMedium),
                             title = stringResource(R.string.vault_emptytitle),
                             // iOS has only the empty-vault hint; Android also explains an
                             // empty search (iOS will gain it later).

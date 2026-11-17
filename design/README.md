@@ -181,6 +181,23 @@ A change that only one app picks up is not done.
      Hello started by itself, and the sheet as a centred card.
    - No vault on the device yet (create or pair) keeps the welcome pages.
 
+6e. **The vault list** (Phase 11, chosen 2026-11-17, option C in `previews/vault-list.html`).
+   The Passwords page, a collection's items and any other list of vault items:
+   - Each **section** (Suggested, Most recent, every letter) is one card (`cardBackground`,
+     1pt `stroke`, `radius.group` 20). Its label sits above it: `sectionLabel` (12 semibold)
+     in `textSecondary`, `space.vaultSectionTop` (20) above, `sectionLabelGap` (8) below,
+     indented 4. The first section's top gap is the list's normal `formGap`.
+   - **Rows** inside a section: `space.vaultRowVertical` (10) top and bottom,
+     `vaultRowHorizontal` (14) at the sides, the tile `size.vaultTile` (44, glyph
+     `vaultTileGlyph` 22), gap `rowIconGap` (14), title `vaultRowTitle` over subtitle
+     `vaultRowSubtitle`, then the copy and ⋯ buttons (`rowIconButton` 36). The row's height comes from these
+     (about 65); nothing sets it.
+   - A 1pt `stroke` **divider** between rows, from the text's leading edge
+     (`vaultRowHorizontal` + `vaultTile` + `rowIconGap` = 72) to the card's trailing edge;
+     none above the first row or below the last.
+   - Pressing a row tints that row only (`rowPressedOpacity`), clipped to the card's corners
+     for the first and last row. No gap between rows.
+
 7. **Motion.** Use the named timings in `motion`: `press` 120 ms ease-out, `standard` 220 ms
    ease-out, `fast` 180 ms ease-in-out, springs `toggle` / `toast`. iOS ease-out is
    `cubic-bezier(0, 0, 0.58, 1)`; Android uses `QasaTokens.Easings`, never M3's default
@@ -191,9 +208,12 @@ A change that only one app picks up is not done.
    extension. No app uses SF Symbols, Material icons or Lucide. **Sizes** (Phase 2,
    2026-11-16, option B in `previews/icon-sizes.html`): a glyph fills about half its box.
    Item tile `size.itemTile` 48 / `itemTileGlyph` 24. A login's tile shows its **site's own
-   icon** (`siteIconGlyph` 28 on `siteIconTile` with a 1pt `stroke` ring; hero
-   `heroSiteIconGlyph` 52), else the **calm letter** (accent on `cardMuted`); never a bundled
-   brand mark or a brand colour (Phase 7, 2026-11-16; `docs/site-icons.md`); icon badge 36 / `iconBadgeGlyph` 20;
+   icon** (on `siteIconTile`, filling the tile, a 1pt `stroke` ring only round a glyph; the hero at 88),
+   else the **calm letter** (accent on `cardMuted`); never a bundled
+   brand mark or a brand colour (Phase 7, 2026-11-16; `docs/site-icons.md`). The cached icon
+   is shaped for its circle once, when it is saved (Phase 11: a solid icon fills the circle,
+   a wide solid logo sits on its own edge colour, a glyph keeps the white circle), and every
+   app draws it filling the tile; icon badge 36 / `iconBadgeGlyph` 20;
    home tile `homeTile` 40 / `homeTileGlyph` 22; a row's plain icon buttons (copy, ⋯)
    `rowIconButton` 36 / `rowIconButtonGlyph` 20. Field icon buttons stay 32 / 16, the tab
    bar 22. **The add button** is a `size.fab` (56) accent circle with the plain plus
@@ -202,7 +222,11 @@ A change that only one app picks up is not done.
    item tiles, icon badges, Home tiles, the item hero, the Home bell, payment and confirm
    badges. An icon with no fill (tab bar, row buttons, field buttons) has no shape. A navigation tab's
    icon is the linear glyph, and the filled glyph (`.fill`, Solar Bold) while it is the
-   active tab. To add an icon: name it in `icons.json`, run `import_solar.py`, then
+   active tab. **Navigation buttons have no pressed or hover fill** (Phase 11, 2026-11-17):
+   the tab bar on iOS and Android and the desktop sidebar show no grey ripple, highlight or
+   hover background. While pressed, the tab's glyph and label dim to
+   `motion.tabPressedOpacity` (0.6); on hover the desktop only changes the label colour to
+   `textPrimary`. The selected desktop page keeps its light accent fill. To add an icon: name it in `icons.json`, run `import_solar.py`, then
    `generate.py`. Solar is CC BY 4.0: every app credits "Icons: Solar by 480 Design" on its
    licences screen (`assets/icons/LICENSE.md`).
    **One meaning, one icon, on every app**: personal info `identity` (as ID documents), Delete

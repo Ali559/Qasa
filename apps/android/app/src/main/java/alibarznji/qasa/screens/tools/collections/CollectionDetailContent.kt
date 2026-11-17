@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -116,11 +117,13 @@ internal fun CollectionDetailContent(
                     top = QasaTokens.Space.pageTop,
                     bottom = QasaDimens.scrollTail,
                 ),
-                verticalArrangement = Arrangement.spacedBy(QasaDimens.gapSmall),
             ) {
-                items(items, key = { it.id }) { row ->
+                // One card for the whole list (design/README.md rule 6e).
+                itemsIndexed(items, key = { _, it -> it.id }) { i, row ->
                     VaultListItemRow(
                         row = row,
+                        first = i == 0,
+                        last = i == items.lastIndex,
                         subtitleFallback = stringResource(row.kind.chipLabel),
                         loadPayload = vm::loadPayload,
                         onOpen = { onOpenItem(row.id) },

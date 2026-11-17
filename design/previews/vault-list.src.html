@@ -1,0 +1,223 @@
+<title>Qasa Vault List</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Vault list preview (2026-11-17): tighter rows, one card per section, no grey press on nav
+   buttons, site icons that always sit as a clean circle. Colours are design/tokens.json.
+   Built by build.py (inlines assets/icons/svg). */
+:root {
+  --bg: #FBF6F0; --card: #FFFFFF; --muted: #F3EAF7; --stroke: #E6E1E1; --siteTile: #FFFFFF;
+  --accent: #722F99; --onAccent: #FFFFFF; --text: #2A1F33; --text2: #6E6475; --text3: #A39DA3; --frame: #2A1F33;
+  --blue: #2F67D0; --blueTile: #E2EBFB; --mint: #1E8F6C; --mintTile: #DDF2EA; --press: rgba(0,0,0,.10);
+  --font: "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D; --siteTile: #F2F1F3;
+  --accent: #B67FDB; --onAccent: #22102F; --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; --press: rgba(255,255,255,.14); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1C1D1F; --card: #26272A; --muted: #323337; --stroke: #38393D; --siteTile: #F2F1F3;
+  --accent: #B67FDB; --onAccent: #22102F; --text: #F2F1F3; --text2: #C5C1C1; --text3: #8D8D92; --frame: #0E0E10;
+  --blue: #80ABF6; --blueTile: #23304A; --mint: #4FD1A5; --mintTile: #1F3A31; --press: rgba(255,255,255,.14); color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.5; margin: 0; padding: 28px 16px 48px; }
+.page { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+header p, .note { margin: 4px 0 0; color: var(--text2); max-width: 74ch; font-size: 15px; }
+h3 { font-size: 18px; margin: 10px 0 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.seg { display: inline-flex; flex-wrap: wrap; background: var(--muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--text2); padding: 5px 14px; border-radius: 7px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--text); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.opt h2 { font-size: 17px; margin: 0; }
+.opt .sub { color: var(--text2); font-size: 13px; margin: 0 0 10px; min-height: 60px; }
+.phone { background: var(--bg); border: 8px solid var(--frame); border-radius: 36px; overflow: hidden; position: relative;
+  height: 700px; max-width: 340px; margin: 0 auto; display: flex; flex-direction: column; }
+.screen { flex: 1; padding: 8px 20px 0; overflow: hidden; }
+.title { font-size: 20px; font-weight: 700; margin: 6px 0 14px; }
+.search { height: 48px; border-radius: 10px; background: var(--card); border: 1px solid var(--stroke); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: var(--text3); font-size: 15px; }
+.chips { display: flex; gap: 8px; margin: 16px 0 0; }
+.chip { padding: 4px 14px; border-radius: 999px; border: 1px solid var(--stroke); font-size: 13px; color: var(--text2); white-space: nowrap; }
+.chip.on { background: var(--accent); color: var(--onAccent); border-color: var(--accent); font-weight: 600; }
+.sec { font-size: var(--secSize); font-weight: 600; color: var(--text2); margin: var(--secTop) 4px var(--secGap); }
+
+/* Rows. --pad / --gap / --tile are set per option. */
+.row { display: flex; align-items: center; gap: 14px; padding: var(--padV) var(--padH); position: relative; }
+.txt { flex: 1; min-width: 0; }
+.name, .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.name { font-weight: 600; font-size: 16px; }
+.meta { color: var(--text2); font-size: 14px; unicode-bidi: plaintext; text-align: start; }
+.rbtn { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text2); flex: none; margin-inline: -4px; }
+.card { background: var(--card); border: 1px solid var(--stroke); border-radius: 20px; }
+/* Today: every row is its own card. */
+.loose .row { margin-bottom: 16px; }
+/* Grouped: one card per section, a divider between rows that starts after the tile. */
+.group { overflow: hidden; }
+.group .row + .row::before { content: ""; position: absolute; top: 0; inset-inline: calc(var(--padH) + var(--tile) + 14px) 0; border-top: 1px solid var(--stroke); }
+
+.tile { width: var(--tile); height: var(--tile); border-radius: 50%; display: grid; place-items: center; flex: none; overflow: hidden; position: relative;
+  background: var(--muted); color: var(--accent); font-weight: 700; font-size: 18px; }
+.tile.blue { background: var(--blueTile); color: var(--blue); }
+.tile.mint { background: var(--mintTile); color: var(--mint); }
+.tile.site { background: var(--siteTile); box-shadow: inset 0 0 0 1px var(--stroke); }
+.tile.site img { width: calc(var(--tile) * 28 / 48); height: calc(var(--tile) * 28 / 48); object-fit: contain; display: block; }
+.tile.site.soft img { border-radius: 22%; }
+.tile.bleed, .tile.edge { box-shadow: none; }
+.tile.edge img { width: 76%; height: 76%; }
+.tile.bleed img { width: 100%; height: 100%; object-fit: cover; }
+
+.fab { position: absolute; bottom: 82px; inset-inline-end: 18px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--onAccent); box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+.tabs { height: 66px; border-top: 1px solid var(--stroke); background: var(--card); display: flex; flex: none; padding: 4px 6px; }
+.tabs button { all: unset; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text3); gap: 2px; border-radius: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tabs button.on { color: var(--accent); font-weight: 600; }
+/* Today on Android: the system ripple leaves a grey blob on the pressed tab. */
+.ripple .tabs button:active, .ripple .tabs button.pressed { background: var(--press); }
+/* New: no fill when pressed; the glyph dims a little while the finger is down. */
+.still .tabs button:active, .still .tabs button.pressed { opacity: .6; }
+svg.i { display: block; }
+
+/* Favicon table */
+.fav { display: grid; grid-template-columns: minmax(150px, 1.4fr) repeat(2, minmax(80px, 1fr)); gap: 0; border-radius: 20px; overflow: hidden; border: 1px solid var(--stroke); background: var(--card); max-width: 720px; }
+.fav > div { padding: 12px 14px; display: flex; align-items: center; gap: 12px; font-size: 14px; border-top: 1px solid var(--stroke); }
+.fav > .h { border-top: 0; font-weight: 600; font-size: 13px; color: var(--text2); }
+.fav small { display: block; color: var(--text2); font-size: 12px; }
+.fav .c { justify-content: center; }
+.fav .tile { --tile: 48px; }
+</style>
+
+<div class="page">
+  <header>
+    <h1>Vault list: tighter rows, grouped sections</h1>
+    <p>The Passwords page as it is today, next to two ways of tightening it. In B and C each section (Suggested, Most recent, every letter) is one card and its rows are split by a divider. The tab bar has no grey fill when you press a tab, and site icons always sit as a clean circle. Press a tab in each phone to feel the difference.</p>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="theme"><button data-v="light">Light</button><button data-v="dark" aria-pressed="true">Dark</button></div>
+    <div class="seg" id="lang"><button data-v="en" aria-pressed="true">English</button><button data-v="ckb">کوردی</button></div>
+    <div class="seg" id="press"><button data-v="off" aria-pressed="true">Tabs at rest</button><button data-v="on">Show a tab pressed</button></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <h3>Site icons in their circle</h3>
+  <p class="note">Sites ship favicons in every shape. Today each one is shrunk into the middle of a white circle, so square and wide ones look boxed in. The fix happens once, when the icon is saved to the cache: if the icon is solid inside its circle (a square, a rounded square, a circle), it fills the whole circle and is cut to it. If it's solid but not square (a wide logo), the circle takes the logo's own edge colour and the logo fits inside. If it's a glyph on a see-through background, it stays centred on the white circle as today, with its corners softened so a hard square edge never shows.</p>
+  <div class="fav" id="fav"></div>
+
+  <p class="note">Sizes: B keeps the 48 tile and brings the row padding from 17 to 12 (row height 72). C goes to 10 and a 44 tile (row height 64). Section labels are 12 semibold with 8 under them and 20 above. Nav buttons on every app: no fill when pressed or hovered, only the colour of the selected tab changes; the desktop sidebar keeps its light accent fill on the selected page.</p>
+</div>
+
+<script>
+const ICONS = /*ICONS*/;
+const icon = (name, size) => ICONS[name].replace('<svg ', `<svg class="i" width="${size}" height="${size}" `);
+
+// Made-up sites in the shapes real favicons come in.
+const svg = s => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${s}</svg>`);
+const FAV = {
+  square:  { url: svg('<rect width="64" height="64" fill="#C8102E"/><text x="32" y="45" font-family="Arial" font-weight="700" font-size="38" fill="#fff" text-anchor="middle">R</text>'),
+             bleed: true, label: 'Square, solid to the edge', site: 'rafidbank.iq' },
+  rounded: { url: svg('<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1FA2FF"/><stop offset="1" stop-color="#3550DC"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g)"/><path d="M18 40 L32 18 L46 40 Z" fill="#fff"/>'),
+             bleed: true, label: 'Rounded square (app-icon style)', site: 'safar.app' },
+  glyph:   { url: svg('<path d="M32 6 C50 18 54 40 32 58 C10 40 14 18 32 6 Z" fill="#1E8F6C"/>'),
+             bleed: false, label: 'Glyph on a see-through background', site: 'nawroz.shop' },
+  wide:    { url: svg('<rect y="18" width="64" height="28" fill="#111"/><text x="32" y="38" font-family="Arial" font-weight="700" font-size="17" fill="#FFD400" text-anchor="middle">KNET</text>'),
+             bleed: false, edge: '#111', label: 'Wide logo, solid', site: 'kurdnet.net' },
+  square2: { url: svg('<rect width="64" height="64" fill="#F5F5F5"/><rect x="14" y="14" width="36" height="36" rx="4" fill="#FF6A00"/>'),
+             bleed: true, label: 'Square with its own light background', site: 'bazar.krd' },
+};
+
+const OPTIONS = [
+  { name: 'A · Today', sub: 'Each item is its own card with 17 padding and 16 between cards. Icons are shrunk into a white circle. Pressing a tab on Android leaves a grey fill.',
+    cls: 'loose ripple', fix: false, vars: { padV: '17px', padH: '17px', tile: '48px', secTop: '8px', secGap: '16px', secSize: '14px' } },
+  { name: 'B · Grouped, 12 padding', sub: 'One card per section with dividers. Rows 12 top and bottom, 14 at the sides, the 48 tile kept. About 30% more items on screen.',
+    cls: 'grouped still', fix: true, vars: { padV: '12px', padH: '14px', tile: '48px', secTop: '20px', secGap: '8px', secSize: '12px' } },
+  { name: 'C · Grouped, compact', sub: 'The same groups with 10 padding and a 44 tile. The densest that still keeps a 44pt touch target per row.',
+    cls: 'grouped still', fix: true, vars: { padV: '10px', padH: '14px', tile: '44px', secTop: '20px', secGap: '8px', secSize: '12px' } },
+];
+
+const T = {
+  en: { pw: 'Your passwords', search: 'Search your passwords', all: 'All', logins: 'Logins', notes: 'Notes', cards: 'Cards',
+    home: 'Home', pwTab: 'Passwords', alerts: 'Alerts', you: 'You', recent: 'Most recent', fib: 'FIB card', wifi: 'Home Wi-Fi', wifiSub: 'Secure note' },
+  ckb: { pw: 'وشە نهێنییەکانت', search: 'لە وشە نهێنییەکانت بگەڕێ', all: 'هەموو', logins: 'چوونەژوورەوەکان', notes: 'تێبینییەکان', cards: 'کارتەکان',
+    home: 'سەرەکی', pwTab: 'وشە نهێنییەکان', alerts: 'ئاگادارییەکان', you: 'تۆ', recent: 'دواین بەکارهێنراو', fib: 'کارتی FIB', wifi: 'وای فایی ماڵەوە', wifiSub: 'تێبینی پارێزراو' },
+};
+
+const siteTile = (key, fix) => {
+  const f = FAV[key];
+  if (!fix) return `<div class="tile site"><img alt="" src="${f.url}"></div>`;
+  if (f.bleed) return `<div class="tile site bleed"><img alt="" src="${f.url}"></div>`;
+  // A solid logo that isn't square: the circle takes the logo's own edge colour, the logo fits inside.
+  if (f.edge) return `<div class="tile site edge" style="background:${f.edge}"><img alt="" src="${f.url}"></div>`;
+  return `<div class="tile site soft"><img alt="" src="${f.url}"></div>`;
+};
+const row = (tile, name, meta, copy = true) => `<div class="row">${tile}<div class="txt"><div class="name">${name}</div><div class="meta">${meta}</div></div>${copy ? `<div class="rbtn">${icon('copy', 20)}</div>` : ''}<div class="rbtn">${icon('more-vertical', 20)}</div></div>`;
+
+function sections(t, fix) {
+  return [
+    [t.recent, [
+      row(siteTile('square', fix), 'Rafid Bank', 'sara.ahmed'),
+      row(`<div class="tile blue">${icon('card', 24)}</div>`, t.fib, '•••• 1111'),
+    ]],
+    ['B', [
+      row(siteTile('square2', fix), 'Bazar', 'sara@bazar.krd'),
+    ]],
+    ['K', [
+      row(siteTile('wide', fix), 'Kurdnet', '0750 123 4567'),
+      row(`<div class="tile">K</div>`, 'Korek', '0750 555 1290'),
+    ]],
+    ['N', [
+      row(siteTile('glyph', fix), 'Nawroz Shop', 'sara.ahmed@gmail.com'),
+    ]],
+    ['S', [
+      row(siteTile('rounded', fix), 'Safar', 'sara.a'),
+      row(`<div class="tile mint">${icon('note', 24)}</div>`, 'Sulaymaniyah Wi-Fi', t.wifiSub, false),
+    ]],
+  ];
+}
+
+const state = { theme: 'dark', lang: 'en', press: 'off' };
+
+function render() {
+  document.documentElement.dataset.theme = state.theme;
+  const t = T[state.lang];
+  const dir = state.lang === 'ckb' ? 'rtl' : 'ltr';
+  document.getElementById('grid').innerHTML = OPTIONS.map(o => {
+    const style = Object.entries(o.vars).map(([k, v]) => `--${k}:${v}`).join(';');
+    const body = sections(t, o.fix).map(([label, rows]) => o.cls.includes('loose')
+      ? `<div class="sec">${label}</div>${rows.map(r => r.replace('class="row"', 'class="row card"')).join('')}`
+      : `<div class="sec">${label}</div><div class="card group">${rows.join('')}</div>`).join('');
+    const tab = (id, ic, label, on) => `<button class="${on ? 'on' : ''} ${state.press === 'on' && id === 'alerts' ? 'pressed' : ''}">${icon(on ? ic + '.fill' : ic, 24)}${label}</button>`;
+    return `<section class="opt"><h2>${o.name}</h2><p class="sub">${o.sub}</p>
+      <div class="phone ${o.cls}" style="${style}" dir="${dir}" lang="${state.lang}">
+        <div class="screen">
+          <div class="title">${t.pw}</div>
+          <div class="search">${icon('search', 16)}<span>${t.search}</span></div>
+          <div class="chips"><span class="chip on">${t.all}</span><span class="chip">${t.logins}</span><span class="chip">${t.notes}</span><span class="chip">${t.cards}</span></div>
+          ${body}
+        </div>
+        <div class="fab">${icon('add-plain', 26)}</div>
+        <div class="tabs">${tab('home', 'home', t.home)}${tab('pw', 'passwords', t.pwTab, true)}${tab('alerts', 'alerts', t.alerts)}${tab('you', 'you', t.you)}</div>
+      </div></section>`;
+  }).join('');
+
+  document.getElementById('fav').innerHTML = `<div class="h">Favicon the site sends</div><div class="h c">Today</div><div class="h c">New</div>` +
+    Object.values(FAV).map(f => `<div><img alt="" src="${f.url}" width="32" height="32" style="background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/8px 8px;border-radius:4px"><span>${f.label}<small>${f.site}</small></span></div>
+      <div class="c">${siteTile(Object.keys(FAV).find(k => FAV[k] === f), false)}</div>
+      <div class="c">${siteTile(Object.keys(FAV).find(k => FAV[k] === f), true)}</div>`).join('');
+}
+
+for (const id of ['theme', 'lang', 'press']) {
+  const seg = document.getElementById(id);
+  seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state[id] = b.dataset.v;
+    for (const x of seg.children) x.setAttribute('aria-pressed', x === b);
+    render();
+  });
+}
+render();
+</script>

@@ -10,11 +10,21 @@ brand-colour letter table in `SiteLogo` are removed.
 
 ## What a tile shows
 
-| Item | Tile (48 circle) | Detail hero (88 circle) |
+| Item | Vault list tile (44 circle) | Detail hero (88 circle) |
 | --- | --- | --- |
-| Login with a cached icon | the icon, `size.siteIconGlyph` (28), centred on `siteIconTile`, with a 1pt `stroke` ring | the icon at `size.heroSiteIconGlyph` (52) on `siteIconTile`, 1pt `stroke` ring |
+| Login with a cached icon | the cached PNG filling the circle, on `siteIconTile`, cut to the circle; a 1pt `stroke` ring only for a glyph (see below) | the same at 88 |
 | Login without one (none yet, none found, setting off) | **calm letter**: the name's first letter or digit, 18 bold, `accent` on `cardMuted` | the same letter at 36 bold on `cardMuted` |
 | Note, card, other kinds | their type icon, unchanged | unchanged |
+
+The cached PNG is already shaped for the circle (step 7), so every app draws it the same
+way at any size: the whole image, scaled to the tile, clipped to a circle. (Phase 11,
+2026-11-17: before this the icon was drawn at 28 in the middle of the tile, and square or
+wide favicons looked boxed in.)
+
+The ring: a bleed or edge icon is its own solid circle and has none; a glyph sits on the
+light `siteIconTile` and needs one. The tile tells them apart from the PNG alone: pixel
+`(11, 11)` of the 64 × 64 PNG (on the circle's edge, inside the glyph box's margin) has
+alpha < 128 for a glyph, so the ring is drawn exactly then.
 
 The letter is the first letter or digit of the item name, upper-cased (`?` when none). There
 is no colour per site any more. While an icon is being fetched the letter shows; when it
@@ -65,7 +75,28 @@ rules above; 8 s timeout per request.
 4. If none is usable, try `https://<host>/favicon.ico`.
 5. Download at most 256 KB. Decode PNG, ICO (largest image), JPEG, GIF (first frame) and
    WebP where the platform can. Reject anything under 16 × 16.
-6. Normalise: fit into 64 × 64 px (aspect kept, centred, transparent padding), encode PNG.
+6. Fit into 64 × 64 px (aspect kept, centred, transparent padding).
+7. **Shape** it for the circle (Phase 11, chosen 2026-11-17 in `design/previews/vault-list.html`),
+   then encode PNG. Pixel centres are at `(x + 0.5, y + 0.5)`; "opaque" means alpha ≥ 128.
+   - **Bleed** (solid inside its circle: a square, rounded square or circle): at least 95% of
+     the pixels within 30 px of the centre `(32, 32)` are opaque. Keep the image as it is;
+     it fills the circle and the tile cuts its corners.
+   - **Edge** (solid but not square, or small on its canvas): take the bounding box of the
+     opaque pixels. It is at least 16 × 16, at least 95% of it is opaque, and its **ring**
+     (the pixels 3 or 4 px inside the box's edge, so a resampler's rim doesn't count) is at
+     least 90% opaque with at least 90% of those within 24 (every channel) of the ring's
+     colour. The ring's colour is, per channel, the value at index `n / 2` of the sorted
+     values. Output: a 64 × 64 square filled with that colour, and the box's content fitted
+     into a centred 48 × 48 box on top.
+   - **Glyph** (anything else: a shape on a see-through background, a border of many colours):
+     the bounding box's content fitted into a centred 38 × 38 box on a transparent canvas,
+     with its corners cut to a radius of 8 so a hard square edge never shows. No opaque
+     pixel at all: the canvas stays empty (the tile then shows `siteIconTile` only).
+
+`docs/site-icon-shapes/` holds the test images and `reference.py`, the reference for steps
+6–7; `site-icons-vectors.json` → `shapes` lists the kind each one gets (and the colour for
+edge, within 6 per channel). Resamplers differ between platforms, so the tests check the
+kind and the colour, not every pixel.
 
 `site-icons-vectors.json` → `pickIcons` holds HTML snippets and the expected order of URLs.
 
@@ -91,6 +122,9 @@ Per device and per vault, keyed by host: `{ png | none, checkedAt }`.
 - `none` (the site answered but had no usable icon) is retried after 7 days; a network
   failure (offline, timeout, TLS error) after 1 day.
 - It is not synced: each device asks each site once. Not in backups or exports.
+- An entry written before step 7 existed holds an unshaped PNG. Each entry records that it is
+  shaped (`shape: 1`); one without it is shaped from its PNG when read and written back.
+  No site is asked again for this.
 
 ## Setting
 
@@ -101,6 +135,6 @@ cache is deleted, every login shows its letter.
 ## Extension
 
 The extension never fetches. The desktop sends each login's cached icon (PNG, base64) with
-the items it gives the extension. The popup draws it as an `<img src="data:image/png…">`.
+the items it gives the extension. The popup draws it as an `<img src="data:image/png…">` filling its circle, like the apps.
 The in-page menu decodes it with `createImageBitmap` onto a `<canvas>` (a page's CSP
 `img-src` can block `data:` images in the page), and shows the letter if that fails.

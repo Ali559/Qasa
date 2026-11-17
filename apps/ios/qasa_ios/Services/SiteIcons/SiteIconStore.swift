@@ -17,8 +17,20 @@ final class SiteIconStore {
     /// The app hosting the unit tests never asks real sites (tests inject their own store).
     static let isUnitTestHost = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
+    /// A decoded cached icon and whether its tile draws the stroke ring (glyphs only).
+    struct Icon {
+        let image: UIImage
+        let ring: Bool
+
+        init?(png: Data) {
+            guard let image = UIImage(data: png) else { return nil }
+            self.image = image
+            ring = image.cgImage.map(SiteIconImage.needsRing) ?? true
+        }
+    }
+
     /// Host → icon, read by the tiles (an arrival redraws them).
-    private(set) var icons: [String: UIImage] = [:]
+    private(set) var icons: [String: Icon] = [:]
 
     @ObservationIgnored private let cache: SiteIconCache
     @ObservationIgnored private let fetch: @Sendable (String) async -> SiteIconFetchResult
@@ -44,7 +56,7 @@ final class SiteIconStore {
     }
 
     /// The icon to draw for `host`, or nil (the letter shows).
-    func icon(forHost host: String?) -> UIImage? {
+    func icon(forHost host: String?) -> Icon? {
         guard let host, isEnabled() else { return nil }
         return icons[host]
     }
@@ -55,7 +67,7 @@ final class SiteIconStore {
         if known[host] == nil {
             if let entry = cache.entry(host: host, key: key) {
                 known[host] = entry
-                if let png = entry.png, let image = UIImage(data: png) { icons[host] = image }
+                if let png = entry.png, let icon = Icon(png: png) { icons[host] = icon }
             }
         }
         if let entry = known[host], entry.isFresh(at: cache.now()) { return }
@@ -82,8 +94,8 @@ final class SiteIconStore {
         defer { pump() }
         guard isEnabled(), let key = vaultKey(), let entry = cache.store(host: host, result: result, key: key) else { return }
         known[host] = entry
-        if let png = entry.png, let image = UIImage(data: png) {
-            icons[host] = image
+        if let png = entry.png, let icon = Icon(png: png) {
+            icons[host] = icon
         } else {
             icons[host] = nil
         }

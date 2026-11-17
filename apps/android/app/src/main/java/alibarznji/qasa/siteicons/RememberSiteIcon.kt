@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import dagger.hilt.EntryPoint
@@ -26,7 +25,7 @@ interface SiteIconsEntryPoint {
  * service UI shows the letter.
  */
 @Composable
-fun rememberSiteIcon(website: String?): ImageBitmap? {
+fun rememberSiteIcon(website: String?): SiteIcon? {
     if (LocalInspectionMode.current) return null
     val context = LocalContext.current
     val service = remember(context) {

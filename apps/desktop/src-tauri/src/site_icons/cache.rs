@@ -45,20 +45,32 @@ pub struct Entry {
     pub png: Option<String>,
     /// Unix ms of the last answer (or failure).
     pub checked_at: i64,
+    /// `SHAPED` when `png` went through step 7 (docs/site-icons.md); missing in entries
+    /// written before Phase 11, whose PNG is shaped when the cache is read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shape: Option<u32>,
 }
+
+/// The `shape` of an entry written after step 7 existed.
+pub const SHAPED: u32 = 1;
 
 impl Entry {
     pub fn icon(png: &[u8], now: i64) -> Self {
         use base64::Engine;
-        Self { status: Status::Icon, png: Some(base64::engine::general_purpose::STANDARD.encode(png)), checked_at: now }
+        Self {
+            status: Status::Icon,
+            png: Some(base64::engine::general_purpose::STANDARD.encode(png)),
+            checked_at: now,
+            shape: Some(SHAPED),
+        }
     }
 
     pub fn none(now: i64) -> Self {
-        Self { status: Status::None, png: None, checked_at: now }
+        Self { status: Status::None, png: None, checked_at: now, shape: Some(SHAPED) }
     }
 
     pub fn failed(now: i64) -> Self {
-        Self { status: Status::Failed, png: None, checked_at: now }
+        Self { status: Status::Failed, png: None, checked_at: now, shape: Some(SHAPED) }
     }
 
     pub fn ttl_ms(&self) -> i64 {
@@ -67,6 +79,25 @@ impl Entry {
             Status::None => NONE_TTL_MS,
             Status::Failed => FAILED_TTL_MS,
         }
+    }
+
+    /// Shapes an icon written before step 7 from its own PNG (no network). True when the
+    /// entry changed and the file should be written back.
+    fn shape_if_needed(&mut self) -> bool {
+        use base64::Engine;
+        if self.shape.is_some() {
+            return false;
+        }
+        let engine = base64::engine::general_purpose::STANDARD;
+        let Some(png) = &self.png else {
+            self.shape = Some(SHAPED);
+            return true;
+        };
+        // An undecodable PNG is left as it was (and the tile falls back to the letter).
+        let Some(shaped) = engine.decode(png).ok().and_then(|bytes| super::decode::reshape(&bytes)) else { return false };
+        self.png = Some(engine.encode(shaped));
+        self.shape = Some(SHAPED);
+        true
     }
 
     /// Whether it needs no new request at `now`. An entry from the future (the clock was
@@ -102,8 +133,9 @@ impl Cache {
     }
 
     /// Reads the file with the vault key (at unlock). Anything unreadable is an empty cache.
+    /// Entries written before step 7 are shaped from their PNG and the file written back.
     pub fn load(&mut self, key: &[u8; 32]) {
-        let entries = self
+        let mut entries = self
             .path
             .as_ref()
             .and_then(|p| fs::read(p).ok())
@@ -111,7 +143,14 @@ impl Cache {
             .and_then(|json| serde_json::from_slice::<File>(&json).ok())
             .map(|f| f.entries)
             .unwrap_or_default();
+        let mut changed = false;
+        for entry in entries.values_mut() {
+            changed |= entry.shape_if_needed();
+        }
         self.entries = Some(entries);
+        if changed {
+            let _ = self.save(key);
+        }
     }
 
     /// Forgets the decrypted map (at lock); the file stays.
@@ -236,5 +275,49 @@ mod tests {
         again.delete();
         assert!(!dir.path().join(FILE_NAME).exists());
         assert!(again.get("secret-bank.example.com").is_none());
+    }
+
+    fn png_of(img: &image::RgbaImage) -> Vec<u8> {
+        let mut out = Vec::new();
+        image::DynamicImage::ImageRgba8(img.clone())
+            .write_to(&mut std::io::Cursor::new(&mut out), image::ImageFormat::Png)
+            .unwrap();
+        out
+    }
+
+    #[test]
+    fn an_unshaped_entry_is_shaped_on_read_and_written_back() {
+        use base64::Engine;
+        let engine = base64::engine::general_purpose::STANDARD;
+        // An entry from before Phase 11: a wide solid logo fitted into 64 × 64 as it was then,
+        // transparent above and below, with no `shape`.
+        let mut old = image::RgbaImage::new(64, 64);
+        for y in 16..48 {
+            for x in 0..64 {
+                old.put_pixel(x, y, image::Rgba([17, 17, 17, 255]));
+            }
+        }
+        let dir = tempfile::tempdir().unwrap();
+        let db = dir.path().join("vault.sqlite");
+        let mut cache = Cache::beside(&db);
+        cache.load(&KEY);
+        let unshaped = Entry { shape: None, ..Entry::icon(&png_of(&old), NOW) };
+        cache.put(&KEY, "wide.example.com", unshaped.clone()).unwrap();
+        cache.put(&KEY, "none.example.com", Entry { shape: None, ..Entry::none(NOW) }).unwrap();
+
+        let mut again = Cache::beside(&db);
+        again.load(&KEY);
+        let entry = again.get("wide.example.com").unwrap();
+        assert_eq!(entry.shape, Some(SHAPED));
+        assert_eq!(entry.checked_at, NOW, "shaping is not a new answer from the site");
+        let shaped = image::load_from_memory(&engine.decode(entry.png.as_ref().unwrap()).unwrap()).unwrap().to_rgba8();
+        assert_eq!(*shaped.get_pixel(32, 2), image::Rgba([17, 17, 17, 255]), "now on its edge colour");
+
+        // Written back: the file itself holds the shaped entry.
+        let blob = fs::read(dir.path().join(FILE_NAME)).unwrap();
+        let file: File = serde_json::from_slice(&qasa_vault::decrypt(&blob, &KEY).unwrap()).unwrap();
+        assert_eq!(file.entries["wide.example.com"], *entry);
+        assert_eq!(file.entries["none.example.com"].shape, Some(SHAPED));
+        assert_ne!(file.entries["wide.example.com"].png, unshaped.png);
     }
 }

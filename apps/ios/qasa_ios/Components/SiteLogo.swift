@@ -12,9 +12,11 @@ struct SiteLogo: Equatable {
 }
 
 /// A login's circle: its site's own icon when one is cached (`SiteIconStore`), else the calm
-/// letter. The row tile is 48 (icon 28, letter 18 bold); the detail hero 88 (icon 52, letter
-/// 36 bold). The icon sits on `siteIconTile` with a 1pt `stroke` ring. An arriving icon
-/// replaces the letter without animation.
+/// letter. The row tile is `vaultTile` 44 (letter 18 bold); the detail hero 88 (letter 36
+/// bold). The cached icon is already shaped for its circle (`docs/site-icons.md` step 7), so
+/// it is drawn filling the tile on `siteIconTile`, cut to the circle; a glyph icon gets a 1pt
+/// `stroke` ring, a bleed or edge icon none. An arriving icon replaces the letter without
+/// animation.
 struct LoginSiteTile: View {
     @Environment(\.themePalette) private var theme
     let name: String
@@ -22,22 +24,22 @@ struct LoginSiteTile: View {
     let website: String?
     var hero = false
 
-    private var side: CGFloat { hero ? 88 : QasaTokens.Size.itemTile }
-    private var glyph: CGFloat { hero ? QasaTokens.Size.heroSiteIconGlyph : QasaTokens.Size.siteIconGlyph }
+    private var side: CGFloat { hero ? 88 : QasaTokens.Size.vaultTile }
 
     var body: some View {
         let host = website.flatMap(SiteIconRules.host(forWebsite:))
         Group {
-            if let image = SiteIconStore.shared.icon(forHost: host) {
-                Image(uiImage: image)
+            if let icon = SiteIconStore.shared.icon(forHost: host) {
+                Image(uiImage: icon.image)
                     .resizable()
                     .interpolation(.high)
-                    .scaledToFit()
-                    .frame(width: glyph, height: glyph)
+                    .scaledToFill()
                     .frame(width: side, height: side)
                     .background(theme.siteIconTile)
                     .clipShape(Circle())
-                    .overlay(Circle().stroke(theme.stroke, lineWidth: QasaTokens.Size.stroke))
+                    .overlay {
+                        if icon.ring { Circle().stroke(theme.stroke, lineWidth: QasaTokens.Size.stroke) }
+                    }
             } else {
                 Text(SiteLogo(name: name).letter)
                     .font(.qasa(hero ? 36 : 18, weight: .bold))

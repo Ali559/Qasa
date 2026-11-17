@@ -283,6 +283,19 @@ picks one before anything is built.
       and the hint under Pay now says it opens Wayl's payment page. Seen on the iOS
       simulator and the desktop UI; Android builds but wasn't seen on screen.
 
+### Phase 11: Vault list (chosen 2026-11-17, option C in `design/previews/vault-list.html`)
+
+- [x] Rows tighter: 10 / 14 padding and a 44 tile (`design/README.md` rule 6e).
+- [x] Each section (Suggested, Most recent, every letter) is one card with dividers.
+- [x] No grey fill when a nav button is pressed or hovered (rule 8).
+- [x] Site icons shaped for their circle once, when cached (`docs/site-icons.md` step 7).
+      (2026-11-17) Done on iOS, Android, the desktop and the extension; the same grouped card
+      is used for collections, password health and breached lists. Icons are bleed, edge or
+      glyph (test images in `docs/site-icon-shapes`); only a glyph gets the ring; old cache
+      entries are reshaped on the device. Seen on the iOS simulator (Kurdish), the Android
+      emulator with real sites, and the desktop UI. iOS 26's own tab bar still draws its
+      grey pill behind the selected tab (system glass, not a press fill).
+
 ## 1. One shared design spec
 
 - [x] **Spec from iOS** (2026-11-11): `design/tokens.json` holds every color, radius, size,

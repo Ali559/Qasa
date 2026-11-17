@@ -143,6 +143,12 @@ class QasaText internal constructor(
     /** 12 semibold — `type.sectionLabel`: `SectionLabel`, every language. */
     val tokenSectionLabel get() = token(QasaTokens.Typography.sectionLabel)
 
+    /** 16 semibold — `type.vaultRowTitle`: a vault list row's title (rule 6e). */
+    val vaultRowTitle get() = token(QasaTokens.Typography.vaultRowTitle)
+
+    /** 14 regular — `type.vaultRowSubtitle`: a vault list row's subtitle (rule 6e). */
+    val vaultRowSubtitle get() = token(QasaTokens.Typography.vaultRowSubtitle)
+
     /** 13 medium — `type.pill`. */
     val pill get() = token(QasaTokens.Typography.pill)
 

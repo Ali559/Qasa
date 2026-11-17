@@ -16,6 +16,7 @@ import { loadVault, reloadCollections, session, sortByName } from '@/vault/sessi
 import type { Collection } from '@/vault/types'
 import PromptSheet from '../vault/form/PromptSheet.vue'
 import VaultRow from '../vault/VaultRow.vue'
+import VaultSection from '../vault/VaultSection.vue'
 
 defineEmits<{ back: [] }>()
 const t = useT()
@@ -74,7 +75,9 @@ function openItem(id: string) {
       <strong>{{ t('collections.emptyCollectionTitle') }}</strong>
       <span>{{ t('collections.assignHint', open.name) }}</span>
     </div>
-    <VaultRow v-for="row in items" :key="row.id" :row="row" :selected="false" @select="openItem(row.id)" @edit="openItem(row.id)" />
+    <VaultSection v-else>
+      <VaultRow v-for="row in items" :key="row.id" :row="row" :selected="false" @select="openItem(row.id)" @edit="openItem(row.id)" />
+    </VaultSection>
   </PageFrame>
 
   <PageFrame v-else :title="t('nav.collections')" back :gap="12" @back="$emit('back')">

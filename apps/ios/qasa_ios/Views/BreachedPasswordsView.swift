@@ -33,7 +33,7 @@ struct BreachedPasswordsView: View {
                         summary
                     }
                     if !isLocked, let report, !report.breachedItems.isEmpty {
-                        LazyVStack(spacing: 12) {
+                        VaultSectionCard {
                             ForEach(report.breachedItems) { row in
                                 breachedRow(row, count: report.breachCounts[row.id] ?? 0)
                             }
@@ -135,7 +135,7 @@ struct BreachedPasswordsView: View {
                 editorMode = EditorPresentation(mode: .edit(row.id))
             } onDeleted: {}
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 0) {
                 VaultItemRow(row: row) {
                     editorMode = EditorPresentation(mode: .edit(row.id))
                 } onDeleted: {}
@@ -145,10 +145,14 @@ struct BreachedPasswordsView: View {
                 ))
                 .font(.qasa(13, weight: .medium))
                 .foregroundColor(Theme.danger)
-                .padding(.leading, 64)
+                // Under the row's text, inside the same row of the card.
+                .padding(.leading, QasaTokens.Space.vaultRowHorizontal + QasaTokens.Size.vaultTile + QasaTokens.Space.rowIconGap)
+                .padding(.trailing, QasaTokens.Space.vaultRowHorizontal)
+                .padding(.top, -2)
+                .padding(.bottom, QasaTokens.Space.vaultRowVertical)
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.vaultRow)
     }
 
     private var privacyCard: some View {

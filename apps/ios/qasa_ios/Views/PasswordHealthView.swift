@@ -315,17 +315,19 @@ struct PasswordHealthIssuesView: View {
                         )
                         .padding(.top, 48)
                     } else {
-                        ForEach(currentItems) { row in
-                            NavigationLink {
-                                VaultItemDetailView(itemId: row.id) {
-                                    editorMode = EditorPresentation(mode: .edit(row.id))
-                                } onDeleted: {}
-                            } label: {
-                                VaultItemRow(row: row) {
-                                    editorMode = EditorPresentation(mode: .edit(row.id))
-                                } onDeleted: {}
+                        VaultSectionCard {
+                            ForEach(currentItems) { row in
+                                NavigationLink {
+                                    VaultItemDetailView(itemId: row.id) {
+                                        editorMode = EditorPresentation(mode: .edit(row.id))
+                                    } onDeleted: {}
+                                } label: {
+                                    VaultItemRow(row: row) {
+                                        editorMode = EditorPresentation(mode: .edit(row.id))
+                                    } onDeleted: {}
+                                }
+                                .buttonStyle(.vaultRow)
                             }
-                            .buttonStyle(PressableStyle())
                         }
                     }
                 }

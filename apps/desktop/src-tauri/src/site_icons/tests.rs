@@ -66,3 +66,45 @@ fn redirects_are_checked_like_the_first_request() {
     assert!(!ok("https://localhost/"));
     assert!(!ok("https://10.1/"), "a short IPv4 spelling");
 }
+
+#[test]
+fn shape_vectors() {
+    use super::shape::{fit, shape, Kind, SIDE};
+    let v = vectors();
+    let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/../../../docs/site-icon-shapes");
+    for case in cases(&v, "shapes") {
+        let file = case["file"].as_str().unwrap();
+        let src = image::open(format!("{dir}/{file}")).unwrap_or_else(|e| panic!("{file}: {e}")).to_rgba8();
+        let (kind, edge, out) = shape(&fit(&src, SIDE));
+        assert_eq!(out.dimensions(), (SIDE, SIDE), "{file}");
+        let want = match case["kind"].as_str().unwrap() {
+            "bleed" => Kind::Bleed,
+            "edge" => Kind::Edge,
+            "glyph" => Kind::Glyph,
+            other => panic!("{file}: unknown kind {other}"),
+        };
+        assert_eq!(kind, want, "kind of {file}");
+        // docs/site-icons.md "What a tile shows": the tile draws the ring when pixel (11, 11)
+        // of the shaped PNG has alpha < 128, which must be exactly the glyphs. Read back from
+        // the encoded PNG, as the tiles do.
+        let mut png = Vec::new();
+        image::DynamicImage::ImageRgba8(out.clone())
+            .write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png)
+            .unwrap();
+        let decoded = image::load_from_memory(&png).unwrap().to_rgba8();
+        assert_eq!(decoded.get_pixel(11, 11)[3] < 128, want == Kind::Glyph, "ring of {file}");
+        match case["edge"].as_str() {
+            Some(hex) => {
+                let hex = hex.trim_start_matches('#');
+                let want: Vec<i32> = (0..3).map(|i| i32::from_str_radix(&hex[i * 2..i * 2 + 2], 16).unwrap()).collect();
+                let got = edge.unwrap_or_else(|| panic!("{file}: no edge colour"));
+                for i in 0..3 {
+                    assert!((i32::from(got[i]) - want[i]).abs() <= 6, "edge of {file}: {got:?}, want #{hex}");
+                }
+                // The output is that colour at its corner (the tile cuts it to a circle).
+                assert_eq!(out.get_pixel(0, 0)[3], 255, "{file}");
+            }
+            None => assert_eq!(edge, None, "{file}"),
+        }
+    }
+}

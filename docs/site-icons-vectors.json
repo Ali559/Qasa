@@ -1,5 +1,5 @@
 {
-  "$comment": "Shared cases for docs/site-icons.md. Every platform's unit tests load this file (or a copy generated from it) and must pass every case. host: the website field -> the host asked (null: never asked). letter: item name -> tile letter. pickIcons: page URL + HTML -> the icon URLs to try, in order (favicon.ico fallback not included).",
+  "$comment": "Shared cases for docs/site-icons.md. Every platform's unit tests load this file (or a copy generated from it) and must pass every case. host: the website field -> the host asked (null: never asked). letter: item name -> tile letter. pickIcons: page URL + HTML -> the icon URLs to try, in order (favicon.ico fallback not included). shapes: an image in docs/site-icon-shapes -> the kind step 7 gives it, and for edge the colour (each channel within 6).",
   "host": [
     { "website": "https://github.com/login", "host": "github.com" },
     { "website": "github.com", "host": "github.com" },
@@ -66,5 +66,17 @@
       "html": "<link href=\"/x.png\" rel=\"alternate icon\">",
       "icons": ["https://example.com/x.png"]
     }
+  ],
+  "shapes": [
+    {"file": "circle.png", "kind": "bleed"},
+    {"file": "glyph-diamond.png", "kind": "glyph"},
+    {"file": "glyph-plus.png", "kind": "glyph"},
+    {"file": "rounded-square.png", "kind": "bleed"},
+    {"file": "small-square-padded.png", "kind": "edge", "edge": "#2F67D0"},
+    {"file": "square-light-background.png", "kind": "bleed"},
+    {"file": "square-solid.png", "kind": "bleed"},
+    {"file": "tall-solid.png", "kind": "edge", "edge": "#2F9E6C"},
+    {"file": "wide-gradient.png", "kind": "glyph"},
+    {"file": "wide-solid.png", "kind": "edge", "edge": "#111111"}
   ]
 }

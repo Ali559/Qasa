@@ -20,6 +20,7 @@ import ItemDetail from './ItemDetail.vue'
 import ItemEditor from './ItemEditor.vue'
 import ProtectedGateDialog from './ProtectedGateDialog.vue'
 import VaultRow from './VaultRow.vue'
+import VaultSection from './VaultSection.vue'
 
 const t = useT()
 type Filter = 'all' | ItemKind
@@ -128,31 +129,31 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             />
           </div>
 
-          <template v-if="recent.length">
-            <h2 class="section">{{ t('vault.mostRecent') }}</h2>
-            <VaultRow
-              v-for="row in recent"
-              :key="`recent-${row.id}`"
-              :row="row"
-              :selected="row.id === nav.selectedItemId"
-              @select="nav.selectedItemId = row.id"
-              @edit="editor = { id: row.id }"
-              @deleted="nav.selectedItemId = null"
-            />
-          </template>
+          <div v-if="filtered.length" class="sections">
+            <VaultSection v-if="recent.length" :label="t('vault.mostRecent')">
+              <VaultRow
+                v-for="row in recent"
+                :key="`recent-${row.id}`"
+                :row="row"
+                :selected="row.id === nav.selectedItemId"
+                @select="nav.selectedItemId = row.id"
+                @edit="editor = { id: row.id }"
+                @deleted="nav.selectedItemId = null"
+              />
+            </VaultSection>
 
-          <template v-for="section in sections" :key="section.letter">
-            <h2 class="section">{{ section.letter }}</h2>
-            <VaultRow
-              v-for="row in section.items"
-              :key="row.id"
-              :row="row"
-              :selected="row.id === nav.selectedItemId"
-              @select="nav.selectedItemId = row.id"
-              @edit="editor = { id: row.id }"
-              @deleted="nav.selectedItemId = null"
-            />
-          </template>
+            <VaultSection v-for="section in sections" :key="section.letter" :label="section.letter">
+              <VaultRow
+                v-for="row in section.items"
+                :key="row.id"
+                :row="row"
+                :selected="row.id === nav.selectedItemId"
+                @select="nav.selectedItemId = row.id"
+                @edit="editor = { id: row.id }"
+                @deleted="nav.selectedItemId = null"
+              />
+            </VaultSection>
+          </div>
 
           <div v-if="filtered.length === 0" class="empty">
             <QasaIcon name="inbox" :size="40" />
@@ -229,7 +230,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-form-gap);
   padding: var(--space-page-top) var(--space-screen-padding) 100px;
 }
 
@@ -302,11 +303,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   scrollbar-width: none;
 }
 
-.section {
-  margin: 8px 0 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
+.sections {
+  display: flex;
+  flex-direction: column;
 }
 
 .empty {

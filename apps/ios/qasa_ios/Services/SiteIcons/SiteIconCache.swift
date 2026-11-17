@@ -11,6 +11,19 @@ nonisolated struct SiteIconCacheEntry: Codable, Equatable, Sendable {
     /// The 64 × 64 PNG: for `.icon`, and kept on a `.failure` that refreshed an icon.
     let png: Data?
     let checkedAt: Date
+    /// `1` once the PNG is shaped for its circle (`docs/site-icons.md` step 7). An entry
+    /// written before Phase 11 has none and is shaped when read.
+    var shape: Int? = SiteIconCacheEntry.currentShape
+
+    static let currentShape = 1
+
+    init(host: String, kind: Kind, png: Data?, checkedAt: Date, shape: Int? = SiteIconCacheEntry.currentShape) {
+        self.host = host
+        self.kind = kind
+        self.png = png
+        self.checkedAt = checkedAt
+        self.shape = shape
+    }
 
     /// How long an answer stands before the site is asked again: an icon 30 days (it still
     /// shows meanwhile), `none` 7 days, a network failure 1 day.
@@ -58,7 +71,15 @@ final class SiteIconCache {
             try? FileManager.default.removeItem(at: file)
             return nil
         }
-        return entry
+        guard entry.shape != SiteIconCacheEntry.currentShape else { return entry }
+        // Written before step 7: shape its PNG and write it back. No site is asked.
+        let shaped = SiteIconCacheEntry(
+            host: entry.host, kind: entry.kind,
+            png: entry.png.map { SiteIconImage.shapedPNG(fromUnshaped: $0) ?? $0 },
+            checkedAt: entry.checkedAt
+        )
+        try? write(shaped, key: key)
+        return shaped
     }
 
     /// Whether `host` has an answer that still stands (nothing to ask).
@@ -77,13 +98,18 @@ final class SiteIconCache {
             newEntry = SiteIconCacheEntry(host: host, kind: .failure, png: entry(host: host, key: key)?.png, checkedAt: now())
         }
         do {
-            try prepareDirectory()
-            let blob = try VaultCrypto.encrypt(try JSONEncoder().encode(newEntry), key: key)
-            try blob.write(to: fileURL(host: host, key: key), options: [.atomic, .completeFileProtection])
+            try write(newEntry, key: key)
             return newEntry
         } catch {
             return nil
         }
+    }
+
+    /// Seals and writes `entry` to its host's file. Internal so tests can plant an old entry.
+    func write(_ entry: SiteIconCacheEntry, key: SymmetricKey) throws {
+        try prepareDirectory()
+        let blob = try VaultCrypto.encrypt(try JSONEncoder().encode(entry), key: key)
+        try blob.write(to: fileURL(host: entry.host, key: key), options: [.atomic, .completeFileProtection])
     }
 
     /// Deletes every cached icon (vault reset, sign out, master password change, setting off).
