@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// R1 (docs/autofill-hardening.md) on forms A–H of docs/autofill-test-pages/signup.html, and
+// R1 (docs/autofill-hardening.md) on forms A–K of docs/autofill-test-pages/signup.html, and
 // the rest of the hardening that can run without a browser: shadow-root grouping, hidden
 // fields, multi-step sign-up, split one-time codes, R2 constraints and R6 fill events.
 import { readFileSync } from 'node:fs'
@@ -65,6 +65,20 @@ describe('R1 on the sign-up test page', () => {
   it('H: controlled inputs', () => {
     expect(groupOfForm('h')).toMatchObject({ kind: 'signup', newPassword: field('h', 'password'), confirmPassword: field('h', 'confirmPassword') })
   })
+
+  it('I: full name, username, email and one password with "Continue" is new', () => {
+    const g = groupOfForm('i')
+    expect(g).toMatchObject({ kind: 'signup', username: field('i', 'email'), newPassword: field('i', 'password') })
+    expect(g.confirmPassword).toBeUndefined()
+  })
+
+  it('J: email and one password with "Create account" is new', () => {
+    expect(groupOfForm('j')).toMatchObject({ kind: 'signup', username: field('j', 'email'), newPassword: field('j', 'password') })
+  })
+
+  it('K: an Arabic login (تسجيل الدخول) stays a login', () => {
+    expect(groupOfForm('k')).toMatchObject({ kind: 'login', username: field('k', 'email'), password: field('k', 'password') })
+  })
 })
 
 describe('R1 edge cases', () => {
@@ -76,6 +90,36 @@ describe('R1 edge cases', () => {
   it('one plain password with a "Create account" button is new', () => {
     document.body.innerHTML = '<form id=x><input name=email type=email><input type=password id=p><button>Create account</button></form>'
     expect(groupOfForm('x')).toMatchObject({ kind: 'signup', newPassword: document.getElementById('p') })
+  })
+
+  const kindOf = (html: string) => {
+    document.body.innerHTML = `<form id=x>${html}</form>`
+    return groupOfForm('x').kind
+  }
+
+  it('R1.6: a full-name field alone makes one password new', () => {
+    expect(kindOf('<input name=name autocomplete=name><input name=email type=email><input type=password><button>Go</button>')).toBe('signup')
+    expect(kindOf('<label>Full name<input name=n></label><input name=email type=email><input type=password><button>Go</button>')).toBe('signup')
+  })
+
+  it('R1.6: a username and an email field make one password new; one of them does not', () => {
+    expect(kindOf('<input name=username><input name=email type=email><input type=password><button>Next</button>')).toBe('signup')
+    expect(kindOf('<input name=username><input type=password><button>Next</button>')).toBe('login')
+    expect(kindOf('<input name=login placeholder="Username or email"><input type=password><button>Submit</button>')).toBe('login')
+  })
+
+  it('R1.6: sign-up words on the button, in English, Arabic and Kurdish', () => {
+    const one = (button: string) => kindOf(`<input name=email type=email><input type=password><button>${button}</button>`)
+    for (const b of ['Sign up', 'Register', 'Create an account', 'Join now', 'إنشاء حساب', 'انشاء حساب', 'حساب جديد', 'التسجيل', 'تۆمارکردن', 'خۆتۆمارکردن', 'دروستکردنی هەژمار']) {
+      expect(one(b), b).toBe('signup')
+    }
+    for (const b of ['Continue', 'Next', 'Submit', 'Create', 'تسجيل', 'تسجيل الدخول', 'Log in', 'چوونەژوورەوە']) expect(one(b), b).toBe('login')
+  })
+
+  it('R1.6: a sign-up heading counts, a bare تسجيل heading does not', () => {
+    expect(kindOf('<h2>حساب جديد</h2><input name=email type=email><input type=password><button>متابعة</button>')).toBe('signup')
+    expect(kindOf('<h2>تسجيل</h2><input name=email type=email><input type=password><button>متابعة</button>')).toBe('login')
+    expect(kindOf('<h2>تسجيل الدخول</h2><input name=email type=email><input type=password><button>متابعة</button>')).toBe('login')
   })
 
   it('a phone number that is the username does not make a login a sign-up', () => {

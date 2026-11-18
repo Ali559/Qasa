@@ -2,8 +2,11 @@ package alibarznji.qasa.credentials
 
 import alibarznji.qasa.MainActivity
 import alibarznji.qasa.R
+import alibarznji.qasa.prefs.AppPreferences
 import alibarznji.qasa.prefs.LocaleContext
 import alibarznji.qasa.screens.AppSession
+import alibarznji.qasa.services.AutoLockMonitor
+import alibarznji.qasa.vault.VaultSession
 import alibarznji.qasa.vault.VaultPayload
 import alibarznji.qasa.vault.crypto.PasswordGenerator
 import android.annotation.SuppressLint
@@ -11,6 +14,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Bundle
 import android.os.CancellationSignal
 import android.service.autofill.AutofillService
 import android.service.autofill.Dataset
@@ -27,6 +31,7 @@ import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
 import androidx.annotation.RequiresApi
 import androidx.autofill.inline.UiVersions
+import androidx.core.os.BundleCompat
 import androidx.autofill.inline.v1.InlineSuggestionUi
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
@@ -40,17 +45,26 @@ import javax.inject.Inject
  * until the user picks a suggestion and [AutofillAuthActivity] has unlocked or confirmed.
  * Logins are offered only to the site or app they belong to ([AutofillMatcher]); cards and
  * profiles to any form that asks for them, behind the same unlock.
+ *
+ * One exception (R8, docs/autofill-hardening.md): the login just picked for this app or site,
+ * when its next request is for a field that pick didn't fill (an app that reports one field
+ * at a time), comes first and carries its values, read from the unlocked vault, so it fills
+ * without unlocking again. [RecentLoginPicks] holds only its id, for 2 minutes.
  */
 @AndroidEntryPoint
 class QasaAutofillService : AutofillService() {
     @Inject lateinit var indexStore: AutofillIndexStore
     @Inject lateinit var appSession: AppSession
     @Inject lateinit var generated: GeneratedPasswordStore
+    @Inject lateinit var vaultSession: VaultSession
+    @Inject lateinit var prefs: AppPreferences
+    @Inject lateinit var autoLock: AutoLockMonitor
 
     override fun onFillRequest(request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback) {
         val structure = request.fillContexts.lastOrNull()?.structure ?: return callback.onSuccess(null)
-        // R4: a strong password picked on the last screen is recorded before anything else.
-        recordStrongPasswordPicks(emptyList(), null)
+        // R4: a strong password picked on the last screen is recorded before anything else;
+        // R8: so is a pick of "the login you just picked" (it has no authentication to see it).
+        recordPicksFromHistory(emptyList(), null)
         val screen = AutofillStructureParser.parse(structure)
         // Never fill into Qasa itself.
         if ((screen.caller as? AutofillCaller.App)?.packageName == packageName) return callback.onSuccess(null)
@@ -63,26 +77,29 @@ class QasaAutofillService : AutofillService() {
         val inline = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) InlineSpecs(request) else null
         val response = FillResponse.Builder()
         var added = 0
-        val loginOffers = AutofillOffers.login(form)
+        val loginOffers = AutofillOffers.login(form, screen.focused)
+        val now = System.currentTimeMillis()
 
-        // Sign-up / change-password form (design rule 6c): the new-password fields get one
-        // suggestion, a fresh password from the shared generator, and never a saved login.
-        // First, so it gets a keyboard (inline) slot.
-        if (loginOffers.strongPasswordIds.isNotEmpty()) {
-            // R2: fitted to the fields' maxlength / minlength / passwordrules.
-            val password = runCatching { PasswordGenerator.generate(AutofillOffers.strongPasswordSpec(form)) }
+        /**
+         * "Use a strong password" on [ids]: a fresh password from the shared generator, fitted
+         * to those fields (R2), recorded as offered (R4). [fallback] is R7's row on a login
+         * password: it fills only that field.
+         */
+        fun addStrongPassword(ids: List<AutofillId>, fallback: Boolean) {
+            val signals = form.fields.filter { it.id in ids }.map { it.signals }
+            val password = runCatching { PasswordGenerator.generate(AutofillOffers.strongPasswordSpec(signals)) }
                 .getOrElse { PasswordGenerator.generateDefault() }
             val datasetId = GeneratedPasswordLog.DATASET_PREFIX + UUID.randomUUID()
             // R4: kept (encrypted, briefly) so a pick reported later by id still has its value.
             val (name, website) = loginTarget(screen.caller)
-            val now = System.currentTimeMillis()
             generated.update { GeneratedPasswordLog.offered(it, GeneratedPassword(datasetId, name, website, password, now), now) }
-            response.addDataset(strongPasswordDataset(form, datasetId, password, l10n.getString(R.string.fill_strongpassword), inline))
+            val targets = if (fallback) ids else emptyList()
+            response.addDataset(strongPasswordDataset(ids, targets, datasetId, password, l10n.getString(R.string.fill_strongpassword), inline))
             added++
         }
 
         fun offer(group: AutofillGroup, candidates: List<AutofillIndexEntry>, limit: Int) {
-            val ids = if (group == AutofillGroup.Login) loginOffers.savedLoginIds else form.group(group).map { it.id }
+            val ids = form.group(group).map { it.id }
             if (ids.isEmpty()) return
             for (entry in candidates.take(limit)) {
                 response.addDataset(dataset(ids, group, entry.id, entry.title, AutofillPresentation.hint(entry), inline))
@@ -93,9 +110,30 @@ class QasaAutofillService : AutofillService() {
             added++
         }
 
-        if (form.hasLogin) {
-            val logins = entries.filter { it.kind == AutofillIndexStore.KIND_LOGIN }
-            offer(AutofillGroup.Login, AutofillMatcher.rank(logins, screen.caller) { it.website ?: it.websiteHost }, 5)
+        // Logins (R1, R7, R8): a new-password field gets one suggestion, a fresh password and
+        // never a saved login (design rule 6c), first so it gets a keyboard (inline) slot. A
+        // login password R1 couldn't call new gets the strong password after its matches.
+        val logins = entries.filter { it.kind == AutofillIndexStore.KIND_LOGIN }
+        val matches = if (form.hasLogin) AutofillMatcher.rank(logins, screen.caller) { it.website ?: it.websiteHost } else emptyList()
+        val focusedType = form.fields.firstOrNull { it.id == screen.focused }?.type
+        val recent = RecentLoginPicks.cache.lookup(screen.caller, focusedType, now)?.let { id -> logins.firstOrNull { it.id == id } }
+        for (row in AutofillOffers.loginRows(loginOffers, matches, recent)) {
+            when (row) {
+                is LoginRow.StrongPassword ->
+                    addStrongPassword(if (row.fallback) loginOffers.fallbackStrongIds else loginOffers.strongPasswordIds, row.fallback)
+                is LoginRow.Saved -> {
+                    val ids = loginOffers.savedLoginIds
+                    val direct = if (row.recent) recentDataset(screen, row.entry, inline) else null
+                    response.addDataset(direct ?: dataset(ids, AutofillGroup.Login, row.entry.id, row.entry.title, AutofillPresentation.hint(row.entry), inline))
+                    added++
+                }
+                LoginRow.Search -> {
+                    response.addDataset(
+                        dataset(loginOffers.savedLoginIds, AutofillGroup.Login, null, l10n.getString(R.string.autofill_searchqasa), l10n.getString(R.string.autofill_title), inline),
+                    )
+                    added++
+                }
+            }
         }
         if (form.hasCard) offer(AutofillGroup.Card, entries.filter { it.kind == AutofillIndexStore.KIND_CARD }, 5)
         if (form.hasIdentity) {
@@ -118,11 +156,33 @@ class QasaAutofillService : AutofillService() {
         // same. Left out: a form whose only watched fields Qasa filled itself (a reset page
         // with no username, or a change form whose current password came from a saved login);
         // Android shows no save prompt there.
-        AutofillOffers.save(form)?.let { plan ->
+        //
+        // R4 two-screen (Android 12+, apps only): a username screen delays its save and keeps
+        // the username's id in the client state; the password screen, same app, reads it back
+        // and requires both, so the save request carries both screens.
+        val twoScreen = TwoScreenSave.applies(screen.caller, Build.VERSION.SDK_INT, isCompatMode(request))
+        val previousUsername = if (twoScreen) delayedUsername(request.clientState, screen.caller) else null
+        val plan = if (twoScreen) TwoScreenSave.plan(form, previousUsername) else AutofillOffers.save(form)
+        if (plan != null) {
+            val fromEarlierScreen = plan.usernameId != null && plan.usernameId == previousUsername
             val type = SaveInfo.SAVE_DATA_TYPE_PASSWORD or (if (plan.usernameId != null) SaveInfo.SAVE_DATA_TYPE_USERNAME else 0)
-            val save = SaveInfo.Builder(type, arrayOf(plan.passwordId))
-            if (plan.optionalIds.isNotEmpty()) save.setOptionalIds(plan.optionalIds.toTypedArray())
+            val required = if (fromEarlierScreen) arrayOf(plan.usernameId!!, plan.passwordId) else arrayOf(plan.passwordId)
+            val save = SaveInfo.Builder(type, required)
+            val optional = plan.optionalIds.filter { it !in required }
+            if (optional.isNotEmpty()) save.setOptionalIds(optional.toTypedArray())
             response.setSaveInfo(save.build())
+        } else if (twoScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            TwoScreenSave.delayedOf(form)?.let { delayed ->
+                val type = if (delayed.isEmail) SaveInfo.SAVE_DATA_TYPE_EMAIL_ADDRESS else SaveInfo.SAVE_DATA_TYPE_USERNAME
+                response.setSaveInfo(SaveInfo.Builder(type, arrayOf(delayed.usernameId)).setFlags(SaveInfo.FLAG_DELAY_SAVE).build())
+                val app = screen.caller as AutofillCaller.App
+                response.setClientState(
+                    Bundle().apply {
+                        putParcelable(TwoScreenSave.KEY_USERNAME_ID, delayed.usernameId)
+                        putString(TwoScreenSave.KEY_PACKAGE, app.packageName)
+                    },
+                )
+            }
         }
         try {
             callback.onSuccess(response.build())
@@ -131,21 +191,73 @@ class QasaAutofillService : AutofillService() {
         }
     }
 
+    private fun isCompatMode(request: FillRequest): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && request.flags and FillRequest.FLAG_COMPATIBILITY_MODE_REQUEST != 0
+
+    /** R4 two-screen: the earlier screen's username id, when the client state is this app's. */
+    private fun delayedUsername(state: Bundle?, caller: AutofillCaller): AutofillId? {
+        val app = caller as? AutofillCaller.App ?: return null
+        if (state?.getString(TwoScreenSave.KEY_PACKAGE) != app.packageName) return null
+        return BundleCompat.getParcelable(state, TwoScreenSave.KEY_USERNAME_ID, AutofillId::class.java)
+    }
+
+    /**
+     * R8: "the login you just picked", filled without its authentication: only while the
+     * vault is unlocked and no confirmation is due (AutofillPolicy). The values are read
+     * from the vault here, never from the cache. Null: use the normal authenticated row.
+     */
+    @SuppressLint("NewApi")
+    private fun recentDataset(screen: ParsedScreen, entry: AutofillIndexEntry, inline: InlineSpecs?): Dataset? {
+        autoLock.lockIfExpiredInBackground()
+        if (AutofillPolicy.needsAuth(entry.kind, vaultSession.isUnlocked, prefs.autofillConfirmEveryFill.value)) return null
+        val values = AutofillDatasets.values(this, indexStore, screen, AutofillGroup.Login, entry, copyTotp = false) ?: return null
+        val filled = screen.form.fields.filter { it.id in values.keys }.map { it.type }.toSet()
+        val hint = AutofillPresentation.hint(entry)
+        val presentation = RemoteViews(packageName, R.layout.autofill_suggestion).apply {
+            setTextViewText(R.id.autofill_title, entry.title)
+            setTextViewText(R.id.autofill_hint, hint)
+        }
+        val inlinePresentation = inline?.next(this, entry.title, hint, AutofillGroup.Login, entry.id)
+        @Suppress("DEPRECATION")
+        val builder = Dataset.Builder(presentation)
+        builder.setId(RecentLoginPicks.datasetId(entry.id, filled))
+        for ((id, value) in values) {
+            val autofillValue = AutofillDatasets.autofillValue(value)
+            @Suppress("DEPRECATION")
+            if (inlinePresentation != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                builder.setValue(id, autofillValue, presentation, inlinePresentation)
+            } else {
+                builder.setValue(id, autofillValue, presentation)
+            }
+        }
+        return builder.build()
+    }
+
     /**
      * A login was typed and submitted: open the app's new-login form with it, so the user
      * reviews and saves it there. Nothing is saved without that step.
      */
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        val structure = request.fillContexts.lastOrNull()?.structure ?: return callback.onSuccess()
+        val contexts = request.fillContexts
+        val structure = contexts.lastOrNull()?.structure ?: return callback.onSuccess()
         val screen = AutofillStructureParser.parse(structure)
         // The new password on a sign-up or change form (AutofillForm.passwordField).
         val password = screen.form.passwordField?.let { screen.textValues[it.id] }?.takeIf { it.isNotEmpty() }
             ?: return callback.onSuccess()
-        val username = AutofillOffers.save(screen.form)?.usernameId?.let { screen.textValues[it] }.orEmpty()
+        val current = AutofillOffers.save(screen.form)?.usernameId?.let { screen.textValues[it] }
+        // R4 two-screen: the username was typed on an earlier screen of the same app.
+        val earlier = contexts.dropLast(1).map { AutofillStructureParser.parse(it.structure) }
+            .filter { it.caller == screen.caller }
+        val username = TwoScreenSave.username(
+            current = current,
+            earlierValues = earlier.map { it.textValues },
+            previousUsername = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) delayedUsername(request.clientState, screen.caller) else null,
+            earlierUsernames = earlier.map { s -> TwoScreenSave.delayedOf(s.form)?.let { s.textValues[it.usernameId] } },
+        )
         // R4: the generated password is being saved here; still recorded as picked, so the
         // unlock reminder catches it if the user closes the review without saving.
         val picked = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) request.datasetIds.orEmpty() else emptyList()
-        recordStrongPasswordPicks(picked, password)
+        recordPicksFromHistory(picked, password)
         val (name, website) = loginTarget(screen.caller)
         appSession.requestSaveLogin(
             VaultPayload.Login(itemName = name, username = username, password = password, website = website),
@@ -166,8 +278,11 @@ class QasaAutofillService : AutofillService() {
      * this service's last response (selected / authentication selected carry the dataset
      * id); a save request also lists the datasets picked in its session ([extraIds]), and a
      * saved [password] equal to an offered one is a pick too.
+     *
+     * R8: a pick of "the login you just picked" (no authentication, so only the history
+     * reports it) adds the fields it filled to the cached pick.
      */
-    private fun recordStrongPasswordPicks(extraIds: List<String>, password: String?) {
+    private fun recordPicksFromHistory(extraIds: List<String>, password: String?) {
         val fromHistory = runCatching {
             fillEventHistory?.events.orEmpty()
                 .filter {
@@ -176,6 +291,10 @@ class QasaAutofillService : AutofillService() {
                 }
                 .mapNotNull { it.datasetId }
         }.getOrDefault(emptyList())
+        val now = System.currentTimeMillis()
+        fromHistory.mapNotNull(RecentLoginPicks::parseDatasetId).forEach { (item, filled) ->
+            RecentLoginPicks.cache.recordAgain(item, filled, now)
+        }
         val ids = (fromHistory + extraIds).filter { it.startsWith(GeneratedPasswordLog.DATASET_PREFIX) }.toSet()
         if (ids.isEmpty() && password == null) return
         generated.update { GeneratedPasswordLog.picked(it, ids, password) }
@@ -193,7 +312,14 @@ class QasaAutofillService : AutofillService() {
      * records the pick at once (R4) and hands the values back.
      */
     @SuppressLint("NewApi")
-    private fun strongPasswordDataset(form: AutofillForm<AutofillId>, datasetId: String, password: String, title: String, inline: InlineSpecs?): Dataset {
+    private fun strongPasswordDataset(
+        ids: List<AutofillId>,
+        targets: List<AutofillId>,
+        datasetId: String,
+        password: String,
+        title: String,
+        inline: InlineSpecs?,
+    ): Dataset {
         val presentation = RemoteViews(packageName, R.layout.autofill_suggestion).apply {
             setTextViewText(R.id.autofill_title, title)
             setTextViewText(R.id.autofill_hint, password)
@@ -203,7 +329,7 @@ class QasaAutofillService : AutofillService() {
         val builder = Dataset.Builder(presentation)
         // The id also comes back in the fill event history (the fallback, R4).
         builder.setId(datasetId)
-        for (id in AutofillOffers.strongPasswordValues(form, password).keys) {
+        for (id in ids) {
             @Suppress("DEPRECATION")
             if (inlinePresentation != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 builder.setValue(id, null, presentation, inlinePresentation)
@@ -211,7 +337,7 @@ class QasaAutofillService : AutofillService() {
                 builder.setValue(id, null, presentation)
             }
         }
-        builder.setAuthentication(StrongPasswordPickActivity.intentSender(this, datasetId))
+        builder.setAuthentication(StrongPasswordPickActivity.intentSender(this, datasetId, targets))
         return builder.build()
     }
 

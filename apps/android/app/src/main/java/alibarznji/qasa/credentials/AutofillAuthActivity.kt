@@ -199,8 +199,14 @@ class AutofillAuthActivity : FragmentActivity() {
 
     /** Builds the real dataset for [entry] and hands it to the framework, which fills it. */
     private fun finishWith(entry: AutofillIndexEntry) {
-        val dataset = AutofillDatasets.filled(this, indexStore, screen, group, entry)
-        if (dataset == null) { cancel(); return }
+        val values = AutofillDatasets.values(this, indexStore, screen, group, entry, copyTotp = true)
+        if (values == null) { cancel(); return }
+        // R8: remember which login this was (its id, never its values) for the app's next request.
+        if (group == AutofillGroup.Login) {
+            val filled = screen.form.fields.filter { it.id in values.keys }.map { it.type }.toSet()
+            RecentLoginPicks.cache.record(entry.id, screen.caller, filled, System.currentTimeMillis())
+        }
+        val dataset = AutofillDatasets.build(values)
         setResult(RESULT_OK, Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset))
         finish()
     }
@@ -242,7 +248,21 @@ object AutofillDatasets {
         screen: ParsedScreen,
         group: AutofillGroup,
         entry: AutofillIndexEntry,
-    ): Dataset? {
+    ): Dataset? = values(context, indexStore, screen, group, entry, copyTotp = true)?.let(::build)
+
+    /**
+     * The values a pick of [entry] fills, or null when there are none (or the vault is
+     * locked). [copyTotp]: copy a one-time code with no field to the clipboard; false when
+     * the dataset is built before any pick (R8's row).
+     */
+    fun values(
+        context: Context,
+        indexStore: AutofillIndexStore,
+        screen: ParsedScreen,
+        group: AutofillGroup,
+        entry: AutofillIndexEntry,
+        copyTotp: Boolean,
+    ): Map<AutofillId, FieldValue>? {
         // A login only ever fills where it matches, even when picked from "Search Qasa"
         // on an app it was never saved for: then the user chose it, which is the point.
         val secrets = indexStore.decryptSecrets(entry) ?: return null
@@ -262,19 +282,24 @@ object AutofillDatasets {
         if (group == AutofillGroup.Login) {
             secrets.totp?.let(Totp::currentCode)?.let { code ->
                 val otp = fields.firstOrNull { it.type == AutofillFieldType.OneTimeCode }
-                if (otp != null) values[otp.id] = FieldValue.Text(code) else TotpClipboard.copy(context, code)
+                if (otp != null) values[otp.id] = FieldValue.Text(code) else if (copyTotp) TotpClipboard.copy(context, code)
             }
         }
-        if (values.isEmpty()) return null
+        return values.takeIf { it.isNotEmpty() }
+    }
+
+    fun autofillValue(value: FieldValue): AutofillValue = when (value) {
+        is FieldValue.Text -> AutofillValue.forText(value.text)
+        is FieldValue.ListIndex -> AutofillValue.forList(value.index)
+    }
+
+    /** An authentication result: no presentation, the values are filled at once. */
+    fun build(values: Map<AutofillId, FieldValue>): Dataset {
         @Suppress("DEPRECATION") // Dataset.Builder() without a presentation: the values are filled at once.
         val builder = Dataset.Builder()
         for ((id, value) in values) {
-            val autofillValue = when (value) {
-                is FieldValue.Text -> AutofillValue.forText(value.text)
-                is FieldValue.ListIndex -> AutofillValue.forList(value.index)
-            }
             @Suppress("DEPRECATION")
-            builder.setValue(id, autofillValue)
+            builder.setValue(id, autofillValue(value))
         }
         return builder.build()
     }

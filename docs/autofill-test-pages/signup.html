@@ -19,7 +19,7 @@
 </style>
 </head>
 <body>
-<nav><a href="#a">A</a><a href="#b">B</a><a href="#c">C</a><a href="#d">D</a><a href="#e">E</a><a href="#f">F</a><a href="#g">G</a><a href="#h">H</a></nav>
+<nav><a href="#a">A</a><a href="#b">B</a><a href="#c">C</a><a href="#d">D</a><a href="#e">E</a><a href="#f">F</a><a href="#g">G</a><a href="#h">H</a><a href="#i">I</a><a href="#j">J</a><a href="#k">K</a></nav>
 
 <form id="a" data-name="A · new-password + confirm by autocomplete">
   <h2>A · autocomplete="new-password" on both</h2>
@@ -84,6 +84,29 @@
   <label>Password<input name="password" type="password" autocomplete="new-password" data-controlled></label>
   <label>Confirm password<input name="confirmPassword" type="password" autocomplete="new-password" data-controlled></label>
   <button>Create</button><div class="out"></div>
+</form>
+
+<form id="i" data-name="I · the Dozarawa shape">
+  <h2>I · full name, username, email, one password, "Continue"</h2>
+  <label>Full name<input name="fullName" placeholder="Full name"></label>
+  <label>Username<input name="username" placeholder="Username"></label>
+  <label>Email<input name="email" type="email" placeholder="Email"></label>
+  <label>Password<input name="password" type="password" placeholder="Password"></label>
+  <button>Continue</button><div class="out"></div>
+</form>
+
+<form id="j" data-name="J · one password, Create account button">
+  <h2>J · email, one password, button "Create account"</h2>
+  <label>Email<input name="email" type="email"></label>
+  <label>Password<input name="password" type="password"></label>
+  <button>Create account</button><div class="out"></div>
+</form>
+
+<form id="k" data-name="K · Arabic login" dir="rtl">
+  <h2>K · تسجيل الدخول (a login: must offer saved logins)</h2>
+  <label>البريد الإلكتروني<input name="email" type="email"></label>
+  <label>كلمة المرور<input name="password" type="password"></label>
+  <button>تسجيل الدخول</button><div class="out"></div>
 </form>
 
 <script>

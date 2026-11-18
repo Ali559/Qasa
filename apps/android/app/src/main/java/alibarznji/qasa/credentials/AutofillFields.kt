@@ -184,7 +184,20 @@ object AutofillFieldClassifier {
     fun isPasswordField(s: FieldSignals): Boolean {
         if (isPasswordInput(s.inputType) || s.htmlAttributes["type"]?.lowercase() == "password") return true
         val declared = s.autofillHints + listOfNotNull(s.htmlAttributes["autocomplete"])
-        return declared.flatMap { it.lowercase().split(' ', ',') }.any { hintTable[it] == AutofillFieldType.Password || hintTable[it] == AutofillFieldType.NewPassword }
+        if (declared.flatMap { it.lowercase().split(' ', ',') }.any { hintTable[it] == AutofillFieldType.Password || hintTable[it] == AutofillFieldType.NewPassword }) return true
+        return isUntypedPasswordField(s)
+    }
+
+    /**
+     * "Detecting a password field" (docs/autofill-hardening.md R1): a Flutter field reports
+     * its placeholder (`hintText`) but no input type, id, label or HTML attributes. Its
+     * placeholder words alone (password, كلمة المرور, وشەی نهێنی …) make it a password. A
+     * native or web text field always reports a type, so "password_hint" in one stays text.
+     */
+    fun isUntypedPasswordField(s: FieldSignals): Boolean {
+        if (s.inputType != 0 || s.htmlAttributes.isNotEmpty()) return false
+        val type = match(describe(s))
+        return type == AutofillFieldType.Password || type == AutofillFieldType.NewPassword
     }
 
     /** A number keyboard (a PIN-style password): a generated password must be digits only. */
@@ -217,8 +230,13 @@ data class ClassifiedField<T>(val id: T, val type: AutofillFieldType, val signal
  * the fields the classifier left untyped (a date of birth, a checkbox label): R1 reads them
  * for sign-up context.
  */
-class AutofillForm<T>(fields: List<ClassifiedField<T>>, others: List<FieldSignals> = emptyList()) {
-    val fields: List<ClassifiedField<T>> = resolvePasswords(resolveUsernames(fields), others)
+class AutofillForm<T>(
+    fields: List<ClassifiedField<T>>,
+    others: List<FieldSignals> = emptyList(),
+    /** The text of the screen's native buttons (R1 rule 6, Phase 12); empty for web pages and Flutter. */
+    buttons: List<String> = emptyList(),
+) {
+    val fields: List<ClassifiedField<T>> = resolvePasswords(resolveUsernames(fields), others, buttons)
 
     fun group(group: AutofillGroup): List<ClassifiedField<T>> = when (group) {
         // A username step (Google's "Email or phone" page) is a login form without a password.
@@ -246,16 +264,21 @@ class AutofillForm<T>(fields: List<ClassifiedField<T>>, others: List<FieldSignal
          * the screen's password fields in order ([PasswordFieldRoles]). A field whose type
          * came from its name alone (no password input type, no hint) is left as classified.
          */
-        private fun <T> resolvePasswords(fields: List<ClassifiedField<T>>, others: List<FieldSignals>): List<ClassifiedField<T>> {
+        private fun <T> resolvePasswords(fields: List<ClassifiedField<T>>, others: List<FieldSignals>, buttons: List<String>): List<ClassifiedField<T>> {
             val passwords = fields.filter {
                 (it.type == AutofillFieldType.Password || it.type == AutofillFieldType.NewPassword) &&
                     AutofillFieldClassifier.isPasswordField(it.signals)
             }
             if (passwords.isEmpty()) return fields
+            // Rule 6: a name (given, family, middle or full), a phone, a date of birth, both a
+            // username and an email (a login asks for one of them), or a sign-up button.
             val signupContext = fields.any {
                 it.type == AutofillFieldType.GivenName || it.type == AutofillFieldType.FamilyName ||
-                    it.type == AutofillFieldType.MiddleName || it.type == AutofillFieldType.Phone
-            } || others.any { PasswordFieldRoles.isBirthday(it) } || fields.any { it.type.group == AutofillGroup.Identity && PasswordFieldRoles.isBirthday(it.signals) }
+                    it.type == AutofillFieldType.MiddleName || it.type == AutofillFieldType.FullName ||
+                    it.type == AutofillFieldType.Phone
+            } || (fields.any { it.type == AutofillFieldType.Username } && fields.any { it.type == AutofillFieldType.Email }) ||
+                others.any { PasswordFieldRoles.isBirthday(it) } || fields.any { it.type.group == AutofillGroup.Identity && PasswordFieldRoles.isBirthday(it.signals) } ||
+                PasswordFieldRoles.buttonsSaySignup(buttons)
             val isNew = PasswordFieldRoles.resolve(passwords.map { it.signals }, signupContext)
             val roles = passwords.zip(isNew).associate { (field, new) -> field to new }
             return fields.map { field ->

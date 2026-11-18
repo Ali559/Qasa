@@ -1,6 +1,7 @@
 // R5 (docs/autofill-hardening.md): a fill started from the in-page menu never closes the
 // menu as if it worked.
-import type { Overlay } from './overlay'
+import type { LoginMatch } from '@ext/shared/messages'
+import type { MenuState, Overlay, Suggestion } from './overlay'
 
 /** How a fill ended: true when the values went in, false when they could not (a covered
  *  or missing field), 'cancelled' when the user said no to a card's confirmation. */
@@ -31,4 +32,16 @@ export async function fillFromMenu(overlay: MenuLike, fill: () => Promise<FillOu
   if (!overlay.isMenuOpen()) return
   overlay.showMenu()
   overlay.setMenu({ kind: 'message', key })
+}
+
+/**
+ * R7: the menu of a password field R1 does not call new (it may be a sign-up nobody could
+ * tell). No matching login: "Use a strong password" alone (first). Matching logins: the
+ * logins, then "Use a strong password" last. Without a suggestion (the generator failed)
+ * the logins, or "no matches", as for any login field.
+ */
+export function loginPasswordMenu(items: LoginMatch[], suggest: Suggestion | null): MenuState {
+  if (!suggest) return items.length ? { kind: 'items', items } : { kind: 'message', key: 'ext.page.noMatches' }
+  if (!items.length) return { kind: 'suggest', ...suggest }
+  return { kind: 'items', items, suggest }
 }

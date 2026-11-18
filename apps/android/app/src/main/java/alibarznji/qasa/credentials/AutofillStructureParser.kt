@@ -24,8 +24,15 @@ object AutofillStructureParser {
         val values = mutableMapOf<AutofillId, String>()
         var webDomain: String? = null
         var focused: AutofillId? = null
+        // R1 rule 6 (Phase 12): the screen's native button text ("Create account", "Log in").
+        val buttons = mutableListOf<String>()
         fun walk(node: AssistStructure.ViewNode) {
             if (webDomain == null) node.webDomain?.takeIf { it.isNotBlank() }?.let { webDomain = it }
+            if (node.visibility == View.VISIBLE && isButton(node.className, node.isClickable, node.text != null)) {
+                listOfNotNull(node.text?.toString(), node.contentDescription?.toString())
+                    .map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+                    .forEach { buttons += it }
+            }
             val id = node.autofillId
             if (id != null && node.autofillType != View.AUTOFILL_TYPE_NONE && node.visibility == View.VISIBLE) {
                 val signals = signalsOf(node)
@@ -39,8 +46,20 @@ object AutofillStructureParser {
         }
         for (i in 0 until structure.windowNodeCount) walk(structure.getWindowNodeAt(i).rootViewNode)
         val packageName = structure.activityComponent?.packageName.orEmpty()
-        return ParsedScreen(AutofillForm(fields, others), AutofillMatcher.caller(packageName, webDomain), focused, values)
+        return ParsedScreen(AutofillForm(fields, others, buttons), AutofillMatcher.caller(packageName, webDomain), focused, values)
     }
+
+    private val buttonClasses = setOf(
+        "android.widget.Button",
+        "android.widget.ImageButton",
+        "com.google.android.material.button.MaterialButton",
+        "androidx.appcompat.widget.AppCompatButton",
+        "androidx.appcompat.widget.AppCompatImageButton",
+    )
+
+    /** A native button whose text R1 reads: a button class, or a clickable `…Button` with text. */
+    fun isButton(className: String?, clickable: Boolean, hasText: Boolean): Boolean =
+        className != null && (className in buttonClasses || (clickable && hasText && className.endsWith("Button")))
 
     private fun signalsOf(node: AssistStructure.ViewNode): FieldSignals {
         val attributes = node.htmlInfo?.attributes.orEmpty()
