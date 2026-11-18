@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { Download } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import type { OverviewKpi } from '@/api/admin'
 
 const props = defineProps<{
@@ -11,106 +12,88 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ export: [] }>()
 
-const peak = computed(() => Math.max(...props.growth.map((d) => d.subscribers), 1))
+// Round the axis up to a tidy step so the three gridlines carry readable numbers.
+const axisMax = computed(() => {
+  const peak = Math.max(...props.growth.map((d) => d.subscribers), 1)
+  const step = 10 ** Math.max(Math.floor(Math.log10(peak)) - 1, 0) * 5
+  return Math.ceil(peak / step) * step
+})
+const ticks = computed(() => [1, 0.5, 0].map((f) => Math.round(axisMax.value * f)))
 const latest = computed(() => props.growth.at(-1))
+const label = computed(() => props.chartLabel ?? 'Paid subscribers by month')
+const metaTone = computed(() =>
+  props.kpi.tone === 'up' ? 'text-ok' : props.kpi.tone === 'down' ? 'text-bad' : 'text-muted-foreground',
+)
 </script>
 
 <template>
-  <section
-    class="hero bg-primary text-primary-foreground relative isolate flex h-full flex-col gap-8 overflow-hidden rounded-[2rem] p-6 sm:p-8"
-    aria-labelledby="hero-label"
-  >
+  <Card class="h-full gap-8 px-6 py-6" aria-labelledby="hero-label">
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
-        <p id="hero-label" class="text-sm font-medium opacity-80">{{ kpi.label }}</p>
-        <p class="font-heading hero-figure mt-1 flex items-baseline gap-3 font-extrabold">
+        <p id="hero-label" class="text-muted-foreground text-sm">{{ kpi.label }}</p>
+        <p class="mt-2 flex items-baseline gap-2 text-5xl leading-none font-medium tabular-nums">
           {{ kpi.value }}
-          <span v-if="kpi.unit" class="text-2xl font-bold opacity-70">{{ kpi.unit }}</span>
+          <span v-if="kpi.unit" class="text-muted-foreground text-base font-normal">{{ kpi.unit }}</span>
         </p>
+        <p v-if="kpi.meta" class="mt-3 text-sm tabular-nums" :class="metaTone">{{ kpi.meta }}</p>
       </div>
-      <p
-        v-if="kpi.meta"
-        class="bg-sun text-sun-ink sticker max-w-40 rotate-6 rounded-2xl px-4 py-3 text-sm leading-snug font-semibold"
-      >
-        {{ kpi.meta }}
-      </p>
+      <Button variant="outline" size="sm" @click="emit('export')">
+        <Download />
+        Export CSV
+      </Button>
     </div>
 
-    <div class="mt-auto">
-      <div class="mb-3 flex items-center justify-between gap-3">
-        <p class="text-sm font-semibold">{{ chartLabel ?? 'Paid subscribers by month' }}</p>
-        <Button
-          variant="secondary"
-          size="sm"
-          class="rounded-lg"
-          @click="emit('export')"
-        >
-          <Download />
-          Export CSV
-        </Button>
-      </div>
-      <ol class="flex h-44 items-end gap-2 sm:gap-3" :aria-label="chartLabel ?? 'Paid subscribers by month'">
-        <li
-          v-for="(d, i) in growth"
-          :key="d.month"
-          class="flex h-full flex-1 flex-col items-center gap-2"
-        >
-          <!-- Every column shares one track height so bars compare honestly; 85% leaves room for the label. -->
-          <span class="flex w-full flex-1 items-end">
+    <figure class="mt-auto">
+      <figcaption class="mb-4 flex items-baseline justify-between gap-3 text-sm">
+        <span class="text-muted-foreground">{{ label }}</span>
+        <span v-if="latest" class="tabular-nums">
+          <span class="text-primary font-medium">{{ latest.subscribers.toLocaleString('en-US') }}</span>
+          <span class="text-muted-foreground"> in {{ latest.month }}</span>
+        </span>
+      </figcaption>
+
+      <div class="relative h-60 ps-10">
+        <!-- Gridlines with their values; the plot sits on the bottom line. -->
+        <div class="pointer-events-none absolute inset-0 flex flex-col justify-between" aria-hidden="true">
+          <div v-for="t in ticks" :key="t" class="flex items-center gap-3">
+            <span class="text-muted-foreground w-7 text-end font-mono text-[0.6875rem] tabular-nums">{{ t }}</span>
+            <span class="bg-border h-px flex-1" />
+          </div>
+        </div>
+
+        <ol class="relative flex h-full items-end gap-3 sm:gap-5" :aria-label="label">
+          <li
+            v-for="(d, i) in growth"
+            :key="d.month"
+            class="group flex h-full flex-1 items-end justify-center"
+            :title="`${d.month}: ${d.subscribers.toLocaleString('en-US')}`"
+          >
             <span
-              class="bar relative w-full rounded-t-xl rounded-b-md"
-              :class="d === latest ? 'bg-sun' : 'bg-primary-foreground/22'"
-              :style="{ height: `${(d.subscribers / peak) * 85}%`, animationDelay: `${i * 55}ms` }"
-              :title="`${d.month}: ${d.subscribers} subscribers`"
-            >
-              <span
-                v-if="d === latest"
-                class="font-heading absolute inset-x-0 -top-7 text-center text-lg leading-none font-bold"
-              >{{ d.subscribers }}</span>
-            </span>
-          </span>
-          <span class="text-xs font-medium opacity-75">{{ d.month }}</span>
-        </li>
+              class="bar w-full max-w-12 rounded-t-md transition-colors duration-150"
+              :class="d === latest ? 'bg-primary' : 'bg-foreground/12 group-hover:bg-foreground/20'"
+              :style="{ height: `${(d.subscribers / axisMax) * 100}%`, animationDelay: `${Math.min(i, 6) * 40}ms` }"
+            />
+            <span class="sr-only">{{ d.month }}: {{ d.subscribers }}</span>
+          </li>
+        </ol>
+      </div>
+      <ol class="mt-2 flex gap-3 ps-10 sm:gap-5" aria-hidden="true">
+        <li
+          v-for="d in growth"
+          :key="d.month"
+          class="flex-1 text-center font-mono text-[0.6875rem]"
+          :class="d === latest ? 'text-foreground' : 'text-muted-foreground'"
+        >{{ d.month }}</li>
       </ol>
-    </div>
-  </section>
+    </figure>
+  </Card>
 </template>
 
 <style scoped>
-.hero {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 6px 0 color-mix(in oklch, var(--primary) 55%, black),
-    0 28px 40px -24px color-mix(in oklch, var(--primary) 70%, transparent);
-}
-
-/* Soft dotted texture keeps the slab from reading as a flat swatch. */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(rgb(255 255 255 / 0.12) 1.2px, transparent 1.2px);
-  background-size: 18px 18px;
-  mask-image: linear-gradient(to bottom left, black, transparent 70%);
-}
-
-.hero-figure {
-  font-size: clamp(3.25rem, 7vw, 6rem);
-  font-variation-settings: 'wdth' 82;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-}
-
-.sticker {
-  box-shadow: 0 4px 0 var(--sun-lip);
-}
-
 .bar {
-  min-height: 0.75rem;
+  min-height: 2px;
   transform-origin: bottom;
-  animation: rise 650ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.3);
+  animation: rise 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes rise {

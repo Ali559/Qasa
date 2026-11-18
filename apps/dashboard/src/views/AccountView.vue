@@ -6,12 +6,9 @@ import {
   Ban,
   Copy,
   Gift,
-  Gauge,
   LockOpen,
   // MailWarning, (breach monitors tile, parked)
   RefreshCw,
-  ShieldCheck,
-  Smartphone,
   Undo2,
   Unlink,
 } from '@lucide/vue'
@@ -100,11 +97,11 @@ const tiles = computed(() => {
   if (!d) return []
   const gb = d.vpn_usage.bytes_used / 1_000_000_000
   return [
-    { label: 'Plan', value: d.entitlements.tier === 'premium' ? 'Premium' : 'Free', meta: d.entitlements.vpn ? 'VPN' : 'No VPN', icon: ShieldCheck, accent: 'var(--chart-2)' },
-    { label: 'Devices', value: `${activeDevices.value.length} / ${d.entitlements.device_limit}`, meta: `${d.devices.length - activeDevices.value.length} unlinked`, icon: Smartphone, accent: 'var(--chart-4)' },
-    { label: 'VPN data this period', value: gb >= 10 ? gb.toFixed(0) : gb.toFixed(1), unit: 'GB', meta: d.vpn_usage.throttled ? 'Throttled' : `since ${fmtDate(d.vpn_usage.period_start)}`, icon: Gauge, accent: 'var(--chart-3)' },
+    { label: 'Plan', value: d.entitlements.tier === 'premium' ? 'Premium' : 'Free', meta: d.entitlements.vpn ? 'VPN' : 'No VPN' },
+    { label: 'Devices', value: `${activeDevices.value.length} / ${d.entitlements.device_limit}`, meta: `${d.devices.length - activeDevices.value.length} unlinked` },
+    { label: 'VPN data this period', value: gb >= 10 ? gb.toFixed(0) : gb.toFixed(1), unit: 'GB', meta: d.vpn_usage.throttled ? 'Throttled' : `since ${fmtDate(d.vpn_usage.period_start)}` },
     // Email leak alerts are parked (todo email-leak-alerts in docs/server-followups-plan.md).
-    // { label: 'Breach monitors', value: String(d.breach_monitors), meta: `limit ${d.entitlements.breach_monitor_limit}`, icon: MailWarning, accent: 'var(--chart-5)' },
+    // { label: 'Breach monitors', value: String(d.breach_monitors), meta: `limit ${d.entitlements.breach_monitor_limit}` },
   ]
 })
 
@@ -298,7 +295,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
     </div>
 
     <Card v-if="notFound" class="px-6 py-10 text-center">
-      <p class="font-heading text-xl font-bold">Account not found</p>
+      <p class="font-medium">Account not found</p>
       <p class="text-muted-foreground mt-1 text-sm">It may have been deleted. Go back and search again.</p>
     </Card>
 
@@ -307,7 +304,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-3">
-              <h2 class="font-heading text-2xl font-bold">{{ account.public_id }}</h2>
+              <h2 class="text-xl font-medium">{{ account.public_id }}</h2>
               <StatusPill :tone="statusTone">{{ statusLabel }}</StatusPill>
             </div>
             <button
@@ -335,8 +332,8 @@ function auditSummary(payload: Record<string, unknown> | null) {
             </Button>
           </div>
         </div>
-        <div v-if="blocked" class="bg-bad/12 rounded-2xl p-4 text-sm">
-          <p class="font-semibold">Blocked {{ fmtDateTime(account.blocked_at) }}</p>
+        <div v-if="blocked" class="bg-bad/12 rounded-lg p-4 text-sm">
+          <p class="font-medium">Blocked {{ fmtDateTime(account.blocked_at) }}</p>
           <p class="text-muted-foreground">{{ account.blocked_reason || 'No reason recorded' }}</p>
         </div>
       </Card>
@@ -347,7 +344,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
 
       <Card class="gap-0 py-0">
         <CardHeader class="px-6 pt-6 pb-4">
-          <CardTitle class="text-xl font-bold">Devices</CardTitle>
+          <CardTitle>Devices</CardTitle>
           <CardDescription>The oldest linked device is the primary.</CardDescription>
         </CardHeader>
         <CardContent class="px-0">
@@ -365,7 +362,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
             <TableBody>
               <TableRow v-for="d in detail.devices" :key="d.id" :class="d.revoked_at ? 'opacity-60' : ''">
                 <TableCell class="py-3.5 pl-6">
-                  <p class="font-semibold">{{ d.device_name }}</p>
+                  <p class="font-medium">{{ d.device_name }}</p>
                   <p class="text-muted-foreground text-xs">{{ d.location || 'Unknown location' }}</p>
                 </TableCell>
                 <TableCell class="capitalize">{{ d.platform }}</TableCell>
@@ -390,7 +387,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
                 </TableCell>
               </TableRow>
               <TableRow v-if="detail.devices.length === 0" class="hover:bg-transparent">
-                <TableCell colspan="6" class="text-muted-foreground h-24 text-center">No devices.</TableCell>
+                <TableCell colspan="6" class="text-muted-foreground h-24 text-center">No devices</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -400,7 +397,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
       <div class="grid gap-6 xl:grid-cols-2">
         <Card class="gap-0 py-0">
           <CardHeader class="px-6 pt-6 pb-4">
-            <CardTitle class="text-xl font-bold">Subscriptions</CardTitle>
+            <CardTitle>Subscriptions</CardTitle>
             <CardDescription>
               Last 20, grants included.
               <template v-if="detail.payment_method">
@@ -422,7 +419,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
               <TableBody>
                 <TableRow v-for="s in detail.subscriptions" :key="s.id">
                   <TableCell class="py-3.5 pl-6">
-                    <p class="font-semibold">{{ planLabel(s.plan_id) }}</p>
+                    <p class="font-medium">{{ planLabel(s.plan_id) }}</p>
                     <p v-if="isGrant(s)" class="text-muted-foreground text-xs">
                       Grant, {{ s.grant_days }} days: {{ s.grant_reason }}
                     </p>
@@ -450,7 +447,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
                   </TableCell>
                 </TableRow>
                 <TableRow v-if="detail.subscriptions.length === 0" class="hover:bg-transparent">
-                  <TableCell colspan="4" class="text-muted-foreground h-24 text-center">No subscriptions yet.</TableCell>
+                  <TableCell colspan="4" class="text-muted-foreground h-24 text-center">No subscriptions yet</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -459,7 +456,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
 
         <Card class="gap-0 py-0">
           <CardHeader class="px-6 pt-6 pb-4">
-            <CardTitle class="text-xl font-bold">Payments</CardTitle>
+            <CardTitle>Payments</CardTitle>
             <CardDescription>Last 20</CardDescription>
           </CardHeader>
           <CardContent class="px-0">
@@ -481,14 +478,14 @@ function auditSummary(payload: Record<string, unknown> | null) {
                     </p>
                   </TableCell>
                   <TableCell class="text-right">
-                    <span class="font-heading font-bold tabular-nums">{{ fmtIqd(p.amount_iqd) }}</span>
-                    <span class="text-muted-foreground ml-1 text-xs">IQD</span>
+                    <span class="font-medium tabular-nums">{{ fmtIqd(p.amount_iqd) }}</span>
+                    <span class="text-muted-foreground ms-1 text-xs">IQD</span>
                   </TableCell>
                   <TableCell><StatusPill :tone="payTone[p.status] ?? 'neutral'">{{ p.status === 'success' ? 'paid' : p.status }}</StatusPill></TableCell>
                   <TableCell class="text-muted-foreground pr-6 text-xs">{{ fmtDateTime(p.created_at) }}</TableCell>
                 </TableRow>
                 <TableRow v-if="detail.payments.length === 0" class="hover:bg-transparent">
-                  <TableCell colspan="4" class="text-muted-foreground h-24 text-center">No payments yet.</TableCell>
+                  <TableCell colspan="4" class="text-muted-foreground h-24 text-center">No payments yet</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -498,7 +495,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
 
       <Card class="gap-4 py-6">
         <CardHeader class="px-6">
-          <CardTitle class="text-xl font-bold">Staff actions</CardTitle>
+          <CardTitle>Staff actions</CardTitle>
           <CardDescription>Audit log entries about this account</CardDescription>
         </CardHeader>
         <CardContent class="px-6">
@@ -507,10 +504,10 @@ function auditSummary(payload: Record<string, unknown> | null) {
               <span class="text-muted-foreground w-36 shrink-0 text-xs tabular-nums">{{ fmtDateTime(a.created_at) }}</span>
               <StatusPill tone="info" :dot="false">{{ a.action.replace(/_/g, ' ') }}</StatusPill>
               <span class="text-sm">{{ auditSummary(a.payload) }}</span>
-              <span class="text-muted-foreground text-xs sm:ml-auto">{{ a.admin_email ?? a.admin_id }}</span>
+              <span class="text-muted-foreground text-xs sm:ms-auto">{{ a.admin_email ?? a.admin_id }}</span>
             </li>
           </ul>
-          <p v-else class="text-muted-foreground text-sm">No staff actions on this account.</p>
+          <p v-else class="text-muted-foreground text-sm">No staff actions on this account</p>
         </CardContent>
       </Card>
     </template>
@@ -520,7 +517,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
     <Dialog v-model:open="blockOpen">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Block this user?</DialogTitle>
+          <DialogTitle class="text-lg">Block this user?</DialogTitle>
           <DialogDescription>
             Every device is signed out, VPN sessions end and the app can't register new devices until you unblock.
           </DialogDescription>
@@ -539,7 +536,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
     <Dialog v-model:open="grantOpen">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Grant Premium</DialogTitle>
+          <DialogTitle class="text-lg">Grant Premium</DialogTitle>
           <DialogDescription>Adds days on top of any time the account already has. No payment is taken.</DialogDescription>
         </DialogHeader>
         <div class="grid gap-4">
@@ -566,7 +563,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
     <Dialog :open="!!unlinkTarget" @update:open="(o) => !o && (unlinkTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Unlink this device?</DialogTitle>
+          <DialogTitle class="text-lg">Unlink this device?</DialogTitle>
           <DialogDescription>
             {{ unlinkTarget?.device_name }} is signed out, stops getting notifications and its VPN session ends.
           </DialogDescription>
@@ -581,7 +578,7 @@ function auditSummary(payload: Record<string, unknown> | null) {
     <Dialog :open="!!revokeTarget" @update:open="(o) => !o && (revokeTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Revoke this grant?</DialogTitle>
+          <DialogTitle class="text-lg">Revoke this grant?</DialogTitle>
           <DialogDescription>
             Takes {{ revokeTarget?.grant_days }} days back off the subscription. Paid time is untouched.
           </DialogDescription>

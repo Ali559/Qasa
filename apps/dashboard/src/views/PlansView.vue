@@ -81,7 +81,6 @@ async function save() {
 
 onMounted(load)
 
-const accents = ['var(--chart-1)', 'var(--sun)', 'var(--chart-2)', 'var(--chart-4)']
 const perLabel = (interval: string) => (interval === 'yearly' ? 'year' : interval === 'monthly' ? 'month' : interval)
 </script>
 
@@ -96,29 +95,30 @@ const perLabel = (interval: string) => (interval === 'yearly' ? 'year' : interva
 
     <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       <Card
-        v-for="(p, i) in plans"
+        v-for="p in plans"
         :key="p.id"
-        class="relative gap-6 overflow-hidden px-6 pt-0 pb-6"
-        :class="{ 'outline-primary outline-3 outline-offset-3': editing?.id === p.id }"
+        class="relative gap-6 px-6 py-6"
+        :class="{ 'outline-primary outline-2 outline-offset-2': editing?.id === p.id }"
       >
-        <div class="-mx-6 h-3" :style="{ background: accents[i % accents.length] }" aria-hidden="true" />
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="font-heading text-2xl font-bold">{{ p.title }}</h3>
-            <p class="text-muted-foreground font-mono text-xs">{{ p.id }}</p>
+            <h3 class="text-base font-medium">{{ p.title }}</h3>
+            <p class="text-muted-foreground mt-1 font-mono text-xs">{{ p.id }}</p>
           </div>
           <StatusPill :tone="p.active ? 'ok' : 'neutral'">{{ p.active ? 'Active' : 'Inactive' }}</StatusPill>
         </div>
 
         <p class="flex items-baseline gap-1.5">
-          <span class="font-heading text-5xl leading-none font-extrabold tabular-nums">{{ p.amount_iqd.toLocaleString() }}</span>
-          <span class="text-muted-foreground text-sm font-semibold">IQD / {{ perLabel(p.interval) }}</span>
+          <span class="text-[2rem] leading-none font-medium tabular-nums">{{ p.amount_iqd.toLocaleString() }}</span>
+          <span class="text-muted-foreground text-sm">IQD per {{ perLabel(p.interval) }}</span>
         </p>
 
-        <ul class="flex flex-wrap gap-2 text-sm">
-          <li class="bg-muted rounded-lg px-2.5 py-1 font-medium">{{ p.days }} days</li>
-          <li class="bg-muted rounded-lg px-2.5 py-1 font-medium">{{ p.vpn_quota_gb }} GB VPN</li>
-          <li v-for="f in p.features_json ?? []" :key="f" class="bg-muted rounded-lg px-2.5 py-1 font-medium">{{ f }}</li>
+        <ul class="text-muted-foreground grid gap-1.5 border-t pt-4 text-sm">
+          <li class="flex justify-between gap-3"><span>Length</span><span class="text-foreground tabular-nums">{{ p.days }} days</span></li>
+          <li class="flex justify-between gap-3"><span>VPN quota</span><span class="text-foreground tabular-nums">{{ p.vpn_quota_gb }} GB</span></li>
+          <li v-if="p.features_json?.length" class="flex justify-between gap-3">
+            <span>Includes</span><span class="text-foreground text-end">{{ p.features_json.join(', ') }}</span>
+          </li>
         </ul>
 
         <Button v-if="canWrite()" variant="outline" class="mt-auto w-full" @click="startEdit(p)">
@@ -130,7 +130,7 @@ const perLabel = (interval: string) => (interval === 'yearly' ? 'year' : interva
 
     <Card v-if="editing" class="gap-6 py-6">
       <CardHeader class="px-6">
-        <CardTitle class="text-xl font-bold">Edit {{ editing.title }}</CardTitle>
+        <CardTitle>Edit {{ editing.title }}</CardTitle>
       </CardHeader>
       <CardContent class="space-y-5 px-6">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

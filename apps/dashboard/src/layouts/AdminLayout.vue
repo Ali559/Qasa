@@ -25,45 +25,45 @@ const activeKey = computed<NavKey>(() => {
 const titles: Record<NavKey, { title: string; description: string }> = {
   overview: {
     title: 'Overview',
-    description: 'Revenue, subscribers and bandwidth at a glance.',
+    description: 'Revenue, subscribers and bandwidth at a glance',
   },
   analytics: {
     title: 'Analytics',
-    description: 'How checkouts convert and why people cancel.',
+    description: 'How checkouts convert and why people cancel',
   },
   users: {
-    title: 'Users & devices',
-    description: 'Find a subscriber, check their devices, or block access.',
+    title: 'Users and devices',
+    description: 'Find a subscriber, check their devices, or block access',
   },
   payments: {
     title: 'Payments',
-    description: 'Every payment the gateways reported, with the raw webhook.',
+    description: 'Every payment the gateways reported, with the raw webhook',
   },
   plans: {
     title: 'Pricing',
-    description: 'Change plan prices and VPN quotas in IQD.',
+    description: 'Change plan prices and VPN quotas in IQD',
   },
   cancellations: {
     title: 'Cancellations',
-    description: 'Reasons users give when they cancel Premium.',
+    description: 'Reasons users give when they cancel Premium',
   },
   notifications: {
     title: 'Notifications',
-    description: 'Send a message to every user in English, Kurdish and Arabic.',
+    description: 'Send a message to every user in English, Kurdish and Arabic',
   },
   vpn: {
     title: 'VPN nodes',
-    description: 'Load, peers and bandwidth on each server.',
+    description: 'Load, peers and bandwidth on each server',
   },
   telemetry: {
     title: 'Telemetry',
-    description: 'Live service health and event logs.',
+    description: 'Live service health and event logs',
   },
 }
 
 const page = computed(() =>
   route.name === 'account'
-    ? { title: 'Account', description: 'Devices, subscriptions, payments and staff actions for one user.' }
+    ? { title: 'Account', description: 'Devices, subscriptions, payments and staff actions for one user' }
     : titles[activeKey.value],
 )
 
@@ -91,41 +91,30 @@ async function signOut() {
     />
 
     <SidebarInset class="bg-transparent">
-      <header class="flex items-start gap-3 px-4 pt-5 pb-2 md:px-8 md:pt-7">
-        <SidebarTrigger class="mt-1 -ml-1 md:hidden" />
-        <div class="min-w-0 flex-1">
-          <h1 class="font-heading truncate text-2xl font-bold sm:text-[2rem] sm:leading-tight">
-            {{ page.title }}
-          </h1>
-          <p class="text-muted-foreground mt-0.5 truncate text-sm">
-            {{ page.description }}
-          </p>
-        </div>
-        <span
-          v-if="isLiveApiEnabled() && adminRole === 'viewer'"
-          class="bg-warn/16 text-warn mt-1 hidden rounded-full px-3 py-1.5 text-xs font-semibold sm:inline-flex"
-          title="Your account can view everything but not change anything."
-        >Read-only</span>
-        <span class="bg-card text-foreground mt-1 hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-[0_3px_0_var(--lip)] sm:inline-flex">
-          <span class="relative flex size-2">
-            <span class="bg-ok absolute inset-0 animate-ping rounded-full opacity-60" />
-            <span class="bg-ok relative size-2 rounded-full" />
-          </span>
-          All systems normal
-        </span>
-        <Button
-          variant="outline"
-          size="icon-lg"
-          class="mt-0.5 rounded-xl"
-          :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
-          @click="toggleTheme()"
-        >
-          <Sun v-if="isDark" />
-          <Moon v-else />
-        </Button>
-      </header>
+      <div class="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6 px-4 pt-6 pb-12 md:px-8 md:pt-8">
+        <header class="flex items-start gap-3">
+          <SidebarTrigger class="mt-0.5 -ms-1 md:hidden" />
+          <div class="min-w-0 flex-1">
+            <h1 class="truncate text-2xl leading-tight font-medium sm:text-[1.75rem]">{{ page.title }}</h1>
+            <p class="text-muted-foreground mt-1 text-sm sm:truncate">{{ page.description }}</p>
+          </div>
+          <span
+            v-if="isLiveApiEnabled() && adminRole === 'viewer'"
+            class="bg-warn/14 text-warn mt-1 hidden h-7 items-center rounded-md px-2.5 text-xs font-medium sm:inline-flex"
+            title="Your account can view everything but not change anything."
+          >Read-only</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            class="text-muted-foreground hover:text-foreground"
+            :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+            @click="toggleTheme()"
+          >
+            <Sun v-if="isDark" />
+            <Moon v-else />
+          </Button>
+        </header>
 
-      <div class="mx-auto flex w-full max-w-[1440px] flex-1 flex-col gap-6 px-4 pt-4 pb-10 md:px-8">
         <RouterView v-slot="{ Component, route: childRoute }">
           <Transition name="page" mode="out-in">
             <div
@@ -146,8 +135,8 @@ async function signOut() {
 .page-enter-active,
 .page-leave-active {
   transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+    opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .page-enter-from {
@@ -157,6 +146,5 @@ async function signOut() {
 
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
 }
 </style>

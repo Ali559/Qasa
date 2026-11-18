@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="ink bg-sidebar text-sidebar-foreground overflow-hidden rounded-2xl">
+  <div class="ink bg-sidebar text-sidebar-foreground overflow-hidden rounded-xl">
     <slot />
   </div>
 </template>
@@ -15,8 +15,6 @@
   --ink-warn: #F0C48C; /* gold-muted */
   --ink-ok: #5CCB97; /* success */
   --ink-bad: #FF6B6B; /* danger */
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    0 4px 0 var(--dock-lip);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
 }
 </style>

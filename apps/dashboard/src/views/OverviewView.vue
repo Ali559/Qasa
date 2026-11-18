@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Gauge, Smartphone, UserRoundCheck, Wallet } from '@lucide/vue'
 import HeroRevenue from '@/components/overview/HeroRevenue.vue'
 import StatTile from '@/components/kit/StatTile.vue'
 import GatewayMix from '@/components/overview/GatewayMix.vue'
@@ -33,20 +32,9 @@ onMounted(async () => {
   }
 })
 
-// First KPI (revenue) leads the page; the rest become accent tiles in order.
+// First KPI (revenue) leads the page with the growth chart; the rest sit in one row of compact stats.
 const hero = computed(() => overviewKpis.value[0])
 const tiles = computed(() => overviewKpis.value.slice(1))
-const tileStyle = [
-  { icon: Wallet, accent: 'var(--chart-5)' },
-  { icon: UserRoundCheck, accent: 'var(--chart-2)' },
-  { icon: Smartphone, accent: 'var(--chart-4)' },
-  { icon: Gauge, accent: 'var(--chart-3)' },
-]
-const styleFor = (i: number) => {
-  // Keep the demo tiles' original look (no "Collected" tile there).
-  const offset = live ? 0 : 1
-  return tileStyle[(i + offset) % tileStyle.length]!
-}
 
 function exportGrowth() {
   downloadCsv(
@@ -57,21 +45,16 @@ function exportGrowth() {
 </script>
 
 <template>
-  <div class="grid gap-6 xl:grid-cols-12">
-    <div v-if="hero" class="xl:col-span-8 xl:row-span-2">
-      <HeroRevenue :kpi="hero" :growth="growth" :chart-label="growthLabel" @export="exportGrowth" />
-    </div>
-
-    <div
-      v-for="(kpi, i) in tiles"
-      :key="kpi.label"
-      class="xl:col-span-4"
-    >
-      <StatTile v-bind="kpi" :icon="styleFor(i).icon" :accent="styleFor(i).accent" />
-    </div>
-
-    <div class="xl:col-span-8">
+  <div class="grid gap-6">
+    <div class="grid gap-6 xl:grid-cols-3">
+      <div v-if="hero" class="xl:col-span-2">
+        <HeroRevenue :kpi="hero" :growth="growth" :chart-label="growthLabel" @export="exportGrowth" />
+      </div>
       <GatewayMix :gateways="gateways" :description="gatewayDescription" />
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2" :class="tiles.length >= 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-3'">
+      <StatTile v-for="kpi in tiles" :key="kpi.label" v-bind="kpi" />
     </div>
   </div>
 </template>

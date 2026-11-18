@@ -1,25 +1,25 @@
 export const overviewKpis = [
   {
-    label: 'Monthly Recurring Rev',
+    label: 'Monthly recurring revenue',
     value: '4.5M',
     unit: 'IQD',
     meta: '+12.4% vs last month',
     tone: 'up' as const,
   },
   {
-    label: 'Paid Subscribers',
+    label: 'Paid subscribers',
     value: '450',
-    meta: '+42 new this week',
+    meta: '+42 vs last week',
     tone: 'up' as const,
   },
   {
-    label: 'Active Free Devices',
+    label: 'Active free devices',
     value: '2,100',
-    meta: 'Stable',
+    meta: 'No change vs last week',
     tone: 'flat' as const,
   },
   {
-    label: 'VPN Bandwidth (30D)',
+    label: 'VPN bandwidth, last 30 days',
     value: '1.2',
     unit: 'TB',
     progress: 45,
@@ -92,10 +92,10 @@ export const payments: PaymentRow[] = [
 ]
 
 export const vpnKpis = [
-  { label: 'Total Active Peers', value: '1,248', meta: '+12%' },
-  { label: 'Global Bandwidth', value: '4.2 Gbps' },
-  { label: 'Avg Latency', value: '24 ms' },
-  { label: 'Node Uptime', value: '99.98%' },
+  { label: 'Active peers', value: '1,248', meta: '+12% vs last week', tone: 'up' },
+  { label: 'Total bandwidth', value: '4.2 Gbps' },
+  { label: 'Average latency', value: '24 ms' },
+  { label: 'Node uptime', value: '99.98%' },
 ]
 
 export const vpnNodes = [
@@ -138,16 +138,16 @@ export const vpnNodes = [
 ]
 
 export const telemetryMetrics = [
-  { label: 'Active Sessions', value: '24,591', meta: '+12% vs last hr', tone: 'good' as const },
-  { label: 'Avg Latency (Global)', value: '42 ms', meta: 'Stable', tone: 'warn' as const },
-  { label: 'API Error Rate', value: '0.04%', meta: '-0.01% vs last hr', tone: 'good' as const },
-  { label: 'DB Read/Write', value: '8.2 k/s', meta: 'Optimal', tone: 'good' as const },
+  { label: 'Active sessions', value: '24,591', meta: '+12% vs last hour', tone: 'good' as const },
+  { label: 'Average latency', value: '42 ms', meta: '+6 ms vs last hour', tone: 'warn' as const },
+  { label: 'API error rate', value: '0.04%', meta: '-0.01% vs last hour', tone: 'good' as const },
+  { label: 'Database reads and writes', value: '8.2k/s', meta: 'Within normal range', tone: 'good' as const },
 ]
 
 export const resources = [
-  { label: 'CPU Load (Cluster)', value: '42%', width: 42 },
-  { label: 'Memory Utilization', value: '78%', width: 78 },
-  { label: 'Storage Capacity', value: '31%', width: 31 },
+  { label: 'Cluster CPU', value: '42%', width: 42 },
+  { label: 'Memory', value: '78%', width: 78 },
+  { label: 'Storage', value: '31%', width: 31 },
   { label: 'Network I/O', value: '1.2 GB/s', width: 64 },
 ]
 

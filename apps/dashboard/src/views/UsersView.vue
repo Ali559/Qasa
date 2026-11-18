@@ -170,11 +170,11 @@ function prevPage() {
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <FilterChips v-model="tier" :options="tierOptions" label="Filter by plan" />
       <div class="relative w-full lg:max-w-xs">
-        <Search class="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Search class="text-muted-foreground absolute top-1/2 start-3 size-4 -translate-y-1/2" />
         <Input
           v-model="query"
-          class="bg-card h-10 pl-9"
-          placeholder="Search by user or account ID"
+          class="bg-card h-9 ps-9"
+          placeholder="User or account ID"
           aria-label="Search by user or account ID"
         />
       </div>
@@ -206,14 +206,14 @@ function prevPage() {
                     <i
                       v-for="n in devicePips(user.devices).max"
                       :key="n"
-                      class="size-2.5 rounded-[3px]"
-                      :class="n <= devicePips(user.devices).used ? 'bg-chart-4' : 'bg-muted shadow-[inset_0_1px_0_var(--edge)]'"
+                      class="size-2 rounded-[2px]"
+                      :class="n <= devicePips(user.devices).used ? 'bg-foreground/60' : 'bg-muted'"
                     />
                   </span>
                   <span class="text-muted-foreground text-xs tabular-nums">{{ user.devices }}</span>
                 </span>
               </TableCell>
-              <TableCell :class="user.expiryAlert ? 'text-bad font-semibold' : ''">{{ user.expiry }}</TableCell>
+              <TableCell :class="user.expiryAlert ? 'text-bad' : 'text-muted-foreground'">{{ user.expiry }}</TableCell>
               <TableCell class="pr-6">
                 <div class="flex justify-end gap-1">
                   <Tooltip>
@@ -249,7 +249,7 @@ function prevPage() {
             </TableRow>
             <TableRow v-if="pageRows.length === 0" class="hover:bg-transparent">
               <TableCell colspan="6" class="text-muted-foreground h-32 text-center">
-                No users match these filters. Clear the search or pick another plan.
+                No users match. Clear the search or pick another plan
               </TableCell>
             </TableRow>
           </TableBody>
@@ -271,7 +271,7 @@ function prevPage() {
     <Dialog :open="!!blockTarget" @update:open="(open) => !open && (blockTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Block this user?</DialogTitle>
+          <DialogTitle class="text-lg">Block this user?</DialogTitle>
           <DialogDescription>
             <span class="font-mono">{{ blockTarget?.id }}</span> is signed out on every device and loses VPN
             access until unblocked.

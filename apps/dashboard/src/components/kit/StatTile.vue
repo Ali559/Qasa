@@ -1,43 +1,36 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
 import { Card } from '@/components/ui/card'
 import SegmentMeter from './SegmentMeter.vue'
 
+// A stat is a number: a label, the figure and what it compares to. No icon tiles or mini charts.
 defineProps<{
   label: string
   value: string
   unit?: string
   meta?: string
+  tone?: string
   progress?: number
-  icon: Component
-  accent: string
 }>()
+
+const toneClass = (tone?: string) =>
+  tone === 'up' || tone === 'good' ? 'text-ok' : tone === 'down' || tone === 'bad' ? 'text-bad' : 'text-muted-foreground'
 </script>
 
 <template>
-  <Card class="h-full justify-between gap-5 px-5 py-5">
-    <div class="flex items-center gap-3">
-      <span
-        class="grid size-10 shrink-0 -rotate-6 place-items-center rounded-xl text-ink"
-        :style="{ background: accent, boxShadow: `0 3px 0 color-mix(in oklch, ${accent} 60%, black)` }"
-        aria-hidden="true"
-      >
-        <component :is="icon" class="size-5" />
-      </span>
-      <p class="text-muted-foreground text-sm font-medium">{{ label }}</p>
-    </div>
+  <Card class="h-full justify-between gap-4 px-5 py-5">
+    <p class="text-muted-foreground text-sm">{{ label }}</p>
 
     <div>
-      <p class="font-heading flex items-baseline gap-1.5 text-4xl leading-none font-bold">
+      <p class="flex items-baseline gap-1.5 text-[1.75rem] leading-none font-medium tabular-nums">
         {{ value }}
-        <span v-if="unit" class="text-muted-foreground text-base font-semibold">{{ unit }}</span>
+        <span v-if="unit" class="text-muted-foreground text-sm font-normal">{{ unit }}</span>
       </p>
 
       <template v-if="progress !== undefined">
-        <SegmentMeter class="mt-4" :value="progress" :color="accent" :label="`${label}: ${progress}% of quota`" />
-        <p class="text-muted-foreground mt-2 text-xs">{{ progress }}% of monthly quota used</p>
+        <SegmentMeter class="mt-4" :value="progress" :label="`${label}: ${progress}% of quota`" />
+        <p class="text-muted-foreground mt-2 text-xs tabular-nums">{{ progress }}% of monthly quota used</p>
       </template>
-      <p v-else-if="meta" class="text-muted-foreground mt-2 text-sm">{{ meta }}</p>
+      <p v-else-if="meta" class="mt-2 text-sm tabular-nums" :class="toneClass(tone)">{{ meta }}</p>
     </div>
   </Card>
 </template>
