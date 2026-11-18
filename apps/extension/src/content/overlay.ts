@@ -13,10 +13,17 @@ import { FONT_WAIT_MS, ICON_INSET, ICON_SIZE, MENU_ARM_MS, MENU_GAP, MENU_HEADER
 
 export type MenuState =
   | { kind: 'loading' }
-  | { kind: 'items'; items: LoginMatch[] }
+  /** Logins; on a password field R1 doesn't call new (R7), "Use a strong password" after them. */
+  | { kind: 'items'; items: LoginMatch[]; suggest?: Suggestion }
   | { kind: 'message'; key: string; args?: Array<string | number>; action?: { key: string; run: () => void } }
   /** A new-password field (rule 6c): "Use a strong password", the generated value under it. */
-  | { kind: 'suggest'; password: string; run: () => void }
+  | ({ kind: 'suggest' } & Suggestion)
+
+/** The "Use a strong password" row: the generated value, and what picking it does. */
+export interface Suggestion {
+  password: string
+  run: () => void
+}
 
 /** The app's tokens (tokens.css, generated from design/tokens.json, the iOS values) as
  *  declarations for the shadow root: sizes, type, motion and shadows from the first `:root`
@@ -440,23 +447,7 @@ export class Overlay {
       }
     } else if (state.kind === 'suggest') {
       const list = this.listbox(lang)
-      const row = this.option()
-      const tile = this.doc.createElement('span')
-      tile.className = 'tile brand'
-      tile.append(qasaMark(this.doc))
-      const text = this.doc.createElement('span')
-      text.className = 'text'
-      const title = this.doc.createElement('span')
-      title.className = 'title'
-      title.textContent = ct(lang, 'fill.strongPassword')
-      const sub = this.doc.createElement('span')
-      sub.className = 'sub mono'
-      sub.textContent = state.password
-      sub.dir = 'ltr'
-      text.append(title, sub)
-      row.append(tile, text)
-      this.actions.set(row, state.run)
-      list.append(row)
+      list.append(this.suggestRow(lang, state))
       menu.el.append(list)
     } else {
       const list = this.listbox(lang)
@@ -490,10 +481,32 @@ export class Overlay {
         this.rows.set(row, item)
         list.append(row)
       }
+      if (state.suggest) list.append(this.suggestRow(lang, state.suggest))
       menu.el.append(list)
     }
     this.placeMenu()
     if (menu.keyboard && this.options().length) this.highlight(0)
+  }
+
+  /** "Use a strong password" with the generated value under it (rule 6c). */
+  private suggestRow(lang: ContentLanguage, suggest: Suggestion): HTMLButtonElement {
+    const row = this.option()
+    const tile = this.doc.createElement('span')
+    tile.className = 'tile brand'
+    tile.append(qasaMark(this.doc))
+    const text = this.doc.createElement('span')
+    text.className = 'text'
+    const title = this.doc.createElement('span')
+    title.className = 'title'
+    title.textContent = ct(lang, 'fill.strongPassword')
+    const sub = this.doc.createElement('span')
+    sub.className = 'sub mono'
+    sub.textContent = suggest.password
+    sub.dir = 'ltr'
+    text.append(title, sub)
+    row.append(tile, text)
+    this.actions.set(row, suggest.run)
+    return row
   }
 
   /** The rows' container: a listbox whose highlighted option is its active descendant. */

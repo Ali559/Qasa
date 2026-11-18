@@ -19,8 +19,15 @@ function isNumeric(field: HTMLInputElement): boolean {
   return /^\^?(\\d|\[0-9\])(\*|\+|\{\d+(,\d*)?\})?\$?$/.test(pattern)
 }
 
+/** The fields a strong password goes into: a new password and its confirm, or, on a field
+ *  R1 calls a login (R7), that one password field. */
+export function strongPasswordFields(group: FieldGroup): HTMLInputElement[] {
+  const fields = group.kind === 'login' ? [group.password] : [group.newPassword, group.confirmPassword]
+  return fields.filter((f): f is HTMLInputElement => !!f)
+}
+
 export function generateConstraints(group: FieldGroup): GenerateConstraints {
-  const fields = [group.newPassword, group.confirmPassword].filter((f): f is HTMLInputElement => !!f)
+  const fields = strongPasswordFields(group)
   const out: GenerateConstraints = {}
   const max = fields.map((f) => f.maxLength).filter((n) => n > 0)
   if (max.length) out.maxLength = Math.min(...max)

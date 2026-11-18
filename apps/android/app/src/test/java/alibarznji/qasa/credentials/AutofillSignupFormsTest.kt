@@ -17,15 +17,21 @@ class AutofillSignupFormsTest {
         FieldSignals(htmlAttributes = attrs.toMap(), maxLength = maxLength)
 
     /** Classified like [AutofillStructureParser]: typed fields in order, the rest as context. */
-    private fun form(vararg fields: FieldSignals): AutofillForm<Int> {
+    private fun form(vararg fields: FieldSignals): AutofillForm<Int> = formWithButtons(emptyList(), *fields)
+
+    /** [buttons]: the screen's native button text, as the parser collects it (R1 rule 6). */
+    private fun formWithButtons(buttons: List<String>, vararg fields: FieldSignals): AutofillForm<Int> {
         val typed = mutableListOf<ClassifiedField<Int>>()
         val others = mutableListOf<FieldSignals>()
         fields.forEachIndexed { i, s ->
             val type = AutofillFieldClassifier.classify(s)
             if (type != null) typed += ClassifiedField(i, type, s) else others += s
         }
-        return AutofillForm(typed, others)
+        return AutofillForm(typed, others, buttons)
     }
+
+    /** A Flutter field outside an AutofillGroup: only its placeholder, no type, id or hints. */
+    private fun flutter(hintText: String) = FieldSignals(hint = hintText)
 
     private fun assertOffers(form: AutofillForm<Int>, strong: List<Int>, saved: List<Int>) {
         val offers = AutofillOffers.login(form)
@@ -251,5 +257,127 @@ class AutofillSignupFormsTest {
         val password = PasswordGenerator.generate(AutofillOffers.strongPasswordSpec(f))
         assertEquals(6, password.length)
         assertTrue(password.all { it.isDigit() })
+    }
+    // Phase 12: forms I–L (docs/autofill-hardening.md R1 rule 6, "Detecting a password field").
+
+    @Test
+    fun formI_fullNameUsernameEmailOnePasswordIsSignUp() {
+        val f = formWithButtons(
+            listOf("Continue"),
+            input("name" to "fullName", "placeholder" to "Full name"),
+            input("name" to "username", "placeholder" to "Username"),
+            input("type" to "email", "name" to "email", "placeholder" to "Email"),
+            input("type" to "password", "name" to "password", "placeholder" to "Password"),
+        )
+        assertEquals(AutofillFieldType.FullName, f.fields[0].type)
+        assertOffers(f, strong = listOf(3), saved = listOf(1))
+        assertStrong(f, 16)
+    }
+
+    @Test
+    fun formI_usernameAndEmailAloneMakeTheOnePasswordNew() {
+        val f = form(
+            input("type" to "text", "name" to "username"),
+            input("type" to "email", "name" to "email"),
+            input("type" to "password", "name" to "password"),
+        )
+        assertOffers(f, strong = listOf(2), saved = listOf(0))
+    }
+
+    @Test
+    fun formI_flutterAllFieldsReportedByPlaceholder() {
+        // The Dozarawa shape inside an AutofillGroup: every field, placeholders only.
+        val f = form(flutter("Full name"), flutter("Username"), flutter("Email"), flutter("Password"))
+        assertEquals(
+            listOf(AutofillFieldType.FullName, AutofillFieldType.Username, AutofillFieldType.Email, AutofillFieldType.NewPassword),
+            f.fields.map { it.type },
+        )
+        assertOffers(f, strong = listOf(3), saved = listOf(1))
+    }
+
+    @Test
+    fun formJ_createAccountButtonMakesTheOnePasswordNew() {
+        val f = formWithButtons(
+            listOf("Create account"),
+            input("type" to "email", "name" to "email"),
+            input("type" to "password", "name" to "password"),
+        )
+        assertOffers(f, strong = listOf(1), saved = listOf(0))
+        // Other sign-up buttons, in each language.
+        for (button in listOf("Sign up", "SIGN UP", "Register", "Join", "إنشاء حساب", "حساب جديد", "التسجيل", "تۆمارکردن", "خۆتۆمارکردن", "دروستکردنی هەژمار")) {
+            val g = formWithButtons(listOf(button), input("type" to "email", "name" to "email"), input("type" to "password", "name" to "password"))
+            assertOffers(g, strong = listOf(1), saved = listOf(0))
+        }
+    }
+
+    @Test
+    fun formJ_neutralButtonsCountForNothing() {
+        for (button in listOf("Continue", "Next", "Submit", "متابعة", "بەردەوامبە")) {
+            val f = formWithButtons(listOf(button), input("type" to "email", "name" to "email"), input("type" to "password", "name" to "password"))
+            assertOffers(f, strong = emptyList(), saved = listOf(0, 1))
+        }
+    }
+
+    @Test
+    fun formK_arabicLoginStaysALogin() {
+        val f = formWithButtons(
+            listOf("تسجيل الدخول"),
+            input("type" to "email", "name" to "email", "aria-label" to "البريد الإلكتروني"),
+            input("type" to "password", "name" to "password", "aria-label" to "كلمة المرور"),
+        )
+        assertOffers(f, strong = emptyList(), saved = listOf(0, 1))
+        assertEquals(listOf(AutofillFieldType.Username, AutofillFieldType.Password), f.fields.map { it.type })
+        // R7: the login password still gets the strong password, after its logins.
+        assertEquals(listOf(1), AutofillOffers.login(f, focused = 1).fallbackStrongIds)
+    }
+
+    @Test
+    fun formK_loginButtonWinsOverASignUpLink() {
+        for (buttons in listOf(listOf("تسجيل الدخول", "إنشاء حساب"), listOf("Log in", "Don't have an account? Sign up"), listOf("Sign in", "Register"))) {
+            val f = formWithButtons(buttons, input("type" to "email", "name" to "email"), input("type" to "password", "name" to "password"))
+            assertOffers(f, strong = emptyList(), saved = listOf(0, 1))
+        }
+    }
+
+    @Test
+    fun bareTasjeelInAFieldLabelIsNotSignUp() {
+        // تسجيل الدخول is "log in": a login password labelled with it stays a login.
+        val f = form(
+            input("type" to "email", "name" to "email"),
+            input("type" to "password", "name" to "p", "aria-label" to "كلمة المرور - تسجيل الدخول"),
+        )
+        assertOffers(f, strong = emptyList(), saved = listOf(0, 1))
+        val g = form(
+            input("type" to "email", "name" to "email"),
+            input("type" to "password", "name" to "p", "aria-label" to "كلمة المرور - التسجيل"),
+        )
+        assertOffers(g, strong = listOf(1), saved = listOf(0))
+    }
+
+    @Test
+    fun formL_flutterPasswordReportedAloneIsAPassword() {
+        for (hintText in listOf("Password", "كلمة المرور", "وشەی نهێنی")) {
+            val signals = FieldSignals(autofillHints = emptyList(), hint = hintText, inputType = 0, idEntry = null)
+            assertTrue(hintText, AutofillFieldClassifier.isPasswordField(signals))
+            val f = form(signals)
+            // Alone, R1 can't call it new: a login password, with R7's strong password.
+            assertEquals(listOf(AutofillFieldType.Password), f.fields.map { it.type })
+            val offers = AutofillOffers.login(f, focused = 0)
+            assertEquals(listOf(0), offers.savedLoginIds)
+            assertEquals(listOf(0), offers.fallbackStrongIds)
+            // No saved login: "Use a strong password" first, then "Search Qasa".
+            assertEquals(
+                listOf(LoginRow.StrongPassword(fallback = true), LoginRow.Search),
+                AutofillOffers.loginRows(offers, emptyList<String>()),
+            )
+            assertEquals(mapOf(0 to "x"), AutofillOffers.fallbackStrongPasswordValues(f, listOf(0), "x"))
+        }
+    }
+
+    @Test
+    fun aTypedTextFieldNamedPasswordHintIsNotAPasswordField() {
+        val text = InputType.TYPE_CLASS_TEXT
+        assertTrue(!AutofillFieldClassifier.isPasswordField(FieldSignals(hint = "Password hint", inputType = text)))
+        assertTrue(!AutofillFieldClassifier.isPasswordField(input("type" to "text", "name" to "password_hint")))
     }
 }

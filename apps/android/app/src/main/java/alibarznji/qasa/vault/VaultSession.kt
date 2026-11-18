@@ -1,5 +1,6 @@
 package alibarznji.qasa.vault
 
+import alibarznji.qasa.credentials.RecentLoginPicks
 import alibarznji.qasa.vault.crypto.MasterKeyDeriver
 import alibarznji.qasa.vault.crypto.VaultCryptoException
 import java.util.UUID
@@ -247,6 +248,8 @@ class VaultSession @Inject constructor(
         // A copied card number left in the clipboard is the same secret, so it does not
         // outlive the lock either.
         clipboard.clearIfOwned()
+        // R8: "the login you just picked" fills without unlocking, so it never outlives the unlock.
+        RecentLoginPicks.clear()
         _unlocked.value = false
     }
 

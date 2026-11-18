@@ -34,9 +34,28 @@ object PasswordFieldRoles {
     /** A password word with a `2` suffix: `pw2`, `pwd2`, `password2`, `passwd_2`. */
     private val secondPassword = Regex("^(pw|pwd|pass|passwd|password|passcode|pword)2$")
 
-    /** Words on the field itself that say "this is a sign-up" (rule 6, Android has no submit text). */
-    private val signupWords = setOf("signup", "register", "registration", "create", "new", "join", "تسجيل", "تۆمار", "دروستکردن", "خۆتۆمارکردن")
-    private val signupNonLatin = listOf("إنشاء حساب", "انشاء حساب", "تۆمارکردن", "خۆتۆمارکردن", "دروستکردن")
+    /**
+     * Words on the field itself that say "this is a sign-up" (rule 6). Not the bare Arabic
+     * تسجيل: تسجيل الدخول is "log in" (Phase 12); التسجيل ("registration") is.
+     */
+    private val signupWords = setOf("signup", "register", "registration", "create", "new", "join", "التسجيل", "تۆمار", "دروستکردن", "خۆتۆمارکردن")
+    private val signupNonLatin = listOf("إنشاء حساب", "انشاء حساب", "حساب جديد", "التسجيل", "تۆمارکردن", "خۆتۆمارکردن", "دروستکردن")
+
+    /**
+     * Rule 6's button text (Phase 12): native `Button` nodes of the screen. Latin phrases are
+     * matched with spaces and punctuation removed ("Sign up" → `signup`), whole words for
+     * `join`. "Continue", "Next" and "Submit" are in neither list: they count for nothing.
+     */
+    private val signupButtonLatin = listOf("signup", "register", "createaccount", "createanaccount", "createyouraccount", "createnewaccount")
+    private val signupButtonWords = setOf("join")
+    private val signupButtonNonLatin = listOf(
+        "إنشاء حساب", "انشاء حساب", "حساب جديد", "التسجيل",
+        "تۆمارکردن", "خۆتۆمارکردن", "دروستکردنی هەژمار",
+    )
+
+    /** Log-in buttons: a screen with one is a login, whatever its "Sign up" link says. */
+    private val loginButtonLatin = listOf("login", "signin", "logon")
+    private val loginButtonNonLatin = listOf("تسجيل الدخول", "دخول", "چوونەژوورەوە", "چوونە ژوورەوە")
 
     /** Hints and names of a date of birth (no field type exists for it). */
     private val birthdayHints = setOf("birthdatefull", "birthdateday", "birthdatemonth", "birthdateyear", "bday", "bday-day", "bday-month", "bday-year")
@@ -95,6 +114,29 @@ object PasswordFieldRoles {
         return ws.any { it in signupWords } || joined.contains("signup") || joined.contains("register") ||
             signupNonLatin.any { raw.lowercase().contains(it) }
     }
+
+    /** Whether one button's text says sign up / register / create account / join. */
+    fun buttonSaysSignup(text: String): Boolean {
+        val lower = text.lowercase()
+        val joined = compact(text)
+        return signupButtonLatin.any { joined.contains(it) } || words(text).any { it in signupButtonWords } ||
+            signupButtonNonLatin.any { lower.contains(it) }
+    }
+
+    /** Whether one button's text says log in / sign in (Arabic تسجيل الدخول, Kurdish چوونەژوورەوە). */
+    fun buttonSaysLogin(text: String): Boolean {
+        val lower = text.lowercase()
+        val joined = compact(text)
+        return loginButtonLatin.any { joined.contains(it) } || loginButtonNonLatin.any { lower.contains(it) }
+    }
+
+    /**
+     * Rule 6 from the screen's buttons: some button says sign up and none says log in. A login
+     * screen often carries a "Sign up" link next to its "Log in" button; Android can't tell
+     * which one submits, so the log-in button wins (the password then gets R7's fallback).
+     */
+    fun buttonsSaySignup(buttons: List<String>): Boolean =
+        buttons.any(::buttonSaysSignup) && buttons.none(::buttonSaysLogin)
 
     /** A date-of-birth field, among the fields the classifier left untyped. */
     fun isBirthday(s: FieldSignals): Boolean {

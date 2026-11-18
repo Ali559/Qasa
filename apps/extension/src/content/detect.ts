@@ -50,12 +50,17 @@ const NEW_WORDS =
   /\b(new|create|choose|set|reset|confirm\w*|repeat\w*|again|retype|re ?enter|verif\w*)\b|جديدة|تأكيد|إعادة|أعد|نوێ|دووبارە|دڵنیاکردنەوە|پشتڕاستکردنەوە/i
 /** `pw2`, `password2`, `pass_2`: the second of two password fields. */
 const SECOND_SUFFIX = /(?:pw|pwd|pass|passwd|password)[_-]?2$/i
-/** Submit or heading text of a sign-up form (R1.6) and of a login form (which wins). */
-const SIGNUP_WORDS = /sign.?up|register|create|join|تسجيل|إنشاء حساب|تۆمار|دروستکردن|خۆتۆمارکردن/i
-const LOGIN_WORDS = /log.?in|sign.?in|دخول|تسجيل الدخول|چوونەژوورەوە/i
-/** Fields only a sign-up form asks for (R1.6): given / family name, phone, date of birth. */
-const SIGNUP_FIELD_TOKENS = /^(given-name|family-name|additional-name|tel|tel-national|tel-local|bday|bday-day|bday-month|bday-year)$/
-const SIGNUP_FIELD_HINT = /first.?name|last.?name|given.?name|family.?name|surname|birth|\bdob\b|phone|mobile/i
+/** Submit or heading text of a sign-up form (R1.6) and of a login form (which wins). The
+ *  bare Arabic تسجيل is not a sign-up word: تسجيل الدخول is "log in"; التسجيل is. "Continue",
+ *  "Next" and "Submit" say nothing either way. Kurdish ک / ی and Arabic ك / ي both occur. */
+const SIGNUP_WORDS =
+  /sign.?up|register|\bcreate\s+(?:an?\s+|your\s+|a\s+new\s+|new\s+)?account\b|\bjoin\b|[إا]نشاء\s+حساب|حساب\s+جديد|التسجيل|تۆمار[\s\u200c]?[کك]ردن|دروست[\s\u200c]?[کك]ردن[یي]\s+هەژمار/i
+const LOGIN_WORDS = /log.?in|sign.?in|دخول|چوونەژوورەوە/i
+/** Fields only a sign-up form asks for (R1.6): given / family / full name, phone, date of birth. */
+const SIGNUP_FIELD_TOKENS = /^(name|given-name|family-name|additional-name|tel|tel-national|tel-local|bday|bday-day|bday-month|bday-year)$/
+const SIGNUP_FIELD_HINT = /first.?name|last.?name|given.?name|family.?name|full.?name|surname|birth|\bdob\b|phone|mobile|الاسم الكامل|ناوی تەواو/i
+const EMAIL_HINT = /e-?mail|البريد|ئیمەیڵ/i
+const ACCOUNT_NAME_HINT = /user.?name|\buser\b|\blogin\b|nick.?name|اسم المستخدم|ناوی بەکارهێنەر/i
 
 /** Inputs that were `type=password` when first seen stay passwords after a reveal toggle. */
 const wasPassword = new WeakSet<HTMLInputElement>()
@@ -233,6 +238,10 @@ function looksLikeSignup(container: FieldGroup['container'], textual: HTMLInputE
     return i.type === 'tel' || SIGNUP_FIELD_HINT.test(words(i))
   })
   if (asksProfile) return true
+  // A login asks for a username or an email; a sign-up often asks for both.
+  const isEmail = (i: HTMLInputElement) => i.type === 'email' || autocompleteTokens(i).includes('email') || EMAIL_HINT.test(words(i))
+  const isAccountName = (i: HTMLInputElement) => !isEmail(i) && (autocompleteTokens(i).includes('username') || ACCOUNT_NAME_HINT.test(words(i)))
+  if (textual.some(isEmail) && textual.some(isAccountName)) return true
   if (SIGNUP_WORDS.test(submits)) return true
   const headings = formText(container, 'h1, h2, h3, legend')
   return !LOGIN_WORDS.test(headings) && SIGNUP_WORDS.test(headings)

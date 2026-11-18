@@ -8,6 +8,7 @@ import android.content.IntentSender
 import android.os.Build
 import android.os.Bundle
 import android.service.autofill.Dataset
+import android.view.autofill.AutofillId
 import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import androidx.activity.ComponentActivity
@@ -53,7 +54,14 @@ class StrongPasswordPickActivity : ComponentActivity() {
             next
         }
         val password = entry?.password ?: return null
-        val values = AutofillOffers.strongPasswordValues(AutofillStructureParser.parse(structure).form, password)
+        val form = AutofillStructureParser.parse(structure).form
+        // R7: the fallback on a login password fills only that field (no confirm is known).
+        val targets = IntentCompat.getParcelableArrayListExtra(intent, EXTRA_TARGETS, AutofillId::class.java)
+        val values = if (targets.isNullOrEmpty()) {
+            AutofillOffers.strongPasswordValues(form, password)
+        } else {
+            AutofillOffers.fallbackStrongPasswordValues(form, targets, password)
+        }
         if (values.isEmpty()) return null
         @Suppress("DEPRECATION") // Dataset.Builder() without a presentation: the values are filled at once.
         val builder = Dataset.Builder().setId(id)
@@ -64,14 +72,17 @@ class StrongPasswordPickActivity : ComponentActivity() {
 
     companion object {
         private const val EXTRA_DATASET_ID = "datasetId"
+        private const val EXTRA_TARGETS = "targets"
 
         /**
          * Carries only the dataset id, never the password. One per dataset (the id is the
          * request code); explicit, so nothing else can receive it; mutable, because the
          * framework adds the assist structure to it (as [AutofillAuthActivity.intentSender]).
+         * [targets]: R7's fallback, the one login password to fill; empty for the new fields.
          */
-        fun intentSender(context: Context, datasetId: String): IntentSender {
+        fun intentSender(context: Context, datasetId: String, targets: List<AutofillId> = emptyList()): IntentSender {
             val intent = Intent(context, StrongPasswordPickActivity::class.java).putExtra(EXTRA_DATASET_ID, datasetId)
+            if (targets.isNotEmpty()) intent.putParcelableArrayListExtra(EXTRA_TARGETS, ArrayList(targets))
             val mutable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
             return PendingIntent.getActivity(context, datasetId.hashCode(), intent, mutable or PendingIntent.FLAG_CANCEL_CURRENT).intentSender
         }

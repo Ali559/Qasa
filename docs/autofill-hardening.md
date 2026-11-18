@@ -34,12 +34,30 @@ In one form (or one screen on Android), with the password-type fields in documen
 3. The password field right **after** a new one, if not current, is its confirm: new.
 4. Two password fields, neither marked current: both new (sign-up: new + confirm).
 5. Three password fields, none marked: current, new, new.
-6. One password field, not marked: new only when the same form also asks for a given or
-   family name, a phone number, or a date of birth, or its submit/heading text says sign
-   up / register / create / join (Arabic تسجيل / إنشاء حساب; Kurdish تۆمار / دروستکردن /
-   خۆتۆمارکردن). Otherwise it is a login password.
+6. One password field, not marked: new when the same form (one screen on Android) also
+   - asks for a given, family or **full** name, a phone number, or a date of birth; or
+   - has **both** a username field and an email field (Phase 12: a login asks for one of
+     them, a sign-up often for both); or
+   - has a submit button or heading whose text says sign up / register / create account /
+     join (Arabic إنشاء حساب / حساب جديد / التسجيل; Kurdish تۆمارکردن / خۆتۆمارکردن /
+     دروستکردنی هەژمار). The bare Arabic تسجيل does **not** count: تسجيل الدخول is
+     "log in". "Continue", "Next" and "Submit" count for nothing either way.
+     A login button on the same screen (log in / sign in / تسجيل الدخول / دخول /
+     چوونەژوورەوە) wins over sign-up buttons: a login screen's "Don't have an account?
+     Sign up" link must not take its saved logins away. Chrome on Android reports no
+     `<button>` nodes, so there a page's button text counts for nothing (R7 still offers
+     the strong password).
+   Otherwise it is a login password. Where the button text comes from: the extension reads
+   the page; Android reads the text of native `Button` nodes in the structure (a Flutter or
+   React Native app reports none, see below); iOS gets no form at all.
 
 A new field never gets saved logins; it gets "Use a strong password" only.
+
+**Detecting a password field** never depends on the input type alone. A Flutter app reports
+a field's `autofillHints` and placeholder (`hintText`) but no input type, id or label, and
+outside an `AutofillGroup` it reports **only the focused field**
+(`flutter/engine … TextInputPlugin.java`, `AutofillGroup` docs). The placeholder words
+(password, کلمة المرور, وشەی نهێنی …) are enough to make a field a password.
 
 ### R2. The generated password fits the field
 
@@ -63,6 +81,11 @@ Whatever fills a generated password records it (site, time, the value; encrypted
 deleted after 24 h or once saved). If the form's own save prompt doesn't happen, the app
 offers it on the next unlock: "Save the password you created for <site>?".
 
+**Two-screen sign-ups and logins (Android 12+, apps only, not browsers).** A screen with a
+username or email but no password sets its save info with `FLAG_DELAY_SAVE` and keeps that
+field's id in the response's client state. The next screen's request, from the same app,
+reads it back and saves the username and the password as one login. (As Proton Pass does.)
+
 ### R5. A fill that can't happen says so
 
 The extension's menu stays open with "Couldn't fill. Click the field and try again." It
@@ -75,6 +98,32 @@ The extension sets the value with the native setter and fires `keydown`, `before
 `input` (`InputEvent`, `insertReplacementText`), `keyup`, `change` and `blur` in that order.
 It re-finds the field at pick time (same form, same name/id/position) in case the page
 replaced it.
+
+### R7. A password field never shows nothing (Phase 12, 2026-11-18)
+
+When R1 can't call a password field new (it may still be a sign-up nobody could tell):
+
+| Saved logins match this app / site | What is offered, in order |
+| --- | --- |
+| None | "Use a strong password", then "Search Qasa" |
+| Some | the matching logins, then "Use a strong password", then "Search Qasa" |
+
+A field R1 calls **new** keeps "Use a strong password" only (plus "Search Qasa" where the
+platform always shows it). On iOS the system builds the list: before 26.2 the text-insertion
+sheet already shows "Use a strong password" first; from 26.2 iOS itself asks Qasa for a
+password on the fields it thinks are new.
+
+### R8. Finish a fill the app split in two (Android, Phase 12)
+
+An app that reports one field at a time (a Flutter or React Native app without an autofill
+group) gets only the username filled by the first pick; its password field then asks again.
+After a pick, Qasa remembers **which login** it was (its id, never its values) for the app's
+package or the browser's site, **in memory, for 2 minutes**, cleared when the vault locks.
+A request from the same app or site within that time for a field that pick didn't fill puts
+that login **first**, labelled with its name, and fills it **without asking to unlock again**
+(if the vault is still unlocked; with "Confirm every fill" on in Settings, it still asks).
+Android can't fill a field the app didn't report, so this is one tap, never zero. No other
+manager we looked at does this (Bitwarden, KeePassDX, Keyguard, Proton Pass, 2026-11-18).
 
 ## Test matrix
 
@@ -92,6 +141,10 @@ Status: ✅ passed, ❌ failed before the fix, — not applicable, ◻ not run (
 | F | `maxlength=12` |
 | G | Kurdish labels only |
 | H | controlled inputs (React-style) |
+| I | full name, username, email, one password, button "Continue" (the Dozarawa shape) |
+| J | email, one password, button "Create account" |
+| K | Arabic login: email, password, button "تسجيل الدخول" (must stay a login) |
+| L | one password field reported alone, placeholder "Password", no input type (Flutter) |
 
 ### Platforms
 
@@ -99,10 +152,10 @@ Status: ✅ passed, ❌ failed before the fix, — not applicable, ◻ not run (
 | --- | --- | --- | --- |
 | Android | 8.0 (API 26) – 17 (API 37) | Chrome (native third-party mode), Samsung Internet, Firefox, Edge, Brave; native apps | JVM tests per form shape; emulator Chrome for A and B |
 | iOS | 17 – 27 | Safari, apps | Swift tests per rule; 26.2 generate/save and 18 text insertion need a device |
-| Extension | Chrome / Edge 116+, Firefox 128+ | — | Vitest (detection, rules) + Playwright per form A–H |
+| Extension | Chrome / Edge 116+, Firefox 128+ | — | Vitest (detection, rules) + Playwright per form A–K |
 | Desktop | macOS 13+, Windows 10+ | via the extension | Rust tests for `generate` with constraints |
 
-### Results (2026-11-16)
+### Results (2026-11-16, Phase 12 rows 2026-11-18)
 
 | Form | Android | iOS | Extension |
 | --- | --- | --- | --- |
@@ -110,9 +163,16 @@ Status: ✅ passed, ❌ failed before the fix, — not applicable, ◻ not run (
 | B | ❌ → ✅ (emulator Chrome, `android-form-b-fixed.png`) | ✅ unit | ✅ e2e |
 | C, D, E, F, G | ❌ → ✅ unit | ✅ unit | ❌ → ✅ e2e |
 | H | ✅ unit | — | ✅ e2e |
+| I | ❌ → ✅ unit; Flutter-shaped app on the emulator (R7, `android-flutter-split-fill.png`) | — | ❌ → ✅ e2e |
+| J | ❌ → ✅ unit (native app); in Chrome a login + R7 (no button nodes) | — | ❌ → ✅ e2e |
+| K | ✅ unit (stays a login) | — | ✅ e2e |
+| L | ❌ → ✅ unit; Flutter app on the emulator | — | — |
+| R8 split sign-in | ❌ → ✅ Flutter app on the emulator | — | — |
 
 iOS 26.2 generate/save, iOS 18 text insertion (same password), the save-on-unlock prompts
-and Face ID inside the iOS extension still need a device.
+and Face ID inside the iOS extension still need a device. The Android two-screen save (R4)
+and native-app button text are unit tested only; `docs/autofill-test-pages/flutter-app`
+holds the Flutter test app.
 
 The per-form results live in the tests: `AutofillSignupFormsTest` (Android),
 `SignupFormsTests` (iOS), `signup-forms.spec.ts` (extension).

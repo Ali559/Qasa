@@ -296,6 +296,24 @@ picks one before anything is built.
       emulator with real sites, and the desktop UI. iOS 26's own tab bar still draws its
       grey pill behind the selected tab (system glass, not a press fill).
 
+### Phase 12: Sign-up detection and split fills (2026-11-18)
+
+Reported: signing up in the Dozarawa app (full name, username, email, password, button
+"Continue") offered nothing; signing in filled only the username, the password needed a
+second tap. Research on Bitwarden, KeePassDX, Keyguard and Proton Pass: the app reports
+one field at a time (Flutter without an autofill group). Rules in
+`docs/autofill-hardening.md` R1, R4, R7, R8.
+
+- [x] R1: full name, or username + email, or sign-up button text make one password new.
+- [x] R7: a password field never shows nothing (strong password when nothing matches).
+- [x] R8 (Android): the login just picked comes first, without unlocking again, for 2 minutes.
+- [x] R4 (Android 12+): a username screen and a password screen save as one login.
+      (2026-11-18) Android and the extension; iOS needed nothing (the system builds its
+      list). A Flutter test app shaped like Dozarawa (`docs/autofill-test-pages/flutter-app`)
+      shows the fix on the emulator: sign-up offers a strong password, a split sign-in
+      fills the password in one more tap. The two-screen save and native button text are
+      unit tested only; not yet tried in the real Dozarawa app.
+
 ## 1. One shared design spec
 
 - [x] **Spec from iOS** (2026-11-11): `design/tokens.json` holds every color, radius, size,
