@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { AlertTriangle, Database, Download, Filter, Timer, UsersRound } from '@lucide/vue'
+import { Download, Filter } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -70,13 +70,6 @@ onMounted(async () => {
   }
 })
 
-const metricStyle = [
-  { icon: UsersRound, accent: 'var(--chart-2)' },
-  { icon: Timer, accent: 'var(--chart-3)' },
-  { icon: AlertTriangle, accent: 'var(--chart-4)' },
-  { icon: Database, accent: 'var(--chart-5)' },
-]
-const styleFor = (i: number) => metricStyle[i % metricStyle.length]!
 
 const region = ref<'mena' | 'global'>('mena')
 const regionOptions = [
@@ -86,14 +79,14 @@ const regionOptions = [
 const regionStats = computed(() =>
   region.value === 'mena'
     ? [
-        { label: 'Threats (1h)', value: '12,491', accent: 'var(--chart-2)' },
-        { label: 'Active connections', value: '45,103', accent: 'var(--chart-4)' },
-        { label: 'Average latency', value: '28 ms', accent: 'var(--chart-3)' },
+        { label: 'Threats (1h)', value: '12,491' },
+        { label: 'Active connections', value: '45,103' },
+        { label: 'Average latency', value: '28 ms' },
       ]
     : [
-        { label: 'Threats (1h)', value: '28,104', accent: 'var(--chart-2)' },
-        { label: 'Active connections', value: '91,220', accent: 'var(--chart-4)' },
-        { label: 'Average latency', value: '42 ms', accent: 'var(--chart-3)' },
+        { label: 'Threats (1h)', value: '28,104' },
+        { label: 'Active connections', value: '91,220' },
+        { label: 'Average latency', value: '42 ms' },
       ],
 )
 
@@ -126,13 +119,12 @@ function exportEvents() {
   <div class="space-y-6">
     <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       <StatTile
-        v-for="(m, i) in telemetryMetrics"
+        v-for="m in telemetryMetrics"
         :key="m.label"
         :label="m.label"
         :value="m.value"
         :meta="m.meta"
-        :icon="styleFor(i).icon"
-        :accent="styleFor(i).accent"
+        :tone="m.tone"
       />
     </div>
 
@@ -140,7 +132,7 @@ function exportEvents() {
       <Card class="gap-6 py-6 xl:col-span-2">
         <CardHeader class="flex flex-row flex-wrap items-start justify-between gap-3 px-6">
           <div>
-            <CardTitle class="text-xl font-bold">Traffic and threats</CardTitle>
+            <CardTitle>Traffic and threats</CardTitle>
             <CardDescription>Last hour, by region</CardDescription>
           </div>
           <FilterChips v-model="region" :options="regionOptions" label="Region" />
@@ -149,30 +141,29 @@ function exportEvents() {
           <div
             v-for="stat in regionStats"
             :key="stat.label"
-            class="rounded-3xl p-5 text-ink"
-            :style="{ background: stat.accent, boxShadow: `inset 0 2px 0 rgb(255 255 255 / 0.35), 0 4px 0 color-mix(in oklch, ${stat.accent} 60%, black)` }"
+            class="bg-muted/60 rounded-lg px-4 py-4"
           >
-            <p class="text-sm font-semibold opacity-75">{{ stat.label }}</p>
-            <p class="font-heading mt-3 text-4xl leading-none font-extrabold tabular-nums">{{ stat.value }}</p>
+            <p class="text-muted-foreground text-sm">{{ stat.label }}</p>
+            <p class="mt-3 text-[1.75rem] leading-none font-medium tabular-nums">{{ stat.value }}</p>
           </div>
           <p class="text-muted-foreground text-sm sm:col-span-3">
-            Latency under 50 ms is healthy; 50 to 150 ms means a node is under pressure.
+            Latency under 50 ms is healthy; 50 to 150 ms means a node is under pressure
           </p>
         </CardContent>
       </Card>
 
       <Card class="gap-6 py-6">
         <CardHeader class="px-6">
-          <CardTitle class="text-xl font-bold">Cluster resources</CardTitle>
+          <CardTitle>Cluster resources</CardTitle>
           <CardDescription>Capacity used across all servers</CardDescription>
         </CardHeader>
         <CardContent class="space-y-5 px-6">
           <div v-for="r in resources" :key="r.label" class="space-y-2">
             <div class="flex justify-between text-sm">
               <span class="text-muted-foreground">{{ r.label }}</span>
-              <span class="font-semibold tabular-nums">{{ r.value }}</span>
+              <span class="tabular-nums">{{ r.value }}</span>
             </div>
-            <SegmentMeter :value="r.width" :label="`${r.label} ${r.value}`" size="sm" />
+            <SegmentMeter :value="r.width" :label="`${r.label} ${r.value}`" />
           </div>
         </CardContent>
       </Card>
@@ -181,7 +172,7 @@ function exportEvents() {
     <InkPanel>
       <div class="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-4">
         <div>
-          <h2 class="font-heading text-xl font-bold">{{ live ? 'Staff activity' : 'Live events' }}</h2>
+          <h2 class="text-base font-medium">{{ live ? 'Staff activity' : 'Live events' }}</h2>
           <p class="text-sidebar-foreground/60 text-sm">
             {{ live ? 'Admin audit log, newest first' : 'Newest first, from every service' }}
           </p>
@@ -206,11 +197,11 @@ function exportEvents() {
           >
             <span class="text-sidebar-foreground/55 shrink-0 tabular-nums">{{ event.time }}</span>
             <span
-              class="w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-[0.7rem] font-semibold text-ink"
-              :style="{ background: levelColor[event.level] }"
+              class="w-12 shrink-0 text-[0.6875rem] font-medium"
+              :style="{ color: levelColor[event.level] }"
             >{{ event.level }}</span>
             <span class="min-w-0 break-words">{{ event.message }}</span>
-            <span v-if="event.who" class="text-sidebar-foreground/55 shrink-0 sm:ml-auto">{{ event.who }}</span>
+            <span v-if="event.who" class="text-sidebar-foreground/55 shrink-0 sm:ms-auto">{{ event.who }}</span>
           </li>
           <li v-if="live && !auditLoading && visibleEvents.length === 0" class="text-sidebar-foreground/60 px-6 py-6">
             No staff actions recorded yet.

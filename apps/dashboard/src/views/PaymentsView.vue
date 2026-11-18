@@ -35,7 +35,7 @@ import {
 } from '@/data/mock'
 import { fetchPaymentDetail, fetchPayments, fetchTimeseries, type PaymentDetail } from '@/api/admin'
 import { errorMessage, isLiveApiEnabled } from '@/api/client'
-import { downloadCsv, gatewayColor, gatewayShares } from '@/lib/reports'
+import { downloadCsv, gatewayShares } from '@/lib/reports'
 import { toast } from 'vue-sonner'
 
 const live = isLiveApiEnabled()
@@ -173,10 +173,10 @@ function exportLogs() {
       <FilterChips v-model="statusFilter" :options="statusOptions" label="Filter by payment status" />
       <div class="flex w-full flex-wrap items-center gap-3 lg:w-auto">
         <div class="relative w-full lg:w-72">
-          <Search class="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Search class="text-muted-foreground absolute top-1/2 start-3 size-4 -translate-y-1/2" />
           <Input
             v-model="query"
-            class="bg-card h-10 pl-9"
+            class="bg-card h-9 ps-9"
             placeholder="Order ID or account ID"
             aria-label="Search by order ID or account ID"
           />
@@ -221,14 +221,11 @@ function exportLogs() {
                 <template v-else>{{ row.userId }}</template>
               </TableCell>
               <TableCell>
-                <span class="inline-flex items-center gap-2 font-semibold">
-                  <i class="size-2.5 rounded-full" :style="{ background: gatewayColor(row.gateway) }" />
-                  {{ row.gateway }}
-                </span>
+                {{ row.gateway }}
               </TableCell>
               <TableCell class="text-right">
-                <span class="font-heading text-base font-bold tabular-nums">{{ row.amount }}</span>
-                <span class="text-muted-foreground ml-1 text-xs">IQD</span>
+                <span class="font-medium tabular-nums">{{ row.amount }}</span>
+                <span class="text-muted-foreground ms-1 text-xs">IQD</span>
               </TableCell>
               <TableCell><StatusPill :tone="statusTone[row.status] ?? 'neutral'">{{ statusLabel[row.status] ?? row.status }}</StatusPill></TableCell>
               <TableCell class="pr-6 text-right">
@@ -239,7 +236,7 @@ function exportLogs() {
             </TableRow>
             <TableRow v-if="rows.length === 0" class="hover:bg-transparent">
               <TableCell colspan="7" class="text-muted-foreground h-32 text-center">
-                {{ loading ? 'Loading payments…' : 'No payments match. Pick another filter or clear the search.' }}
+                {{ loading ? 'Loading payments…' : 'No payments match. Pick another filter or clear the search' }}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -255,47 +252,47 @@ function exportLogs() {
     <Sheet v-model:open="open">
       <SheetContent class="gap-5 sm:max-w-md">
         <SheetHeader class="pb-0">
-          <SheetTitle class="font-heading text-xl">Webhook events</SheetTitle>
+          <SheetTitle class="text-lg">Webhook events</SheetTitle>
           <SheetDescription class="font-mono">{{ selected?.orderId ?? 'No payment selected' }}</SheetDescription>
         </SheetHeader>
 
         <dl v-if="detail" class="mx-4 grid grid-cols-2 gap-3 text-sm">
-          <div class="bg-muted/60 rounded-2xl px-4 py-3">
+          <div class="bg-muted/60 rounded-lg px-3 py-2.5">
             <dt class="text-muted-foreground text-xs">Amount</dt>
-            <dd class="font-heading font-bold">{{ detail.payment.amount_iqd.toLocaleString('en-US') }} IQD</dd>
+            <dd class="font-medium">{{ detail.payment.amount_iqd.toLocaleString('en-US') }} IQD</dd>
           </div>
-          <div class="bg-muted/60 rounded-2xl px-4 py-3">
+          <div class="bg-muted/60 rounded-lg px-3 py-2.5">
             <dt class="text-muted-foreground text-xs">Status</dt>
-            <dd class="font-semibold capitalize">{{ statusLabel[detail.payment.status] ?? detail.payment.status }}</dd>
+            <dd class="font-medium capitalize">{{ statusLabel[detail.payment.status] ?? detail.payment.status }}</dd>
           </div>
-          <div class="bg-muted/60 rounded-2xl px-4 py-3">
+          <div class="bg-muted/60 rounded-lg px-3 py-2.5">
             <dt class="text-muted-foreground text-xs">Plan</dt>
-            <dd class="font-semibold">
+            <dd class="font-medium">
               {{ detail.payment.plan_id }}<template v-if="detail.payment.kind === 'renewal'">, renewal</template>
             </dd>
           </div>
-          <div class="bg-muted/60 rounded-2xl px-4 py-3">
+          <div class="bg-muted/60 rounded-lg px-3 py-2.5">
             <dt class="text-muted-foreground text-xs">Completed</dt>
-            <dd class="font-semibold">{{ detail.payment.completed_at ? fmtTime(detail.payment.completed_at) : '—' }}</dd>
+            <dd class="font-medium">{{ detail.payment.completed_at ? fmtTime(detail.payment.completed_at) : '—' }}</dd>
           </div>
         </dl>
 
         <p v-if="detailLoading" class="text-muted-foreground mx-4 text-sm">Loading webhook events…</p>
 
         <template v-else-if="detail">
-          <div v-if="detail.webhooks.length === 0" class="bg-muted/60 mx-4 rounded-2xl p-4 text-sm">
-            <p class="font-semibold">No webhooks received</p>
+          <div v-if="detail.webhooks.length === 0" class="bg-muted/60 mx-4 rounded-lg p-4 text-sm">
+            <p class="font-medium">No webhooks received</p>
             <p class="text-muted-foreground text-xs">The gateway hasn't called back for this order yet.</p>
           </div>
           <div
             v-else
-            class="mx-4 flex items-start gap-3 rounded-2xl p-4"
+            class="mx-4 flex items-start gap-3 rounded-lg p-4"
             :class="anyInvalid ? 'bg-bad/12' : 'bg-ok/12'"
           >
             <AlertTriangle v-if="anyInvalid" class="text-bad mt-0.5 size-5 shrink-0" />
             <CheckCircle2 v-else class="text-ok mt-0.5 size-5 shrink-0" />
             <div>
-              <p class="text-sm font-semibold">
+              <p class="text-sm font-medium">
                 {{ anyInvalid ? 'A webhook failed signature checks' : 'Every signature verified' }}
               </p>
               <p class="text-muted-foreground text-xs">
@@ -310,14 +307,14 @@ function exportLogs() {
                 <div class="flex flex-wrap items-center gap-2 px-5 pt-4 text-xs">
                   <span class="tabular-nums opacity-70">{{ fmtTime(w.received_at) }}</span>
                   <span
-                    class="rounded-md px-2 py-0.5 font-semibold text-ink"
-                    :style="{ background: w.signature_valid ? 'var(--ink-ok)' : 'var(--ink-bad)' }"
+                    class="font-medium"
+                    :style="{ color: w.signature_valid ? 'var(--ink-ok)' : 'var(--ink-bad)' }"
                   >{{ w.signature_valid ? 'signature ok' : 'bad signature' }}</span>
                   <span
-                    class="rounded-md px-2 py-0.5 font-semibold text-ink"
-                    :style="{ background: w.error_message ? 'var(--ink-bad)' : w.processed ? 'var(--ink-info)' : 'var(--ink-warn)' }"
+                    class="font-medium"
+                    :style="{ color: w.error_message ? 'var(--ink-bad)' : w.processed ? 'var(--ink-info)' : 'var(--ink-warn)' }"
                   >{{ w.error_message ? 'rejected' : w.processed ? 'processed' : 'not processed' }}</span>
-                  <Button variant="secondary" size="sm" class="ml-auto" @click="copyPayload(w.payload)">
+                  <Button variant="secondary" size="sm" class="ms-auto" @click="copyPayload(w.payload)">
                     <Copy />
                     Copy
                   </Button>

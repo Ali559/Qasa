@@ -279,7 +279,7 @@ export async function upsertPlan(body: {
 }
 
 export type AnalyticsResponse = {
-  kpis: { label: string; value: string; unit?: string; meta?: string }[]
+  kpis: { label: string; value: string; unit?: string; meta?: string; tone?: string }[]
   funnel: { intents: number; success: number; failed: number; conversion_pct: number }
   cancellations: { id: string; planId: string; reason: string | null; cancelledAt: string | null }[]
 }
@@ -337,7 +337,7 @@ export type VpnNodeRow = {
 }
 
 export async function fetchVpnNodes() {
-  return apiFetch<{ kpis: { label: string; value: string; meta: string }[]; nodes: VpnNodeRow[] }>(
+  return apiFetch<{ kpis: { label: string; value: string; meta?: string; tone?: string }[]; nodes: VpnNodeRow[] }>(
     '/v1/admin/vpn/nodes',
   )
 }

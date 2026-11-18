@@ -31,41 +31,37 @@ import adminAvatar from '@/assets/images/admin-avatar.png'
 const props = defineProps<{ activeKey: NavKey; email?: string | null; role?: string | null }>()
 
 const displayName = computed(() => (props.role === 'viewer' ? 'Viewer' : props.role ? 'Admin' : 'System Admin'))
-const displayEmail = computed(() => props.email ?? 'admin@kaso.vault')
+const displayEmail = computed(() => props.email ?? 'admin@qasa.io')
 const initials = computed(() => (props.email ? props.email.slice(0, 2).toUpperCase() : 'SA'))
 const emit = defineEmits<{ signOut: [] }>()
 
-// Active item reads as a raised sunflower key sitting on the ink dock.
+// Active item is one surface step up with a top hairline; the beige icon is the only warm note on the dock.
 const itemClass =
-  'h-10 rounded-xl px-3 text-[0.9rem] text-sidebar-foreground/75 transition-[translate,background-color,color] data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold data-active:shadow-[0_3px_0_var(--sun-lip),inset_0_1px_0_rgb(255_255_255/0.5)] data-active:-translate-y-px'
+  'h-8 rounded-lg px-2.5 text-sm text-sidebar-foreground/70 transition-colors duration-150 hover:text-sidebar-foreground [&>svg]:size-4 [&>svg]:text-sidebar-foreground/55 data-active:bg-sidebar-accent data-active:text-sidebar-foreground data-active:font-medium data-active:shadow-[inset_0_1px_0_rgb(255_255_255/0.08)] data-active:[&>svg]:text-sidebar-primary'
 
 const itemsIn = (group: string) => navItems.filter((item) => item.group === group)
 </script>
 
 <template>
-  <Sidebar collapsible="icon" variant="floating" class="[&>[data-slot=sidebar-inner]]:rounded-[1.6rem] [&>[data-slot=sidebar-inner]]:shadow-[0_6px_0_var(--dock-lip)]">
-    <SidebarHeader class="px-3 pt-4">
+  <Sidebar collapsible="icon" variant="floating" class="[&>[data-slot=sidebar-inner]]:rounded-2xl [&>[data-slot=sidebar-inner]]:border-0 [&>[data-slot=sidebar-inner]]:shadow-none">
+    <SidebarHeader class="px-3 pt-4 pb-2">
       <RouterLink
         to="/"
-        class="flex items-center gap-3 rounded-xl p-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+        class="flex items-center gap-2.5 rounded-lg p-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
       >
-        <img
-          src="/favicon.svg"
-          alt=""
-          class="size-9 shrink-0 -rotate-6 rounded-xl shadow-[0_3px_0_var(--sun-lip)]"
-        />
-        <span class="grid leading-tight group-data-[collapsible=icon]:hidden">
-          <span class="font-heading text-lg font-bold">Qasa</span>
-          <span class="text-sidebar-foreground/60 text-xs">Admin console</span>
+        <img src="/favicon.svg" alt="" class="size-8 shrink-0 rounded-lg" />
+        <span class="grid gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
+          <span class="text-base font-semibold">Qasa</span>
+          <span class="text-sidebar-foreground/55 text-xs">Admin console</span>
         </span>
       </RouterLink>
     </SidebarHeader>
 
-    <SidebarContent class="px-1">
-      <SidebarGroup v-for="group in navGroups" :key="group">
-        <SidebarGroupLabel class="text-sidebar-foreground/45">{{ group }}</SidebarGroupLabel>
+    <SidebarContent class="gap-4 px-1 pt-2">
+      <SidebarGroup v-for="group in navGroups" :key="group" class="py-0">
+        <SidebarGroupLabel class="text-sidebar-foreground/45 h-6 px-2.5">{{ group }}</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu class="gap-1">
+          <SidebarMenu class="gap-0.5">
             <SidebarMenuItem v-for="item in itemsIn(group)" :key="item.key">
               <SidebarMenuButton
                 as-child
@@ -89,19 +85,19 @@ const itemsIn = (group: string) => navItems.filter((item) => item.group === grou
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <SidebarMenuButton size="lg" class="bg-sidebar-accent rounded-2xl data-[state=open]:bg-sidebar-accent">
-                <Avatar class="size-8 rounded-xl">
+              <SidebarMenuButton size="lg" class="rounded-xl hover:bg-sidebar-accent data-[state=open]:bg-sidebar-accent">
+                <Avatar class="size-8 rounded-lg">
                   <AvatarImage :src="adminAvatar" alt="" />
-                  <AvatarFallback class="rounded-xl">{{ initials }}</AvatarFallback>
+                  <AvatarFallback class="rounded-lg">{{ initials }}</AvatarFallback>
                 </Avatar>
-                <span class="grid flex-1 text-left text-sm leading-tight">
-                  <span class="truncate font-semibold">{{ displayName }}</span>
-                  <span class="text-sidebar-foreground/60 truncate text-xs">{{ displayEmail }}</span>
+                <span class="grid flex-1 gap-0.5 text-start text-sm leading-tight">
+                  <span class="truncate font-medium">{{ displayName }}</span>
+                  <span class="text-sidebar-foreground/55 truncate text-xs">{{ displayEmail }}</span>
                 </span>
-                <ChevronsUpDown class="text-sidebar-foreground/50" />
+                <ChevronsUpDown class="text-sidebar-foreground/50 size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent class="w-56 rounded-xl" side="top" align="start">
+            <DropdownMenuContent class="w-56" side="top" align="start">
               <DropdownMenuLabel>Signed in as {{ displayName }}<template v-if="role === 'viewer'"> (read-only)</template></DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem @click="emit('signOut')">

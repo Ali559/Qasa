@@ -1,50 +1,44 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
-    gateways: { name: string; value: number; color: string }[]
+    gateways: { name: string; value: number; color?: string }[]
     description?: string
   }>(),
   { description: 'Share of revenue by source' },
 )
+
+// A share reads best as a ranked list: the leader carries the accent, the rest stay neutral.
+const ranked = computed(() => [...props.gateways].sort((a, b) => b.value - a.value))
 </script>
 
 <template>
-  <Card class="h-full gap-6 py-6">
+  <Card class="h-full gap-5 py-6">
     <CardHeader class="px-6">
-      <CardTitle class="text-xl font-bold">Revenue by payment gateway</CardTitle>
+      <CardTitle>Revenue by payment gateway</CardTitle>
       <CardDescription>{{ description }}</CardDescription>
     </CardHeader>
-    <CardContent v-if="gateways.length === 0" class="px-6">
-      <p class="text-muted-foreground text-sm">No successful payments in this period yet.</p>
+    <CardContent v-if="ranked.length === 0" class="px-6">
+      <p class="text-muted-foreground text-sm">No successful payments in this period yet</p>
     </CardContent>
-    <CardContent v-else class="space-y-6 px-6">
-      <div class="flex h-8 gap-1.5" role="img" :aria-label="gateways.map((g) => `${g.name} ${g.value}%`).join(', ')">
-        <span
-          v-for="g in gateways"
-          :key="g.name"
-          class="h-full rounded-lg first:rounded-l-full last:rounded-r-full"
-          :style="{
-            width: `${g.value}%`,
-            background: g.color,
-            boxShadow: `inset 0 2px 0 rgb(255 255 255 / 0.35), 0 3px 0 color-mix(in oklch, ${g.color} 60%, black)`,
-          }"
-        />
-      </div>
-      <ul class="grid gap-3 sm:grid-cols-3">
-        <li
-          v-for="g in gateways"
-          :key="g.name"
-          class="bg-muted/60 flex items-center justify-between gap-3 rounded-2xl px-4 py-3"
-        >
-          <span class="flex items-center gap-2 text-sm font-semibold">
-            <i class="size-3 rounded-full" :style="{ background: g.color }" />
-            {{ g.name }}
-          </span>
-          <span class="font-heading text-2xl font-bold">{{ g.value }}%</span>
+    <CardContent v-else class="px-6">
+      <ol class="grid gap-4">
+        <li v-for="(g, i) in ranked" :key="g.name" class="grid gap-2">
+          <div class="flex items-baseline justify-between gap-3 text-sm">
+            <span>{{ g.name }}</span>
+            <span class="tabular-nums" :class="i === 0 ? 'font-medium' : 'text-muted-foreground'">{{ g.value }}%</span>
+          </div>
+          <div class="bg-muted h-1.5 overflow-hidden rounded-full" aria-hidden="true">
+            <span
+              class="block h-full rounded-full"
+              :class="i === 0 ? 'bg-primary' : 'bg-muted-foreground/45'"
+              :style="{ width: `${g.value}%` }"
+            />
+          </div>
         </li>
-      </ul>
+      </ol>
     </CardContent>
   </Card>
 </template>

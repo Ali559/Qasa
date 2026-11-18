@@ -83,25 +83,20 @@ onMounted(load)
           <TableBody>
             <TableRow v-if="!rows.length" class="hover:bg-transparent">
               <TableCell colspan="6" class="py-14 text-center">
-                <span class="bg-chart-4 mx-auto mb-3 grid size-12 -rotate-6 place-items-center rounded-2xl text-ink shadow-[0_3px_0_color-mix(in_oklch,var(--chart-4)_60%,black)]">
-                  <MessageSquareWarning class="size-5" />
-                </span>
-                <p class="font-heading text-lg font-bold">No cancellations yet</p>
-                <p class="text-muted-foreground text-sm">Reasons appear here when someone cancels Premium.</p>
+                <MessageSquareWarning class="text-muted-foreground mx-auto mb-3 size-5" />
+                <p class="font-medium">No cancellations yet</p>
+                <p class="text-muted-foreground mt-1 text-sm">Reasons appear here when someone cancels Premium</p>
               </TableCell>
             </TableRow>
             <TableRow v-for="row in rows" :key="row.id">
               <TableCell class="max-w-sm py-4 pl-6 whitespace-normal">
-                <span
-                  class="bg-muted/70 inline-block rounded-2xl rounded-bl-md px-3.5 py-2 text-sm"
-                  :class="{ 'text-muted-foreground italic': !row.reason }"
-                >{{ row.reason || 'No reason given' }}</span>
+                <span class="text-sm" :class="{ 'text-muted-foreground': !row.reason }">{{ row.reason || 'No reason given' }}</span>
               </TableCell>
               <TableCell class="font-mono text-xs">{{ row.accountId }}</TableCell>
               <TableCell><StatusPill tone="info" :dot="false">{{ planLabel(row.planId) }}</StatusPill></TableCell>
               <TableCell class="text-right">
-                <span class="font-heading text-base font-bold tabular-nums">{{ row.amountIqd.toLocaleString() }}</span>
-                <span class="text-muted-foreground ml-1 text-xs">IQD</span>
+                <span class="font-medium tabular-nums">{{ row.amountIqd.toLocaleString() }}</span>
+                <span class="text-muted-foreground ms-1 text-xs">IQD</span>
               </TableCell>
               <TableCell class="text-muted-foreground text-sm">{{ formatDate(row.cancelledAt) }}</TableCell>
               <TableCell class="pr-6 text-sm">{{ formatDate(row.expiresAt) }}</TableCell>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { Activity, Copy, Gauge, Plus, Timer, UsersRound } from '@lucide/vue'
+import { Copy, Plus } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import StatTile from '@/components/kit/StatTile.vue'
@@ -29,7 +29,7 @@ import { canWrite, errorMessage, isLiveApiEnabled } from '@/api/client'
 import { toast } from 'vue-sonner'
 
 const live = isLiveApiEnabled()
-const vpnKpis = ref([...mockVpnKpis])
+const vpnKpis = ref<{ label: string; value: string; meta?: string; tone?: string }[]>([...mockVpnKpis])
 const vpnNodes = ref<VpnNodeRow[]>(mockVpnNodes.map((n, i) => ({ ...n, id: `demo-node-${i + 1}` })))
 const busy = ref(false)
 
@@ -46,13 +46,6 @@ async function load() {
 
 onMounted(load)
 
-const kpiStyle = [
-  { icon: UsersRound, accent: 'var(--chart-2)' },
-  { icon: Gauge, accent: 'var(--chart-4)' },
-  { icon: Timer, accent: 'var(--chart-3)' },
-  { icon: Activity, accent: 'var(--chart-5)' },
-]
-const styleFor = (i: number) => kpiStyle[i % kpiStyle.length]!
 
 // Retired nodes sink to the end.
 const sortedNodes = computed(() =>
@@ -247,18 +240,17 @@ async function confirmRetire() {
   <div class="space-y-6">
     <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       <StatTile
-        v-for="(kpi, i) in vpnKpis"
+        v-for="kpi in vpnKpis"
         :key="kpi.label"
         :label="kpi.label"
         :value="kpi.value"
         :meta="kpi.meta"
-        :icon="styleFor(i).icon"
-        :accent="styleFor(i).accent"
+        :tone="kpi.tone"
       />
     </div>
 
     <div class="flex items-center justify-between gap-3">
-      <h2 class="font-heading text-xl font-bold">Nodes</h2>
+      <h2 class="text-base font-medium">Nodes</h2>
       <Button v-if="canWrite()" @click="createOpen = true">
         <Plus />
         Add node
@@ -281,33 +273,39 @@ async function confirmRetire() {
     <Card class="gap-4 py-6">
       <CardHeader class="flex flex-row flex-wrap items-start justify-between gap-3 px-6">
         <div>
-          <CardTitle class="text-xl font-bold">Network traffic</CardTitle>
+          <CardTitle>Network traffic</CardTitle>
           <CardDescription>Combined bandwidth across all nodes</CardDescription>
         </div>
-        <div class="flex gap-4 text-sm font-medium">
-          <span class="inline-flex items-center gap-2"><i class="bg-chart-2 size-3 rounded-full" /> Ingress (Rx)</span>
-          <span class="inline-flex items-center gap-2"><i class="bg-chart-1 size-3 rounded-full" /> Egress (Tx)</span>
+        <div class="text-muted-foreground flex gap-4 text-sm">
+          <span class="inline-flex items-center gap-2"><i class="bg-primary h-0.5 w-3 rounded-full" /> Egress (Tx)</span>
+          <span class="inline-flex items-center gap-2"><i class="bg-muted-foreground/60 h-0.5 w-3 rounded-full" /> Ingress (Rx)</span>
         </div>
       </CardHeader>
       <CardContent class="px-6">
-        <svg viewBox="0 0 900 180" class="h-52 w-full" preserveAspectRatio="none" role="img" aria-label="Ingress and egress traffic over time">
+        <svg viewBox="0 0 900 180" class="h-56 w-full" preserveAspectRatio="none" role="img" aria-label="Ingress and egress traffic over time">
+          <g stroke="var(--border)" stroke-width="1" vector-effect="non-scaling-stroke">
+            <line x1="0" x2="900" y1="20" y2="20" vector-effect="non-scaling-stroke" />
+            <line x1="0" x2="900" y1="100" y2="100" vector-effect="non-scaling-stroke" />
+            <line x1="0" x2="900" y1="179" y2="179" vector-effect="non-scaling-stroke" />
+          </g>
           <path
             d="M0 110 C90 90, 160 60, 240 80 S380 140, 470 95 S650 30, 740 70 S850 120, 900 95 L900 180 L0 180 Z"
-            fill="color-mix(in oklch, var(--chart-2) 16%, transparent)"
+            fill="color-mix(in oklch, var(--muted-foreground) 10%, transparent)"
           />
           <path
             d="M0 110 C90 90, 160 60, 240 80 S380 140, 470 95 S650 30, 740 70 S850 120, 900 95"
             fill="none"
-            stroke="var(--chart-2)"
-            stroke-width="5"
+            stroke="var(--muted-foreground)"
+            stroke-opacity="0.6"
+            stroke-width="1.5"
             stroke-linecap="round"
             vector-effect="non-scaling-stroke"
           />
           <path
             d="M0 140 C100 120, 170 100, 250 115 S390 150, 480 120 S660 50, 750 90 S860 130, 900 115"
             fill="none"
-            stroke="var(--chart-1)"
-            stroke-width="5"
+            stroke="var(--primary)"
+            stroke-width="2"
             stroke-linecap="round"
             vector-effect="non-scaling-stroke"
           />
@@ -317,7 +315,7 @@ async function confirmRetire() {
     <Dialog v-model:open="createOpen">
       <DialogContent class="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Add a VPN node</DialogTitle>
+          <DialogTitle class="text-lg">Add a VPN node</DialogTitle>
           <DialogDescription>
             Registers a WireGuard endpoint. It starts draining; set it online once its agent checks in.
           </DialogDescription>
@@ -366,7 +364,7 @@ async function confirmRetire() {
     <Dialog :open="!!token" @update:open="(o) => !o && (token = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Agent token for {{ token?.node }}</DialogTitle>
+          <DialogTitle class="text-lg">Agent token for {{ token?.node }}</DialogTitle>
           <DialogDescription>
             Copy it into the node agent's config now. It is shown only this once; only its hash is stored.
           </DialogDescription>
@@ -387,7 +385,7 @@ async function confirmRetire() {
     <Dialog :open="!!editTarget" @update:open="(o) => !o && (editTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Edit {{ editTarget?.name }}</DialogTitle>
+          <DialogTitle class="text-lg">Edit {{ editTarget?.name }}</DialogTitle>
           <DialogDescription>Only the fields you change are sent.</DialogDescription>
         </DialogHeader>
         <div class="grid gap-4 py-2 sm:grid-cols-2">
@@ -422,7 +420,7 @@ async function confirmRetire() {
     <Dialog :open="!!rotateTarget" @update:open="(o) => !o && (rotateTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Rotate the agent token?</DialogTitle>
+          <DialogTitle class="text-lg">Rotate the agent token?</DialogTitle>
           <DialogDescription>
             The current token for {{ rotateTarget?.name }} stops working at once. The agent can't report until you
             install the new one.
@@ -438,7 +436,7 @@ async function confirmRetire() {
     <Dialog :open="!!retireTarget" @update:open="(o) => !o && (retireTarget = null)">
       <DialogContent>
         <DialogHeader>
-          <DialogTitle class="font-heading text-xl">Retire {{ retireTarget?.name }}?</DialogTitle>
+          <DialogTitle class="text-lg">Retire {{ retireTarget?.name }}?</DialogTitle>
           <DialogDescription>
             It stops taking peers for good. A node with live sessions can't be retired: drain it and wait first.
           </DialogDescription>
